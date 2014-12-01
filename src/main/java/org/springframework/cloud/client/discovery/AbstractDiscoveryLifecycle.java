@@ -45,8 +45,11 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle, 
         if (ManagementServerPortUtils.isDifferent(context)) {
             registerManagement();
         }
+        context.publishEvent(new InstanceRegisteredEvent<>(this, getConfiguration()));
         running = true;
     }
+
+    protected abstract Object getConfiguration();
 
     protected abstract void register();
 
