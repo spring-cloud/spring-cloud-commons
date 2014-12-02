@@ -1,7 +1,6 @@
 package org.springframework.cloud.client.discovery;
 
 import org.springframework.beans.BeansException;
-import org.springframework.boot.actuate.autoconfigure.ManagementServerPortUtils;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
