@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationEvent;
 /**
  * @author Spencer Gibb
  */
+@SuppressWarnings("serial")
 public class InstanceRegisteredEvent<T> extends ApplicationEvent {
     private T config;
 
