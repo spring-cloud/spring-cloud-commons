@@ -9,6 +9,8 @@ import java.util.List;
  */
 //TODO: merge with LoadBalancerClient?
 public interface DiscoveryClient {
+	public String description();
+
     /**
      * @return ServiceInstance with information used to register the local service
      */
