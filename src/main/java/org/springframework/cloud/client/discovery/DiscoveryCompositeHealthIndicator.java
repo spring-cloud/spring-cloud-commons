@@ -2,15 +2,15 @@ package org.springframework.cloud.client.discovery;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.health.*;
+import org.springframework.boot.actuate.health.CompositeHealthIndicator;
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthAggregator;
+import org.springframework.boot.actuate.health.HealthIndicator;
 
 /**
  * @author Spencer Gibb
  */
-@Slf4j
 public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator {
 
 	@Autowired
