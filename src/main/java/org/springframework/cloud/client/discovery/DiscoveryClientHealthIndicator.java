@@ -20,18 +20,18 @@ public class DiscoveryClientHealthIndicator implements ApplicationContextAware, 
     private ApplicationContext context;
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
+	private DiscoveryClient discoveryClient;
+
+	public DiscoveryClientHealthIndicator(DiscoveryClient discoveryClient) {
+		this.discoveryClient = discoveryClient;
+	}
 
 	@Override
 	public Health health() {
 		Health.Builder builder = new Health.Builder();
         try {
-			DiscoveryClient client = context.getBean(DiscoveryClient.class);
-            if (client == null) {
-                builder.unknown().withDetail("warning", "No DiscoveryClient found");
-                return builder.build();
-            }
-			List<String> services = client.getServices();
-            builder.status(new Status("UP", client.description()))
+			List<String> services = discoveryClient.getServices();
+            builder.status(new Status("UP", discoveryClient.description()))
 					.withDetail("services", services);
         } catch (Exception e) {
             log.error("Error", e);

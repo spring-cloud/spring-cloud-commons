@@ -2,9 +2,11 @@ package org.springframework.cloud.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.DeferredImportSelector;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
@@ -19,11 +21,12 @@ import java.util.List;
  * @author Spencer Gibb
  */
 @Slf4j
-public abstract class SingleImplementationImportSelector<T> implements DeferredImportSelector, BeanClassLoaderAware {
+public abstract class SingleImplementationImportSelector<T> implements DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
 
     protected ClassLoader beanClassLoader;
 
     protected Class<T> annotationClass;
+    protected Environment environment;
 
     @SuppressWarnings("unchecked")
     protected SingleImplementationImportSelector() {
@@ -32,6 +35,9 @@ public abstract class SingleImplementationImportSelector<T> implements DeferredI
 
     @Override
     public String[] selectImports(AnnotationMetadata metadata) {
+        if (!isEnabled()) {
+            return new String[0];
+        }
         AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata
                 .getAnnotationAttributes(annotationClass.getName(),
                         true));
@@ -55,8 +61,15 @@ public abstract class SingleImplementationImportSelector<T> implements DeferredI
 
     }
 
+    protected abstract boolean isEnabled();
+
     protected String getSimpleName() {
         return annotationClass.getSimpleName();
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 
     @Override
