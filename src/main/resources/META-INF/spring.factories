@@ -1,3 +1,4 @@
 # Bootstrap Configuration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.springframework.cloud.client.CommonsClientAutoConfiguration
+org.springframework.cloud.client.CommonsClientAutoConfiguration,\
+org.springframework.cloud.client.discovery.NoopDiscoveryClientConfiguration
