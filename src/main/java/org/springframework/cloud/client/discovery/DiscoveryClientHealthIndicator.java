@@ -4,20 +4,15 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.BeansException;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.Ordered;
 
 /**
  * @author Spencer Gibb
  */
 @Slf4j
-public class DiscoveryClientHealthIndicator implements ApplicationContextAware, DiscoveryHealthIndicator, Ordered {
-
-    private ApplicationContext context;
+public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator, Ordered {
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
 	private DiscoveryClient discoveryClient;
@@ -44,11 +39,6 @@ public class DiscoveryClientHealthIndicator implements ApplicationContextAware, 
 	public String getName() {
 		return "discoveryClient";
 	}
-
-	@Override
-    public void setApplicationContext(ApplicationContext context) throws BeansException {
-        this.context = context;
-    }
 
 	@Override
 	public int getOrder() {
