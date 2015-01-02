@@ -9,10 +9,12 @@ import org.springframework.core.annotation.Order;
  * @author Spencer Gibb
  */
 @Order(Ordered.LOWEST_PRECEDENCE - 100)
-public class EnableDiscoveryClientImportSelector extends SingleImplementationImportSelector<EnableDiscoveryClient> {
+public class EnableDiscoveryClientImportSelector extends
+		SingleImplementationImportSelector<EnableDiscoveryClient> {
 
 	@Override
 	protected boolean isEnabled() {
-		return new RelaxedPropertyResolver(environment).getProperty("spring.cloud.discovery.enabled", Boolean.class, Boolean.TRUE);
+		return new RelaxedPropertyResolver(getEnvironment()).getProperty(
+				"spring.cloud.discovery.enabled", Boolean.class, Boolean.TRUE);
 	}
 }

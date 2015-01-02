@@ -13,6 +13,6 @@ public class EnableCircuitBreakerImportSelector extends SingleImplementationImpo
 
 	@Override
 	protected boolean isEnabled() {
-		return new RelaxedPropertyResolver(environment).getProperty("spring.cloud.circuit.breaker.enabled", Boolean.class, Boolean.TRUE);
+		return new RelaxedPropertyResolver(getEnvironment()).getProperty("spring.cloud.circuit.breaker.enabled", Boolean.class, Boolean.TRUE);
 	}
 }

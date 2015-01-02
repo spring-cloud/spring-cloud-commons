@@ -1,6 +1,12 @@
 package org.springframework.cloud.client;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.DeferredImportSelector;
@@ -11,69 +17,76 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-
 /**
  * Selects a single configuration to load defined by the generic type T.
  * @author Spencer Gibb
+ * @author Dave Syer
  */
 @Slf4j
-public abstract class SingleImplementationImportSelector<T> implements DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
+public abstract class SingleImplementationImportSelector<T> implements
+		DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
 
-    protected ClassLoader beanClassLoader;
+	private ClassLoader beanClassLoader;
 
-    protected Class<T> annotationClass;
-    protected Environment environment;
+	private Class<T> annotationClass;
+	private Environment environment;
 
-    @SuppressWarnings("unchecked")
-    protected SingleImplementationImportSelector() {
-        annotationClass = (Class<T>) GenericTypeResolver.resolveTypeArgument(this.getClass(), SingleImplementationImportSelector.class);
-    }
+	@SuppressWarnings("unchecked")
+	protected SingleImplementationImportSelector() {
+		annotationClass = (Class<T>) GenericTypeResolver.resolveTypeArgument(
+				this.getClass(), SingleImplementationImportSelector.class);
+	}
 
-    @Override
-    public String[] selectImports(AnnotationMetadata metadata) {
-        if (!isEnabled()) {
-            return new String[0];
-        }
-        AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata
-                .getAnnotationAttributes(annotationClass.getName(),
-                        true));
+	@Override
+	public String[] selectImports(AnnotationMetadata metadata) {
+		if (!isEnabled()) {
+			return new String[0];
+		}
+		AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata
+				.getAnnotationAttributes(annotationClass.getName(), true));
 
-        Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is "
-                + metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
+		Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is "
+				+ metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
 
-        // Find all possible auto configuration classes, filtering duplicates
-        List<String> factories = new ArrayList<>(new LinkedHashSet<>(
-                SpringFactoriesLoader.loadFactoryNames(annotationClass,
-                        this.beanClassLoader)));
+		// Find all possible auto configuration classes, filtering duplicates
+		List<String> factories = new ArrayList<>(new LinkedHashSet<>(
+				SpringFactoriesLoader.loadFactoryNames(annotationClass,
+						this.beanClassLoader)));
 
-        if (factories.size() > 1) {
-            String factory = factories.get(0);
-            //there should only every be one DiscoveryClient
-            log.warn("More than one implementation of @{}.  Using {} out of available {}", getSimpleName(), factory, factories);
-            factories = Collections.singletonList(factory);
-        }
+		if (factories.size() > 1) {
+			String factory = factories.get(0);
+			// there should only every be one DiscoveryClient
+			log.warn(
+					"More than one implementation of @{}.  Using {} out of available {}",
+					getSimpleName(), factory, factories);
+			factories = Collections.singletonList(factory);
+		}
 
-        return factories.toArray(new String[factories.size()]);
+		return factories.toArray(new String[factories.size()]);
 
-    }
+	}
 
-    protected abstract boolean isEnabled();
+	protected abstract boolean isEnabled();
 
-    protected String getSimpleName() {
-        return annotationClass.getSimpleName();
-    }
+	protected String getSimpleName() {
+		return annotationClass.getSimpleName();
+	}
+	
+	protected Class<T> getAnnotationClass() {
+		return annotationClass;
+	}
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
+	protected Environment getEnvironment() {
+		return environment;
+	}
 
-    @Override
-    public void setBeanClassLoader(ClassLoader classLoader) {
-        this.beanClassLoader = classLoader;
-    }
+	@Override
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
+
+	@Override
+	public void setBeanClassLoader(ClassLoader classLoader) {
+		this.beanClassLoader = classLoader;
+	}
 }

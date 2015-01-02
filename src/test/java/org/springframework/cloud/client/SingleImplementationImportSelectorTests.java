@@ -12,7 +12,7 @@ public class SingleImplementationImportSelectorTests {
     @Test
     public void testFindAnnotation() {
         MyAnnotationImportSelector selector = new MyAnnotationImportSelector();
-        assertEquals("annotationClass was wrong", MyAnnotation.class, selector.annotationClass);
+        assertEquals("annotationClass was wrong", MyAnnotation.class, selector.getAnnotationClass());
     }
 
     public static @interface MyAnnotation {}
@@ -21,5 +21,6 @@ public class SingleImplementationImportSelectorTests {
         protected boolean isEnabled() {
             return true;
         }
+
     }
 }
