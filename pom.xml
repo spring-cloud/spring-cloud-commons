@@ -21,6 +21,7 @@
 		<tag>HEAD</tag>
 	</scm>
 	<properties>
+		<main.basedir>.</main.basedir>
 		<!-- TODO: why does javadoc fail because of actuator dev -->
 		<maven.javadoc.skip>true</maven.javadoc.skip>
 	</properties>
@@ -32,6 +33,23 @@
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<useProjectReferences>false</useProjectReferences>
+					<additionalConfig>
+						<file>
+							<name>.settings/org.eclipse.jdt.ui.prefs</name>
+							<location>${main.basedir}/eclipse/org.eclipse.jdt.ui.prefs</location>
+						</file>
+						<file>
+							<name>.settings/org.eclipse.jdt.core.prefs</name>
+							<location>${main.basedir}/eclipse/org.eclipse.jdt.core.prefs</location>
+						</file>
+					</additionalConfig>
 				</configuration>
 			</plugin>
 		</plugins>
