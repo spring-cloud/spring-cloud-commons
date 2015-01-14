@@ -1,5 +1,7 @@
 package org.springframework.cloud.client;
 
+import java.util.List;
+
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -12,8 +14,6 @@ import org.springframework.cloud.client.discovery.DiscoveryHealthIndicator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-
-import java.util.List;
 
 /**
  * @author Spencer Gibb
@@ -28,12 +28,14 @@ public class CommonsClientAutoConfiguration {
 	@ConditionalOnExpression("${spring.cloud.discovery.enabled:true}")
 	protected static class HealthConfiguration {
 		@Bean
-		public DiscoveryClientHealthIndicator instancesHealthIndicator(DiscoveryClient discoveryClient) {
+		public DiscoveryClientHealthIndicator instancesHealthIndicator(
+				DiscoveryClient discoveryClient) {
 			return new DiscoveryClientHealthIndicator(discoveryClient);
 		}
 
 		@Bean
-		public DiscoveryCompositeHealthIndicator discoveryHealthIndicator(HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
+		public DiscoveryCompositeHealthIndicator discoveryHealthIndicator(
+				HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
 			return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
 		}
 	}

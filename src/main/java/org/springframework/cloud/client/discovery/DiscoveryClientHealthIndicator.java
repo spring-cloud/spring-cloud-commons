@@ -24,16 +24,17 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 	@Override
 	public Health health() {
 		Health.Builder builder = new Health.Builder();
-        try {
-			List<String> services = discoveryClient.getServices();
-            builder.status(new Status("UP", discoveryClient.description()))
+		try {
+			List<String> services = this.discoveryClient.getServices();
+			builder.status(new Status("UP", this.discoveryClient.description()))
 					.withDetail("services", services);
-        } catch (Exception e) {
-            log.error("Error", e);
-            builder.down(e);
-        }
+		}
+		catch (Exception e) {
+			log.error("Error", e);
+			builder.down(e);
+		}
 		return builder.build();
-    }
+	}
 
 	@Override
 	public String getName() {
@@ -42,7 +43,7 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 
 	@Override
 	public int getOrder() {
-		return order;
+		return this.order;
 	}
 
 	public void setOrder(int order) {

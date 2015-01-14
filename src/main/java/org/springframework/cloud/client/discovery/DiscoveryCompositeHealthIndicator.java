@@ -14,7 +14,8 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator {
 
 	@Autowired
-	public DiscoveryCompositeHealthIndicator(HealthAggregator healthAggregator, List<DiscoveryHealthIndicator> indicators) {
+	public DiscoveryCompositeHealthIndicator(HealthAggregator healthAggregator,
+			List<DiscoveryHealthIndicator> indicators) {
 		super(healthAggregator);
 		for (DiscoveryHealthIndicator indicator : indicators) {
 			addHealthIndicator(indicator.getName(), new Holder(indicator));
@@ -30,7 +31,7 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 
 		@Override
 		public Health health() {
-			return delegate.health();
+			return this.delegate.health();
 		}
 	}
 }

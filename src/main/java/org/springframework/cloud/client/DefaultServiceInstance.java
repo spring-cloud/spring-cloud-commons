@@ -7,7 +7,7 @@ import lombok.Data;
  */
 @Data
 public class DefaultServiceInstance implements ServiceInstance {
-    private final String serviceId;
-    private final String host;
-    private final int port;
+	private final String serviceId;
+	private final String host;
+	private final int port;
 }

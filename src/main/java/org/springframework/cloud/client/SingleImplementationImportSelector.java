@@ -33,7 +33,7 @@ public abstract class SingleImplementationImportSelector<T> implements
 
 	@SuppressWarnings("unchecked")
 	protected SingleImplementationImportSelector() {
-		annotationClass = (Class<T>) GenericTypeResolver.resolveTypeArgument(
+		this.annotationClass = (Class<T>) GenericTypeResolver.resolveTypeArgument(
 				this.getClass(), SingleImplementationImportSelector.class);
 	}
 
@@ -43,14 +43,14 @@ public abstract class SingleImplementationImportSelector<T> implements
 			return new String[0];
 		}
 		AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata
-				.getAnnotationAttributes(annotationClass.getName(), true));
+				.getAnnotationAttributes(this.annotationClass.getName(), true));
 
 		Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is "
 				+ metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
 
 		// Find all possible auto configuration classes, filtering duplicates
 		List<String> factories = new ArrayList<>(new LinkedHashSet<>(
-				SpringFactoriesLoader.loadFactoryNames(annotationClass,
+				SpringFactoriesLoader.loadFactoryNames(this.annotationClass,
 						this.beanClassLoader)));
 
 		if (factories.size() > 1) {
@@ -69,15 +69,15 @@ public abstract class SingleImplementationImportSelector<T> implements
 	protected abstract boolean isEnabled();
 
 	protected String getSimpleName() {
-		return annotationClass.getSimpleName();
+		return this.annotationClass.getSimpleName();
 	}
-	
+
 	protected Class<T> getAnnotationClass() {
-		return annotationClass;
+		return this.annotationClass;
 	}
 
 	protected Environment getEnvironment() {
-		return environment;
+		return this.environment;
 	}
 
 	@Override

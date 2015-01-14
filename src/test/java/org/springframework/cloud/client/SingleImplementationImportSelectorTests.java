@@ -2,25 +2,29 @@ package org.springframework.cloud.client;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Spencer Gibb
  */
 public class SingleImplementationImportSelectorTests {
 
-    @Test
-    public void testFindAnnotation() {
-        MyAnnotationImportSelector selector = new MyAnnotationImportSelector();
-        assertEquals("annotationClass was wrong", MyAnnotation.class, selector.getAnnotationClass());
-    }
+	@Test
+	public void testFindAnnotation() {
+		MyAnnotationImportSelector selector = new MyAnnotationImportSelector();
+		assertEquals("annotationClass was wrong", MyAnnotation.class,
+				selector.getAnnotationClass());
+	}
 
-    public static @interface MyAnnotation {}
-    public static class MyAnnotationImportSelector extends SingleImplementationImportSelector<MyAnnotation> {
-        @Override
-        protected boolean isEnabled() {
-            return true;
-        }
+	public static @interface MyAnnotation {
+	}
 
-    }
+	public static class MyAnnotationImportSelector extends
+			SingleImplementationImportSelector<MyAnnotation> {
+		@Override
+		protected boolean isEnabled() {
+			return true;
+		}
+
+	}
 }

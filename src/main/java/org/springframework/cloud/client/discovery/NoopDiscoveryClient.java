@@ -27,7 +27,7 @@ import org.springframework.cloud.client.ServiceInstance;
 public class NoopDiscoveryClient implements DiscoveryClient {
 
 	private final ServiceInstance instance;
-	
+
 	public NoopDiscoveryClient(ServiceInstance instance) {
 		this.instance = instance;
 	}
@@ -39,7 +39,7 @@ public class NoopDiscoveryClient implements DiscoveryClient {
 
 	@Override
 	public ServiceInstance getLocalServiceInstance() {
-		return instance;
+		return this.instance;
 	}
 
 	@Override
