@@ -33,8 +33,8 @@ import com.google.common.collect.Lists;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Spencer Gibb
@@ -57,8 +57,8 @@ public class DiscoveryCompositeHealthIndicatorTests {
 		@Bean
 		public DiscoveryClient discoveryClient() {
 			DiscoveryClient mock = mock(DiscoveryClient.class);
-			when(mock.description()).thenReturn("TestDiscoveryClient");
-			when(mock.getServices()).thenReturn(Lists.newArrayList("TestService1"));
+			given(mock.description()).willReturn("TestDiscoveryClient");
+			given(mock.getServices()).willReturn(Lists.newArrayList("TestService1"));
 			return mock;
 		}
 
