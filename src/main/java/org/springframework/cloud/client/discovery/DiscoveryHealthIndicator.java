@@ -22,10 +22,12 @@ import org.springframework.boot.actuate.health.Health;
  * @author Spencer Gibb
  */
 public interface DiscoveryHealthIndicator {
-	public String getName();
+
+	String getName();
 
 	/**
 	 * @return an indication of health
 	 */
 	Health health();
+
 }

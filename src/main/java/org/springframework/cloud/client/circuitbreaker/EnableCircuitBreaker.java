@@ -34,4 +34,5 @@ import org.springframework.context.annotation.Import;
 @Inherited
 @Import(EnableCircuitBreakerImportSelector.class)
 public @interface EnableCircuitBreaker {
+
 }

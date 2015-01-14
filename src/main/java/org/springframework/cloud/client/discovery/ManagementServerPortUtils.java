@@ -27,13 +27,28 @@ import org.springframework.web.context.WebApplicationContext;
  */
 public class ManagementServerPortUtils {
 
+	public static ManagementServerPort get(BeanFactory beanFactory) {
+		return ManagementServerPort.get(beanFactory);
+	}
+
+	public static boolean isDifferent(BeanFactory beanFactory) {
+		return get(beanFactory) == ManagementServerPort.DIFFERENT;
+	}
+
+	public static boolean isDisabled(BeanFactory beanFactory) {
+		return get(beanFactory) == ManagementServerPort.DISABLE;
+	}
+
+	public static boolean isSame(BeanFactory beanFactory) {
+		return get(beanFactory) == ManagementServerPort.SAME;
+	}
+
 	// TODO: copied from EndpointWebMvcAutoConfiguration.ManagementServerPort
 	public static enum ManagementServerPort {
 
 		DISABLE, SAME, DIFFERENT;
 
 		public static ManagementServerPort get(BeanFactory beanFactory) {
-
 			ServerProperties serverProperties;
 			try {
 				serverProperties = beanFactory.getBean(ServerProperties.class);
@@ -66,19 +81,4 @@ public class ManagementServerPortUtils {
 		}
 	};
 
-	public static ManagementServerPort get(BeanFactory beanFactory) {
-		return ManagementServerPort.get(beanFactory);
-	}
-
-	public static boolean isDifferent(BeanFactory beanFactory) {
-		return get(beanFactory) == ManagementServerPort.DIFFERENT;
-	}
-
-	public static boolean isDisabled(BeanFactory beanFactory) {
-		return get(beanFactory) == ManagementServerPort.DISABLE;
-	}
-
-	public static boolean isSame(BeanFactory beanFactory) {
-		return get(beanFactory) == ManagementServerPort.SAME;
-	}
 }

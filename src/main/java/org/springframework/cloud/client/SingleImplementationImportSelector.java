@@ -35,6 +35,7 @@ import org.springframework.util.Assert;
 
 /**
  * Selects a single configuration to load defined by the generic type T.
+ *
  * @author Spencer Gibb
  * @author Dave Syer
  */
@@ -45,6 +46,7 @@ public abstract class SingleImplementationImportSelector<T> implements
 	private ClassLoader beanClassLoader;
 
 	private Class<T> annotationClass;
+
 	private Environment environment;
 
 	@SuppressWarnings("unchecked")
@@ -72,14 +74,13 @@ public abstract class SingleImplementationImportSelector<T> implements
 		if (factories.size() > 1) {
 			String factory = factories.get(0);
 			// there should only every be one DiscoveryClient
-			log.warn(
-					"More than one implementation of @{}.  Using {} out of available {}",
-					getSimpleName(), factory, factories);
+			log.warn("More than one implementation "
+					+ "of @{}.  Using {} out of available {}", getSimpleName(), factory,
+					factories);
 			factories = Collections.singletonList(factory);
 		}
 
 		return factories.toArray(new String[factories.size()]);
-
 	}
 
 	protected abstract boolean isEnabled();
@@ -105,4 +106,5 @@ public abstract class SingleImplementationImportSelector<T> implements
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
+
 }

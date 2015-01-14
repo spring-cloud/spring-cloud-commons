@@ -20,14 +20,17 @@ import org.springframework.context.ApplicationEvent;
 
 /**
  * Event to be published after the local service instance registers itself with a
- * discovery service
+ * discovery service.
+ *
  * @author Spencer Gibb
  */
 @SuppressWarnings("serial")
 public class InstanceRegisteredEvent<T> extends ApplicationEvent {
+
 	private T config;
 
 	/**
+	 * Create a new {@link InstanceRegisteredEvent} instance.
 	 * @param source the component that published the event (never {@code null})
 	 * @param config the configuration of the instance
 	 */
@@ -39,4 +42,5 @@ public class InstanceRegisteredEvent<T> extends ApplicationEvent {
 	public T getConfig() {
 		return this.config;
 	}
+
 }

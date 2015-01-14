@@ -17,9 +17,12 @@
 package org.springframework.cloud.client;
 
 /**
- * @author Spencer Gibb TODO: name? Server? HostAndPort? Instance?
+ * @author Spencer Gibb
  */
 public interface ServiceInstance {
+
+	// TODO: name? Server? HostAndPort? Instance?
+
 	public String getServiceId();
 
 	public String getHost();

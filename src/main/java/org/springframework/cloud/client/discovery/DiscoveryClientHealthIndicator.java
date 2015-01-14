@@ -31,6 +31,7 @@ import org.springframework.core.Ordered;
 public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator, Ordered {
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
+
 	private DiscoveryClient discoveryClient;
 
 	public DiscoveryClientHealthIndicator(DiscoveryClient discoveryClient) {
@@ -65,4 +66,5 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 	public void setOrder(int order) {
 		this.order = order;
 	}
+
 }

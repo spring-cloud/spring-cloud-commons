@@ -33,4 +33,5 @@ public class EnableCircuitBreakerImportSelector extends
 		return new RelaxedPropertyResolver(getEnvironment()).getProperty(
 				"spring.cloud.circuit.breaker.enabled", Boolean.class, Boolean.TRUE);
 	}
+
 }

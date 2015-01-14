@@ -50,4 +50,5 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 			return this.delegate.health();
 		}
 	}
+
 }

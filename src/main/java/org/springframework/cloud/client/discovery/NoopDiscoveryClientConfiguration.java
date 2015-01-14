@@ -40,7 +40,6 @@ import org.springframework.core.env.Environment;
 
 /**
  * @author Dave Syer
- *
  */
 @Configuration
 @EnableConfigurationProperties

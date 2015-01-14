@@ -34,4 +34,5 @@ public class DiscoveryHeartbeatEvent extends ApplicationEvent {
 	public Object getValue() {
 		return this.value;
 	}
+
 }

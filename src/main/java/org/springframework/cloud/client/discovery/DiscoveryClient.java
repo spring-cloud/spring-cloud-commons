@@ -23,8 +23,10 @@ import org.springframework.cloud.client.ServiceInstance;
 /**
  * @author Spencer Gibb
  */
-// TODO: merge with LoadBalancerClient?
 public interface DiscoveryClient {
+
+	// TODO: merge with LoadBalancerClient?
+
 	public String description();
 
 	/**
@@ -45,4 +47,5 @@ public interface DiscoveryClient {
 	 * @return all known service id's
 	 */
 	public List<String> getServices();
+
 }

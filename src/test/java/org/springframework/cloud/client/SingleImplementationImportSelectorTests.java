@@ -37,6 +37,7 @@ public class SingleImplementationImportSelectorTests {
 
 	public static class MyAnnotationImportSelector extends
 			SingleImplementationImportSelector<MyAnnotation> {
+
 		@Override
 		protected boolean isEnabled() {
 			return true;

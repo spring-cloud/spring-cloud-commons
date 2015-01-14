@@ -23,7 +23,6 @@ import org.springframework.cloud.client.ServiceInstance;
 
 /**
  * @author Dave Syer
- *
  */
 public class NoopDiscoveryClient implements DiscoveryClient {
 

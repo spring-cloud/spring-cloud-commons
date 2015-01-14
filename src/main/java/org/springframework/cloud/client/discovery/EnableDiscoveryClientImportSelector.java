@@ -33,4 +33,5 @@ public class EnableDiscoveryClientImportSelector extends
 		return new RelaxedPropertyResolver(getEnvironment()).getProperty(
 				"spring.cloud.discovery.enabled", Boolean.class, Boolean.TRUE);
 	}
+
 }

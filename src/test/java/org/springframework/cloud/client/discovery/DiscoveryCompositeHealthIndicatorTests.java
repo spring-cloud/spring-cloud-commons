@@ -89,4 +89,5 @@ public class DiscoveryCompositeHealthIndicatorTests {
 		assertEquals("status desciption was wrong", "TestDiscoveryClient",
 				status.getDescription());
 	}
+
 }

@@ -31,9 +31,13 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		ApplicationContextAware {
 
 	protected boolean autoStartup = true;
+
 	protected boolean running;
+
 	protected int order = 0;
+
 	protected ApplicationContext context;
+
 	protected Environment environment;
 
 	@Override
@@ -84,12 +88,13 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	protected abstract boolean isEnabled();
 
 	protected String getManagementServiceId() {
-		return this.context.getId() + ":management"; // TODO: configurable management
-														// suffix
+		return this.context.getId() + ":management";
+		// TODO: configurable management suffix
 	}
 
 	protected String getManagementServiceName() {
-		return getAppName() + ":management"; // TODO: configurable management suffix
+		return getAppName() + ":management";
+		// TODO: configurable management suffix
 	}
 
 	protected Integer getManagementPort() {
@@ -130,4 +135,5 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	public int getPhase() {
 		return 0;
 	}
+
 }
