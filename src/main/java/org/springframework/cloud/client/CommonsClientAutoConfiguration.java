@@ -23,7 +23,7 @@ import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.DiscoveryClientHealthIndicator;
 import org.springframework.cloud.client.discovery.DiscoveryCompositeHealthIndicator;
@@ -44,7 +44,7 @@ public class CommonsClientAutoConfiguration {
 
 	@Configuration
 	@ConditionalOnBean(DiscoveryClient.class)
-	@ConditionalOnExpression("${spring.cloud.discovery.enabled:true}")
+	@ConditionalOnProperty(prefix = "spring.cloud.discovery", name = "enabled", matchIfMissing = true)
 	protected static class HealthConfiguration {
 
 		@Bean
