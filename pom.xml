@@ -3,28 +3,27 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.springframework.cloud</groupId>
-	<artifactId>spring-cloud-commons</artifactId>
-	<version>1.0.0.BUILD-SNAPSHOT</version>
-	<packaging>jar</packaging>
-	<name>Spring Cloud Commons</name>
-	<description>Spring Cloud Commons</description>
-
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
 		<version>1.0.0.BUILD-SNAPSHOT</version>
 		<relativePath />
-		<!-- lookup parent from repository -->
 	</parent>
-
+	<artifactId>spring-cloud-commons</artifactId>
+	<version>1.0.0.BUILD-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<name>Spring Cloud Commons</name>
+	<description>Spring Cloud Commons</description>
 	<scm>
 		<url>https://github.com/spring-cloud/spring-cloud-commons</url>
 		<connection>scm:git:git://github.com/spring-cloud/spring-cloud-commons.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/spring-cloud/spring-cloud-commons.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
-
+	<properties>
+		<!-- TODO: why does javadoc fail because of actuator dev -->
+		<maven.javadoc.skip>true</maven.javadoc.skip>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -37,7 +36,6 @@
 			</plugin>
 		</plugins>
 	</build>
-
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -52,7 +50,6 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -80,10 +77,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<properties>
-		<!-- TODO: why does javadoc fail because of actuator dev -->
-		<maven.javadoc.skip>true</maven.javadoc.skip>
-	</properties>
-
 </project>
