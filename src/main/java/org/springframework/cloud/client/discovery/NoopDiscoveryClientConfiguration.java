@@ -23,8 +23,8 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
@@ -44,7 +44,7 @@ import org.springframework.core.env.Environment;
 @Configuration
 @EnableConfigurationProperties
 @ConditionalOnMissingClass(name = "com.netflix.discovery.EurekaClientConfig")
-@ConditionalOnExpression("!${eureka.client.enabled:false}")
+@ConditionalOnProperty(value = "eureka.client.enabled", havingValue = "false")
 public class NoopDiscoveryClientConfiguration implements ApplicationListener<ContextRefreshedEvent> {
 
 	private static final Logger logger = LoggerFactory
