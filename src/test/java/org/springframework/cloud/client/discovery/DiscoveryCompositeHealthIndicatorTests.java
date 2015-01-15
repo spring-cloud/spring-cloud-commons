@@ -1,6 +1,21 @@
+/*
+ * Copyright 2013-2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.discovery;
 
-import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +29,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import com.google.common.collect.Lists;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Spencer Gibb
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {DiscoveryCompositeHealthIndicatorTests.Config.class, CommonsClientAutoConfiguration.class})
+@ContextConfiguration(classes = { DiscoveryCompositeHealthIndicatorTests.Config.class,
+		CommonsClientAutoConfiguration.class })
 public class DiscoveryCompositeHealthIndicatorTests {
 
 	@Autowired
@@ -37,8 +57,8 @@ public class DiscoveryCompositeHealthIndicatorTests {
 		@Bean
 		public DiscoveryClient discoveryClient() {
 			DiscoveryClient mock = mock(DiscoveryClient.class);
-			when(mock.description()).thenReturn("TestDiscoveryClient");
-			when(mock.getServices()).thenReturn(Lists.newArrayList("TestService1"));
+			given(mock.description()).willReturn("TestDiscoveryClient");
+			given(mock.getServices()).willReturn(Lists.newArrayList("TestService1"));
 			return mock;
 		}
 
@@ -60,12 +80,14 @@ public class DiscoveryCompositeHealthIndicatorTests {
 
 	@Test
 	public void testHealthIndicator() {
-		assertNotNull("healthIndicator was null", healthIndicator);
-		Health health = healthIndicator.health();
+		assertNotNull("healthIndicator was null", this.healthIndicator);
+		Health health = this.healthIndicator.health();
 		assertNotNull("health was null", health);
 		Status status = health.getStatus();
 		assertNotNull("status was null", status);
 		assertEquals("status code was wrong", "UP", status.getCode());
-		assertEquals("status desciption was wrong", "TestDiscoveryClient", status.getDescription());
+		assertEquals("status desciption was wrong", "TestDiscoveryClient",
+				status.getDescription());
 	}
+
 }

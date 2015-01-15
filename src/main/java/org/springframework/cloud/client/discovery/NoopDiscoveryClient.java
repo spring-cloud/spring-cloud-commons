@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.discovery;
 
 import java.util.Collections;
@@ -22,12 +23,11 @@ import org.springframework.cloud.client.ServiceInstance;
 
 /**
  * @author Dave Syer
- *
  */
 public class NoopDiscoveryClient implements DiscoveryClient {
 
 	private final ServiceInstance instance;
-	
+
 	public NoopDiscoveryClient(ServiceInstance instance) {
 		this.instance = instance;
 	}
@@ -39,7 +39,7 @@ public class NoopDiscoveryClient implements DiscoveryClient {
 
 	@Override
 	public ServiceInstance getLocalServiceInstance() {
-		return instance;
+		return this.instance;
 	}
 
 	@Override

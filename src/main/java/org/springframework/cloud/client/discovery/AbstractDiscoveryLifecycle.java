@@ -1,4 +1,22 @@
+/*
+ * Copyright 2013-2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.discovery;
+
+import javax.annotation.PreDestroy;
 
 import org.springframework.beans.BeansException;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
@@ -6,104 +24,116 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
 
-import javax.annotation.PreDestroy;
-
 /**
  * @author Spencer Gibb
  */
-public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle, ApplicationContextAware {
+public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
+		ApplicationContextAware {
 
-    protected boolean autoStartup = true;
-    protected boolean running;
-    protected int order = 0;
-    protected ApplicationContext context;
-    protected Environment environment;
+	protected boolean autoStartup = true;
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.context = applicationContext;
-        environment = context.getEnvironment();
-    }
+	protected boolean running;
 
-    @Override
-    public boolean isAutoStartup() {
-        return autoStartup;
-    }
+	protected int order = 0;
 
-    @Override
-    public void stop(Runnable callback) {
-        stop();
-        callback.run();
-    }
+	protected ApplicationContext context;
 
-    @Override
-    public void start() {
-        if (!isEnabled()) return;
+	protected Environment environment;
 
-        register();
-        if (ManagementServerPortUtils.isDifferent(context)) {
-            registerManagement();
-        }
-        context.publishEvent(new InstanceRegisteredEvent<>(this, getConfiguration()));
-        running = true;
-    }
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeansException {
+		this.context = applicationContext;
+		this.environment = this.context.getEnvironment();
+	}
 
-    protected abstract Object getConfiguration();
+	@Override
+	public boolean isAutoStartup() {
+		return this.autoStartup;
+	}
 
-    protected abstract void register();
+	@Override
+	public void stop(Runnable callback) {
+		stop();
+		callback.run();
+	}
 
-    protected void registerManagement() {}
+	@Override
+	public void start() {
+		if (!isEnabled()) {
+			return;
+		}
 
-    protected abstract void deregister();
+		register();
+		if (ManagementServerPortUtils.isDifferent(this.context)) {
+			registerManagement();
+		}
+		this.context
+				.publishEvent(new InstanceRegisteredEvent<>(this, getConfiguration()));
+		this.running = true;
+	}
 
-    protected void deregisterManagement() {}
+	protected abstract Object getConfiguration();
 
-    protected abstract boolean isEnabled();
+	protected abstract void register();
 
-    protected String getManagementServiceId() {
-        return context.getId() + ":management"; //TODO: configurable management suffix
-    }
+	protected void registerManagement() {
+	}
 
-    protected String getManagementServiceName() {
-        return getAppName() + ":management"; //TODO: configurable management suffix
-    }
+	protected abstract void deregister();
 
-    protected Integer getManagementPort() {
-        return context.getBean(ManagementServerProperties.class).getPort();
-    }
+	protected void deregisterManagement() {
+	}
 
-    protected String getAppName() {
-        return environment.getProperty("spring.application.name");
-    }
+	protected abstract boolean isEnabled();
 
-    @Override
-    public void stop() {
-        if (isEnabled()) {
-            deregister();
-            if (getManagementPort() != null) {
-                deregisterManagement();
-            }
-        }
-        running = false;
-    }
+	protected String getManagementServiceId() {
+		return this.context.getId() + ":management";
+		// TODO: configurable management suffix
+	}
 
-    @PreDestroy
-    public void destroy() {
-        stop();
-    }
+	protected String getManagementServiceName() {
+		return getAppName() + ":management";
+		// TODO: configurable management suffix
+	}
 
-    @Override
-    public boolean isRunning() {
-        return running;
-    }
+	protected Integer getManagementPort() {
+		return this.context.getBean(ManagementServerProperties.class).getPort();
+	}
 
-    @Override
-    public int getOrder() {
-        return order;
-    }
+	protected String getAppName() {
+		return this.environment.getProperty("spring.application.name");
+	}
 
-    @Override
-    public int getPhase() {
-        return 0;
-    }
+	@Override
+	public void stop() {
+		if (isEnabled()) {
+			deregister();
+			if (getManagementPort() != null) {
+				deregisterManagement();
+			}
+		}
+		this.running = false;
+	}
+
+	@PreDestroy
+	public void destroy() {
+		stop();
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
+
+	@Override
+	public int getPhase() {
+		return 0;
+	}
+
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013-2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client;
 
 import java.util.ArrayList;
@@ -19,6 +35,7 @@ import org.springframework.util.Assert;
 
 /**
  * Selects a single configuration to load defined by the generic type T.
+ *
  * @author Spencer Gibb
  * @author Dave Syer
  */
@@ -29,11 +46,12 @@ public abstract class SingleImplementationImportSelector<T> implements
 	private ClassLoader beanClassLoader;
 
 	private Class<T> annotationClass;
+
 	private Environment environment;
 
 	@SuppressWarnings("unchecked")
 	protected SingleImplementationImportSelector() {
-		annotationClass = (Class<T>) GenericTypeResolver.resolveTypeArgument(
+		this.annotationClass = (Class<T>) GenericTypeResolver.resolveTypeArgument(
 				this.getClass(), SingleImplementationImportSelector.class);
 	}
 
@@ -43,41 +61,40 @@ public abstract class SingleImplementationImportSelector<T> implements
 			return new String[0];
 		}
 		AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata
-				.getAnnotationAttributes(annotationClass.getName(), true));
+				.getAnnotationAttributes(this.annotationClass.getName(), true));
 
 		Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is "
 				+ metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
 
 		// Find all possible auto configuration classes, filtering duplicates
 		List<String> factories = new ArrayList<>(new LinkedHashSet<>(
-				SpringFactoriesLoader.loadFactoryNames(annotationClass,
+				SpringFactoriesLoader.loadFactoryNames(this.annotationClass,
 						this.beanClassLoader)));
 
 		if (factories.size() > 1) {
 			String factory = factories.get(0);
 			// there should only every be one DiscoveryClient
-			log.warn(
-					"More than one implementation of @{}.  Using {} out of available {}",
-					getSimpleName(), factory, factories);
+			log.warn("More than one implementation "
+					+ "of @{}.  Using {} out of available {}", getSimpleName(), factory,
+					factories);
 			factories = Collections.singletonList(factory);
 		}
 
 		return factories.toArray(new String[factories.size()]);
-
 	}
 
 	protected abstract boolean isEnabled();
 
 	protected String getSimpleName() {
-		return annotationClass.getSimpleName();
+		return this.annotationClass.getSimpleName();
 	}
-	
+
 	protected Class<T> getAnnotationClass() {
-		return annotationClass;
+		return this.annotationClass;
 	}
 
 	protected Environment getEnvironment() {
-		return environment;
+		return this.environment;
 	}
 
 	@Override
@@ -89,4 +106,5 @@ public abstract class SingleImplementationImportSelector<T> implements
 	public void setBeanClassLoader(ClassLoader classLoader) {
 		this.beanClassLoader = classLoader;
 	}
+
 }

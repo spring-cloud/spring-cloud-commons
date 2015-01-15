@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.discovery;
 
 import java.net.InetAddress;
@@ -39,13 +40,13 @@ import org.springframework.core.env.Environment;
 
 /**
  * @author Dave Syer
- *
  */
 @Configuration
 @EnableConfigurationProperties
 @ConditionalOnMissingClass(name = "com.netflix.discovery.EurekaClientConfig")
 @ConditionalOnProperty(value = "eureka.client.enabled", havingValue = "false")
-public class NoopDiscoveryClientConfiguration implements ApplicationListener<ContextRefreshedEvent> {
+public class NoopDiscoveryClientConfiguration implements
+		ApplicationListener<ContextRefreshedEvent> {
 
 	private static final Logger logger = LoggerFactory
 			.getLogger(NoopDiscoveryClientConfiguration.class);
@@ -71,29 +72,30 @@ public class NoopDiscoveryClientConfiguration implements ApplicationListener<Con
 			logger.error("Cannot get host info", e);
 		}
 		int port = 0;
-		if (server != null && server.getPort() != null) {
-			port = server.getPort();
+		if (this.server != null && this.server.getPort() != null) {
+			port = this.server.getPort();
 		}
-		if (context instanceof EmbeddedWebApplicationContext) {
-			EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) context)
+		if (this.context instanceof EmbeddedWebApplicationContext) {
+			EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) this.context)
 					.getEmbeddedServletContainer();
 			if (container != null) {
 				// TODO: why is it null
 				port = container.getPort();
 			}
 		}
-		serviceInstance = new DefaultServiceInstance(environment.getProperty(
+		this.serviceInstance = new DefaultServiceInstance(this.environment.getProperty(
 				"spring.application.name", "application"), host, port);
 	}
-	
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		context.publishEvent(new InstanceRegisteredEvent<Environment>(this, environment));
+		this.context.publishEvent(new InstanceRegisteredEvent<Environment>(this,
+				this.environment));
 	}
 
 	@Bean
 	public DiscoveryClient discoveryClient() {
-		return new NoopDiscoveryClient(serviceInstance);
+		return new NoopDiscoveryClient(this.serviceInstance);
 	}
 
 }
