@@ -30,21 +30,29 @@ import org.springframework.core.env.Environment;
 public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		ApplicationContextAware {
 
-	protected boolean autoStartup = true;
+	private boolean autoStartup = true;
 
-	protected boolean running;
+	private boolean running;
 
-	protected int order = 0;
+	private int order = 0;
 
-	protected ApplicationContext context;
+	private ApplicationContext context;
 
-	protected Environment environment;
+	private Environment environment;
+
+	protected ApplicationContext getContext() {
+		return context;
+	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		this.context = applicationContext;
 		this.environment = this.context.getEnvironment();
+	}
+
+	protected Environment getEnvironment() {
+		return environment;
 	}
 
 	@Override

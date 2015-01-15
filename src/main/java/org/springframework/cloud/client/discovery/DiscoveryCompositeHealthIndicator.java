@@ -39,7 +39,7 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 	}
 
 	public static class Holder implements HealthIndicator {
-		DiscoveryHealthIndicator delegate;
+		private DiscoveryHealthIndicator delegate;
 
 		public Holder(DiscoveryHealthIndicator delegate) {
 			this.delegate = delegate;
@@ -48,6 +48,10 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 		@Override
 		public Health health() {
 			return this.delegate.health();
+		}
+
+		protected DiscoveryHealthIndicator getDelegate() {
+			return delegate;
 		}
 	}
 

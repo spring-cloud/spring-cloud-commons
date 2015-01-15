@@ -79,6 +79,6 @@ public class ManagementServerPortUtils {
 					|| (port != 0 && port.equals(serverProperties.getPort())) ? SAME
 					: DIFFERENT);
 		}
-	};
+	}
 
 }

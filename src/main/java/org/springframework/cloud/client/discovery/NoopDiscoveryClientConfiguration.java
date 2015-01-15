@@ -89,7 +89,7 @@ public class NoopDiscoveryClientConfiguration implements
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		this.context.publishEvent(new InstanceRegisteredEvent<Environment>(this,
+		this.context.publishEvent(new InstanceRegisteredEvent<>(this,
 				this.environment));
 	}
 
