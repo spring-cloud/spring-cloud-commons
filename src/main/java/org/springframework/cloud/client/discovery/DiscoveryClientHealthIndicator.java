@@ -18,7 +18,7 @@ package org.springframework.cloud.client.discovery;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
@@ -27,7 +27,7 @@ import org.springframework.core.Ordered;
 /**
  * @author Spencer Gibb
  */
-@Slf4j
+@CommonsLog
 public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator, Ordered {
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;

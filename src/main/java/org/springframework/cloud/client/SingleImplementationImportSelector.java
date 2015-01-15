@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.EnvironmentAware;
@@ -39,7 +39,7 @@ import org.springframework.util.Assert;
  * @author Spencer Gibb
  * @author Dave Syer
  */
-@Slf4j
+@CommonsLog
 public abstract class SingleImplementationImportSelector<T> implements
 		DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
 
@@ -74,9 +74,8 @@ public abstract class SingleImplementationImportSelector<T> implements
 		if (factories.size() > 1) {
 			String factory = factories.get(0);
 			// there should only every be one DiscoveryClient
-			log.warn("More than one implementation "
-					+ "of @{}.  Using {} out of available {}", getSimpleName(), factory,
-					factories);
+			log.warn("More than one implementation " + "of @" + getSimpleName()
+					+ ".  Using " + factory + " out of available " + factories);
 			factories = Collections.singletonList(factory);
 		}
 

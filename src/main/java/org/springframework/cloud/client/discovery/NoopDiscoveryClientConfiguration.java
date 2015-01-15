@@ -21,8 +21,7 @@ import java.net.UnknownHostException;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -45,11 +44,9 @@ import org.springframework.core.env.Environment;
 @EnableConfigurationProperties
 @ConditionalOnMissingClass(name = "com.netflix.discovery.EurekaClientConfig")
 @ConditionalOnProperty(value = "eureka.client.enabled", havingValue = "false")
+@CommonsLog
 public class NoopDiscoveryClientConfiguration implements
 		ApplicationListener<ContextRefreshedEvent> {
-
-	private static final Logger logger = LoggerFactory
-			.getLogger(NoopDiscoveryClientConfiguration.class);
 
 	@Autowired(required = false)
 	private ServerProperties server;
@@ -69,7 +66,7 @@ public class NoopDiscoveryClientConfiguration implements
 			host = InetAddress.getLocalHost().getHostName();
 		}
 		catch (UnknownHostException e) {
-			logger.error("Cannot get host info", e);
+			log.error("Cannot get host info", e);
 		}
 		int port = 0;
 		if (this.server != null && this.server.getPort() != null) {
