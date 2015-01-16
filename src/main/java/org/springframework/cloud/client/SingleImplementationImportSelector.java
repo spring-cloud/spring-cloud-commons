@@ -71,6 +71,11 @@ public abstract class SingleImplementationImportSelector<T> implements
 				SpringFactoriesLoader.loadFactoryNames(this.annotationClass,
 						this.beanClassLoader)));
 
+		if (factories.isEmpty()) {
+			throw new IllegalStateException("Annotation @" + getSimpleName() +
+					" found, but there are no implementations.  Did you forget to include a starter?");
+		}
+
 		if (factories.size() > 1) {
 			String factory = factories.get(0);
 			// there should only every be one DiscoveryClient

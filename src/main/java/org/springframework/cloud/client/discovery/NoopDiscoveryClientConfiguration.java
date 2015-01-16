@@ -22,9 +22,8 @@ import java.net.UnknownHostException;
 import javax.annotation.PostConstruct;
 
 import lombok.extern.apachecommons.CommonsLog;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
@@ -42,8 +41,6 @@ import org.springframework.core.env.Environment;
  */
 @Configuration
 @EnableConfigurationProperties
-@ConditionalOnMissingClass(name = "com.netflix.discovery.EurekaClientConfig")
-@ConditionalOnProperty(value = "eureka.client.enabled", havingValue = "false")
 @CommonsLog
 public class NoopDiscoveryClientConfiguration implements
 		ApplicationListener<ContextRefreshedEvent> {
