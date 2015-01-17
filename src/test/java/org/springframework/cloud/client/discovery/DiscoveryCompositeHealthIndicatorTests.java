@@ -16,6 +16,13 @@
 
 package org.springframework.cloud.client.discovery;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
+import java.util.Arrays;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +35,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import com.google.common.collect.Lists;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Spencer Gibb
@@ -58,7 +58,7 @@ public class DiscoveryCompositeHealthIndicatorTests {
 		public DiscoveryClient discoveryClient() {
 			DiscoveryClient mock = mock(DiscoveryClient.class);
 			given(mock.description()).willReturn("TestDiscoveryClient");
-			given(mock.getServices()).willReturn(Lists.newArrayList("TestService1"));
+			given(mock.getServices()).willReturn(Arrays.asList("TestService1"));
 			return mock;
 		}
 
