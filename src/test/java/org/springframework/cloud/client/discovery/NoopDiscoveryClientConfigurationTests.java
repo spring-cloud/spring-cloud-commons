@@ -16,8 +16,8 @@ import static org.junit.Assert.*;
  * @author Spencer Gibb
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = NoopDiscoveryClientImportSelectorTests.App.class)
-public class NoopDiscoveryClientImportSelectorTests {
+@SpringApplicationConfiguration(classes = NoopDiscoveryClientConfigurationTests.App.class)
+public class NoopDiscoveryClientConfigurationTests {
 
 	@Autowired
 	DiscoveryClient discoveryClient;

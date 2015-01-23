@@ -24,6 +24,7 @@ import javax.annotation.PostConstruct;
 import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
@@ -41,8 +42,9 @@ import org.springframework.core.env.Environment;
  */
 @Configuration
 @EnableConfigurationProperties
+@ConditionalOnMissingBean(DiscoveryClient.class)
 @CommonsLog
-public class NoopDiscoveryClientConfiguration implements
+public class NoopDiscoveryClientAutoConfiguration implements
 		ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired(required = false)
