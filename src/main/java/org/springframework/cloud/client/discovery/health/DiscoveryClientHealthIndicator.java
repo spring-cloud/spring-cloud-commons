@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.discovery;
+package org.springframework.cloud.client.discovery.health;
 
 import java.util.List;
 
@@ -22,6 +22,7 @@ import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.Ordered;
 
 /**

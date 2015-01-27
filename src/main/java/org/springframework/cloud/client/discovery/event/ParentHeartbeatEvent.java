@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.discovery;
+package org.springframework.cloud.client.discovery.event;
 
-import org.springframework.boot.actuate.health.Health;
+import org.springframework.context.ApplicationEvent;
 
 /**
+ * Heartbeat Event that a Parent ApplicationContext can send to a child Context.
+ * Useful when config server is located via DiscoveryClient
  * @author Spencer Gibb
  */
-public interface DiscoveryHealthIndicator {
+@SuppressWarnings("serial")
+public class ParentHeartbeatEvent extends ApplicationEvent {
 
-	String getName();
+	private final Object value;
 
-	/**
-	 * @return an indication of health
-	 */
-	Health health();
+	public ParentHeartbeatEvent(Object source, Object value) {
+		super(source);
+		this.value = value;
+	}
+
+	public Object getValue() {
+		return this.value;
+	}
 
 }

@@ -14,33 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.discovery;
+package org.springframework.cloud.client.discovery.health;
 
-import org.springframework.context.ApplicationEvent;
+import org.springframework.boot.actuate.health.Health;
 
 /**
- * Event to be published after the local service instance registers itself with a
- * discovery service.
- *
  * @author Spencer Gibb
  */
-@SuppressWarnings("serial")
-public class InstanceRegisteredEvent<T> extends ApplicationEvent {
+public interface DiscoveryHealthIndicator {
 
-	private T config;
+	String getName();
 
 	/**
-	 * Create a new {@link InstanceRegisteredEvent} instance.
-	 * @param source the component that published the event (never {@code null})
-	 * @param config the configuration of the instance
+	 * @return an indication of health
 	 */
-	public InstanceRegisteredEvent(Object source, T config) {
-		super(source);
-		this.config = config;
-	}
-
-	public T getConfig() {
-		return this.config;
-	}
+	Health health();
 
 }

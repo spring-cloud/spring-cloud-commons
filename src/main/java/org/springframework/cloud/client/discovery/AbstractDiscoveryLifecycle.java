@@ -20,6 +20,7 @@ import javax.annotation.PreDestroy;
 
 import org.springframework.beans.BeansException;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
+import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
