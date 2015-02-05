@@ -19,6 +19,7 @@ package org.springframework.cloud.client.discovery;
 import javax.annotation.PreDestroy;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
@@ -74,12 +75,18 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		}
 
 		register();
-		if (ManagementServerPortUtils.isDifferent(this.context)) {
+		if (shouldRegisterManagement()) {
 			registerManagement();
 		}
 		this.context
 				.publishEvent(new InstanceRegisteredEvent<>(this, getConfiguration()));
 		this.running = true;
+	}
+
+	protected boolean shouldRegisterManagement() {
+		return getManagementServerProperties() != null
+				&& getManagementPort() != null
+				&& ManagementServerPortUtils.isDifferent(this.context);
 	}
 
 	protected abstract Object getConfiguration();
@@ -107,7 +114,15 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	}
 
 	protected Integer getManagementPort() {
-		return this.context.getBean(ManagementServerProperties.class).getPort();
+		return getManagementServerProperties().getPort();
+	}
+
+	private ManagementServerProperties getManagementServerProperties() {
+		try {
+			return this.context.getBean(ManagementServerProperties.class);
+		} catch (NoSuchBeanDefinitionException e) {
+			return null;
+		}
 	}
 
 	protected String getAppName() {
@@ -118,7 +133,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	public void stop() {
 		if (isEnabled()) {
 			deregister();
-			if (getManagementPort() != null) {
+			if (shouldRegisterManagement()) {
 				deregisterManagement();
 			}
 		}
