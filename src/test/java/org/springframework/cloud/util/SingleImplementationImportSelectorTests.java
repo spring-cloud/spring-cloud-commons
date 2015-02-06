@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client;
+package org.springframework.cloud.util;
 
 import org.junit.Test;
+import org.springframework.cloud.util.SingleImplementationImportSelector;
 
 import static org.junit.Assert.assertEquals;
 

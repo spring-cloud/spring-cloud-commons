@@ -17,7 +17,7 @@
 package org.springframework.cloud.client.discovery;
 
 import org.springframework.boot.bind.RelaxedPropertyResolver;
-import org.springframework.cloud.client.SingleImplementationImportSelector;
+import org.springframework.cloud.util.SingleImplementationImportSelector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 

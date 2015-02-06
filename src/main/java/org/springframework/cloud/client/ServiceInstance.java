@@ -21,8 +21,6 @@ package org.springframework.cloud.client;
  */
 public interface ServiceInstance {
 
-	// TODO: name? Server? HostAndPort? Instance?
-
 	public String getServiceId();
 
 	public String getHost();

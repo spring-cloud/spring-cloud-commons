@@ -39,25 +39,21 @@ import org.springframework.core.annotation.Order;
  */
 @Configuration
 @ConditionalOnClass(HealthIndicator.class)
+@ConditionalOnBean(DiscoveryClient.class)
+@ConditionalOnProperty(value = "spring.cloud.discovery.enabled", matchIfMissing = true)
 @Order(0)
 public class CommonsClientAutoConfiguration {
 
-	@Configuration
-	@ConditionalOnBean(DiscoveryClient.class)
-	@ConditionalOnProperty(value = "spring.cloud.discovery.enabled", matchIfMissing = true)
-	protected static class HealthConfiguration {
-
-		@Bean
-		public DiscoveryClientHealthIndicator instancesHealthIndicator(
-				DiscoveryClient discoveryClient) {
-			return new DiscoveryClientHealthIndicator(discoveryClient);
-		}
-
-		@Bean
-		public DiscoveryCompositeHealthIndicator discoveryHealthIndicator(
-				HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
-			return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
-		}
-
+	@Bean
+	public DiscoveryClientHealthIndicator instancesHealthIndicator(
+			DiscoveryClient discoveryClient) {
+		return new DiscoveryClientHealthIndicator(discoveryClient);
 	}
+
+	@Bean
+	public DiscoveryCompositeHealthIndicator discoveryHealthIndicator(
+			HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
+		return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
+	}
+
 }
