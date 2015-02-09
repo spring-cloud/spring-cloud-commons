@@ -38,6 +38,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author Dave Syer
@@ -69,26 +70,39 @@ public class NoopDiscoveryClientAutoConfiguration implements
 		catch (UnknownHostException e) {
 			log.error("Cannot get host info", e);
 		}
-		int port = 0;
-		if (this.server != null && this.server.getPort() != null) {
-			port = this.server.getPort();
-		}
-		if (this.context instanceof EmbeddedWebApplicationContext) {
-			EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) this.context)
-					.getEmbeddedServletContainer();
-			if (container != null) {
-				// TODO: why is it null
-				port = container.getPort();
-			}
-		}
+		int port = findPort();
 		this.serviceInstance = new DefaultServiceInstance(this.environment.getProperty(
 				"spring.application.name", "application"), host, port);
 	}
 
+	private int findPort() {
+		int port = 0;
+		if (this.server != null && this.server.getPort() != null) {
+			port = this.server.getPort();
+		}
+		if (ClassUtils.isPresent(
+				"org.springframework.web.context.support.GenericWebApplicationContext",
+				null)) {
+			if (this.context instanceof EmbeddedWebApplicationContext) {
+				EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) this.context)
+						.getEmbeddedServletContainer();
+				if (container != null) {
+					port = container.getPort();
+				}
+			}
+		}
+		else {
+			// Apparently spring-web is not on the classpath
+			if (log.isDebugEnabled()) {
+				log.debug("Could not locate port in embedded container (spring-web not available)");
+			}
+		}
+		return port;
+	}
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
-		this.context.publishEvent(new InstanceRegisteredEvent<>(this,
-				this.environment));
+		this.context.publishEvent(new InstanceRegisteredEvent<>(this, this.environment));
 	}
 
 	@Bean
