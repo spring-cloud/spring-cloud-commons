@@ -41,6 +41,11 @@ public class DefaultServiceInstance implements ServiceInstance {
 		return getUri(this);
 	}
 
+	/**
+	 * Create a uri from the given ServiceInstance's host:port
+	 * @param instance
+	 * @return URI of the form (secure)?https:http + "host:port"
+	 */
 	public static URI getUri(ServiceInstance instance) {
 		String scheme = (instance.isSecure()) ? "https" : "http";
 		String uri = String.format("%s://%s:%s", scheme, instance.getHost(),

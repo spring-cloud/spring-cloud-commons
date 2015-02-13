@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
 
 /**
+ * Lifecycle methods that may be useful and common to various DiscoveryClient implementations.
  * @author Spencer Gibb
  */
 public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
@@ -83,36 +84,66 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		this.running = true;
 	}
 
+	/**
+	 * @return if the management service should be registered with the DiscoveryService
+	 */
 	protected boolean shouldRegisterManagement() {
 		return getManagementServerProperties() != null
 				&& getManagementPort() != null
 				&& ManagementServerPortUtils.isDifferent(this.context);
 	}
 
+	/**
+	 * @return the object used to configure the DiscoveryClient
+	 */
 	protected abstract Object getConfiguration();
 
+	/**
+	 * Register the local service with the DiscoveryClient
+	 */
 	protected abstract void register();
 
+	/**
+	 * Register the local management service with the DiscoveryClient
+	 */
 	protected void registerManagement() {
 	}
 
+	/**
+	 * De-register the local service with the DiscoveryClient
+	 */
 	protected abstract void deregister();
 
+	/**
+	 * De-register the local management service with the DiscoveryClient
+	 */
 	protected void deregisterManagement() {
 	}
 
+	/**
+	 * @return if the DiscoveryClient is enabled
+	 */
 	protected abstract boolean isEnabled();
 
+	/**
+	 * @return the serviceId of the Management Service
+	 */
 	protected String getManagementServiceId() {
 		return this.context.getId() + ":management";
 		// TODO: configurable management suffix
 	}
 
+	/**
+	 * @return the service name of the Management Service
+	 */
 	protected String getManagementServiceName() {
 		return getAppName() + ":management";
 		// TODO: configurable management suffix
 	}
 
+	/**
+	 * @return the management server port
+	 */
 	protected Integer getManagementPort() {
 		return getManagementServerProperties().getPort();
 	}
@@ -125,6 +156,9 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		}
 	}
 
+	/**
+	 * @return the app name, currently the spring.application.name property
+	 */
 	protected String getAppName() {
 		return this.environment.getProperty("spring.application.name");
 	}

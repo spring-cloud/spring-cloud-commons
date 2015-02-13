@@ -21,12 +21,16 @@ import java.util.List;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * DiscoveryClient represents operations commonly available to Discovery service
+ * such as Netflix Eureka or consul.io
  * @author Spencer Gibb
  */
 public interface DiscoveryClient {
 
-	// TODO: merge with LoadBalancerClient?
-
+	/**
+	 * A human readable description of the implementation, used in HealthIndicator
+	 * @return
+	 */
 	public String description();
 
 	/**
@@ -40,8 +44,6 @@ public interface DiscoveryClient {
 	 * @return a List of ServiceInstance
 	 */
 	public List<ServiceInstance> getInstances(String serviceId);
-
-	public List<ServiceInstance> getAllInstances();
 
 	/**
 	 * @return all known service id's

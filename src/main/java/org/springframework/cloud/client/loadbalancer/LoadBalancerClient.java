@@ -21,6 +21,7 @@ import java.net.URI;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * Represents a client side load balancer
  * @author Spencer Gibb
  */
 public interface LoadBalancerClient {
@@ -42,6 +43,15 @@ public interface LoadBalancerClient {
 	 */
 	public <T> T execute(String serviceId, LoadBalancerRequest<T> request);
 
+	/**
+	 * Create a proper URI with a real host and port for systems to utilize.
+	 * Some systems use a URI with the logical serivce name as the host,
+	 * such as http://myservice/path/to/service.  This will replace the
+	 * service name with the host:port from the ServiceInstance.
+	 * @param instance
+	 * @param original a URI with the host as a logical service name
+	 * @return a reconstructed URI
+	 */
 	public URI reconstructURI(ServiceInstance instance, URI original);
 
 }

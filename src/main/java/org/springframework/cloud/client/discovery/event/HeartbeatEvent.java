@@ -19,6 +19,8 @@ package org.springframework.cloud.client.discovery.event;
 import org.springframework.context.ApplicationEvent;
 
 /**
+ * Event DiscoveryClient implementation can broadcast if they support
+ * heartbeat's from the discovery server
  * @author Spencer Gibb
  */
 @SuppressWarnings("serial")

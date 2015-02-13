@@ -19,6 +19,8 @@ package org.springframework.cloud.client.loadbalancer;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * Simple interface used by LoadBalancerClient to apply metrics or pre and post
+ * actions around load balancer requests.
  * @author Spencer Gibb
  */
 public interface LoadBalancerRequest<T> {
