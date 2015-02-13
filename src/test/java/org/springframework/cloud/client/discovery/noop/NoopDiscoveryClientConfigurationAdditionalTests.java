@@ -56,11 +56,6 @@ public class NoopDiscoveryClientConfigurationAdditionalTests {
 				}
 
 				@Override
-				public List<ServiceInstance> getAllInstances() {
-					return null;
-				}
-
-				@Override
 				public List<String> getServices() {
 					return null;
 				}
