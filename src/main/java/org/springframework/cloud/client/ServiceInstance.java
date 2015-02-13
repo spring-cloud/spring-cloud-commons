@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client;
 
+import java.net.URI;
+
 /**
  * @author Spencer Gibb
  */
@@ -26,4 +28,9 @@ public interface ServiceInstance {
 	public String getHost();
 
 	public int getPort();
+
+	public boolean isSecure();
+
+	public URI getUri();
+
 }

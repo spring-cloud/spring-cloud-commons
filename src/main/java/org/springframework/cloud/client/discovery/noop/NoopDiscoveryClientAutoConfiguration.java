@@ -72,7 +72,7 @@ public class NoopDiscoveryClientAutoConfiguration implements
 		}
 		int port = findPort();
 		this.serviceInstance = new DefaultServiceInstance(this.environment.getProperty(
-				"spring.application.name", "application"), host, port);
+				"spring.application.name", "application"), host, port, false);
 	}
 
 	private int findPort() {

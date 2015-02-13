@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client;
 
+import java.net.URI;
+
 import lombok.Data;
 
 /**
@@ -32,4 +34,17 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private final int port;
 
+	private final boolean secure;
+
+	@Override
+	public URI getUri() {
+		return getUri(this);
+	}
+
+	public static URI getUri(ServiceInstance instance) {
+		String scheme = (instance.isSecure()) ? "https" : "http";
+		String uri = String.format("%s://%s:%s", scheme, instance.getHost(),
+				instance.getPort());
+		return URI.create(uri);
+	}
 }
