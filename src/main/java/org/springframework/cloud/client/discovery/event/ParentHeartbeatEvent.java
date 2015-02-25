@@ -16,16 +16,27 @@
 
 package org.springframework.cloud.client.discovery.event;
 
+import org.springframework.context.ApplicationEvent;
+
 /**
  * Heartbeat Event that a Parent ApplicationContext can send to a child Context. Useful
  * when config server is located via DiscoveryClient
  * @author Spencer Gibb
  */
 @SuppressWarnings("serial")
-public class ParentHeartbeatEvent extends HeartbeatEvent {
+//WARNING: do not extend HearbeatEvent because of a parent context forwarding
+//Heartbeat events to a child.  Avoids a stack overflow.
+public class ParentHeartbeatEvent extends ApplicationEvent {
+
+	private final Object value;
 
 	public ParentHeartbeatEvent(Object source, Object value) {
-		super(source, value);
+		super(source);
+		this.value = value;
+	}
+
+	public Object getValue() {
+		return this.value;
 	}
 
 }
