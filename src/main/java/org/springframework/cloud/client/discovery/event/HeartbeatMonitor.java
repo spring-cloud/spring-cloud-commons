@@ -16,16 +16,25 @@
 
 package org.springframework.cloud.client.discovery.event;
 
-/**
- * Heartbeat Event that a Parent ApplicationContext can send to a child Context. Useful
- * when config server is located via DiscoveryClient
- * @author Spencer Gibb
- */
-@SuppressWarnings("serial")
-public class ParentHeartbeatEvent extends HeartbeatEvent {
+import java.util.concurrent.atomic.AtomicReference;
 
-	public ParentHeartbeatEvent(Object source, Object value) {
-		super(source, value);
+/**
+ * @author Dave Syer
+ */
+public class HeartbeatMonitor {
+
+	private AtomicReference<Object> latestHeartbeat = new AtomicReference<>();
+
+	/**
+	 * @param value the latest heartbeat
+	 * @return true if the state changed
+	 */
+	public boolean update(Object value) {
+		Object last = this.latestHeartbeat.get();
+		if (!value.equals(last)) {
+			return this.latestHeartbeat.compareAndSet(last, value);
+		}
+		return false;
 	}
 
 }

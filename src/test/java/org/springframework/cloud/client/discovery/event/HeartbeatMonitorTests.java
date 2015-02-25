@@ -16,16 +16,28 @@
 
 package org.springframework.cloud.client.discovery.event;
 
-/**
- * Heartbeat Event that a Parent ApplicationContext can send to a child Context. Useful
- * when config server is located via DiscoveryClient
- * @author Spencer Gibb
- */
-@SuppressWarnings("serial")
-public class ParentHeartbeatEvent extends HeartbeatEvent {
+import org.junit.Test;
 
-	public ParentHeartbeatEvent(Object source, Object value) {
-		super(source, value);
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * @author Dave Syer
+ */
+public class HeartbeatMonitorTests {
+
+	private HeartbeatMonitor monitor = new HeartbeatMonitor();
+
+	@Test
+	public void onAndOff() {
+		assertTrue(this.monitor.update("foo"));
+		assertFalse(this.monitor.update("foo"));
+	}
+
+	@Test
+	public void toggle() {
+		assertTrue(this.monitor.update("foo"));
+		assertTrue(this.monitor.update("bar"));
 	}
 
 }
