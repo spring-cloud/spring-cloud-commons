@@ -22,8 +22,6 @@
 	</scm>
 	<properties>
 		<main.basedir>.</main.basedir>
-		<!-- TODO: why does javadoc fail because of actuator dev -->
-		<maven.javadoc.skip>true</maven.javadoc.skip>
 	</properties>
 	<build>
 		<plugins>
