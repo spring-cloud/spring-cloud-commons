@@ -22,7 +22,8 @@
 	</scm>
 	<properties>
 		<main.basedir>.</main.basedir>
-	</properties>
+        <bintray.package>commons</bintray.package>
+    </properties>
 	<build>
 		<plugins>
 			<plugin>
