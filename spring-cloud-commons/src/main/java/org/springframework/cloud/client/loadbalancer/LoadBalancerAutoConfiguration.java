@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -39,8 +38,8 @@ import org.springframework.web.client.RestTemplate;
 public class LoadBalancerAutoConfiguration {
 
 	@Bean
-	@ConditionalOnMissingBean(RestTemplate.class)
-	public RestTemplate restTemplate(LoadBalancerInterceptor loadBalancerInterceptor) {
+    @LoadBalanced
+	public RestTemplate loadBalancedRestTemplate(LoadBalancerInterceptor loadBalancerInterceptor) {
 		RestTemplate restTemplate = new RestTemplate();
 		List<ClientHttpRequestInterceptor> list = new ArrayList<>();
 		list.add(loadBalancerInterceptor);
