@@ -1,99 +1,22 @@
-=== Environment Changes
+= Cloud Native Applications
+:toc:
 
-The application will listen for an `EnvironmentChangedEvent` and react
-to the change in a couple of standard ways (additional
-`ApplicationListeners` can be added as `@Beans` by the user in the
-normal way). When an `EnvironmentChangedEvent` is observed it will
-have a list of key values that have changed, and the application will
-use those to:
+include::intro.adoc[]
 
-* Re-bind any `@ConfigurationProperties` beans in the context
-* Set the logger levels for any properties in `logging.level.*`
+== Spring Cloud Context: Application Context Services
 
-Note that the Config Client does not by default poll for changes in
-the `Environment`, and generally we would not recommend that approach
-for detecting changes (although you could set it up with a
-`@Scheduled` annotation). If you have a scaled-out client application
-then it is better to broadcast the `EnvironmentChangedEvent` to all
-the instances instead of having them polling for changes (e.g. using
-the https://github.com/spring-cloud/spring-cloud-bus[Spring Cloud
-Bus]).
-
-The `EnvironmentChangedEvent` covers a large class of refresh use
-cases, as long as you can actually make a change to the `Environment`
-and publish the event (those APIs are public and part of core
-Spring). You can verify the changes are bound to
-`@ConfigurationProperties` beans by visiting the `/configprops`
-endpoint (normal Spring Boot Actuator feature). For instance a
-`DataSource` can have its `maxPoolSize` changed at runtime (the
-default `DataSource` created by Spring Boot is an
-`@ConfigurationProperties` bean) and grow capacity
-dynamically. Re-binding `@ConfigurationProperties` does not cover
-another large class of use cases, where you need more control over the
-refresh, and where you need a change to be atomic over the whole
-`ApplicationContext`. To address those concerns we have
-`@RefreshScope`.
-
-=== Refresh Scope
-
-A Spring `@Bean` that is marked as `@RefreshScope` will get special
-treatment when there is a configuration change. This addresses the
-problem of stateful beans that only get their configuration injected
-when they are initialized. For instance if a `DataSource` has open
-connections when the database URL is changed via the `Environment`, we
-probably want the holders of those connections to be able to complete
-what they are doing. Then the next time someone borrows a connection
-from the pool he gets one with the new URL.
-
-Refresh scope beans are lazy proxies that initialize when they are
-used (i.e. when a method is called), and the scope acts as a cache of
-initialized values. To force a bean to re-initialize on the next
-method call you just need to invalidate its cache entry.
-
-The `RefreshScope` is a bean in the context and it has a public method
-`refreshAll()` to refresh all beans in the scope by clearing the
-target cache. There is also a `refresh(String)` method to refresh an
-individual bean by name. This functionality is exposed in the
-`/refresh` endpoint (over HTTP or JMX).
-
-NOTE: `@RefreshScope` works (technically) on an `@Configuration`
-class, but it might lead to surprising behaviour: e.g. it does *not*
-mean that all the `@Beans` defined in that class are themselves
-`@RefreshScope`. Specifically, anything that depends on those beans
-cannot rely on them being updated when a refresh is initiated, unless
-it is itself in `@RefreshScope` (in which it will be rebuilt on a
-refresh and its dependencies re-injected, at which point they will be
-re-initialized from the refreshed `@Configuration`).
-
-=== Encryption and Decryption
-
-The Config Client has an `Environment` pre-processor for decrypting
-property values locally. It follows the same rules as the Config
-Server, and has the same external configuration via `encrypt.\*`. Thus
-you can use encrypted values in the form `{cipher}*` and as long as
-there is a valid key then they will be decrypted before the main
-application context gets the `Environment`. To use the encryption
-features in a client you need to include Spring Security RSA in your
-classpath (Maven co-ordinates
-"org.springframework.security:spring-security-rsa") and you also need
-the full strength JCE extensions in your JVM (google it and download
-from Oracle).
-
-=== Endpoints
-
-For a Spring Boot Actuator application there are some additional management endpoints:
-
-* POST to `/env` to update the `Environment` and rebind `@ConfigurationProperties` and log levels
-* `/refresh` for re-loading the boot strap context and refreshing the `@RefreshScope` beans
-* `/restart` for closing the `ApplicationContext` and restarting it (disabled by default)
-* `/pause` and `/resume` for calling the `Lifecycle` methods (`stop()` and `start()` on the `ApplicationContext`)
+Spring Boot has an opinionated view of how to build an application
+with Spring: for instance it has conventional locations for common
+configuration file, and endpoints for common management and monitoring
+tasks. Spring Cloud builds on top of that and adds a few features that
+probably all components in a system would use or occasionally need.
 
 === The Bootstrap Application Context
 
-The Config Client operates by creating a "bootstrap" application
+A Spring Cloud application operates by creating a "bootstrap"
 context, which is a parent context for the main application. Out of
 the box it is responsible for loading configuration properties from
-the Config Server, and also decrypting properties in the local
+the external sources, and also decrypting properties in the local
 external configuration files. The two contexts share an `Environment`
 which is the source of external properties for any Spring
 application. Bootstrap properties are added with high precedence, so
@@ -255,3 +178,96 @@ org.springframework.cloud.bootstrap.BootstrapConfiguration=sample.custom.CustomP
 then the "customProperty" `PropertySource` will show up in any
 application that includes that jar on its classpath.
 
+=== Environment Changes
+
+The application will listen for an `EnvironmentChangedEvent` and react
+to the change in a couple of standard ways (additional
+`ApplicationListeners` can be added as `@Beans` by the user in the
+normal way). When an `EnvironmentChangedEvent` is observed it will
+have a list of key values that have changed, and the application will
+use those to:
+
+* Re-bind any `@ConfigurationProperties` beans in the context
+* Set the logger levels for any properties in `logging.level.*`
+
+Note that the Config Client does not by default poll for changes in
+the `Environment`, and generally we would not recommend that approach
+for detecting changes (although you could set it up with a
+`@Scheduled` annotation). If you have a scaled-out client application
+then it is better to broadcast the `EnvironmentChangedEvent` to all
+the instances instead of having them polling for changes (e.g. using
+the https://github.com/spring-cloud/spring-cloud-bus[Spring Cloud
+Bus]).
+
+The `EnvironmentChangedEvent` covers a large class of refresh use
+cases, as long as you can actually make a change to the `Environment`
+and publish the event (those APIs are public and part of core
+Spring). You can verify the changes are bound to
+`@ConfigurationProperties` beans by visiting the `/configprops`
+endpoint (normal Spring Boot Actuator feature). For instance a
+`DataSource` can have its `maxPoolSize` changed at runtime (the
+default `DataSource` created by Spring Boot is an
+`@ConfigurationProperties` bean) and grow capacity
+dynamically. Re-binding `@ConfigurationProperties` does not cover
+another large class of use cases, where you need more control over the
+refresh, and where you need a change to be atomic over the whole
+`ApplicationContext`. To address those concerns we have
+`@RefreshScope`.
+
+=== Refresh Scope
+
+A Spring `@Bean` that is marked as `@RefreshScope` will get special
+treatment when there is a configuration change. This addresses the
+problem of stateful beans that only get their configuration injected
+when they are initialized. For instance if a `DataSource` has open
+connections when the database URL is changed via the `Environment`, we
+probably want the holders of those connections to be able to complete
+what they are doing. Then the next time someone borrows a connection
+from the pool he gets one with the new URL.
+
+Refresh scope beans are lazy proxies that initialize when they are
+used (i.e. when a method is called), and the scope acts as a cache of
+initialized values. To force a bean to re-initialize on the next
+method call you just need to invalidate its cache entry.
+
+The `RefreshScope` is a bean in the context and it has a public method
+`refreshAll()` to refresh all beans in the scope by clearing the
+target cache. There is also a `refresh(String)` method to refresh an
+individual bean by name. This functionality is exposed in the
+`/refresh` endpoint (over HTTP or JMX).
+
+NOTE: `@RefreshScope` works (technically) on an `@Configuration`
+class, but it might lead to surprising behaviour: e.g. it does *not*
+mean that all the `@Beans` defined in that class are themselves
+`@RefreshScope`. Specifically, anything that depends on those beans
+cannot rely on them being updated when a refresh is initiated, unless
+it is itself in `@RefreshScope` (in which it will be rebuilt on a
+refresh and its dependencies re-injected, at which point they will be
+re-initialized from the refreshed `@Configuration`).
+
+=== Encryption and Decryption
+
+The Config Client has an `Environment` pre-processor for decrypting
+property values locally. It follows the same rules as the Config
+Server, and has the same external configuration via `encrypt.\*`. Thus
+you can use encrypted values in the form `{cipher}*` and as long as
+there is a valid key then they will be decrypted before the main
+application context gets the `Environment`. To use the encryption
+features in a client you need to include Spring Security RSA in your
+classpath (Maven co-ordinates
+"org.springframework.security:spring-security-rsa") and you also need
+the full strength JCE extensions in your JVM (google it and download
+from Oracle).
+
+=== Endpoints
+
+For a Spring Boot Actuator application there are some additional management endpoints:
+
+* POST to `/env` to update the `Environment` and rebind `@ConfigurationProperties` and log levels
+* `/refresh` for re-loading the boot strap context and refreshing the `@RefreshScope` beans
+* `/restart` for closing the `ApplicationContext` and restarting it (disabled by default)
+* `/pause` and `/resume` for calling the `Lifecycle` methods (`stop()` and `start()` on the `ApplicationContext`)
+
+== Spring Cloud Commons: Common Abstractions
+
+Patterns such as service discovery, load balancing and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (e.g. discovery via Eureka or Consul).
