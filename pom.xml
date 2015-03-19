@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
+	<groupId>org.springframework.cloud</groupId>
+	<artifactId>spring-cloud-commons-parent</artifactId>
+	<version>1.0.1.BUILD-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>Spring Cloud Commons Parent</name>
+	<description>Spring Cloud Commons Parent</description>
+	<url>http://projects.spring.io/spring-cloud/</url>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
 		<version>1.0.1.BUILD-SNAPSHOT</version>
-		<relativePath />
+		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<artifactId>spring-cloud-commons</artifactId>
-	<version>1.0.1.BUILD-SNAPSHOT</version>
-	<packaging>jar</packaging>
-	<name>Spring Cloud Commons</name>
-	<description>Spring Cloud Commons</description>
 	<scm>
 		<url>https://github.com/spring-cloud/spring-cloud-commons</url>
 		<connection>scm:git:git://github.com/spring-cloud/spring-cloud-commons.git</connection>
@@ -53,46 +53,9 @@
 			</plugin>
 		</plugins>
 	</build>
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-aop</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-crypto</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-rsa</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.integration</groupId>
-			<artifactId>spring-integration-jmx</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+	<modules>
+	  <module>spring-cloud-context</module>
+	  <module>spring-cloud-commons</module>
+	  <module>docs</module>
+	</modules>
 </project>
