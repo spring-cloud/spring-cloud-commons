@@ -34,6 +34,8 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 
 	private LoadBalancerClient loadBalancer;
 
+    private static final ThreadLocal<ServiceInstance> instanceHolder = new ThreadLocal<>();
+
 	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer) {
 		this.loadBalancer = loadBalancer;
 	}
@@ -43,12 +45,14 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 			final ClientHttpRequestExecution execution) throws IOException {
 		final URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
+        request.getHeaders().add("X-SpringCloud-Service-Id", serviceName);
 		return this.loadBalancer.execute(serviceName,
 				new LoadBalancerRequest<ClientHttpResponse>() {
 
 					@Override
 					public ClientHttpResponse apply(final ServiceInstance instance)
 							throws Exception {
+                        instanceHolder.set(instance);
 						HttpRequest serviceRequest = new ServiceRequestWrapper(request,
 								instance);
 						return execution.execute(serviceRequest, body);
@@ -74,5 +78,9 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 		}
 
 	}
+
+    public static ServiceInstance getThreadLocalServiceInstance() {
+        return instanceHolder.get();
+    }
 
 }
