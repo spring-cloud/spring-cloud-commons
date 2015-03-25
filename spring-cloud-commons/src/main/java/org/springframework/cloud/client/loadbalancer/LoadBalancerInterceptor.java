@@ -45,7 +45,6 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 			final ClientHttpRequestExecution execution) throws IOException {
 		final URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
-        request.getHeaders().add("X-SpringCloud-Service-Id", serviceName);
 		return this.loadBalancer.execute(serviceName,
 				new LoadBalancerRequest<ClientHttpResponse>() {
 
