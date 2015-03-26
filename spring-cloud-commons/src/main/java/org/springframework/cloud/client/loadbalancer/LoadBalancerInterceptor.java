@@ -34,8 +34,6 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 
 	private LoadBalancerClient loadBalancer;
 
-    private static final ThreadLocal<ServiceInstance> instanceHolder = new ThreadLocal<>();
-
 	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer) {
 		this.loadBalancer = loadBalancer;
 	}
@@ -51,7 +49,6 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 					@Override
 					public ClientHttpResponse apply(final ServiceInstance instance)
 							throws Exception {
-                        instanceHolder.set(instance);
 						HttpRequest serviceRequest = new ServiceRequestWrapper(request,
 								instance);
 						return execution.execute(serviceRequest, body);
@@ -77,9 +74,5 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 		}
 
 	}
-
-    public static ServiceInstance getThreadLocalServiceInstance() {
-        return instanceHolder.get();
-    }
 
 }
