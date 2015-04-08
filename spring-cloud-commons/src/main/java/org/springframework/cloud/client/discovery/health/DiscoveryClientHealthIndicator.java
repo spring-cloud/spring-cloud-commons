@@ -17,19 +17,25 @@
 package org.springframework.cloud.client.discovery.health;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 
 /**
  * @author Spencer Gibb
  */
 @CommonsLog
-public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator, Ordered {
+public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator, Ordered,
+		ApplicationListener<InstanceRegisteredEvent> {
+
+	private AtomicBoolean discoveryInitialized = new AtomicBoolean(false);
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
 
@@ -40,16 +46,30 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 	}
 
 	@Override
+	public void onApplicationEvent(InstanceRegisteredEvent event) {
+		if (this.discoveryInitialized.compareAndSet(false, true)) {
+			log.debug("Discovery Client has been initialized");
+		}
+	}
+
+	@Override
 	public Health health() {
 		Health.Builder builder = new Health.Builder();
-		try {
-			List<String> services = this.discoveryClient.getServices();
-			builder.status(new Status("UP", this.discoveryClient.description()))
-					.withDetail("services", services);
+
+		if (this.discoveryInitialized.get()) {
+			try {
+				List<String> services = this.discoveryClient.getServices();
+				builder.status(new Status("UP", this.discoveryClient.description()))
+						.withDetail("services", services);
+			}
+			catch (Exception e) {
+				log.error("Error", e);
+				builder.down(e);
+			}
 		}
-		catch (Exception e) {
-			log.error("Error", e);
-			builder.down(e);
+		else {
+			builder.status(new Status(Status.UNKNOWN.getCode(),
+					"Discovery Client not initialized"));
 		}
 		return builder.build();
 	}

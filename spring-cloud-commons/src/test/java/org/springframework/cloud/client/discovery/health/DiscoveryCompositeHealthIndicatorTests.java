@@ -32,6 +32,7 @@ import org.springframework.boot.actuate.health.OrderedHealthAggregator;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.cloud.client.CommonsClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -47,6 +48,9 @@ public class DiscoveryCompositeHealthIndicatorTests {
 
 	@Autowired
 	DiscoveryCompositeHealthIndicator healthIndicator;
+
+	@Autowired
+	DiscoveryClientHealthIndicator clientHealthIndicator;
 
 	@Configuration
 	public static class Config {
@@ -83,12 +87,22 @@ public class DiscoveryCompositeHealthIndicatorTests {
 	public void testHealthIndicator() {
 		assertNotNull("healthIndicator was null", this.healthIndicator);
 		Health health = this.healthIndicator.health();
+		assertHealth(health, Status.UNKNOWN);
+
+		clientHealthIndicator.onApplicationEvent(new InstanceRegisteredEvent(this, null));
+
+		health = this.healthIndicator.health();
+		Status status = assertHealth(health, Status.UP);
+		assertEquals("status desciption was wrong", "TestDiscoveryClient",
+				status.getDescription());
+	}
+
+	protected Status assertHealth(Health health, Status expected) {
 		assertNotNull("health was null", health);
 		Status status = health.getStatus();
 		assertNotNull("status was null", status);
-		assertEquals("status code was wrong", "UP", status.getCode());
-		assertEquals("status desciption was wrong", "TestDiscoveryClient",
-				status.getDescription());
+		assertEquals("status code was wrong", expected.getCode(), status.getCode());
+		return status;
 	}
 
 }
