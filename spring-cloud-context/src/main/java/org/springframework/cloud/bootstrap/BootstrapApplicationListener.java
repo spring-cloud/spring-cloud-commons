@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
  * spring.factories as {@link BootstrapConfiguration}, and initialized with external
  * config taken from "bootstrap.properties" (or yml), instead of the normal
  * "application.properties".
- * 
+ *
  * @author Dave Syer
  *
  */
@@ -122,6 +122,7 @@ public class BootstrapApplicationListener implements
 			sources.add(cls);
 		}
 		builder.sources(sources.toArray(new Class[sources.size()]));
+		AnnotationAwareOrderComparator.sort(sources);
 		final ConfigurableApplicationContext context = builder.run();
 		// Make the bootstrap context a parent of the app context
 		addAncestorInitializer(application, context);
@@ -203,7 +204,8 @@ public class BootstrapApplicationListener implements
 			while (context.getParent() != null && context.getParent() != context) {
 				context = (ConfigurableApplicationContext) context.getParent();
 			}
-			new ParentContextApplicationContextInitializer(parent).initialize(context);
+			new ParentContextApplicationContextInitializer(this.parent)
+					.initialize(context);
 		}
 
 		private void preemptMerge(MutablePropertySources propertySources,

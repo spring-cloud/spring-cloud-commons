@@ -129,7 +129,16 @@ a comma-separated list of Spring `@Configuration` classes which will
 be used to create the context. Any beans that you want to be available
 to the main application context for autowiring can be created here,
 and also there is a special contract for `@Beans` of type
-`ApplicationContextInitializer`.
+`ApplicationContextInitializer`. Classes can be marked with an `@Order`
+if you want to control the startup sequence (the default order is
+"last").
+
+WARNING: Be careful when adding custom `BootstrapConfiguration` that the
+classes you add are not `@ComponentScanned` by mistake into your 
+"main" application context, where they might not be needed. 
+Use a separate package name for boot configuration classes that is
+not already covered by your `@ComponentScan` or `@SpringBootApplication`
+annotated configuration classes.
 
 The bootstrap process ends by injecting initializers into the main
 `SpringApplication` instance (i.e. the normal Spring Boot startup
