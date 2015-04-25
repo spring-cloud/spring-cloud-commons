@@ -83,11 +83,12 @@ public class PropertySourceBootstrapConfiguration implements
 		}
 		if (!empty) {
 			MutablePropertySources propertySources = applicationContext.getEnvironment()
-					.getPropertySources();
+					.getPropertySources();			
+			CompositePropertySource originalBootstrap = new CompositePropertySource("originalBootstrap");
 			if (propertySources.contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
-				propertySources.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
+				originalBootstrap.addPropertySource(propertySources.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME));
 			}
-			insertPropertySources(propertySources, composite);
+			insertPropertySources(propertySources, composite, originalBootstrap);
 			setLogLevels(applicationContext.getEnvironment());
 		}
 	}
@@ -102,26 +103,28 @@ public class PropertySourceBootstrapConfiguration implements
 	}
 
 	private void insertPropertySources(MutablePropertySources propertySources,
-			CompositePropertySource composite) {
+			CompositePropertySource composite, PropertySource<?> originalBootstrap) {
 		MutablePropertySources incoming = new MutablePropertySources();
 		incoming.addFirst(composite);
+		incoming.addFirst(originalBootstrap);
 		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
 		new RelaxedDataBinder(remoteProperties, "spring.cloud.config")
 				.bind(new PropertySourcesPropertyValues(incoming));
-		if (!remoteProperties.isAllowOverride()
-				|| remoteProperties.isOverrideSystemProperties()) {
-			propertySources.addFirst(composite);
-			return;
-		}
-		if (propertySources
-				.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
-			propertySources.addAfter(
-					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-					composite);
-		}
-		else {
-			propertySources.addLast(composite);
-		}
+		
+		if(remoteProperties.isAllowOverride()) {
+			if(remoteProperties.isOverrideNoProperties()) {
+				propertySources.addLast(composite);
+				return;
+			} else if (!remoteProperties.isOverrideSystemProperties() && propertySources
+					.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
+				propertySources.addAfter(
+						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, composite);
+				return;
+			}
+		} 
+		
+		propertySources.addFirst(composite);		
+		
 	}
 
 }
