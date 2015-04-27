@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.logging.LogFile;
+import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.logging.LoggingRebinder;
@@ -39,6 +41,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
@@ -71,9 +75,10 @@ public class PropertySourceBootstrapConfiguration implements
 				BOOTSTRAP_PROPERTY_SOURCE_NAME);
 		AnnotationAwareOrderComparator.sort(this.propertySourceLocators);
 		boolean empty = true;
+		ConfigurableEnvironment environment = applicationContext.getEnvironment();
 		for (PropertySourceLocator locator : this.propertySourceLocators) {
 			PropertySource<?> source = null;
-			source = locator.locate(applicationContext.getEnvironment());
+			source = locator.locate(environment);
 			if (source == null) {
 				continue;
 			}
@@ -82,13 +87,33 @@ public class PropertySourceBootstrapConfiguration implements
 			empty = false;
 		}
 		if (!empty) {
-			MutablePropertySources propertySources = applicationContext.getEnvironment()
-					.getPropertySources();
+			MutablePropertySources propertySources = environment.getPropertySources();
+			String logConfig = environment.resolvePlaceholders("${logging.config:}");
 			if (propertySources.contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 				propertySources.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
 			}
 			insertPropertySources(propertySources, composite);
-			setLogLevels(applicationContext.getEnvironment());
+			reinitializeLoggingSystem(environment, logConfig);
+			setLogLevels(environment);
+		}
+	}
+
+	private void reinitializeLoggingSystem(ConfigurableEnvironment environment,
+			String oldLogConfig) {
+		String logConfig = environment.resolvePlaceholders("${logging.config:}");
+		if (StringUtils.hasText(logConfig) && !logConfig.equals(oldLogConfig)) {
+			LoggingSystem system = LoggingSystem
+					.get(LoggingSystem.class.getClassLoader());
+			try {
+				ResourceUtils.getURL(logConfig).openStream().close();
+				LogFile logFile = LogFile.get(environment);
+				system.initialize(logConfig, logFile);
+			}
+			catch (Exception ex) {
+				PropertySourceBootstrapConfiguration.logger
+						.warn("Logging config file location '" + logConfig
+								+ "' cannot be opened and will be ignored");
+			}
 		}
 	}
 

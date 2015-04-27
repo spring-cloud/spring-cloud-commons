@@ -31,7 +31,7 @@ import org.springframework.core.env.Environment;
 /**
  * Listener that looks for {@link EnvironmentChangeEvent} and rebinds logger levels if any
  * changed.
- * 
+ *
  * @author Dave Syer
  *
  */
@@ -49,11 +49,11 @@ public class LoggingRebinder implements ApplicationListener<EnvironmentChangeEve
 
 	@Override
 	public void onApplicationEvent(EnvironmentChangeEvent event) {
-		if (environment == null) {
+		if (this.environment == null) {
 			return;
 		}
 		LoggingSystem system = LoggingSystem.get(LoggingSystem.class.getClassLoader());
-		setLogLevels(system, environment);
+		setLogLevels(system, this.environment);
 	}
 
 	protected void setLogLevels(LoggingSystem system, Environment environment) {
