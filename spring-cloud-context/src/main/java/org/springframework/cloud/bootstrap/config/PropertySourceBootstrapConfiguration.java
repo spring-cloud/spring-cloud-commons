@@ -134,15 +134,27 @@ public class PropertySourceBootstrapConfiguration implements
 		new RelaxedDataBinder(remoteProperties, "spring.cloud.config")
 				.bind(new PropertySourcesPropertyValues(incoming));
 		if (!remoteProperties.isAllowOverride()
-				|| remoteProperties.isOverrideSystemProperties()) {
+				|| (!remoteProperties.isOverrideNone() && remoteProperties
+						.isOverrideSystemProperties())) {
 			propertySources.addFirst(composite);
+			return;
+		}
+		if (remoteProperties.isOverrideNone()) {
+			propertySources.addLast(composite);
 			return;
 		}
 		if (propertySources
 				.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
-			propertySources.addAfter(
-					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-					composite);
+			if (!remoteProperties.isOverrideSystemProperties()) {
+				propertySources.addAfter(
+						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+						composite);
+			}
+			else {
+				propertySources.addBefore(
+						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+						composite);
+			}
 		}
 		else {
 			propertySources.addLast(composite);

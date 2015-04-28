@@ -18,8 +18,23 @@ public class PropertySourceBootstrapProperties {
 	 */
 	private boolean allowOverride = true;
 
+	/**
+	 * Flag to indicate that when {@link #setAllowOverride(boolean) allowOverride} is
+	 * true, external properties should take lowest priority, and not override any
+	 * existing property sources (including local config files). Default false.
+	 */
+	private boolean overrideNone = false;
+
+	public boolean isOverrideNone() {
+		return this.overrideNone;
+	}
+
+	public void setOverrideNone(boolean overrideNone) {
+		this.overrideNone = overrideNone;
+	}
+
 	public boolean isOverrideSystemProperties() {
-		return overrideSystemProperties;
+		return this.overrideSystemProperties;
 	}
 
 	public void setOverrideSystemProperties(boolean overrideSystemProperties) {
@@ -27,7 +42,7 @@ public class PropertySourceBootstrapProperties {
 	}
 
 	public boolean isAllowOverride() {
-		return allowOverride;
+		return this.allowOverride;
 	}
 
 	public void setAllowOverride(boolean allowOverride) {

@@ -157,6 +157,32 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
+	public void systemPropertyOverrideFalseWhenOverrideAllowed() {
+		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
+		PropertySourceConfiguration.MAP.put(
+				"spring.cloud.config.overrideSystemProperties", "false");
+		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
+		System.setProperty("bootstrap.foo", "system");
+		this.context = new SpringApplicationBuilder().web(false)
+				.sources(BareConfiguration.class).run();
+		assertEquals("system", this.context.getEnvironment().getProperty("bootstrap.foo"));
+	}
+
+	@Test
+	public void overrideAllWhenOverrideAllowed() {
+		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
+		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideNone", "true");
+		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
+		ConfigurableEnvironment environment = new StandardEnvironment();
+		environment.getPropertySources().addLast(
+				new MapPropertySource("last", Collections.<String, Object> singletonMap(
+						"bootstrap.foo", "splat")));
+		this.context = new SpringApplicationBuilder().web(false).environment(environment)
+				.sources(BareConfiguration.class).run();
+		assertEquals("splat", this.context.getEnvironment().getProperty("bootstrap.foo"));
+	}
+
+	@Test
 	public void applicationNameInBootstrapAndMain() {
 		System.setProperty("expected.name", "main");
 		this.context = new SpringApplicationBuilder()
