@@ -28,6 +28,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.CompositePropertySource;
@@ -66,7 +67,8 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 
 	@ManagedOperation
 	public synchronized String[] refresh() {
-		Map<String, Object> before = extract(context.getEnvironment().getPropertySources());
+		Map<String, Object> before = extract(context.getEnvironment()
+				.getPropertySources());
 		addConfigFilesToEnvironment();
 		Set<String> keys = changes(before,
 				extract(context.getEnvironment().getPropertySources())).keySet();
@@ -79,20 +81,36 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 	}
 
 	private void addConfigFilesToEnvironment() {
-		ConfigurableApplicationContext capture = new SpringApplicationBuilder(Empty.class).showBanner(
-				false).web(false).environment(context.getEnvironment()).run();
-		MutablePropertySources target = context.getEnvironment().getPropertySources();
-		for (PropertySource<?> source : capture.getEnvironment().getPropertySources()) {
-			String name = source.getName();
-			if (!standardSources.contains(name)) {
-				if (target.contains(name)) {
-					target.replace(name, source);
-				} else {
-					if (target.contains("defaultProperties")) {
-						target.addBefore("defaultProperties", source);
-					} else {
-						target.addLast(source);
+		ConfigurableApplicationContext capture = null;
+		try {
+			capture = new SpringApplicationBuilder(Empty.class).showBanner(false)
+					.web(false).environment(context.getEnvironment()).run();
+			MutablePropertySources target = context.getEnvironment().getPropertySources();
+			for (PropertySource<?> source : capture.getEnvironment().getPropertySources()) {
+				String name = source.getName();
+				if (!standardSources.contains(name)) {
+					if (target.contains(name)) {
+						target.replace(name, source);
 					}
+					else {
+						if (target.contains("defaultProperties")) {
+							target.addBefore("defaultProperties", source);
+						}
+						else {
+							target.addLast(source);
+						}
+					}
+				}
+			}
+		}
+		finally {
+			while (capture != null) {
+				capture.close();
+				ApplicationContext parent = capture.getParent();
+				if (parent instanceof ConfigurableApplicationContext) {
+					capture = (ConfigurableApplicationContext) parent;
+				} else {
+					capture = null;
 				}
 			}
 		}
@@ -109,7 +127,8 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 		for (String key : before.keySet()) {
 			if (!after.containsKey(key)) {
 				result.put(key, null);
-			} else if (!equal(before.get(key), after.get(key))) {
+			}
+			else if (!equal(before.get(key), after.get(key))) {
 				result.put(key, after.get(key));
 			}
 		}
@@ -144,13 +163,16 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 	private void extract(PropertySource<?> parent, Map<String, Object> result) {
 		if (parent instanceof CompositePropertySource) {
 			try {
-				for (PropertySource<?> source : ((CompositePropertySource) parent).getPropertySources()) {
+				for (PropertySource<?> source : ((CompositePropertySource) parent)
+						.getPropertySources()) {
 					extract(source, result);
 				}
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				return;
 			}
-		} else if (parent instanceof EnumerablePropertySource) {
+		}
+		else if (parent instanceof EnumerablePropertySource) {
 			for (String key : ((EnumerablePropertySource<?>) parent).getPropertyNames()) {
 				result.put(key, parent.getProperty(key));
 			}
