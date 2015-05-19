@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingSystem;
@@ -63,6 +64,9 @@ public class PropertySourceBootstrapConfiguration implements
 
 	@Autowired
 	private PropertySourceBootstrapProperties properties;
+
+	@Autowired
+	private ConfigurationPropertiesBindingPostProcessor binder;
 
 	public void setPropertySourceLocators(
 			Collection<PropertySourceLocator> propertySourceLocators) {

@@ -21,9 +21,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
+import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetaData;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessorRegistrar;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.bootstrap.encrypt.KeyProperties.KeyStore;
 import org.springframework.cloud.context.encrypt.EncryptorFactory;
+import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
@@ -90,13 +95,24 @@ public class EncryptionBootstrapConfiguration {
 	}
 
 	@Bean
+	public ConfigurationPropertiesRebinder configurationPropertiesRebinder(
+			ApplicationContext context, ConfigurationPropertiesBindingPostProcessor binder) {
+		ConfigurationBeanFactoryMetaData metaData = context.getBean(
+				ConfigurationPropertiesBindingPostProcessorRegistrar.BINDER_BEAN_NAME
+						+ ".store", ConfigurationBeanFactoryMetaData.class);
+		ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(
+				binder);
+		rebinder.setBeanMetaDataStore(metaData);
+		return rebinder;
+	}
+
+	@Bean
 	public EnvironmentDecryptApplicationInitializer environmentDecryptApplicationListener() {
 		if (encryptor == null) {
 			encryptor = new FailsafeTextEncryptor();
 		}
 		EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
 				encryptor);
-		listener.setFailOnError(key.isFailOnError());
 		return listener;
 	}
 

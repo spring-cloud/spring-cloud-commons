@@ -54,7 +54,7 @@ import org.springframework.util.StringUtils;
  */
 public class BootstrapApplicationListener implements
 		ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
-
+	
 	public static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
 	public static final int DEFAULT_ORDER = Ordered.HIGHEST_PRECEDENCE + 5;
