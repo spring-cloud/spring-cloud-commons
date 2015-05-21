@@ -17,7 +17,6 @@
 package org.springframework.cloud.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -77,11 +76,9 @@ public abstract class SingleImplementationImportSelector<T> implements
 		}
 
 		if (factories.size() > 1) {
-			String factory = factories.get(0);
-			// there should only every be one DiscoveryClient
+			// there should only ever be one DiscoveryClient, but there might be more than one factory
 			log.warn("More than one implementation " + "of @" + getSimpleName()
-					+ ".  Using " + factory + " out of available " + factories);
-			factories = Collections.singletonList(factory);
+					+ " (now relying on @Conditionals to pick one): " + factories);
 		}
 
 		return factories.toArray(new String[factories.size()]);
