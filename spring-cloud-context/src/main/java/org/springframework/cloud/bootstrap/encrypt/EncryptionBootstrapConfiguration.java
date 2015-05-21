@@ -45,7 +45,7 @@ import org.springframework.util.StringUtils;
  *
  */
 @Configuration
-@ConditionalOnClass({ TextEncryptor.class, RsaSecretEncryptor.class })
+@ConditionalOnClass({ TextEncryptor.class })
 @EnableConfigurationProperties(KeyProperties.class)
 public class EncryptionBootstrapConfiguration {
 
