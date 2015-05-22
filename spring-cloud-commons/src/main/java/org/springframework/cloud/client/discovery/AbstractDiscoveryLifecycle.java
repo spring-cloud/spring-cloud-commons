@@ -21,27 +21,34 @@ import javax.annotation.PreDestroy;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Lifecycle methods that may be useful and common to various DiscoveryClient implementations.
  * @author Spencer Gibb
  */
 public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
-		ApplicationContextAware {
+		ApplicationContextAware, ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
 	private boolean autoStartup = true;
 
-	private boolean running;
+	private AtomicBoolean running = new AtomicBoolean(false);
 
 	private int order = 0;
 
 	private ApplicationContext context;
 
 	private Environment environment;
+
+	private AtomicInteger port = new AtomicInteger(0);
 
 	protected ApplicationContext getContext() {
 		return context;
@@ -56,6 +63,10 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 
 	protected Environment getEnvironment() {
 		return environment;
+	}
+
+	protected AtomicInteger getPort() {
+		return port;
 	}
 
 	@Override
@@ -75,14 +86,25 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 			return;
 		}
 
-		register();
-		if (shouldRegisterManagement()) {
-			registerManagement();
+		// only set the port if the nonSecurePort is 0 and this.port != 0
+		if (this.port.get() != 0 && getConfiguredPort() == 0) {
+			setConfiguredPort(this.port.get());
 		}
-		this.context
-				.publishEvent(new InstanceRegisteredEvent<>(this, getConfiguration()));
-		this.running = true;
+		// only initialize if nonSecurePort is greater than 0 and it isn't already running
+		// because of containerPortInitializer below
+		if (!this.running.get() && getConfiguredPort() > 0) {
+			register();
+			if (shouldRegisterManagement()) {
+				registerManagement();
+			}
+			this.context .publishEvent(new InstanceRegisteredEvent<>(this,
+					getConfiguration()));
+			this.running.compareAndSet(false, true);
+		}
 	}
+
+	protected abstract int getConfiguredPort();
+	protected abstract void setConfiguredPort(int port);
 
 	/**
 	 * @return if the management service should be registered with the DiscoveryService
@@ -171,7 +193,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 				deregisterManagement();
 			}
 		}
-		this.running = false;
+		this.running.compareAndSet(true, false);
 	}
 
 	@PreDestroy
@@ -181,7 +203,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 
 	@Override
 	public boolean isRunning() {
-		return this.running;
+		return this.running.get();
 	}
 
 	@Override
@@ -194,4 +216,10 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		return 0;
 	}
 
+	@Override
+	public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
+		// TODO: take SSL into account when Spring Boot 1.2 is available
+		this.port.compareAndSet(0, event.getEmbeddedServletContainer().getPort());
+		this.start();
+	}
 }
