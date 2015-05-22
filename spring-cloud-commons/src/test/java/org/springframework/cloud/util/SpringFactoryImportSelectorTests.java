@@ -17,14 +17,13 @@
 package org.springframework.cloud.util;
 
 import org.junit.Test;
-import org.springframework.cloud.util.SingleImplementationImportSelector;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Spencer Gibb
  */
-public class SingleImplementationImportSelectorTests {
+public class SpringFactoryImportSelectorTests {
 
 	@Test
 	public void testFindAnnotation() {
@@ -37,7 +36,7 @@ public class SingleImplementationImportSelectorTests {
 	}
 
 	public static class MyAnnotationImportSelector extends
-			SingleImplementationImportSelector<MyAnnotation> {
+			SpringFactoryImportSelector<MyAnnotation> {
 
 		@Override
 		protected boolean isEnabled() {

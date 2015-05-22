@@ -33,13 +33,14 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
 /**
- * Selects a single configuration to load defined by the generic type T.
+ * Selects configurations to load defined by the generic type T.  Loads
+ * implementations using {@link SpringFactoriesLoader}.
  *
  * @author Spencer Gibb
  * @author Dave Syer
  */
 @CommonsLog
-public abstract class SingleImplementationImportSelector<T> implements
+public abstract class SpringFactoryImportSelector<T> implements
 		DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
 
 	private ClassLoader beanClassLoader;
@@ -49,9 +50,9 @@ public abstract class SingleImplementationImportSelector<T> implements
 	private Environment environment;
 
 	@SuppressWarnings("unchecked")
-	protected SingleImplementationImportSelector() {
+	protected SpringFactoryImportSelector() {
 		this.annotationClass = (Class<T>) GenericTypeResolver.resolveTypeArgument(
-				this.getClass(), SingleImplementationImportSelector.class);
+				this.getClass(), SpringFactoryImportSelector.class);
 	}
 
 	@Override

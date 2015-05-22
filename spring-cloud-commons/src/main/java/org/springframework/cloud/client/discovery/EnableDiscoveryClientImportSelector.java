@@ -17,7 +17,7 @@
 package org.springframework.cloud.client.discovery;
 
 import org.springframework.boot.bind.RelaxedPropertyResolver;
-import org.springframework.cloud.util.SingleImplementationImportSelector;
+import org.springframework.cloud.util.SpringFactoryImportSelector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
@@ -26,7 +26,7 @@ import org.springframework.core.annotation.Order;
  */
 @Order(Ordered.LOWEST_PRECEDENCE - 100)
 public class EnableDiscoveryClientImportSelector extends
-		SingleImplementationImportSelector<EnableDiscoveryClient> {
+		SpringFactoryImportSelector<EnableDiscoveryClient> {
 
 	@Override
 	protected boolean isEnabled() {
