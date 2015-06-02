@@ -113,6 +113,7 @@ public class EncryptionBootstrapConfiguration {
 		}
 		EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
 				encryptor);
+		listener.setFailOnError(key.isFailOnError());
 		return listener;
 	}
 
