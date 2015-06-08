@@ -270,8 +270,9 @@ application context gets the `Environment`. To use the encryption
 features in a client you need to include Spring Security RSA in your
 classpath (Maven co-ordinates
 "org.springframework.security:spring-security-rsa") and you also need
-the full strength JCE extensions in your JVM (google it and download
-from Oracle).
+the full strength JCE extensions in your JVM.
+
+include::jce.adoc
 
 === Endpoints
 
