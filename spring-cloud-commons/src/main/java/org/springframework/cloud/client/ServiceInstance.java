@@ -17,12 +17,24 @@
 package org.springframework.cloud.client;
 
 import java.net.URI;
+import java.util.Set;
 
 /**
  * Represents an instance of a Service in a Discovery System
  * @author Spencer Gibb
  */
 public interface ServiceInstance {
+	/**
+	 * Enum of known service capability types.
+	 * @author Matt Benson
+	 */
+	public enum Capability {
+		/**
+		 * Capability to return a {@link Set} of {@link String} which comprise a set of
+		 * tags to identify a given service instance.
+		 */
+		TAGS;
+	}
 
 	/**
 	 * @return the service id as register by the DiscoveryClient
@@ -46,4 +58,16 @@ public interface ServiceInstance {
 
 	public URI getUri();
 
+	/**
+	 * @param capability
+	 * @return whether the specified service capability is supported by this
+	 * ServiceInstance.
+	 */
+	public boolean supports(Capability capability);
+
+	/**
+	 * @param capability
+	 * @return service capability payload value (using type inference)
+	 */
+	public <T> T getValue(Capability capability);
 }
