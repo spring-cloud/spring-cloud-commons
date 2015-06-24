@@ -18,6 +18,7 @@ package org.springframework.cloud.bootstrap.encrypt;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.security.rsa.crypto.RsaAlgorithm;
+import org.springframework.util.ClassUtils;
 
 @ConfigurationProperties("encrypt")
 public class KeyProperties {
@@ -42,7 +43,13 @@ public class KeyProperties {
 	/**
 	 * Rsa algorithm properties when using asymmetric encryption.
 	 */
-	private Rsa rsa = new Rsa();
+	private Rsa rsa;
+
+	{
+		if (ClassUtils.isPresent("org.springframework.security.rsa.crypto.RsaAlgorithm", null)) {
+			this.rsa = new Rsa();
+		}
+	}
 
 	public Rsa getRsa() {
 		return this.rsa;
