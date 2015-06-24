@@ -17,18 +17,39 @@ package org.springframework.cloud.bootstrap.encrypt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
+import org.springframework.security.rsa.crypto.RsaAlgorithm;
 
-@ConfigurationProperties("encrypt") 
+@ConfigurationProperties("encrypt")
 public class KeyProperties {
 
+	/**
+	 * A symmetric key. As a stronger alternative consider using a keystore.
+	 */
 	private String key;
-	
+
+	/**
+	 * Flag to say that a process should fail if there is an encryption or decryption
+	 * error.
+	 */
 	private boolean failOnError = true;
 
-	private KeyProperties.KeyStore keyStore = new KeyStore();
+	/**
+	 * The key store properties for locating a key in a Java Key Store (a file in a format
+	 * defined and understood by the JVM).
+	 */
+	private KeyStore keyStore = new KeyStore();
+
+	/**
+	 * Rsa algorithm properties when using asymmetric encryption.
+	 */
+	private Rsa rsa = new Rsa();
+
+	public Rsa getRsa() {
+		return this.rsa;
+	}
 
 	public boolean isFailOnError() {
-		return failOnError;
+		return this.failOnError;
 	}
 
 	public void setFailOnError(boolean failOnError) {
@@ -36,7 +57,7 @@ public class KeyProperties {
 	}
 
 	public String getKey() {
-		return key;
+		return this.key;
 	}
 
 	public void setKey(String key) {
@@ -44,7 +65,7 @@ public class KeyProperties {
 	}
 
 	public KeyStore getKeyStore() {
-		return keyStore;
+		return this.keyStore;
 	}
 
 	public void setKeyStore(KeyProperties.KeyStore keyStore) {
@@ -53,13 +74,28 @@ public class KeyProperties {
 
 	public static class KeyStore {
 
+		/**
+		 * Location of the key store file, e.g. classpath:/keystore.jks.
+		 */
 		private Resource location;
+
+		/**
+		 * Password that locks the keystore.
+		 */
 		private String password;
+
+		/**
+		 * Alias for a key in the store.
+		 */
 		private String alias;
+
+		/**
+		 * Secret protecting the key (defaults to the same as the password).
+		 */
 		private String secret;
 
 		public String getAlias() {
-			return alias;
+			return this.alias;
 		}
 
 		public void setAlias(String alias) {
@@ -67,7 +103,7 @@ public class KeyProperties {
 		}
 
 		public Resource getLocation() {
-			return location;
+			return this.location;
 		}
 
 		public void setLocation(Resource location) {
@@ -75,7 +111,7 @@ public class KeyProperties {
 		}
 
 		public String getPassword() {
-			return password;
+			return this.password;
 		}
 
 		public void setPassword(String password) {
@@ -83,11 +119,59 @@ public class KeyProperties {
 		}
 
 		public String getSecret() {
-			return secret==null ? password : secret;
+			return this.secret == null ? this.password : this.secret;
 		}
 
 		public void setSecret(String secret) {
 			this.secret = secret;
+		}
+
+	}
+
+	public static class Rsa {
+
+		/**
+		 * The RSA algorithm to use (DEFAULT or OEAP). Once it is set do not change it (or
+		 * existing ciphers will not a decryptable).
+		 */
+		private RsaAlgorithm algorithm = RsaAlgorithm.DEFAULT;
+
+		/**
+		 * Flag to indicate that "strong" AES encryption should be used internally. If
+		 * true then the GCM algorithm is applied to the AES encrypted bytes. Default is
+		 * false (in which case "standard" CBC is used instead). Once it is set do not
+		 * change it (or existing ciphers will not a decryptable).
+		 */
+		private boolean strong = false;
+
+		/**
+		 * Salt for the random secret used to encrypt cipher text. Once it is set do not
+		 * change it (or existing ciphers will not a decryptable).
+		 */
+		private String salt = "deadbeef";
+
+		public RsaAlgorithm getAlgorithm() {
+			return this.algorithm;
+		}
+
+		public void setAlgorithm(RsaAlgorithm algorithm) {
+			this.algorithm = algorithm;
+		}
+
+		public boolean isStrong() {
+			return this.strong;
+		}
+
+		public void setStrong(boolean strong) {
+			this.strong = strong;
+		}
+
+		public String getSalt() {
+			return this.salt;
+		}
+
+		public void setSalt(String salt) {
+			this.salt = salt;
 		}
 
 	}

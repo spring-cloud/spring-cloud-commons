@@ -66,14 +66,16 @@ public class EncryptionBootstrapConfiguration {
 		@Bean
 		@ConditionalOnMissingBean(TextEncryptor.class)
 		public TextEncryptor textEncryptor() {
-			KeyStore keyStore = key.getKeyStore();
+			KeyStore keyStore = this.key.getKeyStore();
 			if (keyStore.getLocation() != null && keyStore.getLocation().exists()) {
 				return new RsaSecretEncryptor(
 						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore
 								.getPassword().toCharArray()).getKeyPair(
-								keyStore.getAlias(), keyStore.getSecret().toCharArray()));
+										keyStore.getAlias(), keyStore.getSecret().toCharArray()),
+										this.key.getRsa().getAlgorithm(), this.key.getRsa().getSalt(), this.key.getRsa()
+										.isStrong());
 			}
-			return new EncryptorFactory().create(key.getKey());
+			return new EncryptorFactory().create(this.key.getKey());
 		}
 
 	}
@@ -89,7 +91,7 @@ public class EncryptionBootstrapConfiguration {
 		@Bean
 		@ConditionalOnMissingBean(TextEncryptor.class)
 		public TextEncryptor textEncryptor() {
-			return new EncryptorFactory().create(key.getKey());
+			return new EncryptorFactory().create(this.key.getKey());
 		}
 
 	}
@@ -99,7 +101,7 @@ public class EncryptionBootstrapConfiguration {
 			ApplicationContext context, ConfigurationPropertiesBindingPostProcessor binder) {
 		ConfigurationBeanFactoryMetaData metaData = context.getBean(
 				ConfigurationPropertiesBindingPostProcessorRegistrar.BINDER_BEAN_NAME
-						+ ".store", ConfigurationBeanFactoryMetaData.class);
+				+ ".store", ConfigurationBeanFactoryMetaData.class);
 		ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(
 				binder);
 		rebinder.setBeanMetaDataStore(metaData);
@@ -108,12 +110,12 @@ public class EncryptionBootstrapConfiguration {
 
 	@Bean
 	public EnvironmentDecryptApplicationInitializer environmentDecryptApplicationListener() {
-		if (encryptor == null) {
-			encryptor = new FailsafeTextEncryptor();
+		if (this.encryptor == null) {
+			this.encryptor = new FailsafeTextEncryptor();
 		}
 		EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
-				encryptor);
-		listener.setFailOnError(key.isFailOnError());
+				this.encryptor);
+		listener.setFailOnError(this.key.isFailOnError());
 		return listener;
 	}
 
@@ -149,7 +151,7 @@ public class EncryptionBootstrapConfiguration {
 	/**
 	 * TextEncryptor that just fails, so that users don't get a false sense of security
 	 * adding ciphers to config files and not getting them decrypted.
-	 * 
+	 *
 	 * @author Dave Syer
 	 *
 	 */
