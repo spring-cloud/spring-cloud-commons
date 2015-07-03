@@ -26,6 +26,7 @@ import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.OrderedHealthAggregator;
@@ -77,7 +78,7 @@ public class DiscoveryCompositeHealthIndicatorTests {
 
 				@Override
 				public Health health() {
-					return new Health.Builder().up().build();
+					return new Health.Builder().unknown().build();
 				}
 			};
 		}
@@ -89,7 +90,7 @@ public class DiscoveryCompositeHealthIndicatorTests {
 		Health health = this.healthIndicator.health();
 		assertHealth(health, Status.UNKNOWN);
 
-		clientHealthIndicator.onApplicationEvent(new InstanceRegisteredEvent(this, null));
+		clientHealthIndicator.onApplicationEvent(new InstanceRegisteredEvent<Object>(this, null));
 
 		health = this.healthIndicator.health();
 		Status status = assertHealth(health, Status.UP);
@@ -103,6 +104,10 @@ public class DiscoveryCompositeHealthIndicatorTests {
 		assertNotNull("status was null", status);
 		assertEquals("status code was wrong", expected.getCode(), status.getCode());
 		return status;
+	}
+	
+	public static void main(String[] args) {
+		SpringApplication.run(new Object[]{Config.class,CommonsClientAutoConfiguration.class}, new String[] {"--debug", "--spring.main.webEnvironment=false"});
 	}
 
 }

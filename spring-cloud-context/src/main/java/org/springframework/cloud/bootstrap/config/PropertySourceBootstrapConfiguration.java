@@ -29,6 +29,7 @@ import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.logging.LogFile;
+import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
@@ -111,7 +112,7 @@ public class PropertySourceBootstrapConfiguration implements
 			try {
 				ResourceUtils.getURL(logConfig).openStream().close();
 				LogFile logFile = LogFile.get(environment);
-				system.initialize(logConfig, logFile);
+				system.initialize(new LoggingInitializationContext(environment), logConfig, logFile);
 			}
 			catch (Exception ex) {
 				PropertySourceBootstrapConfiguration.logger

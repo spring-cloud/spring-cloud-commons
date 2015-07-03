@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -30,7 +31,6 @@ import org.springframework.cloud.client.discovery.health.DiscoveryCompositeHealt
 import org.springframework.cloud.client.discovery.health.DiscoveryHealthIndicator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Cloud Commons Client.
@@ -41,17 +41,17 @@ import org.springframework.core.annotation.Order;
 @ConditionalOnClass(HealthIndicator.class)
 @ConditionalOnBean(DiscoveryClient.class)
 @ConditionalOnProperty(value = "spring.cloud.discovery.enabled", matchIfMissing = true)
-@Order(0)
+@AutoConfigureOrder(0)
 public class CommonsClientAutoConfiguration {
 
 	@Bean
-	public DiscoveryClientHealthIndicator instancesHealthIndicator(
+	public DiscoveryClientHealthIndicator discoveryClientHealthIndicator(
 			DiscoveryClient discoveryClient) {
 		return new DiscoveryClientHealthIndicator(discoveryClient);
 	}
 
 	@Bean
-	public DiscoveryCompositeHealthIndicator discoveryHealthIndicator(
+	public DiscoveryCompositeHealthIndicator discoveryCompositeHealthIndicator(
 			HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
 		return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
 	}
