@@ -73,9 +73,9 @@
 		</plugins>
 	</build>
 	<modules>
-	  <module>spring-cloud-context</module>
-	  <module>spring-cloud-commons</module>
+		<module>spring-cloud-context</module>
+		<module>spring-cloud-commons</module>
 		<module>spring-cloud-starter</module>
-	  <module>docs</module>
+		<module>docs</module>
 	</modules>
 </project>
