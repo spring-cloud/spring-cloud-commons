@@ -24,6 +24,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.actuate.autoconfigure.EndpointAutoConfiguration;
 import org.springframework.boot.actuate.endpoint.Endpoint;
 import org.springframework.boot.actuate.endpoint.InfoEndpoint;
@@ -88,10 +89,7 @@ public class RefreshAutoConfiguration {
 	@ConditionalOnClass(InfoEndpoint.class)
 	@ConditionalOnBean(EndpointAutoConfiguration.class)
 	protected static class InfoEndpointRebinderConfiguration implements
-			ApplicationListener<EnvironmentChangeEvent> {
-
-		@Autowired
-		private EndpointAutoConfiguration endpoints;
+	ApplicationListener<EnvironmentChangeEvent>, BeanPostProcessor {
 
 		@Autowired
 		private ConfigurableEnvironment environment;
@@ -108,9 +106,23 @@ public class RefreshAutoConfiguration {
 			}
 		}
 
-		@Bean
-		public InfoEndpoint infoEndpoint() throws Exception {
-			return new InfoEndpoint(this.endpoints.infoEndpoint().invoke()) {
+		@Override
+		public Object postProcessAfterInitialization(Object bean, String beanName)
+				throws BeansException {
+			if (bean instanceof InfoEndpoint) {
+				return infoEndpoint((InfoEndpoint) bean);
+			}
+			return bean;
+		}
+
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName)
+				throws BeansException {
+			return bean;
+		}
+
+		private InfoEndpoint infoEndpoint(InfoEndpoint endpoint) {
+			return new InfoEndpoint(endpoint.invoke()) {
 				@Override
 				public Map<String, Object> invoke() {
 					Map<String, Object> info = new LinkedHashMap<String, Object>(
@@ -126,7 +138,7 @@ public class RefreshAutoConfiguration {
 	@Configuration
 	@ConditionalOnBean(ConfigurationPropertiesBindingPostProcessor.class)
 	protected static class ConfigurationPropertiesRebinderConfiguration implements
-			BeanFactoryAware {
+	BeanFactoryAware {
 
 		private BeanFactory context;
 
@@ -147,7 +159,7 @@ public class RefreshAutoConfiguration {
 							ConfigurationPropertiesBindingPostProcessor.class);
 			ConfigurationBeanFactoryMetaData metaData = this.context.getBean(
 					ConfigurationPropertiesBindingPostProcessorRegistrar.BINDER_BEAN_NAME
-							+ ".store", ConfigurationBeanFactoryMetaData.class);
+					+ ".store", ConfigurationBeanFactoryMetaData.class);
 			ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(
 					binder);
 			rebinder.setBeanMetaDataStore(metaData);
