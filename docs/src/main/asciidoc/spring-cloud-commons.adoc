@@ -108,7 +108,7 @@ things with their parent.
 [[customizing-bootstrap-properties]]
 === Changing the Location of Bootstrap Properties
 
-The `bootstrap.yml` (or `.properties) location can be specified using
+The `bootstrap.yml` (or `.properties`) location can be specified using
 `spring.cloud.bootstrap.name` (default "bootstrap") or
 `spring.cloud.bootstrap.location` (default empty), e.g. in System
 properties. Those properties behave like the `spring.config.*`
