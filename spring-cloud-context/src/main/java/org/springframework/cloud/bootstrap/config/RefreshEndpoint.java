@@ -32,6 +32,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.CompositePropertySource;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -67,28 +68,30 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 
 	@ManagedOperation
 	public synchronized String[] refresh() {
-		Map<String, Object> before = extract(context.getEnvironment()
+		Map<String, Object> before = extract(this.context.getEnvironment()
 				.getPropertySources());
 		addConfigFilesToEnvironment();
 		Set<String> keys = changes(before,
-				extract(context.getEnvironment().getPropertySources())).keySet();
-		scope.refreshAll();
+				extract(this.context.getEnvironment().getPropertySources())).keySet();
+		this.scope.refreshAll();
 		if (keys.isEmpty()) {
 			return new String[0];
 		}
-		context.publishEvent(new EnvironmentChangeEvent(keys));
+		this.context.publishEvent(new EnvironmentChangeEvent(keys));
 		return keys.toArray(new String[keys.size()]);
 	}
 
 	private void addConfigFilesToEnvironment() {
 		ConfigurableApplicationContext capture = null;
 		try {
+			StandardEnvironment environment = copyEnvironment(this.context.getEnvironment());
 			capture = new SpringApplicationBuilder(Empty.class).showBanner(false)
-					.web(false).environment(context.getEnvironment()).run();
-			MutablePropertySources target = context.getEnvironment().getPropertySources();
-			for (PropertySource<?> source : capture.getEnvironment().getPropertySources()) {
+					.web(false).environment(environment).run();
+			MutablePropertySources target = this.context.getEnvironment()
+					.getPropertySources();
+			for (PropertySource<?> source : environment.getPropertySources()) {
 				String name = source.getName();
-				if (!standardSources.contains(name)) {
+				if (!this.standardSources.contains(name)) {
 					if (target.contains(name)) {
 						target.replace(name, source);
 					}
@@ -109,11 +112,29 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 				ApplicationContext parent = capture.getParent();
 				if (parent instanceof ConfigurableApplicationContext) {
 					capture = (ConfigurableApplicationContext) parent;
-				} else {
+				}
+				else {
 					capture = null;
 				}
 			}
 		}
+	}
+
+	// Don't use ConfigurableEnvironment.merge() in case there are clashes with property source names
+	private StandardEnvironment copyEnvironment(ConfigurableEnvironment input) {
+		StandardEnvironment environment = new StandardEnvironment();
+		MutablePropertySources capturedPropertySources = environment
+				.getPropertySources();
+		for (PropertySource<?> source : capturedPropertySources) {
+			capturedPropertySources.remove(source.getName());
+		}
+		for (PropertySource<?> source : input
+				.getPropertySources()) {
+			capturedPropertySources.addLast(source);
+		}
+		environment.setActiveProfiles(input.getActiveProfiles());
+		environment.setDefaultProfiles(input.getDefaultProfiles());
+		return environment;
 	}
 
 	@Override
@@ -153,7 +174,7 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 	private Map<String, Object> extract(MutablePropertySources propertySources) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		for (PropertySource<?> parent : propertySources) {
-			if (!standardSources.contains(parent.getName())) {
+			if (!this.standardSources.contains(parent.getName())) {
 				extract(parent, result);
 			}
 		}
