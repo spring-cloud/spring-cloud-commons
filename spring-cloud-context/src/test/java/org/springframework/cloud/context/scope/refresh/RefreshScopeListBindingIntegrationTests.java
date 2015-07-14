@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +60,7 @@ public class RefreshScopeListBindingIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	public void testAppendProperties() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
 		assertTrue(this.properties instanceof Advised);
 		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
@@ -67,6 +68,18 @@ public class RefreshScopeListBindingIntegrationTests {
 		assertEquals("[foo, two]", this.properties.getMessages().toString());
 	}
 
+	@Test
+	@DirtiesContext
+	public void testReplaceProperties() throws Exception {
+		assertEquals("[one, two]", this.properties.getMessages().toString());
+		assertTrue(this.properties instanceof Advised);
+		@SuppressWarnings("unchecked")
+		Map<String,Object> map = (Map<String, Object>) this.environment.getPropertySources().get("integrationTest").getSource();
+		map.clear();
+		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
+		this.scope.refreshAll();
+		assertEquals("[foo]", this.properties.getMessages().toString());
+	}
 
 	@Configuration
 	@EnableConfigurationProperties

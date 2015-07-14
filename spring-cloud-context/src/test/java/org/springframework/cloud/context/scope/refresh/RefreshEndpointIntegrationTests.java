@@ -62,10 +62,10 @@ public class RefreshEndpointIntegrationTests {
 	public void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
 		template.exchange(
-				getUrlEncodedEntity("http://localhost:" + port + "/env", "message",
+				getUrlEncodedEntity("http://localhost:" + this.port + "/env", "message",
 						"Hello Dave!"), String.class);
-		template.postForObject("http://localhost:" + port + "/refresh", "", String.class);
-		String message = template.getForObject("http://localhost:" + port + "/",
+		template.postForObject("http://localhost:" + this.port + "/refresh", "", String.class);
+		String message = template.getForObject("http://localhost:" + this.port + "/",
 				String.class);
 		assertEquals("Hello Dave!", message);
 	}
@@ -73,7 +73,7 @@ public class RefreshEndpointIntegrationTests {
 	private RequestEntity<?> getUrlEncodedEntity(String uri, String key, String value)
 			throws URISyntaxException {
 		MultiValueMap<String, String> env = new LinkedMultiValueMap<String, String>(
-				Collections.singletonMap("message", Arrays.asList("Hello Dave!")));
+				Collections.singletonMap(key, Arrays.asList(value)));
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 		RequestEntity<MultiValueMap<String, String>> entity = new RequestEntity<MultiValueMap<String, String>>(
@@ -84,7 +84,7 @@ public class RefreshEndpointIntegrationTests {
 	@Configuration
 	@EnableAutoConfiguration
 	protected static class ClientApp {
-		
+
 		@Bean
 		@RefreshScope
 		public Controller controller() {
@@ -105,7 +105,7 @@ public class RefreshEndpointIntegrationTests {
 
 		@RequestMapping("/")
 		public String hello() {
-			return message;
+			return this.message;
 		}
 
 	}

@@ -17,8 +17,12 @@ package org.springframework.cloud.context.properties;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +30,10 @@ import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfigurati
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.EnvironmentTestUtils;
+import org.springframework.boot.test.IntegrationTest;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
-import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderIntegrationTests.TestConfiguration;
+import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderListIntegrationTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -38,7 +43,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @SpringApplicationConfiguration(classes=TestConfiguration.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-public class ConfigurationPropertiesRebinderIntegrationTests {
+@IntegrationTest("messages=one,two")
+public class ConfigurationPropertiesRebinderListIntegrationTests {
 
 	@Autowired
 	private TestProperties properties;
@@ -51,27 +57,38 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
-		assertEquals("Hello scope!", this.properties.getMessage());
-		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
-		// ...but don't refresh, so the bean stays the same:
-		assertEquals("Hello scope!", this.properties.getMessage());
-		assertEquals(1, this.properties.getCount());
+	public void testAppendProperties() throws Exception {
+		assertEquals("[one, two]", this.properties.getMessages().toString());
+		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
+		this.rebinder.rebind();
+		assertEquals("[foo, two]", this.properties.getMessages().toString());
 	}
 
 	@Test
 	@DirtiesContext
-	public void testRefresh() throws Exception {
-		assertEquals(1, this.properties.getCount());
-		assertEquals("Hello scope!", this.properties.getMessage());
-		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
-		// ...and then refresh, so the bean is re-initialized:
+	@Ignore("Can't rebind to list and re-initialize it (need refresh scope for this to work)")
+	public void testReplaceProperties() throws Exception {
+		assertEquals("[one, two]", this.properties.getMessages().toString());
+		@SuppressWarnings("unchecked")
+		Map<String,Object> map = (Map<String, Object>) this.environment.getPropertySources().get("integrationTest").getSource();
+		map.clear();
+		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
 		this.rebinder.rebind();
-		assertEquals("Foo", this.properties.getMessage());
-		assertEquals(2, this.properties.getCount());
+		assertEquals("[foo]", this.properties.getMessages().toString());
 	}
+
+	@Test
+	@DirtiesContext
+	public void testReplacePropertiesWithCommaSeparated() throws Exception {
+		assertEquals("[one, two]", this.properties.getMessages().toString());
+		@SuppressWarnings("unchecked")
+		Map<String,Object> map = (Map<String, Object>) this.environment.getPropertySources().get("integrationTest").getSource();
+		map.clear();
+		EnvironmentTestUtils.addEnvironment(this.environment, "messages:foo");
+		this.rebinder.rebind();
+		assertEquals("[foo]", this.properties.getMessages().toString());
+	}
+
 
 	@Configuration
 	@EnableConfigurationProperties
@@ -95,23 +112,16 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	@ConfigurationProperties
 	protected static class TestProperties {
-		private String message;
-		private int delay;
-		private int count = 0;
+		private List<String> messages;
+		private int count;
+		public List<String> getMessages() {
+			return this.messages;
+		}
+		public void setMessages(List<String> messages) {
+			this.messages = messages;
+		}
 		public int getCount() {
 			return this.count;
-		}
-		public String getMessage() {
-			return this.message;
-		}
-		public void setMessage(String message) {
-			this.message = message;
-		}
-		public int getDelay() {
-			return this.delay;
-		}
-		public void setDelay(int delay) {
-			this.delay = delay;
 		}
 		@PostConstruct
 		public void init() {
