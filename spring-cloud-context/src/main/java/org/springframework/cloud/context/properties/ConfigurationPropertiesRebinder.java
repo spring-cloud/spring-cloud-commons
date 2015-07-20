@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetaData;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
@@ -67,10 +68,20 @@ public class ConfigurationPropertiesRebinder implements BeanPostProcessor,
 
 	private ApplicationContext applicationContext;
 
+	private ConfigurableListableBeanFactory beanFactory;
+
+	private String refreshScope;
+
+	private boolean refreshScopeInitialized;
+
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		this.applicationContext = applicationContext;
+		if (applicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory) {
+			this.beanFactory = (ConfigurableListableBeanFactory) applicationContext
+					.getAutowireCapableBeanFactory();
+		}
 	}
 
 	/**
@@ -83,6 +94,9 @@ public class ConfigurationPropertiesRebinder implements BeanPostProcessor,
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName)
 			throws BeansException {
+		if (isRefreshScoped(beanName)) {
+			return bean;
+		}
 		ConfigurationProperties annotation = AnnotationUtils.findAnnotation(
 				bean.getClass(), ConfigurationProperties.class);
 		if (annotation != null) {
@@ -96,6 +110,24 @@ public class ConfigurationPropertiesRebinder implements BeanPostProcessor,
 			}
 		}
 		return bean;
+	}
+
+	private boolean isRefreshScoped(String beanName) {
+		if (refreshScope == null && !refreshScopeInitialized) {
+			refreshScopeInitialized = true;
+			for (String scope : beanFactory.getRegisteredScopeNames()) {
+				if (beanFactory.getRegisteredScope(scope) instanceof org.springframework.cloud.context.scope.refresh.RefreshScope) {
+					this.refreshScope = scope;
+					break;
+				}
+			}
+		}
+		if (refreshScope == null) {
+			return false;
+		}
+		return beanFactory.containsBeanDefinition(beanName)
+				&& refreshScope
+						.equals(beanFactory.getBeanDefinition(beanName).getScope());
 	}
 
 	@Override
