@@ -107,14 +107,15 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 			}
 		}
 		finally {
-			while (capture != null) {
-				capture.close();
-				ApplicationContext parent = capture.getParent();
+			ConfigurableApplicationContext closeable = capture;
+			while (closeable != null) {
+				closeable.close();
+				ApplicationContext parent = closeable.getParent();
 				if (parent instanceof ConfigurableApplicationContext) {
-					capture = (ConfigurableApplicationContext) parent;
+					closeable = (ConfigurableApplicationContext) parent;
 				}
 				else {
-					capture = null;
+					closeable = null;
 				}
 			}
 		}

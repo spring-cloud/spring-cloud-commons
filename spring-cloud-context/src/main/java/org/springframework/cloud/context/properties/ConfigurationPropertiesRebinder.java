@@ -44,16 +44,16 @@ import org.springframework.stereotype.Component;
  * <code>@ConfigurationProperties</code>}. When these beans are re-bound and
  * re-initialized the changes are available immediately to any component that is using the
  * <code>@ConfigurationProperties</code> bean.
- * 
+ *
  * @see RefreshScope for a deeper and optionally more focused refresh of bean components
- * 
+ *
  * @author Dave Syer
  *
  */
 @Component
 @ManagedResource
 public class ConfigurationPropertiesRebinder implements BeanPostProcessor,
-		ApplicationListener<EnvironmentChangeEvent>, ApplicationContextAware {
+ApplicationListener<EnvironmentChangeEvent>, ApplicationContextAware {
 
 	private ConfigurationBeanFactoryMetaData metaData;
 
@@ -100,34 +100,34 @@ public class ConfigurationPropertiesRebinder implements BeanPostProcessor,
 		ConfigurationProperties annotation = AnnotationUtils.findAnnotation(
 				bean.getClass(), ConfigurationProperties.class);
 		if (annotation != null) {
-			beans.put(beanName, bean);
+			this.beans.put(beanName, bean);
 		}
-		else if (metaData != null) {
+		else if (this.metaData != null) {
 			annotation = this.metaData.findFactoryAnnotation(beanName,
 					ConfigurationProperties.class);
 			if (annotation != null) {
-				beans.put(beanName, bean);
+				this.beans.put(beanName, bean);
 			}
 		}
 		return bean;
 	}
 
 	private boolean isRefreshScoped(String beanName) {
-		if (refreshScope == null && !refreshScopeInitialized) {
-			refreshScopeInitialized = true;
-			for (String scope : beanFactory.getRegisteredScopeNames()) {
-				if (beanFactory.getRegisteredScope(scope) instanceof org.springframework.cloud.context.scope.refresh.RefreshScope) {
+		if (this.refreshScope == null && !this.refreshScopeInitialized) {
+			this.refreshScopeInitialized = true;
+			for (String scope : this.beanFactory.getRegisteredScopeNames()) {
+				if (this.beanFactory.getRegisteredScope(scope) instanceof org.springframework.cloud.context.scope.refresh.RefreshScope) {
 					this.refreshScope = scope;
 					break;
 				}
 			}
 		}
-		if (refreshScope == null) {
+		if (this.refreshScope == null) {
 			return false;
 		}
-		return beanFactory.containsBeanDefinition(beanName)
-				&& refreshScope
-						.equals(beanFactory.getBeanDefinition(beanName).getScope());
+		return this.beanFactory.containsBeanDefinition(beanName)
+				&& this.refreshScope
+				.equals(this.beanFactory.getBeanDefinition(beanName).getScope());
 	}
 
 	@Override
@@ -138,23 +138,30 @@ public class ConfigurationPropertiesRebinder implements BeanPostProcessor,
 
 	@ManagedOperation
 	public void rebind() {
-		for (String name : beans.keySet()) {
+		for (String name : this.beans.keySet()) {
 			rebind(name);
 		}
 	}
 
 	@ManagedOperation
 	public void rebind(String name) {
-		binder.postProcessBeforeInitialization(beans.get(name), name);
-		if (applicationContext != null) {
-			applicationContext.getAutowireCapableBeanFactory().initializeBean(
-					beans.get(name), name);
+		if (!this.applicationContext.containsBean(name)) {
+			return;
+		}
+		if (isRefreshScoped(name)) {
+			return;
+		}
+		Object bean = this.applicationContext.getBean(name);
+		this.binder.postProcessBeforeInitialization(bean, name);
+		if (this.applicationContext != null) {
+			this.applicationContext.getAutowireCapableBeanFactory().initializeBean(
+					bean, name);
 		}
 	}
 
 	@ManagedAttribute
 	public Set<String> getBeanNames() {
-		return new HashSet<String>(beans.keySet());
+		return new HashSet<String>(this.beans.keySet());
 	}
 
 	@Override
