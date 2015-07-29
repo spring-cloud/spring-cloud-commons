@@ -27,6 +27,17 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Spencer Gibb
  */
 public class ManagementServerPortUtils {
+	private static final boolean hasActuator;
+	static {
+		boolean hasClass;
+		try {
+			Class.forName("org.springframework.boot.actuate.autoconfigure.ManagementServerProperties");
+			hasClass = true;
+		} catch (ClassNotFoundException e) {
+			hasClass = false;
+		}
+		hasActuator = hasClass;
+	}
 
 	public static ManagementServerPort get(BeanFactory beanFactory) {
 		return ManagementServerPort.get(beanFactory);
@@ -44,12 +55,30 @@ public class ManagementServerPortUtils {
 		return get(beanFactory) == ManagementServerPort.SAME;
 	}
 
+	public static Integer getPort(BeanFactory beanFactory) {
+		if (!hasActuator) {
+			return null;
+		}
+		try {
+			ManagementServerProperties properties = beanFactory
+					.getBean(ManagementServerProperties.class);
+			return properties.getPort();
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			return null;
+		}
+	}
+
 	// TODO: copied from EndpointWebMvcAutoConfiguration.ManagementServerPort
 	public static enum ManagementServerPort {
 
 		DISABLE, SAME, DIFFERENT;
 
 		public static ManagementServerPort get(BeanFactory beanFactory) {
+			if (!hasActuator) {
+				return SAME;
+			}
+
 			ServerProperties serverProperties;
 			try {
 				serverProperties = beanFactory.getBean(ServerProperties.class);

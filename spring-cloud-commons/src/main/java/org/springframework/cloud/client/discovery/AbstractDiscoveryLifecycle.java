@@ -19,8 +19,6 @@ package org.springframework.cloud.client.discovery;
 import javax.annotation.PreDestroy;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
@@ -110,9 +108,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	 * @return if the management service should be registered with the DiscoveryService
 	 */
 	protected boolean shouldRegisterManagement() {
-		return getManagementServerProperties() != null
-				&& getManagementPort() != null
-				&& ManagementServerPortUtils.isDifferent(this.context);
+		return getManagementPort() != null && ManagementServerPortUtils.isDifferent(this.context);
 	}
 
 	/**
@@ -167,15 +163,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	 * @return the management server port
 	 */
 	protected Integer getManagementPort() {
-		return getManagementServerProperties().getPort();
-	}
-
-	private ManagementServerProperties getManagementServerProperties() {
-		try {
-			return this.context.getBean(ManagementServerProperties.class);
-		} catch (NoSuchBeanDefinitionException e) {
-			return null;
-		}
+		return ManagementServerPortUtils.getPort(this.context);
 	}
 
 	/**
