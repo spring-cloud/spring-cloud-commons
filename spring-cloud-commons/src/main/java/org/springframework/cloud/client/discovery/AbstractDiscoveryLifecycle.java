@@ -147,16 +147,16 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	 * @return the serviceId of the Management Service
 	 */
 	protected String getManagementServiceId() {
-		return this.context.getId() + ":management";
 		// TODO: configurable management suffix
+		return this.context.getId() + ":management";
 	}
 
 	/**
 	 * @return the service name of the Management Service
 	 */
 	protected String getManagementServiceName() {
-		return getAppName() + ":management";
 		// TODO: configurable management suffix
+		return getAppName() + ":management";
 	}
 
 	/**
@@ -206,8 +206,11 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 
 	@Override
 	public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
-		// TODO: take SSL into account when Spring Boot 1.2 is available
-		this.port.compareAndSet(0, event.getEmbeddedServletContainer().getPort());
-		this.start();
+		// TODO: take SSL into account
+		// Don't register the management port as THE port
+		if (!"management".equals(event.getApplicationContext().getNamespace())) {
+			this.port.compareAndSet(0, event.getEmbeddedServletContainer().getPort());
+			this.start();
+		}
 	}
 }

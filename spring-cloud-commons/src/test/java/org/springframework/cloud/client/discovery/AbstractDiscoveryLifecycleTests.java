@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
@@ -17,15 +18,23 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = AbstractDiscoveryLifecycleTests.Config.class)
-@WebIntegrationTest(randomPort = true)
+@WebIntegrationTest(randomPort = true, value = "management.port=0")
 public class AbstractDiscoveryLifecycleTests {
 
 	@Autowired
 	private TestDiscoveryLifecycle lifecycle;
 
+	@Value("${local.server.port}")
+	private int port;
+
+	@Value("${local.management.port}")
+	private int managementPort;
+
 	@Test
-	public void randomPortWorks() {
+	public void portsWork() {
 		assertNotEquals("Lifecycle port is zero", 0, lifecycle.getPort().get());
+		assertNotEquals("Lifecycle port is management port", managementPort, lifecycle.getPort().get());
+		assertEquals("Lifecycle port is wrong", port, lifecycle.getPort().get());
 		assertTrue("Lifecycle not running", lifecycle.isRunning());
 		assertTrue("Lifecycle not registered", lifecycle.isRegistered());
 	}
