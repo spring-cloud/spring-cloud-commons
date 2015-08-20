@@ -122,7 +122,7 @@ ApplicationListener<EnvironmentChangeEvent>, ApplicationContextAware {
 				}
 			}
 		}
-		if (this.refreshScope == null) {
+		if (beanName == null || this.refreshScope == null) {
 			return false;
 		}
 		return this.beanFactory.containsBeanDefinition(beanName)
