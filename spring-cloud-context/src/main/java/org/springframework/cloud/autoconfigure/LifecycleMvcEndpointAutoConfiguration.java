@@ -25,12 +25,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
-import org.springframework.cloud.bootstrap.config.RefreshEndpoint;
 import org.springframework.cloud.context.environment.EnvironmentManager;
 import org.springframework.cloud.context.environment.EnvironmentManagerMvcEndpoint;
 import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.cloud.context.restart.RestartMvcEndpoint;
 import org.springframework.cloud.endpoint.GenericPostableMvcEndpoint;
+import org.springframework.cloud.endpoint.RefreshEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

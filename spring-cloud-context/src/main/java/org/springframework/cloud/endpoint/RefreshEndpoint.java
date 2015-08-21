@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.bootstrap.config;
+package org.springframework.cloud.endpoint;
 
 import java.util.Arrays;
 import java.util.Collection;
