@@ -134,11 +134,19 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		}
 	}
 
-	protected void destroy(String name) {
+	/**
+	 * Destroy the named bean (i.e. flush it from the cache by default).
+	 *
+	 * @param name the bean name to flush
+	 * @return true if the bean was already cached, false otherwise
+	 */
+	protected boolean destroy(String name) {
 		BeanLifecycleWrapper wrapper = this.cache.remove(name);
 		if (wrapper != null) {
 			wrapper.destroy();
+			return true;
 		}
+		return false;
 	}
 
 	@Override

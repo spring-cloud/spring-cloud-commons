@@ -53,7 +53,7 @@ import org.springframework.util.StringUtils;
 @Configuration
 @EnableConfigurationProperties(PropertySourceBootstrapProperties.class)
 public class PropertySourceBootstrapConfiguration implements
-		ApplicationContextInitializer<ConfigurableApplicationContext> {
+ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 	private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
@@ -112,12 +112,13 @@ public class PropertySourceBootstrapConfiguration implements
 			try {
 				ResourceUtils.getURL(logConfig).openStream().close();
 				LogFile logFile = LogFile.get(environment);
-				system.initialize(new LoggingInitializationContext(environment), logConfig, logFile);
+				system.initialize(new LoggingInitializationContext(environment),
+						logConfig, logFile);
 			}
 			catch (Exception ex) {
 				PropertySourceBootstrapConfiguration.logger
-						.warn("Logging config file location '" + logConfig
-								+ "' cannot be opened and will be ignored");
+				.warn("Logging config file location '" + logConfig
+						+ "' cannot be opened and will be ignored");
 			}
 		}
 	}
@@ -137,7 +138,7 @@ public class PropertySourceBootstrapConfiguration implements
 		incoming.addFirst(composite);
 		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
 		new RelaxedDataBinder(remoteProperties, "spring.cloud.config")
-				.bind(new PropertySourcesPropertyValues(incoming));
+		.bind(new PropertySourcesPropertyValues(incoming));
 		if (!remoteProperties.isAllowOverride()
 				|| (!remoteProperties.isOverrideNone() && remoteProperties
 						.isOverrideSystemProperties())) {

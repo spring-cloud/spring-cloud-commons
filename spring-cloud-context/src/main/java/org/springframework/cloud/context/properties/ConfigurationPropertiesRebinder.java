@@ -15,15 +15,10 @@
  */
 package org.springframework.cloud.context.properties;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetaData;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -31,7 +26,6 @@ import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
@@ -52,116 +46,53 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ManagedResource
-public class ConfigurationPropertiesRebinder implements BeanPostProcessor,
-ApplicationListener<EnvironmentChangeEvent>, ApplicationContextAware {
+public class ConfigurationPropertiesRebinder implements ApplicationContextAware,
+ApplicationListener<EnvironmentChangeEvent> {
 
-	private ConfigurationBeanFactoryMetaData metaData;
+	private ConfigurationPropertiesBeans beans;
 
 	private ConfigurationPropertiesBindingPostProcessor binder;
 
-	public ConfigurationPropertiesRebinder(
-			ConfigurationPropertiesBindingPostProcessor binder) {
-		this.binder = binder;
-	}
-
-	private Map<String, Object> beans = new HashMap<String, Object>();
-
 	private ApplicationContext applicationContext;
 
-	private ConfigurableListableBeanFactory beanFactory;
-
-	private String refreshScope;
-
-	private boolean refreshScopeInitialized;
+	public ConfigurationPropertiesRebinder(
+			ConfigurationPropertiesBindingPostProcessor binder,
+			ConfigurationPropertiesBeans beans) {
+		this.binder = binder;
+		this.beans = beans;
+	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		this.applicationContext = applicationContext;
-		if (applicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory) {
-			this.beanFactory = (ConfigurableListableBeanFactory) applicationContext
-					.getAutowireCapableBeanFactory();
-		}
-	}
-
-	/**
-	 * @param beans the bean meta data to set
-	 */
-	public void setBeanMetaDataStore(ConfigurationBeanFactoryMetaData beans) {
-		this.metaData = beans;
-	}
-
-	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName)
-			throws BeansException {
-		if (isRefreshScoped(beanName)) {
-			return bean;
-		}
-		ConfigurationProperties annotation = AnnotationUtils.findAnnotation(
-				bean.getClass(), ConfigurationProperties.class);
-		if (annotation != null) {
-			this.beans.put(beanName, bean);
-		}
-		else if (this.metaData != null) {
-			annotation = this.metaData.findFactoryAnnotation(beanName,
-					ConfigurationProperties.class);
-			if (annotation != null) {
-				this.beans.put(beanName, bean);
-			}
-		}
-		return bean;
-	}
-
-	private boolean isRefreshScoped(String beanName) {
-		if (this.refreshScope == null && !this.refreshScopeInitialized) {
-			this.refreshScopeInitialized = true;
-			for (String scope : this.beanFactory.getRegisteredScopeNames()) {
-				if (this.beanFactory.getRegisteredScope(scope) instanceof org.springframework.cloud.context.scope.refresh.RefreshScope) {
-					this.refreshScope = scope;
-					break;
-				}
-			}
-		}
-		if (beanName == null || this.refreshScope == null) {
-			return false;
-		}
-		return this.beanFactory.containsBeanDefinition(beanName)
-				&& this.refreshScope
-				.equals(this.beanFactory.getBeanDefinition(beanName).getScope());
-	}
-
-	@Override
-	public Object postProcessAfterInitialization(Object bean, String beanName)
-			throws BeansException {
-		return bean;
 	}
 
 	@ManagedOperation
 	public void rebind() {
-		for (String name : this.beans.keySet()) {
+		for (String name : this.beans.getBeanNames()) {
 			rebind(name);
 		}
 	}
 
 	@ManagedOperation
-	public void rebind(String name) {
-		if (!this.applicationContext.containsBean(name)) {
-			return;
+	public boolean rebind(String name) {
+		if (!this.beans.getBeanNames().contains(name)) {
+			return false;
 		}
-		if (isRefreshScoped(name)) {
-			return;
-		}
-		Object bean = this.applicationContext.getBean(name);
-		this.binder.postProcessBeforeInitialization(bean, name);
 		if (this.applicationContext != null) {
-			this.applicationContext.getAutowireCapableBeanFactory().initializeBean(
-					bean, name);
+			Object bean = this.applicationContext.getBean(name);
+			this.binder.postProcessBeforeInitialization(bean, name);
+			this.applicationContext.getAutowireCapableBeanFactory().initializeBean(bean,
+					name);
+			return true;
 		}
+		return false;
 	}
 
 	@ManagedAttribute
 	public Set<String> getBeanNames() {
-		return new HashSet<String>(this.beans.keySet());
+		return new HashSet<String>(this.beans.getBeanNames());
 	}
 
 	@Override

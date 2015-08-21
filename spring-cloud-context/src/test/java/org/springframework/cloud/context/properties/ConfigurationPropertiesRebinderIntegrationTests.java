@@ -36,7 +36,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@SpringApplicationConfiguration(classes=TestConfiguration.class)
+@SpringApplicationConfiguration(classes = TestConfiguration.class)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ConfigurationPropertiesRebinderIntegrationTests {
 
@@ -53,42 +53,44 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 	@DirtiesContext
 	public void testSimpleProperties() throws Exception {
 		assertEquals("Hello scope!", this.properties.getMessage());
+		assertEquals(2, this.properties.getCount());
 		// Change the dynamic property source...
 		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
 		// ...but don't refresh, so the bean stays the same:
 		assertEquals("Hello scope!", this.properties.getMessage());
-		assertEquals(1, this.properties.getCount());
+		assertEquals(2, this.properties.getCount());
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefresh() throws Exception {
-		assertEquals(1, this.properties.getCount());
+		assertEquals(2, this.properties.getCount());
 		assertEquals("Hello scope!", this.properties.getMessage());
 		// Change the dynamic property source...
 		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind();
 		assertEquals("Foo", this.properties.getMessage());
-		assertEquals(2, this.properties.getCount());
+		assertEquals(3, this.properties.getCount());
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefreshByName() throws Exception {
-		assertEquals(1, this.properties.getCount());
+		assertEquals(2, this.properties.getCount());
 		assertEquals("Hello scope!", this.properties.getMessage());
 		// Change the dynamic property source...
 		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind("properties");
 		assertEquals("Foo", this.properties.getMessage());
-		assertEquals(2, this.properties.getCount());
+		assertEquals(3, this.properties.getCount());
 	}
 
 	@Configuration
 	@EnableConfigurationProperties
-	@Import({RefreshConfiguration.RebinderConfiguration.class, PropertyPlaceholderAutoConfiguration.class})
+	@Import({ RefreshConfiguration.RebinderConfiguration.class,
+		PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 
 		@Bean
@@ -101,7 +103,8 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 	// Hack out a protected inner class for testing
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
 		@Configuration
-		protected static class RebinderConfiguration extends ConfigurationPropertiesRebinderConfiguration {
+		protected static class RebinderConfiguration extends
+		ConfigurationPropertiesRebinderConfiguration {
 
 		}
 	}
@@ -111,24 +114,30 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		private String message;
 		private int delay;
 		private int count = 0;
+
 		public int getCount() {
 			return this.count;
 		}
+
 		public String getMessage() {
 			return this.message;
 		}
+
 		public void setMessage(String message) {
 			this.message = message;
 		}
+
 		public int getDelay() {
 			return this.delay;
 		}
+
 		public void setDelay(int delay) {
 			this.delay = delay;
 		}
+
 		@PostConstruct
 		public void init() {
-			this.count ++;
+			this.count++;
 		}
 	}
 
