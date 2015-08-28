@@ -124,31 +124,32 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 			EnumerablePropertySource<?> enumerable = (EnumerablePropertySource<?>) source;
 			for (String key : enumerable.getPropertyNames()) {
-				String value = source.getProperty(key).toString();
-				if (value.startsWith("{cipher}")) {
-					value = value.substring("{cipher}".length());
-					try {
-						value = encryptor.decrypt(value);
-						if (logger.isDebugEnabled()) {
-							logger.debug("Decrypted: key=" + key);
+				Object property = source.getProperty(key);
+				if (property != null) {
+					String value = property.toString();
+					if (value.startsWith("{cipher}")) {
+						value = value.substring("{cipher}".length());
+						try {
+							value = encryptor.decrypt(value);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Decrypted: key=" + key);
+							}
+						} catch (Exception e) {
+							String message = "Cannot decrypt: key=" + key;
+							if (failOnError) {
+								throw new IllegalStateException(message, e);
+							}
+							if (logger.isDebugEnabled()) {
+								logger.warn(message, e);
+							} else {
+								logger.warn(message);
+							}
+							// Set value to empty to avoid making a password out of the
+							// cipher text
+							value = "";
 						}
+						overrides.put(key, value);
 					}
-					catch (Exception e) {
-						String message = "Cannot decrypt: key=" + key;
-						if (failOnError) {
-							throw new IllegalStateException(message, e);
-						}
-						if (logger.isDebugEnabled()) {
-							logger.warn(message, e);
-						}
-						else {
-							logger.warn(message);
-						}
-						// Set value to empty to avoid making a password out of the
-						// cipher text
-						value = "";
-					}
-					overrides.put(key, value);
 				}
 			}
 
