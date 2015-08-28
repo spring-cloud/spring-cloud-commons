@@ -175,13 +175,12 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 
 	@Override
 	public void stop() {
-		if (isEnabled()) {
+		if (this.running.compareAndSet(true, false) && isEnabled()) {
 			deregister();
 			if (shouldRegisterManagement()) {
 				deregisterManagement();
 			}
 		}
-		this.running.compareAndSet(true, false);
 	}
 
 	@PreDestroy
