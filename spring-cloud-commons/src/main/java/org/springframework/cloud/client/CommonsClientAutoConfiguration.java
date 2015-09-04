@@ -76,7 +76,7 @@ public class CommonsClientAutoConfiguration {
 		private List<HasFeatures> hasFeatures = new ArrayList<>();
 
 		@Bean
-		public FeaturesEndpoint cloudEndpoint() {
+		public FeaturesEndpoint featuresEndpoint() {
 			return new FeaturesEndpoint(hasFeatures);
 		}
 	}
