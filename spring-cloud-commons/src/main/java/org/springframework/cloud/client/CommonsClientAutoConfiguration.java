@@ -16,8 +16,12 @@
 
 package org.springframework.cloud.client;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.Endpoint;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
@@ -25,10 +29,13 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.client.actuator.FeaturesEndpoint;
+import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicator;
 import org.springframework.cloud.client.discovery.health.DiscoveryCompositeHealthIndicator;
 import org.springframework.cloud.client.discovery.health.DiscoveryHealthIndicator;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -54,6 +61,24 @@ public class CommonsClientAutoConfiguration {
 	public DiscoveryCompositeHealthIndicator discoveryCompositeHealthIndicator(
 			HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
 		return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
+	}
+
+	@Bean
+	public HasFeatures commonsFeatures() {
+		return HasFeatures.abstractFeatures(DiscoveryClient.class,
+				LoadBalancerClient.class);
+	}
+
+	@Configuration
+	@ConditionalOnClass(Endpoint.class)
+	protected static class ActuatorConfiguration {
+		@Autowired(required = false)
+		private List<HasFeatures> hasFeatures = new ArrayList<>();
+
+		@Bean
+		public FeaturesEndpoint cloudEndpoint() {
+			return new FeaturesEndpoint(hasFeatures);
+		}
 	}
 
 }
