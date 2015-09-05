@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
@@ -52,8 +51,8 @@ import org.springframework.util.StringUtils;
  */
 @Configuration
 @EnableConfigurationProperties(PropertySourceBootstrapProperties.class)
-public class PropertySourceBootstrapConfiguration implements
-ApplicationContextInitializer<ConfigurableApplicationContext> {
+public class PropertySourceBootstrapConfiguration
+		implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 	private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
@@ -62,12 +61,6 @@ ApplicationContextInitializer<ConfigurableApplicationContext> {
 
 	@Autowired(required = false)
 	private List<PropertySourceLocator> propertySourceLocators = new ArrayList<>();
-
-	@Autowired
-	private PropertySourceBootstrapProperties properties;
-
-	@Autowired
-	private ConfigurationPropertiesBindingPostProcessor binder;
 
 	public void setPropertySourceLocators(
 			Collection<PropertySourceLocator> propertySourceLocators) {
@@ -94,31 +87,34 @@ ApplicationContextInitializer<ConfigurableApplicationContext> {
 		if (!empty) {
 			MutablePropertySources propertySources = environment.getPropertySources();
 			String logConfig = environment.resolvePlaceholders("${logging.config:}");
+			LogFile logFile = LogFile.get(environment);
 			if (propertySources.contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 				propertySources.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
 			}
 			insertPropertySources(propertySources, composite);
-			reinitializeLoggingSystem(environment, logConfig);
+			reinitializeLoggingSystem(environment, logConfig, logFile);
 			setLogLevels(environment);
 		}
 	}
 
 	private void reinitializeLoggingSystem(ConfigurableEnvironment environment,
-			String oldLogConfig) {
+			String oldLogConfig, LogFile oldLogFile) {
 		String logConfig = environment.resolvePlaceholders("${logging.config:}");
-		if (StringUtils.hasText(logConfig) && !logConfig.equals(oldLogConfig)) {
+		LogFile logFile = LogFile.get(environment);
+		if ((StringUtils.hasText(logConfig) && !logConfig.equals(oldLogConfig)
+				|| (logFile != null && !logFile.toString()
+						.equals(oldLogFile == null ? null : oldLogFile.toString())))) {
 			LoggingSystem system = LoggingSystem
 					.get(LoggingSystem.class.getClassLoader());
 			try {
 				ResourceUtils.getURL(logConfig).openStream().close();
-				LogFile logFile = LogFile.get(environment);
 				system.initialize(new LoggingInitializationContext(environment),
 						logConfig, logFile);
 			}
 			catch (Exception ex) {
 				PropertySourceBootstrapConfiguration.logger
-				.warn("Logging config file location '" + logConfig
-						+ "' cannot be opened and will be ignored");
+						.warn("Logging config file location '" + logConfig
+								+ "' cannot be opened and will be ignored");
 			}
 		}
 	}
@@ -128,8 +124,8 @@ ApplicationContextInitializer<ConfigurableApplicationContext> {
 		rebinder.setEnvironment(environment);
 		// We can't fire the event in the ApplicationContext here (too early), but we can
 		// create our own listener and poke it (it doesn't need the key changes)
-		rebinder.onApplicationEvent(new EnvironmentChangeEvent(Collections
-				.<String> emptySet()));
+		rebinder.onApplicationEvent(
+				new EnvironmentChangeEvent(Collections.<String> emptySet()));
 	}
 
 	private void insertPropertySources(MutablePropertySources propertySources,
@@ -138,10 +134,9 @@ ApplicationContextInitializer<ConfigurableApplicationContext> {
 		incoming.addFirst(composite);
 		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
 		new RelaxedDataBinder(remoteProperties, "spring.cloud.config")
-		.bind(new PropertySourcesPropertyValues(incoming));
-		if (!remoteProperties.isAllowOverride()
-				|| (!remoteProperties.isOverrideNone() && remoteProperties
-						.isOverrideSystemProperties())) {
+				.bind(new PropertySourcesPropertyValues(incoming));
+		if (!remoteProperties.isAllowOverride() || (!remoteProperties.isOverrideNone()
+				&& remoteProperties.isOverrideSystemProperties())) {
 			propertySources.addFirst(composite);
 			return;
 		}
