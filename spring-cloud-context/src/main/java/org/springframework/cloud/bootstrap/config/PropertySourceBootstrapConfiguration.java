@@ -20,12 +20,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
+import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
@@ -43,7 +45,6 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.ResourceUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
@@ -99,11 +100,10 @@ public class PropertySourceBootstrapConfiguration
 
 	private void reinitializeLoggingSystem(ConfigurableEnvironment environment,
 			String oldLogConfig, LogFile oldLogFile) {
-		String logConfig = environment.resolvePlaceholders("${logging.config:}");
-		LogFile logFile = LogFile.get(environment);
-		if ((StringUtils.hasText(logConfig) && !logConfig.equals(oldLogConfig)
-				|| (logFile != null && !logFile.toString()
-						.equals(oldLogFile == null ? null : oldLogFile.toString())))) {
+		Map<String, Object> props = new RelaxedPropertyResolver(environment).getSubProperties("logging.");
+		if (!props.isEmpty()) {
+			String logConfig = environment.resolvePlaceholders("${logging.config:}");
+			LogFile logFile = LogFile.get(environment);
 			LoggingSystem system = LoggingSystem
 					.get(LoggingSystem.class.getClassLoader());
 			try {
