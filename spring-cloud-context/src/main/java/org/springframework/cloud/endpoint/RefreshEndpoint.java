@@ -74,9 +74,6 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 		Set<String> keys = changes(before,
 				extract(this.context.getEnvironment().getPropertySources())).keySet();
 		this.scope.refreshAll();
-		if (keys.isEmpty()) {
-			return new String[0];
-		}
 		this.context.publishEvent(new EnvironmentChangeEvent(keys));
 		return keys.toArray(new String[keys.size()]);
 	}
