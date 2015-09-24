@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.After;
 import org.junit.Test;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
@@ -42,14 +43,23 @@ import org.springframework.util.ReflectionUtils;
  */
 public class RefreshEndpointTests {
 
+	private ConfigurableApplicationContext context;
+
+	@After
+	public void close() {
+		if (this.context!=null) {
+			this.context.close();
+		}
+	}
+
 	@Test
 	public void eventsPublishedInOrder() throws Exception {
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(Empty.class)
+		this.context = new SpringApplicationBuilder(Empty.class)
 				.web(false).showBanner(false).run();
 		RefreshScope scope = new RefreshScope();
-		scope.setApplicationContext(context);
-		RefreshEndpoint endpoint = new RefreshEndpoint(context, scope);
-		Empty empty = context.getBean(Empty.class);
+		scope.setApplicationContext(this.context);
+		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
+		Empty empty = this.context.getBean(Empty.class);
 		endpoint.invoke();
 		int after = empty.events.size();
 		assertEquals("Shutdown hooks not cleaned on refresh", 2, after);
