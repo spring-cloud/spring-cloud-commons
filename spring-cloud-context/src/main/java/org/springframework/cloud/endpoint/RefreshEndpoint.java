@@ -73,8 +73,8 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 		addConfigFilesToEnvironment();
 		Set<String> keys = changes(before,
 				extract(this.context.getEnvironment().getPropertySources())).keySet();
-		this.scope.refreshAll();
 		this.context.publishEvent(new EnvironmentChangeEvent(keys));
+		this.scope.refreshAll();
 		return keys.toArray(new String[keys.size()]);
 	}
 

@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.bootstrap.config;
+package org.springframework.cloud.endpoint;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
-import org.springframework.cloud.endpoint.RefreshEndpoint;
+import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -35,6 +41,20 @@ import org.springframework.util.ReflectionUtils;
  *
  */
 public class RefreshEndpointTests {
+
+	@Test
+	public void eventsPublishedInOrder() throws Exception {
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(Empty.class)
+				.web(false).showBanner(false).run();
+		RefreshScope scope = new RefreshScope();
+		scope.setApplicationContext(context);
+		RefreshEndpoint endpoint = new RefreshEndpoint(context, scope);
+		Empty empty = context.getBean(Empty.class);
+		endpoint.invoke();
+		int after = empty.events.size();
+		assertEquals("Shutdown hooks not cleaned on refresh", 2, after);
+		assertTrue(empty.events.get(0) instanceof EnvironmentChangeEvent);
+	}
 
 	@Test
 	public void shutdownHooksCleaned() {
@@ -61,6 +81,14 @@ public class RefreshEndpointTests {
 
 	@Configuration
 	protected static class Empty {
-
+		private List<ApplicationEvent> events = new ArrayList<ApplicationEvent>();
+		@EventListener(EnvironmentChangeEvent.class)
+		public void changed(EnvironmentChangeEvent event) {
+			this.events.add(event);
+		}
+		@EventListener(RefreshScopeRefreshedEvent.class)
+		public void refreshed(RefreshScopeRefreshedEvent event) {
+			this.events.add(event);
+		}
 	}
 }
