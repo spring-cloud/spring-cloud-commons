@@ -55,20 +55,22 @@ public class FeaturesEndpoint extends AbstractEndpoint<FeaturesEndpoint.Features
 	}
 
 	private void addAbstractFeature(Features features, Class type) {
-		addFeature(features, new NamedFeature(type.getSimpleName(), type));
+		String featureName = type.getSimpleName();
+		try {
+			Object bean = context.getBean(type);
+			Class<?> beanClass = bean.getClass();
+			addFeature(features, new NamedFeature(featureName, beanClass));
+		} catch (NoSuchBeanDefinitionException e) {
+			features.getDisabled().add(featureName);
+		}
 	}
 
 	private void addFeature(Features features, NamedFeature feature) {
-		try {
-			Object bean = context.getBean(feature.getType());
-			Class<?> beanClass = bean.getClass();
+			Class<?> type = feature.getType();
 			features.getEnabled().add(new Feature(feature.getName(),
-					beanClass.getCanonicalName(),
-					beanClass.getPackage().getImplementationVersion(),
-					beanClass.getPackage().getImplementationVendor()));
-		} catch (NoSuchBeanDefinitionException e) {
-			features.getDisabled().add(feature.getName());
-		}
+					type.getCanonicalName(),
+					type.getPackage().getImplementationVersion(),
+					type.getPackage().getImplementationVendor()));
 	}
 
 	@Value

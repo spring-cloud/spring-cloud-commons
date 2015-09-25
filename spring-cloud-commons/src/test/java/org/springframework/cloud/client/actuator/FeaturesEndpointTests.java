@@ -56,11 +56,6 @@ public class FeaturesEndpointTests {
 		}
 
 		@Bean
-		Bar bar() {
-			return new Bar();
-		}
-
-		@Bean
 		HasFeatures localFeatures() {
 			return HasFeatures.builder()
 					.abstractFeature(Foo.class)
