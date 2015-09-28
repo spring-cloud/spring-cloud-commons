@@ -1,6 +1,7 @@
 package org.springframework.cloud.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,77 +18,77 @@ public class IdUtilsTests {
 
 	@Before
 	public void setup() {
-		env = new MockEnvironment();
+		this.env = new MockEnvironment();
 	}
 
 	@After
 	public void destroy() {
-		env = null;
+		this.env = null;
 	}
 
 	@Test
 	public void emptyEnvironmentWorks() {
-		String instanceId = IdUtils.getDefaultInstanceId(env);
+		String instanceId = IdUtils.getDefaultInstanceId(this.env);
 		assertNull("instanceId was not null", instanceId);
 	}
 
 	@Test
 	public void vcapInstanceIdWorks() {
-		env.setProperty("vcap.application.instance_id", DEFAULT_ID);
-		String instanceId = IdUtils.getDefaultInstanceId(env);
+		this.env.setProperty("vcap.application.instance_id", DEFAULT_ID);
+		String instanceId = IdUtils.getDefaultInstanceId(this.env);
 		assertEquals("instanceId was wrong", DEFAULT_ID, instanceId);
 	}
 
 	@Test
 	public void hostnameWorks() {
-		env.setProperty("spring.cloud.client.hostname", DEFAULT_ID);
-		String instanceId = IdUtils.getDefaultInstanceId(env);
+		this.env.setProperty("spring.cloud.client.hostname", DEFAULT_ID);
+		String instanceId = IdUtils.getDefaultInstanceId(this.env);
 		assertEquals("instanceId was wrong", DEFAULT_ID, instanceId);
 	}
 
 	@Test
 	public void appNameWorks() {
-		env.setProperty("spring.application.name", DEFAULT_ID);
-		String instanceId = IdUtils.getDefaultInstanceId(env);
+		this.env.setProperty("spring.application.name", DEFAULT_ID);
+		String instanceId = IdUtils.getDefaultInstanceId(this.env);
 		assertEquals("instanceId was wrong", DEFAULT_ID, instanceId);
 	}
 
 	@Test
 	public void hostnameAndAppNameWorks() {
-		env.setProperty("spring.application.name", DEFAULT_ID);
-		env.setProperty("spring.cloud.client.hostname", DEFAULT_ID+"2");
-		String instanceId = IdUtils.getDefaultInstanceId(env);
+		this.env.setProperty("spring.application.name", DEFAULT_ID);
+		this.env.setProperty("spring.cloud.client.hostname", DEFAULT_ID+"2");
+		String instanceId = IdUtils.getDefaultInstanceId(this.env);
 		assertEquals("instanceId was wrong", DEFAULT_ID+"2"+":"+DEFAULT_ID, instanceId);
 	}
 
 	@Test
 	public void instanceIdWorks() {
-		env.setProperty("spring.cloud.client.hostname", DEFAULT_ID);
-		String instanceId = IdUtils.getDefaultInstanceId(env);
+		this.env.setProperty("spring.cloud.client.hostname", DEFAULT_ID);
+		String instanceId = IdUtils.getDefaultInstanceId(this.env);
 		assertEquals("instanceId was wrong", DEFAULT_ID, instanceId);
 	}
 
 	@Test
 	public void portWorks() {
-		env.setProperty("spring.application.name", DEFAULT_ID);
-		String instanceId = IdUtils.getDefaultInstanceId(env);
+		this.env.setProperty("spring.application.name", DEFAULT_ID);
+		String instanceId = IdUtils.getDefaultInstanceId(this.env);
 		assertEquals("instanceId was wrong", DEFAULT_ID, instanceId);
 	}
 
 	@Test
 	public void appNameAndPortWorks() {
-		env.setProperty("spring.application.name", DEFAULT_ID);
-		env.setProperty("server.port", "80");
-		String instanceId = IdUtils.getDefaultInstanceId(env);
+		this.env.setProperty("spring.application.name", DEFAULT_ID);
+		this.env.setProperty("server.port", "80");
+		String instanceId = IdUtils.getDefaultInstanceId(this.env);
 		assertEquals("instanceId was wrong", DEFAULT_ID+":80", instanceId);
 	}
 
 	@Test
 	public void fullWorks() {
-		env.setProperty("spring.cloud.client.hostname", "myhost");
-		env.setProperty("spring.application.name", DEFAULT_ID);
-		env.setProperty("server.port", "80");
-		String instanceId = IdUtils.getDefaultInstanceId(env);
+		this.env.setProperty("spring.cloud.client.hostname", "myhost");
+		this.env.setProperty("spring.application.name", DEFAULT_ID);
+		this.env.setProperty("server.port", "80");
+		String instanceId = IdUtils.getDefaultInstanceId(this.env);
 		assertEquals("instanceId was wrong", "myhost:"+DEFAULT_ID+":80", instanceId);
 	}
 

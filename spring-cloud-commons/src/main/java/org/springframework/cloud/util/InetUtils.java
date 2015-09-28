@@ -1,15 +1,16 @@
 package org.springframework.cloud.util;
 
-import lombok.Data;
-import lombok.SneakyThrows;
-import lombok.extern.apachecommons.CommonsLog;
-
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Enumeration;
+
+import lombok.Data;
+import lombok.SneakyThrows;
+import lombok.extern.apachecommons.CommonsLog;
 
 /**
  * @author Spencer Gibb
@@ -77,5 +78,15 @@ public class InetUtils {
 		public boolean override;
 		private String ipAddress;
 		private String hostname;
+		public int getIpAddressAsInt() {
+			InetAddress inetAddress = null;
+			try {
+				inetAddress = InetAddress.getByName(this.ipAddress);
+			}
+			catch (final UnknownHostException e) {
+				throw new IllegalArgumentException(e);
+			}
+			return ByteBuffer.wrap(inetAddress.getAddress()).getInt();
+		}
 	}
 }
