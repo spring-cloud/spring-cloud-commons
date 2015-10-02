@@ -20,23 +20,23 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @IntegrationTest("encrypt.key:deadbeef")
 @ActiveProfiles("encrypt")
 public class BootstrapOrderingAutoConfigurationIntegrationTests {
-	
+
 	@Autowired
 	private ConfigurableEnvironment environment;
 
 	@Test
 	public void bootstrapPropertiesExist() {
-		assertTrue(environment.getPropertySources().contains("bootstrap"));
+		assertTrue(this.environment.getPropertySources().contains("bootstrap"));
 	}
 
 	@Test
 	public void normalPropertiesDecrypted() {
-		assertEquals("foo", environment.resolvePlaceholders("${foo}"));
+		assertEquals("foo", this.environment.resolvePlaceholders("${foo}"));
 	}
 
 	@Test
 	public void bootstrapPropertiesDecrypted() {
-		assertEquals("bar", environment.resolvePlaceholders("${bar}"));
+		assertEquals("bar", this.environment.resolvePlaceholders("${bar}"));
 	}
 
 	@EnableAutoConfiguration

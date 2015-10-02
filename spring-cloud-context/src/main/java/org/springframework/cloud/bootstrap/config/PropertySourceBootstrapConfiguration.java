@@ -38,6 +38,7 @@ import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -53,15 +54,22 @@ import org.springframework.util.ResourceUtils;
 @Configuration
 @EnableConfigurationProperties(PropertySourceBootstrapProperties.class)
 public class PropertySourceBootstrapConfiguration
-		implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+		implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
 	private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 	private static Log logger = LogFactory
 			.getLog(PropertySourceBootstrapConfiguration.class);
 
+	private int order = Ordered.HIGHEST_PRECEDENCE + 10;
+
 	@Autowired(required = false)
 	private List<PropertySourceLocator> propertySourceLocators = new ArrayList<>();
+
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
 
 	public void setPropertySourceLocators(
 			Collection<PropertySourceLocator> propertySourceLocators) {
