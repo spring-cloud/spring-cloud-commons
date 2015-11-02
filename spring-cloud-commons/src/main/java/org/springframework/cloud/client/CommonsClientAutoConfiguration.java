@@ -17,7 +17,6 @@
 package org.springframework.cloud.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +76,7 @@ public class CommonsClientAutoConfiguration {
 
 		@Bean
 		public FeaturesEndpoint featuresEndpoint() {
-			return new FeaturesEndpoint(hasFeatures);
+			return new FeaturesEndpoint(this.hasFeatures);
 		}
 	}
 

@@ -19,8 +19,6 @@ package org.springframework.cloud.client.discovery.health;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import lombok.extern.apachecommons.CommonsLog;
-
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -28,12 +26,14 @@ import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 
+import lombok.extern.apachecommons.CommonsLog;
+
 /**
  * @author Spencer Gibb
  */
 @CommonsLog
 public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator, Ordered,
-		ApplicationListener<InstanceRegisteredEvent> {
+		ApplicationListener<InstanceRegisteredEvent<?>> {
 
 	private AtomicBoolean discoveryInitialized = new AtomicBoolean(false);
 
@@ -46,7 +46,7 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 	}
 
 	@Override
-	public void onApplicationEvent(InstanceRegisteredEvent event) {
+	public void onApplicationEvent(InstanceRegisteredEvent<?> event) {
 		if (this.discoveryInitialized.compareAndSet(false, true)) {
 			log.debug("Discovery Client has been initialized");
 		}
