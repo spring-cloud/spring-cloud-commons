@@ -23,15 +23,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.ParentContextApplicationContextInitializer;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
@@ -52,8 +55,8 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  *
  */
-public class BootstrapApplicationListener implements
-		ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
+public class BootstrapApplicationListener
+		implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
 	public static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
@@ -94,8 +97,8 @@ public class BootstrapApplicationListener implements
 		if (StringUtils.hasText(configLocation)) {
 			bootstrapMap.put("spring.config.location", configLocation);
 		}
-		bootstrapProperties.addFirst(new MapPropertySource(
-				BOOTSTRAP_PROPERTY_SOURCE_NAME, bootstrapMap));
+		bootstrapProperties.addFirst(
+				new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME, bootstrapMap));
 		bootstrapProperties.addFirst(new MapPropertySource("bootstrapInProgress",
 				Collections.<String, Object> emptyMap()));
 		for (PropertySource<?> source : environment.getPropertySources()) {
@@ -103,11 +106,11 @@ public class BootstrapApplicationListener implements
 		}
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		// Use names and ensure unique to protect against duplicates
-		List<String> names = SpringFactoriesLoader.loadFactoryNames(
-				BootstrapConfiguration.class, classLoader);
+		List<String> names = SpringFactoriesLoader
+				.loadFactoryNames(BootstrapConfiguration.class, classLoader);
 		// TODO: is it possible or sensible to share a ResourceLoader?
 		SpringApplicationBuilder builder = new SpringApplicationBuilder()
-				.profiles(environment.getActiveProfiles()).showBanner(false)
+				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)
 				.environment(bootstrapEnvironment)
 				.properties("spring.application.name:" + configName).web(false);
 		List<Class<?>> sources = new ArrayList<>();
@@ -133,7 +136,8 @@ public class BootstrapApplicationListener implements
 	private void addAncestorInitializer(SpringApplication application,
 			ConfigurableApplicationContext context) {
 		boolean installed = false;
-		for (ApplicationContextInitializer<?> initializer : application.getInitializers()) {
+		for (ApplicationContextInitializer<?> initializer : application
+				.getInitializers()) {
 			if (initializer instanceof AncestorInitializer) {
 				installed = true;
 				// New parent
@@ -154,9 +158,27 @@ public class BootstrapApplicationListener implements
 				ApplicationContextInitializer.class);
 		application.addInitializers(initializers
 				.toArray(new ApplicationContextInitializer[initializers.size()]));
+		addBootstrapDecryptInitializer(application);
 	}
 
-	private <T> List<T> getOrderedBeansOfType(ListableBeanFactory context, Class<T> type) {
+	private void addBootstrapDecryptInitializer(SpringApplication application) {
+		DelegatingEnvironmentDecryptApplicationInitializer decrypter = null;
+		for (ApplicationContextInitializer<?> initializer : application
+				.getInitializers()) {
+			if (initializer instanceof EnvironmentDecryptApplicationInitializer) {
+				@SuppressWarnings("unchecked")
+				ApplicationContextInitializer<ConfigurableApplicationContext> delegate = (ApplicationContextInitializer<ConfigurableApplicationContext>) initializer;
+				decrypter = new DelegatingEnvironmentDecryptApplicationInitializer(
+						delegate);
+			}
+		}
+		if (decrypter != null) {
+			application.addInitializers(decrypter);
+		}
+	}
+
+	private <T> List<T> getOrderedBeansOfType(ListableBeanFactory context,
+			Class<T> type) {
 		List<T> result = new ArrayList<T>();
 		for (String name : context.getBeanNamesForType(type)) {
 			result.add(context.getBean(name, type));
@@ -191,17 +213,16 @@ public class BootstrapApplicationListener implements
 		public int getOrder() {
 			// Need to run not too late (so not unordered), so that, for instance, the
 			// ContextIdApplicationContextInitializer runs later and picks up the merged
-			// Environment. Also not too early so that other initializers can pick up the
-			// parent (especially the Environment).
-			return Ordered.HIGHEST_PRECEDENCE + 10;
+			// Environment. Also needs to be quite early so that other initializers can
+			// pick up the parent (especially the Environment).
+			return Ordered.HIGHEST_PRECEDENCE + 5;
 		}
 
 		@Override
 		public void initialize(ConfigurableApplicationContext context) {
-			preemptMerge(
-					context.getEnvironment().getPropertySources(),
-					new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME, Collections
-							.<String, Object> emptyMap()));
+			preemptMerge(context.getEnvironment().getPropertySources(),
+					new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME,
+							Collections.<String, Object> emptyMap()));
 			while (context.getParent() != null && context.getParent() != context) {
 				context = (ConfigurableApplicationContext) context.getParent();
 			}
@@ -216,5 +237,27 @@ public class BootstrapApplicationListener implements
 				propertySources.addFirst(propertySource);
 			}
 		}
+	}
+
+	/**
+	 * A special initializer designed to run before the property source bootstrap and
+	 * decrypt any properties needed there (e.g. URL of config server).
+	 */
+	@Order(Ordered.HIGHEST_PRECEDENCE + 9)
+	private static class DelegatingEnvironmentDecryptApplicationInitializer
+			implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+		private ApplicationContextInitializer<ConfigurableApplicationContext> delegate;
+
+		public DelegatingEnvironmentDecryptApplicationInitializer(
+				ApplicationContextInitializer<ConfigurableApplicationContext> delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public void initialize(ConfigurableApplicationContext applicationContext) {
+			this.delegate.initialize(applicationContext);
+		}
+
 	}
 }

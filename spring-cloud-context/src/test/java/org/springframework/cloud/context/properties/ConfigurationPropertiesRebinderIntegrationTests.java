@@ -27,6 +27,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.EnvironmentTestUtils;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderIntegrationTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -104,7 +105,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
 		@Configuration
 		protected static class RebinderConfiguration extends
-		ConfigurationPropertiesRebinderConfiguration {
+		ConfigurationPropertiesRebinderAutoConfiguration {
 
 		}
 	}

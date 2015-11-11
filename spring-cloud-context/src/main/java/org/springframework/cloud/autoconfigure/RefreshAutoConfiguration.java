@@ -17,12 +17,10 @@
 
 package org.springframework.cloud.autoconfigure;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.actuate.autoconfigure.EndpointAutoConfiguration;
@@ -34,23 +32,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.condition.SearchStrategy;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
-import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetaData;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessorRegistrar;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.environment.EnvironmentManager;
-import org.springframework.cloud.context.properties.ConfigurationPropertiesBeans;
-import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.RefreshEndpoint;
 import org.springframework.cloud.logging.LoggingRebinder;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -136,53 +126,6 @@ public class RefreshAutoConfiguration {
 			};
 		}
 
-	}
-
-	@Configuration
-	@ConditionalOnBean(ConfigurationPropertiesBindingPostProcessor.class)
-	protected static class ConfigurationPropertiesRebinderConfiguration implements
-	ApplicationContextAware, SmartInitializingSingleton {
-
-		private ApplicationContext context;
-
-		@Override
-		public void setApplicationContext(ApplicationContext applicationContext) {
-			this.context = applicationContext;
-		}
-
-		@Bean
-		@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
-		public ConfigurationPropertiesBeans configurationPropertiesBeans() {
-			// Since this is a BeanPostProcessor we have to be super careful not to
-			// cause a cascade of bean instantiation. Knowing the *name* of the beans we
-			// need is super optimal, but a little brittle (unfortunately we have no
-			// choice).
-			ConfigurationBeanFactoryMetaData metaData = this.context.getBean(
-					ConfigurationPropertiesBindingPostProcessorRegistrar.BINDER_BEAN_NAME
-					+ ".store", ConfigurationBeanFactoryMetaData.class);
-			ConfigurationPropertiesBeans beans = new ConfigurationPropertiesBeans();
-			beans.setBeanMetaDataStore(metaData);
-			return beans;
-		}
-
-		@Bean
-		@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
-		public ConfigurationPropertiesRebinder configurationPropertiesRebinder(
-				ConfigurationPropertiesBeans beans,
-				ConfigurationPropertiesBindingPostProcessor binder) {
-			ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(
-					binder, beans);
-			return rebinder;
-		}
-
-		@Override
-		public void afterSingletonsInstantiated() {
-			// After all beans are initialized send a pre-emptive EnvironmentChangeEvent
-			// so that anything that needs to rebind gets a chance now (especially for
-			// beans in the parent context)
-			this.context.publishEvent(new EnvironmentChangeEvent(Collections
-					.<String> emptySet()));
-		}
 	}
 
 	@ConditionalOnClass(Endpoint.class)

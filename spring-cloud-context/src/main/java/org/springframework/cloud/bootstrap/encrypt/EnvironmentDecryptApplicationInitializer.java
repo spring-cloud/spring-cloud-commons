@@ -78,6 +78,10 @@ public class EnvironmentDecryptApplicationInitializer implements
 		return this.order;
 	}
 
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
 
