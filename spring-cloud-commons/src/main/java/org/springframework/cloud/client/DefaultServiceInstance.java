@@ -52,4 +52,14 @@ public class DefaultServiceInstance implements ServiceInstance {
 				instance.getPort());
 		return URI.create(uri);
 	}
+
+	@Override
+	public boolean supports(Capability serviceCapability) {
+		return false;
+	}
+
+	@Override
+	public <T> T getValue(Capability serviceCapability) {
+		throw new UnsupportedOperationException();
+	}
 }
