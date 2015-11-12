@@ -39,28 +39,33 @@ import org.springframework.web.client.RestTemplate;
 public class LoadBalancerAutoConfiguration {
 
 	@Bean
-    @LoadBalanced
-	public RestTemplate loadBalancedRestTemplate(RestTemplateCustomizer customizer) {
+	@LoadBalanced
+	public RestTemplate loadBalancedRestTemplate(
+			List<RestTemplateCustomizer> customizers) {
 		RestTemplate restTemplate = new RestTemplate();
-        customizer.customize(restTemplate);
+		for (RestTemplateCustomizer customizer : customizers) {
+			customizer.customize(restTemplate);
+		}
 		return restTemplate;
 	}
 
-    @Bean
-    @ConditionalOnMissingBean
-    public RestTemplateCustomizer restTemplateCustomizer(final LoadBalancerInterceptor loadBalancerInterceptor) {
-        return new RestTemplateCustomizer() {
-            @Override
-            public void customize(RestTemplate restTemplate) {
-                List<ClientHttpRequestInterceptor> list = new ArrayList<>();
-                list.add(loadBalancerInterceptor);
-                restTemplate.setInterceptors(list);
-            }
-        };
-    }
+	@Bean
+	@ConditionalOnMissingBean
+	public RestTemplateCustomizer restTemplateCustomizer(
+			final LoadBalancerInterceptor loadBalancerInterceptor) {
+		return new RestTemplateCustomizer() {
+			@Override
+			public void customize(RestTemplate restTemplate) {
+				List<ClientHttpRequestInterceptor> list = new ArrayList<>();
+				list.add(loadBalancerInterceptor);
+				restTemplate.setInterceptors(list);
+			}
+		};
+	}
 
 	@Bean
-	public LoadBalancerInterceptor ribbonInterceptor(LoadBalancerClient loadBalancerClient) {
+	public LoadBalancerInterceptor ribbonInterceptor(
+			LoadBalancerClient loadBalancerClient) {
 		return new LoadBalancerInterceptor(loadBalancerClient);
 	}
 
