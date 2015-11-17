@@ -17,36 +17,16 @@
 
 package org.springframework.cloud.autoconfigure;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.actuate.autoconfigure.EndpointAutoConfiguration;
-import org.springframework.boot.actuate.endpoint.Endpoint;
-import org.springframework.boot.actuate.endpoint.InfoEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
-import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.environment.EnvironmentManager;
-import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
-import org.springframework.cloud.endpoint.RefreshEndpoint;
 import org.springframework.cloud.logging.LoggingRebinder;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.integration.monitor.IntegrationMBeanExporter;
 
 /**
  * Autoconfiguration for the refresh scope and associated features to do with changes in
@@ -57,7 +37,7 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  */
 @Configuration
 @ConditionalOnClass(RefreshScope.class)
-@AutoConfigureAfter({ WebMvcAutoConfiguration.class, EndpointAutoConfiguration.class })
+@AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class RefreshAutoConfiguration {
 
 	@Bean
@@ -78,113 +58,4 @@ public class RefreshAutoConfiguration {
 		return new EnvironmentManager(environment);
 	}
 
-	@Configuration
-	@ConditionalOnClass(InfoEndpoint.class)
-	@ConditionalOnBean(EndpointAutoConfiguration.class)
-	protected static class InfoEndpointRebinderConfiguration
-			implements ApplicationListener<EnvironmentChangeEvent>, BeanPostProcessor {
-
-		@Autowired
-		private ConfigurableEnvironment environment;
-
-		private Map<String, Object> map = new LinkedHashMap<String, Object>();
-
-		@Override
-		public void onApplicationEvent(EnvironmentChangeEvent event) {
-			for (String key : event.getKeys()) {
-				if (key.startsWith("info.")) {
-					this.map.put(key.substring("info.".length()),
-							this.environment.getProperty(key));
-				}
-			}
-		}
-
-		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName)
-				throws BeansException {
-			if (bean instanceof InfoEndpoint) {
-				return infoEndpoint((InfoEndpoint) bean);
-			}
-			return bean;
-		}
-
-		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName)
-				throws BeansException {
-			return bean;
-		}
-
-		private InfoEndpoint infoEndpoint(InfoEndpoint endpoint) {
-			return new InfoEndpoint(endpoint.invoke()) {
-				@Override
-				public Map<String, Object> invoke() {
-					Map<String, Object> info = new LinkedHashMap<String, Object>(
-							super.invoke());
-					info.putAll(InfoEndpointRebinderConfiguration.this.map);
-					return info;
-				}
-			};
-		}
-
-	}
-
-	@ConditionalOnClass(Endpoint.class)
-	protected static class RefreshEndpointsConfiguration {
-
-		@ConditionalOnClass(IntegrationMBeanExporter.class)
-		protected static class RestartEndpointWithIntegration {
-
-			@Autowired(required = false)
-			private IntegrationMBeanExporter exporter;
-
-			@Bean
-			@ConditionalOnMissingBean
-			public RestartEndpoint restartEndpoint() {
-				RestartEndpoint endpoint = new RestartEndpoint();
-				if (this.exporter != null) {
-					endpoint.setIntegrationMBeanExporter(this.exporter);
-				}
-				return endpoint;
-			}
-
-		}
-
-		@ConditionalOnMissingClass(name = "org.springframework.integration.monitor.IntegrationMBeanExporter")
-		protected static class RestartEndpointWithoutIntegration {
-
-			@Bean
-			@ConditionalOnMissingBean
-			public RestartEndpoint restartEndpoint() {
-				return new RestartEndpoint();
-			}
-		}
-
-		@Bean
-		@ConfigurationProperties("endpoints.pause")
-		public Endpoint<Boolean> pauseEndpoint(RestartEndpoint restartEndpoint) {
-			return restartEndpoint.getPauseEndpoint();
-		}
-
-		@Bean
-		@ConfigurationProperties("endpoints.resume")
-		public Endpoint<Boolean> resumeEndpoint(RestartEndpoint restartEndpoint) {
-			return restartEndpoint.getResumeEndpoint();
-		}
-
-		@Configuration
-		@ConditionalOnProperty(value = "endpoints.refresh.enabled", matchIfMissing = true)
-		@ConditionalOnBean(PropertySourceBootstrapConfiguration.class)
-		protected static class RefreshEndpointConfiguration {
-
-			@Bean
-			@ConditionalOnMissingBean
-			public RefreshEndpoint refreshEndpoint(ConfigurableApplicationContext context,
-					RefreshScope scope) {
-				RefreshEndpoint endpoint = new RefreshEndpoint(context, scope);
-				return endpoint;
-			}
-
-		}
-
-	}
 }

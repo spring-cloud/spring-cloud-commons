@@ -2,6 +2,7 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration,\
 org.springframework.cloud.autoconfigure.RefreshAutoConfiguration,\
+org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration,\
 org.springframework.cloud.autoconfigure.LifecycleMvcEndpointAutoConfiguration
 
 # Application Listeners
