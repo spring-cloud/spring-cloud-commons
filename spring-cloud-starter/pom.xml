@@ -5,10 +5,10 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-commons-parent</artifactId>
-		<version>1.1.0.M3</version>
+		<version>1.1.0.BUILD-SNAPSHOT</version>
 	</parent>
 	<artifactId>spring-cloud-starter</artifactId>
-	<version>1.1.0.M3</version>
+	<version>1.1.0.BUILD-SNAPSHOT</version>
 	<name>spring-cloud-starter</name>
 	<description>Spring Cloud Starter</description>
 	<url>http://projects.spring.io/spring-cloud</url>
