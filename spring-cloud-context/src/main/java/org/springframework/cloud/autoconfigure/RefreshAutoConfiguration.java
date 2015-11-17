@@ -57,7 +57,7 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  */
 @Configuration
 @ConditionalOnClass(RefreshScope.class)
-@AutoConfigureAfter(WebMvcAutoConfiguration.class)
+@AutoConfigureAfter({ WebMvcAutoConfiguration.class, EndpointAutoConfiguration.class })
 public class RefreshAutoConfiguration {
 
 	@Bean
@@ -81,8 +81,8 @@ public class RefreshAutoConfiguration {
 	@Configuration
 	@ConditionalOnClass(InfoEndpoint.class)
 	@ConditionalOnBean(EndpointAutoConfiguration.class)
-	protected static class InfoEndpointRebinderConfiguration implements
-	ApplicationListener<EnvironmentChangeEvent>, BeanPostProcessor {
+	protected static class InfoEndpointRebinderConfiguration
+			implements ApplicationListener<EnvironmentChangeEvent>, BeanPostProcessor {
 
 		@Autowired
 		private ConfigurableEnvironment environment;
@@ -178,8 +178,8 @@ public class RefreshAutoConfiguration {
 
 			@Bean
 			@ConditionalOnMissingBean
-			public RefreshEndpoint refreshEndpoint(
-					ConfigurableApplicationContext context, RefreshScope scope) {
+			public RefreshEndpoint refreshEndpoint(ConfigurableApplicationContext context,
+					RefreshScope scope) {
 				RefreshEndpoint endpoint = new RefreshEndpoint(context, scope);
 				return endpoint;
 			}
