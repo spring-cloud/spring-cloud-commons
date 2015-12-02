@@ -111,7 +111,7 @@ public class BootstrapApplicationListener
 		// TODO: is it possible or sensible to share a ResourceLoader?
 		SpringApplicationBuilder builder = new SpringApplicationBuilder()
 				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)
-				.environment(bootstrapEnvironment)
+				.environment(bootstrapEnvironment).registerShutdownHook(false)
 				.properties("spring.application.name:" + configName).web(false);
 		List<Class<?>> sources = new ArrayList<>();
 		for (String name : names) {
