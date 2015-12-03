@@ -145,7 +145,6 @@ public class BootstrapApplicationListener
 			}
 		}
 		if (!installed) {
-			application.setRegisterShutdownHook(false);
 			application.addInitializers(new AncestorInitializer(context));
 		}
 
