@@ -91,9 +91,15 @@ public class InetUtils {
 
 		String hostname;
 		try {
-			SystemPropertyUtils.resolvePlaceholders(
-					"${spring.util.timeout.sec:${SPRING_UTIL_TIMEOUT_SEC:1}");
-			hostname = result.get(1, TimeUnit.SECONDS);
+			String value = SystemPropertyUtils.resolvePlaceholders(
+					"${spring.util.timeout.sec:${SPRING_UTIL_TIMEOUT_SEC:1}}");
+			int timeout = 1;
+			try {
+				timeout = Integer.valueOf(value);
+			}
+			catch (NumberFormatException e) {
+			}
+			hostname = result.get(timeout, TimeUnit.SECONDS);
 		}
 		catch (Exception e) {
 			log.info("Cannot determine local hostname");
