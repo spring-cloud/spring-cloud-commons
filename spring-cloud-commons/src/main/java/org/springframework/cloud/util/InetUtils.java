@@ -7,6 +7,13 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.util.SystemPropertyUtils;
 
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -18,9 +25,11 @@ import lombok.extern.apachecommons.CommonsLog;
 @CommonsLog
 public class InetUtils {
 
+	private static ExecutorService executor = Executors.newSingleThreadExecutor();
+
 	/**
-	 * Find the first non-loopback host info.
-	 * If there were errors return a hostinfo with 'localhost' and '127.0.0.1' for hostname and ipAddress respectively.
+	 * Find the first non-loopback host info. If there were errors return a hostinfo with
+	 * 'localhost' and '127.0.0.1' for hostname and ipAddress respectively.
 	 */
 	public static HostInfo getFirstNonLoopbackHostInfo() {
 		InetAddress address = getFirstNonLoopbackAddress();
@@ -39,14 +48,18 @@ public class InetUtils {
 	@SneakyThrows
 	public static InetAddress getFirstNonLoopbackAddress() {
 		try {
-			for (Enumeration<NetworkInterface> enumNic = NetworkInterface.getNetworkInterfaces();
-				 enumNic.hasMoreElements(); ) {
+			for (Enumeration<NetworkInterface> enumNic = NetworkInterface
+					.getNetworkInterfaces(); enumNic.hasMoreElements();) {
 				NetworkInterface ifc = enumNic.nextElement();
 				if (ifc.isUp()) {
-					for (Enumeration<InetAddress> enumAddr = ifc.getInetAddresses();
-						 enumAddr.hasMoreElements(); ) {
+					log.debug("Testing interface: " + ifc.getDisplayName());
+					for (Enumeration<InetAddress> enumAddr = ifc
+							.getInetAddresses(); enumAddr.hasMoreElements();) {
 						InetAddress address = enumAddr.nextElement();
-						if (address instanceof Inet4Address && !address.isLoopbackAddress()) {
+						if (address instanceof Inet4Address
+								&& !address.isLoopbackAddress()) {
+							log.debug("Found non-loopback interface: "
+									+ ifc.getDisplayName());
 							return address;
 						}
 					}
@@ -59,16 +72,34 @@ public class InetUtils {
 
 		try {
 			return InetAddress.getLocalHost();
-		} catch (UnknownHostException e) {
+		}
+		catch (UnknownHostException e) {
 			log.warn("Unable to retrieve localhost");
 		}
 
 		return null;
 	}
 
-	public static HostInfo convert(InetAddress address) {
+	public static HostInfo convert(final InetAddress address) {
 		HostInfo hostInfo = new HostInfo();
-		hostInfo.setHostname(address.getHostName());
+		Future<String> result = executor.submit(new Callable<String>() {
+			@Override
+			public String call() throws Exception {
+				return address.getHostName();
+			}
+		});
+
+		String hostname;
+		try {
+			SystemPropertyUtils.resolvePlaceholders(
+					"${spring.util.timeout.sec:${SPRING_UTIL_TIMEOUT_SEC:1}");
+			hostname = result.get(1, TimeUnit.SECONDS);
+		}
+		catch (Exception e) {
+			log.info("Cannot determine local hostname");
+			hostname = "localhost";
+		}
+		hostInfo.setHostname(hostname);
 		hostInfo.setIpAddress(address.getHostAddress());
 		return hostInfo;
 	}
@@ -78,6 +109,7 @@ public class InetUtils {
 		public boolean override;
 		private String ipAddress;
 		private String hostname;
+
 		public int getIpAddressAsInt() {
 			InetAddress inetAddress = null;
 			try {
