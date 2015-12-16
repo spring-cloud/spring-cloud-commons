@@ -42,6 +42,18 @@ public class InetUtils {
 		return hostInfo;
 	}
 
+	/*
+	 * These interfaces are not usable for "outside" communication, so they're probably
+	 *  not a good fit for the simple strategy of getting the first "usable" interface.
+	 *
+	 * Docker:
+	 *	https://docs.docker.com/v1.7/articles/networking/
+	 *
+	 *	The private range [RFC 1918] is perfectly fine for other uses than docker, as well
+	 *		as bridged interfaces...
+	 */
+	private static final String[] virtualInterfacesRegexes = {"docker0", "veth.*"};
+
 	/**
 	 * Find the first non-loopback InetAddress
 	 */
@@ -52,14 +64,26 @@ public class InetUtils {
 					.getNetworkInterfaces(); enumNic.hasMoreElements();) {
 				NetworkInterface ifc = enumNic.nextElement();
 				if (ifc.isUp()) {
-					log.debug("Testing interface: " + ifc.getDisplayName());
+					final String displayName = ifc.getDisplayName();
+
+					boolean isVirtual = false;
+					for(String virtualIfaceRegex : virtualInterfacesRegexes) {
+						if ((isVirtual = displayName.matches(virtualIfaceRegex))) {
+							break;
+						}
+					}
+					if (isVirtual) {
+						log.debug("Skipping interface: " + displayName);
+						continue;
+					}
+
+					log.debug("Testing interface: " + displayName);
 					for (Enumeration<InetAddress> enumAddr = ifc
 							.getInetAddresses(); enumAddr.hasMoreElements();) {
 						InetAddress address = enumAddr.nextElement();
 						if (address instanceof Inet4Address
 								&& !address.isLoopbackAddress()) {
-							log.debug("Found non-loopback interface: "
-									+ ifc.getDisplayName());
+							log.debug("Found non-loopback interface: " + displayName);
 							return address;
 						}
 					}
