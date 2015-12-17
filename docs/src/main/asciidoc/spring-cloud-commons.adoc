@@ -1,12 +1,13 @@
 = Cloud Native Applications
-:github: https://github.com/spring-cloud/spring-cloud-commons
+:githubroot: https://github.com/spring-cloud
+:github: {githubroot}/spring-cloud-commons
 :githubmaster: {github}/tree/master
 :docslink: {githubmaster}/docs/src/main/asciidoc
 :toc:
 
 include::intro.adoc[]
 
-include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/docs/src/main/asciidoc/contributing-docs.adoc[]
+include::https://github.com/spring-cloud/spring-cloud-build/blob/master/docs/src/main/asciidoc/contributing-docs.adoc[]
 
 == Spring Cloud Context: Application Context Services
 
@@ -272,7 +273,7 @@ classpath (Maven co-ordinates
 "org.springframework.security:spring-security-rsa") and you also need
 the full strength JCE extensions in your JVM.
 
-include::jce.adoc
+include::jce.adoc[]
 
 === Endpoints
 
@@ -308,7 +309,7 @@ public class MyClass {
 
 The URI needs to use a virtual host name (ie. service name, not a host name).
 The Ribbon client is used to create a full physical address. See
-{github-code}/spring-cloud-netflix-core/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java[RibbonAutoConfiguration]
+{githubroot}/spring-cloud-netflix/blob/master/spring-cloud-netflix-core/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java[RibbonAutoConfiguration]
 for details of how the `RestTemplate` is set up.
 
 === Multiple RestTemplate objects
