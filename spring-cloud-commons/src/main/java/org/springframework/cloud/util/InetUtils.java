@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.util.SystemPropertyUtils;
@@ -25,7 +26,16 @@ import lombok.extern.apachecommons.CommonsLog;
 @CommonsLog
 public class InetUtils {
 
-	private static ExecutorService executor = Executors.newSingleThreadExecutor();
+	private static ExecutorService executor = Executors
+			.newSingleThreadExecutor(new ThreadFactory() {
+				@Override
+				public Thread newThread(Runnable r) {
+					Thread thread = new Thread(r);
+					thread.setName("spring.cloud.inetutils");
+					thread.setDaemon(true);
+					return thread;
+				}
+			});
 
 	/**
 	 * Find the first non-loopback host info. If there were errors return a hostinfo with
