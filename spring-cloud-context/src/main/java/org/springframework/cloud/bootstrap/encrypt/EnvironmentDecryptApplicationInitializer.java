@@ -15,7 +15,9 @@
  */
 package org.springframework.cloud.bootstrap.encrypt;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -38,7 +40,7 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 /**
  * Decrypt properties from the environment and insert them with high priority so they
  * override the encrypted values.
- * 
+ *
  * @author Dave Syer
  *
  */
@@ -58,7 +60,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 	/**
 	 * Strategy to determine how to handle exceptions during decryption.
-	 * 
+	 *
 	 * @param failOnError the flag value (default true)
 	 */
 	public void setFailOnError(boolean failOnError) {
@@ -71,14 +73,15 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 	@Override
 	public int getOrder() {
-		return order;
+		return this.order;
 	}
 
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
 		ConfigurableEnvironment environment = applicationContext.getEnvironment();
 		MapPropertySource decrypted = new MapPropertySource(
-				DECRYPTED_PROPERTY_SOURCE_NAME, decrypt(environment.getPropertySources()));
+				DECRYPTED_PROPERTY_SOURCE_NAME,
+				decrypt(environment.getPropertySources()));
 		if (!decrypted.getSource().isEmpty()) {
 			// We have some decrypted properties
 			insert(environment.getPropertySources(), decrypted);
@@ -91,8 +94,8 @@ public class EnvironmentDecryptApplicationInitializer implements
 				// initialized, so we can fire an EnvironmentChangeEvent there to rebind
 				// @ConfigurationProperties, in case they were encrypted.
 				insert(mutable.getPropertySources(), decrypted);
-				parent.publishEvent(new EnvironmentChangeEvent(decrypted.getSource()
-						.keySet()));
+				parent.publishEvent(
+						new EnvironmentChangeEvent(decrypted.getSource().keySet()));
 			}
 		}
 	}
@@ -112,7 +115,11 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 	public Map<String, Object> decrypt(PropertySources propertySources) {
 		Map<String, Object> overrides = new LinkedHashMap<String, Object>();
+		List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
 		for (PropertySource<?> source : propertySources) {
+			sources.add(0, source);
+		}
+		for (PropertySource<?> source : sources) {
 			decrypt(source, overrides);
 		}
 		return overrides;
@@ -128,14 +135,14 @@ public class EnvironmentDecryptApplicationInitializer implements
 				if (value.startsWith("{cipher}")) {
 					value = value.substring("{cipher}".length());
 					try {
-						value = encryptor.decrypt(value);
+						value = this.encryptor.decrypt(value);
 						if (logger.isDebugEnabled()) {
 							logger.debug("Decrypted: key=" + key);
 						}
 					}
 					catch (Exception e) {
 						String message = "Cannot decrypt: key=" + key;
-						if (failOnError) {
+						if (this.failOnError) {
 							throw new IllegalStateException(message, e);
 						}
 						if (logger.isDebugEnabled()) {
@@ -163,5 +170,5 @@ public class EnvironmentDecryptApplicationInitializer implements
 		}
 
 	}
-	
+
 }
