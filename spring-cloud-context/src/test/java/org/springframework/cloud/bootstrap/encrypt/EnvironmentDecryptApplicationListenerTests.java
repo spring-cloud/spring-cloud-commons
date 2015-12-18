@@ -15,46 +15,63 @@
  */
 package org.springframework.cloud.bootstrap.encrypt;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.springframework.boot.test.EnvironmentTestUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.security.crypto.encrypt.Encryptors;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dave Syer
  *
  */
 public class EnvironmentDecryptApplicationListenerTests {
-	
-	private EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(Encryptors.noOpText());
+
+	private EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
+			Encryptors.noOpText());
 
 	@Test
 	public void decryptCipherKey() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		EnvironmentTestUtils.addEnvironment(context, "foo: {cipher}bar");
-		listener.initialize(context);
+		this.listener.initialize(context);
 		assertEquals("bar", context.getEnvironment().getProperty("foo"));
 	}
 
-	@Test(expected=IllegalStateException.class)
-	public void errorOnDecrypt() {
-		listener = new EnvironmentDecryptApplicationInitializer(Encryptors.text("deadbeef", "AFFE37"));
+	@Test
+	public void propertySourcesOrderedCorrectly() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		EnvironmentTestUtils.addEnvironment(context, "foo: {cipher}bar");
-		listener.initialize(context);
+		context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
+				"test_override",
+				Collections.<String, Object> singletonMap("foo", "{cipher}spam")));
+		this.listener.initialize(context);
+		assertEquals("spam", context.getEnvironment().getProperty("foo"));
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void errorOnDecrypt() {
+		this.listener = new EnvironmentDecryptApplicationInitializer(
+				Encryptors.text("deadbeef", "AFFE37"));
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
+		EnvironmentTestUtils.addEnvironment(context, "foo: {cipher}bar");
+		this.listener.initialize(context);
 		assertEquals("bar", context.getEnvironment().getProperty("foo"));
 	}
 
 	@Test
 	public void errorOnDecryptWithEmpty() {
-		listener = new EnvironmentDecryptApplicationInitializer(Encryptors.text("deadbeef", "AFFE37"));
-		listener.setFailOnError(false);
+		this.listener = new EnvironmentDecryptApplicationInitializer(
+				Encryptors.text("deadbeef", "AFFE37"));
+		this.listener.setFailOnError(false);
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		EnvironmentTestUtils.addEnvironment(context, "foo: {cipher}bar");
-		listener.initialize(context);
+		this.listener.initialize(context);
 		// Empty is safest fallback for undecryptable cipher
 		assertEquals("", context.getEnvironment().getProperty("foo"));
 	}

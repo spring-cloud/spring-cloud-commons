@@ -15,8 +15,10 @@
  */
 package org.springframework.cloud.bootstrap.encrypt;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -154,7 +156,11 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 	public Map<String, Object> decrypt(PropertySources propertySources) {
 		Map<String, Object> overrides = new LinkedHashMap<String, Object>();
+		List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
 		for (PropertySource<?> source : propertySources) {
+			sources.add(0, source);
+		}
+		for (PropertySource<?> source : sources) {
 			decrypt(source, overrides);
 		}
 		return overrides;
