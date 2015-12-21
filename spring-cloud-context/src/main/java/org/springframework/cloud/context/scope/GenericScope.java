@@ -154,8 +154,8 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		if (this.lifecycle == null) {
 			this.lifecycle = new StandardBeanLifecycleDecorator(this.proxyTargetClass);
 		}
-		BeanLifecycleWrapper value = this.cache.put(name, new BeanLifecycleWrapper(name,
-				objectFactory, this.lifecycle));
+		BeanLifecycleWrapper value = this.cache.put(name,
+				new BeanLifecycleWrapper(name, objectFactory, this.lifecycle));
 		return value.getBean();
 	}
 
@@ -198,7 +198,8 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 				return parser.parseExpression(input);
 			}
 			catch (ParseException e) {
-				throw new IllegalArgumentException("Cannot parse expression: " + input, e);
+				throw new IllegalArgumentException("Cannot parse expression: " + input,
+						e);
 			}
 
 		}
@@ -240,8 +241,9 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 
 		}
 		else {
-			logger.warn("BeanFactory was not a DefaultListableBeanFactory, so RefreshScope beans "
-					+ "cannot be serialized reliably and passed to a remote JVM.");
+			logger.warn(
+					"BeanFactory was not a DefaultListableBeanFactory, so RefreshScope beans "
+							+ "cannot be serialized reliably and passed to a remote JVM.");
 		}
 
 	}
@@ -323,8 +325,12 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		@SuppressWarnings("unchecked")
 		public Object getBean() {
 			if (this.bean == null) {
-				this.bean = this.lifecycle.decorateBean(this.objectFactory.getObject(),
-						this.context);
+				synchronized (this.name) {
+					if (this.bean == null) {
+						this.bean = this.lifecycle.decorateBean(
+								this.objectFactory.getObject(), this.context);
+					}
+				}
 			}
 			return this.bean;
 		}

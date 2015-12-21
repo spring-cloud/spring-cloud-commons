@@ -35,7 +35,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeConcurrencyTests.TestConfiguration;
+import org.springframework.cloud.context.scope.refresh.RefreshScopeScaleTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -51,53 +51,50 @@ import static org.junit.Assert.assertTrue;
 
 @SpringApplicationConfiguration(classes = TestConfiguration.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-public class RefreshScopeConcurrencyTests {
+public class RefreshScopeScaleTests {
 
-	private static Log logger = LogFactory.getLog(RefreshScopeConcurrencyTests.class);
+	private static Log logger = LogFactory.getLog(RefreshScopeScaleTests.class);
 
-	private ExecutorService executor = Executors.newSingleThreadExecutor();
+	private ExecutorService executor = Executors.newFixedThreadPool(8);
 
 	@Autowired
-	private Service service;
+	private ExampleService service;
 
 	@Autowired
 	private TestProperties properties;
-
-	@Autowired
-	private org.springframework.cloud.context.scope.refresh.RefreshScope scope;
 
 	@Test
 	@Repeat(10)
 	@DirtiesContext
 	public void testConcurrentRefresh() throws Exception {
 
-		assertEquals("Hello scope!", this.service.getMessage());
+		// overload the thread pool and try to force Spring to create too many instances
+		int n = 80;
+		ExampleService.count = 0;
 		this.properties.setMessage("Foo");
 		this.properties.setDelay(500);
-		final CountDownLatch latch = new CountDownLatch(1);
-		Future<String> result = this.executor.submit(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				logger.debug("Background started.");
-				try {
-					return RefreshScopeConcurrencyTests.this.service.getMessage();
+		final CountDownLatch latch = new CountDownLatch(n);
+		Future<String> result = null;
+		for (int i = 0; i < n; i++) {
+			result = this.executor.submit(new Callable<String>() {
+				@Override
+				public String call() throws Exception {
+					logger.debug("Background started.");
+					try {
+						return RefreshScopeScaleTests.this.service.getMessage();
+					}
+					finally {
+						latch.countDown();
+						logger.debug("Background done.");
+					}
 				}
-				finally {
-					latch.countDown();
-					logger.debug("Background done.");
-				}
-			}
-		});
-		assertTrue(latch.await(1500, TimeUnit.MILLISECONDS));
-		logger.info("Refreshing");
-		this.scope.refreshAll();
+			});
+		}
+		assertTrue(latch.await(15000, TimeUnit.MILLISECONDS));
 		assertEquals("Foo", this.service.getMessage());
-		/*
-		 * This is the most important assertion: we don't want a null value because that
-		 * means the bean was destroyed and not re-initialized before we accessed it.
-		 */
 		assertNotNull(result.get());
-		assertEquals("Hello scope!", result.get());
+		assertEquals("Foo", result.get());
+		assertEquals(1, ExampleService.count);
 	}
 
 	public static interface Service {
@@ -113,6 +110,7 @@ public class RefreshScopeConcurrencyTests {
 
 		private String message = null;
 		private volatile long delay = 0;
+		private static volatile int count;
 
 		public void setDelay(long delay) {
 			this.delay = delay;
@@ -120,6 +118,13 @@ public class RefreshScopeConcurrencyTests {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
+			ExampleService.count++;
+			try {
+				Thread.sleep(this.delay);
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
 			logger.debug("Initializing message: " + this.message);
 		}
 
@@ -136,13 +141,6 @@ public class RefreshScopeConcurrencyTests {
 
 		@Override
 		public String getMessage() {
-			logger.debug("Getting message: " + this.message);
-			try {
-				Thread.sleep(this.delay);
-			}
-			catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
 			logger.info("Returning message: " + this.message);
 			return this.message;
 		}
