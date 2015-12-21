@@ -16,12 +16,15 @@
 
 package org.springframework.cloud.util;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.net.InetAddress;
+import java.util.Arrays;
 
 import org.junit.Test;
 import org.springframework.cloud.util.InetUtils.HostInfo;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dave Syer
@@ -31,23 +34,51 @@ public class InetUtilsTests {
 
 	@Test
 	public void testGetFirstNonLoopbackHostInfo() {
+		assertNotNull(new InetUtils(new InetUtilsProperties())
+				.findFirstNonLoopbackHostInfo());
 		assertNotNull(InetUtils.getFirstNonLoopbackHostInfo());
 	}
 
 	@Test
 	public void testGetFirstNonLoopbackAddress() {
+		assertNotNull(new InetUtils(new InetUtilsProperties())
+				.findFirstNonLoopbackAddress());
 		assertNotNull(InetUtils.getFirstNonLoopbackAddress());
 	}
 
 	@Test
 	public void testConvert() throws Exception {
+		assertNotNull(new InetUtils(new InetUtilsProperties()).convertAddress(InetAddress
+				.getByName("localhost")));
 		assertNotNull(InetUtils.convert(InetAddress.getByName("localhost")));
 	}
 
 	@Test
 	public void testHostInfo() throws Exception {
-		HostInfo info = InetUtils.getFirstNonLoopbackHostInfo();
+		HostInfo info = new InetUtils(new InetUtilsProperties())
+				.findFirstNonLoopbackHostInfo();
 		assertNotNull(info.getIpAddressAsInt());
+
+		info = InetUtils.getFirstNonLoopbackHostInfo();
+		assertNotNull(info.getIpAddressAsInt());
+	}
+
+	@Test
+	public void testIgnoreInterface() {
+		InetUtilsProperties properties = new InetUtilsProperties();
+		// These interfaces are not usable for "outside" communication, so they're
+		// probably not a good fit for the simple strategy of getting the first "usable"
+		// interface.
+		// https://docs.docker.com/v1.7/articles/networking/
+		properties.setIgnoredInterfaces(Arrays.asList("docker0", "veth.*"));
+		InetUtils inetUtils = new InetUtils(properties);
+
+		assertTrue("docker0 not ignored", inetUtils.ignoreInterface("docker0"));
+		assertTrue("vethAQI2QT0 not ignored", inetUtils.ignoreInterface("vethAQI2QT"));
+		assertFalse("docker1 ignored", inetUtils.ignoreInterface("docker1"));
+
+		assertFalse("docker0 ignored",
+				new InetUtils(new InetUtilsProperties()).ignoreInterface("docker0"));
 	}
 
 }
