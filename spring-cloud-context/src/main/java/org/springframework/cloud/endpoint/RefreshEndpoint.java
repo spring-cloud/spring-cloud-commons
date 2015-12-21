@@ -16,13 +16,16 @@
 
 package org.springframework.cloud.endpoint;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -49,12 +52,12 @@ import org.springframework.web.context.support.StandardServletEnvironment;
 @ManagedResource
 public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 
-	private Set<String> standardSources = new HashSet<String>(Arrays.asList(
-			StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
-			StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-			StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME,
-			StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME,
-			StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
+	private Set<String> standardSources = new HashSet<String>(
+			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
+					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+					StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME,
+					StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME,
+					StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
 
 	private ConfigurableApplicationContext context;
 
@@ -68,8 +71,8 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 
 	@ManagedOperation
 	public synchronized String[] refresh() {
-		Map<String, Object> before = extract(this.context.getEnvironment()
-				.getPropertySources());
+		Map<String, Object> before = extract(
+				this.context.getEnvironment().getPropertySources());
 		addConfigFilesToEnvironment();
 		Set<String> keys = changes(before,
 				extract(this.context.getEnvironment().getPropertySources())).keySet();
@@ -81,23 +84,33 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 	private void addConfigFilesToEnvironment() {
 		ConfigurableApplicationContext capture = null;
 		try {
-			StandardEnvironment environment = copyEnvironment(this.context.getEnvironment());
-			capture = new SpringApplicationBuilder(Empty.class).showBanner(false)
+			StandardEnvironment environment = copyEnvironment(
+					this.context.getEnvironment());
+			capture = new SpringApplicationBuilder(Empty.class).bannerMode(Mode.OFF)
 					.web(false).environment(environment).run();
 			MutablePropertySources target = this.context.getEnvironment()
 					.getPropertySources();
+			String targetName = null;
 			for (PropertySource<?> source : environment.getPropertySources()) {
 				String name = source.getName();
+				if (target.contains(name)) {
+					targetName = name;
+				}
 				if (!this.standardSources.contains(name)) {
 					if (target.contains(name)) {
 						target.replace(name, source);
 					}
 					else {
-						if (target.contains("defaultProperties")) {
-							target.addBefore("defaultProperties", source);
+						if (targetName != null) {
+							target.addAfter(targetName, source);
 						}
 						else {
-							target.addLast(source);
+							if (target.contains("defaultProperties")) {
+								target.addBefore("defaultProperties", source);
+							}
+							else {
+								target.addLast(source);
+							}
 						}
 					}
 				}
@@ -118,16 +131,15 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 		}
 	}
 
-	// Don't use ConfigurableEnvironment.merge() in case there are clashes with property source names
+	// Don't use ConfigurableEnvironment.merge() in case there are clashes with property
+	// source names
 	private StandardEnvironment copyEnvironment(ConfigurableEnvironment input) {
 		StandardEnvironment environment = new StandardEnvironment();
-		MutablePropertySources capturedPropertySources = environment
-				.getPropertySources();
+		MutablePropertySources capturedPropertySources = environment.getPropertySources();
 		for (PropertySource<?> source : capturedPropertySources) {
 			capturedPropertySources.remove(source.getName());
 		}
-		for (PropertySource<?> source : input
-				.getPropertySources()) {
+		for (PropertySource<?> source : input.getPropertySources()) {
 			capturedPropertySources.addLast(source);
 		}
 		environment.setActiveProfiles(input.getActiveProfiles());
@@ -171,9 +183,13 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 
 	private Map<String, Object> extract(MutablePropertySources propertySources) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		for (PropertySource<?> parent : propertySources) {
-			if (!this.standardSources.contains(parent.getName())) {
-				extract(parent, result);
+		List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
+		for (PropertySource<?> source : propertySources) {
+			sources.add(0, source);
+		}
+		for (PropertySource<?> source : sources) {
+			if (!this.standardSources.contains(source.getName())) {
+				extract(source, result);
 			}
 		}
 		return result;
@@ -182,8 +198,12 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 	private void extract(PropertySource<?> parent, Map<String, Object> result) {
 		if (parent instanceof CompositePropertySource) {
 			try {
+				List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
 				for (PropertySource<?> source : ((CompositePropertySource) parent)
 						.getPropertySources()) {
+					sources.add(0, source);
+				}
+				for (PropertySource<?> source : sources) {
 					extract(source, result);
 				}
 			}

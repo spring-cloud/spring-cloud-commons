@@ -16,17 +16,17 @@
 
 package org.springframework.cloud.endpoint;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
 import org.junit.Test;
+import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.test.EnvironmentTestUtils;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
@@ -36,6 +36,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dave Syer
@@ -47,15 +50,42 @@ public class RefreshEndpointTests {
 
 	@After
 	public void close() {
-		if (this.context!=null) {
+		if (this.context != null) {
 			this.context.close();
 		}
 	}
 
 	@Test
+	public void keysComputedWhenAdded() throws Exception {
+		this.context = new SpringApplicationBuilder(Empty.class).web(false)
+				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
+				.run();
+		RefreshScope scope = new RefreshScope();
+		scope.setApplicationContext(this.context);
+		EnvironmentTestUtils.addEnvironment(this.context, "spring.profiles.active=local");
+		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
+		Collection<String> keys = endpoint.invoke();
+		assertTrue("Wrong keys: " + keys, keys.contains("added"));
+	}
+
+	@Test
+	public void keysComputedWhenOveridden() throws Exception {
+		this.context = new SpringApplicationBuilder(Empty.class).web(false)
+				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
+				.run();
+		RefreshScope scope = new RefreshScope();
+		scope.setApplicationContext(this.context);
+		EnvironmentTestUtils.addEnvironment(this.context,
+				"spring.profiles.active=override");
+		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
+		Collection<String> keys = endpoint.invoke();
+		assertTrue("Wrong keys: " + keys, keys.contains("message"));
+	}
+
+	@Test
 	public void eventsPublishedInOrder() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class)
-				.web(false).showBanner(false).run();
+		this.context = new SpringApplicationBuilder(Empty.class).web(false)
+				.bannerMode(Mode.OFF).run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
@@ -69,7 +99,7 @@ public class RefreshEndpointTests {
 	@Test
 	public void shutdownHooksCleaned() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(Empty.class)
-				.web(false).showBanner(false).run();
+				.web(false).bannerMode(Mode.OFF).run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(context);
 		RefreshEndpoint endpoint = new RefreshEndpoint(context, scope);
@@ -92,10 +122,12 @@ public class RefreshEndpointTests {
 	@Configuration
 	protected static class Empty {
 		private List<ApplicationEvent> events = new ArrayList<ApplicationEvent>();
+
 		@EventListener(EnvironmentChangeEvent.class)
 		public void changed(EnvironmentChangeEvent event) {
 			this.events.add(event);
 		}
+
 		@EventListener(RefreshScopeRefreshedEvent.class)
 		public void refreshed(RefreshScopeRefreshedEvent event) {
 			this.events.add(event);
