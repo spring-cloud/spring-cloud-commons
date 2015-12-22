@@ -16,9 +16,12 @@
 
 package org.springframework.cloud.client;
 
-import java.net.URI;
-
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
+import java.net.URI;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Default implementation of {@link ServiceInstance}.
@@ -26,6 +29,7 @@ import lombok.Data;
  * @author Spencer Gibb
  */
 @Data
+@RequiredArgsConstructor
 public class DefaultServiceInstance implements ServiceInstance {
 
 	private final String serviceId;
@@ -36,9 +40,20 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private final boolean secure;
 
+	private final Map<String, String> metadata;
+
+	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure) {
+		this(serviceId, host, port, secure, Collections.<String, String>emptyMap());
+	}
+
 	@Override
 	public URI getUri() {
 		return getUri(this);
+	}
+
+	@Override
+	public Map<String, String> getMetadata() {
+		return metadata;
 	}
 
 	/**

@@ -16,13 +16,7 @@
 
 package org.springframework.cloud.client.discovery.noop;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import javax.annotation.PostConstruct;
-
 import lombok.extern.apachecommons.CommonsLog;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -39,6 +33,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.util.ClassUtils;
+
+import javax.annotation.PostConstruct;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * @author Dave Syer
@@ -71,8 +69,8 @@ public class NoopDiscoveryClientAutoConfiguration implements
 			log.error("Cannot get host info", e);
 		}
 		int port = findPort();
-		this.serviceInstance = new DefaultServiceInstance(this.environment.getProperty(
-				"spring.application.name", "application"), host, port, false);
+		this.serviceInstance = new DefaultServiceInstance(
+				this.environment.getProperty("spring.application.name", "application"), host, port, false);
 	}
 
 	private int findPort() {
