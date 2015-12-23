@@ -339,3 +339,18 @@ public class MyClass {
     }
 }
 ----
+
+[[ignore-network-interfaces]]
+=== Ignore Network Interfaces
+
+Sometimes it is useful to ignore certain named network interfaces so they can be excluded from Service Discovery registration (eg. running in a Docker container). A list of regular expressions can be set that will cause the desired network interfaces to be ignored. The following configuration will ignore the "docker0" interface and all interfaces that start with "veth".
+
+.application.yml
+----
+spring:
+  cloud:
+    inetutils:
+      ignoredInterfaces:
+        - docker0
+        - veth.*
+----
