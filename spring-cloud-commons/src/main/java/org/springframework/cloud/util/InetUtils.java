@@ -161,13 +161,13 @@ public class InetUtils {
 					.getNetworkInterfaces(); enumNic.hasMoreElements();) {
 				NetworkInterface ifc = enumNic.nextElement();
 				if (ifc.isUp()) {
-					log.debug("Testing interface: " + ifc.getDisplayName());
+					log.trace("Testing interface: " + ifc.getDisplayName());
 					for (Enumeration<InetAddress> enumAddr = ifc
 							.getInetAddresses(); enumAddr.hasMoreElements();) {
 						InetAddress address = enumAddr.nextElement();
 						if (address instanceof Inet4Address
 								&& !address.isLoopbackAddress()) {
-							log.debug("Found non-loopback interface: "
+							log.trace("Found non-loopback interface: "
 									+ ifc.getDisplayName());
 							return address;
 						}
