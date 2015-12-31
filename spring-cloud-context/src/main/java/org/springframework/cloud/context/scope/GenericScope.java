@@ -258,6 +258,10 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		return new IllegalStateException(throwable);
 	}
 
+	protected String getName() {
+		return this.name;
+	}
+
 	private static class BeanLifecycleWrapperCache {
 
 		private final ScopeCache cache;

@@ -16,9 +16,14 @@ package org.springframework.cloud.context.scope.refresh;
 import java.io.Serializable;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.cloud.context.scope.GenericScope;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
@@ -64,16 +69,48 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  *
  */
 @ManagedResource
-public class RefreshScope extends GenericScope implements ApplicationContextAware {
+public class RefreshScope extends GenericScope
+		implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
 
 	private ApplicationContext context;
+	private BeanDefinitionRegistry registry;
+	private boolean eager = true;
 
 	/**
 	 * Create a scope instance and give it the default name: "refresh".
 	 */
 	public RefreshScope() {
-		super();
 		super.setName("refresh");
+	}
+
+	/**
+	 * Flag to determine whether all beans in refresh scope should be instantiated eagerly
+	 * on startup. Default true.
+	 *
+	 * @param eager the flag to set
+	 */
+	public void setEager(boolean eager) {
+		this.eager = eager;
+	}
+
+	@Override
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
+			throws BeansException {
+		this.registry = registry;
+	}
+
+	@EventListener
+	public void start(ContextRefreshedEvent event) {
+		if (event.getApplicationContext() == this.context) {
+			if (this.eager && this.registry != null) {
+				for (String name : this.context.getBeanDefinitionNames()) {
+					BeanDefinition definition = this.registry.getBeanDefinition(name);
+					if (this.getName().equals(definition.getScope())) {
+						this.context.getBean(name);
+					}
+				}
+			}
+		}
 	}
 
 	@ManagedOperation(description = "Dispose of the current instance of bean name provided and force a refresh on next method execution.")

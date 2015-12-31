@@ -15,17 +15,13 @@
  */
 package org.springframework.cloud.context.scope.refresh;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,70 +31,96 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeScaleTests.TestConfiguration;
+import org.springframework.cloud.context.scope.GenericScope;
+import org.springframework.cloud.context.scope.refresh.RefreshScopeLazyIntegrationTests.TestConfiguration;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 @SpringApplicationConfiguration(classes = TestConfiguration.class)
 @RunWith(SpringJUnit4ClassRunner.class)
-public class RefreshScopeScaleTests {
-
-	private static Log logger = LogFactory.getLog(RefreshScopeScaleTests.class);
-
-	private ExecutorService executor = Executors.newFixedThreadPool(8);
+public class RefreshScopeLazyIntegrationTests {
 
 	@Autowired
-	org.springframework.cloud.context.scope.refresh.RefreshScope scope;
-
-	@Autowired
-	private ExampleService service;
+	private Service service;
 
 	@Autowired
 	private TestProperties properties;
 
-	@Test
-	@Repeat(10)
-	@DirtiesContext
-	public void testConcurrentRefresh() throws Exception {
+	@Autowired
+	private org.springframework.cloud.context.scope.refresh.RefreshScope scope;
 
-		// overload the thread pool and try to force Spring to create too many instances
-		int n = 80;
-		ExampleService.count = 0;
+	@Before
+	public void init() {
+		// The RefreshScope is lazy (eager=false) so it won't have been instantiated yet
+		assertEquals(0, ExampleService.getInitCount());
+		ExampleService.reset();
+	}
+
+	@After
+	public void close() {
+		ExampleService.reset();
+	}
+
+	@Test
+	@DirtiesContext
+	public void testSimpleProperties() throws Exception {
+		assertEquals("Hello scope!", this.service.getMessage());
+		assertTrue(this.service instanceof Advised);
+		// Change the dynamic property source...
 		this.properties.setMessage("Foo");
-		this.properties.setDelay(500);
+		// ...but don't refresh, so the bean stays the same:
+		assertEquals("Hello scope!", this.service.getMessage());
+		assertEquals(1, ExampleService.getInitCount());
+		assertEquals(0, ExampleService.getDestroyCount());
+	}
+
+	@Test
+	@DirtiesContext
+	public void testRefresh() throws Exception {
+		assertEquals("Hello scope!", this.service.getMessage());
+		String id1 = this.service.toString();
+		// Change the dynamic property source...
+		this.properties.setMessage("Foo");
+		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refreshAll();
-		final CountDownLatch latch = new CountDownLatch(n);
-		Future<String> result = null;
-		for (int i = 0; i < n; i++) {
-			result = this.executor.submit(new Callable<String>() {
-				@Override
-				public String call() throws Exception {
-					logger.debug("Background started.");
-					try {
-						return RefreshScopeScaleTests.this.service.getMessage();
-					}
-					finally {
-						latch.countDown();
-						logger.debug("Background done.");
-					}
-				}
-			});
-		}
-		assertTrue(latch.await(15000, TimeUnit.MILLISECONDS));
+		String id2 = this.service.toString();
 		assertEquals("Foo", this.service.getMessage());
-		assertNotNull(result.get());
-		assertEquals("Foo", result.get());
-		assertEquals(1, ExampleService.count);
+		assertEquals(2, ExampleService.getInitCount());
+		assertEquals(1, ExampleService.getDestroyCount());
+		assertNotSame(id1, id2);
+		assertNotNull(ExampleService.event);
+		assertEquals(RefreshScopeRefreshedEvent.DEFAULT_NAME,
+				ExampleService.event.getName());
+	}
+
+	@Test
+	@DirtiesContext
+	public void testRefreshBean() throws Exception {
+		assertEquals("Hello scope!", this.service.getMessage());
+		String id1 = this.service.toString();
+		// Change the dynamic property source...
+		this.properties.setMessage("Foo");
+		// ...and then refresh, so the bean is re-initialized:
+		this.scope.refresh("service");
+		String id2 = this.service.toString();
+		assertEquals("Foo", this.service.getMessage());
+		assertEquals(2, ExampleService.getInitCount());
+		assertEquals(1, ExampleService.getDestroyCount());
+		assertNotSame(id1, id2);
+		assertNotNull(ExampleService.event);
+		assertEquals(GenericScope.SCOPED_TARGET_PREFIX + "service",
+				ExampleService.event.getName());
 	}
 
 	public static interface Service {
@@ -107,14 +129,17 @@ public class RefreshScopeScaleTests {
 
 	}
 
-	public static class ExampleService
-			implements Service, InitializingBean, DisposableBean {
+	public static class ExampleService implements Service, InitializingBean,
+			DisposableBean, ApplicationListener<RefreshScopeRefreshedEvent> {
 
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 
+		private volatile static int initCount = 0;
+		private volatile static int destroyCount = 0;
+		private volatile static RefreshScopeRefreshedEvent event;
+
 		private String message = null;
 		private volatile long delay = 0;
-		private static volatile int count;
 
 		public void setDelay(long delay) {
 			this.delay = delay;
@@ -122,20 +147,29 @@ public class RefreshScopeScaleTests {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
-			ExampleService.count++;
-			try {
-				Thread.sleep(this.delay);
-			}
-			catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
 			logger.debug("Initializing message: " + this.message);
+			initCount++;
 		}
 
 		@Override
 		public void destroy() throws Exception {
 			logger.debug("Destroying message: " + this.message);
+			destroyCount++;
 			this.message = null;
+		}
+
+		public static void reset() {
+			initCount = 0;
+			destroyCount = 0;
+			event = null;
+		}
+
+		public static int getInitCount() {
+			return initCount;
+		}
+
+		public static int getDestroyCount() {
+			return destroyCount;
 		}
 
 		public void setMessage(String message) {
@@ -145,10 +179,21 @@ public class RefreshScopeScaleTests {
 
 		@Override
 		public String getMessage() {
+			logger.debug("Getting message: " + this.message);
+			try {
+				Thread.sleep(this.delay);
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
 			logger.info("Returning message: " + this.message);
 			return this.message;
 		}
 
+		@Override
+		public void onApplicationEvent(RefreshScopeRefreshedEvent e) {
+			event = e;
+		}
 	}
 
 	@Configuration
@@ -159,6 +204,13 @@ public class RefreshScopeScaleTests {
 
 		@Autowired
 		private TestProperties properties;
+
+		@Bean
+		public static org.springframework.cloud.context.scope.refresh.RefreshScope refreshScope() {
+			org.springframework.cloud.context.scope.refresh.RefreshScope scope = new org.springframework.cloud.context.scope.refresh.RefreshScope();
+			scope.setEager(false);
+			return scope;
+		}
 
 		@Bean
 		@RefreshScope

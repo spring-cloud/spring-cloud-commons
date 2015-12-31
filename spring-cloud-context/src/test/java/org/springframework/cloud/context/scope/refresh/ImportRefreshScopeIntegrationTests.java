@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.context.scope.refresh;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +27,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import static org.junit.Assert.assertEquals;
+
 @SpringApplicationConfiguration(classes = TestConfiguration.class)
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ImportRefreshScopeIntegrationTests {
-	
+
 	@Autowired
 	private ConfigurableListableBeanFactory beanFactory;
 
@@ -40,13 +40,14 @@ public class ImportRefreshScopeIntegrationTests {
 	private ExampleService service;
 
 	@Autowired
-	private org.springframework.cloud.context.scope.refresh.RefreshScope scope;
+	org.springframework.cloud.context.scope.refresh.RefreshScope scope;
 
 	@Test
 	public void testSimpleProperties() throws Exception {
-		assertEquals("Hello scope!", service.getMessage());
-		assertEquals("refresh", beanFactory.getBeanDefinition("scopedTarget.service").getScope());
-		assertEquals("Hello scope!", service.getMessage());
+		assertEquals("Hello scope!", this.service.getMessage());
+		assertEquals("refresh",
+				this.beanFactory.getBeanDefinition("scopedTarget.service").getScope());
+		assertEquals("Hello scope!", this.service.getMessage());
 	}
 
 	@Configuration("service")

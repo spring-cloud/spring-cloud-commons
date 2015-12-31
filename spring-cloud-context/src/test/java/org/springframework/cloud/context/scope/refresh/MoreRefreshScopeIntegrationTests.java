@@ -16,13 +16,9 @@
 
 package org.springframework.cloud.context.scope.refresh;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,17 +32,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.EnvironmentTestUtils;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
-import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests.TestConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @SpringApplicationConfiguration(classes = TestConfiguration.class)
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -56,9 +57,6 @@ public class MoreRefreshScopeIntegrationTests {
 	private TestService service;
 
 	@Autowired
-	private TestProperties properties;
-
-	@Autowired
 	private org.springframework.cloud.context.scope.refresh.RefreshScope scope;
 
 	@Autowired
@@ -66,34 +64,40 @@ public class MoreRefreshScopeIntegrationTests {
 
 	@Before
 	public void init() {
+		assertEquals(1, TestService.getInitCount());
+		TestService.reset();
+	}
+
+	@After
+	public void close() {
 		TestService.reset();
 	}
 
 	@Test
 	@DirtiesContext
 	public void testSimpleProperties() throws Exception {
-		assertEquals("Hello scope!", service.getMessage());
-		assertTrue(service instanceof Advised);
+		assertEquals("Hello scope!", this.service.getMessage());
+		assertTrue(this.service instanceof Advised);
 		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(environment, "message:Foo");
+		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
 		// ...but don't refresh, so the bean stays the same:
-		assertEquals("Hello scope!", service.getMessage());
-		assertEquals(1, TestService.getInitCount());
+		assertEquals("Hello scope!", this.service.getMessage());
+		assertEquals(0, TestService.getInitCount());
 		assertEquals(0, TestService.getDestroyCount());
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefresh() throws Exception {
-		assertEquals("Hello scope!", service.getMessage());
-		String id1 = service.toString();
+		assertEquals("Hello scope!", this.service.getMessage());
+		String id1 = this.service.toString();
 		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(environment, "message:Foo");
+		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
 		// ...and then refresh, so the bean is re-initialized:
-		scope.refreshAll();
-		String id2 = service.toString();
-		assertEquals("Foo", service.getMessage());
-		assertEquals(2, TestService.getInitCount());
+		this.scope.refreshAll();
+		String id2 = this.service.toString();
+		assertEquals("Foo", this.service.getMessage());
+		assertEquals(1, TestService.getInitCount());
 		assertEquals(1, TestService.getDestroyCount());
 		assertNotSame(id1, id2);
 	}
@@ -101,23 +105,24 @@ public class MoreRefreshScopeIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testRefreshFails() throws Exception {
-		assertEquals("Hello scope!", service.getMessage());
+		assertEquals("Hello scope!", this.service.getMessage());
 		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(environment, "message:Foo", "delay:foo");
+		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo", "delay:foo");
 		// ...and then refresh, so the bean is re-initialized:
-		scope.refreshAll();
+		this.scope.refreshAll();
 		try {
 			// If a refresh fails (e.g. a binding error in this case) the application is
 			// basically hosed.
-			assertEquals("Hello scope!", service.getMessage());
+			assertEquals("Hello scope!", this.service.getMessage());
 			fail("expected BeanCreationException");
-		} catch (BeanCreationException e) {
+		}
+		catch (BeanCreationException e) {
 		}
 		// But we can fix it by fixing the binding error:
-		EnvironmentTestUtils.addEnvironment(environment, "delay:0");
+		EnvironmentTestUtils.addEnvironment(this.environment, "delay:0");
 		// ...and then refresh, so the bean is re-initialized:
-		scope.refreshAll();
-		assertEquals("Foo", service.getMessage());
+		this.scope.refreshAll();
+		assertEquals("Foo", this.service.getMessage());
 	}
 
 	public static class TestService implements InitializingBean, DisposableBean {
@@ -136,15 +141,17 @@ public class MoreRefreshScopeIntegrationTests {
 			this.delay = delay;
 		}
 
+		@Override
 		public void afterPropertiesSet() throws Exception {
-			logger.debug("Initializing message: " + message);
+			logger.debug("Initializing message: " + this.message);
 			initCount++;
 		}
 
+		@Override
 		public void destroy() throws Exception {
-			logger.debug("Destroying message: " + message);
+			logger.debug("Destroying message: " + this.message);
 			destroyCount++;
-			message = null;
+			this.message = null;
 		}
 
 		public static void reset() {
@@ -166,21 +173,23 @@ public class MoreRefreshScopeIntegrationTests {
 		}
 
 		public String getMessage() {
-			logger.debug("Getting message: " + message);
+			logger.debug("Getting message: " + this.message);
 			try {
-				Thread.sleep(delay);
-			} catch (InterruptedException e) {
+				Thread.sleep(this.delay);
+			}
+			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			logger.info("Returning message: " + message);
-			return message;
+			logger.info("Returning message: " + this.message);
+			return this.message;
 		}
 
 	}
 
 	@Configuration
 	@EnableConfigurationProperties
-	@Import({ RefreshAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
+	@Import({ RefreshAutoConfiguration.class,
+			PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 
 		@Bean
@@ -210,7 +219,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 		@ManagedAttribute
 		public String getMessage() {
-			return message;
+			return this.message;
 		}
 
 		public void setMessage(String message) {
@@ -219,7 +228,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 		@ManagedAttribute
 		public int getDelay() {
-			return delay;
+			return this.delay;
 		}
 
 		public void setDelay(int delay) {
