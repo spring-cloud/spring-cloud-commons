@@ -31,16 +31,15 @@ public class InetUtils {
 
 	public InetUtils(final InetUtilsProperties properties) {
 		this.properties = properties;
-		this.executorService = Executors
-				.newSingleThreadExecutor(new ThreadFactory() {
-					@Override
-					public Thread newThread(Runnable r) {
-						Thread thread = new Thread(r);
-						thread.setName(properties.getExecutorThreadName());
-						thread.setDaemon(true);
-						return thread;
-					}
-				});
+		this.executorService = Executors.newSingleThreadExecutor(new ThreadFactory() {
+			@Override
+			public Thread newThread(Runnable r) {
+				Thread thread = new Thread(r);
+				thread.setName(properties.getExecutorThreadName());
+				thread.setDaemon(true);
+				return thread;
+			}
+		});
 	}
 
 	public HostInfo findFirstNonLoopbackHostInfo() {
@@ -60,14 +59,17 @@ public class InetUtils {
 					.getNetworkInterfaces(); nics.hasMoreElements();) {
 				NetworkInterface ifc = nics.nextElement();
 				if (ifc.isUp()) {
-					log.debug("Testing interface: " + ifc.getDisplayName());
+					log.trace("Testing interface: " + ifc.getDisplayName());
 
 					// @formatter:off
 					if (!ignoreInterface(ifc.getDisplayName())) {
-						for (Enumeration<InetAddress> addrs = ifc .getInetAddresses(); addrs.hasMoreElements(); ) {
+						for (Enumeration<InetAddress> addrs = ifc
+								.getInetAddresses(); addrs.hasMoreElements();) {
 							InetAddress address = addrs.nextElement();
-							if (address instanceof Inet4Address && !address.isLoopbackAddress()) {
-								log.debug("Found non-loopback interface: " + ifc.getDisplayName());
+							if (address instanceof Inet4Address
+									&& !address.isLoopbackAddress()) {
+								log.trace("Found non-loopback interface: "
+										+ ifc.getDisplayName());
 								return address;
 							}
 						}
@@ -93,7 +95,7 @@ public class InetUtils {
 	boolean ignoreInterface(String interfaceName) {
 		for (String regex : this.properties.getIgnoredInterfaces()) {
 			if (interfaceName.matches(regex)) {
-				log.debug("Ignoring interface: " + interfaceName);
+				log.trace("Ignoring interface: " + interfaceName);
 				return true;
 			}
 		}
