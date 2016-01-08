@@ -56,7 +56,8 @@ public class LoadBalancerAutoConfiguration {
 		return new RestTemplateCustomizer() {
 			@Override
 			public void customize(RestTemplate restTemplate) {
-				List<ClientHttpRequestInterceptor> list = new ArrayList<>();
+				List<ClientHttpRequestInterceptor> list = new ArrayList<>(
+						restTemplate.getInterceptors());
 				list.add(loadBalancerInterceptor);
 				restTemplate.setInterceptors(list);
 			}

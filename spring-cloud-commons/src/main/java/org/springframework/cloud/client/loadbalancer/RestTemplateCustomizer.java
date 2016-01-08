@@ -6,5 +6,5 @@ import org.springframework.web.client.RestTemplate;
  * @author Spencer Gibb
  */
 public interface RestTemplateCustomizer {
-    void customize(RestTemplate restTemplate);
+	void customize(RestTemplate restTemplate);
 }
