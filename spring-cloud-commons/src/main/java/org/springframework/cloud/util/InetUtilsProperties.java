@@ -17,11 +17,6 @@ public class InetUtilsProperties {
 	public static final String PREFIX = "spring.cloud.inetutils";
 
 	/**
-	 * Name of InetUtils executor thread
-	 */
-	private String executorThreadName = PREFIX;
-
-	/**
 	 * The default hostname. Used in case of errors.
 	 */
 	private String defaultHostname = "localhost";

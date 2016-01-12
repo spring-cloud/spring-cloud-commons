@@ -34,22 +34,20 @@ public class InetUtilsTests {
 
 	@Test
 	public void testGetFirstNonLoopbackHostInfo() {
-		assertNotNull(new InetUtils(new InetUtilsProperties())
-				.findFirstNonLoopbackHostInfo());
-		assertNotNull(InetUtils.getFirstNonLoopbackHostInfo());
+		assertNotNull(
+				new InetUtils(new InetUtilsProperties()).findFirstNonLoopbackHostInfo());
 	}
 
 	@Test
 	public void testGetFirstNonLoopbackAddress() {
-		assertNotNull(new InetUtils(new InetUtilsProperties())
-				.findFirstNonLoopbackAddress());
-		assertNotNull(InetUtils.getFirstNonLoopbackAddress());
+		assertNotNull(
+				new InetUtils(new InetUtilsProperties()).findFirstNonLoopbackAddress());
 	}
 
 	@Test
 	public void testConvert() throws Exception {
-		assertNotNull(new InetUtils(new InetUtilsProperties()).convertAddress(InetAddress
-				.getByName("localhost")));
+		assertNotNull(new InetUtils(new InetUtilsProperties())
+				.convertAddress(InetAddress.getByName("localhost")));
 		assertNotNull(InetUtils.convert(InetAddress.getByName("localhost")));
 	}
 
@@ -57,9 +55,6 @@ public class InetUtilsTests {
 	public void testHostInfo() throws Exception {
 		HostInfo info = new InetUtils(new InetUtilsProperties())
 				.findFirstNonLoopbackHostInfo();
-		assertNotNull(info.getIpAddressAsInt());
-
-		info = InetUtils.getFirstNonLoopbackHostInfo();
 		assertNotNull(info.getIpAddressAsInt());
 	}
 

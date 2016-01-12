@@ -1,5 +1,6 @@
 package org.springframework.cloud.util;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -14,32 +15,54 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.util.SystemPropertyUtils;
-
 import lombok.Data;
-import lombok.SneakyThrows;
 import lombok.extern.apachecommons.CommonsLog;
 
 /**
  * @author Spencer Gibb
  */
 @CommonsLog
-public class InetUtils {
+public class InetUtils implements Closeable {
 
-	private final ExecutorService executorService;
+	// TODO: maybe shutdown the thread pool if it isn't being used?
+	private static ExecutorService executorService;
 	private final InetUtilsProperties properties;
+	private static final InetUtils instance = new InetUtils(new InetUtilsProperties());
 
 	public InetUtils(final InetUtilsProperties properties) {
 		this.properties = properties;
-		this.executorService = Executors.newSingleThreadExecutor(new ThreadFactory() {
-			@Override
-			public Thread newThread(Runnable r) {
-				Thread thread = new Thread(r);
-				thread.setName(properties.getExecutorThreadName());
-				thread.setDaemon(true);
-				return thread;
+	}
+
+	@Override
+	public void close() throws IOException {
+		if (executorService != null) {
+			synchronized (InetUtils.class) {
+				if (executorService != null) {
+					executorService.shutdown();
+					executorService = null;
+				}
 			}
-		});
+		}
+	}
+
+	private ExecutorService getExecutor() {
+		if (executorService == null) {
+			synchronized (InetUtils.class) {
+				if (executorService == null) {
+					executorService = Executors
+							.newSingleThreadExecutor(new ThreadFactory() {
+								@Override
+								public Thread newThread(Runnable r) {
+									Thread thread = new Thread(r);
+									thread.setName(InetUtilsProperties.PREFIX);
+									thread.setDaemon(true);
+									return thread;
+								}
+							});
+				}
+			}
+		}
+		return executorService;
 	}
 
 	public HostInfo findFirstNonLoopbackHostInfo() {
@@ -104,7 +127,7 @@ public class InetUtils {
 
 	public HostInfo convertAddress(final InetAddress address) {
 		HostInfo hostInfo = new HostInfo();
-		Future<String> result = this.executorService.submit(new Callable<String>() {
+		Future<String> result = getExecutor().submit(new Callable<String>() {
 			@Override
 			public String call() throws Exception {
 				return address.getHostName();
@@ -124,102 +147,20 @@ public class InetUtils {
 		return hostInfo;
 	}
 
-	@Deprecated
-	private static ExecutorService executor = Executors
-			.newSingleThreadExecutor(new ThreadFactory() {
-				@Override
-				public Thread newThread(Runnable r) {
-					Thread thread = new Thread(r);
-					thread.setName("spring.cloud.inetutils");
-					thread.setDaemon(true);
-					return thread;
-				}
-			});
-
 	/**
-	 * Find the first non-loopback host info. If there were errors return a hostinfo with
+	 * Find the first non-loopback host info. If there were errors return a host info with
 	 * 'localhost' and '127.0.0.1' for hostname and ipAddress respectively.
 	 */
-	@Deprecated
 	public static HostInfo getFirstNonLoopbackHostInfo() {
-		InetAddress address = getFirstNonLoopbackAddress();
-		if (address != null) {
-			return convert(address);
-		}
-		HostInfo hostInfo = new HostInfo();
-		hostInfo.setHostname("localhost");
-		hostInfo.setIpAddress("127.0.0.1");
-		return hostInfo;
+		return instance.findFirstNonLoopbackHostInfo();
 	}
 
-	/**
-	 * Find the first non-loopback InetAddress
-	 */
-	@SneakyThrows
-	@Deprecated
-	public static InetAddress getFirstNonLoopbackAddress() {
-		try {
-			for (Enumeration<NetworkInterface> enumNic = NetworkInterface
-					.getNetworkInterfaces(); enumNic.hasMoreElements();) {
-				NetworkInterface ifc = enumNic.nextElement();
-				if (ifc.isUp()) {
-					log.trace("Testing interface: " + ifc.getDisplayName());
-					for (Enumeration<InetAddress> enumAddr = ifc
-							.getInetAddresses(); enumAddr.hasMoreElements();) {
-						InetAddress address = enumAddr.nextElement();
-						if (address instanceof Inet4Address
-								&& !address.isLoopbackAddress()) {
-							log.trace("Found non-loopback interface: "
-									+ ifc.getDisplayName());
-							return address;
-						}
-					}
-				}
-			}
-		}
-		catch (IOException ex) {
-			log.error("Cannot get first non-loopback address", ex);
-		}
-
-		try {
-			return InetAddress.getLocalHost();
-		}
-		catch (UnknownHostException e) {
-			log.warn("Unable to retrieve localhost");
-		}
-
-		return null;
-	}
-
-	@Deprecated
 	public static HostInfo convert(final InetAddress address) {
-		HostInfo hostInfo = new HostInfo();
-		Future<String> result = executor.submit(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return address.getHostName();
-			}
-		});
+		return instance.convertAddress(address);
+	}
 
-		String hostname;
-		try {
-			String value = SystemPropertyUtils.resolvePlaceholders(
-					"${spring.util.timeout.sec:${SPRING_UTIL_TIMEOUT_SEC:1}}");
-			int timeout = 1;
-			try {
-				timeout = Integer.valueOf(value);
-			}
-			catch (NumberFormatException e) {
-			}
-			hostname = result.get(timeout, TimeUnit.SECONDS);
-		}
-		catch (Exception e) {
-			log.info("Cannot determine local hostname");
-			hostname = "localhost";
-		}
-		hostInfo.setHostname(hostname);
-		hostInfo.setIpAddress(address.getHostAddress());
-		return hostInfo;
+	public static int getIpAddressAsInt(String host) {
+		return new HostInfo(host).getIpAddressAsInt();
 	}
 
 	@Data
@@ -228,10 +169,21 @@ public class InetUtils {
 		private String ipAddress;
 		private String hostname;
 
+		HostInfo(String hostname) {
+			this.hostname = hostname;
+		}
+
+		HostInfo() {
+		}
+
 		public int getIpAddressAsInt() {
 			InetAddress inetAddress = null;
+			String host = this.ipAddress;
+			if (host == null) {
+				host = this.hostname;
+			}
 			try {
-				inetAddress = InetAddress.getByName(this.ipAddress);
+				inetAddress = InetAddress.getByName(host);
 			}
 			catch (final UnknownHostException e) {
 				throw new IllegalArgumentException(e);
@@ -239,4 +191,5 @@ public class InetUtils {
 			return ByteBuffer.wrap(inetAddress.getAddress()).getInt();
 		}
 	}
+
 }
