@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import lombok.extern.apachecommons.CommonsLog;
-
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.DeferredImportSelector;
@@ -32,16 +30,18 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
+import lombok.extern.apachecommons.CommonsLog;
+
 /**
- * Selects configurations to load defined by the generic type T.  Loads
- * implementations using {@link SpringFactoriesLoader}.
+ * Selects configurations to load defined by the generic type T. Loads implementations
+ * using {@link SpringFactoriesLoader}.
  *
  * @author Spencer Gibb
  * @author Dave Syer
  */
 @CommonsLog
-public abstract class SpringFactoryImportSelector<T> implements
-		DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
+public abstract class SpringFactoryImportSelector<T>
+		implements DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
 
 	private ClassLoader beanClassLoader;
 
@@ -51,8 +51,8 @@ public abstract class SpringFactoryImportSelector<T> implements
 
 	@SuppressWarnings("unchecked")
 	protected SpringFactoryImportSelector() {
-		this.annotationClass = (Class<T>) GenericTypeResolver.resolveTypeArgument(
-				this.getClass(), SpringFactoryImportSelector.class);
+		this.annotationClass = (Class<T>) GenericTypeResolver
+				.resolveTypeArgument(this.getClass(), SpringFactoryImportSelector.class);
 	}
 
 	@Override
@@ -60,29 +60,33 @@ public abstract class SpringFactoryImportSelector<T> implements
 		if (!isEnabled()) {
 			return new String[0];
 		}
-		AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata
-				.getAnnotationAttributes(this.annotationClass.getName(), true));
+		AnnotationAttributes attributes = AnnotationAttributes.fromMap(
+				metadata.getAnnotationAttributes(this.annotationClass.getName(), true));
 
 		Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is "
 				+ metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
 
 		// Find all possible auto configuration classes, filtering duplicates
-		List<String> factories = new ArrayList<>(new LinkedHashSet<>(
-				SpringFactoriesLoader.loadFactoryNames(this.annotationClass,
-						this.beanClassLoader)));
+		List<String> factories = new ArrayList<>(new LinkedHashSet<>(SpringFactoriesLoader
+				.loadFactoryNames(this.annotationClass, this.beanClassLoader)));
 
-		if (factories.isEmpty()) {
-			throw new IllegalStateException("Annotation @" + getSimpleName() +
-					" found, but there are no implementations.  Did you forget to include a starter?");
+		if (factories.isEmpty() && !hasDefaultFactory()) {
+			throw new IllegalStateException("Annotation @" + getSimpleName()
+					+ " found, but there are no implementations. Did you forget to include a starter?");
 		}
 
 		if (factories.size() > 1) {
-			// there should only ever be one DiscoveryClient, but there might be more than one factory
+			// there should only ever be one DiscoveryClient, but there might be more than
+			// one factory
 			log.warn("More than one implementation " + "of @" + getSimpleName()
 					+ " (now relying on @Conditionals to pick one): " + factories);
 		}
 
 		return factories.toArray(new String[factories.size()]);
+	}
+
+	protected boolean hasDefaultFactory() {
+		return false;
 	}
 
 	protected abstract boolean isEnabled();

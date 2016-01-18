@@ -25,13 +25,18 @@ import org.springframework.core.annotation.Order;
  * @author Spencer Gibb
  */
 @Order(Ordered.LOWEST_PRECEDENCE - 100)
-public class EnableDiscoveryClientImportSelector extends
-		SpringFactoryImportSelector<EnableDiscoveryClient> {
+public class EnableDiscoveryClientImportSelector
+		extends SpringFactoryImportSelector<EnableDiscoveryClient> {
 
 	@Override
 	protected boolean isEnabled() {
 		return new RelaxedPropertyResolver(getEnvironment()).getProperty(
 				"spring.cloud.discovery.enabled", Boolean.class, Boolean.TRUE);
+	}
+
+	@Override
+	protected boolean hasDefaultFactory() {
+		return true;
 	}
 
 }
