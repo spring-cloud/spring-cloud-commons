@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.client.hypermedia;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -29,9 +26,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.hateoas.client.Traverson;
 import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 
+import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+
 /**
  * Integration tests for {@link CloudHypermediaAutoConfiguration}.
- * 
+ *
  * @author Oliver Gierke
  */
 public class CloudHypermediaAutoConfigurationIntegrationTests {
@@ -39,9 +42,11 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	@Test
 	public void picksUpHypermediaProperties() {
 
-		try (ConfigurableApplicationContext context = getApplicationContext(ConfigWithRemoteResource.class)) {
+		try (ConfigurableApplicationContext context = getApplicationContext(
+				ConfigWithRemoteResource.class)) {
 
-			CloudHypermediaProperties properties = context.getBean(CloudHypermediaProperties.class);
+			CloudHypermediaProperties properties = context
+					.getBean(CloudHypermediaProperties.class);
 
 			assertThat(properties.getRefresh().getInitialDelay(), is(50000));
 			assertThat(properties.getRefresh().getFixedDelay(), is(10000));
@@ -51,38 +56,46 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	@Test
 	public void doesNotCreateCloudHypermediaPropertiesifNotActive() {
 
-		try (ConfigurableApplicationContext context = getApplicationContext(Config.class)) {
-			assertThat(context.getBeanNamesForType(CloudHypermediaProperties.class), is(arrayWithSize(0)));
+		try (ConfigurableApplicationContext context = getApplicationContext(
+				Config.class)) {
+			assertThat(context.getBeanNamesForType(CloudHypermediaProperties.class),
+					is(arrayWithSize(0)));
 		}
 	}
 
 	@Test
 	public void doesNotRegisterResourceRefresherIfNoDiscoveredResourceIsDefined() {
 
-		try (ConfigurableApplicationContext context = getApplicationContext(Config.class)) {
+		try (ConfigurableApplicationContext context = getApplicationContext(
+				Config.class)) {
 
 			assertThat(context.getBeansOfType(RemoteResource.class).values(), hasSize(0));
-			assertThat(context.getBeanNamesForType(RemoteResourceRefresher.class), is(arrayWithSize(0)));
+			assertThat(context.getBeanNamesForType(RemoteResourceRefresher.class),
+					is(arrayWithSize(0)));
 		}
 	}
 
 	@Test
 	public void registersResourceRefresherIfDiscoverredResourceIsDefined() {
 
-		try (ConfigurableApplicationContext context = getApplicationContext(ConfigWithRemoteResource.class)) {
+		try (ConfigurableApplicationContext context = getApplicationContext(
+				ConfigWithRemoteResource.class)) {
 
 			assertThat(context.getBeansOfType(RemoteResource.class).values(), hasSize(1));
-			assertThat(context.getBean(RemoteResourceRefresher.class), is(notNullValue()));
+			assertThat(context.getBean(RemoteResourceRefresher.class),
+					is(notNullValue()));
 		}
 	}
 
-	private static ConfigurableApplicationContext getApplicationContext(Class<?> configuration) {
+	private static ConfigurableApplicationContext getApplicationContext(
+			Class<?> configuration) {
 		return SpringApplication.run(configuration, new String[0]);
 	}
 
 	@Configuration
 	@EnableAutoConfiguration
-	static class Config {}
+	static class Config {
+	}
 
 	@Configuration
 	@EnableAutoConfiguration
