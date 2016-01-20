@@ -21,7 +21,7 @@ public class UtilAutoConfiguration {
 		return new InetUtilsProperties();
 	}
 
-	@Bean(destroyMethod = "close")
+	@Bean
 	@ConditionalOnMissingBean
 	public InetUtils inetUtils(InetUtilsProperties properties) {
 		return new InetUtils(properties);
