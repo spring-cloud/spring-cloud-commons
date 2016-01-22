@@ -16,8 +16,8 @@
 package org.springframework.cloud.client.hypermedia;
 
 import org.junit.Test;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.hypermedia.CloudHypermediaAutoConfiguration.CloudHypermediaProperties;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -89,7 +89,8 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(
 			Class<?> configuration) {
-		return SpringApplication.run(configuration, new String[0]);
+		return new SpringApplicationBuilder(configuration).properties("server.port=0")
+				.run();
 	}
 
 	@Configuration
