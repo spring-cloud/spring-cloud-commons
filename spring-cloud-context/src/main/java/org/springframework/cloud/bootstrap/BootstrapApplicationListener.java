@@ -17,7 +17,6 @@
 package org.springframework.cloud.bootstrap;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +71,7 @@ public class BootstrapApplicationListener
 			return;
 		}
 		// don't listen to events in a bootstrap context
-		if (environment.getPropertySources().contains("bootstrapInProgress")) {
+		if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			return;
 		}
 		ConfigurableApplicationContext context = bootstrapServiceContext(environment,
@@ -99,8 +98,6 @@ public class BootstrapApplicationListener
 		}
 		bootstrapProperties.addFirst(
 				new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME, bootstrapMap));
-		bootstrapProperties.addFirst(new MapPropertySource("bootstrapInProgress",
-				Collections.<String, Object> emptyMap()));
 		for (PropertySource<?> source : environment.getPropertySources()) {
 			bootstrapProperties.addLast(source);
 		}
@@ -129,7 +126,9 @@ public class BootstrapApplicationListener
 		final ConfigurableApplicationContext context = builder.run();
 		// Make the bootstrap context a parent of the app context
 		addAncestorInitializer(application, context);
-		bootstrapProperties.remove("bootstrapInProgress");
+		// It only has properties in it now that we don't want in the parent so remove
+		// it (and it will be added back later)
+		bootstrapProperties.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
 		return context;
 	}
 
@@ -219,9 +218,6 @@ public class BootstrapApplicationListener
 
 		@Override
 		public void initialize(ConfigurableApplicationContext context) {
-			preemptMerge(context.getEnvironment().getPropertySources(),
-					new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME,
-							Collections.<String, Object> emptyMap()));
 			while (context.getParent() != null && context.getParent() != context) {
 				context = (ConfigurableApplicationContext) context.getParent();
 			}
@@ -229,13 +225,6 @@ public class BootstrapApplicationListener
 					.initialize(context);
 		}
 
-		private void preemptMerge(MutablePropertySources propertySources,
-				PropertySource<?> propertySource) {
-			if (propertySource != null
-					&& !propertySources.contains(propertySource.getName())) {
-				propertySources.addFirst(propertySource);
-			}
-		}
 	}
 
 	/**
