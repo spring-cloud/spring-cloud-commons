@@ -108,8 +108,9 @@ public class BootstrapApplicationListener
 		// TODO: is it possible or sensible to share a ResourceLoader?
 		SpringApplicationBuilder builder = new SpringApplicationBuilder()
 				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)
-				.environment(bootstrapEnvironment).registerShutdownHook(false)
-				.properties("spring.application.name:" + configName).web(false);
+				.environment(bootstrapEnvironment)
+				.properties("spring.application.name:" + configName)
+				.registerShutdownHook(false).web(false);
 		List<Class<?>> sources = new ArrayList<>();
 		for (String name : names) {
 			Class<?> cls = ClassUtils.resolveClassName(name, null);
@@ -129,7 +130,43 @@ public class BootstrapApplicationListener
 		// It only has properties in it now that we don't want in the parent so remove
 		// it (and it will be added back later)
 		bootstrapProperties.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
+		mergeDefaultProperties(environment.getPropertySources(), bootstrapProperties);
 		return context;
+	}
+
+	private void mergeDefaultProperties(MutablePropertySources environment,
+			MutablePropertySources bootstrap) {
+		String name = "defaultProperties";
+		if (!bootstrap.contains(name)) {
+			return;
+		}
+		PropertySource<?> source = bootstrap.get(name);
+		if (source instanceof MapPropertySource) {
+			Map<String, Object> map = ((MapPropertySource) source).getSource();
+			// The application name is "bootstrap" (by default) at this point and
+			// we don't want that to appear in the parent context at all.
+			map.remove("spring.application.name");
+		}
+		if (!environment.contains(name)) {
+			environment.addLast(source);
+		}
+		else {
+			PropertySource<?> target = environment.get(name);
+			if (target instanceof MapPropertySource) {
+				Map<String, Object> targetMap = ((MapPropertySource) target).getSource();
+				if (target == source) {
+					return;
+				}
+				if (source instanceof MapPropertySource) {
+					Map<String, Object> map = ((MapPropertySource) source).getSource();
+					for (String key : map.keySet()) {
+						if (!target.containsProperty(key)) {
+							targetMap.put(key, map.get(key));
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void addAncestorInitializer(SpringApplication application,

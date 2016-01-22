@@ -212,9 +212,9 @@ public class BootstrapConfigurationTests {
 				.sources(BareConfiguration.class).run();
 		assertEquals("main",
 				this.context.getEnvironment().getProperty("spring.application.name"));
-		// The parent is called "application" because spring.application.name is not
+		// The parent has no name because spring.application.name is not
 		// defined in the bootstrap properties
-		assertEquals("application", this.context.getParent().getEnvironment()
+		assertEquals(null, this.context.getParent().getEnvironment()
 				.getProperty("spring.application.name"));
 	}
 
