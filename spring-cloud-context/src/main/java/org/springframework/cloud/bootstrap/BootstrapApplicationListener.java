@@ -17,7 +17,9 @@
 package org.springframework.cloud.bootstrap;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +36,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -60,6 +64,8 @@ public class BootstrapApplicationListener
 	public static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
 	public static final int DEFAULT_ORDER = Ordered.HIGHEST_PRECEDENCE + 5;
+
+	public static final String DEFAULT_PROPERTIES = "defaultProperties";
 
 	private int order = DEFAULT_ORDER;
 
@@ -136,7 +142,7 @@ public class BootstrapApplicationListener
 
 	private void mergeDefaultProperties(MutablePropertySources environment,
 			MutablePropertySources bootstrap) {
-		String name = "defaultProperties";
+		String name = DEFAULT_PROPERTIES;
 		if (!bootstrap.contains(name)) {
 			return;
 		}
@@ -167,6 +173,26 @@ public class BootstrapApplicationListener
 				}
 			}
 		}
+		mergeAdditionalPropertySources(environment, bootstrap);
+	}
+
+	private void mergeAdditionalPropertySources(MutablePropertySources environment,
+			MutablePropertySources bootstrap) {
+		PropertySource<?> defaultProperties = environment.get(DEFAULT_PROPERTIES);
+		ExtendedDefaultPropertySource result = defaultProperties instanceof ExtendedDefaultPropertySource
+				? (ExtendedDefaultPropertySource) defaultProperties
+				: new ExtendedDefaultPropertySource(defaultProperties.getName(),
+						defaultProperties);
+		for (PropertySource<?> source : bootstrap) {
+			if (!environment.contains(source.getName())) {
+				result.add(source);
+			}
+		}
+		for (String name : result.getPropertySourceNames()) {
+			bootstrap.remove(name);
+		}
+		environment.replace(DEFAULT_PROPERTIES, result);
+		bootstrap.replace(DEFAULT_PROPERTIES, result);
 	}
 
 	private void addAncestorInitializer(SpringApplication application,
@@ -258,8 +284,24 @@ public class BootstrapApplicationListener
 			while (context.getParent() != null && context.getParent() != context) {
 				context = (ConfigurableApplicationContext) context.getParent();
 			}
+			reorderSources(context.getEnvironment());
 			new ParentContextApplicationContextInitializer(this.parent)
 					.initialize(context);
+		}
+
+		private void reorderSources(ConfigurableEnvironment environment) {
+			PropertySource<?> removed = environment.getPropertySources()
+					.remove(DEFAULT_PROPERTIES);
+			if (removed instanceof ExtendedDefaultPropertySource) {
+				ExtendedDefaultPropertySource defaultProperties = (ExtendedDefaultPropertySource) removed;
+				environment.getPropertySources().addLast(new MapPropertySource(
+						DEFAULT_PROPERTIES, defaultProperties.getSource()));
+				for (PropertySource<?> source : defaultProperties.getPropertySources()
+						.getPropertySources()) {
+					environment.getPropertySources().addBefore(DEFAULT_PROPERTIES,
+							source);
+				}
+			}
 		}
 
 	}
@@ -285,4 +327,66 @@ public class BootstrapApplicationListener
 		}
 
 	}
+
+	private static class ExtendedDefaultPropertySource extends MapPropertySource {
+
+		private final CompositePropertySource sources;
+		private final List<String> names = new ArrayList<>();
+
+		public ExtendedDefaultPropertySource(String name,
+				PropertySource<?> propertySource) {
+			super(name, findMap(propertySource));
+			this.sources = new CompositePropertySource(name);
+		}
+
+		public CompositePropertySource getPropertySources() {
+			return this.sources;
+		}
+
+		public List<String> getPropertySourceNames() {
+			return this.names;
+		}
+
+		public void add(PropertySource<?> source) {
+			if (source instanceof EnumerablePropertySource
+					&& !this.names.contains(source.getName())) {
+				this.sources.addPropertySource(source);
+				this.names.add(source.getName());
+			}
+		}
+
+		@Override
+		public Object getProperty(String name) {
+			if (this.sources.containsProperty(name)) {
+				return this.sources.getProperty(name);
+			}
+			return super.getProperty(name);
+		}
+
+		@Override
+		public boolean containsProperty(String name) {
+			if (this.sources.containsProperty(name)) {
+				return true;
+			}
+			return super.containsProperty(name);
+		}
+
+		@Override
+		public String[] getPropertyNames() {
+			List<String> names = new ArrayList<>();
+			names.addAll(Arrays.asList(this.sources.getPropertyNames()));
+			names.addAll(Arrays.asList(super.getPropertyNames()));
+			return names.toArray(new String[0]);
+		}
+
+		@SuppressWarnings("unchecked")
+		private static Map<String, Object> findMap(PropertySource<?> propertySource) {
+			if (propertySource instanceof MapPropertySource) {
+				return (Map<String, Object>) propertySource.getSource();
+			}
+			return new LinkedHashMap<String, Object>();
+		}
+
+	}
+
 }

@@ -28,6 +28,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -81,6 +82,24 @@ public class BootstrapConfigurationTests {
 				this.context.getEnvironment().getPropertySources().contains("bootstrap"));
 	}
 
+	@Test
+	public void bootstrapPropertiesAvailableInInitializer() {
+		this.context = new SpringApplicationBuilder().web(false)
+				.sources(BareConfiguration.class).initializers(
+						new ApplicationContextInitializer<ConfigurableApplicationContext>() {
+							@Override
+							public void initialize(
+									ConfigurableApplicationContext applicationContext) {
+								// This property is defined in bootstrap.properties
+								assertEquals("child", applicationContext.getEnvironment()
+										.getProperty("info.name"));
+							}
+						})
+				.run();
+		assertTrue(
+				this.context.getEnvironment().getPropertySources().contains("bootstrap"));
+	}
+
 	/**
 	 * Running the test from maven will start from a different directory then starting it
 	 * from intellij
@@ -105,7 +124,6 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void picksUpAdditionalPropertySource() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		System.setProperty("expected.name", "bootstrap");
 		this.context = new SpringApplicationBuilder().web(false)
 				.sources(BareConfiguration.class).run();
 		assertEquals("bar", this.context.getEnvironment().getProperty("bootstrap.foo"));
