@@ -17,7 +17,7 @@
 package org.springframework.cloud.client;
 
 import java.net.URI;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import lombok.Data;
@@ -42,8 +42,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private final Map<String, String> metadata;
 
-	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure) {
-		this(serviceId, host, port, secure, Collections.<String, String>emptyMap());
+	public DefaultServiceInstance(String serviceId, String host, int port,
+			boolean secure) {
+		this(serviceId, host, port, secure, new LinkedHashMap<String, String>());
 	}
 
 	@Override
@@ -53,7 +54,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	@Override
 	public Map<String, String> getMetadata() {
-		return metadata;
+		return this.metadata;
 	}
 
 	/**
