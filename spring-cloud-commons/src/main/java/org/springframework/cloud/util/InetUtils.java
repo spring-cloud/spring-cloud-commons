@@ -34,7 +34,7 @@ public class InetUtils implements Closeable {
 	}
 
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		if (executorService != null) {
 			synchronized (InetUtils.class) {
 				if (executorService != null) {
