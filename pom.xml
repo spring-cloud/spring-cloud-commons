@@ -73,6 +73,7 @@
 		</plugins>
 	</build>
 	<modules>
+	  <module>spring-cloud-commons-dependencies</module>
 	  <module>spring-cloud-context</module>
 	  <module>spring-cloud-commons</module>
 	  <module>docs</module>
