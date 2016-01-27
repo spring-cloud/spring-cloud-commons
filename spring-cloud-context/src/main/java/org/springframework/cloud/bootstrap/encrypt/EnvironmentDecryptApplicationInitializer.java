@@ -45,14 +45,14 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
  *
  */
 public class EnvironmentDecryptApplicationInitializer implements
-		ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
+	ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
 	public static final String DECRYPTED_PROPERTY_SOURCE_NAME = "decrypted";
 
 	private int order = Ordered.HIGHEST_PRECEDENCE + 15;
 
 	private static Log logger = LogFactory
-			.getLog(EnvironmentDecryptApplicationInitializer.class);
+		.getLog(EnvironmentDecryptApplicationInitializer.class);
 
 	private TextEncryptor encryptor;
 
@@ -64,110 +64,110 @@ public class EnvironmentDecryptApplicationInitializer implements
 	 * @param failOnError the flag value (default true)
 	 */
 	public void setFailOnError(boolean failOnError) {
-		this.failOnError = failOnError;
+	this.failOnError = failOnError;
 	}
 
 	public EnvironmentDecryptApplicationInitializer(TextEncryptor encryptor) {
-		this.encryptor = encryptor;
+	this.encryptor = encryptor;
 	}
 
 	@Override
 	public int getOrder() {
-		return this.order;
+	return this.order;
 	}
 
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
-		ConfigurableEnvironment environment = applicationContext.getEnvironment();
-		MapPropertySource decrypted = new MapPropertySource(
-				DECRYPTED_PROPERTY_SOURCE_NAME,
-				decrypt(environment.getPropertySources()));
-		if (!decrypted.getSource().isEmpty()) {
-			// We have some decrypted properties
-			insert(environment.getPropertySources(), decrypted);
-			ApplicationContext parent = applicationContext.getParent();
-			if (parent != null
-					&& (parent.getEnvironment() instanceof ConfigurableEnvironment)) {
-				ConfigurableEnvironment mutable = (ConfigurableEnvironment) parent
-						.getEnvironment();
-				// The parent is actually the bootstrap context, and it is fully
-				// initialized, so we can fire an EnvironmentChangeEvent there to rebind
-				// @ConfigurationProperties, in case they were encrypted.
-				insert(mutable.getPropertySources(), decrypted);
-				parent.publishEvent(
-						new EnvironmentChangeEvent(decrypted.getSource().keySet()));
-			}
+	ConfigurableEnvironment environment = applicationContext.getEnvironment();
+	MapPropertySource decrypted = new MapPropertySource(
+		DECRYPTED_PROPERTY_SOURCE_NAME,
+		decrypt(environment.getPropertySources()));
+	if (!decrypted.getSource().isEmpty()) {
+		// We have some decrypted properties
+		insert(environment.getPropertySources(), decrypted);
+		ApplicationContext parent = applicationContext.getParent();
+		if (parent != null
+			&& (parent.getEnvironment() instanceof ConfigurableEnvironment)) {
+		ConfigurableEnvironment mutable = (ConfigurableEnvironment) parent
+			.getEnvironment();
+		// The parent is actually the bootstrap context, and it is fully
+		// initialized, so we can fire an EnvironmentChangeEvent there to rebind
+		// @ConfigurationProperties, in case they were encrypted.
+		insert(mutable.getPropertySources(), decrypted);
+		parent.publishEvent(
+			new EnvironmentChangeEvent(decrypted.getSource().keySet()));
 		}
+	}
 	}
 
 	private void insert(MutablePropertySources propertySources,
-			MapPropertySource propertySource) {
-		if (propertySources
-				.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
-			propertySources.addAfter(
-					BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME,
-					propertySource);
-		}
-		else {
-			propertySources.addFirst(propertySource);
-		}
+		MapPropertySource propertySource) {
+	if (propertySources
+		.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+		propertySources.addBefore(
+			BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME,
+			propertySource);
+	}
+	else {
+		propertySources.addFirst(propertySource);
+	}
 	}
 
 	public Map<String, Object> decrypt(PropertySources propertySources) {
-		Map<String, Object> overrides = new LinkedHashMap<String, Object>();
-		List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
-		for (PropertySource<?> source : propertySources) {
-			sources.add(0, source);
-		}
-		for (PropertySource<?> source : sources) {
-			decrypt(source, overrides);
-		}
-		return overrides;
+	Map<String, Object> overrides = new LinkedHashMap<String, Object>();
+	List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
+	for (PropertySource<?> source : propertySources) {
+		sources.add(0, source);
+	}
+	for (PropertySource<?> source : sources) {
+		decrypt(source, overrides);
+	}
+	return overrides;
 	}
 
 	private void decrypt(PropertySource<?> source, Map<String, Object> overrides) {
 
-		if (source instanceof EnumerablePropertySource) {
+	if (source instanceof EnumerablePropertySource) {
 
-			EnumerablePropertySource<?> enumerable = (EnumerablePropertySource<?>) source;
-			for (String key : enumerable.getPropertyNames()) {
-				String value = source.getProperty(key).toString();
-				if (value.startsWith("{cipher}")) {
-					value = value.substring("{cipher}".length());
-					try {
-						value = this.encryptor.decrypt(value);
-						if (logger.isDebugEnabled()) {
-							logger.debug("Decrypted: key=" + key);
-						}
-					}
-					catch (Exception e) {
-						String message = "Cannot decrypt: key=" + key;
-						if (this.failOnError) {
-							throw new IllegalStateException(message, e);
-						}
-						if (logger.isDebugEnabled()) {
-							logger.warn(message, e);
-						}
-						else {
-							logger.warn(message);
-						}
-						// Set value to empty to avoid making a password out of the
-						// cipher text
-						value = "";
-					}
-					overrides.put(key, value);
-				}
+		EnumerablePropertySource<?> enumerable = (EnumerablePropertySource<?>) source;
+		for (String key : enumerable.getPropertyNames()) {
+		String value = source.getProperty(key).toString();
+		if (value.startsWith("{cipher}")) {
+			value = value.substring("{cipher}".length());
+			try {
+			value = this.encryptor.decrypt(value);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Decrypted: key=" + key);
 			}
-
-		}
-		else if (source instanceof CompositePropertySource) {
-
-			for (PropertySource<?> nested : ((CompositePropertySource) source)
-					.getPropertySources()) {
-				decrypt(nested, overrides);
 			}
-
+			catch (Exception e) {
+			String message = "Cannot decrypt: key=" + key;
+			if (this.failOnError) {
+				throw new IllegalStateException(message, e);
+			}
+			if (logger.isDebugEnabled()) {
+				logger.warn(message, e);
+			}
+			else {
+				logger.warn(message);
+			}
+			// Set value to empty to avoid making a password out of the
+			// cipher text
+			value = "";
+			}
+			overrides.put(key, value);
 		}
+		}
+
+	}
+	else if (source instanceof CompositePropertySource) {
+
+		for (PropertySource<?> nested : ((CompositePropertySource) source)
+			.getPropertySources()) {
+		decrypt(nested, overrides);
+		}
+
+	}
 
 	}
 

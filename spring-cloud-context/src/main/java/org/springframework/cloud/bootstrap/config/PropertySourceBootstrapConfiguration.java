@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingSystem;
@@ -36,6 +35,7 @@ import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -52,117 +52,117 @@ import org.springframework.util.StringUtils;
 @Configuration
 @EnableConfigurationProperties(PropertySourceBootstrapProperties.class)
 public class PropertySourceBootstrapConfiguration implements
-		ApplicationContextInitializer<ConfigurableApplicationContext> {
+	ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
 	private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 	private static Log logger = LogFactory
-			.getLog(PropertySourceBootstrapConfiguration.class);
+		.getLog(PropertySourceBootstrapConfiguration.class);
+
+	private int order = Ordered.HIGHEST_PRECEDENCE + 10;
 
 	@Autowired(required = false)
 	private List<PropertySourceLocator> propertySourceLocators = new ArrayList<>();
 
-	@Autowired
-	private PropertySourceBootstrapProperties properties;
-
-	@Autowired
-	private ConfigurationPropertiesBindingPostProcessor binder;
-
 	public void setPropertySourceLocators(
-			Collection<PropertySourceLocator> propertySourceLocators) {
-		this.propertySourceLocators = new ArrayList<>(propertySourceLocators);
+		Collection<PropertySourceLocator> propertySourceLocators) {
+	this.propertySourceLocators = new ArrayList<>(propertySourceLocators);
+	}
+
+	@Override
+	public int getOrder() {
+	return this.order;
 	}
 
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
-		CompositePropertySource composite = new CompositePropertySource(
-				BOOTSTRAP_PROPERTY_SOURCE_NAME);
-		AnnotationAwareOrderComparator.sort(this.propertySourceLocators);
-		boolean empty = true;
-		ConfigurableEnvironment environment = applicationContext.getEnvironment();
-		for (PropertySourceLocator locator : this.propertySourceLocators) {
-			PropertySource<?> source = null;
-			source = locator.locate(environment);
-			if (source == null) {
-				continue;
-			}
-			logger.info("Located property source: " + source);
-			composite.addPropertySource(source);
-			empty = false;
+	CompositePropertySource composite = new CompositePropertySource(
+		BOOTSTRAP_PROPERTY_SOURCE_NAME);
+	AnnotationAwareOrderComparator.sort(this.propertySourceLocators);
+	boolean empty = true;
+	ConfigurableEnvironment environment = applicationContext.getEnvironment();
+	for (PropertySourceLocator locator : this.propertySourceLocators) {
+		PropertySource<?> source = null;
+		source = locator.locate(environment);
+		if (source == null) {
+		continue;
 		}
-		if (!empty) {
-			MutablePropertySources propertySources = environment.getPropertySources();
-			String logConfig = environment.resolvePlaceholders("${logging.config:}");
-			if (propertySources.contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
-				propertySources.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
-			}
-			insertPropertySources(propertySources, composite);
-			reinitializeLoggingSystem(environment, logConfig);
-			setLogLevels(environment);
+		logger.info("Located property source: " + source);
+		composite.addPropertySource(source);
+		empty = false;
+	}
+	if (!empty) {
+		MutablePropertySources propertySources = environment.getPropertySources();
+		String logConfig = environment.resolvePlaceholders("${logging.config:}");
+		if (propertySources.contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+		propertySources.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
 		}
+		insertPropertySources(propertySources, composite);
+		reinitializeLoggingSystem(environment, logConfig);
+		setLogLevels(environment);
+	}
 	}
 
 	private void reinitializeLoggingSystem(ConfigurableEnvironment environment,
-			String oldLogConfig) {
-		String logConfig = environment.resolvePlaceholders("${logging.config:}");
-		if (StringUtils.hasText(logConfig) && !logConfig.equals(oldLogConfig)) {
-			LoggingSystem system = LoggingSystem
-					.get(LoggingSystem.class.getClassLoader());
-			try {
-				ResourceUtils.getURL(logConfig).openStream().close();
-				LogFile logFile = LogFile.get(environment);
-				system.initialize(logConfig, logFile);
-			}
-			catch (Exception ex) {
-				PropertySourceBootstrapConfiguration.logger
-						.warn("Logging config file location '" + logConfig
-								+ "' cannot be opened and will be ignored");
-			}
+		String oldLogConfig) {
+	String logConfig = environment.resolvePlaceholders("${logging.config:}");
+	if (StringUtils.hasText(logConfig) && !logConfig.equals(oldLogConfig)) {
+		LoggingSystem system = LoggingSystem
+			.get(LoggingSystem.class.getClassLoader());
+		try {
+		ResourceUtils.getURL(logConfig).openStream().close();
+		LogFile logFile = LogFile.get(environment);
+		system.initialize(logConfig, logFile);
 		}
+		catch (Exception ex) {
+		PropertySourceBootstrapConfiguration.logger
+			.warn("Logging config file location '" + logConfig
+				+ "' cannot be opened and will be ignored");
+		}
+	}
 	}
 
 	private void setLogLevels(ConfigurableEnvironment environment) {
-		LoggingRebinder rebinder = new LoggingRebinder();
-		rebinder.setEnvironment(environment);
-		// We can't fire the event in the ApplicationContext here (too early), but we can
-		// create our own listener and poke it (it doesn't need the key changes)
-		rebinder.onApplicationEvent(new EnvironmentChangeEvent(Collections
-				.<String> emptySet()));
+	LoggingRebinder rebinder = new LoggingRebinder();
+	rebinder.setEnvironment(environment);
+	// We can't fire the event in the ApplicationContext here (too early), but we can
+	// create our own listener and poke it (it doesn't need the key changes)
+	rebinder.onApplicationEvent(
+		new EnvironmentChangeEvent(Collections.<String> emptySet()));
 	}
 
 	private void insertPropertySources(MutablePropertySources propertySources,
-			CompositePropertySource composite) {
-		MutablePropertySources incoming = new MutablePropertySources();
-		incoming.addFirst(composite);
-		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
-		new RelaxedDataBinder(remoteProperties, "spring.cloud.config")
-				.bind(new PropertySourcesPropertyValues(incoming));
-		if (!remoteProperties.isAllowOverride()
-				|| (!remoteProperties.isOverrideNone() && remoteProperties
-						.isOverrideSystemProperties())) {
-			propertySources.addFirst(composite);
-			return;
-		}
-		if (remoteProperties.isOverrideNone()) {
-			propertySources.addLast(composite);
-			return;
-		}
-		if (propertySources
-				.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
-			if (!remoteProperties.isOverrideSystemProperties()) {
-				propertySources.addAfter(
-						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-						composite);
-			}
-			else {
-				propertySources.addBefore(
-						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-						composite);
-			}
+		CompositePropertySource composite) {
+	MutablePropertySources incoming = new MutablePropertySources();
+	incoming.addFirst(composite);
+	PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
+	new RelaxedDataBinder(remoteProperties, "spring.cloud.config")
+		.bind(new PropertySourcesPropertyValues(incoming));
+	if (!remoteProperties.isAllowOverride() || (!remoteProperties.isOverrideNone()
+		&& remoteProperties.isOverrideSystemProperties())) {
+		propertySources.addFirst(composite);
+		return;
+	}
+	if (remoteProperties.isOverrideNone()) {
+		propertySources.addLast(composite);
+		return;
+	}
+	if (propertySources
+		.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
+		if (!remoteProperties.isOverrideSystemProperties()) {
+		propertySources.addAfter(
+			StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+			composite);
 		}
 		else {
-			propertySources.addLast(composite);
+		propertySources.addBefore(
+			StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+			composite);
 		}
+	}
+	else {
+		propertySources.addLast(composite);
+	}
 	}
 
 }
