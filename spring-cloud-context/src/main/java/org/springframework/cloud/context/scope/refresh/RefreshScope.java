@@ -24,6 +24,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
@@ -70,17 +71,27 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  */
 @ManagedResource
 public class RefreshScope extends GenericScope
-		implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
+		implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor, Ordered {
 
 	private ApplicationContext context;
 	private BeanDefinitionRegistry registry;
 	private boolean eager = true;
+	private int order = Ordered.LOWEST_PRECEDENCE - 100;
 
 	/**
 	 * Create a scope instance and give it the default name: "refresh".
 	 */
 	public RefreshScope() {
 		super.setName("refresh");
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	/**
@@ -105,7 +116,8 @@ public class RefreshScope extends GenericScope
 			if (this.eager && this.registry != null) {
 				for (String name : this.context.getBeanDefinitionNames()) {
 					BeanDefinition definition = this.registry.getBeanDefinition(name);
-					if (this.getName().equals(definition.getScope())) {
+					if (this.getName().equals(definition.getScope())
+							&& !definition.isLazyInit()) {
 						this.context.getBean(name);
 					}
 				}
