@@ -64,15 +64,17 @@ public class NoopDiscoveryClientAutoConfiguration implements
 	@PostConstruct
 	public void init() {
 		String host = "localhost";
+		String address = "127.0.0.1";
 		try {
 			host = InetAddress.getLocalHost().getHostName();
+			address = InetAddress.getLocalHost().getHostAddress();
 		}
 		catch (UnknownHostException e) {
 			log.error("Cannot get host info", e);
 		}
 		int port = findPort();
 		this.serviceInstance = new DefaultServiceInstance(this.environment.getProperty(
-				"spring.application.name", "application"), host, port, false);
+				"spring.application.name", "application"), host, port, address, false);
 	}
 
 	private int findPort() {

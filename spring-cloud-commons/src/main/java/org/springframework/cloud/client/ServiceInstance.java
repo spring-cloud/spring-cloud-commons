@@ -41,6 +41,11 @@ public interface ServiceInstance {
 	int getPort();
 
 	/**
+	 * @return the IP address of the registered ServiceInstance
+	 */
+	String getAddress();
+
+	/**
 	 * @return if the port of the registered ServiceInstance is https or not
 	 */
 	boolean isSecure();
