@@ -53,10 +53,11 @@ import org.springframework.util.ResourceUtils;
  */
 @Configuration
 @EnableConfigurationProperties(PropertySourceBootstrapProperties.class)
-public class PropertySourceBootstrapConfiguration
-		implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
+public class PropertySourceBootstrapConfiguration implements
+		ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
-	private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME;
+	private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME
+			+ "Properties";
 
 	private static Log logger = LogFactory
 			.getLog(PropertySourceBootstrapConfiguration.class);
@@ -108,7 +109,8 @@ public class PropertySourceBootstrapConfiguration
 
 	private void reinitializeLoggingSystem(ConfigurableEnvironment environment,
 			String oldLogConfig, LogFile oldLogFile) {
-		Map<String, Object> props = new RelaxedPropertyResolver(environment).getSubProperties("logging.");
+		Map<String, Object> props = new RelaxedPropertyResolver(environment)
+				.getSubProperties("logging.");
 		if (!props.isEmpty()) {
 			String logConfig = environment.resolvePlaceholders("${logging.config:}");
 			LogFile logFile = LogFile.get(environment);

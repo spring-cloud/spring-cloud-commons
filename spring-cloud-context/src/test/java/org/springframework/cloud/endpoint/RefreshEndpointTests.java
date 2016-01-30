@@ -19,6 +19,7 @@ package org.springframework.cloud.endpoint;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ import org.junit.Test;
 import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.EnvironmentTestUtils;
+import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
@@ -34,6 +36,10 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.PropertySource;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
@@ -80,6 +86,20 @@ public class RefreshEndpointTests {
 		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
 		Collection<String> keys = endpoint.invoke();
 		assertTrue("Wrong keys: " + keys, keys.contains("message"));
+	}
+
+	@Test
+	public void keysComputedWhenChangesInExternalProperties() throws Exception {
+		this.context = new SpringApplicationBuilder(Empty.class).web(false)
+				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
+				.run();
+		RefreshScope scope = new RefreshScope();
+		scope.setApplicationContext(this.context);
+		EnvironmentTestUtils.addEnvironment(this.context,
+				"spring.main.sources=" + ExternalPropertySourceLocator.class.getName());
+		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
+		Collection<String> keys = endpoint.invoke();
+		assertTrue("Wrong keys: " + keys, keys.contains("external.message"));
 	}
 
 	@Test
@@ -132,5 +152,17 @@ public class RefreshEndpointTests {
 		public void refreshed(RefreshScopeRefreshedEvent event) {
 			this.events.add(event);
 		}
+	}
+
+	@Component
+	protected static class ExternalPropertySourceLocator
+			implements PropertySourceLocator {
+
+		@Override
+		public PropertySource<?> locate(Environment environment) {
+			return new MapPropertySource("external", Collections
+					.<String, Object> singletonMap("external.message", "I'm External"));
+		}
+
 	}
 }
