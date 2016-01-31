@@ -77,12 +77,20 @@ public class InetUtils implements Closeable {
 	}
 
 	public InetAddress findFirstNonLoopbackAddress() {
+		InetAddress result = null;
 		try {
+			int lowest = Integer.MAX_VALUE;
 			for (Enumeration<NetworkInterface> nics = NetworkInterface
 					.getNetworkInterfaces(); nics.hasMoreElements();) {
 				NetworkInterface ifc = nics.nextElement();
 				if (ifc.isUp()) {
 					log.trace("Testing interface: " + ifc.getDisplayName());
+					if (ifc.getIndex() < lowest || result == null) {
+						lowest = ifc.getIndex();
+					}
+					else if (result != null) {
+						continue;
+					}
 
 					// @formatter:off
 					if (!ignoreInterface(ifc.getDisplayName())) {
@@ -93,7 +101,7 @@ public class InetUtils implements Closeable {
 									&& !address.isLoopbackAddress()) {
 								log.trace("Found non-loopback interface: "
 										+ ifc.getDisplayName());
-								return address;
+								result = address;
 							}
 						}
 					}
@@ -103,6 +111,10 @@ public class InetUtils implements Closeable {
 		}
 		catch (IOException ex) {
 			log.error("Cannot get first non-loopback address", ex);
+		}
+
+		if (result != null) {
+			return result;
 		}
 
 		try {
