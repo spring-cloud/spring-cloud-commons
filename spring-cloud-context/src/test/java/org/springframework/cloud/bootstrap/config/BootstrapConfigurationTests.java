@@ -78,8 +78,8 @@ public class BootstrapConfigurationTests {
 				.run();
 		assertEquals("externalPropertiesInfoName",
 				this.context.getEnvironment().getProperty("info.name"));
-		assertTrue(
-				this.context.getEnvironment().getPropertySources().contains("bootstrap"));
+		assertTrue(this.context.getEnvironment().getPropertySources().contains(
+				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME));
 	}
 
 	@Test
@@ -96,8 +96,8 @@ public class BootstrapConfigurationTests {
 							}
 						})
 				.run();
-		assertTrue(
-				this.context.getEnvironment().getPropertySources().contains("bootstrap"));
+		assertTrue(this.context.getEnvironment().getPropertySources().contains(
+				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME));
 	}
 
 	/**
@@ -127,8 +127,8 @@ public class BootstrapConfigurationTests {
 		this.context = new SpringApplicationBuilder().web(false)
 				.sources(BareConfiguration.class).run();
 		assertEquals("bar", this.context.getEnvironment().getProperty("bootstrap.foo"));
-		assertTrue(
-				this.context.getEnvironment().getPropertySources().contains("bootstrap"));
+		assertTrue(this.context.getEnvironment().getPropertySources().contains(
+				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME));
 	}
 
 	@Test
@@ -264,7 +264,8 @@ public class BootstrapConfigurationTests {
 				this.context.getParent().getEnvironment());
 		MutablePropertySources sources = this.context.getEnvironment()
 				.getPropertySources();
-		PropertySource<?> bootstrap = sources.get("bootstrap");
+		PropertySource<?> bootstrap = sources
+				.get(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME);
 		assertNotNull(bootstrap);
 		assertEquals(0, sources.precedenceOf(bootstrap));
 	}
@@ -277,10 +278,11 @@ public class BootstrapConfigurationTests {
 		assertEquals("bar", this.context.getEnvironment().getProperty("bootstrap.foo"));
 		assertNotSame(this.context.getEnvironment(),
 				this.context.getParent().getEnvironment());
-		assertTrue(
-				this.context.getEnvironment().getPropertySources().contains("bootstrap"));
+		assertTrue(this.context.getEnvironment().getPropertySources().contains(
+				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME));
 		assertTrue(((ConfigurableEnvironment) this.context.getParent().getEnvironment())
-				.getPropertySources().contains("bootstrap"));
+				.getPropertySources().contains(
+						PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME));
 	}
 
 	@Test
@@ -300,7 +302,8 @@ public class BootstrapConfigurationTests {
 		assertFalse(this.context.getParent().getEnvironment().acceptsProfiles("child"));
 		assertTrue(this.context.getParent().getEnvironment().acceptsProfiles("parent"));
 		assertTrue(((ConfigurableEnvironment) this.context.getParent().getEnvironment())
-				.getPropertySources().contains("bootstrap"));
+				.getPropertySources().contains(
+						PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME));
 		assertEquals("bar", this.context.getEnvironment().getProperty("bootstrap.foo"));
 		// The "bootstrap" property source is not shared now, but it has the same
 		// properties in it because they are pulled from the PropertySourceConfiguration
