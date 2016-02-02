@@ -44,6 +44,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -96,10 +97,28 @@ public class RefreshEndpointTests {
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		EnvironmentTestUtils.addEnvironment(this.context,
-				"spring.main.sources=" + ExternalPropertySourceLocator.class.getName());
+				"spring.cloud.bootstrap.sources="
+						+ ExternalPropertySourceLocator.class.getName());
 		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
 		Collection<String> keys = endpoint.invoke();
 		assertTrue("Wrong keys: " + keys, keys.contains("external.message"));
+	}
+
+	@Test
+	public void springMainSourcesEmptyInRefreshCycle() throws Exception {
+		this.context = new SpringApplicationBuilder(Empty.class).web(false)
+				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
+				.run();
+		RefreshScope scope = new RefreshScope();
+		scope.setApplicationContext(this.context);
+		// spring.main.sources should be empty when the refresh cycle starts (we don't
+		// want any config files from the application context getting into the one used to
+		// construct the environment for refresh)
+		EnvironmentTestUtils.addEnvironment(this.context,
+				"spring.main.sources=" + ExternalPropertySourceLocator.class.getName());
+		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
+		Collection<String> keys = endpoint.invoke();
+		assertFalse("Wrong keys: " + keys, keys.contains("external.message"));
 	}
 
 	@Test

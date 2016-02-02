@@ -37,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
@@ -51,6 +52,8 @@ import org.springframework.web.context.support.StandardServletEnvironment;
 @ConfigurationProperties(prefix = "endpoints.refresh", ignoreUnknownFields = false)
 @ManagedResource
 public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
+
+	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
 
 	private Set<String> standardSources = new HashSet<String>(
 			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
@@ -88,6 +91,9 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 					this.context.getEnvironment());
 			capture = new SpringApplicationBuilder(Empty.class).bannerMode(Mode.OFF)
 					.web(false).environment(environment).run();
+			if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
+				environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
+			}
 			MutablePropertySources target = this.context.getEnvironment()
 					.getPropertySources();
 			String targetName = null;
@@ -144,6 +150,11 @@ public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 		}
 		environment.setActiveProfiles(input.getActiveProfiles());
 		environment.setDefaultProfiles(input.getDefaultProfiles());
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("spring.jmx.enabled", false);
+		map.put("spring.main.sources", "");
+		capturedPropertySources
+				.addFirst(new MapPropertySource(REFRESH_ARGS_PROPERTY_SOURCE, map));
 		return environment;
 	}
 

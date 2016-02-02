@@ -111,6 +111,10 @@ public class BootstrapApplicationListener
 		// Use names and ensure unique to protect against duplicates
 		List<String> names = SpringFactoriesLoader
 				.loadFactoryNames(BootstrapConfiguration.class, classLoader);
+		for (String name : StringUtils.commaDelimitedListToStringArray(
+				environment.getProperty("spring.cloud.bootstrap.sources", ""))) {
+			names.add(name);
+		}
 		// TODO: is it possible or sensible to share a ResourceLoader?
 		SpringApplicationBuilder builder = new SpringApplicationBuilder()
 				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)
