@@ -18,7 +18,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,6 +72,8 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 
 	private BeanLifecycleDecorator<?> lifecycle;
 
+	private Map<String, Exception> errors = new ConcurrentHashMap<>();
+
 	/**
 	 * Manual override for the serialization id that will be used to identify the bean
 	 * factory. The default is a unique key based on the bean names in the bean factory.
@@ -117,6 +121,15 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		this.lifecycle = lifecycle;
 	}
 
+	/**
+	 * A map of bean name to errors when instantiating the bean.
+	 *
+	 * @return the errors accumulated since the latest destroy
+	 */
+	public Map<String, Exception> getErrors() {
+		return this.errors;
+	}
+
 	@Override
 	public void destroy() {
 		List<Throwable> errors = new ArrayList<Throwable>();
@@ -132,6 +145,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		if (!errors.isEmpty()) {
 			throw wrapIfNecessary(errors.get(0));
 		}
+		this.errors.clear();
 	}
 
 	/**
@@ -144,6 +158,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		BeanLifecycleWrapper wrapper = this.cache.remove(name);
 		if (wrapper != null) {
 			wrapper.destroy();
+			this.errors.remove(name);
 			return true;
 		}
 		return false;
@@ -156,7 +171,13 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		}
 		BeanLifecycleWrapper value = this.cache.put(name,
 				new BeanLifecycleWrapper(name, objectFactory, this.lifecycle));
-		return value.getBean();
+		try {
+			return value.getBean();
+		}
+		catch (RuntimeException e) {
+			this.errors.put(name, e);
+			throw e;
+		}
 	}
 
 	@Override

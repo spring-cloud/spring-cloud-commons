@@ -34,9 +34,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
+import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.RefreshEndpoint;
+import org.springframework.cloud.health.RefreshScopeHealthIndicator;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -53,6 +55,13 @@ public class RefreshEndpointAutoConfiguration {
 	@Bean
 	InfoEndpointRebinderConfiguration infoEndpointRebinderConfiguration() {
 		return new InfoEndpointRebinderConfiguration();
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	RefreshScopeHealthIndicator refreshScopeHealthIndicator(RefreshScope scope,
+			ConfigurationPropertiesRebinder rebinder) {
+		return new RefreshScopeHealthIndicator(scope, rebinder);
 	}
 
 	@ConditionalOnClass(IntegrationMBeanExporter.class)

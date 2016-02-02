@@ -16,7 +16,9 @@
 package org.springframework.cloud.context.properties;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -46,14 +48,16 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ManagedResource
-public class ConfigurationPropertiesRebinder implements ApplicationContextAware,
-ApplicationListener<EnvironmentChangeEvent> {
+public class ConfigurationPropertiesRebinder
+		implements ApplicationContextAware, ApplicationListener<EnvironmentChangeEvent> {
 
 	private ConfigurationPropertiesBeans beans;
 
 	private ConfigurationPropertiesBindingPostProcessor binder;
 
 	private ApplicationContext applicationContext;
+
+	private Map<String, Exception> errors = new ConcurrentHashMap<>();
 
 	public ConfigurationPropertiesRebinder(
 			ConfigurationPropertiesBindingPostProcessor binder,
@@ -68,8 +72,18 @@ ApplicationListener<EnvironmentChangeEvent> {
 		this.applicationContext = applicationContext;
 	}
 
+	/**
+	 * A map of bean name to errors when instantiating the bean.
+	 *
+	 * @return the errors accumulated since the latest destroy
+	 */
+	public Map<String, Exception> getErrors() {
+		return this.errors;
+	}
+
 	@ManagedOperation
 	public void rebind() {
+		this.errors.clear();
 		for (String name : this.beans.getBeanNames()) {
 			rebind(name);
 		}
@@ -81,11 +95,17 @@ ApplicationListener<EnvironmentChangeEvent> {
 			return false;
 		}
 		if (this.applicationContext != null) {
-			Object bean = this.applicationContext.getBean(name);
-			this.binder.postProcessBeforeInitialization(bean, name);
-			this.applicationContext.getAutowireCapableBeanFactory().initializeBean(bean,
-					name);
-			return true;
+			try {
+				Object bean = this.applicationContext.getBean(name);
+				this.binder.postProcessBeforeInitialization(bean, name);
+				this.applicationContext.getAutowireCapableBeanFactory()
+						.initializeBean(bean, name);
+				return true;
+			}
+			catch (RuntimeException e) {
+				this.errors.put(name, e);
+				throw e;
+			}
 		}
 		return false;
 	}
