@@ -38,14 +38,22 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private final int port;
 
+	private final String address;
+
 	private final boolean secure;
 
 	private final Map<String, String> metadata;
 
 	public DefaultServiceInstance(String serviceId, String host, int port,
 			boolean secure) {
-		this(serviceId, host, port, secure, new LinkedHashMap<String, String>());
+		this(serviceId, host, port, null, secure, new LinkedHashMap<String, String>());
 	}
+
+	public DefaultServiceInstance(String serviceId, String host, int port, String address,
+								  boolean secure) {
+		this(serviceId, host, port, address, secure, new LinkedHashMap<String, String>());
+	}
+
 
 	@Override
 	public URI getUri() {
