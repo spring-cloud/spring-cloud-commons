@@ -72,13 +72,15 @@ public class LifecycleMvcEndpointAutoConfiguration {
 	}
 
 	@Bean
-	public MvcEndpoint pauseMvcEndpoint(RestartMvcEndpoint restartEndpoint) {
-		return restartEndpoint.getPauseEndpoint();
+	@ConditionalOnBean(RestartEndpoint.PauseEndpoint.class)
+	public MvcEndpoint pauseMvcEndpoint(RestartEndpoint.PauseEndpoint pauseEndpoint) {
+		return new GenericPostableMvcEndpoint(pauseEndpoint);
 	}
 
 	@Bean
-	public MvcEndpoint resumeMvcEndpoint(RestartMvcEndpoint restartEndpoint) {
-		return restartEndpoint.getResumeEndpoint();
+	@ConditionalOnBean(RestartEndpoint.ResumeEndpoint.class)
+	public MvcEndpoint resumeMvcEndpoint(RestartEndpoint.ResumeEndpoint resumeEndpoint) {
+		return new GenericPostableMvcEndpoint(resumeEndpoint);
 	}
 
 }

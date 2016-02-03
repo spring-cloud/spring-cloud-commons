@@ -107,15 +107,15 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean> implements
 		}
 	}
 
-	public Endpoint<Boolean> getPauseEndpoint() {
+	public PauseEndpoint getPauseEndpoint() {
 		return new PauseEndpoint();
 	}
 
-	public Endpoint<Boolean> getResumeEndpoint() {
+	public ResumeEndpoint getResumeEndpoint() {
 		return new ResumeEndpoint();
 	}
 
-	private class PauseEndpoint extends AbstractEndpoint<Boolean> {
+	public class PauseEndpoint extends AbstractEndpoint<Boolean> {
 
 		public PauseEndpoint() {
 			super("pause", true, true);
@@ -131,7 +131,7 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean> implements
 		}
 	}
 
-	private class ResumeEndpoint extends AbstractEndpoint<Boolean> {
+	public class ResumeEndpoint extends AbstractEndpoint<Boolean> {
 
 		public ResumeEndpoint() {
 			super("resume", true, true);

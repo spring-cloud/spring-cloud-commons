@@ -94,13 +94,13 @@ public class RefreshEndpointAutoConfiguration {
 
 	@Bean
 	@ConfigurationProperties("endpoints.pause")
-	public Endpoint<Boolean> pauseEndpoint(RestartEndpoint restartEndpoint) {
+	public RestartEndpoint.PauseEndpoint pauseEndpoint(RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getPauseEndpoint();
 	}
 
 	@Bean
 	@ConfigurationProperties("endpoints.resume")
-	public Endpoint<Boolean> resumeEndpoint(RestartEndpoint restartEndpoint) {
+	public RestartEndpoint.ResumeEndpoint resumeEndpoint(RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getResumeEndpoint();
 	}
 

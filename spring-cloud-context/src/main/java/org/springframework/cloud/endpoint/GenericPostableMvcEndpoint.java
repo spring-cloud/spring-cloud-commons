@@ -16,7 +16,6 @@
 package org.springframework.cloud.endpoint;
 
 import java.util.Collections;
-import java.util.Map;
 
 import org.springframework.boot.actuate.endpoint.Endpoint;
 import org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter;
@@ -44,7 +43,7 @@ public class GenericPostableMvcEndpoint extends EndpointMvcAdapter {
 	@Override
 	public Object invoke() {
 		if (!getDelegate().isEnabled()) {
-			return new ResponseEntity<Map<String, String>>(Collections.singletonMap(
+			return new ResponseEntity<>(Collections.singletonMap(
 					"message", "This endpoint is disabled"), HttpStatus.NOT_FOUND);
 		}
 		return super.invoke();
