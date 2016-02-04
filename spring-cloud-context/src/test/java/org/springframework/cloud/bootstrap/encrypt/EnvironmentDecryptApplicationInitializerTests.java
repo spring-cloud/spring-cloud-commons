@@ -30,7 +30,7 @@ import static org.junit.Assert.assertEquals;
  * @author Dave Syer
  *
  */
-public class EnvironmentDecryptApplicationListenerTests {
+public class EnvironmentDecryptApplicationInitializerTests {
 
 	private EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
 			Encryptors.noOpText());
@@ -41,6 +41,14 @@ public class EnvironmentDecryptApplicationListenerTests {
 		EnvironmentTestUtils.addEnvironment(context, "foo: {cipher}bar");
 		this.listener.initialize(context);
 		assertEquals("bar", context.getEnvironment().getProperty("foo"));
+	}
+
+	@Test
+	public void relaxedBinding() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
+		EnvironmentTestUtils.addEnvironment(context, "FOO_TEXT: {cipher}bar");
+		this.listener.initialize(context);
+		assertEquals("bar", context.getEnvironment().getProperty("foo.text"));
 	}
 
 	@Test
