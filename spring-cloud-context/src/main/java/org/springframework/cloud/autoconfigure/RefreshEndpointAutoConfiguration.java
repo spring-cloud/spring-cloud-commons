@@ -38,6 +38,7 @@ import org.springframework.cloud.context.properties.ConfigurationPropertiesRebin
 import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.RefreshEndpoint;
+import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.health.RefreshScopeHealthIndicator;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -115,6 +116,11 @@ public class RefreshEndpointAutoConfiguration {
 				RefreshScope scope) {
 			RefreshEndpoint endpoint = new RefreshEndpoint(context, scope);
 			return endpoint;
+		}
+
+		@Bean
+		public RefreshEventListener refreshEventListener(RefreshEndpoint refreshEndpoint) {
+			return new RefreshEventListener(refreshEndpoint);
 		}
 
 	}
