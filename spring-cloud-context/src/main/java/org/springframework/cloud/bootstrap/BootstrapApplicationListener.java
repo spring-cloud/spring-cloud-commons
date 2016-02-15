@@ -302,8 +302,10 @@ public class BootstrapApplicationListener
 						DEFAULT_PROPERTIES, defaultProperties.getSource()));
 				for (PropertySource<?> source : defaultProperties.getPropertySources()
 						.getPropertySources()) {
-					environment.getPropertySources().addBefore(DEFAULT_PROPERTIES,
-							source);
+					if (!environment.getPropertySources().contains(source.getName())) {
+						environment.getPropertySources().addBefore(DEFAULT_PROPERTIES,
+								source);
+					}
 				}
 			}
 		}
