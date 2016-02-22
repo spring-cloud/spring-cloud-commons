@@ -47,6 +47,16 @@ public class NamedContextFactoryTests {
 		Map<String, Baz> barBazes = factory.getInstances("bar", Baz.class);
 		assertThat("barBazes was null", barBazes, is(notNullValue()));
 		assertThat("barBazes size was wrong", barBazes.size(), is(2));
+
+		// get the contexts before destroy() to verify these are the old ones
+		AnnotationConfigApplicationContext fooContext = factory.getContext("foo");
+		AnnotationConfigApplicationContext barContext = factory.getContext("bar");
+
+		factory.destroy();
+
+		assertThat("foo context wasn't closed", fooContext.isActive(), is(false));
+
+		assertThat("bar context wasn't closed", barContext.isActive(), is(false));
 	}
 
 	private TestSpec getSpec(String name, Class<?> configClass) {

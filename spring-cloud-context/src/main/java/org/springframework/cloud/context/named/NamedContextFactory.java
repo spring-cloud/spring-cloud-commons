@@ -62,10 +62,10 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	@Override
 	public void destroy() {
 		Collection<AnnotationConfigApplicationContext> values = this.contexts.values();
-		this.contexts.clear();
 		for (AnnotationConfigApplicationContext context : values) {
 			context.close();
 		}
+		this.contexts.clear();
 	}
 
 	protected AnnotationConfigApplicationContext getContext(String name) {
