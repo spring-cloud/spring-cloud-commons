@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.discovery.health;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +30,24 @@ import org.springframework.boot.actuate.health.HealthIndicator;
  * and aggregates the statuses.
  * @author Spencer Gibb
  */
+//TODO: do we need this? Can they just be independent HealthIndicators?
 public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator {
+
+	private final ArrayList<Holder> healthIndicators = new ArrayList<>();
 
 	@Autowired
 	public DiscoveryCompositeHealthIndicator(HealthAggregator healthAggregator,
 			List<DiscoveryHealthIndicator> indicators) {
 		super(healthAggregator);
 		for (DiscoveryHealthIndicator indicator : indicators) {
-			addHealthIndicator(indicator.getName(), new Holder(indicator));
+			Holder holder = new Holder(indicator);
+			addHealthIndicator(indicator.getName(), holder);
+			healthIndicators.add(holder);
 		}
+	}
+
+	public ArrayList<Holder> getHealthIndicators() {
+		return healthIndicators;
 	}
 
 	public static class Holder implements HealthIndicator {
@@ -52,7 +62,7 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 			return this.delegate.health();
 		}
 
-		protected DiscoveryHealthIndicator getDelegate() {
+		public DiscoveryHealthIndicator getDelegate() {
 			return delegate;
 		}
 	}
