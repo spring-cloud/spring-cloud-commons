@@ -43,6 +43,7 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -334,7 +335,8 @@ public class BootstrapApplicationListener
 
 	}
 
-	private static class ExtendedDefaultPropertySource extends MapPropertySource {
+	private static class ExtendedDefaultPropertySource
+			extends SystemEnvironmentPropertySource {
 
 		private final CompositePropertySource sources;
 		private final List<String> names = new ArrayList<>();
