@@ -263,8 +263,8 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		}
 		else {
 			logger.warn(
-					"BeanFactory was not a DefaultListableBeanFactory, so RefreshScope beans "
-							+ "cannot be serialized reliably and passed to a remote JVM.");
+					"BeanFactory was not a DefaultListableBeanFactory, scoped proxy beans "
+							+ "cannot be serialized.");
 		}
 
 	}
