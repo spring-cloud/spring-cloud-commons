@@ -87,7 +87,7 @@ public class NoopDiscoveryClientAutoConfiguration implements
 				EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) this.context)
 						.getEmbeddedServletContainer();
 				if (container != null) {
-					port = container.getPort();
+					port = port != 0 ? port : container.getPort();
 				}
 			}
 		}
