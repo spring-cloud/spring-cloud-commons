@@ -51,12 +51,14 @@ import org.springframework.context.annotation.Configuration;
 public class CommonsClientAutoConfiguration {
 
 	@Bean
+	@ConditionalOnProperty(value = "spring.cloud.discovery.client.health-indicator.enabled", matchIfMissing = true)
 	public DiscoveryClientHealthIndicator discoveryClientHealthIndicator(
 			DiscoveryClient discoveryClient) {
 		return new DiscoveryClientHealthIndicator(discoveryClient);
 	}
 
 	@Bean
+	@ConditionalOnProperty(value = "spring.cloud.discovery.client.composite-indicator.enabled", matchIfMissing = true)
 	public DiscoveryCompositeHealthIndicator discoveryCompositeHealthIndicator(
 			HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
 		return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
@@ -70,6 +72,7 @@ public class CommonsClientAutoConfiguration {
 
 	@Configuration
 	@ConditionalOnClass(Endpoint.class)
+	@ConditionalOnProperty(value = "spring.cloud.features.enabled", matchIfMissing = true)
 	protected static class ActuatorConfiguration {
 		@Autowired(required = false)
 		private List<HasFeatures> hasFeatures = new ArrayList<>();
