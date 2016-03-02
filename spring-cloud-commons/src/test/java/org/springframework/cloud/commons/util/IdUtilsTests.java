@@ -1,4 +1,4 @@
-package org.springframework.cloud.util;
+package org.springframework.cloud.commons.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

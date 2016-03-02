@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.util;
+package org.springframework.cloud.commons.util;
 
 import java.net.InetAddress;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.springframework.cloud.util.InetUtils.HostInfo;
+import org.springframework.cloud.commons.util.InetUtils.HostInfo;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

@@ -1,4 +1,4 @@
-package org.springframework.cloud.util;
+package org.springframework.cloud.commons.util;
 
 import java.io.Closeable;
 import java.io.IOException;

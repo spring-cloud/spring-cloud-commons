@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.util;
+package org.springframework.cloud.commons.util;
 
 import org.junit.Test;
 
@@ -32,7 +32,7 @@ public class SpringFactoryImportSelectorTests {
 				selector.getAnnotationClass());
 	}
 
-	public static @interface MyAnnotation {
+	public @interface MyAnnotation {
 	}
 
 	public static class MyAnnotationImportSelector extends

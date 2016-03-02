@@ -1,4 +1,4 @@
-package org.springframework.cloud.util;
+package org.springframework.cloud.commons.util;
 
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

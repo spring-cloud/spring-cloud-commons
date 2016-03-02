@@ -1,4 +1,4 @@
-package org.springframework.cloud.util;
+package org.springframework.cloud.commons.util;
 
 import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.core.env.PropertyResolver;

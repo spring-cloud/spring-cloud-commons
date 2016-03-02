@@ -1,4 +1,4 @@
-package org.springframework.cloud.util;
+package org.springframework.cloud.commons.util;
 
 import java.util.ArrayList;
 import java.util.List;
