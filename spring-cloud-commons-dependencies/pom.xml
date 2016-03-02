@@ -5,33 +5,33 @@
 	<parent>
 		<artifactId>spring-cloud-dependencies-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
-		<version>1.1.0.BUILD-SNAPSHOT</version>
+		<version>1.1.0.RC1</version>
         <relativePath/>
 	</parent>
 	<artifactId>spring-cloud-commons-dependencies</artifactId>
-	<version>1.1.0.BUILD-SNAPSHOT</version>
+	<version>1.1.0.RC1</version>
 	<packaging>pom</packaging>
 	<name>spring-cloud-commons-dependencies</name>
 	<description>Spring Cloud Commons Dependencies</description>
 	<properties>
-		<spring-cloud-commons.version>1.1.0.BUILD-SNAPSHOT</spring-cloud-commons.version>
+		<spring-cloud-commons.version>1.1.0.RC1</spring-cloud-commons.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-commons</artifactId>
-				<version>1.1.0.BUILD-SNAPSHOT</version>
+				<version>1.1.0.RC1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-context</artifactId>
-				<version>1.1.0.BUILD-SNAPSHOT</version>
+				<version>1.1.0.RC1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter</artifactId>
-				<version>1.1.0.BUILD-SNAPSHOT</version>
+				<version>1.1.0.RC1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
