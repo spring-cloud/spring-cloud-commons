@@ -315,11 +315,23 @@ for details of how the `RestTemplate` is set up.
 === Multiple RestTemplate objects
 
 If you want a `RestTemplate` that is not load balanced, create a `RestTemplate`
-bean  and inject it as normal.  To access the load balanced `RestTemplate use
-the provided `@LoadBalanced` `Qualifier`:
+bean and inject it as normal.  To access the load balanced `RestTemplate use
+the provided `@LoadBalanced` `Qualifier`.
+
+IMPORTANT: Notice the `@Primary` annotation on the plain `RestTemplate` declaration.
 
 [source,java,indent=0]
 ----
+@Configuration
+public class MyConfiguration {
+
+    @Primary
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
 public class MyClass {
     @Autowired
     private RestTemplate restTemplate;
