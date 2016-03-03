@@ -340,6 +340,8 @@ public class MyClass {
 }
 ----
 
+TIP: If you see errors like `java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89` try injecting `RestOperations` instead or setting `spring.aop.proxyTargetClass=true`.
+
 [[ignore-network-interfaces]]
 === Ignore Network Interfaces
 
