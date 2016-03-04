@@ -35,8 +35,8 @@ import org.springframework.core.env.Environment;
  * @author Dave Syer
  *
  */
-public class LoggingRebinder implements ApplicationListener<EnvironmentChangeEvent>,
-		EnvironmentAware {
+public class LoggingRebinder
+		implements ApplicationListener<EnvironmentChangeEvent>, EnvironmentAware {
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -71,7 +71,7 @@ public class LoggingRebinder implements ApplicationListener<EnvironmentChangeEve
 				name = null;
 			}
 			level = environment.resolvePlaceholders(level);
-			system.setLogLevel(name, LogLevel.valueOf(level));
+			system.setLogLevel(name, LogLevel.valueOf(level.toUpperCase()));
 		}
 		catch (RuntimeException ex) {
 			this.logger.error("Cannot set level: " + level + " for '" + name + "'");

@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.logging;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Collections;
 
 import org.junit.After;
@@ -27,8 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.boot.test.EnvironmentTestUtils;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
+import org.springframework.core.env.StandardEnvironment;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dave Syer
@@ -38,20 +38,35 @@ public class LoggingRebinderTests {
 
 	private LoggingRebinder rebinder = new LoggingRebinder();
 	private Logger logger = LoggerFactory.getLogger("org.springframework.web");
-	
+
 	@After
 	public void reset() {
-		LoggingSystem.get(getClass().getClassLoader()).setLogLevel("org.springframework.web", LogLevel.INFO);
+		LoggingSystem.get(getClass().getClassLoader())
+				.setLogLevel("org.springframework.web", LogLevel.INFO);
 	}
 
 	@Test
 	public void logLevelsChanged() {
-		assertFalse(logger.isTraceEnabled());
+		assertFalse(this.logger.isTraceEnabled());
 		StandardEnvironment environment = new StandardEnvironment();
-		EnvironmentTestUtils.addEnvironment(environment, "logging.level.org.springframework.web=TRACE");
-		rebinder.setEnvironment(environment);
-		rebinder.onApplicationEvent(new EnvironmentChangeEvent(Collections.singleton("logging.level.org.springframework.web")));
-		assertTrue(logger.isTraceEnabled());
+		EnvironmentTestUtils.addEnvironment(environment,
+				"logging.level.org.springframework.web=TRACE");
+		this.rebinder.setEnvironment(environment);
+		this.rebinder.onApplicationEvent(new EnvironmentChangeEvent(
+				Collections.singleton("logging.level.org.springframework.web")));
+		assertTrue(this.logger.isTraceEnabled());
+	}
+
+	@Test
+	public void logLevelsLowerCase() {
+		assertFalse(this.logger.isTraceEnabled());
+		StandardEnvironment environment = new StandardEnvironment();
+		EnvironmentTestUtils.addEnvironment(environment,
+				"logging.level.org.springframework.web=trace");
+		this.rebinder.setEnvironment(environment);
+		this.rebinder.onApplicationEvent(new EnvironmentChangeEvent(
+				Collections.singleton("logging.level.org.springframework.web")));
+		assertTrue(this.logger.isTraceEnabled());
 	}
 
 }
