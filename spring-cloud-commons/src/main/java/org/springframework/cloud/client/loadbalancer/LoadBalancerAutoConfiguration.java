@@ -17,8 +17,11 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -38,15 +41,23 @@ import org.springframework.web.client.RestTemplate;
 @ConditionalOnBean(LoadBalancerClient.class)
 public class LoadBalancerAutoConfiguration {
 
-	@Bean
 	@LoadBalanced
-	public RestTemplate loadBalancedRestTemplate(
-			List<RestTemplateCustomizer> customizers) {
-		RestTemplate restTemplate = new RestTemplate();
-		for (RestTemplateCustomizer customizer : customizers) {
-			customizer.customize(restTemplate);
-		}
-		return restTemplate;
+	@Autowired(required = false)
+	private List<RestTemplate> restTemplates = Collections.emptyList();
+
+	@Bean
+	public SmartInitializingSingleton loadBalancedRestTemplateInitializer(
+			final List<RestTemplateCustomizer> customizers) {
+		return new SmartInitializingSingleton() {
+			@Override
+			public void afterSingletonsInstantiated() {
+				for (RestTemplate restTemplate : LoadBalancerAutoConfiguration.this.restTemplates) {
+					for (RestTemplateCustomizer customizer : customizers) {
+						customizer.customize(restTemplate);
+					}
+				}
+			}
+		};
 	}
 
 	@Bean
