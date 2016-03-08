@@ -293,11 +293,22 @@ Patterns such as service discovery, load balancing and circuit breakers lend the
 
 === Spring RestTemplate as a Load Balancer Client
 
-You can use Ribbon indirectly via an autoconfigured `RestTemplate`
-when RestTemplate is on the classpath and a `LoadBalancerClient` bean is defined):
+`RestTemplate` can be automatically configured to use ribbon. To create a load balanced `RestTemplate` create a `RestTemplate` `@Bean` and use the `@LoadBalanced` qualifier.
+
+WARNING: A `RestTemplate` bean is no longer created via auto configuration. It must be created by individual applications.
 
 [source,java,indent=0]
 ----
+@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
 public class MyClass {
     @Autowired
     private RestTemplate restTemplate;
