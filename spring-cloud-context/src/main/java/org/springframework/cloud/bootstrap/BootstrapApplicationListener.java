@@ -121,7 +121,9 @@ public class BootstrapApplicationListener
 				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)
 				.environment(bootstrapEnvironment)
 				.properties("spring.application.name:" + configName)
-				.registerShutdownHook(false).web(false);
+				.registerShutdownHook(false)
+				.logStartupInfo(false)
+				.web(false);
 		List<Class<?>> sources = new ArrayList<>();
 		for (String name : names) {
 			Class<?> cls = ClassUtils.resolveClassName(name, null);
