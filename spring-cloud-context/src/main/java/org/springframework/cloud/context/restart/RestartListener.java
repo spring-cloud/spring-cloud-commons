@@ -26,7 +26,7 @@ import org.springframework.context.event.SmartApplicationListener;
 /**
  * A listener that stores enough information about an application as it starts, to be able
  * to restart it later if needed.
- * 
+ *
  * @author Dave Syer
  *
  */
@@ -57,19 +57,21 @@ public class RestartListener implements SmartApplicationListener {
 	@Override
 	public void onApplicationEvent(ApplicationEvent input) {
 		if (input instanceof ApplicationPreparedEvent) {
-			event = (ApplicationPreparedEvent) input;
-			if (context == null) {
-				context = event.getApplicationContext();
+			this.event = (ApplicationPreparedEvent) input;
+			if (this.context == null) {
+				this.context = this.event.getApplicationContext();
 			}
 		}
 		else if (input instanceof ContextRefreshedEvent) {
-			if (context != null && input.getSource().equals(context) && event != null) {
-				context.publishEvent(event);
+			if (this.context != null && input.getSource().equals(this.context)
+					&& this.event != null) {
+				this.context.publishEvent(this.event);
 			}
 		}
 		else {
-			if (context != null && input.getSource().equals(context)) {
-				context = null;
+			if (this.context != null && input.getSource().equals(this.context)) {
+				this.context = null;
+				this.event = null;
 			}
 		}
 	}
