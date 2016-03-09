@@ -16,6 +16,7 @@ package org.springframework.cloud.context.scope;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -251,8 +252,10 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 
 			String id = this.id;
 			if (id == null) {
-				String names = Arrays.asList(beanFactory.getBeanDefinitionNames())
-						.toString();
+				List<String> list = new ArrayList<>(
+						Arrays.asList(beanFactory.getBeanDefinitionNames()));
+				Collections.sort(list);
+				String names = list.toString();
 				logger.debug("Generating bean factory id from names: " + names);
 				id = UUID.nameUUIDFromBytes(names.getBytes()).toString();
 			}
