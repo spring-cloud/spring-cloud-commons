@@ -147,7 +147,7 @@ public class RefreshEndpointTests {
 				.web(false).bannerMode(Mode.OFF).run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(context);
-		RefreshSupport refreshSupport = new RefreshSupport(this.context, scope);
+		RefreshSupport refreshSupport = new RefreshSupport(context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(refreshSupport);
 		int count = countShutdownHooks();
 		endpoint.invoke();
