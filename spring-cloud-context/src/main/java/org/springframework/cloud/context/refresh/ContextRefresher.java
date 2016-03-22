@@ -28,7 +28,7 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * 
  * @author Venil Noronha
  */
-public class RefreshSupport {
+public class ContextRefresher {
 
 	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
 
@@ -42,7 +42,7 @@ public class RefreshSupport {
 	private ConfigurableApplicationContext context;
 	private RefreshScope scope;
 
-	public RefreshSupport(ConfigurableApplicationContext context, RefreshScope scope) {
+	public ContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
 		this.context = context;
 		this.scope = scope;
 	}

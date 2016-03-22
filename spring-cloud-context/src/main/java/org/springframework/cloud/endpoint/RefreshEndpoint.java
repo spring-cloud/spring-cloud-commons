@@ -22,7 +22,7 @@ import java.util.Set;
 
 import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.refresh.RefreshSupport;
+import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
@@ -34,16 +34,16 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 @ManagedResource
 public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
 
-	private RefreshSupport refreshSupport;
+	private ContextRefresher contextRefresher;
 
-	public RefreshEndpoint(RefreshSupport refreshSupport) {
+	public RefreshEndpoint(ContextRefresher contextRefresher) {
 		super("refresh");
-		this.refreshSupport = refreshSupport;
+		this.contextRefresher = contextRefresher;
 	}
 
 	@ManagedOperation
 	public String[] refresh() {
-		Set<String> keys = refreshSupport.refresh();
+		Set<String> keys = contextRefresher.refresh();
 		return keys.toArray(new String[keys.size()]);
 	}
 
