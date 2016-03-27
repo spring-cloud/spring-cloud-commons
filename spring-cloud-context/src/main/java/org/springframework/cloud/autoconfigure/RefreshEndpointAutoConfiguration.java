@@ -35,18 +35,22 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
+import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.RefreshEndpoint;
 import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.health.RefreshScopeHealthIndicator;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.integration.monitor.IntegrationMBeanExporter;
 
+/**
+ * 
+ * @author Venil Noronha
+ */
 @Configuration
 @ConditionalOnClass(Endpoint.class)
 @AutoConfigureAfter(EndpointAutoConfiguration.class)
@@ -112,9 +116,8 @@ public class RefreshEndpointAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public RefreshEndpoint refreshEndpoint(ConfigurableApplicationContext context,
-				RefreshScope scope) {
-			RefreshEndpoint endpoint = new RefreshEndpoint(context, scope);
+		public RefreshEndpoint refreshEndpoint(ContextRefresher contextRefresher) {
+			RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 			return endpoint;
 		}
 
