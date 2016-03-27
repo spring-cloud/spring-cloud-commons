@@ -28,7 +28,7 @@ the external sources, and also decrypting properties in the local
 external configuration files. The two contexts share an `Environment`
 which is the source of external properties for any Spring
 application. Bootstrap properties are added with high precedence, so
-they cannot be overridden by local configuration.
+they cannot be overridden by local configuration, by default.
 
 The bootstrap context uses a different convention for locating
 external configuration than the main application context, so instead
@@ -122,6 +122,25 @@ bootstrap `ApplicationContext` by setting those properties in its
 context you are building) then properties in that profile will be
 loaded as well, just like in a regular Spring Boot app, e.g. from
 `bootstrap-development.properties` for a "development" profile.
+
+[[overriding-bootstrap-properties]]
+=== Overriding the Values of Remote Properties
+
+The property sources that are added to you application by the
+bootstrap context are often "remote" (e.g. from a Config Server), and
+by default they cannot be overridden locally, except on the command
+line. If you want to allow your applications to override the remote
+properties with their own System properties or config files, the
+remote property source has to grant it permission by setting
+`spring.cloud.config.allowOverride=true` (it doesn't work to set this
+locally). Once that flag is set there are some finer grained settings
+to control the location of the remote properties in relation to System
+properties and the application's local configuration:
+`spring.cloud.config.overrideNone=true` to override with any local
+property source, and
+`spring.cloud.config.overrideSystemProperties=false` if only System
+properties and env vars should override the remote settings, but not
+the local config files.
 
 === Customizing the Bootstrap Configuration
 
