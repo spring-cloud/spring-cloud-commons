@@ -30,6 +30,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.EnvironmentTestUtils;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
+import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.context.ApplicationEvent;
@@ -49,7 +50,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dave Syer
- *
+ * @author Venil Noronha
  */
 public class RefreshEndpointTests {
 
@@ -70,7 +71,8 @@ public class RefreshEndpointTests {
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		EnvironmentTestUtils.addEnvironment(this.context, "spring.profiles.active=local");
-		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
+		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
+		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.invoke();
 		assertTrue("Wrong keys: " + keys, keys.contains("added"));
 	}
@@ -84,7 +86,8 @@ public class RefreshEndpointTests {
 		scope.setApplicationContext(this.context);
 		EnvironmentTestUtils.addEnvironment(this.context,
 				"spring.profiles.active=override");
-		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
+		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
+		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.invoke();
 		assertTrue("Wrong keys: " + keys, keys.contains("message"));
 	}
@@ -99,7 +102,8 @@ public class RefreshEndpointTests {
 		EnvironmentTestUtils.addEnvironment(this.context,
 				"spring.cloud.bootstrap.sources="
 						+ ExternalPropertySourceLocator.class.getName());
-		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
+		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
+		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.invoke();
 		assertTrue("Wrong keys: " + keys, keys.contains("external.message"));
 	}
@@ -116,7 +120,8 @@ public class RefreshEndpointTests {
 		// construct the environment for refresh)
 		EnvironmentTestUtils.addEnvironment(this.context,
 				"spring.main.sources=" + ExternalPropertySourceLocator.class.getName());
-		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
+		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
+		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.invoke();
 		assertFalse("Wrong keys: " + keys, keys.contains("external.message"));
 	}
@@ -127,7 +132,8 @@ public class RefreshEndpointTests {
 				.bannerMode(Mode.OFF).run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		RefreshEndpoint endpoint = new RefreshEndpoint(this.context, scope);
+		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
+		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Empty empty = this.context.getBean(Empty.class);
 		endpoint.invoke();
 		int after = empty.events.size();
@@ -141,7 +147,8 @@ public class RefreshEndpointTests {
 				.web(false).bannerMode(Mode.OFF).run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(context);
-		RefreshEndpoint endpoint = new RefreshEndpoint(context, scope);
+		ContextRefresher contextRefresher = new ContextRefresher(context, scope);
+		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		int count = countShutdownHooks();
 		endpoint.invoke();
 		int after = countShutdownHooks();
