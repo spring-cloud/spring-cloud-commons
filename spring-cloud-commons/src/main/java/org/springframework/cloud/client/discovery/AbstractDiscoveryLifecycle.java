@@ -170,7 +170,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	 * @return the app name, currently the spring.application.name property
 	 */
 	protected String getAppName() {
-		return this.environment.getProperty("spring.application.name");
+		return this.environment.getProperty("spring.application.name", "application");
 	}
 
 	@Override

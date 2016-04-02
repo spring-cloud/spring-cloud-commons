@@ -37,6 +37,7 @@ public class AbstractDiscoveryLifecycleTests {
 		assertEquals("Lifecycle port is wrong", port, lifecycle.getPort().get());
 		assertTrue("Lifecycle not running", lifecycle.isRunning());
 		assertTrue("Lifecycle not registered", lifecycle.isRegistered());
+		assertEquals("Lifecycle appName is wrong", "application", lifecycle.getAppName());
 	}
 
 	@EnableAutoConfiguration
