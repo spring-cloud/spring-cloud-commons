@@ -22,6 +22,7 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.actuate.autoconfigure.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.autoconfigure.EndpointAutoConfiguration;
 import org.springframework.boot.actuate.endpoint.Endpoint;
 import org.springframework.boot.actuate.endpoint.InfoEndpoint;
@@ -64,6 +65,7 @@ public class RefreshEndpointAutoConfiguration {
 	}
 
 	@ConditionalOnMissingBean
+	@ConditionalOnEnabledHealthIndicator("refresh")
 	@Bean
 	RefreshScopeHealthIndicator refreshScopeHealthIndicator(RefreshScope scope,
 			ConfigurationPropertiesRebinder rebinder) {
@@ -106,7 +108,8 @@ public class RefreshEndpointAutoConfiguration {
 
 	@Bean
 	@ConfigurationProperties("endpoints.resume")
-	public RestartEndpoint.ResumeEndpoint resumeEndpoint(RestartEndpoint restartEndpoint) {
+	public RestartEndpoint.ResumeEndpoint resumeEndpoint(
+			RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getResumeEndpoint();
 	}
 
@@ -123,7 +126,8 @@ public class RefreshEndpointAutoConfiguration {
 		}
 
 		@Bean
-		public RefreshEventListener refreshEventListener(RefreshEndpoint refreshEndpoint) {
+		public RefreshEventListener refreshEventListener(
+				RefreshEndpoint refreshEndpoint) {
 			return new RefreshEventListener(refreshEndpoint);
 		}
 
