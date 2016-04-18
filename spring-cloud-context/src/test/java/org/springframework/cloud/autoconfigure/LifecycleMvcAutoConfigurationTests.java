@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.context.environment.EnvironmentManagerMvcEndpoint;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,16 @@ import static org.junit.Assert.assertThat;
  * @author Spencer Gibb
  */
 public class LifecycleMvcAutoConfigurationTests {
+
+	@Test
+	public void postEnvMvcEndpointDisabled() {
+		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
+				"server.port=0", "endpoints.env.post.enabled=false")) {
+			assertThat(context
+					.getBeanNamesForType(EnvironmentManagerMvcEndpoint.class).length,
+					is(equalTo(0)));
+		}
+	}
 
 	@Test
 	public void pauseMvcEndpointDisabled() {
@@ -35,16 +46,21 @@ public class LifecycleMvcAutoConfigurationTests {
 	}
 
 	private void endpointDisabled(String enabledProp, String beanName) {
-		try (ConfigurableApplicationContext context = getApplicationContext(Config.class, "server.port=0", enabledProp +"=false")) {
-			EndpointMvcAdapter endpoint = context.getBean(beanName, EndpointMvcAdapter.class);
+		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
+				"server.port=0", enabledProp + "=false")) {
+			EndpointMvcAdapter endpoint = context.getBean(beanName,
+					EndpointMvcAdapter.class);
 			Object result = endpoint.invoke();
-			assertThat("result is wrong type", result, is(instanceOf(ResponseEntity.class)));
-			ResponseEntity response = (ResponseEntity) result;
-			assertThat("response code was wrong", response.getStatusCode(), equalTo(HttpStatus.NOT_FOUND));
+			assertThat("result is wrong type", result,
+					is(instanceOf(ResponseEntity.class)));
+			ResponseEntity<?> response = (ResponseEntity<?>) result;
+			assertThat("response code was wrong", response.getStatusCode(),
+					equalTo(HttpStatus.NOT_FOUND));
 		}
 	}
 
-	private static ConfigurableApplicationContext getApplicationContext(Class<?> configuration, String... properties) {
+	private static ConfigurableApplicationContext getApplicationContext(
+			Class<?> configuration, String... properties) {
 		return new SpringApplicationBuilder(configuration).properties(properties).run();
 	}
 

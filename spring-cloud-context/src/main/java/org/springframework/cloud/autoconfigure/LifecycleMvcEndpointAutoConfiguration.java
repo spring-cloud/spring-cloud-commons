@@ -43,7 +43,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnClass(EnvironmentEndpoint.class)
-@ConditionalOnProperty(value = "endpoints.env.enabled", matchIfMissing = true)
 @ConditionalOnWebApplication
 @ConditionalOnBean(RestartEndpoint.class)
 @AutoConfigureAfter({ WebMvcAutoConfiguration.class,
@@ -55,6 +54,7 @@ public class LifecycleMvcEndpointAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean(EnvironmentEndpoint.class)
+	@ConditionalOnProperty(value = "endpoints.env.post.enabled", matchIfMissing = true)
 	public EnvironmentManagerMvcEndpoint environmentManagerEndpoint(
 			EnvironmentEndpoint delegate, EnvironmentManager environment) {
 		return new EnvironmentManagerMvcEndpoint(delegate, environment);
