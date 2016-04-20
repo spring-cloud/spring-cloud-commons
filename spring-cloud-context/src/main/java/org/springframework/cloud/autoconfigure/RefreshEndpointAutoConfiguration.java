@@ -59,6 +59,7 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
 public class RefreshEndpointAutoConfiguration {
 
 	@ConditionalOnBean(EndpointAutoConfiguration.class)
+	@ConditionalOnMissingClass("org.springframework.boot.actuate.info.InfoContributor")
 	@Bean
 	InfoEndpointRebinderConfiguration infoEndpointRebinderConfiguration() {
 		return new InfoEndpointRebinderConfiguration();
