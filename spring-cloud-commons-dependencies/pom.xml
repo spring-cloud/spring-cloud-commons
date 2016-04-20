@@ -19,6 +19,11 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-rsa</artifactId>
+				<version>1.0.1.RELEASE</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-commons</artifactId>
 				<version>${spring-cloud-commons.version}</version>
