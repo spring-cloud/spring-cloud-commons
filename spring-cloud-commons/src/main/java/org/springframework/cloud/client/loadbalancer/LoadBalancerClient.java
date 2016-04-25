@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -30,7 +31,7 @@ public interface LoadBalancerClient {
 	 * @param serviceId the service id to look up the LoadBalancer
 	 * @return a ServiceInstance that matches the serviceId
 	 */
-	public ServiceInstance choose(String serviceId);
+	ServiceInstance choose(String serviceId);
 
 	/**
 	 * execute request using a ServiceInstance from the LoadBalancer for the specified
@@ -41,7 +42,7 @@ public interface LoadBalancerClient {
 	 * @return the result of the LoadBalancerRequest callback on the selected
 	 * ServiceInstance
 	 */
-	public <T> T execute(String serviceId, LoadBalancerRequest<T> request);
+	<T> T execute(String serviceId, LoadBalancerRequest<T> request) throws IOException;
 
 	/**
 	 * Create a proper URI with a real host and port for systems to utilize.
@@ -52,6 +53,6 @@ public interface LoadBalancerClient {
 	 * @param original a URI with the host as a logical service name
 	 * @return a reconstructed URI
 	 */
-	public URI reconstructURI(ServiceInstance instance, URI original);
+	URI reconstructURI(ServiceInstance instance, URI original);
 
 }
