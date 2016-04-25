@@ -7,10 +7,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
@@ -38,6 +40,8 @@ public class AbstractDiscoveryLifecycleTests {
 		assertTrue("Lifecycle not running", lifecycle.isRunning());
 		assertTrue("Lifecycle not registered", lifecycle.isRegistered());
 		assertEquals("Lifecycle appName is wrong", "application", lifecycle.getAppName());
+		assertTrue("Lifecycle didn't handle containerInit", lifecycle.isContainerInitHandled());
+		assertFalse("Lifecycle handled contextRefreshed", lifecycle.isContextRefreshedHandled());
 	}
 
 	@EnableAutoConfiguration
@@ -53,6 +57,8 @@ public class AbstractDiscoveryLifecycleTests {
 		private int port = 0;
 		private boolean registered = false;
 		private boolean deregistered = false;
+		private boolean containerInitHandled = false;
+		private boolean contextRefreshedHandled = false;
 
 		@Override
 		protected int getConfiguredPort() {
@@ -84,12 +90,34 @@ public class AbstractDiscoveryLifecycleTests {
 			return true;
 		}
 
+		@Override
+		public void handleContainerInit(EmbeddedServletContainerInitializedEvent event) {
+			this.containerInitHandled = true;
+			super.handleContainerInit(event);
+		}
+
+		@Override
+		public void handleContextRefreshed(ContextRefreshedEvent event) {
+			if (!super.isEmbeddedContext(event)) {
+				this.contextRefreshedHandled = true;
+			}
+			super.handleContextRefreshed(event);
+		}
+
 		public boolean isRegistered() {
 			return registered;
 		}
 
 		public boolean isDeregistered() {
 			return deregistered;
+		}
+
+		public boolean isContainerInitHandled() {
+			return containerInitHandled;
+		}
+
+		public boolean isContextRefreshedHandled() {
+			return contextRefreshedHandled;
 		}
 	}
 }

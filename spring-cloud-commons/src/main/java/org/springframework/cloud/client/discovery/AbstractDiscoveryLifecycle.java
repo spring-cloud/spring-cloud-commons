@@ -16,25 +16,32 @@
 
 package org.springframework.cloud.client.discovery;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
+import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Lifecycle methods that may be useful and common to various DiscoveryClient implementations.
  * @author Spencer Gibb
  */
 public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
-		ApplicationContextAware, ApplicationListener<EmbeddedServletContainerInitializedEvent> {
+		ApplicationContextAware {
+
+	private final Log logger = LogFactory.getLog(getClass());
 
 	private boolean autoStartup = true;
 
@@ -47,6 +54,9 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	private Environment environment;
 
 	private AtomicInteger port = new AtomicInteger(0);
+
+	@Value("${server.port:${SERVER_PORT:${PORT:-1}}}")
+	private Integer serverPort;
 
 	protected ApplicationContext getContext() {
 		return context;
@@ -203,13 +213,35 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		return 0;
 	}
 
-	@Override
-	public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
+	@EventListener
+	public void handleContainerInit(EmbeddedServletContainerInitializedEvent event) {
 		// TODO: take SSL into account
 		// Don't register the management port as THE port
 		if (!"management".equals(event.getApplicationContext().getNamespace())) {
 			this.port.compareAndSet(0, event.getEmbeddedServletContainer().getPort());
 			this.start();
 		}
+	}
+
+	/**
+	 * Handles the start() method for a traditional war deployment.
+	 * @param event
+	 */
+	@EventListener
+	public void handleContextRefreshed(ContextRefreshedEvent event) {
+		if (!isEmbeddedContext(event)) {
+			if (this.serverPort == null || this.serverPort <= 0) {
+				throw new IllegalStateException("Running as a traditional war and server.port is not set");
+			} else {
+				this.logger.info("Starting AbstractDiscoveryLifecycle during traditional war deployment using server.port: " + this.serverPort);
+				this.port.compareAndSet(0, this.serverPort);
+				this.start();
+			}
+		}
+	}
+
+	protected boolean isEmbeddedContext(ContextRefreshedEvent event) {
+		return event.getApplicationContext() instanceof EmbeddedWebApplicationContext
+				&& ((EmbeddedWebApplicationContext) event.getApplicationContext()).getEmbeddedServletContainer() != null;
 	}
 }
