@@ -2,7 +2,7 @@
   {
     "name": "management.health.refresh.enabled",
     "type": "java.lang.Boolean",
-    "description": "Enable the health endpoint or the refresh scope.",
+    "description": "Enable the health endpoint for the refresh scope.",
     "defaultValue": true
   },
   {
