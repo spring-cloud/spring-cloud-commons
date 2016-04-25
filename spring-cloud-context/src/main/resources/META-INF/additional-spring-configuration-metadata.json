@@ -1,5 +1,11 @@
 {"properties": [
   {
+    "name": "management.health.refresh.enabled",
+    "type": "java.lang.Boolean",
+    "description": "Enable the health endpoint or the refresh scope.",
+    "defaultValue": true
+  },
+  {
     "name": "endpoints.env.post.enabled",
     "type": "java.lang.Boolean",
     "description": "Enable changing the Environment through a POST to /env.",
