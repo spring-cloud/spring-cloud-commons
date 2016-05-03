@@ -3,8 +3,6 @@ package org.springframework.cloud.client.actuator;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Value;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
@@ -12,11 +10,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
+import lombok.Value;
+
 /**
  * @author Spencer Gibb
  */
 @ConfigurationProperties(prefix = "endpoints.features", ignoreUnknownFields = false)
-public class FeaturesEndpoint extends AbstractEndpoint<FeaturesEndpoint.Features> implements ApplicationContextAware {
+public class FeaturesEndpoint extends AbstractEndpoint<FeaturesEndpoint.Features>
+		implements ApplicationContextAware {
 
 	private final List<HasFeatures> hasFeaturesList;
 	private ApplicationContext context;
@@ -35,10 +36,10 @@ public class FeaturesEndpoint extends AbstractEndpoint<FeaturesEndpoint.Features
 	public Features invoke() {
 		Features features = new Features();
 
-		for (HasFeatures hasFeatures : hasFeaturesList) {
-			List<Class> abstractFeatures = hasFeatures.getAbstractFeatures();
+		for (HasFeatures hasFeatures : this.hasFeaturesList) {
+			List<Class<?>> abstractFeatures = hasFeatures.getAbstractFeatures();
 			if (abstractFeatures != null) {
-				for (Class clazz : abstractFeatures) {
+				for (Class<?> clazz : abstractFeatures) {
 					addAbstractFeature(features, clazz);
 				}
 			}
@@ -54,23 +55,24 @@ public class FeaturesEndpoint extends AbstractEndpoint<FeaturesEndpoint.Features
 		return features;
 	}
 
-	private void addAbstractFeature(Features features, Class type) {
+	private void addAbstractFeature(Features features, Class<?> type) {
 		String featureName = type.getSimpleName();
 		try {
-			Object bean = context.getBean(type);
+			Object bean = this.context.getBean(type);
 			Class<?> beanClass = bean.getClass();
 			addFeature(features, new NamedFeature(featureName, beanClass));
-		} catch (NoSuchBeanDefinitionException e) {
+		}
+		catch (NoSuchBeanDefinitionException e) {
 			features.getDisabled().add(featureName);
 		}
 	}
 
 	private void addFeature(Features features, NamedFeature feature) {
-			Class<?> type = feature.getType();
-			features.getEnabled().add(new Feature(feature.getName(),
-					type.getCanonicalName(),
-					type.getPackage().getImplementationVersion(),
-					type.getPackage().getImplementationVendor()));
+		Class<?> type = feature.getType();
+		features.getEnabled()
+				.add(new Feature(feature.getName(), type.getCanonicalName(),
+						type.getPackage().getImplementationVersion(),
+						type.getPackage().getImplementationVendor()));
 	}
 
 	@Value
