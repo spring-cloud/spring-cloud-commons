@@ -1,10 +1,7 @@
 package org.springframework.cloud.client.actuator;
 
-
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -16,8 +13,10 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Spencer Gibb
@@ -29,7 +28,8 @@ public class FeaturesEndpointTests {
 	@Before
 	public void setup() {
 		this.context = new AnnotationConfigApplicationContext();
-		this.context.register(JacksonAutoConfiguration.class, FeaturesConfig.class, Config.class);
+		this.context.register(JacksonAutoConfiguration.class, FeaturesConfig.class,
+				Config.class);
 		this.context.refresh();
 	}
 
@@ -42,7 +42,8 @@ public class FeaturesEndpointTests {
 
 	@Test
 	public void invokeWorks() {
-		FeaturesEndpoint.Features features = this.context.getBean(FeaturesEndpoint.class).invoke();
+		FeaturesEndpoint.Features features = this.context.getBean(FeaturesEndpoint.class)
+				.invoke();
 		assertThat(features, is(notNullValue()));
 		assertThat(features.getEnabled().size(), is(equalTo(2)));
 		assertThat(features.getDisabled().size(), is(equalTo(1)));
@@ -57,11 +58,11 @@ public class FeaturesEndpointTests {
 
 		@Bean
 		HasFeatures localFeatures() {
-			return HasFeatures.builder()
-					.abstractFeature(Foo.class)
-					.namedFeature(new NamedFeature("Bar Feature", Bar.class))
-					.abstractFeature(Baz.class)
-					.build();
+			HasFeatures features = HasFeatures.namedFeatures(
+					new NamedFeature("foo", Foo.class),
+					new NamedFeature("Bar Feature", Bar.class));
+			features.getAbstractFeatures().add(Bar.class);
+			return features;
 		}
 
 	}
@@ -74,11 +75,16 @@ public class FeaturesEndpointTests {
 
 		@Bean
 		public FeaturesEndpoint cloudEndpoint() {
-			return new FeaturesEndpoint(hasFeatures);
+			return new FeaturesEndpoint(this.hasFeatures);
 		}
 	}
 
-	public static class Foo {}
-	public static class Bar {}
-	public static class Baz {}
+	public static class Foo {
+	}
+
+	public static class Bar {
+	}
+
+	public static class Baz {
+	}
 }
