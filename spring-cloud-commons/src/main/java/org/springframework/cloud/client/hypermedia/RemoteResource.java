@@ -19,22 +19,21 @@ import org.springframework.hateoas.Link;
 
 /**
  * A REST resource that can be discovered and can be either gone or available.
- * 
+ *
  * @author Oliver Gierke
  */
 public interface RemoteResource {
 
 	/**
-	 * Returns the {@link Link} to the resource in case it is available or {@literal null} in case it's gone, i.e. either
-	 * generally unavailable or can't be discovered.
-	 * 
-	 * @return
+	 * Returns the {@link Link} to the resource in case it is available or {@literal null}
+	 * in case it's gone, i.e. either generally unavailable or can't be discovered.
 	 */
 	Link getLink();
 
 	/**
-	 * Discovers the the resource in case it hasn't been yet or became unavailable. In case a link has been discovered
-	 * previously, it is verified and either confirmed or the link is removed to indicate it's not available anymore.
+	 * Discovers the the resource in case it hasn't been yet or became unavailable. In
+	 * case a link has been discovered previously, it is verified and either confirmed or
+	 * the link is removed to indicate it's not available anymore.
 	 */
 	void verifyOrDiscover();
 }

@@ -20,14 +20,13 @@ import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 
 /**
  * Callback to define the traversal to a resource.
- * 
+ *
  * @author Oliver Gierke
  */
 public interface TraversalDefinition {
 
 	/**
 	 * @param traverson the Traverson instance to run the traversal on.
-	 * @return
 	 */
 	TraversalBuilder buildTraversal(Traverson traverson);
 }
