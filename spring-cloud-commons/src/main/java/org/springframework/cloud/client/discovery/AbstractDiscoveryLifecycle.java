@@ -16,8 +16,13 @@
 
 package org.springframework.cloud.client.discovery;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
@@ -26,15 +31,14 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * Lifecycle methods that may be useful and common to various DiscoveryClient implementations.
  * @author Spencer Gibb
  */
 public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		ApplicationContextAware, ApplicationListener<EmbeddedServletContainerInitializedEvent> {
+
+	private static final Log logger = LogFactory.getLog(AbstractDiscoveryLifecycle.class);
 
 	private boolean autoStartup = true;
 
@@ -74,7 +78,11 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 
 	@Override
 	public void stop(Runnable callback) {
-		stop();
+		try {
+			stop();
+		} catch (Exception e) {
+			logger.error("A problem occurred attempting to stop discovery lifecycle", e);
+		}
 		callback.run();
 	}
 
