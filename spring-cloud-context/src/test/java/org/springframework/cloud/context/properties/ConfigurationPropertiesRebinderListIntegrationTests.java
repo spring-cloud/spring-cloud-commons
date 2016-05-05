@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.context.properties;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 import java.util.Map;
 
@@ -39,10 +37,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@SpringApplicationConfiguration(classes=TestConfiguration.class)
+import static org.junit.Assert.assertEquals;
+
+@SpringApplicationConfiguration(classes = TestConfiguration.class)
 @RunWith(SpringJUnit4ClassRunner.class)
 @IntegrationTest("messages=one,two")
 public class ConfigurationPropertiesRebinderListIntegrationTests {
@@ -70,30 +71,39 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	@Ignore("Can't rebind to list and re-initialize it (need refresh scope for this to work)")
 	public void testReplaceProperties() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
-		@SuppressWarnings("unchecked")
-		Map<String,Object> map = (Map<String, Object>) this.environment.getPropertySources().get("integrationTest").getSource();
+		Map<String, Object> map = findTestProperties();
 		map.clear();
 		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
 		this.rebinder.rebind();
 		assertEquals("[foo]", this.properties.getMessages().toString());
 	}
 
+	private Map<String, Object> findTestProperties() {
+		for (PropertySource<?> source : this.environment.getPropertySources()) {
+			if (source.getName().toLowerCase().contains("test")) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> map = (Map<String, Object>) source.getSource();
+				return map;
+			}
+		}
+		throw new IllegalStateException("Could not find test property source");
+	}
+
 	@Test
 	@DirtiesContext
 	public void testReplacePropertiesWithCommaSeparated() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
-		@SuppressWarnings("unchecked")
-		Map<String,Object> map = (Map<String, Object>) this.environment.getPropertySources().get("integrationTest").getSource();
+		Map<String, Object> map = findTestProperties();
 		map.clear();
 		EnvironmentTestUtils.addEnvironment(this.environment, "messages:foo");
 		this.rebinder.rebind();
 		assertEquals("[foo]", this.properties.getMessages().toString());
 	}
 
-
 	@Configuration
 	@EnableConfigurationProperties
-	@Import({RefreshConfiguration.RebinderConfiguration.class, PropertyPlaceholderAutoConfiguration.class})
+	@Import({ RefreshConfiguration.RebinderConfiguration.class,
+			PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 
 		@Bean
@@ -106,7 +116,8 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	// Hack out a protected inner class for testing
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
 		@Configuration
-		protected static class RebinderConfiguration extends ConfigurationPropertiesRebinderAutoConfiguration {
+		protected static class RebinderConfiguration
+				extends ConfigurationPropertiesRebinderAutoConfiguration {
 
 		}
 	}
@@ -115,18 +126,22 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	protected static class TestProperties {
 		private List<String> messages;
 		private int count;
+
 		public List<String> getMessages() {
 			return this.messages;
 		}
+
 		public void setMessages(List<String> messages) {
 			this.messages = messages;
 		}
+
 		public int getCount() {
 			return this.count;
 		}
+
 		@PostConstruct
 		public void init() {
-			this.count ++;
+			this.count++;
 		}
 	}
 

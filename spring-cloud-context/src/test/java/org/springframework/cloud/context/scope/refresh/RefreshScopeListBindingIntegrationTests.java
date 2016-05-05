@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.context.scope.refresh;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +37,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertySource;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @SpringApplicationConfiguration(classes = TestConfiguration.class)
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -73,17 +74,28 @@ public class RefreshScopeListBindingIntegrationTests {
 	public void testReplaceProperties() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
 		assertTrue(this.properties instanceof Advised);
-		@SuppressWarnings("unchecked")
-		Map<String,Object> map = (Map<String, Object>) this.environment.getPropertySources().get("integrationTest").getSource();
+		Map<String, Object> map = findTestProperties();
 		map.clear();
 		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
 		this.scope.refreshAll();
 		assertEquals("[foo]", this.properties.getMessages().toString());
 	}
 
+	private Map<String, Object> findTestProperties() {
+		for (PropertySource<?> source : this.environment.getPropertySources()) {
+			if (source.getName().toLowerCase().contains("test")) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> map = (Map<String, Object>) source.getSource();
+				return map;
+			}
+		}
+		throw new IllegalStateException("Could not find test property source");
+	}
+
 	@Configuration
 	@EnableConfigurationProperties
-	@Import({ RefreshAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
+	@Import({ RefreshAutoConfiguration.class,
+			PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 
 		@Bean
