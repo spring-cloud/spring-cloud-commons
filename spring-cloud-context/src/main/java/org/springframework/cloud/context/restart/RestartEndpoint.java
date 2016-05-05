@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
-import org.springframework.boot.actuate.endpoint.Endpoint;
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationEvent;
@@ -43,8 +42,8 @@ import org.springframework.util.ClassUtils;
  */
 @ConfigurationProperties("endpoints.restart")
 @ManagedResource
-public class RestartEndpoint extends AbstractEndpoint<Boolean> implements
-		ApplicationListener<ApplicationPreparedEvent> {
+public class RestartEndpoint extends AbstractEndpoint<Boolean>
+		implements ApplicationListener<ApplicationPreparedEvent> {
 
 	private static Log logger = LogFactory.getLog(RestartEndpoint.class);
 
@@ -186,8 +185,8 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean> implements
 	}
 
 	private void overrideClassLoaderForRestart() {
-		ClassUtils.overrideThreadContextClassLoader(this.application.getClass()
-				.getClassLoader());
+		ClassUtils.overrideThreadContextClassLoader(
+				this.application.getClass().getClassLoader());
 	}
 
 	private class IntegrationShutdown {
