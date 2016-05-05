@@ -64,11 +64,12 @@ public class EncryptionBootstrapConfiguration {
 			KeyStore keyStore = this.key.getKeyStore();
 			if (keyStore.getLocation() != null && keyStore.getLocation().exists()) {
 				return new RsaSecretEncryptor(
-						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore
-								.getPassword().toCharArray()).getKeyPair(
-										keyStore.getAlias(), keyStore.getSecret().toCharArray()),
-										this.key.getRsa().getAlgorithm(), this.key.getRsa().getSalt(), this.key.getRsa()
-										.isStrong());
+						new KeyStoreKeyFactory(keyStore.getLocation(),
+								keyStore.getPassword().toCharArray()).getKeyPair(
+										keyStore.getAlias(),
+										keyStore.getSecret().toCharArray()),
+						this.key.getRsa().getAlgorithm(), this.key.getRsa().getSalt(),
+						this.key.getRsa().isStrong());
 			}
 			return new EncryptorFactory().create(this.key.getKey());
 		}
@@ -77,7 +78,7 @@ public class EncryptionBootstrapConfiguration {
 
 	@Configuration
 	@Conditional(KeyCondition.class)
-	@ConditionalOnMissingClass(name = "org.springframework.security.rsa.crypto.RsaSecretEncryptor")
+	@ConditionalOnMissingClass("org.springframework.security.rsa.crypto.RsaSecretEncryptor")
 	protected static class VanillaEncryptionConfiguration {
 
 		@Autowired
