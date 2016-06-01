@@ -16,18 +16,20 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.env.MapPropertySource;
 
 /**
- * Creates a set of child contexts that allows a set of Specifications to define the
- * beans in each child context.
+ * Creates a set of child contexts that allows a set of Specifications to define the beans
+ * in each child context.
  *
  * Ported from spring-cloud-netflix FeignClientFactory and SpringClientFactory
  *
  * @author Spencer Gibb
  * @author Dave Syer
  */
-public abstract class NamedContextFactory<C extends NamedContextFactory.Specification> implements DisposableBean, ApplicationContextAware {
+public abstract class NamedContextFactory<C extends NamedContextFactory.Specification>
+		implements DisposableBean, ApplicationContextAware {
 
 	public interface Specification {
 		String getName();
+
 		Class<?>[] getConfiguration();
 	}
 
@@ -41,8 +43,8 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	private final String propertySourceName;
 	private final String propertyName;
 
-
-	public NamedContextFactory(Class<?> defaultConfigType, String propertySourceName, String propertyName) {
+	public NamedContextFactory(Class<?> defaultConfigType, String propertySourceName,
+			String propertyName) {
 		this.defaultConfigType = defaultConfigType;
 		this.propertySourceName = propertySourceName;
 		this.propertyName = propertyName;
@@ -63,6 +65,8 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	public void destroy() {
 		Collection<AnnotationConfigApplicationContext> values = this.contexts.values();
 		for (AnnotationConfigApplicationContext context : values) {
+			// This can fail, but it never throws an exception (you see stack traces
+			// logged as WARN).
 			context.close();
 		}
 		this.contexts.clear();
@@ -87,8 +91,7 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 				context.register(configuration);
 			}
 		}
-		for (Map.Entry<String, C> entry : this.configurations
-				.entrySet()) {
+		for (Map.Entry<String, C> entry : this.configurations.entrySet()) {
 			if (entry.getKey().startsWith("default.")) {
 				for (Class<?> configuration : entry.getValue().getConfiguration()) {
 					context.register(configuration);
@@ -97,11 +100,9 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		}
 		context.register(PropertyPlaceholderAutoConfiguration.class,
 				this.defaultConfigType);
-		context.getEnvironment()
-				.getPropertySources()
-				.addFirst(new MapPropertySource(
-						propertySourceName,
-					Collections.<String, Object> singletonMap(propertyName, name)));
+		context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
+				this.propertySourceName,
+				Collections.<String, Object> singletonMap(this.propertyName, name)));
 		if (this.parent != null) {
 			// Uses Environment from parent as well as beans
 			context.setParent(this.parent);
