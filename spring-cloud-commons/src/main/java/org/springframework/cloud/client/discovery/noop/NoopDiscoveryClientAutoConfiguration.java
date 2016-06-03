@@ -21,8 +21,6 @@ import java.net.UnknownHostException;
 
 import javax.annotation.PostConstruct;
 
-import lombok.extern.apachecommons.CommonsLog;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -40,6 +38,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.util.ClassUtils;
 
+import lombok.extern.apachecommons.CommonsLog;
+
 /**
  * @author Dave Syer
  */
@@ -47,8 +47,8 @@ import org.springframework.util.ClassUtils;
 @EnableConfigurationProperties
 @ConditionalOnMissingBean(DiscoveryClient.class)
 @CommonsLog
-public class NoopDiscoveryClientAutoConfiguration implements
-		ApplicationListener<ContextRefreshedEvent> {
+public class NoopDiscoveryClientAutoConfiguration
+		implements ApplicationListener<ContextRefreshedEvent> {
 
 	@Autowired(required = false)
 	private ServerProperties server;
@@ -68,11 +68,12 @@ public class NoopDiscoveryClientAutoConfiguration implements
 			host = InetAddress.getLocalHost().getHostName();
 		}
 		catch (UnknownHostException e) {
-			log.error("Cannot get host info", e);
+			log.warn("Cannot get host info: (" + e.getMessage() + ")");
 		}
 		int port = findPort();
-		this.serviceInstance = new DefaultServiceInstance(this.environment.getProperty(
-				"spring.application.name", "application"), host, port, false);
+		this.serviceInstance = new DefaultServiceInstance(
+				this.environment.getProperty("spring.application.name", "application"),
+				host, port, false);
 	}
 
 	private int findPort() {
@@ -94,7 +95,8 @@ public class NoopDiscoveryClientAutoConfiguration implements
 		else {
 			// Apparently spring-web is not on the classpath
 			if (log.isDebugEnabled()) {
-				log.debug("Could not locate port in embedded container (spring-web not available)");
+				log.debug(
+						"Could not locate port in embedded container (spring-web not available)");
 			}
 		}
 		return port;
