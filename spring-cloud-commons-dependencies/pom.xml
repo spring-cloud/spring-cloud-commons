@@ -14,29 +14,29 @@
 	<name>spring-cloud-commons-dependencies</name>
 	<description>Spring Cloud Commons Dependencies</description>
 	<properties>
-		<spring-cloud-commons.version>1.1.1.BUILD-SNAPSHOT</spring-cloud-commons.version>
+		<spring-security-rsa.version>1.0.1.RELEASE</spring-security-rsa.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-rsa</artifactId>
-				<version>1.0.1.RELEASE</version>
+				<version>${spring-security-rsa.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-commons</artifactId>
-				<version>${spring-cloud-commons.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-context</artifactId>
-				<version>${spring-cloud-commons.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter</artifactId>
-				<version>${spring-cloud-commons.version}</version>
+				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
