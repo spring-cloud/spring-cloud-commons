@@ -162,11 +162,20 @@ public class InetUtils implements Closeable {
 	/**
 	 * Find the first non-loopback host info. If there were errors return a host info with
 	 * 'localhost' and '127.0.0.1' for hostname and ipAddress respectively.
+	 *
+	 * @deprecated use the non-static findFirstNonLoopbackHostInfo() instead
 	 */
+	@Deprecated
 	public static HostInfo getFirstNonLoopbackHostInfo() {
 		return instance.findFirstNonLoopbackHostInfo();
 	}
 
+	/**
+	 * Convert an internet address to a HostInfo.
+	 *
+	 * @deprecated use the non-static convertAddress() instead
+	 */
+	@Deprecated
 	public static HostInfo convert(final InetAddress address) {
 		return instance.convertAddress(address);
 	}
