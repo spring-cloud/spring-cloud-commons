@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,7 +57,7 @@ public class AbstractDiscoveryLifecycleTests {
 		}
 	}
 
-	public static class TestRegistration implements Registration {
+	public static class TestRegistration {
 	}
 
 	public static class TestServiceRegistry implements ServiceRegistry<TestRegistration> {

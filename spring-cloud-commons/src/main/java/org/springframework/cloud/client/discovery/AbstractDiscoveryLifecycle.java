@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
-import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -37,7 +36,7 @@ import org.springframework.core.env.Environment;
  * Lifecycle methods that may be useful and common to various DiscoveryClient implementations.
  * @author Spencer Gibb
  */
-public abstract class AbstractDiscoveryLifecycle<R extends Registration> implements DiscoveryLifecycle,
+public abstract class AbstractDiscoveryLifecycle<R> implements DiscoveryLifecycle,
 		ApplicationContextAware, ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
 	private static final Log logger = LogFactory.getLog(AbstractDiscoveryLifecycle.class);
@@ -97,6 +96,9 @@ public abstract class AbstractDiscoveryLifecycle<R extends Registration> impleme
 	@Override
 	public void start() {
 		if (!isEnabled()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Discovery Lifecycle disabled. Not starting");
+			}
 			return;
 		}
 
