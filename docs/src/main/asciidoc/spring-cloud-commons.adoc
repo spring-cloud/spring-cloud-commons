@@ -311,6 +311,20 @@ For a Spring Boot Actuator application there are some additional management endp
 Patterns such as service discovery, load balancing and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (e.g. discovery via Eureka or Consul).
 
 
+=== @EnableDiscoveryClient
+
+Commons provides the `@EnableDiscoveryClient` annotation. This looks for implementations of the `DiscoveryClient` interface via `META-INF/spring.factories`. Implementations of Discovery Client will add a configuration class to `spring.factories` under the `org.springframework.cloud.client.discovery.EnableDiscoveryClient` key. Examples of `DiscoveryClient` implementations: are http://cloud.spring.io/spring-cloud-netflix/[Spring Cloud Netflix Eureka], http://cloud.spring.io/spring-cloud-consul/[Spring Cloud Consul Discovery] and http://cloud.spring.io/spring-cloud-zookeeper/[Spring Cloud Zookeeper Discovery].
+
+By default, implementations of `DiscoveryClient` will auto-register the local Spring Boot server with the remote discovery server. This can be disabled by setting `autoRegister=false` in `@EnableDiscoveryClient`.
+
+=== ServiceRegistry
+
+Commons now provides a `ServiceRegistry` interface which provides methods like `register(Registration)` and `deregister(Registration)` which allow you to provide custom registered services. `Registration` is a marker interface.
+
+==== Service Registry Actuator Endpoint
+
+A `/service-registry` actuator endpoint is provided by Commons. This endpoint relys on a `Registration` bean in the Spring Application Context. Calling `/service-registry/instance-status` via a GET will return the status of the `Registration`. A POST to the same endpoint with a `String` body will change the status of the current `Registration` to the new value. Please see the documentation of the `ServiceRegistry` implementation you are using for the allowed values for updating the status and the values retured for the status.
+
 === Spring RestTemplate as a Load Balancer Client
 
 `RestTemplate` can be automatically configured to use ribbon. To create a load balanced `RestTemplate` create a `RestTemplate` `@Bean` and use the `@LoadBalanced` qualifier.
