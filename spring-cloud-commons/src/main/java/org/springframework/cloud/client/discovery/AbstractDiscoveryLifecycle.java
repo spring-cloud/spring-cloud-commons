@@ -26,6 +26,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
+import org.springframework.cloud.client.serviceregistry.Registration;
+import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -35,7 +37,7 @@ import org.springframework.core.env.Environment;
  * Lifecycle methods that may be useful and common to various DiscoveryClient implementations.
  * @author Spencer Gibb
  */
-public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
+public abstract class AbstractDiscoveryLifecycle<R extends Registration> implements DiscoveryLifecycle,
 		ApplicationContextAware, ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
 	private static final Log logger = LogFactory.getLog(AbstractDiscoveryLifecycle.class);
@@ -51,6 +53,12 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	private Environment environment;
 
 	private AtomicInteger port = new AtomicInteger(0);
+
+	private ServiceRegistry<R> serviceRegistry;
+
+	protected AbstractDiscoveryLifecycle(ServiceRegistry<R> serviceRegistry) {
+		this.serviceRegistry = serviceRegistry;
+	}
 
 	protected ApplicationContext getContext() {
 		return context;
@@ -103,7 +111,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 			if (shouldRegisterManagement()) {
 				registerManagement();
 			}
-			this.context .publishEvent(new InstanceRegisteredEvent<>(this,
+			this.context.publishEvent(new InstanceRegisteredEvent<>(this,
 					getConfiguration()));
 			this.running.compareAndSet(false, true);
 		}
@@ -122,28 +130,44 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	/**
 	 * @return the object used to configure the DiscoveryClient
 	 */
-	protected abstract Object getConfiguration();
+	protected Object getConfiguration() {
+		return null;
+	}
+
+	protected abstract R getRegistration();
+
+	protected abstract R getManagementRegistration();
+
+	protected ServiceRegistry<R> getServiceRegistry() {
+		return this.serviceRegistry;
+	}
 
 	/**
 	 * Register the local service with the DiscoveryClient
 	 */
-	protected abstract void register();
+	protected void register() {
+		this.serviceRegistry.register(getRegistration());
+	}
 
 	/**
 	 * Register the local management service with the DiscoveryClient
 	 */
 	protected void registerManagement() {
+		this.serviceRegistry.register(getManagementRegistration());
 	}
 
 	/**
 	 * De-register the local service with the DiscoveryClient
 	 */
-	protected abstract void deregister();
+	protected void deregister() {
+		this.serviceRegistry.deregister(getRegistration());
+	}
 
 	/**
 	 * De-register the local management service with the DiscoveryClient
 	 */
 	protected void deregisterManagement() {
+		this.serviceRegistry.deregister(getManagementRegistration());
 	}
 
 	/**
