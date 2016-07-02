@@ -4,6 +4,7 @@ org.springframework.cloud.client.CommonsClientAutoConfiguration,\
 org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration,\
 org.springframework.cloud.client.hypermedia.CloudHypermediaAutoConfiguration,\
 org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration,\
+org.springframework.cloud.client.serviceregistry.ServiceRegistryAutoConfiguration,\
 org.springframework.cloud.commons.util.UtilAutoConfiguration
 
 

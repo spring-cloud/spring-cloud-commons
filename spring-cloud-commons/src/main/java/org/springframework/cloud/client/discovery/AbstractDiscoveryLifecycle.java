@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
+import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -33,8 +34,12 @@ import org.springframework.core.env.Environment;
 
 /**
  * Lifecycle methods that may be useful and common to various DiscoveryClient implementations.
+ *
+ * @deprecated use {@link org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration} instead. This class will be removed in the next release train.
+ *
  * @author Spencer Gibb
  */
+@Deprecated
 public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		ApplicationContextAware, ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
@@ -89,6 +94,9 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	@Override
 	public void start() {
 		if (!isEnabled()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Discovery Lifecycle disabled. Not starting");
+			}
 			return;
 		}
 
@@ -103,7 +111,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 			if (shouldRegisterManagement()) {
 				registerManagement();
 			}
-			this.context .publishEvent(new InstanceRegisteredEvent<>(this,
+			this.context.publishEvent(new InstanceRegisteredEvent<>(this,
 					getConfiguration()));
 			this.running.compareAndSet(false, true);
 		}
@@ -113,16 +121,17 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	protected abstract void setConfiguredPort(int port);
 
 	/**
-	 * @return if the management service should be registered with the DiscoveryService
+	 * @return if the management service should be registered with the {@link ServiceRegistry}
 	 */
 	protected boolean shouldRegisterManagement() {
 		return getManagementPort() != null && ManagementServerPortUtils.isDifferent(this.context);
 	}
 
 	/**
-	 * @return the object used to configure the DiscoveryClient
+	 * @return the object used to configure the registration
 	 */
 	protected abstract Object getConfiguration();
+
 
 	/**
 	 * Register the local service with the DiscoveryClient
@@ -147,7 +156,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	}
 
 	/**
-	 * @return if the DiscoveryClient is enabled
+	 * @return true, if the {@link DiscoveryLifecycle} is enabled
 	 */
 	protected abstract boolean isEnabled();
 
@@ -199,6 +208,10 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	@Override
 	public boolean isRunning() {
 		return this.running.get();
+	}
+
+	protected AtomicBoolean getRunning() {
+		return running;
 	}
 
 	@Override
