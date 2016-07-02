@@ -1,6 +1,7 @@
 package org.springframework.cloud.client.serviceregistry;
 
 /**
+ * TODO: write javadoc
  * @author Spencer Gibb
  */
 public interface ServiceRegistry<R> {

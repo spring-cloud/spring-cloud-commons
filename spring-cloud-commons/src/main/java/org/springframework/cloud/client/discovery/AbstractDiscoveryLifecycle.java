@@ -33,9 +33,15 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
 /**
- * Lifecycle methods that may be useful and common to various DiscoveryClient implementations.
+ * Lifecycle methods that may be useful and common to {@link ServiceRegistry} implementations.
+ *
+ * TODO: document the lifecycle
+ *
+ * @param <R> registration type passed to the {@link ServiceRegistry}.
+ *
  * @author Spencer Gibb
  */
+//TODO: rename to AbstractServiceRegistryLifecycle or AbstractAutoServiceRegistration?
 public abstract class AbstractDiscoveryLifecycle<R> implements DiscoveryLifecycle,
 		ApplicationContextAware, ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
@@ -123,18 +129,16 @@ public abstract class AbstractDiscoveryLifecycle<R> implements DiscoveryLifecycl
 	protected abstract void setConfiguredPort(int port);
 
 	/**
-	 * @return if the management service should be registered with the DiscoveryService
+	 * @return if the management service should be registered with the {@link ServiceRegistry}
 	 */
 	protected boolean shouldRegisterManagement() {
 		return getManagementPort() != null && ManagementServerPortUtils.isDifferent(this.context);
 	}
 
 	/**
-	 * @return the object used to configure the DiscoveryClient
+	 * @return the object used to configure the registration
 	 */
-	protected Object getConfiguration() {
-		return null;
-	}
+	protected abstract Object getConfiguration();
 
 	protected abstract R getRegistration();
 
@@ -145,35 +149,35 @@ public abstract class AbstractDiscoveryLifecycle<R> implements DiscoveryLifecycl
 	}
 
 	/**
-	 * Register the local service with the DiscoveryClient
+	 * Register the local service with the {@link ServiceRegistry}
 	 */
 	protected void register() {
 		this.serviceRegistry.register(getRegistration());
 	}
 
 	/**
-	 * Register the local management service with the DiscoveryClient
+	 * Register the local management service with the {@link ServiceRegistry}
 	 */
 	protected void registerManagement() {
 		this.serviceRegistry.register(getManagementRegistration());
 	}
 
 	/**
-	 * De-register the local service with the DiscoveryClient
+	 * De-register the local service with the {@link ServiceRegistry}
 	 */
 	protected void deregister() {
 		this.serviceRegistry.deregister(getRegistration());
 	}
 
 	/**
-	 * De-register the local management service with the DiscoveryClient
+	 * De-register the local management service with the {@link ServiceRegistry}
 	 */
 	protected void deregisterManagement() {
 		this.serviceRegistry.deregister(getManagementRegistration());
 	}
 
 	/**
-	 * @return if the DiscoveryClient is enabled
+	 * @return true, if the {@link DiscoveryLifecycle} is enabled
 	 */
 	protected abstract boolean isEnabled();
 

@@ -85,8 +85,6 @@ public class AbstractDiscoveryLifecycleTests {
 
 	public static class TestDiscoveryLifecycle extends AbstractDiscoveryLifecycle<TestRegistration> {
 		private int port = 0;
-		private boolean registered = false;
-		private boolean deregistered = false;
 
 		protected TestDiscoveryLifecycle() {
 			super(new TestServiceRegistry());
@@ -109,6 +107,11 @@ public class AbstractDiscoveryLifecycleTests {
 
 		@Override
 		protected TestRegistration getManagementRegistration() {
+			return null;
+		}
+
+		@Override
+		protected Object getConfiguration() {
 			return null;
 		}
 
