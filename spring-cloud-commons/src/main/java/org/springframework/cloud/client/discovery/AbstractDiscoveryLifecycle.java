@@ -33,16 +33,14 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
 /**
- * Lifecycle methods that may be useful and common to {@link ServiceRegistry} implementations.
+ * Lifecycle methods that may be useful and common to various DiscoveryClient implementations.
  *
- * TODO: document the lifecycle
- *
- * @param <R> registration type passed to the {@link ServiceRegistry}.
+ * @deprecated use {@link org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration} instead. This class will be removed in the next release train.
  *
  * @author Spencer Gibb
  */
-//TODO: rename to AbstractServiceRegistryLifecycle or AbstractAutoServiceRegistration?
-public abstract class AbstractDiscoveryLifecycle<R> implements DiscoveryLifecycle,
+@Deprecated
+public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		ApplicationContextAware, ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
 	private static final Log logger = LogFactory.getLog(AbstractDiscoveryLifecycle.class);
@@ -58,12 +56,6 @@ public abstract class AbstractDiscoveryLifecycle<R> implements DiscoveryLifecycl
 	private Environment environment;
 
 	private AtomicInteger port = new AtomicInteger(0);
-
-	private ServiceRegistry<R> serviceRegistry;
-
-	protected AbstractDiscoveryLifecycle(ServiceRegistry<R> serviceRegistry) {
-		this.serviceRegistry = serviceRegistry;
-	}
 
 	protected ApplicationContext getContext() {
 		return context;
@@ -140,40 +132,27 @@ public abstract class AbstractDiscoveryLifecycle<R> implements DiscoveryLifecycl
 	 */
 	protected abstract Object getConfiguration();
 
-	protected abstract R getRegistration();
-
-	protected abstract R getManagementRegistration();
-
-	protected ServiceRegistry<R> getServiceRegistry() {
-		return this.serviceRegistry;
-	}
 
 	/**
-	 * Register the local service with the {@link ServiceRegistry}
+	 * Register the local service with the DiscoveryClient
 	 */
-	protected void register() {
-		this.serviceRegistry.register(getRegistration());
-	}
+	protected abstract void register();
 
 	/**
-	 * Register the local management service with the {@link ServiceRegistry}
+	 * Register the local management service with the DiscoveryClient
 	 */
 	protected void registerManagement() {
-		this.serviceRegistry.register(getManagementRegistration());
 	}
 
 	/**
-	 * De-register the local service with the {@link ServiceRegistry}
+	 * De-register the local service with the DiscoveryClient
 	 */
-	protected void deregister() {
-		this.serviceRegistry.deregister(getRegistration());
-	}
+	protected abstract void deregister();
 
 	/**
-	 * De-register the local management service with the {@link ServiceRegistry}
+	 * De-register the local management service with the DiscoveryClient
 	 */
 	protected void deregisterManagement() {
-		this.serviceRegistry.deregister(getManagementRegistration());
 	}
 
 	/**
@@ -229,6 +208,10 @@ public abstract class AbstractDiscoveryLifecycle<R> implements DiscoveryLifecycl
 	@Override
 	public boolean isRunning() {
 		return this.running.get();
+	}
+
+	protected AtomicBoolean getRunning() {
+		return running;
 	}
 
 	@Override

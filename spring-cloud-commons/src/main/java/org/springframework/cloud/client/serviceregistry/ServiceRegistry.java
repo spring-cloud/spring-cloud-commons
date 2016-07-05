@@ -8,4 +8,7 @@ public interface ServiceRegistry<R> {
 	void register(R registration);
 
 	void deregister(R registration);
+
+	void close();
+
 }
