@@ -129,23 +129,22 @@ public class InetUtils implements Closeable {
 	}
 
 	boolean ignoreAddress(InetAddress address) {
-        
-	    if (this.properties.isUseOnlySiteLocalInterfaces() && !address.isSiteLocalAddress()) {
-	        log.trace("Ignoring address: " + address.getHostAddress());
-	        return true;
-	    }
-	    
-	    for (String regex : this.properties.getPreferredNetworks()) {
-            if (address.getHostAddress().matches(regex) || address.getHostAddress().startsWith(regex)) {
-                log.trace("Ignoring address: " + address.getHostAddress());
-                return true;
-            }
-        }
-	    
-	    return false;
-    }
 
-    boolean ignoreInterface(String interfaceName) {
+		if (this.properties.isUseOnlySiteLocalInterfaces() && !address.isSiteLocalAddress()) {
+			log.trace("Ignoring address: " + address.getHostAddress());
+			return true;
+		}
+	
+		for (String regex : this.properties.getPreferredNetworks()) {
+		if (address.getHostAddress().matches(regex) || address.getHostAddress().startsWith(regex)) {
+			log.trace("Ignoring address: " + address.getHostAddress());
+				return true;
+			}
+		}
+		return false;
+	}
+
+	boolean ignoreInterface(String interfaceName) {
 		for (String regex : this.properties.getIgnoredInterfaces()) {
 			if (interfaceName.matches(regex)) {
 				log.trace("Ignoring interface: " + interfaceName);
