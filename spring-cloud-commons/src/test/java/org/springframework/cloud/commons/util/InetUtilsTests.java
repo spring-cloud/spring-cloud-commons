@@ -86,4 +86,36 @@ public class InetUtilsTests {
 		}
 	}
 
+	@Test
+    public void testSiteLocalAddresses() throws Exception {
+	    InetUtilsProperties properties = new InetUtilsProperties();
+        properties.setUseOnlySiteLocalInterfaces(true);
+        
+        try (InetUtils utils = new InetUtils(properties)) {
+            assertFalse(utils.ignoreAddress(InetAddress.getByName("192.168.0.1")));
+            assertTrue(utils.ignoreAddress(InetAddress.getByName("5.5.8.1")));
+        }
+	}
+	
+	@Test
+    public void testPrefferedNetworksRegex() throws Exception {
+	    InetUtilsProperties properties = new InetUtilsProperties();
+	    properties.setPreferredNetworks(Arrays.asList("192.168.*"));
+	    
+	    try (InetUtils utils = new InetUtils(properties)) {
+	        assertTrue(utils.ignoreAddress(InetAddress.getByName("192.168.0.1")));
+	        assertFalse(utils.ignoreAddress(InetAddress.getByName("5.5.8.1")));
+	    }
+    }
+	
+	@Test
+	public void testPrefferedNetworksSimple() throws Exception {
+	    InetUtilsProperties properties = new InetUtilsProperties();
+	    properties.setPreferredNetworks(Arrays.asList("192"));
+	    
+	    try (InetUtils utils = new InetUtils(properties)) {
+	        assertTrue(utils.ignoreAddress(InetAddress.getByName("192.168.0.1")));
+	        assertFalse(utils.ignoreAddress(InetAddress.getByName("5.5.8.1")));
+	    }
+	}
 }
