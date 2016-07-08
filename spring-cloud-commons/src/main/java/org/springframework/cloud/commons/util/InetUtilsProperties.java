@@ -1,5 +1,6 @@
 package org.springframework.cloud.commons.util;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,4 +37,14 @@ public class InetUtilsProperties {
 	 * List of Java regex expressions for network interfaces that will be ignored.
 	 */
 	private List<String> ignoredInterfaces = new ArrayList<>();
+	
+	/**
+	 * Use only interfaces with site local addresses. See {@link InetAddress#isSiteLocalAddress()} for more details.
+	 */
+	private boolean useOnlySiteLocalInterfaces = false;
+	
+	/**
+	 * List of Java regex expressions for network addresses that will be ignored.
+	 */
+	private List<String> preferredNetworks = new ArrayList<>();
 }
