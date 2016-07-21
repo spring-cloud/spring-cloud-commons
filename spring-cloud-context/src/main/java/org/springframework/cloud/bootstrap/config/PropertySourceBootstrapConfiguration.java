@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
+import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
@@ -46,6 +49,7 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
@@ -104,6 +108,7 @@ public class PropertySourceBootstrapConfiguration implements
 			insertPropertySources(propertySources, composite);
 			reinitializeLoggingSystem(environment, logConfig, logFile);
 			setLogLevels(environment);
+			handleIncludedProfiles(environment);
 		}
 	}
 
@@ -170,6 +175,47 @@ public class PropertySourceBootstrapConfiguration implements
 		else {
 			propertySources.addLast(composite);
 		}
+	}
+
+	private void handleIncludedProfiles(ConfigurableEnvironment environment) {
+		Set<String> includeProfiles = new TreeSet<>();
+		for (PropertySource<?> propertySource : environment.getPropertySources()) {
+			addIncludedProfilesTo(includeProfiles, propertySource);
+		}
+		List<String> activeProfiles = new ArrayList<>();
+		Collections.addAll(activeProfiles, environment.getActiveProfiles());
+
+		// If it's already accepted we assume the order was set intentionally
+		includeProfiles.removeAll(activeProfiles);
+		if (includeProfiles.isEmpty()) {
+			return;
+		}
+		// Prepend each added profile (last wins in a property key clash)
+		for (String profile : includeProfiles) {
+			activeProfiles.add(0, profile);
+		}
+		environment.setActiveProfiles(
+				activeProfiles.toArray(new String[activeProfiles.size()]));
+	}
+
+	private Set<String> addIncludedProfilesTo(Set<String> profiles,
+			PropertySource<?> propertySource) {
+		if (propertySource instanceof CompositePropertySource) {
+			for (PropertySource<?> nestedPropertySource : ((CompositePropertySource) propertySource)
+					.getPropertySources()) {
+				addIncludedProfilesTo(profiles, nestedPropertySource);
+			}
+		}
+		else {
+			Collections.addAll(profiles, getProfilesForValue(propertySource.getProperty(
+					ConfigFileApplicationListener.INCLUDE_PROFILES_PROPERTY)));
+		}
+		return profiles;
+	}
+
+	private String[] getProfilesForValue(Object property) {
+		final String value = (property == null ? null : property.toString());
+		return StringUtils.commaDelimitedListToStringArray(value);
 	}
 
 }
