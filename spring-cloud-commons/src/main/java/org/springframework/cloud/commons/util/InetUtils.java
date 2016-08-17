@@ -136,7 +136,7 @@ public class InetUtils implements Closeable {
 		}
 	
 		for (String regex : this.properties.getPreferredNetworks()) {
-		if (address.getHostAddress().matches(regex) || address.getHostAddress().startsWith(regex)) {
+		if (!address.getHostAddress().matches(regex) && !address.getHostAddress().startsWith(regex)) {
 			log.trace("Ignoring address: " + address.getHostAddress());
 				return true;
 			}
