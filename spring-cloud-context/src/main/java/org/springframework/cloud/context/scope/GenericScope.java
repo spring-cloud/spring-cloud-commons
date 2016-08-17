@@ -86,7 +86,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 	}
 
 	/**
-	 * The name of this scope. Default "refresh".
+	 * The name of this scope. Default "generic".
 	 *
 	 * @param name the name value to set
 	 */
