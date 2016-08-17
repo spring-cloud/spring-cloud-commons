@@ -102,9 +102,9 @@ public class InetUtilsTests {
 		InetUtilsProperties properties = new InetUtilsProperties();
 		properties.setPreferredNetworks(Arrays.asList("192.168.*"));
 
-	try (InetUtils utils = new InetUtils(properties)) {
-		assertTrue(utils.ignoreAddress(InetAddress.getByName("192.168.0.1")));
-		assertFalse(utils.ignoreAddress(InetAddress.getByName("5.5.8.1")));
+		try (InetUtils utils = new InetUtils(properties)) {
+			assertFalse(utils.ignoreAddress(InetAddress.getByName("192.168.0.1")));
+			assertTrue(utils.ignoreAddress(InetAddress.getByName("5.5.8.1")));
 		}
 	}
 	
@@ -114,8 +114,8 @@ public class InetUtilsTests {
 		properties.setPreferredNetworks(Arrays.asList("192"));
 		
 		try (InetUtils utils = new InetUtils(properties)) {
-			assertTrue(utils.ignoreAddress(InetAddress.getByName("192.168.0.1")));
-		assertFalse(utils.ignoreAddress(InetAddress.getByName("5.5.8.1")));
+			assertFalse(utils.ignoreAddress(InetAddress.getByName("192.168.0.1")));
+			assertTrue(utils.ignoreAddress(InetAddress.getByName("5.5.8.1")));
 		}
 	}
 }
