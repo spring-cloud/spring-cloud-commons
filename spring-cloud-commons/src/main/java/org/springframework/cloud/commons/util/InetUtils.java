@@ -98,7 +98,8 @@ public class InetUtils implements Closeable {
 								.getInetAddresses(); addrs.hasMoreElements();) {
 							InetAddress address = addrs.nextElement();
 							if (address instanceof Inet4Address
-									&& !address.isLoopbackAddress()) {
+									&& !address.isLoopbackAddress()
+									&& !ignoreAddress(address)) {
 								log.trace("Found non-loopback interface: "
 										+ ifc.getDisplayName());
 								result = address;
@@ -127,7 +128,23 @@ public class InetUtils implements Closeable {
 		return null;
 	}
 
-	boolean ignoreInterface(String interfaceName) {
+	/** for testing */ boolean ignoreAddress(InetAddress address) {
+
+		if (this.properties.isUseOnlySiteLocalInterfaces() && !address.isSiteLocalAddress()) {
+			log.trace("Ignoring address: " + address.getHostAddress());
+			return true;
+		}
+	
+		for (String regex : this.properties.getPreferredNetworks()) {
+		if (!address.getHostAddress().matches(regex) && !address.getHostAddress().startsWith(regex)) {
+			log.trace("Ignoring address: " + address.getHostAddress());
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** for testing */ boolean ignoreInterface(String interfaceName) {
 		for (String regex : this.properties.getIgnoredInterfaces()) {
 			if (interfaceName.matches(regex)) {
 				log.trace("Ignoring interface: " + interfaceName);
