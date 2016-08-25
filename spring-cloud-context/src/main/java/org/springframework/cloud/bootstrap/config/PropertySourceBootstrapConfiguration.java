@@ -118,6 +118,11 @@ public class PropertySourceBootstrapConfiguration implements
 					.get(LoggingSystem.class.getClassLoader());
 			try {
 				ResourceUtils.getURL(logConfig).openStream().close();
+				// Three step initialization that accounts for the clean up of the logging
+				// context before initialization. Spring Boot doesn't initialize a logging
+				// system that hasn't had this sequence applied (since 1.4.1).
+				system.cleanUp();
+				system.beforeInitialize();
 				system.initialize(new LoggingInitializationContext(environment),
 						logConfig, logFile);
 			}
