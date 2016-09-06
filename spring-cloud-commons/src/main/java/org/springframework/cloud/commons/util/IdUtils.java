@@ -23,8 +23,12 @@ public class IdUtils {
 
 		String namePart = combineParts(hostname, SEPARATOR, appName);
 
+		// in a containerized environment, it makes more sense to build the
+		// instance id with the mapped port than the container internal server.port
+		String containerHostPort = relaxed.getProperty("spring.cloud.container.hostPort");
 		String indexPart = relaxed.getProperty("spring.application.instance_id",
-				relaxed.getProperty("server.port"));
+				containerHostPort!=null?containerHostPort:relaxed.getProperty("server.port"));
+
 
 		return combineParts(namePart, SEPARATOR, indexPart);
 	}

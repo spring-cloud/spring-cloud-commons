@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.cloud.client.discovery.ContainerProperties;
 import org.springframework.mock.env.MockEnvironment;
 
 /**
@@ -70,9 +71,9 @@ public class IdUtilsTests {
 
 	@Test
 	public void portWorks() {
-		this.env.setProperty("spring.application.name", DEFAULT_ID);
+		this.env.setProperty("server.port", "80");
 		String instanceId = IdUtils.getDefaultInstanceId(this.env);
-		assertEquals("instanceId was wrong", DEFAULT_ID, instanceId);
+		assertEquals("instanceId was wrong", "80", instanceId);
 	}
 
 	@Test
@@ -81,6 +82,15 @@ public class IdUtilsTests {
 		this.env.setProperty("server.port", "80");
 		String instanceId = IdUtils.getDefaultInstanceId(this.env);
 		assertEquals("instanceId was wrong", DEFAULT_ID+":80", instanceId);
+	}
+
+	@Test
+	public void should_useMappedContainerPort_whenProvided() {
+		this.env.setProperty("spring.application.name", DEFAULT_ID);
+		this.env.setProperty("server.port", "80");
+		this.env.setProperty(ContainerProperties.PREFIX+".hostPort", "8080");
+		String instanceId = IdUtils.getDefaultInstanceId(this.env);
+		assertEquals("instanceId was wrong", DEFAULT_ID+":8080", instanceId);
 	}
 
 	@Test
