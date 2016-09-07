@@ -4,6 +4,7 @@
 :githubmaster: {github}/tree/master
 :docslink: {githubmaster}/docs/src/main/asciidoc
 :toc:
+:nofooter:
 
 include::intro.adoc[]
 
@@ -106,7 +107,7 @@ Note that the `SpringApplicationBuilder` allows you to share an
 `Environment` amongst the whole hierarchy, but that is not the
 default. Thus, sibling contexts in particular do not need to have the
 same profiles or property sources, even though they will share common
-things with their parent. 
+things with their parent.
 
 [[customizing-bootstrap-properties]]
 === Changing the Location of Bootstrap Properties
@@ -156,8 +157,8 @@ if you want to control the startup sequence (the default order is
 "last").
 
 WARNING: Be careful when adding custom `BootstrapConfiguration` that the
-classes you add are not `@ComponentScanned` by mistake into your 
-"main" application context, where they might not be needed. 
+classes you add are not `@ComponentScanned` by mistake into your
+"main" application context, where they might not be needed.
 Use a separate package name for boot configuration classes that is
 not already covered by your `@ComponentScan` or `@SpringBootApplication`
 annotated configuration classes.
@@ -393,7 +394,7 @@ TIP: If you see errors like `java.lang.IllegalArgumentException: Can not set org
 [[ignore-network-interfaces]]
 === Ignore Network Interfaces
 
-Sometimes it is useful to ignore certain named network interfaces so they can be excluded from Service Discovery registration (eg. running in a Docker container). A list of regular expressions can be set that will cause the desired network interfaces to be ignored. The following configuration will ignore the "docker0" interface and all interfaces that start with "veth". 
+Sometimes it is useful to ignore certain named network interfaces so they can be excluded from Service Discovery registration (eg. running in a Docker container). A list of regular expressions can be set that will cause the desired network interfaces to be ignored. The following configuration will ignore the "docker0" interface and all interfaces that start with "veth".
 
 .application.yml
 ----
