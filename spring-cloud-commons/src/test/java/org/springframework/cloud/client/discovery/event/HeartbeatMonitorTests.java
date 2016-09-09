@@ -40,4 +40,15 @@ public class HeartbeatMonitorTests {
 		assertTrue(this.monitor.update("bar"));
 	}
 
+	@Test
+	public void nullInitialValue() {
+		assertFalse(this.monitor.update(null));
+	}
+
+	@Test
+	public void nullSecondValue() {
+		assertTrue(this.monitor.update("foo"));
+		assertFalse(this.monitor.update(null));
+	}
+
 }
