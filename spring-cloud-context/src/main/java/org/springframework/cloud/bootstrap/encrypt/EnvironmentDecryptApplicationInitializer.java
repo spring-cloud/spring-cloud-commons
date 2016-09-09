@@ -21,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -155,8 +156,8 @@ public class EnvironmentDecryptApplicationInitializer implements
 	}
 
 	public Map<String, Object> decrypt(PropertySources propertySources) {
-		Map<String, Object> overrides = new LinkedHashMap<String, Object>();
-		List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
+		Map<String, Object> overrides = new LinkedHashMap<>();
+		List<PropertySource<?>> sources = new ArrayList<>();
 		for (PropertySource<?> source : propertySources) {
 			sources.add(0, source);
 		}
@@ -167,14 +168,19 @@ public class EnvironmentDecryptApplicationInitializer implements
 	}
 
 	private Map<String, Object> decrypt(PropertySource<?> source) {
-		Map<String, Object> overrides = new LinkedHashMap<String, Object>();
+		Map<String, Object> overrides = new LinkedHashMap<>();
 		decrypt(source, overrides);
 		return overrides;
 	}
 
+	private static final Pattern COLLECTION_PROPERTY = Pattern
+			.compile("(\\S+)?\\[(\\d+)\\](\\.\\S+)?");
+
 	private void decrypt(PropertySource<?> source, Map<String, Object> overrides) {
 
 		if (source instanceof EnumerablePropertySource) {
+			Map<String, Object> otherCollectionProperties = new LinkedHashMap<>();
+			boolean sourceHasDecryptedCollection = false;
 
 			EnumerablePropertySource<?> enumerable = (EnumerablePropertySource<?>) source;
 			for (String key : enumerable.getPropertyNames()) {
@@ -205,8 +211,18 @@ public class EnvironmentDecryptApplicationInitializer implements
 							value = "";
 						}
 						overrides.put(key, value);
+						if (COLLECTION_PROPERTY.matcher(key).matches()) {
+							sourceHasDecryptedCollection = true;
+						}
+					} else if (COLLECTION_PROPERTY.matcher(key).matches()){
+						// put non-ecrypted properties so merging of index properties happens correctly
+						otherCollectionProperties.put(key, value);
 					}
 				}
+			}
+			// copy all indexed properties even if not encrypted
+			if (sourceHasDecryptedCollection && !otherCollectionProperties.isEmpty()) {
+				overrides.putAll(otherCollectionProperties);
 			}
 
 		}
@@ -219,6 +235,11 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 		}
 
+	}
+
+	class DecryptResult {
+		Map<String, Object> properties = new LinkedHashMap<>();
+		boolean hasEncryptedProperties = false;
 	}
 
 }
