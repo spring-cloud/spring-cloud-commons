@@ -16,15 +16,21 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
 import java.util.Collections;
+import java.util.Map;
 
 import org.junit.Test;
-import org.springframework.boot.test.EnvironmentTestUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
 import org.springframework.security.crypto.encrypt.Encryptors;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.springframework.boot.test.EnvironmentTestUtils.addEnvironment;
+import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME;
 
 /**
  * @author Dave Syer
@@ -38,7 +44,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	@Test
 	public void decryptCipherKey() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(context, "foo: {cipher}bar");
+		addEnvironment(context, "foo: {cipher}bar");
 		this.listener.initialize(context);
 		assertEquals("bar", context.getEnvironment().getProperty("foo"));
 	}
@@ -46,7 +52,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	@Test
 	public void relaxedBinding() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(context, "FOO_TEXT: {cipher}bar");
+		addEnvironment(context, "FOO_TEXT: {cipher}bar");
 		this.listener.initialize(context);
 		assertEquals("bar", context.getEnvironment().getProperty("foo.text"));
 	}
@@ -54,7 +60,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	@Test
 	public void propertySourcesOrderedCorrectly() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(context, "foo: {cipher}bar");
+		addEnvironment(context, "foo: {cipher}bar");
 		context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
 				"test_override",
 				Collections.<String, Object> singletonMap("foo", "{cipher}spam")));
@@ -67,7 +73,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		this.listener = new EnvironmentDecryptApplicationInitializer(
 				Encryptors.text("deadbeef", "AFFE37"));
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(context, "foo: {cipher}bar");
+		addEnvironment(context, "foo: {cipher}bar");
 		this.listener.initialize(context);
 		assertEquals("bar", context.getEnvironment().getProperty("foo"));
 	}
@@ -78,10 +84,35 @@ public class EnvironmentDecryptApplicationInitializerTests {
 				Encryptors.text("deadbeef", "AFFE37"));
 		this.listener.setFailOnError(false);
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
-		EnvironmentTestUtils.addEnvironment(context, "foo: {cipher}bar");
+		addEnvironment(context, "foo: {cipher}bar");
 		this.listener.initialize(context);
 		// Empty is safest fallback for undecryptable cipher
 		assertEquals("", context.getEnvironment().getProperty("foo"));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void indexedPropertiesCopied() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
+		// tests that collections in another property source don't get copied into "decrypted" property source
+		addEnvironment(context, "yours[0].someValue: yourFoo", "yours[1].someValue: yourBar");
+
+		// collection with some encrypted keys and some not encrypted
+		addEnvironment("combinedTest", context.getEnvironment(), "mine[0].someValue: Foo",
+				"mine[0].someKey: {cipher}Foo0", "mine[1].someValue: Bar",
+				"mine[1].someKey: {cipher}Bar1", "nonindexed: nonindexval");
+		this.listener.initialize(context);
+
+		assertEquals("Foo",  context.getEnvironment().getProperty("mine[0].someValue"));
+		assertEquals("Foo0", context.getEnvironment().getProperty("mine[0].someKey"));
+		assertEquals("Bar",  context.getEnvironment().getProperty("mine[1].someValue"));
+		assertEquals("Bar1", context.getEnvironment().getProperty("mine[1].someKey"));
+		assertEquals("yourFoo",  context.getEnvironment().getProperty("yours[0].someValue"));
+		assertEquals("yourBar",  context.getEnvironment().getProperty("yours[1].someValue"));
+
+		MutablePropertySources propertySources = context.getEnvironment().getPropertySources();
+		PropertySource<Map> decrypted = (PropertySource<Map>) propertySources.get(DECRYPTED_PROPERTY_SOURCE_NAME);
+		assertThat("decrypted property source had wrong size", decrypted.getSource().size(), is(4));
 	}
 
 }
