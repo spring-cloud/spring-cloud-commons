@@ -58,7 +58,7 @@ public class AbstractAutoServiceRegistrationTests {
 		}
 	}
 
-	public static class TestRegistration {
+	public static class TestRegistration implements Registration {
 	}
 
 	public static class TestServiceRegistry implements ServiceRegistry<TestRegistration> {
@@ -77,6 +77,17 @@ public class AbstractAutoServiceRegistrationTests {
 
 		@Override
 		public void close() { }
+
+		@Override
+		public void setStatus(TestRegistration registration, String status) {
+			//TODO: test setStatus
+		}
+
+		@Override
+		public Object getStatus(TestRegistration registration) {
+			//TODO: test getStatus
+			return null;
+		}
 
 		boolean isRegistered() {
 			return registered;
