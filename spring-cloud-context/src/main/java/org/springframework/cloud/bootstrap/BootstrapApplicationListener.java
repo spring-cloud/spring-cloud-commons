@@ -85,11 +85,18 @@ public class BootstrapApplicationListener
 		ConfigurableApplicationContext context = bootstrapServiceContext(environment,
 				event.getSpringApplication());
 		apply(context, event.getSpringApplication(), environment);
+		shutdownLogging();
+	}
+
+	private void shutdownLogging() {
 		// Clean up the logging system. Logging will go dark until the
 		// ConfigFileApplicationListener fires, but this is the price we pay for that
 		// listener being able to adjust the log levels according to what it finds in its
 		// own configuration.
-		LoggingSystem.get(ClassUtils.getDefaultClassLoader()).cleanUp();
+		LoggingSystem loggingSystem = LoggingSystem
+				.get(ClassUtils.getDefaultClassLoader());
+		loggingSystem.cleanUp();
+		loggingSystem.beforeInitialize();
 	}
 
 	private ConfigurableApplicationContext bootstrapServiceContext(
