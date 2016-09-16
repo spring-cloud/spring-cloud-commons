@@ -29,7 +29,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.ParentContextApplicationContextInitializer;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationListener;
@@ -85,18 +84,6 @@ public class BootstrapApplicationListener
 		ConfigurableApplicationContext context = bootstrapServiceContext(environment,
 				event.getSpringApplication());
 		apply(context, event.getSpringApplication(), environment);
-		shutdownLogging();
-	}
-
-	private void shutdownLogging() {
-		// Clean up the logging system. Logging will go dark until the
-		// ConfigFileApplicationListener fires, but this is the price we pay for that
-		// listener being able to adjust the log levels according to what it finds in its
-		// own configuration.
-		LoggingSystem loggingSystem = LoggingSystem
-				.get(ClassUtils.getDefaultClassLoader());
-		loggingSystem.cleanUp();
-		loggingSystem.beforeInitialize();
 	}
 
 	private ConfigurableApplicationContext bootstrapServiceContext(
