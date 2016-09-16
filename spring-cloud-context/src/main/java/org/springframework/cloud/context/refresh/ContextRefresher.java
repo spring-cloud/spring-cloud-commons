@@ -10,9 +10,10 @@ import java.util.Set;
 
 import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.config.ConfigFileApplicationListener;
+import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.CompositePropertySource;
@@ -63,8 +64,14 @@ public class ContextRefresher {
 		try {
 			StandardEnvironment environment = copyEnvironment(
 					this.context.getEnvironment());
-			capture = new SpringApplicationBuilder(Empty.class).bannerMode(Mode.OFF)
-					.web(false).environment(environment).run();
+			SpringApplicationBuilder builder = new SpringApplicationBuilder(Empty.class)
+					.bannerMode(Mode.OFF).web(false).environment(environment);
+			// Just the listeners that affect the environment (e.g. excluding logging
+			// listener because it has side effects)
+			builder.application()
+					.setListeners(Arrays.asList(new BootstrapApplicationListener(),
+							new ConfigFileApplicationListener()));
+			capture = builder.run();
 			if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
 				environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
 			}
@@ -98,17 +105,9 @@ public class ContextRefresher {
 		}
 		finally {
 			ConfigurableApplicationContext closeable = capture;
-			while (closeable != null) {
-				closeable.close();
-				ApplicationContext parent = closeable.getParent();
-				if (parent instanceof ConfigurableApplicationContext) {
-					closeable = (ConfigurableApplicationContext) parent;
-				}
-				else {
-					closeable = null;
-				}
-			}
+			closeable.close();
 		}
+
 	}
 
 	// Don't use ConfigurableEnvironment.merge() in case there are clashes with property
@@ -128,7 +127,7 @@ public class ContextRefresher {
 		map.put("spring.jmx.enabled", false);
 		map.put("spring.main.sources", "");
 		capturedPropertySources
-		.addFirst(new MapPropertySource(REFRESH_ARGS_PROPERTY_SOURCE, map));
+				.addFirst(new MapPropertySource(REFRESH_ARGS_PROPERTY_SOURCE, map));
 		return environment;
 	}
 

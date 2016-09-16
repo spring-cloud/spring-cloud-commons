@@ -8,6 +8,7 @@ org.springframework.cloud.autoconfigure.LifecycleMvcEndpointAutoConfiguration
 # Application Listeners
 org.springframework.context.ApplicationListener=\
 org.springframework.cloud.bootstrap.BootstrapApplicationListener,\
+org.springframework.cloud.bootstrap.LoggingSystemShutdownListener,\
 org.springframework.cloud.context.restart.RestartListener
 
 # Bootstrap components
