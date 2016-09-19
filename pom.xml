@@ -23,6 +23,7 @@
 	<properties>
 		<main.basedir>.</main.basedir>
 		<bintray.package>commons</bintray.package>
+		<spring-security-rsa.version>1.0.3.RELEASE</spring-security-rsa.version>
 	</properties>
 	<build>
 		<plugins>
@@ -124,6 +125,11 @@
 				<version>${project.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-rsa</artifactId>
+				<version>${spring-security-rsa.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

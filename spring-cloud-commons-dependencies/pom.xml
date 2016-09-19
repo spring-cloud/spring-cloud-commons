@@ -13,16 +13,8 @@
 	<packaging>pom</packaging>
 	<name>spring-cloud-commons-dependencies</name>
 	<description>Spring Cloud Commons Dependencies</description>
-	<properties>
-		<spring-security-rsa.version>1.0.3.RELEASE</spring-security-rsa.version>
-	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-rsa</artifactId>
-				<version>${spring-security-rsa.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-commons</artifactId>
