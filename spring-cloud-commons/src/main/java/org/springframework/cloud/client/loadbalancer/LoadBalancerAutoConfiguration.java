@@ -25,9 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -39,6 +41,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @ConditionalOnClass(RestTemplate.class)
 @ConditionalOnBean(LoadBalancerClient.class)
+@EnableConfigurationProperties(LoadBalancerRetryProperties.class)
 public class LoadBalancerAutoConfiguration {
 
 	@LoadBalanced
@@ -76,9 +79,22 @@ public class LoadBalancerAutoConfiguration {
 	}
 
 	@Bean
-	public LoadBalancerInterceptor ribbonInterceptor(
-			LoadBalancerClient loadBalancerClient) {
-		return new LoadBalancerInterceptor(loadBalancerClient);
+	public RetryTemplate retryTemplate() {
+		RetryTemplate template =  new RetryTemplate();
+		template.setThrowLastExceptionOnExhausted(true);
+		return template;
 	}
 
+	@Bean
+	@ConditionalOnMissingBean
+	public LoadBalancedRetryPolicyFactory loadBalancedRetryPolicyFactory() {
+		return new LoadBalancedRetryPolicyFactory.NeverRetryFactory();
+	}
+
+	@Bean
+	public LoadBalancerInterceptor ribbonInterceptor(
+			LoadBalancerClient loadBalancerClient, LoadBalancerRetryProperties properties,
+			LoadBalancedRetryPolicyFactory lbRetryPolicyFactory) {
+		return new LoadBalancerInterceptor(loadBalancerClient, retryTemplate(), properties, lbRetryPolicyFactory);
+	}
 }

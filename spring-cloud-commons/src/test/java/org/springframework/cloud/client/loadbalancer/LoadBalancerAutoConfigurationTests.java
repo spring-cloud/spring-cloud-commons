@@ -1,5 +1,6 @@
 package org.springframework.cloud.client.loadbalancer;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.retry.RetryPolicy;
 import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.Matchers.empty;
@@ -92,6 +94,9 @@ public class LoadBalancerAutoConfigurationTests {
 			return new NoopLoadBalancerClient();
 		}
 
+		@Bean
+		LoadBalancedRetryPolicyFactory loadBalancedRetryPolicyFactory() { return new LoadBalancedRetryPolicyFactory.NeverRetryFactory();}
+
 	}
 
 	@Configuration
@@ -113,6 +118,9 @@ public class LoadBalancerAutoConfigurationTests {
 		LoadBalancerClient loadBalancerClient() {
 			return new NoopLoadBalancerClient();
 		}
+
+		@Bean
+		LoadBalancedRetryPolicyFactory loadBalancedRetryPolicyFactory() { return new LoadBalancedRetryPolicyFactory.NeverRetryFactory();}
 
 		@Configuration
 		protected static class Two {
@@ -138,6 +146,12 @@ public class LoadBalancerAutoConfigurationTests {
 		@Override
 		@SneakyThrows
 		public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
+			return request.apply(choose(serviceId));
+		}
+
+		@Override
+		@SneakyThrows
+		public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
 			return request.apply(choose(serviceId));
 		}
 
