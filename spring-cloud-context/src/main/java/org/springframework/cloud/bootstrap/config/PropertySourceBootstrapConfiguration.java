@@ -160,15 +160,15 @@ public class PropertySourceBootstrapConfiguration implements
 			return;
 		}
 		if (propertySources
-				.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
+				.contains(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME)) {
 			if (!remoteProperties.isOverrideSystemProperties()) {
 				propertySources.addAfter(
-						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+						StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
 						composite);
 			}
 			else {
 				propertySources.addBefore(
-						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
+						StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
 						composite);
 			}
 		}
