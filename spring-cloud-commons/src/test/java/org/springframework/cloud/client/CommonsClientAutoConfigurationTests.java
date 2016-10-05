@@ -60,6 +60,15 @@ public class CommonsClientAutoConfigurationTests {
 		}
 	}
 
+	@Test
+	public void disableHealthIndicator() {
+		try (ConfigurableApplicationContext ctxt = init(
+				"spring.cloud.discovery.client.health-indicator.enabled=false")) {
+			assertBeanNonExistant(ctxt, DiscoveryClientHealthIndicator.class);
+			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthIndicator.class);
+		}
+	}
+
 	private void assertBeanNonExistant(ConfigurableApplicationContext ctxt,
 			Class<?> beanClass) {
 		try {

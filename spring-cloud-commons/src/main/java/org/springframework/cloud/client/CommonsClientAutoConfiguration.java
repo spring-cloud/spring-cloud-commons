@@ -59,6 +59,7 @@ public class CommonsClientAutoConfiguration {
 
 	@Bean
 	@ConditionalOnProperty(value = "spring.cloud.discovery.client.composite-indicator.enabled", matchIfMissing = true)
+	@ConditionalOnBean(DiscoveryHealthIndicator.class)
 	public DiscoveryCompositeHealthIndicator discoveryCompositeHealthIndicator(
 			HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
 		return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
