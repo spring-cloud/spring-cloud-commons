@@ -25,44 +25,27 @@ import lombok.extern.apachecommons.CommonsLog;
 public class InetUtils implements Closeable {
 
 	// TODO: maybe shutdown the thread pool if it isn't being used?
-	private static ExecutorService executorService;
+	private final ExecutorService executorService;
 	private final InetUtilsProperties properties;
 	private static final InetUtils instance = new InetUtils(new InetUtilsProperties());
 
 	public InetUtils(final InetUtilsProperties properties) {
 		this.properties = properties;
+		this.executorService = Executors
+				.newSingleThreadExecutor(new ThreadFactory() {
+					@Override
+					public Thread newThread(Runnable r) {
+						Thread thread = new Thread(r);
+						thread.setName(InetUtilsProperties.PREFIX);
+						thread.setDaemon(true);
+						return thread;
+					}
+				});
 	}
 
 	@Override
 	public void close() {
-		if (executorService != null) {
-			synchronized (InetUtils.class) {
-				if (executorService != null) {
-					executorService.shutdown();
-					executorService = null;
-				}
-			}
-		}
-	}
-
-	private ExecutorService getExecutor() {
-		if (executorService == null) {
-			synchronized (InetUtils.class) {
-				if (executorService == null) {
-					executorService = Executors
-							.newSingleThreadExecutor(new ThreadFactory() {
-								@Override
-								public Thread newThread(Runnable r) {
-									Thread thread = new Thread(r);
-									thread.setName(InetUtilsProperties.PREFIX);
-									thread.setDaemon(true);
-									return thread;
-								}
-							});
-				}
-			}
-		}
-		return executorService;
+		executorService.shutdown();
 	}
 
 	public HostInfo findFirstNonLoopbackHostInfo() {
@@ -156,7 +139,7 @@ public class InetUtils implements Closeable {
 
 	public HostInfo convertAddress(final InetAddress address) {
 		HostInfo hostInfo = new HostInfo();
-		Future<String> result = getExecutor().submit(new Callable<String>() {
+		Future<String> result = executorService.submit(new Callable<String>() {
 			@Override
 			public String call() throws Exception {
 				return address.getHostName();
