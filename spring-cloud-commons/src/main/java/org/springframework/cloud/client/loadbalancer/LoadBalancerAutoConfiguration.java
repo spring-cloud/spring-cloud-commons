@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,38 +65,66 @@ public class LoadBalancerAutoConfiguration {
 		};
 	}
 
-	@Bean
-	@ConditionalOnMissingBean
-	public RestTemplateCustomizer restTemplateCustomizer(
-			final LoadBalancerInterceptor loadBalancerInterceptor) {
-		return new RestTemplateCustomizer() {
-			@Override
-			public void customize(RestTemplate restTemplate) {
-				List<ClientHttpRequestInterceptor> list = new ArrayList<>(
-						restTemplate.getInterceptors());
-				list.add(loadBalancerInterceptor);
-				restTemplate.setInterceptors(list);
-			}
-		};
+	@Configuration
+	@ConditionalOnMissingClass("org.springframework.retry.support.RetryTemplate")
+	static class LoadBalancerInterceptorConfig {
+		@Bean
+		public LoadBalancerInterceptor ribbonInterceptor(LoadBalancerClient loadBalancerClient) {
+			return new LoadBalancerInterceptor(loadBalancerClient);
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public RestTemplateCustomizer restTemplateCustomizer(
+				final LoadBalancerInterceptor loadBalancerInterceptor) {
+			return new RestTemplateCustomizer() {
+				@Override
+				public void customize(RestTemplate restTemplate) {
+					List<ClientHttpRequestInterceptor> list = new ArrayList<>(
+							restTemplate.getInterceptors());
+					list.add(loadBalancerInterceptor);
+					restTemplate.setInterceptors(list);
+				}
+			};
+		}
 	}
 
-	@Bean
-	public RetryTemplate retryTemplate() {
-		RetryTemplate template =  new RetryTemplate();
-		template.setThrowLastExceptionOnExhausted(true);
-		return template;
-	}
+	@Configuration
+	@ConditionalOnClass(RetryTemplate.class)
+	static class RetryAutoConfiguration {
+		@Bean
+		public RetryTemplate retryTemplate() {
+			RetryTemplate template =  new RetryTemplate();
+			template.setThrowLastExceptionOnExhausted(true);
+			return template;
+		}
 
-	@Bean
-	@ConditionalOnMissingBean
-	public LoadBalancedRetryPolicyFactory loadBalancedRetryPolicyFactory() {
-		return new LoadBalancedRetryPolicyFactory.NeverRetryFactory();
-	}
+		@Bean
+		@ConditionalOnMissingBean
+		public LoadBalancedRetryPolicyFactory loadBalancedRetryPolicyFactory() {
+			return new LoadBalancedRetryPolicyFactory.NeverRetryFactory();
+		}
 
-	@Bean
-	public LoadBalancerInterceptor ribbonInterceptor(
-			LoadBalancerClient loadBalancerClient, LoadBalancerRetryProperties properties,
-			LoadBalancedRetryPolicyFactory lbRetryPolicyFactory) {
-		return new LoadBalancerInterceptor(loadBalancerClient, retryTemplate(), properties, lbRetryPolicyFactory);
+		@Bean
+		public RetryLoadBalancerInterceptor ribbonInterceptor(
+				LoadBalancerClient loadBalancerClient, LoadBalancerRetryProperties properties,
+				LoadBalancedRetryPolicyFactory lbRetryPolicyFactory) {
+			return new RetryLoadBalancerInterceptor(loadBalancerClient, retryTemplate(), properties, lbRetryPolicyFactory);
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public RestTemplateCustomizer restTemplateCustomizer(
+				final RetryLoadBalancerInterceptor loadBalancerInterceptor) {
+			return new RestTemplateCustomizer() {
+				@Override
+				public void customize(RestTemplate restTemplate) {
+					List<ClientHttpRequestInterceptor> list = new ArrayList<>(
+							restTemplate.getInterceptors());
+					list.add(loadBalancerInterceptor);
+					restTemplate.setInterceptors(list);
+				}
+			};
+		}
 	}
 }
