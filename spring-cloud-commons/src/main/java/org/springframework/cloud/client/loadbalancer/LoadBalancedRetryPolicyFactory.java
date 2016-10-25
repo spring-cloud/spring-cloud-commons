@@ -24,15 +24,15 @@ public interface LoadBalancedRetryPolicyFactory {
     /**
      * Creates a {@link LoadBalancedRetryPolicy}.
      * @param serviceId The ID of the service to create the retry policy for.
-     * @param loadBalanceChooser Used to get the next server from a load balancer
+     * @param serviceInstanceChooser Used to get the next server from a load balancer
      * @return A retry policy for the service.
      */
-    public LoadBalancedRetryPolicy create(String serviceId, LoadBalanceChooser loadBalanceChooser);
+    public LoadBalancedRetryPolicy create(String serviceId, ServiceInstanceChooser serviceInstanceChooser);
 
     static class NeverRetryFactory implements LoadBalancedRetryPolicyFactory {
 
         @Override
-        public LoadBalancedRetryPolicy create(String serviceId, LoadBalanceChooser loadBalanceChooser) {
+        public LoadBalancedRetryPolicy create(String serviceId, ServiceInstanceChooser serviceInstanceChooser) {
             return null;
         }
     }

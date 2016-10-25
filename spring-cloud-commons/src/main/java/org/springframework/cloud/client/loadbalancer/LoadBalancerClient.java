@@ -25,7 +25,7 @@ import java.net.URI;
  * Represents a client side load balancer
  * @author Spencer Gibb
  */
-public interface LoadBalancerClient extends LoadBalanceChooser {
+public interface LoadBalancerClient extends ServiceInstanceChooser {
 
 	/**
 	 * execute request using a ServiceInstance from the LoadBalancer for the specified
