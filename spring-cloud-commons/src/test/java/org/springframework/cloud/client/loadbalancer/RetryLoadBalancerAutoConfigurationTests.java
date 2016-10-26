@@ -1,9 +1,7 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import java.util.List;
-import org.junit.runner.RunWith;
-import org.springframework.cloud.ClassPathExclusions;
-import org.springframework.cloud.FilteredClassPathRunner;
+
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
@@ -13,17 +11,15 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
 /**
- * @author Spencer Gibb
+ * @author Ryan Baxter
  */
-@RunWith(FilteredClassPathRunner.class)
-@ClassPathExclusions({"spring-retry-*.jar", "spring-boot-starter-aop-*.jar"})
-public class LoadBalancerAutoConfigurationTests extends AbstractLoadBalancerAutoConfigurationTests {
-
+public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalancerAutoConfigurationTests {
 	@Override
 	protected void assertLoadBalanced(RestTemplate restTemplate) {
 		List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
 		assertThat(interceptors, hasSize(1));
 		ClientHttpRequestInterceptor interceptor = interceptors.get(0);
-		assertThat(interceptor, is(instanceOf(LoadBalancerInterceptor.class)));
+		assertThat(interceptor, is(instanceOf(RetryLoadBalancerInterceptor.class)));
 	}
 }
+

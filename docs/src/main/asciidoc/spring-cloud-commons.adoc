@@ -345,6 +345,20 @@ The Ribbon client is used to create a full physical address. See
 {githubroot}/spring-cloud-netflix/blob/master/spring-cloud-netflix-core/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java[RibbonAutoConfiguration]
 for details of how the `RestTemplate` is set up.
 
+==== Retrying Failed Requests
+
+A load balanced `RestTemplate` can be configured to retry failed requests.
+By default this logic is disabled, you can enable it by setting
+`spring.cloud.loadbalancer.retry=true`.  The load balanced `RestTemplate` will
+honor some of the Ribbon configuration values related to retrying failed requests.
+The properties you can use are `client.ribbon.MaxAutoRetries`,
+`client.ribbon.MaxAutoRetriesNextServer`, and `client.ribbon.OkToRetryOnAllOperations`.
+See the https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties[Ribbon documentation]
+for a description of what there properties do.
+
+NOTE: `client` in the above examples should be replaced with your Ribbon client's
+name.
+
 === Multiple RestTemplate objects
 
 If you want a `RestTemplate` that is not load balanced, create a `RestTemplate`
