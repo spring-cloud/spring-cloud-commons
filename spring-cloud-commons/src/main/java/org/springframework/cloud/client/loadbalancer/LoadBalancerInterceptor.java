@@ -18,17 +18,16 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.io.IOException;
 import java.net.URI;
-
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.support.HttpRequestWrapper;
 
 /**
  * @author Spencer Gibb
  * @author Dave Syer
+ * @author Ryan Baxter
  */
 public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 
@@ -45,34 +44,14 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 		String serviceName = originalUri.getHost();
 		return this.loadBalancer.execute(serviceName,
 				new LoadBalancerRequest<ClientHttpResponse>() {
-
 					@Override
 					public ClientHttpResponse apply(final ServiceInstance instance)
 							throws Exception {
 						HttpRequest serviceRequest = new ServiceRequestWrapper(request,
-								instance);
+								instance, loadBalancer);
 						return execution.execute(serviceRequest, body);
 					}
 
 				});
 	}
-
-	private class ServiceRequestWrapper extends HttpRequestWrapper {
-
-		private final ServiceInstance instance;
-
-		public ServiceRequestWrapper(HttpRequest request, ServiceInstance instance) {
-			super(request);
-			this.instance = instance;
-		}
-
-		@Override
-		public URI getURI() {
-			URI uri = LoadBalancerInterceptor.this.loadBalancer.reconstructURI(
-					this.instance, getRequest().getURI());
-			return uri;
-		}
-
-	}
-
 }
