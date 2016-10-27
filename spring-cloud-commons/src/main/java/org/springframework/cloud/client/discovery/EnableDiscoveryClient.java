@@ -36,4 +36,8 @@ import org.springframework.context.annotation.Import;
 @Import(EnableDiscoveryClientImportSelector.class)
 public @interface EnableDiscoveryClient {
 
+	/**
+	 * If true, the ServiceRegistry will automatically register the local server.
+	 */
+	boolean autoRegister() default true;
 }
