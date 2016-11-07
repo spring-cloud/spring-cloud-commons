@@ -64,8 +64,6 @@ public class ServiceRegistryEndpoint implements MvcEndpoint {
 		}
 
 		this.serviceRegistry.setStatus(this.registration, status);
-		// getEurekaClient().setStatus(status.getStatus());
-		// getEurekaClient().cancelOverrideStatus();
 		return ResponseEntity.ok().build();
 	}
 
@@ -77,7 +75,6 @@ public class ServiceRegistryEndpoint implements MvcEndpoint {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no registration found");
 		}
 
-		// return new Status(this.infoManager.getInfo().getStatus(), this.infoManager.getInfo().getOverriddenStatus());
 		return ResponseEntity.ok().body(this.serviceRegistry.getStatus(this.registration));
 	}
 
