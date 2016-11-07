@@ -19,7 +19,13 @@ package org.springframework.cloud.client.discovery;
 import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.cloud.commons.util.SpringFactoryImportSelector;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.type.AnnotationMetadata;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Spencer Gibb
@@ -27,6 +33,24 @@ import org.springframework.core.annotation.Order;
 @Order(Ordered.LOWEST_PRECEDENCE - 100)
 public class EnableDiscoveryClientImportSelector
 		extends SpringFactoryImportSelector<EnableDiscoveryClient> {
+
+	@Override
+	public String[] selectImports(AnnotationMetadata metadata) {
+		String[] imports = super.selectImports(metadata);
+
+		AnnotationAttributes attributes = AnnotationAttributes.fromMap(
+				metadata.getAnnotationAttributes(getAnnotationClass().getName(), true));
+
+		boolean autoRegister = attributes.getBoolean("autoRegister");
+
+		if (autoRegister) {
+			List<String> importsList = new ArrayList<>(Arrays.asList(imports));
+			importsList.add("org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
+			imports = importsList.toArray(new String[0]);
+		}
+
+		return imports;
+	}
 
 	@Override
 	protected boolean isEnabled() {
