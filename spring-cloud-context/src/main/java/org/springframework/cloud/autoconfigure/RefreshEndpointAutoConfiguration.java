@@ -58,11 +58,14 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
 @AutoConfigureAfter(EndpointAutoConfiguration.class)
 public class RefreshEndpointAutoConfiguration {
 
-	@ConditionalOnBean(EndpointAutoConfiguration.class)
 	@ConditionalOnMissingClass("org.springframework.boot.actuate.info.InfoContributor")
-	@Bean
-	InfoEndpointRebinderConfiguration infoEndpointRebinderConfiguration() {
-		return new InfoEndpointRebinderConfiguration();
+	protected static class InfoEndpointAutoConfiguration {
+
+		@ConditionalOnBean(EndpointAutoConfiguration.class)
+		@Bean
+		InfoEndpointRebinderConfiguration infoEndpointRebinderConfiguration() {
+			return new InfoEndpointRebinderConfiguration();
+		}
 	}
 
 	@ConditionalOnMissingBean
@@ -168,7 +171,7 @@ public class RefreshEndpointAutoConfiguration {
 		}
 
 		private InfoEndpoint infoEndpoint(InfoEndpoint endpoint) {
-			return new InfoEndpoint(endpoint.invoke()) {
+			InfoEndpoint newEndpoint = new InfoEndpoint(endpoint.invoke()) {
 				@Override
 				public Map<String, Object> invoke() {
 					Map<String, Object> info = new LinkedHashMap<String, Object>(
@@ -177,6 +180,10 @@ public class RefreshEndpointAutoConfiguration {
 					return info;
 				}
 			};
+			newEndpoint.setId(endpoint.getId());
+			newEndpoint.setEnabled(endpoint.isEnabled());
+			newEndpoint.setSensitive(endpoint.isSensitive());
+			return newEndpoint;
 		}
 
 	}
