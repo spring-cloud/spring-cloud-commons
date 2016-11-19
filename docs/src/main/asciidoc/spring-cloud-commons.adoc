@@ -376,7 +376,7 @@ name.
 === Multiple RestTemplate objects
 
 If you want a `RestTemplate` that is not load balanced, create a `RestTemplate`
-bean and inject it as normal.  To access the load balanced `RestTemplate use
+bean and inject it as normal.  To access the load balanced `RestTemplate` use
 the `@LoadBalanced` qualifier when you create your `@Bean`.
 
 IMPORTANT: Notice the `@Primary` annotation on the plain `RestTemplate` declaration in the example below, to disambiguate the unqualified `@Autowired` injection.
