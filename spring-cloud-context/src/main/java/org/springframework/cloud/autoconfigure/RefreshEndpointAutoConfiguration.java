@@ -58,8 +58,6 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
 @AutoConfigureAfter(EndpointAutoConfiguration.class)
 public class RefreshEndpointAutoConfiguration {
 
-	//TODO Remove this class and InfoEndpointRebinderConfiguration once we no longer
-	//need to support Boot 1.3.x
 	@ConditionalOnMissingClass("org.springframework.boot.actuate.info.InfoContributor")
 	protected static class InfoEndpointAutoConfiguration {
 
