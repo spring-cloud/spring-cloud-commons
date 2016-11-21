@@ -58,13 +58,6 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
 @AutoConfigureAfter(EndpointAutoConfiguration.class)
 public class RefreshEndpointAutoConfiguration {
 
-	@ConditionalOnBean(EndpointAutoConfiguration.class)
-	@ConditionalOnMissingClass("org.springframework.boot.actuate.info.InfoContributor")
-	@Bean
-	InfoEndpointRebinderConfiguration infoEndpointRebinderConfiguration() {
-		return new InfoEndpointRebinderConfiguration();
-	}
-
 	@ConditionalOnMissingBean
 	@ConditionalOnEnabledHealthIndicator("refresh")
 	@Bean
@@ -133,52 +126,4 @@ public class RefreshEndpointAutoConfiguration {
 		}
 
 	}
-
-	private static class InfoEndpointRebinderConfiguration
-			implements ApplicationListener<EnvironmentChangeEvent>, BeanPostProcessor {
-
-		@Autowired
-		private ConfigurableEnvironment environment;
-
-		private Map<String, Object> map = new LinkedHashMap<String, Object>();
-
-		@Override
-		public void onApplicationEvent(EnvironmentChangeEvent event) {
-			for (String key : event.getKeys()) {
-				if (key.startsWith("info.")) {
-					this.map.put(key.substring("info.".length()),
-							this.environment.getProperty(key));
-				}
-			}
-		}
-
-		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName)
-				throws BeansException {
-			if (bean instanceof InfoEndpoint) {
-				return infoEndpoint((InfoEndpoint) bean);
-			}
-			return bean;
-		}
-
-		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName)
-				throws BeansException {
-			return bean;
-		}
-
-		private InfoEndpoint infoEndpoint(InfoEndpoint endpoint) {
-			return new InfoEndpoint(endpoint.invoke()) {
-				@Override
-				public Map<String, Object> invoke() {
-					Map<String, Object> info = new LinkedHashMap<String, Object>(
-							super.invoke());
-					info.putAll(InfoEndpointRebinderConfiguration.this.map);
-					return info;
-				}
-			};
-		}
-
-	}
-
 }
