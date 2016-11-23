@@ -1,5 +1,10 @@
 package org.springframework.cloud.autoconfigure;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 import org.junit.Test;
 import org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -9,11 +14,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Spencer Gibb
@@ -43,6 +43,21 @@ public class LifecycleMvcAutoConfigurationTests {
 	@Test
 	public void restartMvcEndpointDisabled() {
 		endpointDisabled("endpoints.restart.enabled", "restartMvcEndpoint");
+	}
+	
+	@Test
+	public void pauseMvcEndpointGloballyDisabled() {
+		endpointDisabled("endpoints.enabled", "pauseMvcEndpoint");
+	}
+	
+	@Test
+	public void resumeMvcEndpointGloballyDisabled() {
+		endpointDisabled("endpoints.enabled", "resumeMvcEndpoint");
+	}
+	
+	@Test
+	public void restartMvcEndpointGloballyDisabled() {
+		endpointDisabled("endpoints.enabled", "restartMvcEndpoint");
 	}
 
 	private void endpointDisabled(String enabledProp, String beanName) {
