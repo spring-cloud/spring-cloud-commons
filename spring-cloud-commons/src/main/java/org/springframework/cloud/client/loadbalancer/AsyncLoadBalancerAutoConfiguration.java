@@ -42,45 +42,45 @@ import java.util.List;
 @EnableConfigurationProperties(LoadBalancerRetryProperties.class)
 public class AsyncLoadBalancerAutoConfiguration {
 
-    @LoadBalanced
-    @Autowired(required = false)
-    private List<AsyncRestTemplate> restTemplates = Collections.emptyList();
+	@LoadBalanced
+	@Autowired(required = false)
+	private List<AsyncRestTemplate> restTemplates = Collections.emptyList();
 
-    @Bean
-    public SmartInitializingSingleton loadBalancedRestTemplateInitializer(
-            final List<AsyncRestTemplateCustomizer> customizers) {
-        return new SmartInitializingSingleton() {
-            @Override
-            public void afterSingletonsInstantiated() {
-                for (AsyncRestTemplate restTemplate : AsyncLoadBalancerAutoConfiguration.this.restTemplates) {
-                    for (AsyncRestTemplateCustomizer customizer : customizers) {
-                        customizer.customize(restTemplate);
-                    }
-                }
-            }
-        };
-    }
+	@Bean
+	public SmartInitializingSingleton loadBalancedRestTemplateInitializer(
+			final List<AsyncRestTemplateCustomizer> customizers) {
+		return new SmartInitializingSingleton() {
+			@Override
+			public void afterSingletonsInstantiated() {
+				for (AsyncRestTemplate restTemplate : AsyncLoadBalancerAutoConfiguration.this.restTemplates) {
+					for (AsyncRestTemplateCustomizer customizer : customizers) {
+						customizer.customize(restTemplate);
+					}
+				}
+			}
+		};
+	}
 
-    @Configuration
-    static class LoadBalancerInterceptorConfig {
-        @Bean
-        public AsyncLoadBalancerInterceptor ribbonInterceptor(LoadBalancerClient loadBalancerClient) {
-            return new AsyncLoadBalancerInterceptor(loadBalancerClient);
-        }
+	@Configuration
+	static class LoadBalancerInterceptorConfig {
+		@Bean
+		public AsyncLoadBalancerInterceptor ribbonInterceptor(LoadBalancerClient loadBalancerClient) {
+			return new AsyncLoadBalancerInterceptor(loadBalancerClient);
+		}
 
-        @Bean
-        @ConditionalOnMissingBean
-        public AsyncRestTemplateCustomizer restTemplateCustomizer(
-                final AsyncLoadBalancerInterceptor loadBalancerInterceptor) {
-            return new AsyncRestTemplateCustomizer() {
-                @Override
-                public void customize(AsyncRestTemplate restTemplate) {
-                    List<AsyncClientHttpRequestInterceptor> list = new ArrayList<>(
-                            restTemplate.getInterceptors());
-                    list.add(loadBalancerInterceptor);
-                    restTemplate.setInterceptors(list);
-                }
-            };
-        }
-    }
+		@Bean
+		@ConditionalOnMissingBean
+		public AsyncRestTemplateCustomizer restTemplateCustomizer(
+				final AsyncLoadBalancerInterceptor loadBalancerInterceptor) {
+			return new AsyncRestTemplateCustomizer() {
+				@Override
+				public void customize(AsyncRestTemplate restTemplate) {
+					List<AsyncClientHttpRequestInterceptor> list = new ArrayList<>(
+							restTemplate.getInterceptors());
+					list.add(loadBalancerInterceptor);
+					restTemplate.setInterceptors(list);
+				}
+			};
+		}
+	}
 }

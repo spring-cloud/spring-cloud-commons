@@ -31,28 +31,28 @@ import java.net.URI;
  */
 public class AsyncLoadBalancerInterceptor implements AsyncClientHttpRequestInterceptor {
 
-    private LoadBalancerClient loadBalancer;
+	private LoadBalancerClient loadBalancer;
 
-    public AsyncLoadBalancerInterceptor(LoadBalancerClient loadBalancer) {
-        this.loadBalancer = loadBalancer;
-    }
+	public AsyncLoadBalancerInterceptor(LoadBalancerClient loadBalancer) {
+		this.loadBalancer = loadBalancer;
+	}
 
-    @Override
-    public ListenableFuture<ClientHttpResponse> intercept(final HttpRequest request, final byte[] body,
-                                                          final AsyncClientHttpRequestExecution execution) throws IOException {
-        final URI originalUri = request.getURI();
-        String serviceName = originalUri.getHost();
-        return this.loadBalancer.execute(serviceName,
-                new LoadBalancerRequest<ListenableFuture<ClientHttpResponse>>() {
-                    @Override
-                    public ListenableFuture<ClientHttpResponse> apply(final ServiceInstance instance)
-                            throws Exception {
-                        HttpRequest serviceRequest = new ServiceRequestWrapper(request,
-                                instance, loadBalancer);
-                        return execution.executeAsync(serviceRequest, body);
-                    }
+	@Override
+	public ListenableFuture<ClientHttpResponse> intercept(final HttpRequest request, final byte[] body,
+														  final AsyncClientHttpRequestExecution execution) throws IOException {
+		final URI originalUri = request.getURI();
+		String serviceName = originalUri.getHost();
+		return this.loadBalancer.execute(serviceName,
+				new LoadBalancerRequest<ListenableFuture<ClientHttpResponse>>() {
+					@Override
+					public ListenableFuture<ClientHttpResponse> apply(final ServiceInstance instance)
+							throws Exception {
+						HttpRequest serviceRequest = new ServiceRequestWrapper(request,
+								instance, loadBalancer);
+						return execution.executeAsync(serviceRequest, body);
+					}
 
-                });
-    }
+				});
+	}
 }
 
