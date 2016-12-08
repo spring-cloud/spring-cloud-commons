@@ -11,18 +11,20 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Spencer Gibb
  */
-@ConditionalOnBean(ServiceRegistry.class)
-@ConditionalOnClass(Endpoint.class)
 @Configuration
 public class ServiceRegistryAutoConfiguration {
 
-	@Autowired(required = false)
-	private Registration registration;
+	@ConditionalOnBean(ServiceRegistry.class)
+	@ConditionalOnClass(Endpoint.class)
+	protected class ServiceRegistryEndpointConfiguration {
+		@Autowired(required = false)
+		private Registration registration;
 
-	@Bean
-	public ServiceRegistryEndpoint serviceRegistryEndpoint(ServiceRegistry serviceRegistry) {
-		ServiceRegistryEndpoint endpoint = new ServiceRegistryEndpoint(serviceRegistry);
-		endpoint.setRegistration(registration);
-		return endpoint;
+		@Bean
+		public ServiceRegistryEndpoint serviceRegistryEndpoint(ServiceRegistry serviceRegistry) {
+			ServiceRegistryEndpoint endpoint = new ServiceRegistryEndpoint(serviceRegistry);
+			endpoint.setRegistration(registration);
+			return endpoint;
+		}
 	}
 }
