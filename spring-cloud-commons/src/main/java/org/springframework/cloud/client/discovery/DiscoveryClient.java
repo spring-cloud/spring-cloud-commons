@@ -31,23 +31,25 @@ public interface DiscoveryClient {
 	 * A human readable description of the implementation, used in HealthIndicator
 	 * @return the description
 	 */
-	public String description();
+	String description();
 
 	/**
+	 * @deprecated use the {@link org.springframework.cloud.client.serviceregistry.Registration} bean instead
+	 *
 	 * @return ServiceInstance with information used to register the local service
 	 */
-	public ServiceInstance getLocalServiceInstance();
+	ServiceInstance getLocalServiceInstance();
 
 	/**
 	 * Get all ServiceInstances associated with a particular serviceId
 	 * @param serviceId the serviceId to query
 	 * @return a List of ServiceInstance
 	 */
-	public List<ServiceInstance> getInstances(String serviceId);
+	List<ServiceInstance> getInstances(String serviceId);
 
 	/**
 	 * @return all known service ids
 	 */
-	public List<String> getServices();
+	List<String> getServices();
 
 }
