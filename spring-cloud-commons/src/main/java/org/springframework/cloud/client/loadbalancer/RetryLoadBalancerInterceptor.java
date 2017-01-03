@@ -12,6 +12,7 @@ import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.policy.NeverRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.Assert;
 
 /**
  * @author Ryan Baxter
@@ -38,6 +39,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 										final ClientHttpRequestExecution execution) throws IOException {
 		final URI originalUri = request.getURI();
 		final String serviceName = originalUri.getHost();
+		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
 		LoadBalancedRetryPolicy retryPolicy = lbRetryPolicyFactory.create(serviceName,
 				loadBalancer);
 		retryTemplate.setRetryPolicy(

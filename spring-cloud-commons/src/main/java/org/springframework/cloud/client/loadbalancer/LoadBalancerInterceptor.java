@@ -23,6 +23,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.util.Assert;
 
 /**
  * @author Spencer Gibb
@@ -42,6 +43,7 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 			final ClientHttpRequestExecution execution) throws IOException {
 		final URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
+		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
 		return this.loadBalancer.execute(serviceName,
 				new LoadBalancerRequest<ClientHttpResponse>() {
 					@Override
