@@ -1,3 +1,19 @@
+/*
+ * Copyright 2016-2017 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.loadbalancer;
 
 import java.io.IOException;
@@ -15,6 +31,7 @@ import org.springframework.retry.support.RetryTemplate;
 
 /**
  * @author Ryan Baxter
+ * @author Will Tran
  */
 public class RetryLoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 
@@ -22,15 +39,26 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 	private RetryTemplate retryTemplate;
 	private LoadBalancerClient loadBalancer;
 	private LoadBalancerRetryProperties lbProperties;
+	private LoadBalancerRequestFactory requestFactory;
 
 
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, RetryTemplate retryTemplate,
 										LoadBalancerRetryProperties lbProperties,
-										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory) {
+										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
+										LoadBalancerRequestFactory requestFactory) {
 		this.loadBalancer = loadBalancer;
 		this.lbRetryPolicyFactory = lbRetryPolicyFactory;
 		this.retryTemplate = retryTemplate;
 		this.lbProperties = lbProperties;
+		this.requestFactory = requestFactory;
+	}
+	
+	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, RetryTemplate retryTemplate,
+										LoadBalancerRetryProperties lbProperties,
+										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory) {
+		// for backwards compatibility
+		this(loadBalancer, retryTemplate, lbProperties, lbRetryPolicyFactory, 
+				new LoadBalancerRequestFactory(loadBalancer));
 	}
 
 	@Override
@@ -59,18 +87,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 						}
 						return RetryLoadBalancerInterceptor.this.loadBalancer.execute(
 								serviceName, serviceInstance,
-								new LoadBalancerRequest<ClientHttpResponse>() {
-
-									@Override
-									public ClientHttpResponse apply(
-											final ServiceInstance instance)
-											throws Exception {
-										HttpRequest serviceRequest = new ServiceRequestWrapper(
-												request, instance, loadBalancer);
-										return execution.execute(serviceRequest, body);
-									}
-
-								});
+								requestFactory.createRequest(request, body, execution));
 					}
 				});
 	}
