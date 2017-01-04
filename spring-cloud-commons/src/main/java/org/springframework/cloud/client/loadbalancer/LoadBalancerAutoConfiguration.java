@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
@@ -39,6 +40,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Spencer Gibb
  * @author Dave Syer
+ * @author Will Tran
  */
 @Configuration
 @ConditionalOnClass(RestTemplate.class)
@@ -65,12 +67,35 @@ public class LoadBalancerAutoConfiguration {
 		};
 	}
 
+	@Bean
+	public LoadBalancerRequestTransformer uriReconstructingRequestTransformer() {
+		return new LoadBalancerRequestTransformer() {
+
+			@Override
+			public HttpRequest transformRequest(HttpRequest request, ServiceInstance instance,
+					LoadBalancerClient loadBalancer) {
+				return new UriReconstructingRequestWrapper(request, instance, loadBalancer);
+			}
+
+		};
+	}
+	
+	@Bean
+	@ConditionalOnMissingBean
+	public LoadBalancerRequestFactory loadBalancerRequestFactory(
+			LoadBalancerClient loadBalancerClient,
+			List<LoadBalancerRequestTransformer> transformers) {
+		return new LoadBalancerRequestFactory(loadBalancerClient, transformers);
+	}
+
 	@Configuration
 	@ConditionalOnMissingClass("org.springframework.retry.support.RetryTemplate")
 	static class LoadBalancerInterceptorConfig {
 		@Bean
-		public LoadBalancerInterceptor ribbonInterceptor(LoadBalancerClient loadBalancerClient) {
-			return new LoadBalancerInterceptor(loadBalancerClient);
+		public LoadBalancerInterceptor ribbonInterceptor(
+				LoadBalancerClient loadBalancerClient,
+				LoadBalancerRequestFactory requestFactory) {
+			return new LoadBalancerInterceptor(loadBalancerClient, requestFactory);
 		}
 
 		@Bean
@@ -108,8 +133,10 @@ public class LoadBalancerAutoConfiguration {
 		@Bean
 		public RetryLoadBalancerInterceptor ribbonInterceptor(
 				LoadBalancerClient loadBalancerClient, LoadBalancerRetryProperties properties,
-				LoadBalancedRetryPolicyFactory lbRetryPolicyFactory) {
-			return new RetryLoadBalancerInterceptor(loadBalancerClient, retryTemplate(), properties, lbRetryPolicyFactory);
+				LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
+				LoadBalancerRequestFactory requestFactory) {
+			return new RetryLoadBalancerInterceptor(loadBalancerClient, retryTemplate(), properties,
+					lbRetryPolicyFactory, requestFactory);
 		}
 
 		@Bean
