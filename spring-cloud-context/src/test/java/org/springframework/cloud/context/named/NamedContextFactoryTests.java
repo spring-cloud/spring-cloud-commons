@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -36,6 +37,8 @@ public class NamedContextFactoryTests {
 
 		Bar bar = factory.getInstance("bar", Bar.class);
 		assertThat("bar was null", bar, is(notNullValue()));
+
+		assertThat("context names not exposed", factory.getContextNames(), hasItems("foo", "bar"));
 
 		Bar foobar = factory.getInstance("foo", Bar.class);
 		assertThat("bar was not null", foobar, is(nullValue()));

@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Spencer Gibb
  */
-public class AutoServiceRegistrationConfigurationTests {
+public class AutoServiceRegistrationAutoConfigurationTests {
 
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
@@ -69,6 +69,7 @@ public class AutoServiceRegistrationConfigurationTests {
 	private AnnotationConfigApplicationContext setup(String property, Class... classes) {
 		ArrayList<Class> list = new ArrayList<>();
 		list.add(AutoServiceRegistrationConfiguration.class);
+		list.add(AutoServiceRegistrationAutoConfiguration.class);
 		list.addAll(Arrays.asList(classes));
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(list.toArray(new Class[0]));
