@@ -217,10 +217,10 @@ application that includes that jar on its classpath.
 
 === Environment Changes
 
-The application will listen for an `EnvironmentChangedEvent` and react
+The application will listen for an `EnvironmentChangeEvent` and react
 to the change in a couple of standard ways (additional
 `ApplicationListeners` can be added as `@Beans` by the user in the
-normal way). When an `EnvironmentChangedEvent` is observed it will
+normal way). When an `EnvironmentChangeEvent` is observed it will
 have a list of key values that have changed, and the application will
 use those to:
 
@@ -231,12 +231,12 @@ Note that the Config Client does not by default poll for changes in
 the `Environment`, and generally we would not recommend that approach
 for detecting changes (although you could set it up with a
 `@Scheduled` annotation). If you have a scaled-out client application
-then it is better to broadcast the `EnvironmentChangedEvent` to all
+then it is better to broadcast the `EnvironmentChangeEvent` to all
 the instances instead of having them polling for changes (e.g. using
 the https://github.com/spring-cloud/spring-cloud-bus[Spring Cloud
 Bus]).
 
-The `EnvironmentChangedEvent` covers a large class of refresh use
+The `EnvironmentChangeEvent` covers a large class of refresh use
 cases, as long as you can actually make a change to the `Environment`
 and publish the event (those APIs are public and part of core
 Spring). You can verify the changes are bound to
@@ -363,7 +363,7 @@ for details of how the `RestTemplate` is set up.
 
 A load balanced `RestTemplate` can be configured to retry failed requests.
 By default this logic is disabled, you can enable it by setting
-`spring.cloud.loadbalancer.retry=true`.  The load balanced `RestTemplate` will
+`spring.cloud.loadbalancer.retry.enabled=true`.  The load balanced `RestTemplate` will
 honor some of the Ribbon configuration values related to retrying failed requests.
 The properties you can use are `client.ribbon.MaxAutoRetries`,
 `client.ribbon.MaxAutoRetriesNextServer`, and `client.ribbon.OkToRetryOnAllOperations`.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.io.IOException;
 import java.net.URI;
-import org.springframework.cloud.client.ServiceInstance;
+
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -29,13 +29,21 @@ import org.springframework.util.Assert;
  * @author Spencer Gibb
  * @author Dave Syer
  * @author Ryan Baxter
+ * @author William Tran
  */
 public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 
 	private LoadBalancerClient loadBalancer;
+	private LoadBalancerRequestFactory requestFactory;
+
+	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRequestFactory requestFactory) {
+		this.loadBalancer = loadBalancer;
+		this.requestFactory = requestFactory;
+	}
 
 	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer) {
-		this.loadBalancer = loadBalancer;
+		// for backwards compatibility
+		this(loadBalancer, new LoadBalancerRequestFactory(loadBalancer));
 	}
 
 	@Override
@@ -44,16 +52,6 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 		final URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
 		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
-		return this.loadBalancer.execute(serviceName,
-				new LoadBalancerRequest<ClientHttpResponse>() {
-					@Override
-					public ClientHttpResponse apply(final ServiceInstance instance)
-							throws Exception {
-						HttpRequest serviceRequest = new ServiceRequestWrapper(request,
-								instance, loadBalancer);
-						return execution.execute(serviceRequest, body);
-					}
-
-				});
+		return this.loadBalancer.execute(serviceName, requestFactory.createRequest(request, body, execution));
 	}
 }

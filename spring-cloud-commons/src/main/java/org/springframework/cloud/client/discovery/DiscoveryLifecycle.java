@@ -21,6 +21,8 @@ import org.springframework.core.Ordered;
 
 /**
  * @author Spencer Gibb
+ * @deprecated  use {@link org.springframework.cloud.client.serviceregistry.AutoServiceRegistration} instead. This class will be removed in the next release train.
  */
+@Deprecated
 public interface DiscoveryLifecycle extends SmartLifecycle, Ordered {
 }
