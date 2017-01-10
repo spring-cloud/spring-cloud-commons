@@ -1,28 +1,27 @@
 package org.springframework.cloud.client.discovery.noop;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Tests if @EnableDiscoveryClient is NOT used, then NoopDiscoveryClient is created.
  * @author Spencer Gibb
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = NoopDiscoveryClientConfigurationAdditionalTests.App.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = NoopDiscoveryClientConfigurationAdditionalTests.App.class)
 public class NoopDiscoveryClientConfigurationAdditionalTests {
 
 	@Autowired

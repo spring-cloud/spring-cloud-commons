@@ -27,9 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.EnvironmentTestUtils;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderListIntegrationTests.TestConfiguration;
@@ -39,13 +38,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringApplicationConfiguration(classes = TestConfiguration.class)
-@RunWith(SpringJUnit4ClassRunner.class)
-@IntegrationTest("messages=one,two")
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = TestConfiguration.class,
+		properties = "messages=one,two")
 public class ConfigurationPropertiesRebinderListIntegrationTests {
 
 	@Autowired

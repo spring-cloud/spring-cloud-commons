@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.context.scope.refresh;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,22 +22,24 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentManager;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeWebIntegrationTests.Application;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dave Syer
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Application.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class)
 public class RefreshScopeWebIntegrationTests {
 
 	@Autowired

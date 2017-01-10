@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.context.scope.refresh;
 
-import static org.junit.Assert.assertEquals;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -27,9 +25,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.boot.test.TestRestTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.scope.refresh.RefreshEndpointIntegrationTests.ClientApp;
 import org.springframework.context.annotation.Bean;
@@ -38,21 +35,21 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.junit.Assert.assertEquals;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
 /**
  * @author Dave Syer
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = ClientApp.class)
-@IntegrationTest("server.port:0")
-@WebAppConfiguration
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = ClientApp.class, webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
 
 	@Value("${local.server.port}")

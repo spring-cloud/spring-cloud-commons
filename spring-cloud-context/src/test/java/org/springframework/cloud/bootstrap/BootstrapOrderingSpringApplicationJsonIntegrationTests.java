@@ -6,19 +6,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bootstrap.BootstrapOrderingSpringApplicationJsonIntegrationTests.Application;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Application.class)
-@IntegrationTest("spring.cloud.bootstrap.name:json")
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class,
+		properties = "spring.cloud.bootstrap.name:json")
 public class BootstrapOrderingSpringApplicationJsonIntegrationTests {
 
 	@BeforeClass

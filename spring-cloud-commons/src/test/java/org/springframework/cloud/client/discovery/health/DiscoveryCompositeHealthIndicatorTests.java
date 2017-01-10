@@ -37,12 +37,12 @@ import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * @author Spencer Gibb
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = { DiscoveryCompositeHealthIndicatorTests.Config.class,
 		CommonsClientAutoConfiguration.class })
 public class DiscoveryCompositeHealthIndicatorTests {

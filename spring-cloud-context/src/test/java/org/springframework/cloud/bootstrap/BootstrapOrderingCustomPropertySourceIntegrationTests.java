@@ -8,8 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bootstrap.BootstrapOrderingCustomPropertySourceIntegrationTests.Application;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
@@ -19,14 +18,14 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Application.class)
-@IntegrationTest({ "encrypt.key:deadbeef", "spring.cloud.bootstrap.name:custom" })
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class,
+		properties = { "encrypt.key:deadbeef", "spring.cloud.bootstrap.name:custom" })
 @ActiveProfiles("encrypt")
 public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 
