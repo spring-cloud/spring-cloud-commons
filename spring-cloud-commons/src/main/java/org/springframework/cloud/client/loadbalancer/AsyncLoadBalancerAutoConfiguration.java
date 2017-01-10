@@ -24,7 +24,6 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
@@ -37,38 +36,42 @@ import org.springframework.web.client.AsyncRestTemplate;
  */
 @Configuration
 @ConditionalOnClass(AsyncRestTemplate.class)
-@ConditionalOnBean(LoadBalancerClient.class)
 public class AsyncLoadBalancerAutoConfiguration {
 
-	@LoadBalanced
-	@Autowired(required = false)
-	private List<AsyncRestTemplate> restTemplates = Collections.emptyList();
 
-	@Bean
-	public SmartInitializingSingleton loadBalancedRestTemplateInitializer(
-			final List<AsyncRestTemplateCustomizer> customizers) {
-		return new SmartInitializingSingleton() {
-			@Override
-			public void afterSingletonsInstantiated() {
-				for (AsyncRestTemplate restTemplate : AsyncLoadBalancerAutoConfiguration.this.restTemplates) {
-					for (AsyncRestTemplateCustomizer customizer : customizers) {
-						customizer.customize(restTemplate);
+	@ConditionalOnBean(AsyncRestTemplateCustomizer.class)
+	@Configuration
+	static class AsyncRestTemplateCustomizerConfig {
+		@LoadBalanced
+		@Autowired(required = false)
+		private List<AsyncRestTemplate> restTemplates = Collections.emptyList();
+
+		@Bean
+		public SmartInitializingSingleton loadBalancedAsyncRestTemplateInitializer(
+				final List<AsyncRestTemplateCustomizer> customizers) {
+			return new SmartInitializingSingleton() {
+				@Override
+				public void afterSingletonsInstantiated() {
+					for (AsyncRestTemplate restTemplate : AsyncRestTemplateCustomizerConfig.this.restTemplates) {
+						for (AsyncRestTemplateCustomizer customizer : customizers) {
+							customizer.customize(restTemplate);
+						}
 					}
 				}
-			}
-		};
+			};
+		}
 	}
 
+	@ConditionalOnBean(LoadBalancerClient.class)
 	@Configuration
 	static class LoadBalancerInterceptorConfig {
 		@Bean
-		public AsyncLoadBalancerInterceptor ribbonInterceptor(LoadBalancerClient loadBalancerClient) {
+		public AsyncLoadBalancerInterceptor asyncLoadBalancerInterceptor(LoadBalancerClient loadBalancerClient) {
 			return new AsyncLoadBalancerInterceptor(loadBalancerClient);
 		}
 
 		@Bean
-		@ConditionalOnMissingBean
-		public AsyncRestTemplateCustomizer restTemplateCustomizer(
+		public AsyncRestTemplateCustomizer asyncRestTemplateCustomizer(
 				final AsyncLoadBalancerInterceptor loadBalancerInterceptor) {
 			return new AsyncRestTemplateCustomizer() {
 				@Override
