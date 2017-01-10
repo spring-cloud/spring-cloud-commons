@@ -1,21 +1,20 @@
 package org.springframework.cloud.bootstrap;
 
-import static org.junit.Assert.assertFalse;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bootstrap.BootstrapDisabledAutoConfigurationIntegrationTests.Application;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = Application.class)
-@IntegrationTest("spring.cloud.bootstrap.enabled:false")
+import static org.junit.Assert.assertFalse;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class,
+		properties = "spring.cloud.bootstrap.enabled:false")
 public class BootstrapDisabledAutoConfigurationIntegrationTests {
 	
 	@Autowired
