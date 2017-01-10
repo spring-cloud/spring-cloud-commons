@@ -16,20 +16,19 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.web.client.AsyncRestTemplate;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Auto configuration for Ribbon (client side load balancing).
@@ -39,7 +38,6 @@ import java.util.List;
 @Configuration
 @ConditionalOnClass(AsyncRestTemplate.class)
 @ConditionalOnBean(LoadBalancerClient.class)
-@EnableConfigurationProperties(LoadBalancerRetryProperties.class)
 public class AsyncLoadBalancerAutoConfiguration {
 
 	@LoadBalanced
