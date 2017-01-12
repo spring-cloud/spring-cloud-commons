@@ -68,10 +68,12 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		this.environment = this.context.getEnvironment();
 	}
 
+	@Deprecated
 	protected Environment getEnvironment() {
 		return environment;
 	}
 
+	@Deprecated
 	protected AtomicInteger getPort() {
 		return port;
 	}
@@ -117,7 +119,9 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 		}
 	}
 
+	@Deprecated
 	protected abstract int getConfiguredPort();
+	@Deprecated
 	protected abstract void setConfiguredPort(int port);
 
 	/**
@@ -130,6 +134,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	/**
 	 * @return the object used to configure the registration
 	 */
+	@Deprecated
 	protected abstract Object getConfiguration();
 
 
@@ -163,6 +168,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	/**
 	 * @return the serviceId of the Management Service
 	 */
+	@Deprecated
 	protected String getManagementServiceId() {
 		// TODO: configurable management suffix
 		return this.context.getId() + ":management";
@@ -171,6 +177,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	/**
 	 * @return the service name of the Management Service
 	 */
+	@Deprecated
 	protected String getManagementServiceName() {
 		// TODO: configurable management suffix
 		return getAppName() + ":management";
@@ -179,6 +186,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	/**
 	 * @return the management server port
 	 */
+	@Deprecated
 	protected Integer getManagementPort() {
 		return ManagementServerPortUtils.getPort(this.context);
 	}
@@ -186,6 +194,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	/**
 	 * @return the app name, currently the spring.application.name property
 	 */
+	@Deprecated
 	protected String getAppName() {
 		return this.environment.getProperty("spring.application.name", "application");
 	}
@@ -225,6 +234,7 @@ public abstract class AbstractDiscoveryLifecycle implements DiscoveryLifecycle,
 	}
 
 	@Override
+	@Deprecated
 	public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
 		// TODO: take SSL into account
 		// Don't register the management port as THE port
