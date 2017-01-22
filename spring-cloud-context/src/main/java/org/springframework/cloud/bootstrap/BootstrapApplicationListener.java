@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ import org.springframework.util.StringUtils;
  * "application.properties".
  *
  * @author Dave Syer
+ * @author Biju Kunjummen
  *
  */
 public class BootstrapApplicationListener
@@ -77,6 +78,7 @@ public class BootstrapApplicationListener
 				true)) {
 			return;
 		}
+
 		// don't listen to events in a bootstrap context
 		if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			return;
@@ -133,6 +135,7 @@ public class BootstrapApplicationListener
 			}
 			sources.add(cls);
 		}
+		sources.add(BootstrapMarkerConfiguration.class);
 		AnnotationAwareOrderComparator.sort(sources);
 		builder.sources(sources.toArray(new Class[sources.size()]));
 		final ConfigurableApplicationContext context = builder.run();
@@ -289,9 +292,24 @@ public class BootstrapApplicationListener
 			while (context.getParent() != null && context.getParent() != context) {
 				context = (ConfigurableApplicationContext) context.getParent();
 			}
+			if (isBootstrapContext(context)) {
+				return;
+			}
 			reorderSources(context.getEnvironment());
 			new ParentContextApplicationContextInitializer(this.parent)
 					.initialize(context);
+		}
+
+		/**
+		 * Determines if a context is a Bootstrap context - by the presence of a Marker bean with a specific name
+		 * @param context
+		 * @return if the context is really a bootstrap context
+		 */
+		private boolean isBootstrapContext(ConfigurableApplicationContext context) {
+			if (context.containsBeanDefinition(BootstrapMarkerConfiguration.MARKER_BEAN_NAME)) {
+				return true;
+			}
+			return false;
 		}
 
 		private void reorderSources(ConfigurableEnvironment environment) {
