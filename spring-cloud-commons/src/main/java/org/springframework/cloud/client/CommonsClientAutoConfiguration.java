@@ -44,31 +44,34 @@ import org.springframework.context.annotation.Configuration;
  * @author Spencer Gibb
  */
 @Configuration
-@ConditionalOnClass(HealthIndicator.class)
-@ConditionalOnBean(DiscoveryClient.class)
-@ConditionalOnProperty(value = "spring.cloud.discovery.enabled", matchIfMissing = true)
 @AutoConfigureOrder(0)
 public class CommonsClientAutoConfiguration {
 
-	@Bean
-	@ConditionalOnProperty(value = "spring.cloud.discovery.client.health-indicator.enabled", matchIfMissing = true)
-	public DiscoveryClientHealthIndicator discoveryClientHealthIndicator(
-			DiscoveryClient discoveryClient) {
-		return new DiscoveryClientHealthIndicator(discoveryClient);
-	}
+	@Configuration
+	@ConditionalOnClass(HealthIndicator.class)
+	@ConditionalOnBean(DiscoveryClient.class)
+	@ConditionalOnProperty(value = "spring.cloud.discovery.enabled", matchIfMissing = true)
+	protected static class DiscoveryLoadBalancerConfiguration {
+		@Bean
+		@ConditionalOnProperty(value = "spring.cloud.discovery.client.health-indicator.enabled", matchIfMissing = true)
+		public DiscoveryClientHealthIndicator discoveryClientHealthIndicator(
+				DiscoveryClient discoveryClient) {
+			return new DiscoveryClientHealthIndicator(discoveryClient);
+		}
 
-	@Bean
-	@ConditionalOnProperty(value = "spring.cloud.discovery.client.composite-indicator.enabled", matchIfMissing = true)
-	@ConditionalOnBean(DiscoveryHealthIndicator.class)
-	public DiscoveryCompositeHealthIndicator discoveryCompositeHealthIndicator(
-			HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
-		return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
-	}
+		@Bean
+		@ConditionalOnProperty(value = "spring.cloud.discovery.client.composite-indicator.enabled", matchIfMissing = true)
+		@ConditionalOnBean(DiscoveryHealthIndicator.class)
+		public DiscoveryCompositeHealthIndicator discoveryCompositeHealthIndicator(
+				HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
+			return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
+		}
 
-	@Bean
-	public HasFeatures commonsFeatures() {
-		return HasFeatures.abstractFeatures(DiscoveryClient.class,
-				LoadBalancerClient.class);
+		@Bean
+		public HasFeatures commonsFeatures() {
+			return HasFeatures.abstractFeatures(DiscoveryClient.class,
+					LoadBalancerClient.class);
+		}
 	}
 
 	@Configuration
