@@ -43,7 +43,7 @@ public class CommonsClientAutoConfigurationTests {
 		try (ConfigurableApplicationContext ctxt = init("spring.cloud.discovery.enabled=false")) {
 			assertBeanNonExistant(ctxt, DiscoveryClientHealthIndicator.class);
 			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthIndicator.class);
-			assertBeanNonExistant(ctxt, FeaturesEndpoint.class);
+			assertThat(ctxt.getBean(FeaturesEndpoint.class), is(notNullValue())); // features actuator is independent of discovery
 			assertBeanNonExistant(ctxt, HasFeatures.class);
 		}
 	}
