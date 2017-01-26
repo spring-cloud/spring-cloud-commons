@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -313,6 +313,15 @@ public class BootstrapConfigurationTests {
 		// The parent property source is there in the child because they are both in the
 		// "parent" profile (by virtue of the merge in AbstractEnvironment)
 		assertEquals("parent", this.context.getEnvironment().getProperty("info.name"));
+	}
+
+	@Test
+	public void includeProfileFromBootstrapPropertySource() {
+		PropertySourceConfiguration.MAP.put("spring.profiles.include", "bar,baz");
+		this.context = new SpringApplicationBuilder().web(false).profiles("foo")
+				.sources(BareConfiguration.class).run();
+		assertTrue(this.context.getEnvironment().acceptsProfiles("baz"));
+		assertTrue(this.context.getEnvironment().acceptsProfiles("bar"));
 	}
 
 	@Configuration
