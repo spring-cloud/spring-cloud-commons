@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.discovery;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.cloud.client.ServiceInstance;
 
@@ -46,6 +47,14 @@ public interface DiscoveryClient {
 	 * @return a List of ServiceInstance
 	 */
 	List<ServiceInstance> getInstances(String serviceId);
+
+	/**
+	 * Get all ServiceInstances associated with a particular serviceId that match the provided metadata
+	 * @param serviceId the serviceId to query
+	 * @param metadata metadata to use in constraining the search
+	 * @return a List of ServiceInstance
+	 */
+	List<ServiceInstance> getInstances(String serviceId, Map<String, String> metadata);
 
 	/**
 	 * @return all known service ids

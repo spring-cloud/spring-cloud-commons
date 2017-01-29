@@ -20,13 +20,14 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.AbstractDiscoveryClient;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
  * DiscoveryClient used when no implementations are found on the classpath
  * @author Dave Syer
  */
-public class NoopDiscoveryClient implements DiscoveryClient {
+public class NoopDiscoveryClient extends AbstractDiscoveryClient {
 
 	private final ServiceInstance instance;
 
