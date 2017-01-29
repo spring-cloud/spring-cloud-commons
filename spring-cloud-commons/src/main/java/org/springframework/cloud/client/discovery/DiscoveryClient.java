@@ -50,6 +50,10 @@ public interface DiscoveryClient {
 
 	/**
 	 * Get all ServiceInstances associated with a particular serviceId that match the provided metadata
+	 *
+	 * Note that not all implementations support metadata, so some or all of the metadata provided may
+	 * be ignored when looking up a service.
+	 *
 	 * @param serviceId the serviceId to query
 	 * @param metadata metadata to use in constraining the search
 	 * @return a List of ServiceInstance

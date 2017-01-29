@@ -1,6 +1,7 @@
 package org.springframework.cloud.client.discovery.noop;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +52,11 @@ public class NoopDiscoveryClientConfigurationAdditionalTests {
 
 				@Override
 				public List<ServiceInstance> getInstances(String serviceId) {
+					return null;
+				}
+
+				@Override
+				public List<ServiceInstance> getInstances(String serviceId, Map<String, String> metadata) {
 					return null;
 				}
 
