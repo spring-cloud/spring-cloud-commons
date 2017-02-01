@@ -72,6 +72,10 @@ public class ServiceRegistryEndpointTests {
 		@Bean
 		Registration registration() {
 			return new Registration() {
+				@Override
+				public String getServiceId() {
+					return "testRegistration1";
+				}
 			};
 		}
 
