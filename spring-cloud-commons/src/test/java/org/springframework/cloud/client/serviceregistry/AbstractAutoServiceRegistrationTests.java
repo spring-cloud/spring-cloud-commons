@@ -59,6 +59,10 @@ public class AbstractAutoServiceRegistrationTests {
 	}
 
 	public static class TestRegistration implements Registration {
+		@Override
+		public String getServiceId() {
+			return "testRegistration2";
+		}
 	}
 
 	public static class TestServiceRegistry implements ServiceRegistry<TestRegistration> {
