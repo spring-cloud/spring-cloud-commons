@@ -38,6 +38,7 @@ public interface DiscoveryClient {
 	 *
 	 * @return ServiceInstance with information used to register the local service
 	 */
+	@Deprecated
 	ServiceInstance getLocalServiceInstance();
 
 	/**
