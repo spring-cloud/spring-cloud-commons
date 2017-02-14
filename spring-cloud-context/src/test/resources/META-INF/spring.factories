@@ -1,0 +1,4 @@
+# Bootstrap components
+org.springframework.cloud.bootstrap.BootstrapConfiguration=\
+org.springframework.cloud.bootstrap.TestBootstrapConfiguration,\
+org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration
