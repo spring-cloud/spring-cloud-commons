@@ -1,20 +1,20 @@
 package org.springframework.cloud.bootstrap;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.cloud.bootstrap.BootstrapOrderingSpringApplicationJsonIntegrationTests.Application;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration.firstToBeCreated;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = Application.class)
 public class BootstrapSourcesOrderingTests {
 
 	@Autowired
@@ -23,7 +23,8 @@ public class BootstrapSourcesOrderingTests {
 	@Test
 	public void sourcesAreOrderedCorrectly() {
 		Class<?> firstConstructedClass = firstToBeCreated.get();
-		assertThat(firstConstructedClass).as("bootstrap sources not ordered correctly").isEqualTo(TestHigherPriorityBootstrapConfiguration.class);
+		Assert.assertEquals("bootstrap sources not ordered correctly",
+				TestHigherPriorityBootstrapConfiguration.class, firstConstructedClass);
 	}
 
 	@EnableAutoConfiguration
