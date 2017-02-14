@@ -133,8 +133,8 @@ public class BootstrapApplicationListener
 			}
 			sources.add(cls);
 		}
-		builder.sources(sources.toArray(new Class[sources.size()]));
 		AnnotationAwareOrderComparator.sort(sources);
+		builder.sources(sources.toArray(new Class[sources.size()]));
 		final ConfigurableApplicationContext context = builder.run();
 		// Make the bootstrap context a parent of the app context
 		addAncestorInitializer(application, context);
