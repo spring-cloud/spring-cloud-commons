@@ -22,15 +22,13 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.EnvironmentTestUtils;
-import org.springframework.boot.test.IntegrationTest;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderProxyIntegrationTests.TestConfiguration;
@@ -39,13 +37,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 
-@SpringApplicationConfiguration(classes = TestConfiguration.class)
-@RunWith(SpringJUnit4ClassRunner.class)
-@IntegrationTest({ "messages.expiry.one=168", "messages.expiry.two=76" })
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = TestConfiguration.class,
+		properties = { "messages.expiry.one=168", "messages.expiry.two=76" })
 public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 
 	@Autowired
@@ -118,3 +116,4 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 	}
 
 }
+
