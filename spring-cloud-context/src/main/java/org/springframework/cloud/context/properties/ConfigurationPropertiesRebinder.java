@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
@@ -97,6 +99,9 @@ public class ConfigurationPropertiesRebinder
 		if (this.applicationContext != null) {
 			try {
 				Object bean = this.applicationContext.getBean(name);
+				if (AopUtils.isCglibProxy(bean)) {
+					bean = getTargetObject(bean);
+				}
 				this.binder.postProcessBeforeInitialization(bean, name);
 				this.applicationContext.getAutowireCapableBeanFactory()
 						.initializeBean(bean, name);
@@ -108,6 +113,19 @@ public class ConfigurationPropertiesRebinder
 			}
 		}
 		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T getTargetObject(Object candidate) {
+		try {
+			if (AopUtils.isAopProxy(candidate) && (candidate instanceof Advised)) {
+				return (T) ((Advised) candidate).getTargetSource().getTarget();
+			}
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to unwrap proxied object", ex);
+		}
+		return (T) candidate;
 	}
 
 	@ManagedAttribute
