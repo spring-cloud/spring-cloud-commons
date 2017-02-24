@@ -81,6 +81,11 @@ public class BootstrapApplicationListener
 		if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			return;
 		}
+		for (ApplicationContextInitializer<?> initializer : event.getSpringApplication().getInitializers()) {
+			if (initializer instanceof ParentContextApplicationContextInitializer) {
+				return;
+			}
+		}
 		ConfigurableApplicationContext context = bootstrapServiceContext(environment,
 				event.getSpringApplication());
 		apply(context, event.getSpringApplication(), environment);

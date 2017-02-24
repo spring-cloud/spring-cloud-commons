@@ -28,6 +28,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +43,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -268,6 +270,18 @@ public class BootstrapConfigurationTests {
 				.get(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME);
 		assertNotNull(bootstrap);
 		assertEquals(0, sources.precedenceOf(bootstrap));
+	}
+
+	@Test
+	public void onlyOneBootstrapContext() {
+		TestHigherPriorityBootstrapConfiguration.count.set(0);
+		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
+		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
+				.child(BareConfiguration.class).web(false).run();
+		assertEquals(1, TestHigherPriorityBootstrapConfiguration.count.get());
+		assertNotNull(context.getParent());
+		assertEquals("bootstrap", context.getParent().getParent().getId());
+		assertNull(context.getParent().getParent().getParent());
 	}
 
 	@Test
