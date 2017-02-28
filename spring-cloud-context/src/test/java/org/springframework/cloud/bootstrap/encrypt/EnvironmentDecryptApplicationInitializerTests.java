@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,30 @@
  */
 package org.springframework.cloud.bootstrap.encrypt;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.security.crypto.encrypt.Encryptors;
 
+import java.util.Collections;
+import java.util.Map;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.util.EnvironmentTestUtils.addEnvironment;
 import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME;
 
 /**
  * @author Dave Syer
- *
+ * @author Biju Kunjummen
  */
 public class EnvironmentDecryptApplicationInitializerTests {
 
@@ -113,6 +117,90 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		MutablePropertySources propertySources = context.getEnvironment().getPropertySources();
 		PropertySource<Map> decrypted = (PropertySource<Map>) propertySources.get(DECRYPTED_PROPERTY_SOURCE_NAME);
 		assertThat("decrypted property source had wrong size", decrypted.getSource().size(), is(4));
+	}
+
+	@Test
+	public void testDecryptNonStandardParent() {
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
+		EnvironmentDecryptApplicationInitializer initializer =
+				new EnvironmentDecryptApplicationInitializer(Encryptors.noOpText());
+
+		addEnvironment(ctx, "key:{cipher}value");
+
+
+		ApplicationContext ctxParent = mock(ApplicationContext.class);
+		when(ctxParent.getEnvironment()).thenReturn(new Environment() {
+			@Override
+			public String[] getActiveProfiles() {
+				return new String[0];
+			}
+
+			@Override
+			public String[] getDefaultProfiles() {
+				return new String[0];
+			}
+
+			@Override
+			public boolean acceptsProfiles(String... profiles) {
+				return false;
+			}
+
+			@Override
+			public boolean containsProperty(String key) {
+				return false;
+			}
+
+			@Override
+			public String getProperty(String key) {
+				return null;
+			}
+
+			@Override
+			public String getProperty(String key, String defaultValue) {
+				return null;
+			}
+
+			@Override
+			public <T> T getProperty(String key, Class<T> targetType) {
+				return null;
+			}
+
+			@Override
+			public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+				return null;
+			}
+
+			@Override
+			public <T> Class<T> getPropertyAsClass(String key, Class<T> targetType) {
+				return null;
+			}
+
+			@Override
+			public String getRequiredProperty(String key) throws IllegalStateException {
+				return null;
+			}
+
+			@Override
+			public <T> T getRequiredProperty(String key, Class<T> targetType) throws IllegalStateException {
+				return null;
+			}
+
+			@Override
+			public String resolvePlaceholders(String text) {
+				return null;
+			}
+
+			@Override
+			public String resolveRequiredPlaceholders(String text) throws IllegalArgumentException {
+				return null;
+			}
+		});
+
+		ctx.setParent(ctxParent);
+
+		initializer.initialize(ctx);
+
+		assertEquals("value", ctx.getEnvironment().getProperty("key"));
 	}
 
 }
