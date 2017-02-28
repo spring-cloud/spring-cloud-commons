@@ -67,6 +67,12 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		return new HashSet<>(contexts.keySet());
 	}
 
+	protected void createAndCacheContexts() {
+		for (String key: this.configurations.keySet()) {
+			getContext(key);
+		}
+	}
+
 	@Override
 	public void destroy() {
 		Collection<AnnotationConfigApplicationContext> values = this.contexts.values();

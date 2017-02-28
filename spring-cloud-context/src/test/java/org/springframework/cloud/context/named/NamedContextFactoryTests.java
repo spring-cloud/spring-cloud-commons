@@ -62,6 +62,18 @@ public class NamedContextFactoryTests {
 		assertThat("bar context wasn't closed", barContext.isActive(), is(false));
 	}
 
+	@Test
+	public void testEagerlyCreateContexts() {
+		TestClientFactory factory = new TestClientFactory();
+		factory.setConfigurations(Arrays.asList(getSpec("foo", FooConfig.class),
+				getSpec("bar", BarConfig.class)));
+		factory.createAndCacheContexts();
+
+		Foo foo = factory.getInstance("foo", Foo.class);
+		assertThat("foo was null", foo, is(notNullValue()));
+
+	}
+
 	private TestSpec getSpec(String name, Class<?> configClass) {
 		return new TestSpec(name, new Class[]{configClass});
 	}
