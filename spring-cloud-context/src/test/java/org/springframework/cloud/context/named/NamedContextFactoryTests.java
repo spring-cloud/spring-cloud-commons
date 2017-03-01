@@ -2,6 +2,7 @@ package org.springframework.cloud.context.named;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -10,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -63,32 +63,22 @@ public class NamedContextFactoryTests {
 
 	@Test
 	public void testEagerlyCreateContexts() {
-		long time1 = lazyGetFromContext();
-		long time2 = cacheAndGetBeanFromContext();
-		assertThat(time2, lessThan(time1));
-	}
-
-	private long cacheAndGetBeanFromContext() {
 		TestClientFactory factory = new TestClientFactory();
-		factory.setConfigurations(Arrays.asList(getSpec("foo", FooConfig.class),
+
+		//An instance of CachedConfig should not exist at this point.
+		assertThat(CachedConfig.getInstanceCount(), is(0));
+
+		factory.setConfigurations(Arrays.asList(getSpec("cached", CachedConfig.class),
 				getSpec("bar", BarConfig.class)));
+
+		//All contexts should get eagerly created and instance of CachedConfig should exist now.
 		factory.createAndCacheContexts();
+		assertThat(CachedConfig.getInstanceCount(), is(1));
 
-		long start = System.nanoTime();
-		Foo foo = factory.getInstance("foo", Foo.class);
+		Foo foo = factory.getInstance("cached", Foo.class);
+		assertThat(CachedConfig.getInstanceCount(), is(1));
+
 		assertThat("foo was null", foo, is(notNullValue()));
-		return (System.nanoTime() - start);
-	}
-
-	private long lazyGetFromContext() {
-		TestClientFactory factory = new TestClientFactory();
-		factory.setConfigurations(Arrays.asList(getSpec("foo", FooConfig.class),
-				getSpec("bar", BarConfig.class)));
-
-		long start = System.nanoTime();
-		Foo foo = factory.getInstance("foo", Foo.class);
-		assertThat("foo was null", foo, is(notNullValue()));
-		return (System.nanoTime() - start);
 	}
 
 	private TestSpec getSpec(String name, Class<?> configClass) {
@@ -148,7 +138,8 @@ public class NamedContextFactoryTests {
 			return new Foo();
 		}
 	}
-	static class Foo{}
+	static class Foo{
+	}
 
 	static class BarConfig {
 		@Bean
@@ -159,6 +150,22 @@ public class NamedContextFactoryTests {
 		@Bean
 		Baz baz2() {
 			return new Baz();
+		}
+	}
+
+	static class CachedConfig {
+		private static AtomicInteger INSTANCE_COUNT = new AtomicInteger();
+		CachedConfig() {
+			INSTANCE_COUNT.incrementAndGet();
+		}
+
+		static int getInstanceCount() {
+			return INSTANCE_COUNT.get();
+		}
+
+		@Bean
+		Foo foo() {
+			return new Foo();
 		}
 	}
 	static class Bar{}
