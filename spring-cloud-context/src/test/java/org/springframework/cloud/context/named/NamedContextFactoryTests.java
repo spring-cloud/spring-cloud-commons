@@ -7,12 +7,10 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -38,7 +36,8 @@ public class NamedContextFactoryTests {
 		Bar bar = factory.getInstance("bar", Bar.class);
 		assertThat("bar was null", bar, is(notNullValue()));
 
-		assertThat("context names not exposed", factory.getContextNames(), hasItems("foo", "bar"));
+		assertThat("context names not exposed", factory.getContextNames(),
+				hasItems("foo", "bar"));
 
 		Bar foobar = factory.getInstance("foo", Bar.class);
 		assertThat("bar was not null", foobar, is(nullValue()));
@@ -64,18 +63,36 @@ public class NamedContextFactoryTests {
 
 	@Test
 	public void testEagerlyCreateContexts() {
+		long time1 = lazyGetFromContext();
+		long time2 = cacheAndGetBeanFromContext();
+		assertThat(time2, lessThan(time1));
+	}
+
+	private long cacheAndGetBeanFromContext() {
 		TestClientFactory factory = new TestClientFactory();
 		factory.setConfigurations(Arrays.asList(getSpec("foo", FooConfig.class),
 				getSpec("bar", BarConfig.class)));
 		factory.createAndCacheContexts();
 
+		long start = System.nanoTime();
 		Foo foo = factory.getInstance("foo", Foo.class);
 		assertThat("foo was null", foo, is(notNullValue()));
+		return (System.nanoTime() - start);
+	}
 
+	private long lazyGetFromContext() {
+		TestClientFactory factory = new TestClientFactory();
+		factory.setConfigurations(Arrays.asList(getSpec("foo", FooConfig.class),
+				getSpec("bar", BarConfig.class)));
+
+		long start = System.nanoTime();
+		Foo foo = factory.getInstance("foo", Foo.class);
+		assertThat("foo was null", foo, is(notNullValue()));
+		return (System.nanoTime() - start);
 	}
 
 	private TestSpec getSpec(String name, Class<?> configClass) {
-		return new TestSpec(name, new Class[]{configClass});
+		return new TestSpec(name, new Class[] { configClass });
 	}
 
 	static class TestClientFactory extends NamedContextFactory<TestSpec> {
