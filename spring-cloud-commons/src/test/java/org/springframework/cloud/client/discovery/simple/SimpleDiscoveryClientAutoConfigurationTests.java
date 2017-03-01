@@ -15,7 +15,7 @@ import java.net.URI;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = { "spring.cloud.discovery.client.simple.enabled=true",
+@SpringBootTest(properties = {
 		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s1-1:8080",
 		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s1-2:8443",
 		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s2-1:8080",
@@ -61,6 +61,11 @@ public class SimpleDiscoveryClientAutoConfigurationTests {
 		assertThat(s1.getPort()).isEqualTo(8080);
 		assertThat(s1.getUri()).isEqualTo(URI.create("http://s1-1:8080"));
 		assertThat(s1.isSecure()).isEqualTo(false);
+	}
+
+	@Test
+	public void testGetServices() {
+		assertThat(this.discoveryClient.getServices()).containsExactlyInAnyOrder("service1", "service2");
 	}
 
 	@Configuration

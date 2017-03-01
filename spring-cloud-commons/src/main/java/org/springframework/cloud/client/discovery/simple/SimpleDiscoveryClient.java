@@ -44,6 +44,6 @@ public class SimpleDiscoveryClient implements DiscoveryClient {
 
 	@Override
 	public List<String> getServices() {
-		return null;
+		return new ArrayList<>(this.simpleDiscoveryProperties.getInstances().keySet());
 	}
 }

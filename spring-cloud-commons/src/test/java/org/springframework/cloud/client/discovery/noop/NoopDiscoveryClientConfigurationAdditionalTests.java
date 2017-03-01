@@ -2,6 +2,7 @@ package org.springframework.cloud.client.discovery.noop;
 
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import static org.junit.Assert.assertFalse;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = NoopDiscoveryClientConfigurationAdditionalTests.App.class)
+@Ignore
 public class NoopDiscoveryClientConfigurationAdditionalTests {
 
 	@Autowired

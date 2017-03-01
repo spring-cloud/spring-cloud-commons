@@ -41,12 +41,17 @@ import org.springframework.core.env.Environment;
 import lombok.extern.apachecommons.CommonsLog;
 
 /**
+ *
+ * @deprecated Use
+ * {@link org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration instead}
+ *
  * @author Dave Syer
  */
 @Configuration
 @EnableConfigurationProperties
 @ConditionalOnMissingBean(DiscoveryClient.class)
 @CommonsLog
+@Deprecated
 public class NoopDiscoveryClientAutoConfiguration
 		implements ApplicationListener<ContextRefreshedEvent> {
 
