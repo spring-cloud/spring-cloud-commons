@@ -18,7 +18,6 @@ public class SimpleServiceInstance implements ServiceInstance {
 	private boolean secure;
 
 	public SimpleServiceInstance() {
-
 	}
 
 	public SimpleServiceInstance(String uri) {

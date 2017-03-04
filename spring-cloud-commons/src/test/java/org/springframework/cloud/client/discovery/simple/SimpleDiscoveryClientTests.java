@@ -12,6 +12,9 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * @author Biju Kunjummen
+ */
 public class SimpleDiscoveryClientTests {
 
 	private SimpleDiscoveryClient simpleDiscoveryClient;

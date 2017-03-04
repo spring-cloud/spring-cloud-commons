@@ -14,13 +14,19 @@ import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Tests for mapping properties to instances in {@link SimpleDiscoveryClient}
+ *
+ * @author Biju Kunjummen
+ */
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {
 		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s1-1:8080",
 		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s1-2:8443",
 		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s2-1:8080",
 		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s2-2:443" })
-public class SimpleDiscoveryClientAutoConfigurationTests {
+public class SimpleDiscoveryClientPropertiesMappingTests {
 
 	@Autowired
 	private SimpleDiscoveryProperties props;
@@ -65,7 +71,14 @@ public class SimpleDiscoveryClientAutoConfigurationTests {
 
 	@Test
 	public void testGetServices() {
-		assertThat(this.discoveryClient.getServices()).containsExactlyInAnyOrder("service1", "service2");
+		assertThat(this.discoveryClient.getServices())
+				.containsExactlyInAnyOrder("service1", "service2");
+	}
+
+	@Test
+	public void testGetANonExistentServiceShouldReturnAnEmptyList() {
+		assertThat(this.discoveryClient.getInstances("nonexistent")).isNotNull();
+		assertThat(this.discoveryClient.getInstances("nonexistent")).isEmpty();
 	}
 
 	@Configuration
