@@ -44,7 +44,7 @@ public class InetUtilsProperties {
 	private boolean useOnlySiteLocalInterfaces = false;
 	
 	/**
-	 * List of Java regex expressions for network addresses that will be ignored.
+	 * List of Java regex expressions for network addresses that will be preferred.
 	 */
 	private List<String> preferredNetworks = new ArrayList<>();
 }
