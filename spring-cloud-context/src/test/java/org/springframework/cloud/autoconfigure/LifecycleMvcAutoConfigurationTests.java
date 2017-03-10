@@ -1,6 +1,7 @@
 package org.springframework.cloud.autoconfigure;
 
 import org.junit.Test;
+
 import org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
