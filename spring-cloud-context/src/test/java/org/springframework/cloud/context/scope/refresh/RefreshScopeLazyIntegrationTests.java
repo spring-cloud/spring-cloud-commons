@@ -21,11 +21,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.test.ImportAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -36,7 +38,6 @@ import org.springframework.cloud.context.scope.refresh.RefreshScopeLazyIntegrati
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
@@ -198,7 +199,7 @@ public class RefreshScopeLazyIntegrationTests {
 
 	@Configuration
 	@EnableConfigurationProperties(TestProperties.class)
-	@Import({ RefreshAutoConfiguration.class,
+	@ImportAutoConfiguration({ RefreshAutoConfiguration.class,
 			PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 

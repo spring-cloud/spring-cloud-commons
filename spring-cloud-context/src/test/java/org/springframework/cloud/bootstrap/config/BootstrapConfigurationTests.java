@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -54,6 +55,8 @@ public class BootstrapConfigurationTests {
 
 	private ConfigurableApplicationContext context;
 
+	private ConfigurableApplicationContext sibling;
+
 	@Rule
 	public ExpectedException expected = ExpectedException.none();
 
@@ -67,6 +70,9 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP.clear();
 		if (this.context != null) {
 			this.context.close();
+		}
+		if (this.sibling != null) {
+			this.sibling.close();
 		}
 	}
 
@@ -197,7 +203,7 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
 		ConfigurableEnvironment environment = new StandardEnvironment();
 		environment.getPropertySources().addLast(new MapPropertySource("last",
-				Collections.<String, Object> singletonMap("bootstrap.foo", "splat")));
+				Collections.<String, Object>singletonMap("bootstrap.foo", "splat")));
 		this.context = new SpringApplicationBuilder().web(false).environment(environment)
 				.sources(BareConfiguration.class).run();
 		assertEquals("splat", this.context.getEnvironment().getProperty("bootstrap.foo"));
@@ -282,6 +288,32 @@ public class BootstrapConfigurationTests {
 		assertNotNull(context.getParent());
 		assertEquals("bootstrap", context.getParent().getParent().getId());
 		assertNull(context.getParent().getParent().getParent());
+		assertEquals("bar", context.getEnvironment().getProperty("custom.foo"));
+	}
+
+	@Test
+	public void bootstrapContextSharedBySiblings() {
+		TestHigherPriorityBootstrapConfiguration.count.set(0);
+		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
+		SpringApplicationBuilder builder = new SpringApplicationBuilder()
+				.sources(BareConfiguration.class);
+		this.sibling = builder.child(BareConfiguration.class)
+				.properties("spring.application.name=sibling").web(false).run();
+		this.context = builder.child(BareConfiguration.class)
+				.properties("spring.application.name=context").web(false).run();
+		assertEquals(1, TestHigherPriorityBootstrapConfiguration.count.get());
+		assertNotNull(context.getParent());
+		assertEquals("bootstrap", context.getParent().getParent().getId());
+		assertNull(context.getParent().getParent().getParent());
+		assertEquals("context", context.getEnvironment().getProperty("custom.foo"));
+		assertEquals("context",
+				context.getEnvironment().getProperty("spring.application.name"));
+		assertNotNull(sibling.getParent());
+		assertEquals("bootstrap", sibling.getParent().getParent().getId());
+		assertNull(sibling.getParent().getParent().getParent());
+		assertEquals("sibling", sibling.getEnvironment().getProperty("custom.foo"));
+		assertEquals("sibling",
+				sibling.getEnvironment().getProperty("spring.application.name"));
 	}
 
 	@Test
@@ -349,7 +381,7 @@ public class BootstrapConfigurationTests {
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 
 		public static Map<String, Object> MAP = new HashMap<String, Object>(
-				Collections.<String, Object> singletonMap("bootstrap.foo", "bar"));
+				Collections.<String, Object>singletonMap("bootstrap.foo", "bar"));
 
 		private String name;
 
