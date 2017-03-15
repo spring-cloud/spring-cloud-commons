@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.bootstrap;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,6 +47,7 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -81,26 +83,56 @@ public class BootstrapApplicationListener
 		if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			return;
 		}
-		for (ApplicationContextInitializer<?> initializer : event.getSpringApplication().getInitializers()) {
+		ConfigurableApplicationContext context = null;
+		String configName = environment
+				.resolvePlaceholders("${spring.cloud.bootstrap.name:bootstrap}");
+		for (ApplicationContextInitializer<?> initializer : event.getSpringApplication()
+				.getInitializers()) {
 			if (initializer instanceof ParentContextApplicationContextInitializer) {
-				return;
+				context = findBootstrapContext(
+						(ParentContextApplicationContextInitializer) initializer,
+						configName);
 			}
 		}
-		ConfigurableApplicationContext context = bootstrapServiceContext(environment,
-				event.getSpringApplication());
+		if (context == null) {
+			context = bootstrapServiceContext(environment, event.getSpringApplication(),
+					configName);
+		}
 		apply(context, event.getSpringApplication(), environment);
 	}
 
+	private ConfigurableApplicationContext findBootstrapContext(
+			ParentContextApplicationContextInitializer initializer, String configName) {
+		Field field = ReflectionUtils
+				.findField(ParentContextApplicationContextInitializer.class, "parent");
+		ReflectionUtils.makeAccessible(field);
+		ConfigurableApplicationContext parent = safeCast(
+				ConfigurableApplicationContext.class,
+				ReflectionUtils.getField(field, initializer));
+		if (parent != null && !configName.equals(parent.getId())) {
+			parent = safeCast(ConfigurableApplicationContext.class, parent.getParent());
+		}
+		return parent;
+	}
+
+	private <T> T safeCast(Class<T> type, Object object) {
+		try {
+			return type.cast(object);
+		}
+		catch (ClassCastException e) {
+			return null;
+		}
+	}
+
 	private ConfigurableApplicationContext bootstrapServiceContext(
-			ConfigurableEnvironment environment, final SpringApplication application) {
+			ConfigurableEnvironment environment, final SpringApplication application,
+			String configName) {
 		StandardEnvironment bootstrapEnvironment = new StandardEnvironment();
 		MutablePropertySources bootstrapProperties = bootstrapEnvironment
 				.getPropertySources();
 		for (PropertySource<?> source : bootstrapProperties) {
 			bootstrapProperties.remove(source.getName());
 		}
-		String configName = environment
-				.resolvePlaceholders("${spring.cloud.bootstrap.name:bootstrap}");
 		String configLocation = environment
 				.resolvePlaceholders("${spring.cloud.bootstrap.location:}");
 		Map<String, Object> bootstrapMap = new HashMap<>();
