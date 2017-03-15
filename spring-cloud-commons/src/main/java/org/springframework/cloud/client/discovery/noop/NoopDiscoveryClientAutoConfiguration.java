@@ -22,6 +22,7 @@ import java.net.UnknownHostException;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedServletContainer;
@@ -36,7 +37,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
-import org.springframework.util.ClassUtils;
 
 import lombok.extern.apachecommons.CommonsLog;
 
@@ -58,6 +58,9 @@ public class NoopDiscoveryClientAutoConfiguration
 
 	@Autowired
 	private Environment environment;
+
+	@Autowired(required = false)
+	private PortFinder portFinder;
 
 	private DefaultServiceInstance serviceInstance;
 
@@ -81,15 +84,10 @@ public class NoopDiscoveryClientAutoConfiguration
 		if (this.server != null && this.server.getPort() != null) {
 			port = this.server.getPort();
 		}
-		if (ClassUtils.isPresent(
-				"org.springframework.web.context.support.GenericWebApplicationContext",
-				null)) {
-			if (this.context instanceof EmbeddedWebApplicationContext) {
-				EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) this.context)
-						.getEmbeddedServletContainer();
-				if (container != null) {
-					port = port != 0 ? port : container.getPort();
-				}
+		if (port != 0 && this.portFinder != null) {
+			Integer found = this.portFinder.findPort();
+			if (found != null) {
+				port = found;
 			}
 		}
 		else {
@@ -107,9 +105,35 @@ public class NoopDiscoveryClientAutoConfiguration
 		this.context.publishEvent(new InstanceRegisteredEvent<>(this, this.environment));
 	}
 
+	private interface PortFinder {
+		Integer findPort();
+	}
+
 	@Bean
 	public DiscoveryClient discoveryClient() {
 		return new NoopDiscoveryClient(this.serviceInstance);
 	}
 
+	@Configuration
+	@ConditionalOnClass(name = {"org.springframework.web.context.support.GenericWebApplicationContext",
+		"org.springframework.boot.context.embedded.EmbeddedWebApplicationContext"})
+	protected static class Boot15PortFinderConfiguration {
+
+		@Bean
+		public PortFinder portFinder(final ApplicationContext context) {
+			return new PortFinder() {
+				@Override
+				public Integer findPort() {
+					if (context instanceof EmbeddedWebApplicationContext) {
+						EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) context)
+								.getEmbeddedServletContainer();
+						if (container != null) {
+							return container.getPort();
+						}
+					}
+					return null;
+				}
+			};
+		}
+	}
 }
