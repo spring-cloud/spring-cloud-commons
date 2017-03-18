@@ -119,12 +119,10 @@ public class AbstractAutoServiceRegistrationTests {
 			super(new TestServiceRegistry());
 		}
 
-		@Override
 		protected int getConfiguredPort() {
 			return port;
 		}
 
-		@Override
 		protected void setConfiguredPort(int port) {
 			this.port = port;
 		}

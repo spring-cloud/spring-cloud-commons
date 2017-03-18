@@ -26,7 +26,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentManager;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
@@ -46,6 +46,7 @@ import org.springframework.stereotype.Component;
  */
 @Configuration
 @ConditionalOnClass(RefreshScope.class)
+//TODO: support reactive
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class RefreshAutoConfiguration {
 

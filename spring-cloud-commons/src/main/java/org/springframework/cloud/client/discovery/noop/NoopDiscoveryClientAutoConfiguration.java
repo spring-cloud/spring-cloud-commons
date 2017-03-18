@@ -25,8 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.context.embedded.EmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -124,13 +122,14 @@ public class NoopDiscoveryClientAutoConfiguration
 			return new PortFinder() {
 				@Override
 				public Integer findPort() {
-					if (context instanceof EmbeddedWebApplicationContext) {
+					// TODO: support reactive
+					/*if (context instanceof EmbeddedWebApplicationContext) {
 						EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) context)
 								.getEmbeddedServletContainer();
 						if (container != null) {
 							return container.getPort();
 						}
-					}
+					}*/
 					return null;
 				}
 			};

@@ -23,7 +23,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentManager;
 import org.springframework.cloud.context.environment.EnvironmentManagerMvcEndpoint;
 import org.springframework.cloud.context.restart.RestartEndpoint;
@@ -45,6 +45,7 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnClass(EnvironmentEndpoint.class)
 @ConditionalOnWebApplication
 @ConditionalOnBean(RestartEndpoint.class)
+//TODO: support reactive
 @AutoConfigureAfter({ WebMvcAutoConfiguration.class,
 		RefreshEndpointAutoConfiguration.class })
 public class LifecycleMvcEndpointAutoConfiguration {
