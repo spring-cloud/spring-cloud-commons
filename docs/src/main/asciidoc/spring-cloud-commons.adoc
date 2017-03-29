@@ -349,7 +349,7 @@ for details of how the `RestTemplate` is set up.
 
 A load balanced `RestTemplate` can be configured to retry failed requests.
 By default this logic is disabled, you can enable it by setting
-`spring.cloud.loadbalancer.retry.enabled=true` and adding https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath.  
+`spring.cloud.loadbalancer.retry.enabled=true` and adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath.  
 The load balanced `RestTemplate` will
 honor some of the Ribbon configuration values related to retrying failed requests.
 The properties you can use are `client.ribbon.MaxAutoRetries`,
