@@ -363,7 +363,9 @@ for details of how the `RestTemplate` is set up.
 
 A load balanced `RestTemplate` can be configured to retry failed requests.
 By default this logic is disabled, you can enable it by adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath.  The load balanced `RestTemplate` will
-honor some of the Ribbon configuration values related to retrying failed requests.
+honor some of the Ribbon configuration values related to retrying failed requests.  If
+you would like to disable the retry logic with Spring Retry on the classpath
+you can set `spring.cloud.loadbalancer.retry.enabled=false`.
 The properties you can use are `client.ribbon.MaxAutoRetries`,
 `client.ribbon.MaxAutoRetriesNextServer`, and `client.ribbon.OkToRetryOnAllOperations`.
 See the https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties[Ribbon documentation]
