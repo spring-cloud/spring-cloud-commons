@@ -49,4 +49,17 @@ public interface LoadBalancedRetryPolicy {
      * @param throwable the throwable from the failed execution.
      */
     public abstract void registerThrowable(LoadBalancedRetryContext context, Throwable throwable);
+
+    /**
+     * If an exception is not thrown when making a request, than this method will be
+     * called to see if the client would like to retry the request based on the status
+     * code returned.  For example in CloudFoundry the router will return a <code>404</code>
+     * when an app is not available.  Since HTTP clients do not throw an exception when
+     * a <code>404</code> is returned than <code>retryableStatusCode</code> allows
+     * clients to force a retry.
+     * @param serviceId The ID of the Ribbon service
+     * @param statusCode The HTTP status code.
+     * @return True if a retry should be attempted, false to just return the response
+     */
+    public boolean retryableStatusCode(String serviceId, int statusCode);
 }
