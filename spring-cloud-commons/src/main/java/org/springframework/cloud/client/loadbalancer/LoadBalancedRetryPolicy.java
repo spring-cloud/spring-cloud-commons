@@ -57,9 +57,8 @@ public interface LoadBalancedRetryPolicy {
      * when an app is not available.  Since HTTP clients do not throw an exception when
      * a <code>404</code> is returned than <code>retryableStatusCode</code> allows
      * clients to force a retry.
-     * @param serviceId The ID of the Ribbon service
      * @param statusCode The HTTP status code.
      * @return True if a retry should be attempted, false to just return the response
      */
-    public boolean retryableStatusCode(String serviceId, int statusCode);
+    public boolean retryableStatusCode(int statusCode);
 }
