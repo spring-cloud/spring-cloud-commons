@@ -19,6 +19,20 @@ public class EncryptionBootstrapConfigurationTests {
 				.run();
 		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
 		assertEquals("foo", encryptor.decrypt(encryptor.encrypt("foo")));
+		context.close();
+	}
+
+	@Test
+	public void rsaKeyStoreWithRelaxedProperties() {
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(
+				EncryptionBootstrapConfiguration.class).web(false).properties(
+				"encrypt.key-store.location:classpath:/server.jks",
+				"encrypt.key-store.password:letmein",
+				"encrypt.key-store.alias:mytestkey", "encrypt.key-store.secret:changeme")
+				.run();
+		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
+		assertEquals("foo", encryptor.decrypt(encryptor.encrypt("foo")));
+		context.close();
 	}
 
 }
