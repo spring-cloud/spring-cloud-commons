@@ -1,4 +1,4 @@
-package org.springframework.cloud.client.discovery.noop;
+package org.springframework.cloud.client.discovery.simple;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,22 +10,22 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests if @EnableDiscoveryClient is NOT used, then NoopDiscoveryClient is created.
- * @author Spencer Gibb
+ * DiscoveryClient implementation defaults to {@link SimpleDiscoveryClient}
+ * @author Biju Kunjummen
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = NoopDiscoveryClientConfigurationTests.App.class)
-public class NoopDiscoveryClientConfigurationTests {
+@SpringBootTest(classes = DiscoveryClientAutoConfigurationDefaultTests.App.class)
+public class DiscoveryClientAutoConfigurationDefaultTests {
 
 	@Autowired
 	DiscoveryClient discoveryClient;
 
 	@Test
-	public void testDiscoveryClientIsNoop() {
-		assertTrue("discoveryClient is wrong instance type", discoveryClient instanceof NoopDiscoveryClient);
+	public void simpleDiscoveryClientShouldBeTheDefault() {
+		assertThat(discoveryClient).isInstanceOf(SimpleDiscoveryClient.class);
 	}
 
 	@EnableAutoConfiguration
