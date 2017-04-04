@@ -1,10 +1,11 @@
 package org.springframework.cloud.client.discovery.simple;
 
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties.SimpleServiceInstance;
 
 /**
  * A {@link org.springframework.cloud.client.discovery.DiscoveryClient} that will use the
