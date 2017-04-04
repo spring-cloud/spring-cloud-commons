@@ -321,6 +321,33 @@ By default, implementations of `DiscoveryClient` will auto-register the local Sp
 
 Commons now provides a `ServiceRegistry` interface which provides methods like `register(Registration)` and `deregister(Registration)` which allow you to provide custom registered services. `Registration` is a marker interface.
 
+[source,java,indent=0]
+----
+@Configuration
+@EnableDiscoveryClient(autoRegister=false)
+public class MyConfiguration {
+    private ServiceRegistry registry;
+
+    public MyConfiguration(ServiceRegistry registry) {
+        this.registry = registry;
+    }
+
+    // called via some external process, such as an event or a custom actuator endpoint
+    public void register() {
+        Registration registration = constructRegistration();
+        this.registry.register(registration);
+    }
+}
+----
+
+Each `ServiceRegistry` implementation has its own `Registry` implementation.
+
+
+==== ServiceRegistry Auto-Registration
+
+By default, the `ServiceRegistry` implementation will auto-register the running service. To disable that behavior, there are two methods. You can set `@EnableDiscoveryClient(autoRegister=false)` to permanently disable auto-registration. You can also set `spring.cloud.service-registry.auto-registration.enabled=false` to disable the behavior via configuration.
+
+
 ==== Service Registry Actuator Endpoint
 
 A `/service-registry` actuator endpoint is provided by Commons. This endpoint relys on a `Registration` bean in the Spring Application Context. Calling `/service-registry/instance-status` via a GET will return the status of the `Registration`. A POST to the same endpoint with a `String` body will change the status of the current `Registration` to the new value. Please see the documentation of the `ServiceRegistry` implementation you are using for the allowed values for updating the status and the values retured for the status.
