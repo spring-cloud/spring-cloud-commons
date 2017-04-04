@@ -1,14 +1,15 @@
 package org.springframework.cloud.client.discovery.simple;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.cloud.client.ServiceInstance;
-
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties.SimpleServiceInstance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
