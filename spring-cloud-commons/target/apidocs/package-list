@@ -1,0 +1,13 @@
+org.springframework.cloud.client
+org.springframework.cloud.client.actuator
+org.springframework.cloud.client.circuitbreaker
+org.springframework.cloud.client.discovery
+org.springframework.cloud.client.discovery.event
+org.springframework.cloud.client.discovery.health
+org.springframework.cloud.client.discovery.noop
+org.springframework.cloud.client.discovery.simple
+org.springframework.cloud.client.hypermedia
+org.springframework.cloud.client.loadbalancer
+org.springframework.cloud.client.serviceregistry
+org.springframework.cloud.client.serviceregistry.endpoint
+org.springframework.cloud.commons.util

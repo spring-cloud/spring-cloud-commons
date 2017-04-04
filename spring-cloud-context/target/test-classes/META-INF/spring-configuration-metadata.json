@@ -1,0 +1,186 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests$TestProperties",
+      "name": "",
+      "type": "org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests$TestProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeIntegrationTests$TestProperties",
+      "name": "",
+      "type": "org.springframework.cloud.context.scope.refresh.RefreshScopeIntegrationTests$TestProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderRefreshScopeIntegrationTests$TestProperties",
+      "name": "",
+      "type": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderRefreshScopeIntegrationTests$TestProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeScaleTests$TestProperties",
+      "name": "",
+      "type": "org.springframework.cloud.context.scope.refresh.RefreshScopeScaleTests$TestProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeLazyIntegrationTests$TestProperties",
+      "name": "",
+      "type": "org.springframework.cloud.context.scope.refresh.RefreshScopeLazyIntegrationTests$TestProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeConcurrencyTests$TestProperties",
+      "name": "",
+      "type": "org.springframework.cloud.context.scope.refresh.RefreshScopeConcurrencyTests$TestProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderIntegrationTests$TestProperties",
+      "name": "",
+      "type": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderIntegrationTests$TestProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.environment.EnvironmentManagerIntegrationTests$TestProperties",
+      "name": "",
+      "type": "org.springframework.cloud.context.environment.EnvironmentManagerIntegrationTests$TestProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderListIntegrationTests$TestProperties",
+      "name": "",
+      "type": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderListIntegrationTests$TestProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeListBindingIntegrationTests$TestProperties",
+      "name": "",
+      "type": "org.springframework.cloud.context.scope.refresh.RefreshScopeListBindingIntegrationTests$TestProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.config.BootstrapConfigurationTests$PropertySourceConfiguration",
+      "name": "expected",
+      "type": "org.springframework.cloud.bootstrap.config.BootstrapConfigurationTests$PropertySourceConfiguration"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderProxyIntegrationTests$TestProperties",
+      "name": "messages",
+      "type": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderProxyIntegrationTests$TestProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests$TestProperties",
+      "defaultValue": 0,
+      "name": "delay",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeIntegrationTests$TestProperties",
+      "defaultValue": 0,
+      "name": "delay",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderRefreshScopeIntegrationTests$TestProperties",
+      "defaultValue": 0,
+      "name": "delay",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeScaleTests$TestProperties",
+      "defaultValue": 0,
+      "name": "delay",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeLazyIntegrationTests$TestProperties",
+      "defaultValue": 0,
+      "name": "delay",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeConcurrencyTests$TestProperties",
+      "defaultValue": 0,
+      "name": "delay",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderIntegrationTests$TestProperties",
+      "defaultValue": 0,
+      "name": "delay",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.environment.EnvironmentManagerIntegrationTests$TestProperties",
+      "defaultValue": 0,
+      "name": "delay",
+      "type": "java.lang.Integer"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.config.BootstrapConfigurationTests$PropertySourceConfiguration",
+      "defaultValue": false,
+      "name": "expected.fail",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.config.BootstrapConfigurationTests$PropertySourceConfiguration",
+      "name": "expected.name",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests$TestProperties",
+      "name": "message",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeIntegrationTests$TestProperties",
+      "name": "message",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderRefreshScopeIntegrationTests$TestProperties",
+      "name": "message",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeScaleTests$TestProperties",
+      "name": "message",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeLazyIntegrationTests$TestProperties",
+      "name": "message",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeConcurrencyTests$TestProperties",
+      "name": "message",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderIntegrationTests$TestProperties",
+      "name": "message",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.environment.EnvironmentManagerIntegrationTests$TestProperties",
+      "name": "message",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderListIntegrationTests$TestProperties",
+      "name": "messages",
+      "type": "java.util.List<java.lang.String>"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.scope.refresh.RefreshScopeListBindingIntegrationTests$TestProperties",
+      "name": "messages",
+      "type": "java.util.List<java.lang.String>"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderProxyIntegrationTests$TestProperties",
+      "name": "messages.expiry",
+      "type": "java.util.Map<java.lang.String,java.lang.Integer>"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderProxyIntegrationTests$TestProperties",
+      "name": "messages.name",
+      "type": "java.lang.String"
+    }
+  ]
+}

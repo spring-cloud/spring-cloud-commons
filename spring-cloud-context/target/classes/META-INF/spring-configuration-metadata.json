@@ -1,0 +1,297 @@
+{
+  "hints": [],
+  "groups": [
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties",
+      "name": "encrypt",
+      "type": "org.springframework.cloud.bootstrap.encrypt.KeyProperties"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties",
+      "name": "encrypt.key-store",
+      "sourceMethod": "getKeyStore()",
+      "type": "org.springframework.cloud.bootstrap.encrypt.KeyProperties$KeyStore"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties",
+      "name": "encrypt.rsa",
+      "sourceMethod": "getRsa()",
+      "type": "org.springframework.cloud.bootstrap.encrypt.KeyProperties$Rsa"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint",
+      "name": "endpoints",
+      "type": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint",
+      "name": "endpoints",
+      "type": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint"
+    },
+    {
+      "sourceType": "org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration",
+      "name": "endpoints.pause",
+      "sourceMethod": "pauseEndpoint(org.springframework.cloud.context.restart.RestartEndpoint)",
+      "type": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint"
+    },
+    {
+      "sourceType": "org.springframework.cloud.endpoint.RefreshEndpoint",
+      "name": "endpoints.refresh",
+      "type": "org.springframework.cloud.endpoint.RefreshEndpoint"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint",
+      "name": "endpoints.restart",
+      "type": "org.springframework.cloud.context.restart.RestartEndpoint"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint",
+      "name": "endpoints.restart.pause-endpoint",
+      "sourceMethod": "getPauseEndpoint()",
+      "type": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint",
+      "name": "endpoints.restart.resume-endpoint",
+      "sourceMethod": "getResumeEndpoint()",
+      "type": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint"
+    },
+    {
+      "sourceType": "org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration",
+      "name": "endpoints.resume",
+      "sourceMethod": "resumeEndpoint(org.springframework.cloud.context.restart.RestartEndpoint)",
+      "type": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.config.PropertySourceBootstrapProperties",
+      "name": "spring.cloud.config",
+      "type": "org.springframework.cloud.bootstrap.config.PropertySourceBootstrapProperties"
+    }
+  ],
+  "properties": [
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties",
+      "defaultValue": true,
+      "name": "encrypt.fail-on-error",
+      "description": "Flag to say that a process should fail if there is an encryption or decryption\n error.",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties",
+      "name": "encrypt.key",
+      "description": "A symmetric key. As a stronger alternative consider using a keystore.",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties$KeyStore",
+      "name": "encrypt.key-store.alias",
+      "description": "Alias for a key in the store.",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties$KeyStore",
+      "name": "encrypt.key-store.location",
+      "description": "Location of the key store file, e.g. classpath:\/keystore.jks.",
+      "type": "org.springframework.core.io.Resource"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties$KeyStore",
+      "name": "encrypt.key-store.password",
+      "description": "Password that locks the keystore.",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties$KeyStore",
+      "name": "encrypt.key-store.secret",
+      "description": "Secret protecting the key (defaults to the same as the password).",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties$Rsa",
+      "name": "encrypt.rsa.algorithm",
+      "description": "The RSA algorithm to use (DEFAULT or OEAP). Once it is set do not change it (or\n existing ciphers will not a decryptable).",
+      "type": "org.springframework.security.rsa.crypto.RsaAlgorithm"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties$Rsa",
+      "defaultValue": "deadbeef",
+      "name": "encrypt.rsa.salt",
+      "description": "Salt for the random secret used to encrypt cipher text. Once it is set do not\n change it (or existing ciphers will not a decryptable).",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.encrypt.KeyProperties$Rsa",
+      "defaultValue": false,
+      "name": "encrypt.rsa.strong",
+      "description": "Flag to indicate that \"strong\" AES encryption should be used internally. If\n true then the GCM algorithm is applied to the AES encrypted bytes. Default is\n false (in which case \"standard\" CBC is used instead). Once it is set do not\n change it (or existing ciphers will not a decryptable).",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint",
+      "name": "endpoints.enabled",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint",
+      "name": "endpoints.enabled",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": true,
+      "name": "endpoints.env.post.enabled",
+      "description": "Enable changing the Environment through a POST to \/env.",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint",
+      "name": "endpoints.id",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint",
+      "name": "endpoints.id",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint",
+      "defaultValue": true,
+      "name": "endpoints.pause.enabled",
+      "description": "Enable the \/pause endpoint (to send Lifecycle.stop()).",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint",
+      "name": "endpoints.pause.id",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint",
+      "name": "endpoints.pause.sensitive",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.endpoint.RefreshEndpoint",
+      "defaultValue": true,
+      "name": "endpoints.refresh.enabled",
+      "description": "Enable the \/refresh endpoint to refresh configuration and re-initialize refresh scoped beans.",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.endpoint.RefreshEndpoint",
+      "name": "endpoints.refresh.id",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.endpoint.RefreshEndpoint",
+      "name": "endpoints.refresh.sensitive",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint",
+      "defaultValue": true,
+      "name": "endpoints.restart.enabled",
+      "description": "Enable the \/restart endpoint to restart the application context.",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint",
+      "name": "endpoints.restart.id",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint",
+      "name": "endpoints.restart.pause-endpoint.enabled",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint",
+      "name": "endpoints.restart.pause-endpoint.id",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint",
+      "name": "endpoints.restart.pause-endpoint.sensitive",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint",
+      "name": "endpoints.restart.resume-endpoint.enabled",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint",
+      "name": "endpoints.restart.resume-endpoint.id",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint",
+      "name": "endpoints.restart.resume-endpoint.sensitive",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint",
+      "name": "endpoints.restart.sensitive",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint",
+      "defaultValue": 0,
+      "name": "endpoints.restart.timeout",
+      "type": "java.lang.Long"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint",
+      "defaultValue": true,
+      "name": "endpoints.resume.enabled",
+      "description": "Enable the \/resume endpoint (to send Lifecycle.start()).",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint",
+      "name": "endpoints.resume.id",
+      "type": "java.lang.String"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint",
+      "name": "endpoints.resume.sensitive",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$PauseEndpoint",
+      "name": "endpoints.sensitive",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.context.restart.RestartEndpoint$ResumeEndpoint",
+      "name": "endpoints.sensitive",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": true,
+      "name": "management.health.refresh.enabled",
+      "description": "Enable the health endpoint for the refresh scope.",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.config.PropertySourceBootstrapProperties",
+      "defaultValue": true,
+      "name": "spring.cloud.config.allow-override",
+      "description": "Flag to indicate that {@link #isSystemPropertiesOverride()\n systemPropertiesOverride} can be used. Set to false to prevent users from changing\n the default accidentally. Default true.",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.config.PropertySourceBootstrapProperties",
+      "defaultValue": false,
+      "name": "spring.cloud.config.override-none",
+      "description": "Flag to indicate that when {@link #setAllowOverride(boolean) allowOverride} is\n true, external properties should take lowest priority, and not override any\n existing property sources (including local config files). Default false.",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "sourceType": "org.springframework.cloud.bootstrap.config.PropertySourceBootstrapProperties",
+      "defaultValue": true,
+      "name": "spring.cloud.config.override-system-properties",
+      "description": "Flag to indicate that the external properties should override system properties.\n Default true.",
+      "type": "java.lang.Boolean"
+    }
+  ]
+}
