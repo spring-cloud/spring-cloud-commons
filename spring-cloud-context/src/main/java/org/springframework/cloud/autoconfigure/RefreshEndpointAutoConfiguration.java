@@ -16,16 +16,10 @@
 
 package org.springframework.cloud.autoconfigure;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.actuate.autoconfigure.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.autoconfigure.EndpointAutoConfiguration;
 import org.springframework.boot.actuate.endpoint.Endpoint;
-import org.springframework.boot.actuate.endpoint.InfoEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -34,18 +28,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
-import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.RefreshEndpoint;
-import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.health.RefreshScopeHealthIndicator;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.integration.monitor.IntegrationMBeanExporter;
 
 /**
@@ -117,12 +107,6 @@ public class RefreshEndpointAutoConfiguration {
 		public RefreshEndpoint refreshEndpoint(ContextRefresher contextRefresher) {
 			RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 			return endpoint;
-		}
-
-		@Bean
-		public RefreshEventListener refreshEventListener(
-				RefreshEndpoint refreshEndpoint) {
-			return new RefreshEventListener(refreshEndpoint);
 		}
 
 	}
