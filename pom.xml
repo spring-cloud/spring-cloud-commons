@@ -74,6 +74,7 @@
 				<version>3.0.0</version>
 				<executions>
 					<execution>
+						<phase>test-compile</phase>
 						<goals>
 							<goal>test-jar</goal>
 						</goals>
