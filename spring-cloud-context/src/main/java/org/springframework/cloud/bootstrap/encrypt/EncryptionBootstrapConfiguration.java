@@ -21,6 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
+import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.bootstrap.encrypt.KeyProperties.KeyStore;
 import org.springframework.cloud.context.encrypt.EncryptorFactory;
@@ -109,21 +110,22 @@ public class EncryptionBootstrapConfiguration {
 		public ConditionOutcome getMatchOutcome(ConditionContext context,
 				AnnotatedTypeMetadata metadata) {
 			Environment environment = context.getEnvironment();
-			if (hasProperty(environment, "encrypt.keyStore.location")) {
-				if (hasProperty(environment, "encrypt.keyStore.password")) {
+			RelaxedPropertyResolver propertyResolver = new RelaxedPropertyResolver(environment);
+			if (hasProperty(propertyResolver, environment, "encrypt.keyStore.location")) {
+				if (hasProperty(propertyResolver, environment, "encrypt.keyStore.password")) {
 					return ConditionOutcome.match("Keystore found in Environment");
 				}
 				return ConditionOutcome
 						.noMatch("Keystore found but no password in Environment");
 			}
-			else if (hasProperty(environment, "encrypt.key")) {
+			else if (hasProperty(propertyResolver, environment, "encrypt.key")) {
 				return ConditionOutcome.match("Key found in Environment");
 			}
 			return ConditionOutcome.noMatch("Keystore nor key found in Environment");
 		}
 
-		private boolean hasProperty(Environment environment, String key) {
-			String value = environment.getProperty(key);
+		private boolean hasProperty(RelaxedPropertyResolver propertyResolver, Environment environment, String key) {
+			String value = propertyResolver.getProperty(key);
 			if (value == null) {
 				return false;
 			}

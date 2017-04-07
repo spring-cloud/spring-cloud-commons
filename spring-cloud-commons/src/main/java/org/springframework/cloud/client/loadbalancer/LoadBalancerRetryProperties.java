@@ -23,7 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties("spring.cloud.loadbalancer.retry")
 public class LoadBalancerRetryProperties {
-    private boolean enabled = false;
+    private boolean enabled = true;
 
     /**
      * Returns true if the load balancer should retry failed requests.

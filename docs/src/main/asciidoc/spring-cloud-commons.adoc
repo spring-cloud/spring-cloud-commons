@@ -321,6 +321,33 @@ By default, implementations of `DiscoveryClient` will auto-register the local Sp
 
 Commons now provides a `ServiceRegistry` interface which provides methods like `register(Registration)` and `deregister(Registration)` which allow you to provide custom registered services. `Registration` is a marker interface.
 
+[source,java,indent=0]
+----
+@Configuration
+@EnableDiscoveryClient(autoRegister=false)
+public class MyConfiguration {
+    private ServiceRegistry registry;
+
+    public MyConfiguration(ServiceRegistry registry) {
+        this.registry = registry;
+    }
+
+    // called via some external process, such as an event or a custom actuator endpoint
+    public void register() {
+        Registration registration = constructRegistration();
+        this.registry.register(registration);
+    }
+}
+----
+
+Each `ServiceRegistry` implementation has its own `Registry` implementation.
+
+
+==== ServiceRegistry Auto-Registration
+
+By default, the `ServiceRegistry` implementation will auto-register the running service. To disable that behavior, there are two methods. You can set `@EnableDiscoveryClient(autoRegister=false)` to permanently disable auto-registration. You can also set `spring.cloud.service-registry.auto-registration.enabled=false` to disable the behavior via configuration.
+
+
 ==== Service Registry Actuator Endpoint
 
 A `/service-registry` actuator endpoint is provided by Commons. This endpoint relys on a `Registration` bean in the Spring Application Context. Calling `/service-registry/instance-status` via a GET will return the status of the `Registration`. A POST to the same endpoint with a `String` body will change the status of the current `Registration` to the new value. Please see the documentation of the `ServiceRegistry` implementation you are using for the allowed values for updating the status and the values retured for the status.
@@ -362,9 +389,10 @@ for details of how the `RestTemplate` is set up.
 ==== Retrying Failed Requests
 
 A load balanced `RestTemplate` can be configured to retry failed requests.
-By default this logic is disabled, you can enable it by setting
-`spring.cloud.loadbalancer.retry.enabled=true`.  The load balanced `RestTemplate` will
-honor some of the Ribbon configuration values related to retrying failed requests.
+By default this logic is disabled, you can enable it by adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath.  The load balanced `RestTemplate` will
+honor some of the Ribbon configuration values related to retrying failed requests.  If
+you would like to disable the retry logic with Spring Retry on the classpath
+you can set `spring.cloud.loadbalancer.retry.enabled=false`.
 The properties you can use are `client.ribbon.MaxAutoRetries`,
 `client.ribbon.MaxAutoRetriesNextServer`, and `client.ribbon.OkToRetryOnAllOperations`.
 See the https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties[Ribbon documentation]

@@ -21,7 +21,7 @@ import java.util.List;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * DiscoveryClient represents operations commonly available to Discovery service such as
+ * DiscoveryClient represents read operations commonly available to Discovery service such as
  * Netflix Eureka or consul.io
  * @author Spencer Gibb
  */

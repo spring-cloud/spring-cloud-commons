@@ -30,6 +30,7 @@ import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguratio
 import org.springframework.cloud.context.environment.EnvironmentManager;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
+import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -87,6 +88,12 @@ public class RefreshAutoConfiguration {
 	public ContextRefresher contextRefresher(ConfigurableApplicationContext context,
 			RefreshScope scope) {
 		return new ContextRefresher(context, scope);
+	}
+
+	@Bean
+	public RefreshEventListener refreshEventListener(
+			ContextRefresher contextRefresher) {
+		return new RefreshEventListener(contextRefresher);
 	}
 
 }

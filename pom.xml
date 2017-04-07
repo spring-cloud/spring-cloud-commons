@@ -28,23 +28,6 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>aggregate</id>
-						<goals>
-							<goal>aggregate-jar</goal>
-						</goals>
-						<phase>package</phase>
-						<inherited>false</inherited>
-						<configuration>
-							<aggregate>true</aggregate>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<source>1.8</source>
@@ -66,23 +49,6 @@
 							<location>${main.basedir}/eclipse/org.eclipse.jdt.core.prefs</location>
 						</file>
 					</additionalConfig>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.0.0</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<excludes>
-						<exclude>**/*.properties</exclude>
-					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>
