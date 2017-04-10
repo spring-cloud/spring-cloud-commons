@@ -32,7 +32,7 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 	private SimpleDiscoveryProperties props;
 
 	@Autowired
-	private DiscoveryClient discoveryClient;
+	private SimpleDiscoveryClient discoveryClient;
 
 	@Test
 	public void propsShouldGetCleanlyMapped() {

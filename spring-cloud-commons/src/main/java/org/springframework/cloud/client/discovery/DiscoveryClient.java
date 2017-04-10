@@ -19,6 +19,7 @@ package org.springframework.cloud.client.discovery;
 import java.util.List;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.core.Ordered;
 
 /**
  * DiscoveryClient represents read operations commonly available to Discovery service such as
