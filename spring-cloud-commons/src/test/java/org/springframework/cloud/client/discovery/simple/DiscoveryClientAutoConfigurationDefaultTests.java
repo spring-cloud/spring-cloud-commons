@@ -10,12 +10,11 @@ import org.springframework.cloud.client.discovery.composite.CompositeDiscoveryCl
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * DiscoveryClient implementation defaults to {@link SimpleDiscoveryClient}
+ * DiscoveryClient implementation defaults to {@link CompositeDiscoveryClient}
+ * 
  * @author Biju Kunjummen
  */
 @RunWith(SpringRunner.class)
@@ -23,16 +22,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class DiscoveryClientAutoConfigurationDefaultTests {
 
 	@Autowired
-	private List<DiscoveryClient> discoveryClients;
+	private DiscoveryClient discoveryClient;
 
 	@Test
 	public void simpleDiscoveryClientShouldBeTheDefault() {
-		assertThat(discoveryClients).hasSize(2);
-		assertThat(discoveryClients.get(0) instanceof SimpleDiscoveryClient
-				|| discoveryClients.get(0) instanceof CompositeDiscoveryClient);
-		
-		assertThat(discoveryClients.get(1) instanceof SimpleDiscoveryClient
-				|| discoveryClients.get(1) instanceof CompositeDiscoveryClient);
+		assertThat(discoveryClient).isInstanceOf(CompositeDiscoveryClient.class);
 	}
 
 	@EnableAutoConfiguration
