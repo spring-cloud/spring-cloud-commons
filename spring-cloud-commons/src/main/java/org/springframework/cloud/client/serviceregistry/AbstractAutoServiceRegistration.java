@@ -196,7 +196,10 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration> im
 	 * Register the local management service with the {@link ServiceRegistry}
 	 */
 	protected void registerManagement() {
-		this.serviceRegistry.register(getManagementRegistration());
+		R registration = getManagementRegistration();
+		if (registration != null) {
+			this.serviceRegistry.register(registration);
+		}
 	}
 
 	/**
@@ -210,7 +213,10 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration> im
 	 * De-register the local management service with the {@link ServiceRegistry}
 	 */
 	protected void deregisterManagement() {
-		this.serviceRegistry.deregister(getManagementRegistration());
+		R registration = getManagementRegistration();
+		if (registration != null) {
+			this.serviceRegistry.deregister(registration);
+		}
 	}
 
 	public void stop() {

@@ -5,8 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.LocalManagementPort;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,10 +32,10 @@ public class AbstractAutoServiceRegistrationTests {
 	@Autowired
 	private TestAutoServiceRegistration autoRegistration;
 
-	@Value("${local.server.port}")
+	@LocalServerPort
 	private int port;
 
-	@Value("${local.management.port}")
+	@LocalManagementPort
 	private int managementPort;
 
 	@Test
@@ -65,18 +66,35 @@ public class AbstractAutoServiceRegistrationTests {
 		}
 	}
 
+	public static class TestMgmtRegistration extends TestRegistration {
+		@Override
+		public String getServiceId() {
+			return "testMgmtRegistration2";
+		}
+	}
+
 	public static class TestServiceRegistry implements ServiceRegistry<TestRegistration> {
 		private boolean registered = false;
 		private boolean deregistered = false;
 
 		@Override
 		public void register(TestRegistration registration) {
-			this.registered = true;
+			if (registration == null) {
+				throw new NullPointerException();
+			}
+			if (!(registration instanceof TestMgmtRegistration)) {
+				this.registered = true;
+			}
 		}
 
 		@Override
 		public void deregister(TestRegistration registration) {
-			this.deregistered = true;
+			if (registration == null) {
+				throw new NullPointerException();
+			}
+			if (!(registration instanceof TestMgmtRegistration)) {
+				this.deregistered = true;
+			}
 		}
 
 		@Override
@@ -129,7 +147,7 @@ public class AbstractAutoServiceRegistrationTests {
 
 		@Override
 		protected TestRegistration getRegistration() {
-			return null;
+			return new TestRegistration();
 		}
 
 		@Override

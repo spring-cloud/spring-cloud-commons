@@ -16,7 +16,6 @@ import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.retry.policy.NeverRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
-import static org.bouncycastle.crypto.tls.ConnectionEnd.client;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
