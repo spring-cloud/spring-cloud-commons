@@ -29,7 +29,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.logging.LogFile;
@@ -50,6 +49,8 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.cloud.env.EnvironmentUtils.getSubProperties;
 
 /**
  * @author Dave Syer
@@ -114,8 +115,7 @@ public class PropertySourceBootstrapConfiguration implements
 
 	private void reinitializeLoggingSystem(ConfigurableEnvironment environment,
 			String oldLogConfig, LogFile oldLogFile) {
-		Map<String, Object> props = new RelaxedPropertyResolver(environment)
-				.getSubProperties("logging.");
+		Map<String, Object> props = getSubProperties(environment, "logging.");
 		if (!props.isEmpty()) {
 			String logConfig = environment.resolvePlaceholders("${logging.config:}");
 			LogFile logFile = LogFile.get(environment);

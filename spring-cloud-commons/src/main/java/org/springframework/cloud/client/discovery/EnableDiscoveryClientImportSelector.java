@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.client.discovery;
 
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.cloud.commons.util.SpringFactoryImportSelector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAttributes;
@@ -54,7 +53,7 @@ public class EnableDiscoveryClientImportSelector
 
 	@Override
 	protected boolean isEnabled() {
-		return new RelaxedPropertyResolver(getEnvironment()).getProperty(
+		return getEnvironment().getProperty(
 				"spring.cloud.discovery.enabled", Boolean.class, Boolean.TRUE);
 	}
 

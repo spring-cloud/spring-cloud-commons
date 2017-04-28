@@ -20,13 +20,14 @@ import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
+
+import static org.springframework.cloud.env.EnvironmentUtils.getSubProperties;
 
 /**
  * Listener that looks for {@link EnvironmentChangeEvent} and rebinds logger levels if any
@@ -57,8 +58,7 @@ public class LoggingRebinder
 	}
 
 	protected void setLogLevels(LoggingSystem system, Environment environment) {
-		Map<String, Object> levels = new RelaxedPropertyResolver(environment)
-				.getSubProperties("logging.level.");
+		Map<String, Object> levels = getSubProperties(environment, "logging.level.");
 		for (Entry<String, Object> entry : levels.entrySet()) {
 			setLogLevel(system, environment, entry.getKey(), entry.getValue().toString());
 		}
