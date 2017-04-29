@@ -52,13 +52,13 @@ public class ServiceRegistryEndpointTests {
 
 	@Test
 	public void testGet() throws Exception {
-		this.mvc.perform(get("/service-registry/instance-status")).andExpect(status().isOk())
+		this.mvc.perform(get("/application/service-registry/instance-status")).andExpect(status().isOk())
 				.andExpect(content().string(containsString(MYSTATUS)));
 	}
 
 	@Test
 	public void testPost() throws Exception {
-		this.mvc.perform(post("/service-registry/instance-status").content(UPDATED_STATUS)).andExpect(status().isOk());
+		this.mvc.perform(post("/application/service-registry/instance-status").content(UPDATED_STATUS)).andExpect(status().isOk());
 		assertThat(this.serviceRegistry.getUpdatedStatus().get()).isEqualTo(UPDATED_STATUS);
 	}
 

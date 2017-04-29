@@ -94,10 +94,6 @@ public class InterceptorRetryPolicyTest {
         InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName);
         LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
         Throwable thrown = new Exception();
-        when(policy.canRetryNextServer(eq(context))).thenReturn(true);
-        when(policy.canRetrySameServer(eq(context))).thenReturn(false);
-        ServiceInstance serviceInstance = mock(ServiceInstance.class);
-        when(serviceInstanceChooser.choose(eq(serviceName))).thenReturn(serviceInstance);
         interceptorRetryPolicy.registerThrowable(context, thrown);
         verify(context, times(1)).registerThrowable(eq(thrown));
         verify(policy, times(1)).registerThrowable(eq(context), eq(thrown));
