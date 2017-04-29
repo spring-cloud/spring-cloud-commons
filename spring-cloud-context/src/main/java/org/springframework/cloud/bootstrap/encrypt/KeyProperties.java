@@ -17,7 +17,6 @@ package org.springframework.cloud.bootstrap.encrypt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
-import org.springframework.security.rsa.crypto.RsaAlgorithm;
 import org.springframework.util.ClassUtils;
 
 @ConfigurationProperties("encrypt")
@@ -141,7 +140,8 @@ public class KeyProperties {
 		 * The RSA algorithm to use (DEFAULT or OEAP). Once it is set do not change it (or
 		 * existing ciphers will not a decryptable).
 		 */
-		private RsaAlgorithm algorithm = RsaAlgorithm.DEFAULT;
+		//TODO: move from String to RsaAlgorithm
+		private String algorithm = "DEFAULT";
 
 		/**
 		 * Flag to indicate that "strong" AES encryption should be used internally. If
@@ -157,11 +157,11 @@ public class KeyProperties {
 		 */
 		private String salt = "deadbeef";
 
-		public RsaAlgorithm getAlgorithm() {
+		public String getAlgorithm() {
 			return this.algorithm;
 		}
 
-		public void setAlgorithm(RsaAlgorithm algorithm) {
+		public void setAlgorithm(String algorithm) {
 			this.algorithm = algorithm;
 		}
 
