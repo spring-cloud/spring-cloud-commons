@@ -123,7 +123,7 @@ public class BootstrapConfigurationTests {
 		}
 		else {
 			externalProperties = new File(
-					"spring-cloud-config-client/src/test/resources/external-properties/bootstrap.properties");
+					"spring-cloud-context/src/test/resources/external-properties/bootstrap.properties");
 			externalPropertiesPath = externalProperties.getAbsolutePath();
 		}
 		return externalPropertiesPath;
