@@ -3,9 +3,11 @@ package org.springframework.cloud.client;
 import java.util.LinkedHashMap;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.bind.PropertySourcesPropertyValues;
-import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.cloud.commons.util.InetUtils.HostInfo;
@@ -34,7 +36,7 @@ public class HostInfoEnvironmentPostProcessor
 		InetUtils.HostInfo hostInfo = getFirstNonLoopbackHostInfo(environment);
 		LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 		map.put("spring.cloud.client.hostname", hostInfo.getHostname());
-		map.put("spring.cloud.client.ipAddress", hostInfo.getIpAddress());
+		map.put("spring.cloud.client.ip-address", hostInfo.getIpAddress());
 		MapPropertySource propertySource = new MapPropertySource(
 				"springCloudClientHostInfo", map);
 		environment.getPropertySources().addLast(propertySource);
@@ -42,9 +44,9 @@ public class HostInfoEnvironmentPostProcessor
 
 	private HostInfo getFirstNonLoopbackHostInfo(ConfigurableEnvironment environment) {
 		InetUtilsProperties target = new InetUtilsProperties();
-		RelaxedDataBinder binder = new RelaxedDataBinder(target,
-				InetUtilsProperties.PREFIX);
-		binder.bind(new PropertySourcesPropertyValues(environment.getPropertySources()));
+		new Binder(ConfigurationPropertySources.attach(environment.getPropertySources()),
+				new PropertySourcesPlaceholdersResolver(environment))
+				.bind(InetUtilsProperties.PREFIX, Bindable.ofInstance(target));
 		try (InetUtils utils = new InetUtils(target)) {
 			return utils.findFirstNonLoopbackHostInfo();
 		}

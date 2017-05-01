@@ -42,7 +42,7 @@ public class HostInfoEnvironmentPostProcessorTests {
 	public void ipAddress() {
 		this.processor.postProcessEnvironment(this.environment,
 				new SpringApplication(""));
-		String address = this.environment.getProperty("spring.cloud.client.ipAddress");
+		String address = this.environment.getProperty("spring.cloud.client.ip-address");
 		assertNotNull(address);
 	}
 

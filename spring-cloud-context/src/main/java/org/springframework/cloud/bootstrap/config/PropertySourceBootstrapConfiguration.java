@@ -27,10 +27,11 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.bind.PropertySourcesPropertyValues;
-import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.boot.logging.LoggingSystem;
@@ -153,8 +154,8 @@ public class PropertySourceBootstrapConfiguration implements
 		MutablePropertySources incoming = new MutablePropertySources();
 		incoming.addFirst(composite);
 		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
-		new RelaxedDataBinder(remoteProperties, "spring.cloud.config")
-				.bind(new PropertySourcesPropertyValues(incoming));
+		new Binder(ConfigurationPropertySources.attach(incoming))
+				.bind("spring.cloud.config", Bindable.ofInstance(remoteProperties));
 		if (!remoteProperties.isAllowOverride() || (!remoteProperties.isOverrideNone()
 				&& remoteProperties.isOverrideSystemProperties())) {
 			propertySources.addFirst(composite);
