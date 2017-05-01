@@ -155,12 +155,7 @@ public class BootstrapApplicationListener
 				environment.getProperty("spring.cloud.bootstrap.sources", ""))) {
 			names.add(name);
 		}
-		// TODO: is it possible or sensible to share a ResourceLoader?
-		SpringApplicationBuilder builder = new SpringApplicationBuilder()
-				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)
-				.environment(bootstrapEnvironment)
-				.properties("spring.application.name:" + configName)
-				.registerShutdownHook(false).logStartupInfo(false).web(NONE);
+
 		List<Class<?>> sources = new ArrayList<>();
 		for (String name : names) {
 			Class<?> cls = ClassUtils.resolveClassName(name, null);
@@ -173,7 +168,15 @@ public class BootstrapApplicationListener
 			sources.add(cls);
 		}
 		AnnotationAwareOrderComparator.sort(sources);
-		builder.sources(sources.toArray(new Class[sources.size()]));
+
+		// TODO: is it possible or sensible to share a ResourceLoader?
+		SpringApplicationBuilder builder = new SpringApplicationBuilder(sources.toArray(new Class[sources.size()]))
+				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)
+				.environment(bootstrapEnvironment)
+				.properties("spring.application.name:" + configName)
+				.registerShutdownHook(false).logStartupInfo(false).web(NONE);
+		// Move back to below when https://github.com/spring-projects/spring-boot/issues/9053 is fixed
+		// builder.sources(sources.toArray(new Class[sources.size()]));
 		final ConfigurableApplicationContext context = builder.run();
 		// Make the bootstrap context a parent of the app context
 		addAncestorInitializer(application, context);
