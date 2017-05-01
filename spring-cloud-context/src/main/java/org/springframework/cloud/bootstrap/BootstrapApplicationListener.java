@@ -50,6 +50,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import static org.springframework.boot.WebApplicationType.NONE;
+
 /**
  * A listener that prepares a SpringApplication (e.g. populating its Environment) by
  * delegating to {@link ApplicationContextInitializer} beans in a separate bootstrap
@@ -158,7 +160,7 @@ public class BootstrapApplicationListener
 				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)
 				.environment(bootstrapEnvironment)
 				.properties("spring.application.name:" + configName)
-				.registerShutdownHook(false).logStartupInfo(false).web(false);
+				.registerShutdownHook(false).logStartupInfo(false).web(NONE);
 		List<Class<?>> sources = new ArrayList<>();
 		for (String name : names) {
 			Class<?> cls = ClassUtils.resolveClassName(name, null);
