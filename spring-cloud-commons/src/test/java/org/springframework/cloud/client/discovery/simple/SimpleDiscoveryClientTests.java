@@ -26,11 +26,12 @@ public class SimpleDiscoveryClientTests {
 
 		Map<String, List<SimpleServiceInstance>> map = new HashMap<>();
 		SimpleServiceInstance service1Inst1 = new SimpleServiceInstance(
-				"http://host1:8080");
+				URI.create("http://host1:8080"));
 		SimpleServiceInstance service1Inst2 = new SimpleServiceInstance(
-				"https://host2:8443");
+				URI.create("https://host2:8443"));
 		map.put("service1", Arrays.asList(service1Inst1, service1Inst2));
 		simpleDiscoveryProperties.setInstances(map);
+		simpleDiscoveryProperties.init();
 		this.simpleDiscoveryClient = new SimpleDiscoveryClient(simpleDiscoveryProperties);
 	}
 
@@ -39,9 +40,11 @@ public class SimpleDiscoveryClientTests {
 		List<ServiceInstance> instances = this.simpleDiscoveryClient
 				.getInstances("service1");
 		assertThat(instances.size()).isEqualTo(2);
+		assertThat(instances.get(0).getServiceId()).isEqualTo("service1");
 		assertThat(instances.get(0).getHost()).isEqualTo("host1");
 		assertThat(instances.get(0).getPort()).isEqualTo(8080);
 		assertThat(instances.get(0).getUri()).isEqualTo(URI.create("http://host1:8080"));
 		assertThat(instances.get(0).isSecure()).isEqualTo(false);
+		assertThat(instances.get(0).getMetadata()).isNotNull();
 	}
 }
