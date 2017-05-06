@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {
+		"spring.application.name=service0",
 		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s1-1:8080",
 		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s1-2:8443",
 		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s2-1:8080",
@@ -68,9 +69,15 @@ public class CompositeDiscoveryClientTests {
 
 	@Test
 	public void getInstancesByUnknownServiceIdShouldReturnAnEmptyList() {
-		assertThat(discoveryClient.getInstances("unknown")).hasSize(0);
+		assertThat(this.discoveryClient.getInstances("unknown")).hasSize(0);
 	}
 
+	
+	@Test
+	public void localServiceInstanceShouldReturnTheFirstMatch() {
+		assertThat(this.discoveryClient.getLocalServiceInstance().getServiceId()).isEqualTo("service0");
+	}
+	
 	@EnableAutoConfiguration
 	@Configuration
 	public static class Config {

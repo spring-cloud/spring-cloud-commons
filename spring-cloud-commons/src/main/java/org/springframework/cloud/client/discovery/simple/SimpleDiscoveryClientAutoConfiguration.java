@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.embedded.EmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.commons.util.InetUtils;
@@ -26,7 +25,6 @@ import java.net.URI;
  */
 
 @Configuration
-@EnableConfigurationProperties(SimpleDiscoveryProperties.class)
 @AutoConfigureBefore(NoopDiscoveryClientAutoConfiguration.class)
 public class SimpleDiscoveryClientAutoConfiguration {
 
@@ -54,10 +52,9 @@ public class SimpleDiscoveryClientAutoConfiguration {
 	}
 
 	@Bean
-	@Order(Ordered.LOWEST_PRECEDENCE - 100)
-	public DiscoveryClient simpleDiscoveryClient(
-			SimpleDiscoveryProperties simpleDiscoveryProperties) {
-		return new SimpleDiscoveryClient(simpleDiscoveryProperties);
+	@Order(Ordered.LOWEST_PRECEDENCE)
+	public DiscoveryClient simpleDiscoveryClient() {
+		return new SimpleDiscoveryClient(simpleDiscoveryProperties());
 	}
 
 	private int findPort() {
