@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.context.embedded.EmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
+// import org.springframework.boot.context.embedded.EmbeddedServletContainer;
+// import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration;
@@ -59,13 +59,14 @@ public class SimpleDiscoveryClientAutoConfiguration {
 	}
 
 	private int findPort() {
-		if (this.context instanceof EmbeddedWebApplicationContext) {
+		//FIXME: is what is the boot 2.0 equiv?
+		/*if (this.context instanceof EmbeddedWebApplicationContext) {
 			EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) this.context)
 					.getEmbeddedServletContainer();
 			if (container != null) {
 				return container.getPort();
 			}
-		}
+		}*/
 		if (this.server != null && this.server.getPort() != null
 				&& this.server.getPort() > 0) {
 			return this.server.getPort();
