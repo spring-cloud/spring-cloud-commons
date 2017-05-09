@@ -28,7 +28,7 @@ public class SimpleDiscoveryClient implements DiscoveryClient {
 
 	@Override
 	public ServiceInstance getLocalServiceInstance() {
-		return null;
+		return this.simpleDiscoveryProperties.getLocal();
 	}
 
 	@Override
