@@ -15,19 +15,21 @@
  */
 package org.springframework.cloud.logging;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
-
-import static org.springframework.cloud.env.EnvironmentUtils.getSubProperties;
 
 /**
  * Listener that looks for {@link EnvironmentChangeEvent} and rebinds logger levels if any
@@ -38,6 +40,9 @@ import static org.springframework.cloud.env.EnvironmentUtils.getSubProperties;
  */
 public class LoggingRebinder
 		implements ApplicationListener<EnvironmentChangeEvent>, EnvironmentAware {
+
+	private static final Bindable<Map<String, String>> STRING_STRING_MAP = Bindable
+			.mapOf(String.class, String.class);
 
 	private final Log logger = LogFactory.getLog(getClass());
 
@@ -58,8 +63,9 @@ public class LoggingRebinder
 	}
 
 	protected void setLogLevels(LoggingSystem system, Environment environment) {
-		Map<String, Object> levels = getSubProperties(environment, "logging.level.");
-		for (Entry<String, Object> entry : levels.entrySet()) {
+		Map<String, String> levels = Binder.get(environment)
+				.bind("logging.level", STRING_STRING_MAP).orElseGet(Collections::emptyMap);
+		for (Entry<String, String> entry : levels.entrySet()) {
 			setLogLevel(system, environment, entry.getKey(), entry.getValue().toString());
 		}
 	}

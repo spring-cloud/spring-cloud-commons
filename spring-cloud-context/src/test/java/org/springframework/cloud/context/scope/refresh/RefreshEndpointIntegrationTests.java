@@ -59,9 +59,9 @@ public class RefreshEndpointIntegrationTests {
 	public void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
 		template.exchange(
-				getUrlEncodedEntity("http://localhost:" + this.port + "/env", "message",
+				getUrlEncodedEntity("http://localhost:" + this.port + "/application/env", "message",
 						"Hello Dave!"), String.class);
-		template.postForObject("http://localhost:" + this.port + "/refresh", "", String.class);
+		template.postForObject("http://localhost:" + this.port + "/application/refresh", "", String.class);
 		String message = template.getForObject("http://localhost:" + this.port + "/",
 				String.class);
 		assertEquals("Hello Dave!", message);

@@ -25,6 +25,8 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -80,7 +82,7 @@ public class BootstrapConfigurationTests {
 	public void pickupExternalBootstrapProperties() {
 		String externalPropertiesPath = getExternalProperties();
 
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class)
 				.properties("spring.cloud.bootstrap.location:" + externalPropertiesPath)
 				.run();
@@ -92,7 +94,7 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void bootstrapPropertiesAvailableInInitializer() {
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class).initializers(
 						new ApplicationContextInitializer<ConfigurableApplicationContext>() {
 							@Override
@@ -132,7 +134,7 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void picksUpAdditionalPropertySource() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class).run();
 		assertEquals("bar", this.context.getEnvironment().getProperty("bootstrap.foo"));
 		assertTrue(this.context.getEnvironment().getPropertySources().contains(
@@ -143,7 +145,7 @@ public class BootstrapConfigurationTests {
 	public void failsOnPropertySource() {
 		System.setProperty("expected.fail", "true");
 		this.expected.expectMessage("Planned");
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class).run();
 	}
 
@@ -151,7 +153,7 @@ public class BootstrapConfigurationTests {
 	public void overrideSystemPropertySourceByDefault() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class).run();
 		assertEquals("bar", this.context.getEnvironment().getProperty("bootstrap.foo"));
 	}
@@ -162,7 +164,7 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP
 				.put("spring.cloud.config.overrideSystemProperties", "false");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class).run();
 		assertEquals("system",
 				this.context.getEnvironment().getProperty("bootstrap.foo"));
@@ -178,7 +180,7 @@ public class BootstrapConfigurationTests {
 		// their own remote property source.
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "false");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class).run();
 		assertEquals("bar", this.context.getEnvironment().getProperty("bootstrap.foo"));
 	}
@@ -190,7 +192,7 @@ public class BootstrapConfigurationTests {
 				.put("spring.cloud.config.overrideSystemProperties", "false");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class).run();
 		assertEquals("system",
 				this.context.getEnvironment().getProperty("bootstrap.foo"));
@@ -204,7 +206,7 @@ public class BootstrapConfigurationTests {
 		ConfigurableEnvironment environment = new StandardEnvironment();
 		environment.getPropertySources().addLast(new MapPropertySource("last",
 				Collections.<String, Object>singletonMap("bootstrap.foo", "splat")));
-		this.context = new SpringApplicationBuilder().web(NONE).environment(environment)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).environment(environment)
 				.sources(BareConfiguration.class).run();
 		assertEquals("splat", this.context.getEnvironment().getProperty("bootstrap.foo"));
 	}
@@ -212,7 +214,7 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void applicationNameInBootstrapAndMain() {
 		System.setProperty("expected.name", "main");
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.cloud.bootstrap.name:other",
 						"spring.config.name:plain")
 				.sources(BareConfiguration.class).run();
@@ -232,7 +234,7 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void applicationNameNotInBootstrap() {
 		System.setProperty("expected.name", "main");
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.cloud.bootstrap.name:application",
 						"spring.config.name:other")
 				.sources(BareConfiguration.class).run();
@@ -247,7 +249,7 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void applicationNameOnlyInBootstrap() {
 		System.setProperty("expected.name", "main");
-		this.context = new SpringApplicationBuilder().web(NONE)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.cloud.bootstrap.name:other")
 				.sources(BareConfiguration.class).run();
 		// The main context is called "main" because spring.application.name is specified
@@ -266,7 +268,7 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
 				.environment(new StandardEnvironment()).child(BareConfiguration.class)
-				.web(NONE).run();
+				.web(WebApplicationType.NONE).run();
 		assertEquals("bar", this.context.getEnvironment().getProperty("bootstrap.foo"));
 		assertEquals(this.context.getEnvironment(),
 				this.context.getParent().getEnvironment());
@@ -283,7 +285,7 @@ public class BootstrapConfigurationTests {
 		TestHigherPriorityBootstrapConfiguration.count.set(0);
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
-				.child(BareConfiguration.class).web(NONE).run();
+				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
 		assertEquals(1, TestHigherPriorityBootstrapConfiguration.count.get());
 		assertNotNull(context.getParent());
 		assertEquals("bootstrap", context.getParent().getParent().getId());
@@ -298,14 +300,14 @@ public class BootstrapConfigurationTests {
 		SpringApplicationBuilder builder = new SpringApplicationBuilder()
 				.sources(BareConfiguration.class);
 		this.sibling = builder.child(BareConfiguration.class)
-				.properties("spring.application.name=sibling").web(NONE).run();
+				.properties("spring.application.name=sibling").web(WebApplicationType.NONE).run();
 		this.context = builder.child(BareConfiguration.class)
-				.properties("spring.application.name=context").web(NONE).run();
+				.properties("spring.application.name=context").web(WebApplicationType.NONE).run();
 		assertEquals(1, TestHigherPriorityBootstrapConfiguration.count.get());
 		assertNotNull(context.getParent());
 		assertEquals("bootstrap", context.getParent().getParent().getId());
 		assertNull(context.getParent().getParent().getParent());
-		//FIXME: 2.0 assertEquals("context", context.getEnvironment().getProperty("custom.foo"));
+		assertEquals("sibling", context.getEnvironment().getProperty("custom.foo"));
 		assertEquals("context",
 				context.getEnvironment().getProperty("spring.application.name"));
 		assertNotNull(sibling.getParent());
@@ -320,7 +322,7 @@ public class BootstrapConfigurationTests {
 	public void environmentEnrichedInParentContext() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
-				.child(BareConfiguration.class).web(NONE).run();
+				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
 		assertEquals("bar", this.context.getEnvironment().getProperty("bootstrap.foo"));
 		assertNotSame(this.context.getEnvironment(),
 				this.context.getParent().getEnvironment());
@@ -336,9 +338,9 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		// Profiles are always merged with the child
 		ConfigurableApplicationContext parent = new SpringApplicationBuilder()
-				.sources(BareConfiguration.class).profiles("parent").web(NONE).run();
+				.sources(BareConfiguration.class).profiles("parent").web(WebApplicationType.NONE).run();
 		this.context = new SpringApplicationBuilder(BareConfiguration.class)
-				.profiles("child").parent(parent).web(NONE).run();
+				.profiles("child").parent(parent).web(WebApplicationType.NONE).run();
 		assertNotSame(this.context.getEnvironment(),
 				this.context.getParent().getEnvironment());
 		// The ApplicationContext merges profiles (profiles and property sources), see
@@ -364,7 +366,7 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void includeProfileFromBootstrapPropertySource() {
 		PropertySourceConfiguration.MAP.put("spring.profiles.include", "bar,baz");
-		this.context = new SpringApplicationBuilder().web(NONE).profiles("foo")
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).profiles("foo")
 				.sources(BareConfiguration.class).run();
 		assertTrue(this.context.getEnvironment().acceptsProfiles("baz"));
 		assertTrue(this.context.getEnvironment().acceptsProfiles("bar"));

@@ -61,7 +61,7 @@ public class EnvironmentManagerIntegrationTests {
 	public void testRefresh() throws Exception {
 		assertEquals("Hello scope!", properties.getMessage());
 		// Change the dynamic property source...
-		this.mvc.perform(post("/env").param("message", "Foo")).andExpect(status().isOk()).andExpect(
+		this.mvc.perform(post("/application/env").param("message", "Foo")).andExpect(status().isOk()).andExpect(
 				content().string("{\"message\":\"Foo\"}"));
 		assertEquals("Foo", properties.getMessage());
 	}
@@ -69,7 +69,7 @@ public class EnvironmentManagerIntegrationTests {
 	@Test
 	public void testRefreshFails() throws Exception {
 		try {
-			this.mvc.perform(post("/env").param("delay", "foo")).andExpect(
+			this.mvc.perform(post("/application/env").param("delay", "foo")).andExpect(
 					status().is5xxServerError());
 			fail("expected ServletException");
 		} catch (ServletException e) {

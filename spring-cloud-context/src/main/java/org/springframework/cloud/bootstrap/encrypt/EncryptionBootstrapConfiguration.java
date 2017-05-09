@@ -111,8 +111,8 @@ public class EncryptionBootstrapConfiguration {
 		public ConditionOutcome getMatchOutcome(ConditionContext context,
 				AnnotatedTypeMetadata metadata) {
 			Environment environment = context.getEnvironment();
-			if (hasProperty(environment, "encrypt.keyStore.location")) {
-				if (hasProperty(environment, "encrypt.keyStore.password")) {
+			if (hasProperty(environment, "encrypt.key-store.location")) {
+				if (hasProperty(environment, "encrypt.key-store.password")) {
 					return ConditionOutcome.match("Keystore found in Environment");
 				}
 				return ConditionOutcome

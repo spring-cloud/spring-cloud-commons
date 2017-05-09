@@ -118,7 +118,7 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean>
 	public class PauseEndpoint extends AbstractEndpoint<Boolean> {
 
 		public PauseEndpoint() {
-			super("pause", true, true);
+			super("pause", true);
 		}
 
 		@Override
@@ -135,7 +135,7 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean>
 	public class ResumeEndpoint extends AbstractEndpoint<Boolean> {
 
 		public ResumeEndpoint() {
-			super("resume", true, true);
+			super("resume", true);
 		}
 
 		@Override
