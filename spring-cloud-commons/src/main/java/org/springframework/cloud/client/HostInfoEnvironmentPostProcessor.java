@@ -6,7 +6,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver;
 import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.cloud.commons.util.InetUtils;
@@ -44,9 +43,9 @@ public class HostInfoEnvironmentPostProcessor
 
 	private HostInfo getFirstNonLoopbackHostInfo(ConfigurableEnvironment environment) {
 		InetUtilsProperties target = new InetUtilsProperties();
-		new Binder(ConfigurationPropertySources.attach(environment.getPropertySources()),
-				new PropertySourcesPlaceholdersResolver(environment))
-				.bind(InetUtilsProperties.PREFIX, Bindable.ofInstance(target));
+		ConfigurationPropertySources.attach(environment);
+		Binder.get(environment).bind(InetUtilsProperties.PREFIX,
+				Bindable.ofInstance(target));
 		try (InetUtils utils = new InetUtils(target)) {
 			return utils.findFirstNonLoopbackHostInfo();
 		}
