@@ -1,9 +1,11 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import java.util.List;
+
 import org.junit.runner.RunWith;
+
 import org.springframework.cloud.ClassPathExclusions;
-import org.springframework.cloud.FilteredClassPathRunner;
+import org.springframework.cloud.ModifiedClassPathRunner;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
@@ -15,7 +17,7 @@ import static org.hamcrest.Matchers.is;
 /**
  * @author Spencer Gibb
  */
-@RunWith(FilteredClassPathRunner.class)
+@RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions({"spring-retry-*.jar", "spring-boot-starter-aop-*.jar"})
 public class LoadBalancerAutoConfigurationTests extends AbstractLoadBalancerAutoConfigurationTests {
 

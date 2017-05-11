@@ -25,7 +25,9 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Test;
+
 import org.springframework.boot.Banner.Mode;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.util.EnvironmentTestUtils;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
@@ -65,7 +67,7 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void keysComputedWhenAdded() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class).web(false)
+		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE)
 				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
 				.run();
 		RefreshScope scope = new RefreshScope();
@@ -79,7 +81,7 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void keysComputedWhenOveridden() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class).web(false)
+		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE)
 				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
 				.run();
 		RefreshScope scope = new RefreshScope();
@@ -94,7 +96,7 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void keysComputedWhenChangesInExternalProperties() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class).web(false)
+		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE)
 				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
 				.run();
 		RefreshScope scope = new RefreshScope();
@@ -110,7 +112,7 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void springMainSourcesEmptyInRefreshCycle() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class).web(false)
+		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE)
 				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
 				.run();
 		RefreshScope scope = new RefreshScope();
@@ -128,7 +130,7 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void eventsPublishedInOrder() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class).web(false)
+		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE)
 				.bannerMode(Mode.OFF).run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
@@ -144,7 +146,7 @@ public class RefreshEndpointTests {
 	@Test
 	public void shutdownHooksCleaned() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(Empty.class)
-				.web(false).bannerMode(Mode.OFF).run();
+				.web(WebApplicationType.NONE).bannerMode(Mode.OFF).run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(context);
 		ContextRefresher contextRefresher = new ContextRefresher(context, scope);

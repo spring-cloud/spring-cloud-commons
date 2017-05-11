@@ -3,6 +3,7 @@ package org.springframework.cloud.autoconfigure;
 import org.junit.Rule;
 import org.junit.Test;
 
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.rule.OutputCapture;
@@ -33,7 +34,7 @@ public class RefreshAutoConfigurationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(
 			Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).web(false)
+		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE)
 				.properties(properties).run();
 	}
 

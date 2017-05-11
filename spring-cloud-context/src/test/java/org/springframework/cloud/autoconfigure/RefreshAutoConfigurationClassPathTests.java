@@ -2,6 +2,8 @@ package org.springframework.cloud.autoconfigure;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.ClassPathExclusions;
@@ -30,7 +32,7 @@ public class RefreshAutoConfigurationClassPathTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(
 			Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).web(false)
+		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE)
 				.properties(properties).run();
 	}
 
