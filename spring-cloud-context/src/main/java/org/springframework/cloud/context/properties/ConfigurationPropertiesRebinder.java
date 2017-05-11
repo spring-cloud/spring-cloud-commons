@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.context.properties;
 
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +36,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Listens for {@link EnvironmentChangeEvent} and rebinds beans that were bound to the
@@ -60,6 +62,8 @@ public class ConfigurationPropertiesRebinder
 	private ApplicationContext applicationContext;
 
 	private Map<String, Exception> errors = new ConcurrentHashMap<>();
+	
+	private boolean resetting = false;
 
 	public ConfigurationPropertiesRebinder(
 			ConfigurationPropertiesBindingPostProcessor binder,
@@ -86,15 +90,23 @@ public class ConfigurationPropertiesRebinder
 	@ManagedOperation
 	public void rebind() {
 		this.errors.clear();
+		if (this.binder != null) {
+			resetting = true;
+			resetBinder();
+		}
 		for (String name : this.beans.getBeanNames()) {
 			rebind(name);
 		}
+		resetting = false;
 	}
 
 	@ManagedOperation
 	public boolean rebind(String name) {
 		if (!this.beans.getBeanNames().contains(name)) {
 			return false;
+		}
+		if (this.binder != null && !this.resetting) {
+			resetBinder();
 		}
 		if (this.applicationContext != null) {
 			try {
@@ -113,6 +125,21 @@ public class ConfigurationPropertiesRebinder
 			}
 		}
 		return false;
+	}
+
+	private void resetBinder() {
+		try {
+			setField(binder, "binder", null);
+			binder.afterPropertiesSet();
+		}
+		catch (Exception e) {
+		}
+	}
+
+	private void setField(Object target, String name, Object value) {
+		Field field = ReflectionUtils.findField(target.getClass(), name);
+		ReflectionUtils.makeAccessible(field);
+		ReflectionUtils.setField(field, target, value);
 	}
 
 	@SuppressWarnings("unchecked")

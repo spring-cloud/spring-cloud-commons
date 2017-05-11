@@ -307,7 +307,7 @@ public class BootstrapConfigurationTests {
 		assertNotNull(context.getParent());
 		assertEquals("bootstrap", context.getParent().getParent().getId());
 		assertNull(context.getParent().getParent().getParent());
-		assertEquals("sibling", context.getEnvironment().getProperty("custom.foo"));
+		assertEquals("context", context.getEnvironment().getProperty("custom.foo"));
 		assertEquals("context",
 				context.getEnvironment().getProperty("spring.application.name"));
 		assertNotNull(sibling.getParent());

@@ -58,7 +58,7 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	private ConfigurableEnvironment environment;
 
 	@Test
-	@Ignore // TODO: reinstate this if possible
+	@Ignore // TODO: reinstate this if possible see https://github.com/spring-projects/spring-boot/issues/9137
 	@DirtiesContext
 	public void testAppendProperties() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
@@ -91,6 +91,7 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	}
 
 	@Test
+	@Ignore // TODO: reinstate this if possible see https://github.com/spring-projects/spring-boot/issues/9137
 	@DirtiesContext
 	public void testReplacePropertiesWithCommaSeparated() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());

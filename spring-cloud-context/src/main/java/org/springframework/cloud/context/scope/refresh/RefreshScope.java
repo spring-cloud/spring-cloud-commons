@@ -14,11 +14,13 @@
 package org.springframework.cloud.context.scope.refresh;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.cloud.context.scope.GenericScope;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -27,6 +29,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * <p>
@@ -143,7 +146,24 @@ public class RefreshScope extends GenericScope
 	@ManagedOperation(description = "Dispose of the current instance of all beans in this scope and force a refresh on next method execution.")
 	public void refreshAll() {
 		super.destroy();
+		if (this.context != null && this.context.getBeanNamesForType(
+				ConfigurationPropertiesBindingPostProcessor.class).length == 1) {
+			try {
+				ConfigurationPropertiesBindingPostProcessor processor = context
+						.getBean(ConfigurationPropertiesBindingPostProcessor.class);
+				setField(processor, "binder", null);
+				processor.afterPropertiesSet();
+			}
+			catch (Exception e) {
+			}
+		}
 		this.context.publishEvent(new RefreshScopeRefreshedEvent());
+	}
+
+	private void setField(Object target, String name, Object value) {
+		Field field = ReflectionUtils.findField(target.getClass(), name);
+		ReflectionUtils.makeAccessible(field);
+		ReflectionUtils.setField(field, target, value);
 	}
 
 	@Override
