@@ -7,7 +7,7 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.ClassPathExclusions;
-import org.springframework.cloud.FilteredClassPathRunner;
+import org.springframework.cloud.ModifiedClassPathRunner;
 import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertFalse;
 /**
  * @author Spencer Gibb
  */
-@RunWith(FilteredClassPathRunner.class)
+@RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions({"spring-boot-actuator-*.jar", "spring-boot-starter-actuator-*.jar"})
 public class RefreshAutoConfigurationClassPathTests {
 

@@ -1,20 +1,26 @@
 package org.springframework.cloud.client.serviceregistry;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
+import org.springframework.boot.web.context.WebServerInitializedEvent;
+import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.cloud.client.discovery.ManagementServerPortUtils;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
 
-import javax.annotation.PreDestroy;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
- * Lifecycle methods that may be useful and common to {@link ServiceRegistry} implementations.
+ * Lifecycle methods that may be useful and common to {@link ServiceRegistry}
+ * implementations.
  *
  * TODO: document the lifecycle
  *
@@ -22,9 +28,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Spencer Gibb
  */
-@SuppressWarnings("deprecation")
-public abstract class AbstractAutoServiceRegistration<R extends Registration> implements AutoServiceRegistration, ApplicationContextAware {
-	private static final Log logger = LogFactory.getLog(AbstractAutoServiceRegistration.class);
+public abstract class AbstractAutoServiceRegistration<R extends Registration>
+		implements AutoServiceRegistration, ApplicationContextAware {
+	private static final Log logger = LogFactory
+			.getLog(AbstractAutoServiceRegistration.class);
 
 	private boolean autoStartup = true;
 
@@ -40,6 +47,19 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration> im
 
 	protected ApplicationContext getContext() {
 		return context;
+	}
+
+	@EventListener(WebServerInitializedEvent.class)
+	public void bind(WebServerInitializedEvent event) {
+		ApplicationContext context = event.getApplicationContext();
+		if (context instanceof ServletWebServerApplicationContext) {
+			if ("management".equals(
+					((ServletWebServerApplicationContext) context).getNamespace())) {
+				return;
+			}
+		}
+		this.port.compareAndSet(0, event.getWebServer().getPort());
+		this.start();
 	}
 
 	@Override
@@ -71,28 +91,27 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration> im
 			return;
 		}
 
-		/*// only set the port if the nonSecurePort is 0 and this.port != 0
-		if (this.port.get() != 0 && getConfiguredPort() == 0) {
-			setConfiguredPort(this.port.get());
-		}
 		// only initialize if nonSecurePort is greater than 0 and it isn't already running
 		// because of containerPortInitializer below
-		if (!this.running.get() && getConfiguredPort() > 0) {
+		if (!this.running.get()) {
 			register();
 			if (shouldRegisterManagement()) {
 				registerManagement();
 			}
-			this.context.publishEvent(new InstanceRegisteredEvent<>(this,
-					getConfiguration()));
+			this.context.publishEvent(
+					new InstanceRegisteredEvent<>(this, getConfiguration()));
 			this.running.compareAndSet(false, true);
-		}*/
+		}
+
 	}
 
 	/**
-	 * @return if the management service should be registered with the {@link ServiceRegistry}
+	 * @return if the management service should be registered with the
+	 * {@link ServiceRegistry}
 	 */
 	protected boolean shouldRegisterManagement() {
-		return getManagementPort() != null && ManagementServerPortUtils.isDifferent(this.context);
+		return getManagementPort() != null
+				&& ManagementServerPortUtils.isDifferent(this.context);
 	}
 
 	/**
@@ -100,7 +119,6 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration> im
 	 */
 	@Deprecated
 	protected abstract Object getConfiguration();
-
 
 	/**
 	 * @return true, if this is enabled
@@ -140,6 +158,7 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration> im
 	protected String getAppName() {
 		return this.environment.getProperty("spring.application.name", "application");
 	}
+
 	@PreDestroy
 	public void destroy() {
 		stop();
@@ -160,16 +179,6 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration> im
 	public int getPhase() {
 		return 0;
 	}
-
-	/*@Deprecated
-	public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
-		// TODO: take SSL into account
-		// Don't register the management port as THE port
-		if (!"management".equals(event.getApplicationContext().getNamespace())) {
-			this.port.compareAndSet(0, event.getEmbeddedServletContainer().getPort());
-			this.start();
-		}
-	}*/
 
 	private ServiceRegistry<R> serviceRegistry;
 

@@ -13,10 +13,6 @@
 	<packaging>jar</packaging>
 	<name>Spring Cloud Commons</name>
 	<description>Spring Cloud Commons</description>
-	<properties>
-		<aether.version>1.0.2.v20150114</aether.version>
-		<maven.version>3.3.9</maven.version>
-	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -33,6 +29,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/*.properties</exclude>
+						<exclude>**/*.jks</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
@@ -137,54 +134,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.aether</groupId>
-			<artifactId>aether-api</artifactId>
-			<version>${aether.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.aether</groupId>
-			<artifactId>aether-connector-basic</artifactId>
-			<version>${aether.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.aether</groupId>
-			<artifactId>aether-impl</artifactId>
-			<version>${aether.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.aether</groupId>
-			<artifactId>aether-spi</artifactId>
-			<version>${aether.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.aether</groupId>
-			<artifactId>aether-transport-file</artifactId>
-			<version>${aether.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.aether</groupId>
-			<artifactId>aether-transport-http</artifactId>
-			<version>${aether.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.aether</groupId>
-			<artifactId>aether-util</artifactId>
-			<version>${aether.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.maven</groupId>
-			<artifactId>maven-core</artifactId>
-			<version>${maven.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
