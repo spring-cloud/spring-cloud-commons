@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.junit.runner.RunWith;
 
-import org.springframework.cloud.ClassPathExclusions;
-import org.springframework.cloud.ModifiedClassPathRunner;
+import org.springframework.cloud.test.ClassPathExclusions;
+import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 

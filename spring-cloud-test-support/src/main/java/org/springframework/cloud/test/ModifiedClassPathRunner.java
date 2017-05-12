@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud;
+package org.springframework.cloud.test;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
