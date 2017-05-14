@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -61,14 +60,13 @@ public class RefreshScopeListBindingIntegrationTests {
 	private ConfigurableEnvironment environment;
 
 	@Test
-	@Ignore // TODO: reinstate this if possible https://github.com/spring-projects/spring-boot/issues/9137
 	@DirtiesContext
 	public void testAppendProperties() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
 		assertTrue(this.properties instanceof Advised);
 		EnvironmentTestUtils.addEnvironment(this.environment, "test.messages[0]:foo");
 		this.scope.refreshAll();
-		assertEquals("[foo, two]", this.properties.getMessages().toString());
+		assertEquals("[foo]", this.properties.getMessages().toString());
 	}
 
 	@Test

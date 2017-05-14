@@ -58,13 +58,12 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	private ConfigurableEnvironment environment;
 
 	@Test
-	@Ignore // TODO: reinstate this if possible see https://github.com/spring-projects/spring-boot/issues/9137
 	@DirtiesContext
 	public void testAppendProperties() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
 		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
 		this.rebinder.rebind();
-		assertEquals("[foo, two]", this.properties.getMessages().toString());
+		assertEquals("[foo]", this.properties.getMessages().toString());
 	}
 
 	@Test
@@ -91,7 +90,6 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	}
 
 	@Test
-	@Ignore // TODO: reinstate this if possible see https://github.com/spring-projects/spring-boot/issues/9137
 	@DirtiesContext
 	public void testReplacePropertiesWithCommaSeparated() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
