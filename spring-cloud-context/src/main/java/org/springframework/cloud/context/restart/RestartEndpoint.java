@@ -114,7 +114,7 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean>
 		return new ResumeEndpoint();
 	}
 
-	@ConfigurationProperties("endpoints")
+	@ConfigurationProperties("endpoints.pause")
 	public class PauseEndpoint extends AbstractEndpoint<Boolean> {
 
 		public PauseEndpoint() {
@@ -131,7 +131,7 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean>
 		}
 	}
 
-	@ConfigurationProperties("endpoints")
+	@ConfigurationProperties("endpoints.resume")
 	public class ResumeEndpoint extends AbstractEndpoint<Boolean> {
 
 		public ResumeEndpoint() {

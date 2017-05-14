@@ -49,9 +49,6 @@ import org.springframework.context.annotation.Configuration;
 		RefreshEndpointAutoConfiguration.class })
 public class LifecycleMvcEndpointAutoConfiguration {
 
-	@Autowired
-	private RestartEndpoint restartEndpoint;
-
 	@Bean
 	@ConditionalOnBean(EnvironmentEndpoint.class)
 	@ConditionalOnProperty(value = "endpoints.env.post.enabled", matchIfMissing = true)
@@ -67,8 +64,9 @@ public class LifecycleMvcEndpointAutoConfiguration {
 	}
 
 	@Bean
-	public RestartMvcEndpoint restartMvcEndpoint() {
-		return new RestartMvcEndpoint(this.restartEndpoint);
+	@ConditionalOnBean(RestartEndpoint.class)
+	public RestartMvcEndpoint restartMvcEndpoint(RestartEndpoint restartEndpoint) {
+		return new RestartMvcEndpoint(restartEndpoint);
 	}
 
 	@Bean

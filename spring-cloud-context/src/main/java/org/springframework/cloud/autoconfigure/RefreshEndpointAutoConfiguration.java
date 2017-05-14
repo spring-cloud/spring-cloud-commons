@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.cloud.context.refresh.ContextRefresher;
@@ -45,6 +44,7 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  */
 @Configuration
 @ConditionalOnClass(Endpoint.class)
+@ConditionalOnProperty(value = "endpoints.enabled", matchIfMissing = true)
 @AutoConfigureAfter(EndpointAutoConfiguration.class)
 public class RefreshEndpointAutoConfiguration {
 
@@ -56,15 +56,16 @@ public class RefreshEndpointAutoConfiguration {
 		return new RefreshScopeHealthIndicator(scope, rebinder);
 	}
 
-	@ConditionalOnClass(IntegrationMBeanExporter.class)
-	protected static class RestartEndpointWithIntegration {
+	@ConditionalOnProperty(value = "endpoints.restart.enabled", matchIfMissing = true)
+	protected static class RestartEndpointConfiguration {
 
 		@Autowired(required = false)
 		private IntegrationMBeanExporter exporter;
 
-		@Bean
+		@Bean("restartEndpoint")
 		@ConditionalOnMissingBean
-		public RestartEndpoint restartEndpoint() {
+		@ConditionalOnClass(IntegrationMBeanExporter.class)
+		public RestartEndpoint restartEndpointWithIntegration() {
 			RestartEndpoint endpoint = new RestartEndpoint();
 			if (this.exporter != null) {
 				endpoint.setIntegrationMBeanExporter(this.exporter);
@@ -72,29 +73,28 @@ public class RefreshEndpointAutoConfiguration {
 			return endpoint;
 		}
 
-	}
 
-	@ConditionalOnMissingClass("org.springframework.integration.monitor.IntegrationMBeanExporter")
-	protected static class RestartEndpointWithoutIntegration {
+		@Bean("restartEndpoint")
+		@ConditionalOnMissingBean
+		@ConditionalOnMissingClass("org.springframework.integration.monitor.IntegrationMBeanExporter")
+		public RestartEndpoint restartEndpointWithoutIntegration() {
+			return new RestartEndpoint();
+		}
 
 		@Bean
 		@ConditionalOnMissingBean
-		public RestartEndpoint restartEndpoint() {
-			return new RestartEndpoint();
+		@ConditionalOnProperty(value = "endpoints.pause.enabled", matchIfMissing = true)
+		public RestartEndpoint.PauseEndpoint pauseEndpoint(RestartEndpoint restartEndpoint) {
+			return restartEndpoint.getPauseEndpoint();
 		}
-	}
 
-	@Bean
-	@ConfigurationProperties("endpoints.pause")
-	public RestartEndpoint.PauseEndpoint pauseEndpoint(RestartEndpoint restartEndpoint) {
-		return restartEndpoint.getPauseEndpoint();
-	}
+		@Bean
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "endpoints.resume.enabled", matchIfMissing = true)
+		public RestartEndpoint.ResumeEndpoint resumeEndpoint(RestartEndpoint restartEndpoint) {
+			return restartEndpoint.getResumeEndpoint();
+		}
 
-	@Bean
-	@ConfigurationProperties("endpoints.resume")
-	public RestartEndpoint.ResumeEndpoint resumeEndpoint(
-			RestartEndpoint restartEndpoint) {
-		return restartEndpoint.getResumeEndpoint();
 	}
 
 	@Configuration
