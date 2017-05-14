@@ -103,7 +103,6 @@ public class LifecycleMvcAutoConfigurationTests {
 	@Test
 	public void resumeMvcEndpointGloballyDisabled() {
 		beanNotCreated("resumeMvcEndpoint",
-				"server.port=0",
 				"endpoints.enabled=false");
 	}
 
