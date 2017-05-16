@@ -122,5 +122,16 @@ public class SimpleDiscoveryProperties {
 		public Map<String, String> getMetadata() {
 			return this.metadata;
 		}
+
+		@Override
+		public void putMetadata(String key, String value) {
+			this.metadata.put(key, value);
+		}
+
+		@Override
+		public void setMetadata(Map<String, String> metadata) {
+			this.metadata = metadata;
+		}
+
 	}
 }
