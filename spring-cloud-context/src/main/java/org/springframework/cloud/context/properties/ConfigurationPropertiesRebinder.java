@@ -62,7 +62,7 @@ public class ConfigurationPropertiesRebinder
 	private ApplicationContext applicationContext;
 
 	private Map<String, Exception> errors = new ConcurrentHashMap<>();
-	
+
 	private boolean resetting = false;
 
 	public ConfigurationPropertiesRebinder(
@@ -129,7 +129,7 @@ public class ConfigurationPropertiesRebinder
 
 	private void resetBinder() {
 		try {
-			setField(binder, "binder", null);
+			setField(binder, "propertySources", null);
 			binder.afterPropertiesSet();
 		}
 		catch (Exception e) {

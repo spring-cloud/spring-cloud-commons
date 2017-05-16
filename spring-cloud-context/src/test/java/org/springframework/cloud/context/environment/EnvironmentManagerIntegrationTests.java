@@ -21,6 +21,7 @@ import javax.servlet.ServletException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -61,18 +62,20 @@ public class EnvironmentManagerIntegrationTests {
 	public void testRefresh() throws Exception {
 		assertEquals("Hello scope!", properties.getMessage());
 		// Change the dynamic property source...
-		this.mvc.perform(post("/application/env").param("message", "Foo")).andExpect(status().isOk()).andExpect(
-				content().string("{\"message\":\"Foo\"}"));
+		this.mvc.perform(post("/application/env").param("message", "Foo"))
+				.andExpect(status().isOk())
+				.andExpect(content().string("{\"message\":\"Foo\"}"));
 		assertEquals("Foo", properties.getMessage());
 	}
 
 	@Test
 	public void testRefreshFails() throws Exception {
 		try {
-			this.mvc.perform(post("/application/env").param("delay", "foo")).andExpect(
-					status().is5xxServerError());
+			this.mvc.perform(post("/application/env").param("delay", "foo"))
+					.andExpect(status().is5xxServerError());
 			fail("expected ServletException");
-		} catch (ServletException e) {
+		}
+		catch (ServletException e) {
 			// The underlying BindException is not handled by the dispatcher servlet
 		}
 		assertEquals(0, properties.getDelay());

@@ -151,7 +151,7 @@ public class RefreshScope extends GenericScope
 			try {
 				ConfigurationPropertiesBindingPostProcessor processor = context
 						.getBean(ConfigurationPropertiesBindingPostProcessor.class);
-				setField(processor, "binder", null);
+				setField(processor, "propertySources", null);
 				processor.afterPropertiesSet();
 			}
 			catch (Exception e) {

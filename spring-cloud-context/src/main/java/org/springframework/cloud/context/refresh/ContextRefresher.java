@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.boot.Banner.Mode;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
@@ -65,7 +66,8 @@ public class ContextRefresher {
 			StandardEnvironment environment = copyEnvironment(
 					this.context.getEnvironment());
 			SpringApplicationBuilder builder = new SpringApplicationBuilder(Empty.class)
-					.bannerMode(Mode.OFF).web(false).environment(environment);
+					.bannerMode(Mode.OFF).web(WebApplicationType.NONE)
+					.environment(environment);
 			// Just the listeners that affect the environment (e.g. excluding logging
 			// listener because it has side effects)
 			builder.application()
