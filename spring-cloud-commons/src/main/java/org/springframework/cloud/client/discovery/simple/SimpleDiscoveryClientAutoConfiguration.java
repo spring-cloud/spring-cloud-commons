@@ -16,6 +16,7 @@ import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.ClassUtils;
 
 /**
  * Spring Boot Auto-Configuration for Simple Properties based Discovery Client
@@ -59,11 +60,15 @@ public class SimpleDiscoveryClientAutoConfiguration {
 	}
 
 	private int findPort() {
-		if (this.context instanceof EmbeddedWebApplicationContext) {
-			EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) this.context)
-					.getEmbeddedServletContainer();
-			if (container != null) {
-				return container.getPort();
+		if (ClassUtils.isPresent(
+				"org.springframework.boot.context.embedded.EmbeddedWebApplicationContext",
+				null)) {
+			if (this.context instanceof EmbeddedWebApplicationContext) {
+				EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) this.context)
+						.getEmbeddedServletContainer();
+				if (container != null) {
+					return container.getPort();
+				}
 			}
 		}
 		if (this.server != null && this.server.getPort() != null
