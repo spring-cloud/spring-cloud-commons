@@ -19,6 +19,7 @@ package org.springframework.cloud.client;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
  * Default implementation of {@link ServiceInstance}.
  *
  * @author Spencer Gibb
+ * @author Steven van Beelen
  */
 @Data
 @RequiredArgsConstructor
@@ -55,6 +57,23 @@ public class DefaultServiceInstance implements ServiceInstance {
 	@Override
 	public Map<String, String> getMetadata() {
 		return this.metadata;
+	}
+
+	@Override
+	public void putMetadata(String key, String value) {
+		this.metadata.put(key, value);
+	}
+
+	@Override
+	public void setMetadata(Map<String, String> metadata) {
+		Set<String> keySet = this.metadata.keySet();
+		for (String key : keySet) {
+			this.metadata.remove(key);
+		}
+
+		for (Map.Entry<String, String> newEntry : metadata.entrySet()) {
+			this.metadata.put(newEntry.getKey(), newEntry.getValue());
+		}
 	}
 
 	/**
