@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.autoconfigure;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.condition.ConditionalOnEnabledEndpoint;
 import org.springframework.boot.actuate.endpoint.EnvironmentEndpoint;
 import org.springframework.boot.actuate.endpoint.mvc.MvcEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -42,16 +42,14 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 @Configuration
-@ConditionalOnClass(EnvironmentEndpoint.class)
 @ConditionalOnWebApplication
-@ConditionalOnBean(RestartEndpoint.class)
 @AutoConfigureAfter({ WebMvcAutoConfiguration.class,
 		RefreshEndpointAutoConfiguration.class })
 public class LifecycleMvcEndpointAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean(EnvironmentEndpoint.class)
-	@ConditionalOnProperty(value = "endpoints.env.post.enabled", matchIfMissing = true)
+	@ConditionalOnEnabledEndpoint(value = "env.post")
 	public EnvironmentManagerMvcEndpoint environmentManagerEndpoint(
 			EnvironmentEndpoint delegate, EnvironmentManager environment) {
 		return new EnvironmentManagerMvcEndpoint(delegate, environment);

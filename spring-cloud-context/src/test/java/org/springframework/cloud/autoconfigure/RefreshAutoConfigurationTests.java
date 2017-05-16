@@ -33,8 +33,7 @@ public class RefreshAutoConfigurationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(
 			Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration)
-				.web(false).registerShutdownHook(true).properties(properties).run();
+		return new SpringApplicationBuilder(configuration).web(false).properties(properties).run();
 	}
 
 	@Configuration

@@ -19,6 +19,7 @@ package org.springframework.cloud.autoconfigure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.autoconfigure.EndpointAutoConfiguration;
+import org.springframework.boot.actuate.condition.ConditionalOnEnabledEndpoint;
 import org.springframework.boot.actuate.endpoint.Endpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -56,16 +57,16 @@ public class RefreshEndpointAutoConfiguration {
 		return new RefreshScopeHealthIndicator(scope, rebinder);
 	}
 
-	@ConditionalOnProperty(value = "endpoints.restart.enabled", matchIfMissing = true)
-	protected static class RestartEndpointConfiguration {
+	@ConditionalOnClass(IntegrationMBeanExporter.class)
+	@ConditionalOnEnabledEndpoint(value = "restart", enabledByDefault = false)
+	protected static class RestartEndpointWithIntegration {
 
 		@Autowired(required = false)
 		private IntegrationMBeanExporter exporter;
 
-		@Bean("restartEndpoint")
+		@Bean
 		@ConditionalOnMissingBean
-		@ConditionalOnClass(IntegrationMBeanExporter.class)
-		public RestartEndpoint restartEndpointWithIntegration() {
+		public RestartEndpoint restartEndpoint() {
 			RestartEndpoint endpoint = new RestartEndpoint();
 			if (this.exporter != null) {
 				endpoint.setIntegrationMBeanExporter(this.exporter);
@@ -73,24 +74,33 @@ public class RefreshEndpointAutoConfiguration {
 			return endpoint;
 		}
 
+	}
 
-		@Bean("restartEndpoint")
+	@ConditionalOnMissingClass("org.springframework.integration.monitor.IntegrationMBeanExporter")
+	@ConditionalOnEnabledEndpoint(value = "restart", enabledByDefault = false)
+	protected static class RestartEndpointWithoutIntegration {
+
+		@Bean
 		@ConditionalOnMissingBean
-		@ConditionalOnMissingClass("org.springframework.integration.monitor.IntegrationMBeanExporter")
 		public RestartEndpoint restartEndpointWithoutIntegration() {
 			return new RestartEndpoint();
 		}
 
+	}
+
+	@ConditionalOnEnabledEndpoint(value = "restart", enabledByDefault = false)
+	protected static class PauseResumeEndpoints {
+
 		@Bean
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "endpoints.pause.enabled", matchIfMissing = true)
+		@ConditionalOnEnabledEndpoint("pause")
 		public RestartEndpoint.PauseEndpoint pauseEndpoint(RestartEndpoint restartEndpoint) {
 			return restartEndpoint.getPauseEndpoint();
 		}
 
 		@Bean
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "endpoints.resume.enabled", matchIfMissing = true)
+		@ConditionalOnEnabledEndpoint("resume")
 		public RestartEndpoint.ResumeEndpoint resumeEndpoint(RestartEndpoint restartEndpoint) {
 			return restartEndpoint.getResumeEndpoint();
 		}
@@ -98,7 +108,7 @@ public class RefreshEndpointAutoConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnProperty(value = "endpoints.refresh.enabled", matchIfMissing = true)
+	@ConditionalOnEnabledEndpoint("refresh")
 	@ConditionalOnBean(PropertySourceBootstrapConfiguration.class)
 	protected static class RefreshEndpointConfiguration {
 
