@@ -107,7 +107,7 @@ public class DiscoveryCompositeHealthIndicatorTests {
 	}
 	
 	public static void main(String[] args) {
-		SpringApplication.run(new Object[]{Config.class,CommonsClientAutoConfiguration.class}, new String[] {"--debug", "--spring.main.webEnvironment=false"});
+		SpringApplication.run(new Class[]{Config.class,CommonsClientAutoConfiguration.class}, new String[] {"--debug", "--spring.main.webEnvironment=false"});
 	}
 
 }
