@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -25,6 +25,7 @@ import org.springframework.core.env.MapPropertySource;
  *
  * @author Spencer Gibb
  * @author Dave Syer
+ * @author Biju Kunjummen
  */
 public abstract class NamedContextFactory<C extends NamedContextFactory.Specification>
 		implements DisposableBean, ApplicationContextAware {
@@ -65,6 +66,15 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 
 	public Set<String> getContextNames() {
 		return new HashSet<>(contexts.keySet());
+	}
+
+	/**
+	 * Eagerly create and cache the  contexts based on the stored Spring Configurations
+	 */
+	protected void createAndCacheContexts() {
+		for (String key: this.configurations.keySet()) {
+			getContext(key);
+		}
 	}
 
 	@Override

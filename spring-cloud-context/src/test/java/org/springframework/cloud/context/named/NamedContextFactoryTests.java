@@ -2,14 +2,12 @@ package org.springframework.cloud.context.named;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.hasItems;
@@ -38,7 +36,8 @@ public class NamedContextFactoryTests {
 		Bar bar = factory.getInstance("bar", Bar.class);
 		assertThat("bar was null", bar, is(notNullValue()));
 
-		assertThat("context names not exposed", factory.getContextNames(), hasItems("foo", "bar"));
+		assertThat("context names not exposed", factory.getContextNames(),
+				hasItems("foo", "bar"));
 
 		Bar foobar = factory.getInstance("foo", Bar.class);
 		assertThat("bar was not null", foobar, is(nullValue()));
@@ -62,8 +61,28 @@ public class NamedContextFactoryTests {
 		assertThat("bar context wasn't closed", barContext.isActive(), is(false));
 	}
 
+	@Test
+	public void testEagerlyCreateContexts() {
+		TestClientFactory factory = new TestClientFactory();
+
+		//An instance of CachedConfig should not exist at this point.
+		assertThat(CachedConfig.getInstanceCount(), is(0));
+
+		factory.setConfigurations(Arrays.asList(getSpec("cached", CachedConfig.class),
+				getSpec("bar", BarConfig.class)));
+
+		//All contexts should get eagerly created and instance of CachedConfig should exist now.
+		factory.createAndCacheContexts();
+		assertThat(CachedConfig.getInstanceCount(), is(1));
+
+		Foo foo = factory.getInstance("cached", Foo.class);
+		assertThat(CachedConfig.getInstanceCount(), is(1));
+
+		assertThat("foo was null", foo, is(notNullValue()));
+	}
+
 	private TestSpec getSpec(String name, Class<?> configClass) {
-		return new TestSpec(name, new Class[]{configClass});
+		return new TestSpec(name, new Class[] { configClass });
 	}
 
 	static class TestClientFactory extends NamedContextFactory<TestSpec> {
@@ -119,7 +138,8 @@ public class NamedContextFactoryTests {
 			return new Foo();
 		}
 	}
-	static class Foo{}
+	static class Foo{
+	}
 
 	static class BarConfig {
 		@Bean
@@ -130,6 +150,22 @@ public class NamedContextFactoryTests {
 		@Bean
 		Baz baz2() {
 			return new Baz();
+		}
+	}
+
+	static class CachedConfig {
+		private static AtomicInteger INSTANCE_COUNT = new AtomicInteger();
+		CachedConfig() {
+			INSTANCE_COUNT.incrementAndGet();
+		}
+
+		static int getInstanceCount() {
+			return INSTANCE_COUNT.get();
+		}
+
+		@Bean
+		Foo foo() {
+			return new Foo();
 		}
 	}
 	static class Bar{}
