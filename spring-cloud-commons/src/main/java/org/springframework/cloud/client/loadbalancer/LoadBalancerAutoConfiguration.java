@@ -103,7 +103,7 @@ public class LoadBalancerAutoConfiguration {
 
 	@Configuration
 	@ConditionalOnClass(RetryTemplate.class)
-	static class RetryAutoConfiguration {
+	public static class RetryAutoConfiguration {
 		@Bean
 		public RetryTemplate retryTemplate() {
 			RetryTemplate template =  new RetryTemplate();
@@ -116,13 +116,18 @@ public class LoadBalancerAutoConfiguration {
 		public LoadBalancedRetryPolicyFactory loadBalancedRetryPolicyFactory() {
 			return new LoadBalancedRetryPolicyFactory.NeverRetryFactory();
 		}
+	}
 
+	@Configuration
+	@ConditionalOnClass(RetryTemplate.class)
+	public static class RetryInterceptorAutoConfiguration {
 		@Bean
+		@ConditionalOnMissingBean
 		public RetryLoadBalancerInterceptor ribbonInterceptor(
 				LoadBalancerClient loadBalancerClient, LoadBalancerRetryProperties properties,
 				LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
-				LoadBalancerRequestFactory requestFactory) {
-			return new RetryLoadBalancerInterceptor(loadBalancerClient, retryTemplate(), properties,
+				LoadBalancerRequestFactory requestFactory, RetryTemplate retryTemplate) {
+			return new RetryLoadBalancerInterceptor(loadBalancerClient, retryTemplate, properties,
 					lbRetryPolicyFactory, requestFactory);
 		}
 
