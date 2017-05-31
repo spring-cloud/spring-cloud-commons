@@ -68,7 +68,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		final URI originalUri = request.getURI();
 		final String serviceName = originalUri.getHost();
 		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
-		LoadBalancedRetryPolicy retryPolicy = lbRetryPolicyFactory.create(serviceName,
+		final LoadBalancedRetryPolicy retryPolicy = lbRetryPolicyFactory.create(serviceName,
 				loadBalancer);
 		retryTemplate.setRetryPolicy(
 				!lbProperties.isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
@@ -87,9 +87,13 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 						if (serviceInstance == null) {
 							serviceInstance = loadBalancer.choose(serviceName);
 						}
-						return RetryLoadBalancerInterceptor.this.loadBalancer.execute(
+						ClientHttpResponse response = RetryLoadBalancerInterceptor.this.loadBalancer.execute(
 								serviceName, serviceInstance,
 								requestFactory.createRequest(request, body, execution));
+						if(retryPolicy != null && retryPolicy.retryableStatusCode(response.getRawStatusCode())) {
+							throw new RetryableStatusCodeException(serviceName, response.getRawStatusCode());
+						}
+						return response;
 					}
 				});
 	}
