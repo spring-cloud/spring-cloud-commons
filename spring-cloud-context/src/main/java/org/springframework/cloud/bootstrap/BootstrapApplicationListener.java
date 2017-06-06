@@ -192,6 +192,12 @@ public class BootstrapApplicationListener
 			return;
 		}
 		PropertySource<?> source = bootstrap.get(name);
+		if (source instanceof MapPropertySource) {
+			Map<String, Object> map = ((MapPropertySource) source).getSource();
+			// The application name is "bootstrap" (by default) at this point and
+			// we don't want that to appear in the parent context at all.
+			map.remove("spring.application.name");
+		}
 		if (!environment.contains(name)) {
 			environment.addLast(source);
 		}
