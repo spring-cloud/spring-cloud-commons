@@ -18,6 +18,7 @@ import org.springframework.retry.support.RetryTemplate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -142,14 +143,14 @@ public class RetryLoadBalancerInterceptorTest {
         when(lbRetryPolicyFactory.create(eq("foo"), any(ServiceInstanceChooser.class))).thenReturn(policy);
         ServiceInstance serviceInstance = mock(ServiceInstance.class);
         when(client.choose(eq("foo"))).thenReturn(serviceInstance);
-        when(client.execute(eq("foo"), eq(serviceInstance), any(LoadBalancerRequest.class))).
+        when(client.execute(eq("foo"), eq(serviceInstance), nullable(LoadBalancerRequest.class))).
                 thenReturn(clientHttpResponseNotFound).thenReturn(clientHttpResponseOk);
         lbProperties.setEnabled(true);
         RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(client, retryTemplate, lbProperties, lbRetryPolicyFactory, lbRequestFactory);
         byte[] body = new byte[]{};
         ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
         ClientHttpResponse rsp = interceptor.intercept(request, body, execution);
-        verify(client, times(2)).execute(eq("foo"), eq(serviceInstance), any(LoadBalancerRequest.class));
+        verify(client, times(2)).execute(eq("foo"), eq(serviceInstance), nullable(LoadBalancerRequest.class));
         assertThat(rsp, is(clientHttpResponseOk));
         verify(retryTemplate, times(1)).setRetryPolicy(eq(interceptorRetryPolicy));
         verify(lbRequestFactory, times(2)).createRequest(request, body, execution);
