@@ -138,7 +138,6 @@ public class BootstrapApplicationListener
 				.resolvePlaceholders("${spring.cloud.bootstrap.location:}");
 		Map<String, Object> bootstrapMap = new HashMap<>();
 		bootstrapMap.put("spring.config.name", configName);
-		bootstrapMap.put("spring.application.name", configName);
 		if (StringUtils.hasText(configLocation)) {
 			bootstrapMap.put("spring.config.location", configLocation);
 		}
@@ -176,6 +175,10 @@ public class BootstrapApplicationListener
 		AnnotationAwareOrderComparator.sort(sources);
 		builder.sources(sources.toArray(new Class[sources.size()]));
 		final ConfigurableApplicationContext context = builder.run();
+		// gh-214 using spring.application.name=bootstrap to set the context id via
+		// `ContextIdApplicationContextInitializer` prevents apps from getting the actual spring.application.name
+		// during the bootstrap phase.
+		context.setId("bootstrap");
 		// Make the bootstrap context a parent of the app context
 		addAncestorInitializer(application, context);
 		// It only has properties in it now that we don't want in the parent so remove
@@ -192,12 +195,6 @@ public class BootstrapApplicationListener
 			return;
 		}
 		PropertySource<?> source = bootstrap.get(name);
-		if (source instanceof MapPropertySource) {
-			Map<String, Object> map = ((MapPropertySource) source).getSource();
-			// The application name is "bootstrap" (by default) at this point and
-			// we don't want that to appear in the parent context at all.
-			map.remove("spring.application.name");
-		}
 		if (!environment.contains(name)) {
 			environment.addLast(source);
 		}
