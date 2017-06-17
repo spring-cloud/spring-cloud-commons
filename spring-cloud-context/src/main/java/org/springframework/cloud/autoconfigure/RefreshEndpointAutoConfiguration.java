@@ -45,7 +45,6 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  */
 @Configuration
 @ConditionalOnClass(Endpoint.class)
-@ConditionalOnProperty(value = "endpoints.enabled", matchIfMissing = true)
 @AutoConfigureAfter(EndpointAutoConfiguration.class)
 public class RefreshEndpointAutoConfiguration {
 
