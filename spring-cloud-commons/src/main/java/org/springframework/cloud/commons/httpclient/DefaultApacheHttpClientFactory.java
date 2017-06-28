@@ -11,12 +11,11 @@ import org.apache.http.impl.client.HttpClientBuilder;
  */
 public class DefaultApacheHttpClientFactory implements ApacheHttpClientFactory {
 
-	public CloseableHttpClient createClient(RequestConfig requestConfig, HttpClientConnectionManager connectionManager) {
+	public CloseableHttpClient createClient(RequestConfig requestConfig,
+			HttpClientConnectionManager connectionManager) {
 		return HttpClientBuilder.create().disableContentCompression()
 				.setDefaultRequestConfig(requestConfig)
-				.setConnectionManager(connectionManager)
-				.disableCookieManagement()
-				.useSystemProperties()
-				.build();
+				.setConnectionManager(connectionManager).disableCookieManagement()
+				.useSystemProperties().build();
 	}
 }

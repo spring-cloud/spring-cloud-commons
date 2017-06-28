@@ -24,15 +24,16 @@ import org.apache.commons.logging.Log;
  * Default implementation of {@link ApacheHttpClientConnectionManagerFactory}.
  * @author Ryan Baxter
  */
-public class DefaultApacheHttpClientConnectionManagerFactory implements ApacheHttpClientConnectionManagerFactory{
+public class DefaultApacheHttpClientConnectionManagerFactory
+		implements ApacheHttpClientConnectionManagerFactory {
 
-	private static final Log LOG = LogFactory.getLog(DefaultApacheHttpClientConnectionManagerFactory.class);
+	private static final Log LOG = LogFactory
+			.getLog(DefaultApacheHttpClientConnectionManagerFactory.class);
 
-	public  HttpClientConnectionManager newConnectionManager(boolean disableSslValidation, 
-															 int maxTotalConnections, 
-															 int maxConnectionsPerRoute) {
-		return newConnectionManager(disableSslValidation, maxTotalConnections, maxConnectionsPerRoute, 
-				-1, TimeUnit.MILLISECONDS, null);
+	public HttpClientConnectionManager newConnectionManager(boolean disableSslValidation,
+			int maxTotalConnections, int maxConnectionsPerRoute) {
+		return newConnectionManager(disableSslValidation, maxTotalConnections,
+				maxConnectionsPerRoute, -1, TimeUnit.MILLISECONDS, null);
 	}
 
 	@Override

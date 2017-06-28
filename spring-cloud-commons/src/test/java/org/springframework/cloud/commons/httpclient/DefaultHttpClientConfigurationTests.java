@@ -25,8 +25,10 @@ public class DefaultHttpClientConfigurationTests {
 
 	@Test
 	public void connManFactory() throws Exception {
-		assertTrue(ApacheHttpClientConnectionManagerFactory.class.isInstance(connectionManagerFactory));
-		assertTrue(DefaultApacheHttpClientConnectionManagerFactory.class.isInstance(connectionManagerFactory));
+		assertTrue(ApacheHttpClientConnectionManagerFactory.class
+				.isInstance(connectionManagerFactory));
+		assertTrue(DefaultApacheHttpClientConnectionManagerFactory.class
+				.isInstance(connectionManagerFactory));
 	}
 
 	@Test

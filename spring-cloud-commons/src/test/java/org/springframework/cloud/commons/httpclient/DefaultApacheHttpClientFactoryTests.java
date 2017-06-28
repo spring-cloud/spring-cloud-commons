@@ -19,12 +19,10 @@ import static org.mockito.Mockito.mock;
 public class DefaultApacheHttpClientFactoryTests {
 	@Test
 	public void createClient() throws Exception {
-		final RequestConfig requestConfig = RequestConfig.custom()
-				.setSocketTimeout(100)
-				.setConnectTimeout(200)
-				.setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
-		CloseableHttpClient httpClient = new DefaultApacheHttpClientFactory().createClient(requestConfig,
-				mock(HttpClientConnectionManager.class));
+		final RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(100)
+				.setConnectTimeout(200).setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
+		CloseableHttpClient httpClient = new DefaultApacheHttpClientFactory()
+				.createClient(requestConfig, mock(HttpClientConnectionManager.class));
 		Assertions.assertThat(httpClient).isInstanceOf(Configurable.class);
 		RequestConfig config = ((Configurable) httpClient).getConfig();
 		assertEquals(100, config.getSocketTimeout());
@@ -36,7 +34,7 @@ public class DefaultApacheHttpClientFactoryTests {
 		Field field = ReflectionUtils.findField(target.getClass(), name);
 		ReflectionUtils.makeAccessible(field);
 		Object value = ReflectionUtils.getField(field, target);
-		return (T)value;
+		return (T) value;
 	}
 
 }

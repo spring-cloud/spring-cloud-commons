@@ -31,8 +31,10 @@ public interface ApacheHttpClientFactory {
 	/**
 	 * Creates a new {@link CloseableHttpClient}.
 	 * @param requestConfig Configuration to be used for all requests by default
-	 * @param connectionManager The {@link HttpClientConnectionManager} to use for the client
+	 * @param connectionManager The {@link HttpClientConnectionManager} to use for the
+	 * client
 	 * @return A new {@link CloseableHttpClient}
 	 */
-	public CloseableHttpClient createClient(RequestConfig requestConfig, HttpClientConnectionManager connectionManager);
+	public CloseableHttpClient createClient(RequestConfig requestConfig,
+			HttpClientConnectionManager connectionManager);
 }
