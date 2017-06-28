@@ -32,16 +32,18 @@ public class CustomHttpClientConfigurationTests {
 
 	@Test
 	public void connManFactory() throws Exception {
-		assertTrue(ApacheHttpClientConnectionManagerFactory.class.isInstance(connectionManagerFactory));
-		assertTrue(CustomApplication.MyApacheHttpClientConnectionManagerFactory.class.isInstance(connectionManagerFactory));
+		assertTrue(ApacheHttpClientConnectionManagerFactory.class
+				.isInstance(connectionManagerFactory));
+		assertTrue(CustomApplication.MyApacheHttpClientConnectionManagerFactory.class
+				.isInstance(connectionManagerFactory));
 	}
 
 	@Test
 	public void apacheHttpClientFactory() throws Exception {
 		assertTrue(ApacheHttpClientFactory.class.isInstance(httpClientFactory));
-		assertTrue(CustomApplication.MyApacheHttpClientFactory.class.isInstance(httpClientFactory));
+		assertTrue(CustomApplication.MyApacheHttpClientFactory.class
+				.isInstance(httpClientFactory));
 	}
-
 
 }
 
@@ -61,7 +63,8 @@ class CustomApplication {
 			return new MyApacheHttpClientFactory();
 		}
 
-		@Bean ApacheHttpClientConnectionManagerFactory connectionManagerFactory() {
+		@Bean
+		ApacheHttpClientConnectionManagerFactory connectionManagerFactory() {
 			return new MyApacheHttpClientConnectionManagerFactory();
 		}
 
@@ -70,18 +73,21 @@ class CustomApplication {
 	static class MyApacheHttpClientFactory implements ApacheHttpClientFactory {
 
 		@Override
-		public CloseableHttpClient createClient(RequestConfig requestConfig, HttpClientConnectionManager connectionManager) {
+		public CloseableHttpClient createClient(RequestConfig requestConfig,
+				HttpClientConnectionManager connectionManager) {
 			return null;
 		}
 	}
 
-	static class MyApacheHttpClientConnectionManagerFactory implements ApacheHttpClientConnectionManagerFactory {
+	static class MyApacheHttpClientConnectionManagerFactory
+			implements ApacheHttpClientConnectionManagerFactory {
 
 		@Override
-		public HttpClientConnectionManager newConnectionManager(boolean disableSslValidation, int maxTotalConnections, int maxConnectionsPerRoute, long timeToLive, TimeUnit timeUnit, RegistryBuilder registryBuilder) {
+		public HttpClientConnectionManager newConnectionManager(
+				boolean disableSslValidation, int maxTotalConnections,
+				int maxConnectionsPerRoute, long timeToLive, TimeUnit timeUnit,
+				RegistryBuilder registryBuilder) {
 			return null;
 		}
 	}
 }
-
-

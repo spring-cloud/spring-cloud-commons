@@ -15,11 +15,14 @@ import static org.junit.Assert.*;
 public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 	@Test
 	public void newConnectionManager() throws Exception {
-		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory().newConnectionManager(
-				false, 2, 6);
-		assertEquals(6, ((PoolingHttpClientConnectionManager)connectionManager).getDefaultMaxPerRoute());
-		assertEquals(2,((PoolingHttpClientConnectionManager)connectionManager).getMaxTotal());
-		Object pool = getField(((PoolingHttpClientConnectionManager)connectionManager), "pool");
+		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
+				.newConnectionManager(false, 2, 6);
+		assertEquals(6, ((PoolingHttpClientConnectionManager) connectionManager)
+				.getDefaultMaxPerRoute());
+		assertEquals(2,
+				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
+		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
+				"pool");
 		assertEquals(-1l, getField(pool, "timeToLive"));
 		TimeUnit timeUnit = getField(pool, "tunit");
 		assertEquals(TimeUnit.MILLISECONDS, timeUnit);
@@ -27,11 +30,14 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 
 	@Test
 	public void newConnectionManagerWithTTL() throws Exception {
-		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory().newConnectionManager(
-				false, 2, 6, 56l, TimeUnit.DAYS, null);
-		assertEquals(6, ((PoolingHttpClientConnectionManager)connectionManager).getDefaultMaxPerRoute());
-		assertEquals(2,((PoolingHttpClientConnectionManager)connectionManager).getMaxTotal());
-		Object pool = getField(((PoolingHttpClientConnectionManager)connectionManager), "pool");
+		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
+				.newConnectionManager(false, 2, 6, 56l, TimeUnit.DAYS, null);
+		assertEquals(6, ((PoolingHttpClientConnectionManager) connectionManager)
+				.getDefaultMaxPerRoute());
+		assertEquals(2,
+				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
+		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
+				"pool");
 		assertEquals(56l, getField(pool, "timeToLive"));
 		TimeUnit timeUnit = getField(pool, "tunit");
 		assertEquals(TimeUnit.DAYS, timeUnit);
@@ -41,6 +47,6 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 		Field field = ReflectionUtils.findField(target.getClass(), name);
 		ReflectionUtils.makeAccessible(field);
 		Object value = ReflectionUtils.getField(field, target);
-		return (T)value;
+		return (T) value;
 	}
 }
