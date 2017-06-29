@@ -25,6 +25,7 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.OrderedHealthAggregator;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.CommonsClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -42,9 +43,9 @@ import static org.mockito.Mockito.mock;
  * @author Spencer Gibb
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { DiscoveryCompositeHealthIndicatorTests.Config.class,
-		CommonsClientAutoConfiguration.class })
-public class DiscoveryCompositeHealthIndicatorTests {
+@SpringBootTest(classes = { DiscoveryClientHealthIndicatorTests.Config.class,
+		CommonsClientAutoConfiguration.class }, properties = "spring.cloud.discovery.client.health-indicator.include-description:false")
+public class DiscoveryClientHealthIndicatorTests {
 
 	@Autowired
 	private DiscoveryCompositeHealthIndicator healthIndicator;
@@ -53,6 +54,7 @@ public class DiscoveryCompositeHealthIndicatorTests {
 	private DiscoveryClientHealthIndicator clientHealthIndicator;
 
 	@Configuration
+	@EnableConfigurationProperties
 	public static class Config {
 		@Bean
 		public HealthAggregator healthAggregator() {
@@ -84,7 +86,7 @@ public class DiscoveryCompositeHealthIndicatorTests {
 	}
 
 	@Test
-	public void testHealthIndicator() {
+	public void testHealthIndicatorDescriptionDisabled() {
 		assertNotNull("healthIndicator was null", this.healthIndicator);
 		Health health = this.healthIndicator.health();
 		assertHealth(health, Status.UNKNOWN);
@@ -93,16 +95,15 @@ public class DiscoveryCompositeHealthIndicatorTests {
 
 		health = this.healthIndicator.health();
 		Status status = assertHealth(health, Status.UP);
-		assertEquals("status description was wrong", "TestDiscoveryClient",
+		assertEquals("status description was wrong", "",
 				status.getDescription());
 	}
 
-	protected Status assertHealth(Health health, Status expected) {
+	private Status assertHealth(Health health, Status expected) {
 		assertNotNull("health was null", health);
 		Status status = health.getStatus();
 		assertNotNull("status was null", status);
 		assertEquals("status code was wrong", expected.getCode(), status.getCode());
 		return status;
 	}
-
 }
