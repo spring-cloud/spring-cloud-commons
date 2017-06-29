@@ -93,7 +93,7 @@ public class DiscoveryCompositeHealthIndicatorTests {
 
 		health = this.healthIndicator.health();
 		Status status = assertHealth(health, Status.UP);
-		assertEquals("status description was wrong", "TestDiscoveryClient",
+		assertEquals("status description was wrong", "",
 				status.getDescription());
 	}
 

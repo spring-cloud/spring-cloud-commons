@@ -44,7 +44,7 @@ import static org.mockito.Mockito.mock;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { DiscoveryClientHealthIndicatorTests.Config.class,
-		CommonsClientAutoConfiguration.class }, properties = "spring.cloud.discovery.client.health-indicator.include-description:false")
+		CommonsClientAutoConfiguration.class }, properties = "spring.cloud.discovery.client.health-indicator.include-description:true")
 public class DiscoveryClientHealthIndicatorTests {
 
 	@Autowired
@@ -95,7 +95,7 @@ public class DiscoveryClientHealthIndicatorTests {
 
 		health = this.healthIndicator.health();
 		Status status = assertHealth(health, Status.UP);
-		assertEquals("status description was wrong", "",
+		assertEquals("status description was wrong", "TestDiscoveryClient",
 				status.getDescription());
 	}
 

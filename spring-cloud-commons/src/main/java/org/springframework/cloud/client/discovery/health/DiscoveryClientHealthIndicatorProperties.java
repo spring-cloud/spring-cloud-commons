@@ -10,8 +10,7 @@ public class DiscoveryClientHealthIndicatorProperties {
 
 	private boolean enabled = true;
 
-	//TODO: change to false in 2.0.0
-	private boolean includeDescription = true;
+	private boolean includeDescription = false;
 
 	public boolean isEnabled() {
 		return enabled;
