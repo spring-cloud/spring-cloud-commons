@@ -39,10 +39,17 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
 
-	private DiscoveryClient discoveryClient;
+	private final DiscoveryClient discoveryClient;
+	private final DiscoveryClientHealthIndicatorProperties properties;
 
+	@Deprecated
 	public DiscoveryClientHealthIndicator(DiscoveryClient discoveryClient) {
+		this(discoveryClient, new DiscoveryClientHealthIndicatorProperties());
+	}
+
+	public DiscoveryClientHealthIndicator(DiscoveryClient discoveryClient, DiscoveryClientHealthIndicatorProperties properties) {
 		this.discoveryClient = discoveryClient;
+		this.properties = properties;
 	}
 
 	@Override
@@ -59,7 +66,8 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 		if (this.discoveryInitialized.get()) {
 			try {
 				List<String> services = this.discoveryClient.getServices();
-				builder.status(new Status("UP", this.discoveryClient.description()))
+				String description = (this.properties.isIncludeDescription()) ? this.discoveryClient.description() : "";
+				builder.status(new Status("UP", description))
 						.withDetail("services", services);
 			}
 			catch (Exception e) {
