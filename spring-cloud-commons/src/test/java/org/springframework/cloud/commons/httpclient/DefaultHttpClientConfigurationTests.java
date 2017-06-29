@@ -15,13 +15,19 @@ import static org.junit.Assert.*;
  * @author Ryan Baxter
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = MyApplication.class)
+@SpringBootTest(classes = MyApplication.class, properties = {"spring.cloud.httpclient.ok.enabled: true"})
 public class DefaultHttpClientConfigurationTests {
 	@Autowired
 	ApacheHttpClientFactory httpClientFactory;
 
 	@Autowired
 	ApacheHttpClientConnectionManagerFactory connectionManagerFactory;
+
+	@Autowired
+	OkHttpClientFactory okHttpClientFactory;
+
+	@Autowired
+	OkHttpClientConnectionPoolFactory okHttpClientConnectionPoolFactory;
 
 	@Test
 	public void connManFactory() throws Exception {
@@ -35,6 +41,18 @@ public class DefaultHttpClientConfigurationTests {
 	public void apacheHttpClientFactory() throws Exception {
 		assertTrue(ApacheHttpClientFactory.class.isInstance(httpClientFactory));
 		assertTrue(DefaultApacheHttpClientFactory.class.isInstance(httpClientFactory));
+	}
+
+	@Test
+	public void connPoolFactory() throws Exception {
+		assertTrue(OkHttpClientConnectionPoolFactory.class.isInstance(okHttpClientConnectionPoolFactory));
+		assertTrue(DefaultOkHttpClientConnectionPoolFactory.class.isInstance(okHttpClientConnectionPoolFactory));
+	}
+
+	@Test
+	public void setOkHttpClientFactory() throws Exception {
+		assertTrue(OkHttpClientFactory.class.isInstance(okHttpClientFactory));
+		assertTrue(DefaultOkHttpClientFactory.class.isInstance(okHttpClientFactory));
 	}
 }
 
