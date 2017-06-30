@@ -67,7 +67,7 @@ public class CompositeDiscoveryClient implements DiscoveryClient {
 		return new ArrayList<>(services);
 	}
 
-	List<DiscoveryClient> getDiscoveryClients() {
+	public List<DiscoveryClient> getDiscoveryClients() {
 		return discoveryClients;
 	}
 }
