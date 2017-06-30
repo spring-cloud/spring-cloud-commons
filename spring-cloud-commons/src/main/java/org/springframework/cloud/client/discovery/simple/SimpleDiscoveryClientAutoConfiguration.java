@@ -1,22 +1,22 @@
 package org.springframework.cloud.client.discovery.simple;
 
-import java.net.URI;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 // import org.springframework.boot.context.embedded.EmbeddedServletContainer;
 // import org.springframework.boot.context.embedded.EmbeddedWebApplicationContext;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.util.ClassUtils;
+
+import java.net.URI;
 
 /**
  * Spring Boot Auto-Configuration for Simple Properties based Discovery Client
@@ -25,8 +25,6 @@ import org.springframework.util.ClassUtils;
  */
 
 @Configuration
-@ConditionalOnMissingBean(DiscoveryClient.class)
-@EnableConfigurationProperties
 @AutoConfigureBefore(NoopDiscoveryClientAutoConfiguration.class)
 public class SimpleDiscoveryClientAutoConfiguration {
 
@@ -54,9 +52,9 @@ public class SimpleDiscoveryClientAutoConfiguration {
 	}
 
 	@Bean
-	public DiscoveryClient simpleDiscoveryClient(
-			SimpleDiscoveryProperties simpleDiscoveryProperties) {
-		return new SimpleDiscoveryClient(simpleDiscoveryProperties);
+	@Order(Ordered.LOWEST_PRECEDENCE)
+	public DiscoveryClient simpleDiscoveryClient() {
+		return new SimpleDiscoveryClient(simpleDiscoveryProperties());
 	}
 
 	private int findPort() {
