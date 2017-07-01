@@ -1,5 +1,7 @@
 package org.springframework.cloud.autoconfigure;
 
+import java.util.List;
+
 import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter;
@@ -8,8 +10,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
-
-import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
@@ -20,6 +20,7 @@ import static org.junit.Assert.assertThat;
 /**
  * @author Spencer Gibb
  */
+//TODO: super slow. Port to @SpringBootTest
 public class LifecycleMvcAutoConfigurationTests {
 
 	// postEnvMvcEndpoint

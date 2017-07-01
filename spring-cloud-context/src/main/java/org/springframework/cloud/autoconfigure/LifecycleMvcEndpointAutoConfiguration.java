@@ -43,7 +43,6 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ConditionalOnWebApplication
-@ConditionalOnBean(RestartEndpoint.class)
 //TODO: support reactive
 @AutoConfigureAfter({ WebMvcAutoConfiguration.class,
 		RefreshEndpointAutoConfiguration.class })
