@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.autoconfigure;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.condition.ConditionalOnEnabledEndpoint;
 import org.springframework.boot.actuate.endpoint.EnvironmentEndpoint;
 import org.springframework.boot.actuate.endpoint.mvc.MvcEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -42,7 +42,6 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 @Configuration
-@ConditionalOnClass(EnvironmentEndpoint.class)
 @ConditionalOnWebApplication
 @ConditionalOnBean(RestartEndpoint.class)
 //TODO: support reactive
@@ -50,12 +49,9 @@ import org.springframework.context.annotation.Configuration;
 		RefreshEndpointAutoConfiguration.class })
 public class LifecycleMvcEndpointAutoConfiguration {
 
-	@Autowired
-	private RestartEndpoint restartEndpoint;
-
 	@Bean
 	@ConditionalOnBean(EnvironmentEndpoint.class)
-	@ConditionalOnProperty(value = "endpoints.env.post.enabled", matchIfMissing = true)
+	@ConditionalOnEnabledEndpoint(value = "env.post")
 	public EnvironmentManagerMvcEndpoint environmentManagerEndpoint(
 			EnvironmentEndpoint delegate, EnvironmentManager environment) {
 		return new EnvironmentManagerMvcEndpoint(delegate, environment);
@@ -68,8 +64,9 @@ public class LifecycleMvcEndpointAutoConfiguration {
 	}
 
 	@Bean
-	public RestartMvcEndpoint restartMvcEndpoint() {
-		return new RestartMvcEndpoint(this.restartEndpoint);
+	@ConditionalOnBean(RestartEndpoint.class)
+	public RestartMvcEndpoint restartMvcEndpoint(RestartEndpoint restartEndpoint) {
+		return new RestartMvcEndpoint(restartEndpoint);
 	}
 
 	@Bean

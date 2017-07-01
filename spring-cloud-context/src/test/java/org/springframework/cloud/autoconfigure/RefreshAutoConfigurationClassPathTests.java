@@ -26,14 +26,13 @@ public class RefreshAutoConfigurationClassPathTests {
 		try (ConfigurableApplicationContext context = getApplicationContext(
 				Config.class)) {
 			assertFalse(context.getBeansOfType(RefreshEventListener.class).isEmpty());
-			assertFalse(context.containsBean("refeshEndpoint"));
+			assertFalse(context.containsBean("refreshEndpoint"));
 		}
 	}
 
 	private static ConfigurableApplicationContext getApplicationContext(
 			Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE)
-				.properties(properties).run();
+		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE).properties(properties).run();
 	}
 
 	@Configuration

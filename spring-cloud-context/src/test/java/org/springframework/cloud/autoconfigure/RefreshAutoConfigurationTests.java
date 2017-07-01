@@ -34,8 +34,7 @@ public class RefreshAutoConfigurationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(
 			Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE)
-				.properties(properties).run();
+		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE).properties(properties).run();
 	}
 
 	@Configuration
