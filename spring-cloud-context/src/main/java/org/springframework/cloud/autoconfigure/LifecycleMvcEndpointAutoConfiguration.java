@@ -42,6 +42,7 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 @Configuration
+@ConditionalOnClass(EnvironmentEndpoint.class)
 @ConditionalOnWebApplication
 @AutoConfigureAfter({ WebMvcAutoConfiguration.class,
 		RefreshEndpointAutoConfiguration.class })
