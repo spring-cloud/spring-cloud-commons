@@ -1,83 +1,152 @@
 package org.springframework.cloud.autoconfigure;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
+import org.assertj.core.util.Lists;
 import org.junit.Test;
-
 import org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.context.environment.EnvironmentManagerMvcEndpoint;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Spencer Gibb
  */
 public class LifecycleMvcAutoConfigurationTests {
 
+	// postEnvMvcEndpoint
 	@Test
 	public void postEnvMvcEndpointDisabled() {
-		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
-				"server.port=0", "endpoints.env.post.enabled=false")) {
-			assertThat(context
-					.getBeanNamesForType(EnvironmentManagerMvcEndpoint.class).length,
-					is(equalTo(0)));
+		beanNotCreated("environmentManagerEndpoint",
+				"endpoints.env.post.enabled=false");
+	}
+
+	@Test
+	public void postEnvMvcEndpointGloballyDisabled() {
+		beanNotCreated("environmentManagerEndpoint",
+				"endpoints.enabled=false");
+	}
+
+	@Test
+	public void postEnvMvcEndpointEnabled() {
+		beanCreated("environmentManagerEndpoint",
+				"endpoints.env.post.enabled=true");
+	}
+
+	// restartMvcEndpoint
+	@Test
+	public void restartMvcEndpointDisabled() {
+		beanNotCreated("restartMvcEndpoint",
+				"endpoints.restart.enabled=false");
+	}
+
+	@Test
+	public void restartMvcEndpointGloballyDisabled() {
+		beanNotCreated("restartMvcEndpoint",
+				"endpoints.enabled=false");
+	}
+
+	@Test
+	public void restartMvcEndpointEnabled() {
+		beanCreatedAndEndpointEnabled("restartMvcEndpoint",
+				"endpoints.restart.enabled=true");
+	}
+
+	// pauseMvcEndpoint
+	@Test
+	public void pauseMvcEndpointDisabled() {
+		beanNotCreated("pauseMvcEndpoint",
+				"endpoints.pause.enabled=false");
+	}
+
+	@Test
+	public void pauseMvcEndpointRestartDisabled() {
+		beanNotCreated("pauseMvcEndpoint",
+				"endpoints.restart.enabled=false",
+				"endpoints.pause.enabled=true");
+	}
+
+	@Test
+	public void pauseMvcEndpointGloballyDisabled() {
+		beanNotCreated("pauseMvcEndpoint",
+				"endpoints.enabled=false");
+	}
+
+	@Test
+	public void pauseMvcEndpointEnabled() {
+		beanCreatedAndEndpointEnabled("pauseMvcEndpoint",
+				"endpoints.restart.enabled=true",
+				"endpoints.pause.enabled=true");
+	}
+
+	// resumeMvcEndpoint
+	@Test
+	public void resumeMvcEndpointDisabled() {
+		beanNotCreated("resumeMvcEndpoint",
+				"endpoints.restart.enabled=true",
+				"endpoints.resume.enabled=false");
+	}
+
+	@Test
+	public void resumeMvcEndpointRestartDisabled() {
+		beanNotCreated("resumeMvcEndpoint",
+				"endpoints.restart.enabled=false",
+				"endpoints.resume.enabled=true");
+	}
+
+	@Test
+	public void resumeMvcEndpointGloballyDisabled() {
+		beanNotCreated("resumeMvcEndpoint",
+				"endpoints.enabled=false");
+	}
+
+	@Test
+	public void resumeMvcEndpointEnabled() {
+		beanCreatedAndEndpointEnabled("resumeMvcEndpoint",
+				"endpoints.restart.enabled=true",
+				"endpoints.resume.enabled=true");
+	}
+
+	private void beanNotCreated(String beanName, String... contextProperties) {
+		try (ConfigurableApplicationContext context = getApplicationContext(Config.class, contextProperties)) {
+			assertThat("bean was created", context.containsBeanDefinition(beanName), equalTo(false));
 		}
 	}
 
-	@Test
-	public void pauseMvcEndpointDisabled() {
-		endpointDisabled("endpoints.pause.enabled", "pauseMvcEndpoint");
+	private void beanCreated(String beanName, String... contextProperties) {
+		try (ConfigurableApplicationContext context = getApplicationContext(Config.class, contextProperties)) {
+			assertThat("bean was not created", context.containsBeanDefinition(beanName), equalTo(true));
+		}
 	}
 
-	@Test
-	public void resumeMvcEndpointDisabled() {
-		endpointDisabled("endpoints.resume.enabled", "resumeMvcEndpoint");
-	}
+	private void beanCreatedAndEndpointEnabled(String beanName, String... properties) {
+		try (ConfigurableApplicationContext context = getApplicationContext(Config.class, properties)) {
+			assertThat("bean was not created", context.containsBeanDefinition(beanName), equalTo(true));
 
-	@Test
-	public void restartMvcEndpointDisabled() {
-		endpointDisabled("endpoints.restart.enabled", "restartMvcEndpoint");
-	}
-	
-	@Test
-	public void pauseMvcEndpointGloballyDisabled() {
-		endpointDisabled("endpoints.enabled", "pauseMvcEndpoint");
-	}
-	
-	@Test
-	public void resumeMvcEndpointGloballyDisabled() {
-		endpointDisabled("endpoints.enabled", "resumeMvcEndpoint");
-	}
-	
-	@Test
-	public void restartMvcEndpointGloballyDisabled() {
-		endpointDisabled("endpoints.enabled", "restartMvcEndpoint");
-	}
-
-	private void endpointDisabled(String enabledProp, String beanName) {
-		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
-				"server.port=0", enabledProp + "=false")) {
-			EndpointMvcAdapter endpoint = context.getBean(beanName,
-					EndpointMvcAdapter.class);
+			EndpointMvcAdapter endpoint = context.getBean(beanName, EndpointMvcAdapter.class);
 			Object result = endpoint.invoke();
+
 			assertThat("result is wrong type", result,
-					is(instanceOf(ResponseEntity.class)));
-			ResponseEntity<?> response = (ResponseEntity<?>) result;
-			assertThat("response code was wrong", response.getStatusCode(),
-					equalTo(HttpStatus.NOT_FOUND));
+					is(not(instanceOf(ResponseEntity.class))));
 		}
 	}
 
 	private static ConfigurableApplicationContext getApplicationContext(
 			Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).properties(properties).run();
+
+		List<String> defaultProperties = Lists.newArrayList(properties);
+		defaultProperties.add("server.port=0");
+		defaultProperties.add("spring.jmx.default-domain=${random.uuid}");
+
+		return new SpringApplicationBuilder(configuration).properties(defaultProperties.toArray(new String[]{})).run();
 	}
 
 	@Configuration

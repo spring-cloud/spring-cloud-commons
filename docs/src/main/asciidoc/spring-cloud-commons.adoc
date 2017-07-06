@@ -317,6 +317,10 @@ Commons provides the `@EnableDiscoveryClient` annotation. This looks for impleme
 
 By default, implementations of `DiscoveryClient` will auto-register the local Spring Boot server with the remote discovery server. This can be disabled by setting `autoRegister=false` in `@EnableDiscoveryClient`.
 
+==== Health Indicator
+
+Commons creates a Spring Boot `HealthIndicator` that `DiscoveryClient` implementations can participate in by implementing `DiscoveryHealthIndicator`. To disable the composite `HealthIndicator` set `spring.cloud.discovery.client.composite-indicator.enabled=false`. A generic `HealthIndicator` based on `DiscoveryClient` is auto-configured (`DiscoveryClientHealthIndicator). To disable it, set `spring.cloud.discovery.client.health-indicator.enabled=false`. To disable the description field of the `DiscoveryClientHealthIndicator` set `spring.cloud.discovery.client.health-indicator.include-description=false`, otherwise it can bubble up as the `description` of the rolled up `HealthIndicator`.
+
 === ServiceRegistry
 
 Commons now provides a `ServiceRegistry` interface which provides methods like `register(Registration)` and `deregister(Registration)` which allow you to provide custom registered services. `Registration` is a marker interface.
