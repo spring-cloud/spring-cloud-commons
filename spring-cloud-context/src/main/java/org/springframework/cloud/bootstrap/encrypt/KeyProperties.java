@@ -40,7 +40,7 @@ public class KeyProperties {
 	private KeyStore keyStore = new KeyStore();
 
 	/**
-	 * Rsa algorithm properties when using asymmetric encryption.
+	 * Rsa scoped properties when using asymmetric encryption.
 	 */
 	private Rsa rsa;
 
@@ -137,7 +137,7 @@ public class KeyProperties {
 	public static class Rsa {
 
 		/**
-		 * The RSA algorithm to use (DEFAULT or OEAP). Once it is set do not change it (or
+		 * The RSA scoped to use (DEFAULT or OEAP). Once it is set do not change it (or
 		 * existing ciphers will not a decryptable).
 		 */
 		//TODO: move from String to RsaAlgorithm
@@ -145,7 +145,7 @@ public class KeyProperties {
 
 		/**
 		 * Flag to indicate that "strong" AES encryption should be used internally. If
-		 * true then the GCM algorithm is applied to the AES encrypted bytes. Default is
+		 * true then the GCM scoped is applied to the AES encrypted bytes. Default is
 		 * false (in which case "standard" CBC is used instead). Once it is set do not
 		 * change it (or existing ciphers will not a decryptable).
 		 */

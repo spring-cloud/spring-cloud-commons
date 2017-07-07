@@ -27,21 +27,21 @@ public class InterceptorRetryPolicy implements RetryPolicy {
 
     private HttpRequest request;
     private LoadBalancedRetryPolicy policy;
-    private ServiceInstanceChooser serviceInstanceChooser;
+    private LoadBalancer loadBalancer;
     private String serviceName;
 
     /**
      * Creates a new retry policy.
      * @param request the request that will be retried
      * @param policy the retry policy from the load balancer
-     * @param serviceInstanceChooser the load balancer client
+     * @param loadBalancer the load balancer client
      * @param serviceName the name of the service
      */
     public InterceptorRetryPolicy(HttpRequest request, LoadBalancedRetryPolicy policy,
-								  ServiceInstanceChooser serviceInstanceChooser, String serviceName) {
+								  LoadBalancer loadBalancer, String serviceName) {
         this.request = request;
         this.policy = policy;
-        this.serviceInstanceChooser = serviceInstanceChooser;
+        this.loadBalancer = loadBalancer;
         this.serviceName = serviceName;
     }
 
@@ -50,7 +50,7 @@ public class InterceptorRetryPolicy implements RetryPolicy {
         LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext)context;
         if(lbContext.getRetryCount() == 0  && lbContext.getServiceInstance() == null) {
             //We haven't even tried to make the request yet so return true so we do
-            lbContext.setServiceInstance(serviceInstanceChooser.choose(serviceName));
+            lbContext.setServiceInstance(loadBalancer.choose(serviceName));
             return true;
         }
         return policy.canRetryNextServer(lbContext);
@@ -86,7 +86,7 @@ public class InterceptorRetryPolicy implements RetryPolicy {
 
         if (!request.equals(that.request)) return false;
         if (!policy.equals(that.policy)) return false;
-        if (!serviceInstanceChooser.equals(that.serviceInstanceChooser)) return false;
+        if (!loadBalancer.equals(that.loadBalancer)) return false;
         return serviceName.equals(that.serviceName);
 
     }
@@ -95,7 +95,7 @@ public class InterceptorRetryPolicy implements RetryPolicy {
     public int hashCode() {
         int result = request.hashCode();
         result = 31 * result + policy.hashCode();
-        result = 31 * result + serviceInstanceChooser.hashCode();
+        result = 31 * result + loadBalancer.hashCode();
         result = 31 * result + serviceName.hashCode();
         return result;
     }
