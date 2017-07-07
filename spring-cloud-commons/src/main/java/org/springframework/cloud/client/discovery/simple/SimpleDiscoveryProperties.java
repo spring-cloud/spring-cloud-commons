@@ -122,5 +122,18 @@ public class SimpleDiscoveryProperties {
 		public Map<String, String> getMetadata() {
 			return this.metadata;
 		}
+
+		@Override
+		public String toString() {
+			final StringBuffer sb = new StringBuffer("SimpleServiceInstance{");
+			sb.append("uri=").append(uri);
+			sb.append(", host='").append(host).append('\'');
+			sb.append(", port=").append(port);
+			sb.append(", secure=").append(secure);
+			sb.append(", metadata=").append(metadata);
+			sb.append(", serviceId='").append(serviceId).append('\'');
+			sb.append('}');
+			return sb.toString();
+		}
 	}
 }

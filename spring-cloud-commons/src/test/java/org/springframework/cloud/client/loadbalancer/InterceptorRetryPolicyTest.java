@@ -26,14 +26,14 @@ public class InterceptorRetryPolicyTest {
 
     private HttpRequest request;
     private LoadBalancedRetryPolicy policy;
-    private ServiceInstanceChooser serviceInstanceChooser;
+    private LoadBalancer loadBalancer;
     private String serviceName;
 
     @Before
     public void setup() {
         request = mock(HttpRequest.class);
         policy = mock(LoadBalancedRetryPolicy.class);
-        serviceInstanceChooser = mock(ServiceInstanceChooser.class);
+        loadBalancer = mock(LoadBalancer.class);
         serviceName = "foo";
     }
 
@@ -41,17 +41,17 @@ public class InterceptorRetryPolicyTest {
     public void teardown() {
         request = null;
         policy = null;
-        serviceInstanceChooser = null;
+        loadBalancer = null;
         serviceName = null;
     }
 
     @Test
     public void canRetryBeforeExecution() throws Exception {
-        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName);
+        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, loadBalancer, serviceName);
         LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
         when(context.getRetryCount()).thenReturn(0);
         ServiceInstance serviceInstance = mock(ServiceInstance.class);
-        when(serviceInstanceChooser.choose(eq(serviceName))).thenReturn(serviceInstance);
+        when(loadBalancer.choose(eq(serviceName))).thenReturn(serviceInstance);
         assertThat(interceptorRetryPolicy.canRetry(context), is(true));
         verify(context, times(1)).setServiceInstance(eq(serviceInstance));
 
@@ -59,7 +59,7 @@ public class InterceptorRetryPolicyTest {
 
     @Test
     public void canRetryNextServer() throws Exception {
-        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName);
+        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, loadBalancer, serviceName);
         LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
         when(context.getRetryCount()).thenReturn(1);
         when(policy.canRetryNextServer(eq(context))).thenReturn(true);
@@ -68,7 +68,7 @@ public class InterceptorRetryPolicyTest {
 
     @Test
     public void cannotRetry() throws Exception {
-        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName);
+        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, loadBalancer, serviceName);
         LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
         when(context.getRetryCount()).thenReturn(1);
         assertThat(interceptorRetryPolicy.canRetry(context), is(false));
@@ -76,14 +76,14 @@ public class InterceptorRetryPolicyTest {
 
     @Test
     public void open() throws Exception {
-        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName);
+        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, loadBalancer, serviceName);
         RetryContext context = interceptorRetryPolicy.open(null);
         assertThat(context, IsInstanceOf.instanceOf(LoadBalancedRetryContext.class));
     }
 
     @Test
     public void close() throws Exception {
-        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName);
+        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, loadBalancer, serviceName);
         LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
         interceptorRetryPolicy.close(context);
         verify(policy, times(1)).close(eq(context));
@@ -91,7 +91,7 @@ public class InterceptorRetryPolicyTest {
 
     @Test
     public void registerThrowable() throws Exception {
-        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName);
+        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, loadBalancer, serviceName);
         LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
         Throwable thrown = new Exception();
         interceptorRetryPolicy.registerThrowable(context, thrown);
@@ -101,11 +101,11 @@ public class InterceptorRetryPolicyTest {
 
     @Test
     public void equals() throws Exception {
-        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName);
+        InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(request, policy, loadBalancer, serviceName);
         assertThat(interceptorRetryPolicy.equals(null), is(false));
         assertThat(interceptorRetryPolicy.equals(new Object()), is(false));
         assertThat(interceptorRetryPolicy.equals(interceptorRetryPolicy), is(true));
-        assertThat(interceptorRetryPolicy.equals(new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName)), is(true));
+        assertThat(interceptorRetryPolicy.equals(new InterceptorRetryPolicy(request, policy, loadBalancer, serviceName)), is(true));
     }
 
 }

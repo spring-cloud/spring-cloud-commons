@@ -24,7 +24,7 @@ import org.springframework.cloud.client.ServiceInstance;
  *
  * @author Ryan Baxter
  */
-public interface ServiceInstanceChooser {
+public interface LoadBalancer {
 
     /**
      * Choose a ServiceInstance from the LoadBalancer for the specified service
