@@ -126,8 +126,8 @@ public class LoadBalancerAutoConfiguration {
 		public RetryLoadBalancerInterceptor ribbonInterceptor(
 				LoadBalancerClient loadBalancerClient, LoadBalancerRetryProperties properties,
 				LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
-				LoadBalancerRequestFactory requestFactory, RetryTemplate retryTemplate) {
-			return new RetryLoadBalancerInterceptor(loadBalancerClient, retryTemplate, properties,
+				LoadBalancerRequestFactory requestFactory) {
+			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties,
 					lbRetryPolicyFactory, requestFactory);
 		}
 
