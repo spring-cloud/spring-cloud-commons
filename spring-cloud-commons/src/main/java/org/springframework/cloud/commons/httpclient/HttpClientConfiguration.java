@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class HttpClientConfiguration {
 
 	@Configuration
-	@ConditionalOnProperty(name = "spring.cloud.httpclient.apache.enabled", matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.apache.enabled", matchIfMissing = true)
 	static class ApacheHttpClientConfiguration {
 
 		@Bean
@@ -32,7 +32,7 @@ public class HttpClientConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnProperty(name = "spring.cloud.httpclient.ok.enabled", matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.ok.enabled", matchIfMissing = true)
 	@ConditionalOnClass(OkHttpClient.class)
 	static class OkHttpClientConfiguration {
 
