@@ -32,7 +32,7 @@ public class HttpClientConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnProperty(name = "spring.cloud.httpclient.ok.enabled")
+	@ConditionalOnProperty(name = "spring.cloud.httpclient.ok.enabled", matchIfMissing = true)
 	@ConditionalOnClass(OkHttpClient.class)
 	static class OkHttpClientConfiguration {
 

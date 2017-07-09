@@ -21,8 +21,11 @@ public class DefaultOkHttpClientFactoryTest {
 		DefaultOkHttpClientFactory okHttpClientFactory = new DefaultOkHttpClientFactory();
 		DefaultOkHttpClientConnectionPoolFactory poolFactory = new DefaultOkHttpClientConnectionPoolFactory();
 		ConnectionPool pool = poolFactory.create(4, 5, TimeUnit.DAYS);
-		OkHttpClient httpClient = okHttpClientFactory.create(true, 2,
-				TimeUnit.MILLISECONDS, true, 3, TimeUnit.HOURS, pool, null, null);
+		OkHttpClient httpClient = okHttpClientFactory.createBuilder(true).
+				connectTimeout(2, TimeUnit.MILLISECONDS).
+				readTimeout(3, TimeUnit.HOURS).
+				followRedirects(true).
+				connectionPool(pool).build();
 		int connectTimeout = getField(httpClient, "connectTimeout");
 		assertEquals(2, connectTimeout);
 		int readTimeout = getField(httpClient, "readTimeout");

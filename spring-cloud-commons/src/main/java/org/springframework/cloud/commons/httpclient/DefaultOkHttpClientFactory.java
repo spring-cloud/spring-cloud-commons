@@ -22,15 +22,8 @@ public class DefaultOkHttpClientFactory implements OkHttpClientFactory {
 	private static final Log LOG = LogFactory.getLog(DefaultOkHttpClientFactory.class);
 
 	@Override
-	public OkHttpClient create(boolean disableSslValidation, long connectTimeout,
-			TimeUnit connectTimeoutUnit, boolean followRedirects, long readTimeout,
-			TimeUnit readTimeoutUnit, ConnectionPool connectionPool,
-			SSLSocketFactory sslSocketFactory, X509TrustManager x509TrustManager) {
-		OkHttpClient.Builder builder = new OkHttpClient.Builder()
-				.connectTimeout(connectTimeout, connectTimeoutUnit)
-				.followRedirects(followRedirects)
-				.readTimeout(readTimeout, readTimeoutUnit).connectionPool(connectionPool)
-				.connectionPool(connectionPool);
+	public OkHttpClient.Builder createBuilder(boolean disableSslValidation) {
+		OkHttpClient.Builder builder = new OkHttpClient.Builder();
 		if (disableSslValidation) {
 			try {
 				X509TrustManager disabledTrustManager = new DisableValidationTrustManager();
@@ -49,9 +42,6 @@ public class DefaultOkHttpClientFactory implements OkHttpClientFactory {
 				LOG.warn("Error setting SSLSocketFactory in OKHttpClient", e);
 			}
 		}
-		if (sslSocketFactory != null && x509TrustManager != null) {
-			builder.sslSocketFactory(sslSocketFactory, x509TrustManager);
-		}
-		return builder.build();
+		return builder;
 	}
 }
