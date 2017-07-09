@@ -42,7 +42,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 	private LoadBalancerRetryProperties lbProperties;
 	private LoadBalancerRequestFactory requestFactory;
 
-
+	@Deprecated
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, RetryTemplate retryTemplate,
 										LoadBalancerRetryProperties lbProperties,
 										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
@@ -53,7 +53,18 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		this.lbProperties = lbProperties;
 		this.requestFactory = requestFactory;
 	}
-	
+
+	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer,
+										LoadBalancerRetryProperties lbProperties,
+										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
+										LoadBalancerRequestFactory requestFactory) {
+		this.loadBalancer = loadBalancer;
+		this.lbRetryPolicyFactory = lbRetryPolicyFactory;
+		this.lbProperties = lbProperties;
+		this.requestFactory = requestFactory;
+	}
+
+	@Deprecated
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, RetryTemplate retryTemplate,
 										LoadBalancerRetryProperties lbProperties,
 										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory) {
@@ -70,11 +81,13 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
 		final LoadBalancedRetryPolicy retryPolicy = lbRetryPolicyFactory.create(serviceName,
 				loadBalancer);
-		retryTemplate.setRetryPolicy(
+		RetryTemplate template = this.retryTemplate == null ? new RetryTemplate() : this.retryTemplate;
+		template.setThrowLastExceptionOnExhausted(true);
+		template.setRetryPolicy(
 				!lbProperties.isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
 						: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer,
 						serviceName));
-		return retryTemplate
+		return template
 				.execute(new RetryCallback<ClientHttpResponse, IOException>() {
 					@Override
 					public ClientHttpResponse doWithRetry(RetryContext context)
