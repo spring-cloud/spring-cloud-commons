@@ -42,17 +42,6 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 	private LoadBalancerRetryProperties lbProperties;
 	private LoadBalancerRequestFactory requestFactory;
 
-	@Deprecated
-	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, RetryTemplate retryTemplate,
-										LoadBalancerRetryProperties lbProperties,
-										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
-										LoadBalancerRequestFactory requestFactory) {
-		this.loadBalancer = loadBalancer;
-		this.lbRetryPolicyFactory = lbRetryPolicyFactory;
-		this.retryTemplate = retryTemplate;
-		this.lbProperties = lbProperties;
-		this.requestFactory = requestFactory;
-	}
 
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer,
 										LoadBalancerRetryProperties lbProperties,
@@ -62,15 +51,6 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		this.lbRetryPolicyFactory = lbRetryPolicyFactory;
 		this.lbProperties = lbProperties;
 		this.requestFactory = requestFactory;
-	}
-
-	@Deprecated
-	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, RetryTemplate retryTemplate,
-										LoadBalancerRetryProperties lbProperties,
-										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory) {
-		// for backwards compatibility
-		this(loadBalancer, retryTemplate, lbProperties, lbRetryPolicyFactory, 
-				new LoadBalancerRequestFactory(loadBalancer));
 	}
 
 	@Override
