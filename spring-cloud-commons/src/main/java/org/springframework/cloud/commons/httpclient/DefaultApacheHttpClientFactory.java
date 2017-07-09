@@ -11,11 +11,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
  */
 public class DefaultApacheHttpClientFactory implements ApacheHttpClientFactory {
 
-	public CloseableHttpClient createClient(RequestConfig requestConfig,
-			HttpClientConnectionManager connectionManager) {
+	/**
+	 * A default {@link HttpClientBuilder}.  The {@link HttpClientBuilder} returned will
+	 * have content compression disabled, cookie management disabled, and use system properties.
+	 */
+	@Override
+	public HttpClientBuilder createBuilder() {
 		return HttpClientBuilder.create().disableContentCompression()
-				.setDefaultRequestConfig(requestConfig)
-				.setConnectionManager(connectionManager).disableCookieManagement()
-				.useSystemProperties().build();
+				.disableCookieManagement().useSystemProperties();
 	}
 }

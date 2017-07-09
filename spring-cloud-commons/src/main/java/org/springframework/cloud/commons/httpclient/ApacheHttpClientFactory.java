@@ -21,6 +21,7 @@ package org.springframework.cloud.commons.httpclient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Factory for creating a new {@link CloseableHttpClient}.
@@ -29,12 +30,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 public interface ApacheHttpClientFactory {
 
 	/**
-	 * Creates a new {@link CloseableHttpClient}.
-	 * @param requestConfig Configuration to be used for all requests by default
-	 * @param connectionManager The {@link HttpClientConnectionManager} to use for the
-	 * client
-	 * @return A new {@link CloseableHttpClient}
+	 * Creates an {@link HttpClientBuilder} that can be used to create a new {@link CloseableHttpClient}.
+	 * @return A {@link HttpClientBuilder}
 	 */
-	public CloseableHttpClient createClient(RequestConfig requestConfig,
-			HttpClientConnectionManager connectionManager);
+	public HttpClientBuilder createBuilder();
 }

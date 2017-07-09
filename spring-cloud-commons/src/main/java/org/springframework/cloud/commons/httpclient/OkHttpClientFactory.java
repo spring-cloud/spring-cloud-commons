@@ -18,22 +18,11 @@ import javax.net.ssl.X509TrustManager;
 public interface OkHttpClientFactory {
 
 	/**
-	 * Creates a new {@link OkHttpClient}.
-	 * @param disableSslValidation To disable SSL validation
-	 * @param connectTimeout Connection timeout duration
-	 * @param connectTimeoutUnit Connection timeout time unit
-	 * @param followRedirects Whether to follow redirects
-	 * @param readTimeout Read timeout duration
-	 * @param readTimeoutUnit Read timeout time unit
-	 * @param connectionPool The connection pool to use
-	 * @param sslSocketFactory The socket factory to use, can be {@code null}
-	 * @param x509TrustManager The trust manager to use, can be {@code null}
-	 * @return A new {@link OkHttpClient}
+	 * Creates a {@link OkHttpClient.Builder} used to build an {@link OkHttpClient}.
+	 * @param disableSslValidation Disables SSL validation
+	 * @return A new {@link OkHttpClient.Builder}
 	 */
-	public OkHttpClient create(boolean disableSslValidation, long connectTimeout,
-			TimeUnit connectTimeoutUnit, boolean followRedirects, long readTimeout,
-			TimeUnit readTimeoutUnit, ConnectionPool connectionPool,
-			SSLSocketFactory sslSocketFactory, X509TrustManager x509TrustManager);
+	public OkHttpClient.Builder createBuilder(boolean disableSslValidation);
 
 	/**
 	 * A {@link X509TrustManager} that does not validate SSL certificates.

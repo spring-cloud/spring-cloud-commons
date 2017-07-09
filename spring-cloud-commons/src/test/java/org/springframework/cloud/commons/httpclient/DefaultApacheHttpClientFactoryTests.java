@@ -6,6 +6,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.Configurable;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.springframework.util.ReflectionUtils;
@@ -21,8 +22,9 @@ public class DefaultApacheHttpClientFactoryTests {
 	public void createClient() throws Exception {
 		final RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(100)
 				.setConnectTimeout(200).setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
-		CloseableHttpClient httpClient = new DefaultApacheHttpClientFactory()
-				.createClient(requestConfig, mock(HttpClientConnectionManager.class));
+		CloseableHttpClient httpClient = new DefaultApacheHttpClientFactory().createBuilder().
+				setConnectionManager(mock(HttpClientConnectionManager.class)).
+				setDefaultRequestConfig(requestConfig).build();
 		Assertions.assertThat(httpClient).isInstanceOf(Configurable.class);
 		RequestConfig config = ((Configurable) httpClient).getConfig();
 		assertEquals(100, config.getSocketTimeout());

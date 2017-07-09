@@ -6,10 +6,12 @@ import okhttp3.OkHttpClient;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -106,9 +108,8 @@ class CustomApplication {
 	static class MyApacheHttpClientFactory implements ApacheHttpClientFactory {
 
 		@Override
-		public CloseableHttpClient createClient(RequestConfig requestConfig,
-				HttpClientConnectionManager connectionManager) {
-			return null;
+		public HttpClientBuilder createBuilder() {
+			return HttpClientBuilder.create();
 		}
 	}
 
@@ -125,13 +126,9 @@ class CustomApplication {
 	}
 
 	static class MyOkHttpClientFactory implements OkHttpClientFactory {
-
 		@Override
-		public OkHttpClient create(boolean disableSslValidation, long connectTimeout,
-				TimeUnit connectTimeoutUnit, boolean followRedirects, long readTimeout,
-				TimeUnit readTimeoutUnit, ConnectionPool connectionPool,
-				SSLSocketFactory sslSocketFactory, X509TrustManager x509TrustManager) {
-			return null;
+		public OkHttpClient.Builder createBuilder(boolean disableSslValidation) {
+			return new OkHttpClient.Builder();
 		}
 	}
 

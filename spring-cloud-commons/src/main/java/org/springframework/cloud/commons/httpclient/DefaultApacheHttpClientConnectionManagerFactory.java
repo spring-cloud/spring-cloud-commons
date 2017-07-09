@@ -72,7 +72,6 @@ public class DefaultApacheHttpClientConnectionManagerFactory
 			catch (KeyManagementException e) {
 				LOG.warn("Error creating SSLContext", e);
 			}
-
 		}
 		final Registry<ConnectionSocketFactory> registry = registryBuilder.build();
 
