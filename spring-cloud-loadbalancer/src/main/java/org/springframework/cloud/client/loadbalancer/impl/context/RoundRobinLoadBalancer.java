@@ -30,27 +30,27 @@ public class RoundRobinLoadBalancer implements LoadBalancer<ServiceInstance> {
 	}
 
 	@Override
-	public Context<ServiceInstance> choose() {
+	public ChosenContext<ServiceInstance> choose(RequestContext requestContext) {
 		ScopedDiscoveryClient discoveryClient = this.clientFactory.getInstance(this.serviceId, ScopedDiscoveryClient.class);
 		List<ServiceInstance> instances = discoveryClient.getInstances();
 
 		if (isEmpty(instances)) {
 			log.warn("No servers available for service: " + this.serviceId);
-			return new DefaultContext(null);
+			return new DefaultChosenContext(null);
 		}
 
 		int nextServerIndex = incrementAndGetModulo(instances.size());
 
 		ServiceInstance instance = instances.get(nextServerIndex);
 
-		return new DefaultContext(instance);
+		return new DefaultChosenContext(instance);
 	}
 
-	public static class DefaultContext implements Context<ServiceInstance> {
+	public static class DefaultChosenContext implements ChosenContext<ServiceInstance> {
 
 		private final ServiceInstance serviceInstance;
 
-		public DefaultContext(ServiceInstance serviceInstance) {
+		public DefaultChosenContext(ServiceInstance serviceInstance) {
 			this.serviceInstance = serviceInstance;
 		}
 
@@ -65,7 +65,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer<ServiceInstance> {
 		}
 
 		@Override
-		public void complete(Status status) {
+		public void complete(CompletionContext completionContext) {
 			//TODO: implement
 		}
 	}
