@@ -14,7 +14,9 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClients;
-import org.springframework.cloud.client.loadbalancer.impl.context.LoadBalancer.Context;
+import org.springframework.cloud.client.loadbalancer.impl.context.LoadBalancer.ChosenContext;
+import org.springframework.cloud.client.loadbalancer.impl.context.LoadBalancer.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.impl.context.LoadBalancer.RequestContext;
 import org.springframework.cloud.client.loadbalancer.impl.context.LoadBalancer.Status;
 import org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
@@ -41,11 +43,11 @@ public class LoadBalancerTest {
 		List<String> hosts = Arrays.asList("a.host", "c.host", "b.host", "a.host");
 
 		for (String host : hosts) {
-			Context<ServiceInstance> context = loadBalancer.choose();
+			ChosenContext<ServiceInstance> chosenContext = loadBalancer.choose(new MyRequestContext());
 
-			assertThat(context.hasServer()).isTrue();
+			assertThat(chosenContext.hasServer()).isTrue();
 
-			ServiceInstance instance = context.getServer();
+			ServiceInstance instance = chosenContext.getServer();
 			assertThat(instance).isNotNull();
 			assertThat(instance.getHost()).isEqualTo(host).as("instance host is incorrent %s", host);
 
@@ -55,7 +57,7 @@ public class LoadBalancerTest {
 				assertThat(instance.isSecure()).isFalse();
 			}
 
-			context.complete(Status.SUCCESSS);
+			chosenContext.complete(new CompletionContext(Status.SUCCESSS));
 		}
 	}
 
@@ -76,6 +78,10 @@ public class LoadBalancerTest {
 			clientFactory.setConfigurations(configurations);
 			return clientFactory;
 		}
+
+	}
+
+	protected static class MyRequestContext implements RequestContext {
 
 	}
 

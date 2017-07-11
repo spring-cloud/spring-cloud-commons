@@ -10,16 +10,41 @@ public interface LoadBalancer<T> {
 		DISCARD, // Request did not go off box and should not be counted for statistics
 	}
 
-	// Context created for each request.
-	interface Context<T> {
+	//TODO: add metrics
+	class CompletionContext {
+		final Status status;
+
+		public CompletionContext(Status status) {
+			this.status = status;
+		}
+
+		public Status getStatus() {
+			return status;
+		}
+
+		@Override
+		public String toString() {
+			final StringBuffer sb = new StringBuffer("CompletionContext{");
+			sb.append("status=").append(status);
+			sb.append('}');
+			return sb.toString();
+		}
+	}
+
+	// ChosenContext created for each request.
+	interface ChosenContext<T> {
 		boolean hasServer();
 
 		T getServer();
 
 		// Notification that the request completed
-		void complete(Status status);
+		void complete(CompletionContext completionContext);
+	}
+
+	interface RequestContext {
+
 	}
 
 	// Choose the next server based on the load balancing algorithm
-	Context<T> choose();
+	ChosenContext<T> choose(RequestContext requestContext);
 }
