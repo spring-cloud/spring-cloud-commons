@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.client.hypermedia;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
@@ -24,15 +22,18 @@ import org.springframework.cloud.client.ServiceInstance;
  * 
  * @author Oliver Gierke
  */
-@RequiredArgsConstructor
 public class StaticServiceInstanceProvider implements ServiceInstanceProvider {
 
 	private final ServiceInstance instance;
 
+	public StaticServiceInstanceProvider(ServiceInstance instance) {
+		this.instance = instance;
+	}
+
 	/* 
-	 * (non-Javadoc)
-	 * @see example.customers.integration.ServiceInstanceProvider#getServiceInstance()
-	 */
+		 * (non-Javadoc)
+		 * @see example.customers.integration.ServiceInstanceProvider#getServiceInstance()
+		 */
 	@Override
 	public ServiceInstance getServiceInstance() {
 		return instance;
