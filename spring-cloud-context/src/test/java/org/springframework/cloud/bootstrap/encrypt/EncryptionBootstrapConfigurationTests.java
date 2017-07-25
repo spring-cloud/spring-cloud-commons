@@ -1,8 +1,6 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
@@ -11,9 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 public class EncryptionBootstrapConfigurationTests {
-
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
 
 	@Test
 	public void rsaKeyStore() {
