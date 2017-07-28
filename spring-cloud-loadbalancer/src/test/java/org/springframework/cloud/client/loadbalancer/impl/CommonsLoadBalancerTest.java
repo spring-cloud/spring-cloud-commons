@@ -36,10 +36,13 @@ public class CommonsLoadBalancerTest {
 
 	@Autowired
 	private CommonsLoadBalancer loadBalancer;
+	
+	@Autowired
+	private LoadBalancerClientFactory clientFactory;
 
 	@Test
 	public void roundRobbinLoadbalancerWorks() {
-		ScopedLoadBalancer scopedLoadBalancer = this.loadBalancer.getClientFactory().getInstance("myservice", ScopedLoadBalancer.class);
+		ScopedLoadBalancer scopedLoadBalancer = this.clientFactory.getInstance("myservice", ScopedLoadBalancer.class);
 
 		assertThat(scopedLoadBalancer).isInstanceOf(RoundRobinScopedLoadBalancer.class);
 
@@ -59,7 +62,7 @@ public class CommonsLoadBalancerTest {
 
 	@Test
 	public void randomAlgorithmWorks() {
-		ScopedLoadBalancer scopedLoadBalancer = this.loadBalancer.getClientFactory().getInstance("anotherservice", ScopedLoadBalancer.class);
+		ScopedLoadBalancer scopedLoadBalancer = this.clientFactory.getInstance("anotherservice", ScopedLoadBalancer.class);
 
 		assertThat(scopedLoadBalancer).isInstanceOf(RandomScopedLoadBalancer.class);
 
@@ -73,7 +76,7 @@ public class CommonsLoadBalancerTest {
 
 	@Test
 	public void decorateDiscoveryClientWorks() {
-		ScopedDiscoveryClient discoveryClient = this.loadBalancer.getClientFactory().getInstance("thirdservice", ScopedDiscoveryClient.class);
+		ScopedDiscoveryClient discoveryClient = this.clientFactory.getInstance("thirdservice", ScopedDiscoveryClient.class);
 
 		assertThat(discoveryClient).isInstanceOf(MyScopedDiscoveryClient.class);
 

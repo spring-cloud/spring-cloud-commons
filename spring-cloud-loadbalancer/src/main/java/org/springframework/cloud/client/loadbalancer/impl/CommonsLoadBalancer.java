@@ -23,7 +23,4 @@ public class CommonsLoadBalancer implements LoadBalancer {
 		return scopedLoadBalancer.choose();
 	}
 
-	public LoadBalancerClientFactory getClientFactory() {
-		return clientFactory;
-	}
 }
