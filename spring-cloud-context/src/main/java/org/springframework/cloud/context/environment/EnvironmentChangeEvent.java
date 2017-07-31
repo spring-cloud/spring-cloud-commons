@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,24 @@ import org.springframework.core.env.Environment;
  * Event published to signal a change in the {@link Environment}.
  * 
  * @author Dave Syer
+ * @author Biju Kunjummen
  *
  */
 @SuppressWarnings("serial")
 public class EnvironmentChangeEvent extends ApplicationEvent {
 
-	private Set<String> keys;
+	private final Set<String> keys;
+	
+	private final ChangeType changeType;
 
 	public EnvironmentChangeEvent(Set<String> keys) {
+		this(keys, ChangeType.ADD_UPDATE);
+	}
+	
+	public EnvironmentChangeEvent(Set<String> keys, ChangeType changeType) {
 		super(keys);
 		this.keys = keys;
+		this.changeType = changeType;
 	}
 	
 	/**
@@ -41,6 +49,23 @@ public class EnvironmentChangeEvent extends ApplicationEvent {
 	 */
 	public Set<String> getKeys() {
 		return keys;
+	}
+
+	/**
+	 * The type of change to the environment.
+	 * Defaults to add/update
+	 * 
+	 * @return change type 
+	 */
+	public ChangeType getChangeType() {
+		return this.changeType;
+	}
+
+	/**
+	 * Represents the type of change for the set of keys.
+	 */
+	public enum ChangeType {
+		ADD_UPDATE, DELETE
 	}
 
 }

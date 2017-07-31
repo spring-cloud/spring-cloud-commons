@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.cloud.autoconfigure;
 import java.util.Collections;
 
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
+import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetaData;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessorRegistrar;
@@ -35,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConditionalOnBean(ConfigurationPropertiesBindingPostProcessor.class)
+@AutoConfigureAfter(ConfigurationPropertiesAutoConfiguration.class)
 public class ConfigurationPropertiesRebinderAutoConfiguration
 		implements ApplicationContextAware, SmartInitializingSingleton {
 

@@ -15,11 +15,6 @@
  */
 package org.springframework.cloud.context.properties;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -35,6 +30,12 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Listens for {@link EnvironmentChangeEvent} and rebinds beans that were bound to the
@@ -85,14 +86,22 @@ public class ConfigurationPropertiesRebinder
 
 	@ManagedOperation
 	public void rebind() {
+		rebind(new EnvironmentChangeEvent(Collections.<String>emptySet()));
+	}
+
+	public void rebind(EnvironmentChangeEvent environmentChangeEvent) {
 		this.errors.clear();
 		for (String name : this.beans.getBeanNames()) {
-			rebind(name);
+			rebind(name, environmentChangeEvent);
 		}
 	}
 
 	@ManagedOperation
 	public boolean rebind(String name) {
+		return rebind(name, new EnvironmentChangeEvent(Collections.<String>emptySet()));
+	}
+
+	public boolean rebind(String name, EnvironmentChangeEvent environmentChangeEvent) {
 		if (!this.beans.getBeanNames().contains(name)) {
 			return false;
 		}
@@ -101,6 +110,14 @@ public class ConfigurationPropertiesRebinder
 				Object bean = this.applicationContext.getBean(name);
 				if (AopUtils.isCglibProxy(bean)) {
 					bean = getTargetObject(bean);
+				}
+
+				if (environmentChangeEvent != null
+						&& environmentChangeEvent.getChangeType()
+								.equals(EnvironmentChangeEvent.ChangeType.DELETE)) {
+					if (bean instanceof PropertiesResettable) {
+						((PropertiesResettable) bean).reset();
+					}
 				}
 				this.binder.postProcessBeforeInitialization(bean, name);
 				this.applicationContext.getAutowireCapableBeanFactory()
@@ -130,12 +147,12 @@ public class ConfigurationPropertiesRebinder
 
 	@ManagedAttribute
 	public Set<String> getBeanNames() {
-		return new HashSet<String>(this.beans.getBeanNames());
+		return new HashSet<>(this.beans.getBeanNames());
 	}
 
 	@Override
 	public void onApplicationEvent(EnvironmentChangeEvent event) {
-		rebind();
+		rebind(event);
 	}
 
 }

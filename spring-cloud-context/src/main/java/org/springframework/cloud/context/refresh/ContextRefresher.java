@@ -54,7 +54,7 @@ public class ContextRefresher {
 		addConfigFilesToEnvironment();
 		Set<String> keys = changes(before,
 				extract(this.context.getEnvironment().getPropertySources())).keySet();
-		this.context.publishEvent(new EnvironmentChangeEvent(keys));
+		this.context.publishEvent(new EnvironmentChangeEvent(keys, EnvironmentChangeEvent.ChangeType.DELETE));
 		this.scope.refreshAll();
 		return keys;
 	}
