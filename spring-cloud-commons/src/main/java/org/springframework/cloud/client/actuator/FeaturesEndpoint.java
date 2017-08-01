@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.actuator;
 
 import java.util.ArrayList;
@@ -10,7 +26,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import lombok.Value;
 
 /**
  * @author Spencer Gibb
@@ -75,17 +90,47 @@ public class FeaturesEndpoint extends AbstractEndpoint<FeaturesEndpoint.Features
 						type.getPackage().getImplementationVendor()));
 	}
 
-	@Value
 	class Features {
-		List<Feature> enabled = new ArrayList<>();
-		List<String> disabled = new ArrayList<>();
+		final List<Feature> enabled = new ArrayList<>();
+		final List<String> disabled = new ArrayList<>();
+
+		public List<Feature> getEnabled() {
+			return enabled;
+		}
+
+		public List<String> getDisabled() {
+			return disabled;
+		}
 	}
 
-	@Value
+	
 	class Feature {
 		final String type;
 		final String name;
 		final String version;
 		final String vendor;
+
+		public Feature(String type, String name, String version, String vendor) {
+			this.type = type;
+			this.name = name;
+			this.version = version;
+			this.vendor = vendor;
+		}
+
+		public String getType() {
+			return type;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getVersion() {
+			return version;
+		}
+
+		public String getVendor() {
+			return vendor;
+		}
 	}
 }

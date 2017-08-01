@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,10 @@
  */
 package org.springframework.cloud.client.hypermedia;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import java.net.URI;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
@@ -35,15 +33,22 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Oliver Gierke
  */
-@Slf4j
-@RequiredArgsConstructor
 public class DiscoveredResource implements RemoteResource {
 
 	private final ServiceInstanceProvider provider;
 	private final TraversalDefinition traversal;
+	
 
 	private RestOperations restOperations = new RestTemplate();
-	private @Getter Link link = null;
+	private Link link = null;
+
+	private final Logger log = LoggerFactory.getLogger(DiscoveredResource.class);
+
+
+	public DiscoveredResource(ServiceInstanceProvider provider, TraversalDefinition traversal) {
+		this.provider = provider;
+		this.traversal = traversal;
+	}
 
 	/**
 	 * Configures the {@link RestOperations} to use to execute the traversal and verifying HEAD calls.
@@ -52,6 +57,27 @@ public class DiscoveredResource implements RemoteResource {
 	 */
 	public void setRestOperations(RestOperations restOperations) {
 		this.restOperations = restOperations == null ? new RestTemplate() : restOperations;
+	}
+
+	public ServiceInstanceProvider getProvider() {
+		return provider;
+	}
+
+	public TraversalDefinition getTraversal() {
+		return traversal;
+	}
+
+	public RestOperations getRestOperations() {
+		return restOperations;
+	}
+
+	@Override
+	public Link getLink() {
+		return link;
+	}
+
+	public void setLink(Link link) {
+		this.link = link;
 	}
 
 	/**
