@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.client.hypermedia;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.List;
 
 import org.springframework.scheduling.config.ContextLifecycleScheduledTaskRegistrar;
@@ -29,16 +27,21 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * 
  * @author Oliver Gierke
  */
-@RequiredArgsConstructor
 public class RemoteResourceRefresher extends ContextLifecycleScheduledTaskRegistrar {
 
 	private final List<RemoteResource> discoveredResources;
 	private final int fixedDelay, initialDelay;
 
+	public RemoteResourceRefresher(List<RemoteResource> discoveredResources, int fixedDelay, int initialDelay) {
+		this.discoveredResources = discoveredResources;
+		this.fixedDelay = fixedDelay;
+		this.initialDelay = initialDelay;
+	}
+
 	/* 
-	 * (non-Javadoc)
-	 * @see org.springframework.scheduling.config.ContextLifecycleScheduledTaskRegistrar#afterPropertiesSet()
-	 */
+		 * (non-Javadoc)
+		 * @see org.springframework.scheduling.config.ContextLifecycleScheduledTaskRegistrar#afterPropertiesSet()
+		 */
 	@Override
 	public void afterPropertiesSet() {
 
