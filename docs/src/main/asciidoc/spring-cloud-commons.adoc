@@ -487,3 +487,16 @@ spring:
     inetutils:
       useOnlySiteLocalInterfaces: true
 ----
+
+[[http-clients]]
+=== HTTP Client Factories
+
+Spring Cloud Commons provides beans for creating both Apache HTTP clients (`ApacheHttpClientFactory`)
+as well as OK HTTP clients (`OkHttpClientFactory`).  The `OkHttpClientFactory` bean will only be created
+if the OK HTTP jar is on the classpath.  In addition, Spring Cloud Commons provides beans for creating
+the connection managers used by both clients, `ApacheHttpClientConnectionManagerFactory` for the Apache
+HTTP client and `OkHttpClientConnectionPoolFactory` for the OK HTTP client.  You can provide
+your own implementation of these beans if you would like to customize how the HTTP clients are created
+in downstream projects.  You can also disable the creation of these beans by setting
+`spring.cloud.httpclientfactories.apache.enabled` or `spring.cloud.httpclientfactories.ok.enabled` to
+`false`.
