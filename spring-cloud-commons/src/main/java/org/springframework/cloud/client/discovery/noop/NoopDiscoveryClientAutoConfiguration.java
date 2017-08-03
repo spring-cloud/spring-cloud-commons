@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.net.UnknownHostException;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -36,8 +38,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 
-import lombok.extern.apachecommons.CommonsLog;
-
 /**
  *
  * @deprecated Use
@@ -48,7 +48,6 @@ import lombok.extern.apachecommons.CommonsLog;
 @Configuration
 @EnableConfigurationProperties
 @ConditionalOnMissingBean(DiscoveryClient.class)
-@CommonsLog
 @Deprecated
 public class NoopDiscoveryClientAutoConfiguration
 		implements ApplicationListener<ContextRefreshedEvent> {
@@ -66,6 +65,8 @@ public class NoopDiscoveryClientAutoConfiguration
 	private PortFinder portFinder;
 
 	private DefaultServiceInstance serviceInstance;
+
+	private final Log log = LogFactory.getLog(NoopDiscoveryClientAutoConfiguration.class);
 
 	@PostConstruct
 	public void init() {
