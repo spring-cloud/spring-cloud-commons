@@ -63,15 +63,20 @@ public class EncryptionBootstrapConfiguration {
 		@ConditionalOnMissingBean(TextEncryptor.class)
 		public TextEncryptor textEncryptor() {
 			KeyStore keyStore = this.key.getKeyStore();
-			if (keyStore.getLocation() != null && keyStore.getLocation().exists()) {
-				return new RsaSecretEncryptor(
-						new KeyStoreKeyFactory(keyStore.getLocation(),
-								keyStore.getPassword().toCharArray()).getKeyPair(
-										keyStore.getAlias(),
-										keyStore.getSecret().toCharArray()),
-						this.key.getRsa().getAlgorithm(), this.key.getRsa().getSalt(),
-						this.key.getRsa().isStrong());
+			if (keyStore.getLocation() != null) {
+				if (keyStore.getLocation().exists()) {
+					return new RsaSecretEncryptor(
+							new KeyStoreKeyFactory(keyStore.getLocation(),
+									keyStore.getPassword().toCharArray()).getKeyPair(
+									keyStore.getAlias(),
+									keyStore.getSecret().toCharArray()),
+							this.key.getRsa().getAlgorithm(), this.key.getRsa().getSalt(),
+							this.key.getRsa().isStrong());
+				} 
+				
+				throw new IllegalStateException("Invalid keystore location");
 			}
+			
 			return new EncryptorFactory().create(this.key.getKey());
 		}
 
