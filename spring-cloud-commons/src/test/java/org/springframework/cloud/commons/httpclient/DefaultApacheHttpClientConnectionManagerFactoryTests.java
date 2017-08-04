@@ -2,13 +2,13 @@ package org.springframework.cloud.commons.httpclient;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.Test;
 import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.assertEquals;
-
 
 /**
  * @author Ryan Baxter
@@ -22,8 +22,7 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 				.getDefaultMaxPerRoute());
 		assertEquals(2,
 				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
-		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
-				"pool");
+		Object pool = getField((connectionManager), "pool");
 		assertEquals(-1l, ((Long)getField(pool, "timeToLive")).longValue());
 		TimeUnit timeUnit = getField(pool, "tunit");
 		assertEquals(TimeUnit.MILLISECONDS, timeUnit);
@@ -37,13 +36,13 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 				.getDefaultMaxPerRoute());
 		assertEquals(2,
 				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
-		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
-				"pool");
+		Object pool = getField((connectionManager), "pool");
 		assertEquals(56l, ((Long)getField(pool, "timeToLive")).longValue());
 		TimeUnit timeUnit = getField(pool, "tunit");
 		assertEquals(TimeUnit.DAYS, timeUnit);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected <T> T getField(Object target, String name) {
 		Field field = ReflectionUtils.findField(target.getClass(), name);
 		ReflectionUtils.makeAccessible(field);
