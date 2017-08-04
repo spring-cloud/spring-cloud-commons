@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  * @author Spencer Gibb
+ * TODO: rename serverlist?
  */
 public class CachedDiscoveryClient implements ScopedDiscoveryClient {
 
