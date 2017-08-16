@@ -30,10 +30,11 @@ import org.springframework.cloud.context.named.NamedContextFactory;
  */
 public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerClientSpecification> {
 
-	static final String NAMESPACE = "loadbalancer";
+	public static final String NAMESPACE = "loadbalancer";
+	public static final String PROPERTY_NAME = NAMESPACE + ".client.name";
 
 	public LoadBalancerClientFactory() {
-		super(LoadBalancerClientConfiguration.class, NAMESPACE, "loadbalancer.client.name");
+		super(LoadBalancerClientConfiguration.class, NAMESPACE, PROPERTY_NAME);
 	}
 
 }

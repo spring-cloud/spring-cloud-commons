@@ -25,9 +25,10 @@ import java.lang.annotation.Target;
 import org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.AliasFor;
 
 /**
- * Declarative configuration for a ribbon client. Add this annotation to any
+ * Declarative configuration for a load balancer client. Add this annotation to any
  * <code>@Configuration</code> and then inject a {@link LoadBalancerClientFactory} to access the
  * client that is created.
  *
@@ -45,12 +46,14 @@ public @interface LoadBalancerClient {
 	 *
 	 * @see #name()
 	 */
+	@AliasFor("name")
 	String value() default "";
 
 	/**
-	 * The name of the ribbon client, uniquely identifying a set of client resources,
+	 * The name of the load balancer client, uniquely identifying a set of client resources,
 	 * including a load balancer.
 	 */
+	@AliasFor("value")
 	String name() default "";
 
 	/**
