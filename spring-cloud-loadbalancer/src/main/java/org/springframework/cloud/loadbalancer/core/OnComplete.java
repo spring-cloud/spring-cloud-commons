@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.impl;
+package org.springframework.cloud.loadbalancer.core;
 
 import org.springframework.core.style.ToStringCreator;
 

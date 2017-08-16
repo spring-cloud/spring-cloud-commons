@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.impl.support;
+package org.springframework.cloud.loadbalancer.support;
 
-import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClientConfiguration;
-import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClientSpecification;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientConfiguration;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.context.named.NamedContextFactory;
 
 /**

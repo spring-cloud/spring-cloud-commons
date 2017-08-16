@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.impl;
+package org.springframework.cloud.loadbalancer.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,11 +27,11 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.impl.OnComplete.Status;
-import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClient;
-import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClientSpecification;
-import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClients;
-import org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerClientFactory;
+import org.springframework.cloud.loadbalancer.core.OnComplete.Status;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
@@ -79,7 +79,7 @@ public class LoadBalancerTest {
 
 	@EnableAutoConfiguration
 	@SpringBootConfiguration
-	@LoadBalancerClients ({ //TODO: move to auto-configuration
+	@LoadBalancerClients({ //TODO: move to auto-configuration
 			@LoadBalancerClient(name = "myservice", configuration = MyServiceConfig.class),
 	})
 	protected static class Config {

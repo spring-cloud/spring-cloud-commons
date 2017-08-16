@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.impl.annotation;
+package org.springframework.cloud.loadbalancer.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -42,7 +43,7 @@ public @interface LoadBalancerClients {
 
 	/**
 	 * {@link LoadBalancerClientConfigurationRegistrar} creates a {@link LoadBalancerClientSpecification}
-	 * with this as an argument. These in turn are added as default contexts in {@link org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerClientFactory}.
+	 * with this as an argument. These in turn are added as default contexts in {@link LoadBalancerClientFactory}.
 	 * Configuration defined in these classes are used as defaults if values aren't defined via
 	 * {@link LoadBalancerClient#configuration()}
 	 */

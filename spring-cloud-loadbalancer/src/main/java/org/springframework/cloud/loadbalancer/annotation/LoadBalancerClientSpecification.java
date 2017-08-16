@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.impl.annotation;
+package org.springframework.cloud.loadbalancer.annotation;
 
 import org.springframework.cloud.context.named.NamedContextFactory;
 import org.springframework.core.style.ToStringCreator;
