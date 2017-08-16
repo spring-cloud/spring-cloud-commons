@@ -18,7 +18,8 @@ package org.springframework.cloud.loadbalancer.core;
 
 import java.util.List;
 
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.env.Environment;
@@ -33,15 +34,20 @@ public class DiscoveryClientServiceInstanceSupplier implements ServiceInstanceSu
 
 	private final DiscoveryClient delegate;
 	private final Environment environment;
+	private final CacheManager cacheManager;
 
-	public DiscoveryClientServiceInstanceSupplier(DiscoveryClient delegate, Environment environment) {
+	public DiscoveryClientServiceInstanceSupplier(DiscoveryClient delegate, Environment environment, CacheManager cacheManager) {
 		this.delegate = delegate;
 		this.environment = environment;
+		this.cacheManager = cacheManager;
 	}
 
-	@Cacheable(cacheNames = "discovery-client-service-instances", key = "${loadbalancer.client.name}")
+	// @Cacheable(cacheNames = "discovery-client-service-instances", key = "${loadbalancer.client.name}")
 	public List<ServiceInstance> get() {
-		return delegate.getInstances(getServiceId());
+		Cache cache = this.cacheManager.getCache("discovery-client-service-instances");
+		String serviceId = getServiceId();
+		return cache.get(serviceId, () -> delegate.getInstances(serviceId));
+		// return delegate.getInstances(getServiceId());
 	}
 
 	public String getServiceId() {
