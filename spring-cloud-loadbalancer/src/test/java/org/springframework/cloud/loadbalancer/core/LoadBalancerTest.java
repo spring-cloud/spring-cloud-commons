@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,12 +25,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.loadbalancer.core.OnComplete.Status;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
-import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
+import org.springframework.cloud.loadbalancer.core.OnComplete.Status;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ResolvableType;
@@ -80,24 +77,10 @@ public class LoadBalancerTest {
 
 	@EnableAutoConfiguration
 	@SpringBootConfiguration
-	@LoadBalancerClients({ //TODO: move to auto-configuration
+	@LoadBalancerClients({
 			@LoadBalancerClient(name = "myservice", configuration = MyServiceConfig.class),
 	})
-	@EnableCaching //TODO: move to auto-configuration
-	protected static class Config {
-
-		@Autowired(required = false)
-		private List<LoadBalancerClientSpecification> configurations = new ArrayList<>();
-
-		//TODO: move to auto-configuration
-		@Bean
-		public LoadBalancerClientFactory loadBalancerClientFactory() {
-			LoadBalancerClientFactory clientFactory = new LoadBalancerClientFactory();
-			clientFactory.setConfigurations(configurations);
-			return clientFactory;
-		}
-
-	}
+	protected static class Config { }
 
 	protected static class MyServiceConfig {
 		@Bean
