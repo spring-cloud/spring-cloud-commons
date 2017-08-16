@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.impl.annotation;
+package org.springframework.cloud.loadbalancer.annotation;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.impl.DiscoveryClientServiceInstanceSupplier;
+import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.impl.annotation;
+package org.springframework.cloud.loadbalancer.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerClientFactory;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;

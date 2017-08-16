@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.impl;
-
-import org.springframework.cloud.client.ServiceInstance;
-
-import java.util.List;
-import java.util.function.Supplier;
+package org.springframework.cloud.loadbalancer.core;
 
 /**
  * @author Spencer Gibb
  */
-public interface ServiceInstanceSupplier extends Supplier<List<ServiceInstance>> {
+class DefaultRequest implements LoadBalancer.Request {
+
 }

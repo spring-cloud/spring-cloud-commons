@@ -14,33 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.impl;
+package org.springframework.cloud.loadbalancer.core;
 
 import org.springframework.cloud.client.ServiceInstance;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * @author Spencer Gibb
  */
-class DefaultResponse implements LoadBalancer.Response<ServiceInstance> {
-
-	private final ServiceInstance serviceInstance;
-
-	public DefaultResponse(ServiceInstance serviceInstance) {
-		this.serviceInstance = serviceInstance;
-	}
-
-	@Override
-	public boolean hasServer() {
-		return serviceInstance != null;
-	}
-
-	@Override
-	public ServiceInstance getServer() {
-		return this.serviceInstance;
-	}
-
-	@Override
-	public void onComplete(OnComplete onComplete) {
-		//TODO: implement
-	}
+public interface ServiceInstanceSupplier extends Supplier<List<ServiceInstance>> {
 }

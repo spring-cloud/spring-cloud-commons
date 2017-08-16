@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.impl;
+package org.springframework.cloud.loadbalancer.core;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerClientFactory;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.core.env.Environment;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
