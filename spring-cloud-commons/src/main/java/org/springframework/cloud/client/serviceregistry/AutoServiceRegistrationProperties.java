@@ -14,6 +14,9 @@ public class AutoServiceRegistrationProperties {
 	/** Whether to register the management as a service, defaults to true */
 	private boolean registerManagement = true;
 
+	/** Should startup fail if there is no AutoServiceRegistration, default to false. */
+	private boolean failFast = false;
+
 	public boolean shouldRegisterManagement() {
 		return registerManagement;
 	}
@@ -21,9 +24,6 @@ public class AutoServiceRegistrationProperties {
 	public void setRegisterManagement(boolean registerManagement) {
 		this.registerManagement = registerManagement;
 	}
-
-	/** Should startup fail if there is no AutoServiceRegistration, default to false. */
-	private boolean failFast = false;
 
 	public boolean isFailFast() {
 		return failFast;
