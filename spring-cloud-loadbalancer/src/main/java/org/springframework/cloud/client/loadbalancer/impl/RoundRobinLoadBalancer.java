@@ -1,14 +1,13 @@
-package org.springframework.cloud.client.loadbalancer.impl.context;
+package org.springframework.cloud.client.loadbalancer.impl;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.impl.scoped.ScopedDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerClientFactory;
+import org.springframework.core.env.Environment;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 
@@ -19,55 +18,32 @@ public class RoundRobinLoadBalancer implements LoadBalancer<ServiceInstance> {
 
 	private static final Log log = LogFactory.getLog(RoundRobinLoadBalancer.class);
 
-	private final LoadBalancerClientFactory clientFactory;
 	private final AtomicInteger nextServerCyclicCounter = new AtomicInteger(-1);
+	private final LoadBalancerClientFactory clientFactory;
+	private final Environment environment;
 
-	@Value("${loadbalancer.client.name}")
-	String serviceId;
-
-	public RoundRobinLoadBalancer(LoadBalancerClientFactory clientFactory) {
+	public RoundRobinLoadBalancer(LoadBalancerClientFactory clientFactory, Environment environment) {
 		this.clientFactory = clientFactory;
+		this.environment = environment;
 	}
 
 	@Override
-	public ChosenContext<ServiceInstance> choose(RequestContext requestContext) {
-		ScopedDiscoveryClient discoveryClient = this.clientFactory.getInstance(this.serviceId, ScopedDiscoveryClient.class);
-		List<ServiceInstance> instances = discoveryClient.getInstances();
+	public Response<ServiceInstance> choose(Request request) {
+		String serviceId = clientFactory.getName(this.environment);
+		ServiceInstanceSupplier supplier = clientFactory.getInstance(serviceId, ServiceInstanceSupplier.class);
+		List<ServiceInstance> instances = supplier.get();
+		//TODO: enforce order?
 
 		if (isEmpty(instances)) {
-			log.warn("No servers available for service: " + this.serviceId);
-			return new DefaultChosenContext(null);
+			log.warn("No servers available for service: " + serviceId);
+			return new DefaultResponse(null);
 		}
 
 		int nextServerIndex = incrementAndGetModulo(instances.size());
 
 		ServiceInstance instance = instances.get(nextServerIndex);
 
-		return new DefaultChosenContext(instance);
-	}
-
-	public static class DefaultChosenContext implements ChosenContext<ServiceInstance> {
-
-		private final ServiceInstance serviceInstance;
-
-		public DefaultChosenContext(ServiceInstance serviceInstance) {
-			this.serviceInstance = serviceInstance;
-		}
-
-		@Override
-		public boolean hasServer() {
-			return serviceInstance != null;
-		}
-
-		@Override
-		public ServiceInstance getServer() {
-			return this.serviceInstance;
-		}
-
-		@Override
-		public void complete(CompletionContext completionContext) {
-			//TODO: implement
-		}
+		return new DefaultResponse(instance);
 	}
 
 	/**

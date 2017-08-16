@@ -60,7 +60,7 @@ public class LoadBalancerClientConfigurationRegistrar implements ImportBeanDefin
 		}
 	}
 
-	private String getClientName(Map<String, Object> client) {
+	private static String getClientName(Map<String, Object> client) {
 		if (client == null) {
 			return null;
 		}
@@ -75,7 +75,7 @@ public class LoadBalancerClientConfigurationRegistrar implements ImportBeanDefin
 				"Either 'name' or 'value' must be provided in @LoadBalancerClient");
 	}
 
-	private void registerClientConfiguration(BeanDefinitionRegistry registry,
+	private static void registerClientConfiguration(BeanDefinitionRegistry registry,
 			Object name, Object configuration) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder
 				.genericBeanDefinition(LoadBalancerClientSpecification.class);

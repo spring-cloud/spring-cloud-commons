@@ -40,6 +40,12 @@ public @interface LoadBalancerClients {
 
 	LoadBalancerClient[] value() default {};
 
+	/**
+	 * {@link LoadBalancerClientConfigurationRegistrar} creates a {@link LoadBalancerClientSpecification}
+	 * with this as an argument. These in turn are added as default contexts in {@link org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerClientFactory}.
+	 * Configuration defined in these classes are used as defaults if values aren't defined via
+	 * {@link LoadBalancerClient#configuration()}
+	 */
 	Class<?>[] defaultConfiguration() default {};
 
 }

@@ -15,6 +15,8 @@ import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoCon
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 
 /**
@@ -63,6 +65,15 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		}
 	}
 
+	/**
+	 * Resolves name of context from environment
+	 * @param environment
+	 * @return
+	 */
+	public String getName(Environment environment) {
+		return environment.getProperty(this.propertyName);
+	}
+
 	public Set<String> getContextNames() {
 		return new HashSet<>(contexts.keySet());
 	}
@@ -108,13 +119,24 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 				this.defaultConfigType);
 		context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
 				this.propertySourceName,
-				Collections.<String, Object> singletonMap(this.propertyName, name)));
+				Collections.singletonMap(this.propertyName, name)));
 		if (this.parent != null) {
 			// Uses Environment from parent as well as beans
 			context.setParent(this.parent);
 		}
 		context.refresh();
 		return context;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getInstance(String name, ResolvableType type) {
+		AnnotationConfigApplicationContext context = getContext(name);
+		String[] names = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context,
+				type);
+		if (names.length > 0) {
+			return (T)context.getBean(names[0]);
+		}
+		return null;
 	}
 
 	public <T> T getInstance(String name, Class<T> type) {

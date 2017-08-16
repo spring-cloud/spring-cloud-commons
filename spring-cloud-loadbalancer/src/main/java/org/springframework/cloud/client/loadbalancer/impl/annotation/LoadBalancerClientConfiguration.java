@@ -16,40 +16,26 @@
 
 package org.springframework.cloud.client.loadbalancer.impl.annotation;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.impl.scoped.CachedDiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.impl.scoped.RoundRobinScopedLoadBalancer;
-import org.springframework.cloud.client.loadbalancer.impl.scoped.ScopedLoadBalancer;
-import org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerClientFactory;
+import org.springframework.cloud.client.loadbalancer.impl.DiscoveryClientServiceInstanceSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 
 /**
- * @author Dave Syer
+ * @author Spencer Gibb
  */
-@SuppressWarnings("deprecation")
 @Configuration
 @EnableConfigurationProperties
 public class LoadBalancerClientConfiguration {
 
-	@Value("${loadbalancer.client.name}")
-	private String name = "client";
-
 	@Bean
 	@ConditionalOnMissingBean
-	public CachedDiscoveryClient cachingDiscoveryClient(DiscoveryClient discoveryClient, Environment env) {
-		return new CachedDiscoveryClient(discoveryClient, env);
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public ScopedLoadBalancer algorithm(LoadBalancerClientFactory clientFactory) {
-		return new RoundRobinScopedLoadBalancer(clientFactory);
+	public DiscoveryClientServiceInstanceSupplier discoveryClientServiceInstanceSupplier(DiscoveryClient discoveryClient, Environment env) {
+		return new DiscoveryClientServiceInstanceSupplier(discoveryClient, env);
 	}
 
 }

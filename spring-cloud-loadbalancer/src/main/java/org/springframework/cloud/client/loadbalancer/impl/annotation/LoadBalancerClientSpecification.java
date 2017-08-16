@@ -17,6 +17,8 @@
 package org.springframework.cloud.client.loadbalancer.impl.annotation;
 
 import org.springframework.cloud.context.named.NamedContextFactory;
+import org.springframework.core.style.ToStringCreator;
+import org.springframework.util.Assert;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -34,7 +36,9 @@ public class LoadBalancerClientSpecification implements NamedContextFactory.Spec
 	}
 
 	public LoadBalancerClientSpecification(String name, Class<?>[] configuration) {
+		Assert.hasText(name, "name must not be empty");
 		this.name = name;
+		Assert.notNull(configuration, "configuration must not be null");
 		this.configuration = configuration;
 	}
 
@@ -43,6 +47,7 @@ public class LoadBalancerClientSpecification implements NamedContextFactory.Spec
 	}
 
 	public void setName(String name) {
+		Assert.hasText(name, "name must not be empty");
 		this.name = name;
 	}
 
@@ -51,16 +56,16 @@ public class LoadBalancerClientSpecification implements NamedContextFactory.Spec
 	}
 
 	public void setConfiguration(Class<?>[] configuration) {
+		Assert.notNull(configuration, "configuration must not be null");
 		this.configuration = configuration;
 	}
 
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer("LoadBalancerClientSpecification{");
-		sb.append("name='").append(name).append('\'');
-		sb.append(", configuration=").append(configuration == null ? "null" : Arrays.asList(configuration).toString());
-		sb.append('}');
-		return sb.toString();
+		ToStringCreator to = new ToStringCreator(this);
+		to.append("name", name);
+		to.append("configuration", configuration);
+		return to.toString();
 	}
 
 	@Override

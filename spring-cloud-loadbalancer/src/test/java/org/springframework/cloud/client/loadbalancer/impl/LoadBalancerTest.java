@@ -1,4 +1,4 @@
-package org.springframework.cloud.client.loadbalancer.impl.context;
+package org.springframework.cloud.client.loadbalancer.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,15 +11,14 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.impl.OnComplete.Status;
 import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.client.loadbalancer.impl.annotation.LoadBalancerClients;
-import org.springframework.cloud.client.loadbalancer.impl.context.LoadBalancer.ChosenContext;
-import org.springframework.cloud.client.loadbalancer.impl.context.LoadBalancer.CompletionContext;
-import org.springframework.cloud.client.loadbalancer.impl.context.LoadBalancer.RequestContext;
-import org.springframework.cloud.client.loadbalancer.impl.context.LoadBalancer.Status;
 import org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,18 +35,19 @@ public class LoadBalancerTest {
 
 	@Test
 	public void roundRobbinLoadbalancerWorks() {
-		LoadBalancer<ServiceInstance> loadBalancer = this.clientFactory.getInstance("myservice", LoadBalancer.class);
+		ResolvableType type = ResolvableType.forClassWithGenerics(LoadBalancer.class, ServiceInstance.class);
+		LoadBalancer<ServiceInstance> loadBalancer = this.clientFactory.getInstance("myservice", type);
 
 		assertThat(loadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
 
 		List<String> hosts = Arrays.asList("a.host", "c.host", "b.host", "a.host");
 
 		for (String host : hosts) {
-			ChosenContext<ServiceInstance> chosenContext = loadBalancer.choose(new MyRequestContext());
+			LoadBalancer.Response<ServiceInstance> response = loadBalancer.choose(new DefaultRequest());
 
-			assertThat(chosenContext.hasServer()).isTrue();
+			assertThat(response.hasServer()).isTrue();
 
-			ServiceInstance instance = chosenContext.getServer();
+			ServiceInstance instance = response.getServer();
 			assertThat(instance).isNotNull();
 			assertThat(instance.getHost()).isEqualTo(host).as("instance host is incorrent %s", host);
 
@@ -57,7 +57,7 @@ public class LoadBalancerTest {
 				assertThat(instance.isSecure()).isFalse();
 			}
 
-			chosenContext.complete(new CompletionContext(Status.SUCCESSS));
+			response.onComplete(new OnComplete(Status.SUCCESSS));
 		}
 	}
 
@@ -81,14 +81,10 @@ public class LoadBalancerTest {
 
 	}
 
-	protected static class MyRequestContext implements RequestContext {
-
-	}
-
 	protected static class MyServiceConfig {
 		@Bean
-		public RoundRobinLoadBalancer roundRobinContextLoadBalancer(LoadBalancerClientFactory clientFactory) {
-			return new RoundRobinLoadBalancer(clientFactory);
+		public RoundRobinLoadBalancer roundRobinContextLoadBalancer(LoadBalancerClientFactory clientFactory, Environment env) {
+			return new RoundRobinLoadBalancer(clientFactory, env);
 		}
 	}
 }
