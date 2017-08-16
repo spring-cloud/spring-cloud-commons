@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.loadbalancer.core.OnComplete.Status;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
@@ -82,6 +83,7 @@ public class LoadBalancerTest {
 	@LoadBalancerClients({ //TODO: move to auto-configuration
 			@LoadBalancerClient(name = "myservice", configuration = MyServiceConfig.class),
 	})
+	@EnableCaching //TODO: move to auto-configuration
 	protected static class Config {
 
 		@Autowired(required = false)

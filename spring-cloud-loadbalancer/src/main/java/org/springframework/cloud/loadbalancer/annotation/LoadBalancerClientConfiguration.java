@@ -18,12 +18,12 @@ package org.springframework.cloud.loadbalancer.annotation;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
 
 /**
  * @author Spencer Gibb
@@ -34,8 +34,10 @@ public class LoadBalancerClientConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public DiscoveryClientServiceInstanceSupplier discoveryClientServiceInstanceSupplier(DiscoveryClient discoveryClient, Environment env) {
-		return new DiscoveryClientServiceInstanceSupplier(discoveryClient, env);
+	public DiscoveryClientServiceInstanceSupplier discoveryClientServiceInstanceSupplier(
+			DiscoveryClient discoveryClient, Environment env, CacheManager cacheManager) {
+		return new DiscoveryClientServiceInstanceSupplier(discoveryClient, env,
+				cacheManager);
 	}
 
 }
