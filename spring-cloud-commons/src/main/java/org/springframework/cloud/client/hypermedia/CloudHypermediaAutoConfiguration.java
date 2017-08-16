@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.client.hypermedia;
 
-import lombok.Data;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,17 +49,39 @@ public class CloudHypermediaAutoConfiguration {
 				properties.getRefresh().getInitialDelay());
 	}
 
-	@Data
 	@ConfigurationProperties(prefix = "spring.cloud.hypermedia")
 	public static class CloudHypermediaProperties {
 
 		private Refresh refresh = new Refresh();
 
-		@Data
+		public Refresh getRefresh() {
+			return refresh;
+		}
+
+		public void setRefresh(Refresh refresh) {
+			this.refresh = refresh;
+		}
+
 		public static class Refresh {
 
 			private int fixedDelay = 5000;
 			private int initialDelay = 10000;
+
+			public int getFixedDelay() {
+				return fixedDelay;
+			}
+
+			public void setFixedDelay(int fixedDelay) {
+				this.fixedDelay = fixedDelay;
+			}
+
+			public int getInitialDelay() {
+				return initialDelay;
+			}
+
+			public void setInitialDelay(int initialDelay) {
+				this.initialDelay = initialDelay;
+			}
 		}
 	}
 }

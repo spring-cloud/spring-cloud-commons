@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.DeferredImportSelector;
@@ -30,7 +32,6 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
-import lombok.extern.apachecommons.CommonsLog;
 
 /**
  * Selects configurations to load defined by the generic type T. Loads implementations
@@ -39,7 +40,6 @@ import lombok.extern.apachecommons.CommonsLog;
  * @author Spencer Gibb
  * @author Dave Syer
  */
-@CommonsLog
 public abstract class SpringFactoryImportSelector<T>
 		implements DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
 
@@ -48,6 +48,8 @@ public abstract class SpringFactoryImportSelector<T>
 	private Class<T> annotationClass;
 
 	private Environment environment;
+
+	private final Log log = LogFactory.getLog(SpringFactoryImportSelector.class);
 
 	@SuppressWarnings("unchecked")
 	protected SpringFactoryImportSelector() {

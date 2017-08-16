@@ -68,9 +68,8 @@ public class EnvironmentManager implements ApplicationEventPublisherAware {
 	public Map<String, Object> reset() {
 		Map<String, Object> result = new LinkedHashMap<String, Object>(map);
 		if (!map.isEmpty()) {
-			Set<String> keys = map.keySet();
 			map.clear();
-			publish(new EnvironmentChangeEvent(keys));
+			publish(new EnvironmentChangeEvent(result.keySet()));
 		}
 		return result;
 	}

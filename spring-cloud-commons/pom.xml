@@ -13,6 +13,10 @@
 	<packaging>jar</packaging>
 	<name>Spring Cloud Commons</name>
 	<description>Spring Cloud Commons</description>
+	<properties>
+		<okhttp3.version>3.6.0</okhttp3.version>
+		<apachehttpclient.version>4.5.1</apachehttpclient.version>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -27,6 +31,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -75,10 +84,21 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<scope>compile</scope>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>${okhttp3.version}</version>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>logging-interceptor</artifactId>
+			<version>${okhttp3.version}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>${apachehttpclient.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -31,20 +31,21 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import lombok.Data;
-import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Spencer Gibb
  */
-@CommonsLog
 public class InetUtils implements Closeable {
 
 	// TODO: maybe shutdown the thread pool if it isn't being used?
 	private final ExecutorService executorService;
 	private final InetUtilsProperties properties;
 	private static final InetUtils instance = new InetUtils(new InetUtilsProperties());
-
+	
+	private final Log log = LogFactory.getLog(InetUtils.class);
+	
 	public InetUtils(final InetUtilsProperties properties) {
 		this.properties = properties;
 		this.executorService = Executors
@@ -200,7 +201,6 @@ public class InetUtils implements Closeable {
 		return new HostInfo(host).getIpAddressAsInt();
 	}
 
-	@Data
 	public static class HostInfo {
 		public boolean override;
 		private String ipAddress;
@@ -226,6 +226,30 @@ public class InetUtils implements Closeable {
 				throw new IllegalArgumentException(e);
 			}
 			return ByteBuffer.wrap(inetAddress.getAddress()).getInt();
+		}
+
+		public boolean isOverride() {
+			return override;
+		}
+
+		public void setOverride(boolean override) {
+			this.override = override;
+		}
+
+		public String getIpAddress() {
+			return ipAddress;
+		}
+
+		public void setIpAddress(String ipAddress) {
+			this.ipAddress = ipAddress;
+		}
+
+		public String getHostname() {
+			return hostname;
+		}
+
+		public void setHostname(String hostname) {
+			this.hostname = hostname;
 		}
 	}
 
