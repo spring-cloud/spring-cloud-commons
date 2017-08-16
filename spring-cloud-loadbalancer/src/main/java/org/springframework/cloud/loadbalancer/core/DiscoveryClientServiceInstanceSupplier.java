@@ -16,17 +16,19 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.List;
+
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.env.Environment;
 
-import java.util.List;
+import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory.PROPERTY_NAME;
 
 /**
  * @author Spencer Gibb
- * TODO: rename serverlist?
  */
+//TODO: how to eagerly invoke cache, such that the first client use is already cached
 public class DiscoveryClientServiceInstanceSupplier implements ServiceInstanceSupplier {
 
 	private final DiscoveryClient delegate;
@@ -37,12 +39,12 @@ public class DiscoveryClientServiceInstanceSupplier implements ServiceInstanceSu
 		this.environment = environment;
 	}
 
-	@Cacheable(cacheNames = "discovery-client", key = "${loadbalancer.client.name}")
+	@Cacheable(cacheNames = "discovery-client-service-instances", key = "${loadbalancer.client.name}")
 	public List<ServiceInstance> get() {
 		return delegate.getInstances(getServiceId());
 	}
 
 	public String getServiceId() {
-		return environment.getProperty("loadbalancer.client.name");
+		return environment.getProperty(PROPERTY_NAME);
 	}
 }
