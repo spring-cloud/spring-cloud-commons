@@ -8,11 +8,11 @@ import org.springframework.cloud.client.loadbalancer.impl.support.LoadBalancerCl
 /**
  * @author Spencer Gibb
  */
-public class CommonsLoadBalancer implements LoadBalancer {
+public class DefaultLoadBalancer implements LoadBalancer {
 
 	private final LoadBalancerClientFactory clientFactory;
 
-	public CommonsLoadBalancer(LoadBalancerClientFactory clientFactory) {
+	public DefaultLoadBalancer(LoadBalancerClientFactory clientFactory) {
 		this.clientFactory = clientFactory;
 	}
 
