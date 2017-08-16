@@ -14,7 +14,7 @@ import org.springframework.cloud.client.discovery.AbstractDiscoveryLifecycle;
 @SuppressWarnings("deprecation")
 public abstract class AbstractAutoServiceRegistration<R extends Registration> extends AbstractDiscoveryLifecycle implements AutoServiceRegistration {
 
-	private ServiceRegistry<R> serviceRegistry;
+	private final ServiceRegistry<R> serviceRegistry;
 
 	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry) {
 		this.serviceRegistry = serviceRegistry;
