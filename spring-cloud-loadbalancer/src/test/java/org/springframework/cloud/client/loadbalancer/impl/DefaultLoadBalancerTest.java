@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class CommonsLoadBalancerTest {
+public class DefaultLoadBalancerTest {
 
 	@Autowired
-	private CommonsLoadBalancer loadBalancer;
+	private DefaultLoadBalancer loadBalancer;
 	
 	@Autowired
 	private LoadBalancerClientFactory clientFactory;
@@ -110,8 +110,8 @@ public class CommonsLoadBalancerTest {
 
 		//TODO: move to auto-configuration
 		@Bean
-		public CommonsLoadBalancer commonsLoadBalancer(LoadBalancerClientFactory clientFactory) {
-			return new CommonsLoadBalancer(clientFactory);
+		public DefaultLoadBalancer commonsLoadBalancer(LoadBalancerClientFactory clientFactory) {
+			return new DefaultLoadBalancer(clientFactory);
 		}
 
 	}
