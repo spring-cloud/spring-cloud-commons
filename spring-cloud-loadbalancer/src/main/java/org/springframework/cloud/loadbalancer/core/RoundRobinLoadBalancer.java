@@ -24,13 +24,14 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.core.env.Environment;
+import reactor.core.publisher.Mono;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * @author Spencer Gibb
  */
-public class RoundRobinLoadBalancer implements LoadBalancer<ServiceInstance> {
+public class RoundRobinLoadBalancer implements LoadBalancer<ServiceInstance>, ReactiveLoadBalancer<ServiceInstance> {
 
 	private static final Log log = LogFactory.getLog(RoundRobinLoadBalancer.class);
 
@@ -44,7 +45,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer<ServiceInstance> {
 	}
 
 	@Override
-	public Response<ServiceInstance> choose(Request request) {
+	public LoadBalancer.Response<ServiceInstance> choose(LoadBalancer.Request request) {
 		String serviceId = clientFactory.getName(this.environment);
 		ServiceInstanceSupplier supplier = clientFactory.getInstance(serviceId, ServiceInstanceSupplier.class);
 		List<ServiceInstance> instances = supplier.get();
@@ -60,6 +61,11 @@ public class RoundRobinLoadBalancer implements LoadBalancer<ServiceInstance> {
 		ServiceInstance instance = instances.get(nextServerIndex);
 
 		return new DefaultResponse(instance);
+	}
+
+	@Override
+	public Mono<ReactiveLoadBalancer.Response<ServiceInstance>> choose(ReactiveLoadBalancer.Request request) {
+		return null;
 	}
 
 	/**
