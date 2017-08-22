@@ -16,4 +16,4 @@ org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration,\
 org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfiguration,\
 org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration,\
-org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration
+org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration
