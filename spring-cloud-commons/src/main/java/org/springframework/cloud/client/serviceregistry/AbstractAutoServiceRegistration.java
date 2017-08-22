@@ -180,7 +180,7 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		return 0;
 	}
 
-	private ServiceRegistry<R> serviceRegistry;
+	private final ServiceRegistry<R> serviceRegistry;
 
 	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry) {
 		this.serviceRegistry = serviceRegistry;
