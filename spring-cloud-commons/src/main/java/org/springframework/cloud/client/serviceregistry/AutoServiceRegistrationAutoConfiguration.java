@@ -4,13 +4,15 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Spencer Gibb
  */
 @Configuration
-@ConditionalOnBean(AutoServiceRegistrationProperties.class)
+@Import(AutoServiceRegistrationConfiguration.class)
 public class AutoServiceRegistrationAutoConfiguration {
 
 	@Autowired(required = false)
