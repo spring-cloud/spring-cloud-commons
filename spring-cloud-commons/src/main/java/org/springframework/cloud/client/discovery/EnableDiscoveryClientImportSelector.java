@@ -21,10 +21,14 @@ import org.springframework.cloud.commons.util.SpringFactoryImportSelector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -47,6 +51,17 @@ public class EnableDiscoveryClientImportSelector
 			List<String> importsList = new ArrayList<>(Arrays.asList(imports));
 			importsList.add("org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
 			imports = importsList.toArray(new String[0]);
+		} else {
+			Environment env = getEnvironment();
+			if(ConfigurableEnvironment.class.isInstance(env)) {
+				ConfigurableEnvironment configEnv = (ConfigurableEnvironment)env;
+				LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+				map.put("spring.cloud.discovery.client.autoregister", false);
+				MapPropertySource propertySource = new MapPropertySource(
+						"springCloudDiscoveryClient", map);
+				configEnv.getPropertySources().addLast(propertySource);
+			}
+
 		}
 
 		return imports;
