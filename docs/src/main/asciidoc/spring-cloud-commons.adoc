@@ -458,16 +458,6 @@ TIP: If you see errors like `java.lang.IllegalArgumentException: Can not set org
 
 [source,java,indent=0]
 ----
-@Configuration
-public class MyConfiguration {
-
-    @LoadBalanced
-    @Bean
-    RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-}
-
 public class MyClass {
     @Autowired
     private LoadBalancerExchangeFilterFunction lbFunction;
