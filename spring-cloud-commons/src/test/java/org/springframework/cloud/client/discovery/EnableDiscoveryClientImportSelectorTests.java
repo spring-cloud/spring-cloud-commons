@@ -39,7 +39,7 @@ public class EnableDiscoveryClientImportSelectorTests {
 	public void autoRegistrationIsEnabled() {
 		configureAnnotation(true);
 		String[] imports = this.importSelector.selectImports(this.annotationMetadata);
-		assertTrue(environment.getProperty("spring.cloud.discovery.client.autoregister", Boolean.class, true));
+		assertTrue(environment.getProperty("spring.cloud.service-registry.auto-registration.enabled", Boolean.class, true));
 		assertThat(imports).hasSize(1);
 	}
 
@@ -47,7 +47,7 @@ public class EnableDiscoveryClientImportSelectorTests {
 	public void autoRegistrationIsDisabled() {
 		configureAnnotation(false);
 		String[] imports = this.importSelector.selectImports(this.annotationMetadata);
-		assertFalse(environment.getProperty("spring.cloud.discovery.client.autoregister", Boolean.class));
+		assertFalse(environment.getProperty("spring.cloud.service-registry.auto-registration.enabled", Boolean.class));
 		assertThat(imports).isEmpty();
 	}
 

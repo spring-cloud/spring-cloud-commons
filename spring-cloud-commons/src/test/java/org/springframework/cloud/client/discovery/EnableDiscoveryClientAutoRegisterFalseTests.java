@@ -31,7 +31,7 @@ public class EnableDiscoveryClientAutoRegisterFalseTests {
 	@Autowired(required = false)
 	AutoServiceRegistrationProperties autoServiceRegistrationProperties;
 
-	@Value("${spring.cloud.discovery.client.autoregister}")
+	@Value("${spring.cloud.service-registry.auto-registration.enabled}")
 	Boolean autoRegisterProperty;
 
 	@Test

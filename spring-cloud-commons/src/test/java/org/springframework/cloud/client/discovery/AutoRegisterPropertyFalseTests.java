@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNull;
  * @author Ryan Baxter
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {"spring.cloud.discovery.client.autoregister: false"})
+@SpringBootTest(properties = {"spring.cloud.service-registry.auto-registration.enabled: false"})
 public class AutoRegisterPropertyFalseTests {
 	@Autowired(required = false)
 	AutoServiceRegistrationAutoConfiguration autoConfiguration;
@@ -30,7 +30,7 @@ public class AutoRegisterPropertyFalseTests {
 	@Autowired(required = false)
 	AutoServiceRegistrationProperties autoServiceRegistrationProperties;
 
-	@Value("${spring.cloud.discovery.client.autoregister}")
+	@Value("${spring.cloud.service-registry.auto-registration.enabled}")
 	Boolean autoRegisterProperty;
 
 	@Test

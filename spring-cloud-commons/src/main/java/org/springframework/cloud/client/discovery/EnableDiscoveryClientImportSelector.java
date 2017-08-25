@@ -56,7 +56,7 @@ public class EnableDiscoveryClientImportSelector
 			if(ConfigurableEnvironment.class.isInstance(env)) {
 				ConfigurableEnvironment configEnv = (ConfigurableEnvironment)env;
 				LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-				map.put("spring.cloud.discovery.client.autoregister", false);
+				map.put("spring.cloud.service-registry.auto-registration.enabled", false);
 				MapPropertySource propertySource = new MapPropertySource(
 						"springCloudDiscoveryClient", map);
 				configEnv.getPropertySources().addLast(propertySource);
