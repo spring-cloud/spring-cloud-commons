@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.3">
+<meta name="generator" content="Asciidoctor 1.5.0">
 <title>Cloud Native Applications</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Noto+Serif:400,400italic,700,700italic|Droid+Sans+Mono:400">
 <style>
 /* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
-/* Remove comment around @import statement below when using as a custom stylesheet */
-/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
+/* Remove the comments around the @import statement below when using this as a custom stylesheet */
+/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Noto+Serif:400,400italic,700,700italic|Droid+Sans+Mono:400";*/
 article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,summary{display:block}
 audio,canvas,video{display:inline-block}
 audio:not([controls]){display:none;height:0}
@@ -57,6 +57,7 @@ a:hover{cursor:pointer}
 img,object,embed{max-width:100%;height:auto}
 object,embed{height:100%}
 img{-ms-interpolation-mode:bicubic}
+#map_canvas img,#map_canvas embed,#map_canvas object,.map_canvas img,.map_canvas embed,.map_canvas object{max-width:none!important}
 .left{float:left!important}
 .right{float:right!important}
 .text-left{text-align:left!important}
@@ -64,12 +65,10 @@ img{-ms-interpolation-mode:bicubic}
 .text-center{text-align:center!important}
 .text-justify{text-align:justify!important}
 .hide{display:none}
-body{-webkit-font-smoothing:antialiased}
-img,object,svg{display:inline-block;vertical-align:middle}
+.antialiased,body{-webkit-font-smoothing:antialiased}
+img{display:inline-block;vertical-align:middle}
 textarea{height:auto;min-height:50px}
 select{width:100%}
-.center{margin-left:auto;margin-right:auto}
-.spread{width:100%}
 p.lead,.paragraph.lead>p,#preamble>.sectionbody>.paragraph:first-of-type p{font-size:1.21875em;line-height:1.6}
 .subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
 div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0;direction:ltr}
@@ -112,14 +111,12 @@ blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
 h1{font-size:2.75em}
 h2{font-size:2.3125em}
 h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
-h4{font-size:1.4375em}}
-table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
+h4{font-size:1.4375em}}table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
 table thead,table tfoot{background:#f7f8f7;font-weight:bold}
 table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
 table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
 table tr.even,table tr.alt,table tr:nth-of-type(even){background:#f8f8f7}
 table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
-body{tab-size:4}
 h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
 h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
 .clearfix:before,.clearfix:after,.float-group:before,.float-group:after{content:" ";display:table}
@@ -127,7 +124,7 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 *:not(pre)>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background-color:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre,pre>code{line-height:1.45;color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;text-rendering:optimizeSpeed}
 .keyseq{color:rgba(51,51,51,.8)}
-kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background-color:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+kbd{display:inline-block;color:rgba(0,0,0,.8);font-size:.75em;line-height:1.4;background-color:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:-.15em .15em 0 .15em;padding:.2em .6em .2em .5em;vertical-align:middle;white-space:nowrap}
 .keyseq kbd:first-child{margin-left:0}
 .keyseq kbd:last-child{margin-right:0}
 .menuseq,.menu{color:rgba(0,0,0,.8)}
@@ -158,33 +155,29 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toc ul.sectlevel0>li>a{font-style:italic}
 #toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
 #toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
-#toc li{line-height:1.3334;margin-top:.3334em}
 #toc a{text-decoration:none}
 #toc a:active{text-decoration:underline}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media only screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
 #toc.toc2{margin-top:0!important;background-color:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #efefed;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
-#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2 #toctitle{margin-top:0;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
 #toc.toc2 ul ul{margin-left:0;padding-left:1em}
 #toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
 body.toc2.toc-right{padding-left:0;padding-right:15em}
-body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #efefed;left:auto;right:0}}
-@media only screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #efefed;left:auto;right:0}}@media only screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
 #toc.toc2{width:20em}
 #toc.toc2 #toctitle{font-size:1.375em}
 #toc.toc2>ul{font-size:.95em}
 #toc.toc2 ul ul{padding-left:1.25em}
-body.toc2.toc-right{padding-left:0;padding-right:20em}}
-#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
 #content #toc>:first-child{margin-top:0}
 #content #toc>:last-child{margin-bottom:0}
 #footer{max-width:100%;background-color:rgba(0,0,0,.8);padding:1.25em}
 #footer-text{color:rgba(255,255,255,.8);line-height:1.44}
 .sect1{padding-bottom:.625em}
-@media only screen and (min-width:768px){.sect1{padding-bottom:1.25em}}
-.sect1+.sect1{border-top:1px solid #efefed}
+@media only screen and (min-width:768px){.sect1{padding-bottom:1.25em}}.sect1+.sect1{border-top:1px solid #efefed}
 #content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
 #content h1>a.anchor:before,h2>a.anchor:before,h3>a.anchor:before,#toctitle>a.anchor:before,.sidebarblock>.content>.title>a.anchor:before,h4>a.anchor:before,h5>a.anchor:before,h6>a.anchor:before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
 #content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
@@ -213,9 +206,7 @@ table.tableblock #preamble>.sectionbody>.paragraph:first-of-type p{font-size:inh
 .sidebarblock .literalblock pre,.sidebarblock .listingblock pre:not(.highlight),.sidebarblock .listingblock pre[class="highlight"],.sidebarblock .listingblock pre[class^="highlight "],.sidebarblock .listingblock pre.CodeRay,.sidebarblock .listingblock pre.prettyprint{background:#f2f1f1}
 .literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;padding:1em;font-size:.8125em}
 .literalblock pre.nowrap,.literalblock pre[class].nowrap,.listingblock pre.nowrap,.listingblock pre[class].nowrap{overflow-x:auto;white-space:pre;word-wrap:normal}
-@media only screen and (min-width:768px){.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{font-size:.90625em}}
-@media only screen and (min-width:1280px){.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{font-size:1em}}
-.literalblock.output pre{color:#f7f7f8;background-color:rgba(0,0,0,.9)}
+@media only screen and (min-width:768px){.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{font-size:.90625em}}@media only screen and (min-width:1280px){.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{font-size:1em}}.literalblock.output pre{color:#f7f7f8;background-color:rgba(0,0,0,.9)}
 .listingblock pre.highlightjs{padding:0}
 .listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
 .listingblock pre.prettyprint{border-width:0}
@@ -225,7 +216,7 @@ table.tableblock #preamble>.sectionbody>.paragraph:first-of-type p{font-size:inh
 .listingblock.terminal pre .command:before{content:attr(data-prompt);padding-right:.5em;color:#999}
 .listingblock.terminal pre .command:not([data-prompt]):before{content:"$"}
 table.pyhltable{border-collapse:separate;border:0;margin-bottom:0;background:none}
-table.pyhltable td{vertical-align:top;padding-top:0;padding-bottom:0;line-height:1.45}
+table.pyhltable td{vertical-align:top;padding-top:0;padding-bottom:0}
 table.pyhltable td.code{padding-left:.75em;padding-right:0}
 pre.pygments .lineno,table.pyhltable td:not(.code){color:#999;padding-left:0;padding-right:.5em;border-right:1px solid #ddddd8}
 pre.pygments .lineno{display:inline-block;margin-right:.25em}
@@ -246,12 +237,13 @@ table.pyhltable .linenodiv{background:none!important;padding-right:0!important}
 .verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
 .quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
 .quoteblock .attribution br,.verseblock .attribution br{display:none}
-.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.05em;color:rgba(0,0,0,.6)}
 .quoteblock.abstract{margin:0 0 1.25em 0;display:block}
 .quoteblock.abstract blockquote,.quoteblock.abstract blockquote p{text-align:left;word-spacing:0}
 .quoteblock.abstract blockquote:before,.quoteblock.abstract blockquote p:first-of-type:before{display:none}
 table.tableblock{max-width:100%;border-collapse:separate}
 table.tableblock td>.paragraph:last-child p>p:last-child,table.tableblock th>p:last-child,table.tableblock td>p:last-child{margin-bottom:0}
+table.spread{width:100%}
 table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
 table.grid-all th.tableblock,table.grid-all td.tableblock{border-width:0 1px 1px 0}
 table.grid-all tfoot>tr>th.tableblock,table.grid-all tfoot>tr>td.tableblock{border-width:1px 1px 0 0}
@@ -282,8 +274,8 @@ dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
 ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
 ul.unstyled,ol.unnumbered,ul.checklist,ul.none{list-style-type:none}
 ul.unstyled,ol.unnumbered,ul.checklist{margin-left:.625em}
-ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1em;font-size:.85em}
-ul.checklist li>p:first-child>input[type="checkbox"]:first-child{width:1em;position:relative;top:1px}
+ul.checklist li>p:first-child>.fa-check-square-o:first-child,ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{position:relative;top:1px}
 ul.inline{margin:0 auto .625em auto;margin-left:-1.375em;margin-right:0;padding:0;list-style:none;overflow:hidden}
 ul.inline>li{list-style:none;float:left;margin-left:1.375em;display:block}
 ul.inline>li>*{display:block}
@@ -297,8 +289,8 @@ ol.upperroman{list-style-type:upper-roman}
 ol.lowergreek{list-style-type:lower-greek}
 .hdlist>table,.colist>table{border:0;background:none}
 .hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
-td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
-td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist1{padding-right:.75em;font-weight:bold}
+td.hdlist1,td.hdlist2{vertical-align:top}
 .literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
 .colist>table tr>td:first-of-type{padding:0 .75em;line-height:1}
 .colist>table tr>td:last-of-type{padding:.25em 0}
@@ -311,14 +303,13 @@ td.hdlist1{font-weight:bold;padding-bottom:1.25em}
 .image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
 .image.left{margin-right:.625em}
 .image.right{margin-left:.625em}
-a.image{text-decoration:none;display:inline-block}
-a.image object{pointer-events:none}
-sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
-sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+a.image{text-decoration:none}
+span.footnote,span.footnoteref{vertical-align:super;font-size:.875em}
+span.footnote a,span.footnoteref a{text-decoration:none}
+span.footnote a:active,span.footnoteref a:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em 0;border-width:1px 0 0 0}
-#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;text-indent:-1.05em;margin-bottom:.2em}
+#footnotes .footnote{padding:0 .375em;line-height:1.3;font-size:.875em;margin-left:1.2em;text-indent:-1.2em;margin-bottom:.2em}
 #footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none}
 #footnotes .footnote:last-of-type{margin-bottom:0}
 #content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
@@ -376,10 +367,11 @@ span.icon>.fa{cursor:default}
 pre .conum[data-value]{position:relative;top:-.125em}
 b.conum *{color:inherit!important}
 .conum:not([data-value]):empty{display:none}
-dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
-h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
-p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
+h1,h2{letter-spacing:-.01em}
+dt,th.tableblock,td.content{text-rendering:optimizeLegibility}
+p,td.content{letter-spacing:-.01em}
+p strong,td.content strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content{font-size:1.0625rem}
 p{margin-bottom:1.25rem}
 .sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
 .exampleblock>.content{background-color:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
@@ -388,11 +380,11 @@ p{margin-bottom:1.25rem}
 *{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
 a{color:inherit!important;text-decoration:underline!important}
 a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
-a[href^="http:"]:not(.bare):after,a[href^="https:"]:not(.bare):after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+a[href^="http:"]:not(.bare):after,a[href^="https:"]:not(.bare):after,a[href^="mailto:"]:not(.bare):after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
 abbr[title]:after{content:" (" attr(title) ")"}
-pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+pre,blockquote,tr,img{page-break-inside:avoid}
 thead{display:table-header-group}
-svg{max-width:100%}
+img{max-width:100%!important}
 p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
 h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
 #toc,.sidebarblock,.exampleblock>.content{background:none!important}
@@ -428,7 +420,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_the_bootstrap_application_context">The Bootstrap Application Context</a></li>
 <li><a href="#_application_context_hierarchies">Application Context Hierarchies</a></li>
 <li><a href="#customizing-bootstrap-properties">Changing the Location of Bootstrap Properties</a></li>
-<li><a href="#overriding-bootstrap-properties">Overriding the Values of Remote Properties</a></li>
 <li><a href="#_customizing_the_bootstrap_configuration">Customizing the Bootstrap Configuration</a></li>
 <li><a href="#customizing-bootstrap-property-sources">Customizing the Bootstrap Property Sources</a></li>
 <li><a href="#_environment_changes">Environment Changes</a></li>
@@ -439,11 +430,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_spring_cloud_commons_common_abstractions">Spring Cloud Commons: Common Abstractions</a>
 <ul class="sectlevel2">
-<li><a href="#__enablediscoveryclient">@EnableDiscoveryClient</a></li>
-<li><a href="#_serviceregistry">ServiceRegistry</a></li>
 <li><a href="#_spring_resttemplate_as_a_load_balancer_client">Spring RestTemplate as a Load Balancer Client</a></li>
 <li><a href="#_multiple_resttemplate_objects">Multiple RestTemplate objects</a></li>
-<li><a href="#ignore-network-interfaces">Ignore Network Interfaces</a></li>
 </ul>
 </li>
 </ul>
@@ -464,13 +452,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</a></p>
+<p>Java 6 JCE Link <a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html" class="bare">http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html</a></p>
 </li>
 <li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</a></p>
+<p>Java 7 JCE Link <a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html" class="bare">http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html</a></p>
 </li>
 <li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</a></p>
+<p>Java 8 JCE Link <a href="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html" class="bare">http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html</a></p>
 </li>
 </ul>
 </div>
@@ -511,7 +499,7 @@ the external sources, and also decrypting properties in the local
 external configuration files. The two contexts share an <code>Environment</code>
 which is the source of external properties for any Spring
 application. Bootstrap properties are added with high precedence, so
-they cannot be overridden by local configuration, by default.</p>
+they cannot be overridden by local configuration.</p>
 </div>
 <div class="paragraph">
 <p>The bootstrap context uses a different convention for locating
@@ -610,8 +598,8 @@ things with their parent.</p>
 <div class="sect2">
 <h3 id="customizing-bootstrap-properties">Changing the Location of Bootstrap Properties</h3>
 <div class="paragraph">
-<p>The <code>bootstrap.yml</code> (or <code>.properties</code>) location can be specified using
-<code>spring.cloud.bootstrap.name</code> (default "bootstrap") or
+<p>The <code>bootstrap.yml</code> (or <code>.properties) location can be specified using
+`spring.cloud.bootstrap.name</code> (default "bootstrap") or
 <code>spring.cloud.bootstrap.location</code> (default empty), e.g. in System
 properties. Those properties behave like the <code>spring.config.*</code>
 variants with the same name, in fact they are used to set up the
@@ -621,26 +609,6 @@ bootstrap <code>ApplicationContext</code> by setting those properties in its
 context you are building) then properties in that profile will be
 loaded as well, just like in a regular Spring Boot app, e.g. from
 <code>bootstrap-development.properties</code> for a "development" profile.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="overriding-bootstrap-properties">Overriding the Values of Remote Properties</h3>
-<div class="paragraph">
-<p>The property sources that are added to you application by the
-bootstrap context are often "remote" (e.g. from a Config Server), and
-by default they cannot be overridden locally, except on the command
-line. If you want to allow your applications to override the remote
-properties with their own System properties or config files, the
-remote property source has to grant it permission by setting
-<code>spring.cloud.config.allowOverride=true</code> (it doesn&#8217;t work to set this
-locally). Once that flag is set there are some finer grained settings
-to control the location of the remote properties in relation to System
-properties and the application&#8217;s local configuration:
-<code>spring.cloud.config.overrideNone=true</code> to override with any local
-property source, and
-<code>spring.cloud.config.overrideSystemProperties=false</code> if only System
-properties and env vars should override the remote settings, but not
-the local config files.</p>
 </div>
 </div>
 <div class="sect2">
@@ -737,10 +705,10 @@ application that includes that jar on its classpath.</p>
 <div class="sect2">
 <h3 id="_environment_changes">Environment Changes</h3>
 <div class="paragraph">
-<p>The application will listen for an <code>EnvironmentChangeEvent</code> and react
+<p>The application will listen for an <code>EnvironmentChangedEvent</code> and react
 to the change in a couple of standard ways (additional
 <code>ApplicationListeners</code> can be added as <code>@Beans</code> by the user in the
-normal way). When an <code>EnvironmentChangeEvent</code> is observed it will
+normal way). When an <code>EnvironmentChangedEvent</code> is observed it will
 have a list of key values that have changed, and the application will
 use those to:</p>
 </div>
@@ -759,13 +727,13 @@ use those to:</p>
 the <code>Environment</code>, and generally we would not recommend that approach
 for detecting changes (although you could set it up with a
 <code>@Scheduled</code> annotation). If you have a scaled-out client application
-then it is better to broadcast the <code>EnvironmentChangeEvent</code> to all
+then it is better to broadcast the <code>EnvironmentChangedEvent</code> to all
 the instances instead of having them polling for changes (e.g. using
 the <a href="https://github.com/spring-cloud/spring-cloud-bus">Spring Cloud
 Bus</a>).</p>
 </div>
 <div class="paragraph">
-<p>The <code>EnvironmentChangeEvent</code> covers a large class of refresh use
+<p>The <code>EnvironmentChangedEvent</code> covers a large class of refresh use
 cases, as long as you can actually make a change to the <code>Environment</code>
 and publish the event (those APIs are public and part of core
 Spring). You can verify the changes are bound to
@@ -829,35 +797,19 @@ re-initialized from the refreshed <code>@Configuration</code>).
 <div class="sect2">
 <h3 id="_encryption_and_decryption">Encryption and Decryption</h3>
 <div class="paragraph">
-<p>Spring Cloud has an <code>Environment</code> pre-processor for decrypting
+<p>The Config Client has an <code>Environment</code> pre-processor for decrypting
 property values locally. It follows the same rules as the Config
 Server, and has the same external configuration via <code>encrypt.*</code>. Thus
 you can use encrypted values in the form <code>{cipher}*</code> and as long as
 there is a valid key then they will be decrypted before the main
 application context gets the <code>Environment</code>. To use the encryption
-features in an application you need to include Spring Security RSA in
-your classpath (Maven co-ordinates
+features in a client you need to include Spring Security RSA in your
+classpath (Maven co-ordinates
 "org.springframework.security:spring-security-rsa") and you also need
 the full strength JCE extensions in your JVM.</p>
 </div>
 <div class="paragraph">
-<p>If you are getting an exception due to "Illegal key size" and you are using Sun&#8217;s JDK, you need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files. See the following links for more information:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</a></p>
-</li>
-<li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</a></p>
-</li>
-<li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</a></p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Extract files into JDK/jre/lib/security folder (whichever version of JRE/JDK x64/x86 you are using).</p>
+<p>include::jce.adoc</p>
 </div>
 </div>
 <div class="sect2">
@@ -891,84 +843,14 @@ the full strength JCE extensions in your JVM.</p>
 <p>Patterns such as service discovery, load balancing and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (e.g. discovery via Eureka or Consul).</p>
 </div>
 <div class="sect2">
-<h3 id="__enablediscoveryclient">@EnableDiscoveryClient</h3>
-<div class="paragraph">
-<p>Commons provides the <code>@EnableDiscoveryClient</code> annotation. This looks for implementations of the <code>DiscoveryClient</code> interface via <code>META-INF/spring.factories</code>. Implementations of Discovery Client will add a configuration class to <code>spring.factories</code> under the <code>org.springframework.cloud.client.discovery.EnableDiscoveryClient</code> key. Examples of <code>DiscoveryClient</code> implementations: are <a href="http://cloud.spring.io/spring-cloud-netflix/">Spring Cloud Netflix Eureka</a>, <a href="http://cloud.spring.io/spring-cloud-consul/">Spring Cloud Consul Discovery</a> and <a href="http://cloud.spring.io/spring-cloud-zookeeper/">Spring Cloud Zookeeper Discovery</a>.</p>
-</div>
-<div class="paragraph">
-<p>By default, implementations of <code>DiscoveryClient</code> will auto-register the local Spring Boot server with the remote discovery server. This can be disabled by setting <code>autoRegister=false</code> in <code>@EnableDiscoveryClient</code>.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_serviceregistry">ServiceRegistry</h3>
-<div class="paragraph">
-<p>Commons now provides a <code>ServiceRegistry</code> interface which provides methods like <code>register(Registration)</code> and <code>deregister(Registration)</code> which allow you to provide custom registered services. <code>Registration</code> is a marker interface.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">@Configuration
-@EnableDiscoveryClient(autoRegister=false)
-public class MyConfiguration {
-    private ServiceRegistry registry;
-
-    public MyConfiguration(ServiceRegistry registry) {
-        this.registry = registry;
-    }
-
-    // called via some external process, such as an event or a custom actuator endpoint
-    public void register() {
-        Registration registration = constructRegistration();
-        this.registry.register(registration);
-    }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Each <code>ServiceRegistry</code> implementation has its own <code>Registry</code> implementation.</p>
-</div>
-<div class="sect3">
-<h4 id="_serviceregistry_auto_registration">ServiceRegistry Auto-Registration</h4>
-<div class="paragraph">
-<p>By default, the <code>ServiceRegistry</code> implementation will auto-register the running service. To disable that behavior, there are two methods. You can set <code>@EnableDiscoveryClient(autoRegister=false)</code> to permanently disable auto-registration. You can also set <code>spring.cloud.service-registry.auto-registration.enabled=false</code> to disable the behavior via configuration.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_service_registry_actuator_endpoint">Service Registry Actuator Endpoint</h4>
-<div class="paragraph">
-<p>A <code>/service-registry</code> actuator endpoint is provided by Commons. This endpoint relys on a <code>Registration</code> bean in the Spring Application Context. Calling <code>/service-registry/instance-status</code> via a GET will return the status of the <code>Registration</code>. A POST to the same endpoint with a <code>String</code> body will change the status of the current <code>Registration</code> to the new value. Please see the documentation of the <code>ServiceRegistry</code> implementation you are using for the allowed values for updating the status and the values retured for the status.</p>
-</div>
-</div>
-</div>
-<div class="sect2">
 <h3 id="_spring_resttemplate_as_a_load_balancer_client">Spring RestTemplate as a Load Balancer Client</h3>
 <div class="paragraph">
-<p><code>RestTemplate</code> can be automatically configured to use ribbon. To create a load balanced <code>RestTemplate</code> create a <code>RestTemplate</code> <code>@Bean</code> and use the <code>@LoadBalanced</code> qualifier.</p>
-</div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Warning</div>
-</td>
-<td class="content">
-A <code>RestTemplate</code> bean is no longer created via auto configuration. It must be created by individual applications.
-</td>
-</tr>
-</table>
+<p>You can use Ribbon indirectly via an autoconfigured <code>RestTemplate</code>
+when RestTemplate is on the classpath and a <code>LoadBalancerClient</code> bean is defined):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">@Configuration
-public class MyConfiguration {
-
-    @LoadBalanced
-    @Bean
-    RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-}
-
-public class MyClass {
+<pre class="highlight"><code class="language-java" data-lang="java">public class MyClass {
     @Autowired
     private RestTemplate restTemplate;
 
@@ -982,43 +864,16 @@ public class MyClass {
 <div class="paragraph">
 <p>The URI needs to use a virtual host name (ie. service name, not a host name).
 The Ribbon client is used to create a full physical address. See
-<a href="https://github.com/spring-cloud/spring-cloud-netflix/blob/master/spring-cloud-netflix-core/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java">RibbonAutoConfiguration</a>
+<a href="https://github.com/spring-cloud/spring-cloud-netflix-core/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java">RibbonAutoConfiguration</a>
 for details of how the <code>RestTemplate</code> is set up.</p>
-</div>
-<div class="sect3">
-<h4 id="_retrying_failed_requests">Retrying Failed Requests</h4>
-<div class="paragraph">
-<p>A load balanced <code>RestTemplate</code> can be configured to retry failed requests.
-By default this logic is disabled, you can enable it by adding <a href="https://github.com/spring-projects/spring-retry">Spring Retry</a> to your application&#8217;s classpath.  The load balanced <code>RestTemplate</code> will
-honor some of the Ribbon configuration values related to retrying failed requests.  If
-you would like to disable the retry logic with Spring Retry on the classpath
-you can set <code>spring.cloud.loadbalancer.retry.enabled=false</code>.
-The properties you can use are <code>client.ribbon.MaxAutoRetries</code>,
-<code>client.ribbon.MaxAutoRetriesNextServer</code>, and <code>client.ribbon.OkToRetryOnAllOperations</code>.
-See the <a href="https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties">Ribbon documentation</a>
-for a description of what there properties do.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-<code>client</code> in the above examples should be replaced with your Ribbon client&#8217;s
-name.
-</td>
-</tr>
-</table>
-</div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_multiple_resttemplate_objects">Multiple RestTemplate objects</h3>
 <div class="paragraph">
 <p>If you want a <code>RestTemplate</code> that is not load balanced, create a <code>RestTemplate</code>
-bean and inject it as normal.  To access the load balanced <code>RestTemplate</code> use
-the <code>@LoadBalanced</code> qualifier when you create your <code>@Bean</code>.</p>
+bean and inject it as normal.  To access the load balanced <code>RestTemplate use
+the provided `@LoadBalanced</code> <code>Qualifier</code>.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -1027,7 +882,7 @@ the <code>@LoadBalanced</code> qualifier when you create your <code>@Bean</code>
 <div class="title">Important</div>
 </td>
 <td class="content">
-Notice the <code>@Primary</code> annotation on the plain <code>RestTemplate</code> declaration in the example below, to disambiguate the unqualified <code>@Autowired</code> injection.
+Notice the <code>@Primary</code> annotation on the plain <code>RestTemplate</code> declaration.
 </td>
 </tr>
 </table>
@@ -1036,12 +891,6 @@ Notice the <code>@Primary</code> annotation on the plain <code>RestTemplate</cod
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">@Configuration
 public class MyConfiguration {
-
-    @LoadBalanced
-    @Bean
-    RestTemplate loadBalanced() {
-        return new RestTemplate();
-    }
 
     @Primary
     @Bean
@@ -1068,63 +917,13 @@ public class MyClass {
 }</code></pre>
 </div>
 </div>
-<div class="admonitionblock tip">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Tip</div>
-</td>
-<td class="content">
-If you see errors like <code>java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89</code> try injecting <code>RestOperations</code> instead or setting <code>spring.aop.proxyTargetClass=true</code>.
-</td>
-</tr>
-</table>
-</div>
-</div>
-<div class="sect2">
-<h3 id="ignore-network-interfaces">Ignore Network Interfaces</h3>
-<div class="paragraph">
-<p>Sometimes it is useful to ignore certain named network interfaces so they can be excluded from Service Discovery registration (eg. running in a Docker container). A list of regular expressions can be set that will cause the desired network interfaces to be ignored. The following configuration will ignore the "docker0" interface and all interfaces that start with "veth".</p>
-</div>
-<div class="listingblock">
-<div class="title">application.yml</div>
-<div class="content">
-<pre>spring:
-  cloud:
-    inetutils:
-      ignoredInterfaces:
-        - docker0
-        - veth.*</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>You can also force to use only specified network addresses using list of regular expressions:</p>
-</div>
-<div class="listingblock">
-<div class="title">application.yml</div>
-<div class="content">
-<pre>spring:
-  cloud:
-    inetutils:
-      preferredNetworks:
-        - 192.168
-        - 10.0</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>You can also force to use only site local addresses. See <a href="https://docs.oracle.com/javase/8/docs/api/java/net/Inet4Address.html#isSiteLocalAddress--">Inet4Address.html.isSiteLocalAddress()</a> for more details what is site local address.</p>
-</div>
-<div class="listingblock">
-<div class="title">application.yml</div>
-<div class="content">
-<pre>spring:
-  cloud:
-    inetutils:
-      useOnlySiteLocalInterfaces: true</pre>
 </div>
 </div>
 </div>
 </div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2017-08-29 16:35:34 +00:00
 </div>
 </div>
 </body>
