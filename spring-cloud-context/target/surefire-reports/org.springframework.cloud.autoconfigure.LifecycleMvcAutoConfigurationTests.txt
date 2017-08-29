@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.springframework.cloud.autoconfigure.LifecycleMvcAutoConfigurationTests
+-------------------------------------------------------------------------------
+Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 21.717 sec

@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderListIntegrationTests
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 0.273 sec
