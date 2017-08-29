@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="6.11.2">
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/CommonsClientAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/DefaultServiceInstance.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/HostInfoEnvironmentPostProcessor.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/ServiceInstance.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/SpringCloudApplication.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/actuator/FeaturesEndpoint.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/actuator/HasFeatures.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/actuator/NamedFeature.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/circuitbreaker/EnableCircuitBreaker.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/circuitbreaker/EnableCircuitBreakerImportSelector.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/AbstractDiscoveryLifecycle.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/DiscoveryClient.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/DiscoveryLifecycle.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/EnableDiscoveryClient.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/EnableDiscoveryClientImportSelector.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/ManagementServerPortUtils.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/composite/CompositeDiscoveryClient.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/composite/CompositeDiscoveryClientAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/event/HeartbeatEvent.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/event/HeartbeatMonitor.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/event/InstanceRegisteredEvent.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/event/ParentHeartbeatEvent.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/health/DiscoveryClientHealthIndicator.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/health/DiscoveryClientHealthIndicatorProperties.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/health/DiscoveryCompositeHealthIndicator.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/health/DiscoveryHealthIndicator.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/noop/NoopDiscoveryClient.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/noop/NoopDiscoveryClientAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/simple/SimpleDiscoveryClient.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/simple/SimpleDiscoveryClientAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/discovery/simple/SimpleDiscoveryProperties.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/hypermedia/CloudHypermediaAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/hypermedia/DiscoveredResource.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/hypermedia/DynamicServiceInstanceProvider.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/hypermedia/RemoteResource.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/hypermedia/RemoteResourceRefresher.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/hypermedia/ServiceInstanceProvider.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/hypermedia/StaticServiceInstanceProvider.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/hypermedia/TraversalDefinition.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/AsyncLoadBalancerAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/AsyncLoadBalancerInterceptor.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/AsyncRestTemplateCustomizer.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/InterceptorRetryPolicy.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalanced.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancedRetryContext.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancedRetryPolicy.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancedRetryPolicyFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancerAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancerClient.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancerInterceptor.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancerRequest.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancerRequestFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancerRequestTransformer.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/LoadBalancerRetryProperties.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/RestTemplateCustomizer.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/RetryLoadBalancerInterceptor.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/RetryableStatusCodeException.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/ServiceInstanceChooser.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/loadbalancer/ServiceRequestWrapper.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/serviceregistry/AbstractAutoServiceRegistration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/serviceregistry/AutoServiceRegistration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/serviceregistry/AutoServiceRegistrationAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/serviceregistry/AutoServiceRegistrationConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/serviceregistry/AutoServiceRegistrationProperties.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/serviceregistry/Registration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/serviceregistry/ServiceRegistry.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/serviceregistry/ServiceRegistryAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/client/serviceregistry/endpoint/ServiceRegistryEndpoint.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/httpclient/ApacheHttpClientConnectionManagerFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/httpclient/ApacheHttpClientFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/httpclient/DefaultApacheHttpClientConnectionManagerFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/httpclient/DefaultApacheHttpClientFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/httpclient/DefaultOkHttpClientConnectionPoolFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/httpclient/DefaultOkHttpClientFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/httpclient/HttpClientConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/httpclient/OkHttpClientConnectionPoolFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/httpclient/OkHttpClientFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/util/IdUtils.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/util/InetUtils.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/util/InetUtilsProperties.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/util/SpringFactoryImportSelector.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/main/java/org/springframework/cloud/commons/util/UtilAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/test/resources/application-encrypt.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/test/resources/application.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/test/resources/bootstrap-encrypt.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/test/resources/bootstrap-parent.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/test/resources/bootstrap.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/test/resources/external-properties/bootstrap.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/test/resources/other.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-commons/src/test/resources/plain.properties">
+</file>
+</checkstyle>

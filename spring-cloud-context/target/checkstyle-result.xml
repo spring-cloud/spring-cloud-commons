@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="6.11.2">
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/autoconfigure/ConfigurationPropertiesRebinderAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/autoconfigure/LifecycleMvcEndpointAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/autoconfigure/RefreshAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/autoconfigure/RefreshEndpointAutoConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/bootstrap/BootstrapApplicationListener.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/bootstrap/BootstrapConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/bootstrap/LoggingSystemShutdownListener.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/bootstrap/config/PropertySourceBootstrapConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/bootstrap/config/PropertySourceBootstrapProperties.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/bootstrap/config/PropertySourceLocator.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/bootstrap/encrypt/EncryptionBootstrapConfiguration.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/bootstrap/encrypt/EnvironmentDecryptApplicationInitializer.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/bootstrap/encrypt/KeyProperties.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/config/BeanLifecycleDecorator.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/config/StandardBeanLifecycleDecorator.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/config/annotation/RefreshScope.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/encrypt/EncryptorFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/encrypt/KeyFormatException.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/environment/EnvironmentChangeEvent.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/environment/EnvironmentManager.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/environment/EnvironmentManagerMvcEndpoint.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/named/NamedContextFactory.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/properties/ConfigurationPropertiesBeans.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/properties/ConfigurationPropertiesRebinder.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/refresh/ContextRefresher.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/restart/RestartEndpoint.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/restart/RestartListener.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/restart/RestartMvcEndpoint.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/scope/GenericScope.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/scope/ScopeCache.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/scope/StandardScopeCache.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/scope/refresh/RefreshScope.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/scope/refresh/RefreshScopeRefreshedEvent.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/scope/thread/ThreadLocalScopeCache.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/context/scope/thread/ThreadScope.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/endpoint/GenericPostableMvcEndpoint.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/endpoint/RefreshEndpoint.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/endpoint/event/RefreshEvent.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/endpoint/event/RefreshEventListener.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/health/RefreshScopeHealthIndicator.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/main/java/org/springframework/cloud/logging/LoggingRebinder.java">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/application-encrypt.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/application-local.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/application-override.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/application.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/bootstrap-encrypt.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/bootstrap-parent.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/bootstrap.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/custom.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/external-properties/bootstrap.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/messages.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/other.properties">
+</file>
+<file name="/opt/jenkins/data/workspace/spring-cloud-commons-master-ci/spring-cloud-context/src/test/resources/plain.properties">
+</file>
+</checkstyle>
