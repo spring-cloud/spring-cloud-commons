@@ -14,7 +14,7 @@
 	<properties>
         <docs.main>spring-cloud-commons</docs.main>
 		<main.basedir>${basedir}/..</main.basedir>
-		<docs.whitelisted.branches>1.0.x</docs.whitelisted.branches>
+		<docs.whitelisted.branches>1.0.x,1.2.x,2.0.x</docs.whitelisted.branches>
 	</properties>
  	<build>
 		<plugins>
@@ -32,21 +32,29 @@
 			<id>docs</id>
             <build>
                <plugins>
-		        <plugin>
-		          <groupId>org.asciidoctor</groupId>
-		          <artifactId>asciidoctor-maven-plugin</artifactId>
-                  <inherited>false</inherited>
-                </plugin>
-			    <plugin>
-				  <groupId>org.apache.maven.plugins</groupId>
-				  <artifactId>maven-antrun-plugin</artifactId>
-                  <inherited>false</inherited>
-                </plugin>
- 				<plugin>
-				  <groupId>org.codehaus.mojo</groupId>
-				  <artifactId>build-helper-maven-plugin</artifactId>
-                  <inherited>false</inherited>
-                </plugin>
+								<plugin>
+									<groupId>org.apache.maven.plugins</groupId>
+									<artifactId>maven-dependency-plugin</artifactId>
+								</plugin>
+							   <plugin>
+								   <groupId>org.asciidoctor</groupId>
+								   <artifactId>asciidoctor-maven-plugin</artifactId>
+								   <inherited>false</inherited>
+							   </plugin>
+							   <plugin>
+								   <groupId>com.agilejava.docbkx</groupId>
+								   <artifactId>docbkx-maven-plugin</artifactId>
+							   </plugin>
+							   <plugin>
+								   <groupId>org.apache.maven.plugins</groupId>
+								   <artifactId>maven-antrun-plugin</artifactId>
+								   <inherited>false</inherited>
+							   </plugin>
+							   <plugin>
+								   <groupId>org.codehaus.mojo</groupId>
+								   <artifactId>build-helper-maven-plugin</artifactId>
+								   <inherited>false</inherited>
+							   </plugin>
               </plugins>
             </build>
 		</profile>
