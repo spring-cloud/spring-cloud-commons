@@ -21,8 +21,8 @@ import java.util.List;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.endpoint.Endpoint;
+import org.springframework.boot.endpoint.ReadOperation;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -30,15 +30,14 @@ import org.springframework.context.ApplicationContextAware;
 /**
  * @author Spencer Gibb
  */
-@ConfigurationProperties(prefix = "endpoints.features", ignoreUnknownFields = false)
-public class FeaturesEndpoint extends AbstractEndpoint<FeaturesEndpoint.Features>
+@Endpoint(id = "features")
+public class FeaturesEndpoint
 		implements ApplicationContextAware {
 
 	private final List<HasFeatures> hasFeaturesList;
 	private ApplicationContext context;
 
 	public FeaturesEndpoint(List<HasFeatures> hasFeaturesList) {
-		super("features", false);
 		this.hasFeaturesList = hasFeaturesList;
 	}
 
@@ -47,8 +46,8 @@ public class FeaturesEndpoint extends AbstractEndpoint<FeaturesEndpoint.Features
 		this.context = context;
 	}
 
-	@Override
-	public Features invoke() {
+	@ReadOperation
+	public Features features() {
 		Features features = new Features();
 
 		for (HasFeatures hasFeatures : this.hasFeaturesList) {

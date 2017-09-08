@@ -15,21 +15,15 @@
  */
 package org.springframework.cloud.autoconfigure;
 
-import org.springframework.boot.actuate.condition.ConditionalOnEnabledEndpoint;
+import org.springframework.boot.actuate.autoconfigure.endpoint.ConditionalOnEnabledEndpoint;
 import org.springframework.boot.actuate.endpoint.EnvironmentEndpoint;
-import org.springframework.boot.actuate.endpoint.mvc.MvcEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentManager;
-import org.springframework.cloud.context.environment.EnvironmentManagerMvcEndpoint;
-import org.springframework.cloud.context.restart.RestartEndpoint;
-import org.springframework.cloud.context.restart.RestartMvcEndpoint;
-import org.springframework.cloud.endpoint.GenericPostableMvcEndpoint;
-import org.springframework.cloud.endpoint.RefreshEndpoint;
+import org.springframework.cloud.context.environment.EnvironmentWebEndpointExtension;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,41 +38,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnClass(EnvironmentEndpoint.class)
 @ConditionalOnWebApplication
-//TODO: support reactive
 @AutoConfigureAfter({ WebMvcAutoConfiguration.class,
 		RefreshEndpointAutoConfiguration.class })
 public class LifecycleMvcEndpointAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean(EnvironmentEndpoint.class)
-	@ConditionalOnEnabledEndpoint(value = "env.post")
-	public EnvironmentManagerMvcEndpoint environmentManagerEndpoint(
-			EnvironmentEndpoint delegate, EnvironmentManager environment) {
-		return new EnvironmentManagerMvcEndpoint(delegate, environment);
-	}
-
-	@Bean
-	@ConditionalOnBean(RefreshEndpoint.class)
-	public MvcEndpoint refreshMvcEndpoint(RefreshEndpoint endpoint) {
-		return new GenericPostableMvcEndpoint(endpoint);
-	}
-
-	@Bean
-	@ConditionalOnBean(RestartEndpoint.class)
-	public RestartMvcEndpoint restartMvcEndpoint(RestartEndpoint restartEndpoint) {
-		return new RestartMvcEndpoint(restartEndpoint);
-	}
-
-	@Bean
-	@ConditionalOnBean(RestartEndpoint.PauseEndpoint.class)
-	public MvcEndpoint pauseMvcEndpoint(RestartEndpoint.PauseEndpoint pauseEndpoint) {
-		return new GenericPostableMvcEndpoint(pauseEndpoint);
-	}
-
-	@Bean
-	@ConditionalOnBean(RestartEndpoint.ResumeEndpoint.class)
-	public MvcEndpoint resumeMvcEndpoint(RestartEndpoint.ResumeEndpoint resumeEndpoint) {
-		return new GenericPostableMvcEndpoint(resumeEndpoint);
+	@ConditionalOnEnabledEndpoint
+	public EnvironmentWebEndpointExtension environmentWebEndpointExtension(
+			EnvironmentManager environment) {
+		return new EnvironmentWebEndpointExtension(environment);
 	}
 
 }

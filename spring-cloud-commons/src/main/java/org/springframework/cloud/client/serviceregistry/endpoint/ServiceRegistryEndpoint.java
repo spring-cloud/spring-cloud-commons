@@ -17,29 +17,23 @@
 
 package org.springframework.cloud.client.serviceregistry.endpoint;
 
-import org.springframework.boot.actuate.endpoint.Endpoint;
-import org.springframework.boot.actuate.endpoint.mvc.MvcEndpoint;
+import org.springframework.boot.endpoint.Endpoint;
+import org.springframework.boot.endpoint.ReadOperation;
+import org.springframework.boot.endpoint.WriteOperation;
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Endpoint to display and set the service instance status using the service registry.
  *
  * @author Spencer Gibb
  */
-@ManagedResource(description = "Can be used to display and set the service instance status using the service registry")
 @SuppressWarnings("unchecked")
-public class ServiceRegistryEndpoint implements MvcEndpoint {
+@Endpoint(id = "service-registry")
+public class ServiceRegistryEndpoint {
 
 	private final ServiceRegistry serviceRegistry;
 
@@ -53,10 +47,8 @@ public class ServiceRegistryEndpoint implements MvcEndpoint {
 		this.registration = registration;
 	}
 
-	@RequestMapping(path = "instance-status", method = RequestMethod.POST)
-	@ResponseBody
-	@ManagedOperation
-	public ResponseEntity<?> setStatus(@RequestBody String status) {
+	@WriteOperation
+	public ResponseEntity<?> setStatus(String status) {
 		Assert.notNull(status, "status may not by null");
 
 		if (this.registration == null) {
@@ -67,9 +59,7 @@ public class ServiceRegistryEndpoint implements MvcEndpoint {
 		return ResponseEntity.ok().build();
 	}
 
-	@RequestMapping(path = "instance-status", method = RequestMethod.GET)
-	@ResponseBody
-	@ManagedAttribute
+	@ReadOperation
 	public ResponseEntity getStatus() {
 		if (this.registration == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no registration found");
@@ -78,18 +68,4 @@ public class ServiceRegistryEndpoint implements MvcEndpoint {
 		return ResponseEntity.ok().body(this.serviceRegistry.getStatus(this.registration));
 	}
 
-	@Override
-	public String getPath() {
-		return "/service-registry";
-	}
-
-	@Override
-	public boolean isSensitive() {
-		return true;
-	}
-
-	@Override
-	public Class<? extends Endpoint<?>> getEndpointType() {
-		return null;
-	}
 }

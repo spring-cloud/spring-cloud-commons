@@ -17,13 +17,10 @@ package org.springframework.cloud.context.environment;
 
 import java.util.Map;
 
-import org.springframework.boot.actuate.endpoint.Endpoint;
 import org.springframework.boot.actuate.endpoint.EnvironmentEndpoint;
-import org.springframework.boot.actuate.endpoint.mvc.MvcEndpoint;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.boot.endpoint.DeleteOperation;
+import org.springframework.boot.endpoint.WriteOperation;
+import org.springframework.boot.endpoint.web.WebEndpointExtension;
 
 /**
  * MVC endpoint for the {@link EnvironmentManager} providing a POST to /env as a simple
@@ -32,28 +29,24 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author Dave Syer
  * 
  */
-public class EnvironmentManagerMvcEndpoint implements MvcEndpoint {
+@WebEndpointExtension(endpoint = EnvironmentEndpoint.class)
+public class EnvironmentWebEndpointExtension {
 
 	private EnvironmentManager environment;
-	private EnvironmentEndpoint delegate;
 
-	public EnvironmentManagerMvcEndpoint(EnvironmentEndpoint delegate,
-			EnvironmentManager enviroment) {
-		this.delegate = delegate;
+	public EnvironmentWebEndpointExtension(EnvironmentManager enviroment) {
 		environment = enviroment;
 	}
 
-	@RequestMapping(value = "", method = RequestMethod.POST)
-	@ResponseBody
-	public Object value(@RequestParam Map<String, String> params) {
+	@WriteOperation
+	public Object write(Map<String, String> params) {
 		for (String name : params.keySet()) {
 			environment.setProperty(name, params.get(name));
 		}
 		return params;
 	}
 
-	@RequestMapping(value = "reset", method = RequestMethod.POST)
-	@ResponseBody
+	@DeleteOperation
 	public Map<String, Object> reset() {
 		return environment.reset();
 	}
@@ -62,19 +55,4 @@ public class EnvironmentManagerMvcEndpoint implements MvcEndpoint {
 		this.environment = environment;
 	}
 
-	@Override
-	public String getPath() {
-		return "/" + this.delegate.getId();
-	}
-
-	@Override
-	public boolean isSensitive() {
-		return this.delegate.isSensitive();
-	}
-
-	@Override
-	@SuppressWarnings("rawtypes")
-	public Class<? extends Endpoint> getEndpointType() {
-		return this.delegate.getClass();
-	}
 }

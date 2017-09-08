@@ -43,7 +43,7 @@ public class FeaturesEndpointTests {
 	@Test
 	public void invokeWorks() {
 		FeaturesEndpoint.Features features = this.context.getBean(FeaturesEndpoint.class)
-				.invoke();
+				.features();
 		assertThat(features, is(notNullValue()));
 		assertThat(features.getEnabled().size(), is(equalTo(2)));
 		assertThat(features.getDisabled().size(), is(equalTo(1)));

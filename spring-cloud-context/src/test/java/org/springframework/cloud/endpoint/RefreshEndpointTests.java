@@ -75,7 +75,7 @@ public class RefreshEndpointTests {
 		EnvironmentTestUtils.addEnvironment(this.context, "spring.profiles.active=local");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
-		Collection<String> keys = endpoint.invoke();
+		Collection<String> keys = endpoint.refresh();
 		assertTrue("Wrong keys: " + keys, keys.contains("added"));
 	}
 
@@ -90,7 +90,7 @@ public class RefreshEndpointTests {
 				"spring.profiles.active=override");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
-		Collection<String> keys = endpoint.invoke();
+		Collection<String> keys = endpoint.refresh();
 		assertTrue("Wrong keys: " + keys, keys.contains("message"));
 	}
 
@@ -106,7 +106,7 @@ public class RefreshEndpointTests {
 						+ ExternalPropertySourceLocator.class.getName());
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
-		Collection<String> keys = endpoint.invoke();
+		Collection<String> keys = endpoint.refresh();
 		assertTrue("Wrong keys: " + keys, keys.contains("external.message"));
 	}
 
@@ -124,7 +124,7 @@ public class RefreshEndpointTests {
 				"spring.main.sources=" + ExternalPropertySourceLocator.class.getName());
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
-		Collection<String> keys = endpoint.invoke();
+		Collection<String> keys = endpoint.refresh();
 		assertFalse("Wrong keys: " + keys, keys.contains("external.message"));
 	}
 
@@ -137,7 +137,7 @@ public class RefreshEndpointTests {
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Empty empty = this.context.getBean(Empty.class);
-		endpoint.invoke();
+		endpoint.refresh();
 		int after = empty.events.size();
 		assertEquals("Shutdown hooks not cleaned on refresh", 2, after);
 		assertTrue(empty.events.get(0) instanceof EnvironmentChangeEvent);
@@ -152,7 +152,7 @@ public class RefreshEndpointTests {
 		ContextRefresher contextRefresher = new ContextRefresher(context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		int count = countShutdownHooks();
-		endpoint.invoke();
+		endpoint.refresh();
 		int after = countShutdownHooks();
 		assertEquals("Shutdown hooks not cleaned on refresh", count, after);
 	}

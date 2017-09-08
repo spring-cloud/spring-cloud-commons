@@ -19,37 +19,30 @@ package org.springframework.cloud.context.restart;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.endpoint.Endpoint;
+import org.springframework.boot.endpoint.WriteOperation;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.integration.monitor.IntegrationMBeanExporter;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.util.ClassUtils;
 
 /**
  * An endpoint that restarts the application context. Install as a bean and also register
  * a {@link RestartListener} with the {@link SpringApplication} that starts the context.
  * Those two components communicate via an {@link ApplicationEvent} and set up the state
- * needed to restart the context.
+ * needed to doRestart the context.
  *
  * @author Dave Syer
  *
  */
-@ConfigurationProperties("endpoints.restart")
-@ManagedResource
-public class RestartEndpoint extends AbstractEndpoint<Boolean>
+@Endpoint(id = "restart", enabledByDefault = false)
+public class RestartEndpoint
 		implements ApplicationListener<ApplicationPreparedEvent> {
 
 	private static Log logger = LogFactory.getLog(RestartEndpoint.class);
-
-	public RestartEndpoint() {
-		super("restart", true, false);
-	}
 
 	private ConfigurableApplicationContext context;
 
@@ -63,7 +56,7 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean>
 
 	private long timeout;
 
-	@ManagedAttribute
+	// @ManagedAttribute
 	public long getTimeout() {
 		return this.timeout;
 	}
@@ -88,19 +81,20 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean>
 		}
 	}
 
-	@Override
-	public Boolean invoke() {
+	@WriteOperation
+	//FIXME: map with "message: Restarting" or couldn't restart
+	public Boolean restart() {
 		try {
-			restart();
+			doRestart();
 			logger.info("Restarted");
 			return true;
 		}
 		catch (Exception e) {
 			if (logger.isDebugEnabled()) {
-				logger.info("Could not restart", e);
+				logger.info("Could not doRestart", e);
 			}
 			else {
-				logger.info("Could not restart: " + e.getMessage());
+				logger.info("Could not doRestart: " + e.getMessage());
 			}
 			return false;
 		}
@@ -114,42 +108,35 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean>
 		return new ResumeEndpoint();
 	}
 
-	@ConfigurationProperties("endpoints.pause")
-	public class PauseEndpoint extends AbstractEndpoint<Boolean> {
+	@Endpoint(id = "pause")
+	public class PauseEndpoint {
 
-		public PauseEndpoint() {
-			super("pause", true);
-		}
-
-		@Override
-		public Boolean invoke() {
+		@WriteOperation
+		public Boolean pause() {
 			if (isRunning()) {
-				pause();
+				doPause();
 				return true;
 			}
 			return false;
 		}
 	}
 
+	@Endpoint(id = "resume")
 	@ConfigurationProperties("endpoints.resume")
-	public class ResumeEndpoint extends AbstractEndpoint<Boolean> {
+	public class ResumeEndpoint {
 
-		public ResumeEndpoint() {
-			super("resume", true);
-		}
-
-		@Override
-		public Boolean invoke() {
+		@WriteOperation
+		public Boolean resume() {
 			if (!isRunning()) {
-				resume();
+				doResume();
 				return true;
 			}
 			return false;
 		}
 	}
 
-	@ManagedOperation
-	public synchronized ConfigurableApplicationContext restart() {
+	// @ManagedOperation
+	public synchronized ConfigurableApplicationContext doRestart() {
 		if (this.context != null) {
 			if (this.integrationShutdown != null) {
 				this.integrationShutdown.stop(this.timeout);
@@ -164,7 +151,7 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean>
 		return this.context;
 	}
 
-	@ManagedAttribute
+	// @ManagedAttribute
 	public boolean isRunning() {
 		if (this.context != null) {
 			return this.context.isRunning();
@@ -172,15 +159,15 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean>
 		return false;
 	}
 
-	@ManagedOperation
-	public synchronized void pause() {
+	// @ManagedOperation
+	public synchronized void doPause() {
 		if (this.context != null) {
 			this.context.stop();
 		}
 	}
 
-	@ManagedOperation
-	public synchronized void resume() {
+	// @ManagedOperation
+	public synchronized void doResume() {
 		if (this.context != null) {
 			this.context.start();
 		}

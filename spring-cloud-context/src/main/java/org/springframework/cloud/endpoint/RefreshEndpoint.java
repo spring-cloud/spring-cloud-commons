@@ -16,40 +16,30 @@
 
 package org.springframework.cloud.endpoint;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
-import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.endpoint.Endpoint;
+import org.springframework.boot.endpoint.ReadOperation;
 import org.springframework.cloud.context.refresh.ContextRefresher;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 
 /**
  * @author Dave Syer
  * @author Venil Noronha
  */
-@ConfigurationProperties(prefix = "endpoints.refresh", ignoreUnknownFields = false)
-@ManagedResource
-public class RefreshEndpoint extends AbstractEndpoint<Collection<String>> {
+@Endpoint(id = "refresh")
+public class RefreshEndpoint {
 
 	private ContextRefresher contextRefresher;
 
 	public RefreshEndpoint(ContextRefresher contextRefresher) {
-		super("refresh");
 		this.contextRefresher = contextRefresher;
 	}
 
-	@ManagedOperation
-	public String[] refresh() {
+	@ReadOperation
+	public Collection<String> refresh() {
 		Set<String> keys = contextRefresher.refresh();
-		return keys.toArray(new String[keys.size()]);
-	}
-
-	@Override
-	public Collection<String> invoke() {
-		return Arrays.asList(refresh());
+		return keys;
 	}
 
 }

@@ -1,12 +1,14 @@
 package org.springframework.cloud.autoconfigure;
 
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 
 import org.assertj.core.util.Lists;
 import org.junit.Test;
-import org.springframework.boot.actuate.endpoint.mvc.EndpointMvcAdapter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.context.restart.RestartEndpoint;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
@@ -23,95 +25,97 @@ import static org.junit.Assert.assertThat;
 //TODO: super slow. Port to @SpringBootTest
 public class LifecycleMvcAutoConfigurationTests {
 
-	// postEnvMvcEndpoint
 	@Test
-	public void postEnvMvcEndpointDisabled() {
-		beanNotCreated("environmentManagerEndpoint",
-				"endpoints.env.post.enabled=false");
+	public void environmentWebEndpointExtensionDisabled() {
+		beanNotCreated("environmentWebEndpointExtension",
+				"endpoints.env.enabled=false");
 	}
 
 	@Test
-	public void postEnvMvcEndpointGloballyDisabled() {
-		beanNotCreated("environmentManagerEndpoint",
-				"endpoints.enabled=false");
+	public void environmentWebEndpointExtensionGloballyDisabled() {
+		beanNotCreated("environmentWebEndpointExtension",
+				"endpoints.default.enabled=false");
 	}
 
 	@Test
-	public void postEnvMvcEndpointEnabled() {
-		beanCreated("environmentManagerEndpoint",
-				"endpoints.env.post.enabled=true");
+	public void environmentWebEndpointExtensionEnabled() {
+		beanCreated("environmentWebEndpointExtension",
+				"endpoints.env.enabled=true");
 	}
 
-	// restartMvcEndpoint
+	// restartEndpoint
 	@Test
-	public void restartMvcEndpointDisabled() {
-		beanNotCreated("restartMvcEndpoint",
+	public void restartEndpointDisabled() {
+		beanNotCreated("restartEndpoint",
 				"endpoints.restart.enabled=false");
 	}
 
 	@Test
-	public void restartMvcEndpointGloballyDisabled() {
-		beanNotCreated("restartMvcEndpoint",
-				"endpoints.enabled=false");
+	public void restartEndpointGloballyDisabled() {
+		beanNotCreated("restartEndpoint",
+				"endpoints.default.enabled=false");
 	}
 
 	@Test
-	public void restartMvcEndpointEnabled() {
-		beanCreatedAndEndpointEnabled("restartMvcEndpoint",
+	public void restartEndpointEnabled() {
+		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class,
+				RestartEndpoint::restart,
 				"endpoints.restart.enabled=true");
 	}
 
-	// pauseMvcEndpoint
+	// pauseEndpoint
 	@Test
-	public void pauseMvcEndpointDisabled() {
-		beanNotCreated("pauseMvcEndpoint",
+	public void pauseEndpointDisabled() {
+		beanNotCreated("pauseEndpoint",
 				"endpoints.pause.enabled=false");
 	}
 
 	@Test
-	public void pauseMvcEndpointRestartDisabled() {
-		beanNotCreated("pauseMvcEndpoint",
+	public void pauseEndpointRestartDisabled() {
+		beanNotCreated("pauseEndpoint",
 				"endpoints.restart.enabled=false",
 				"endpoints.pause.enabled=true");
 	}
 
 	@Test
-	public void pauseMvcEndpointGloballyDisabled() {
-		beanNotCreated("pauseMvcEndpoint",
-				"endpoints.enabled=false");
+	public void pauseEndpointGloballyDisabled() {
+		beanNotCreated("pauseEndpoint",
+				"endpoints.default.enabled=false");
 	}
 
 	@Test
-	public void pauseMvcEndpointEnabled() {
-		beanCreatedAndEndpointEnabled("pauseMvcEndpoint",
+	public void pauseEndpointEnabled() {
+		beanCreatedAndEndpointEnabled("pauseEndpoint", RestartEndpoint.PauseEndpoint.class,
+				RestartEndpoint.PauseEndpoint::pause,
 				"endpoints.restart.enabled=true",
 				"endpoints.pause.enabled=true");
 	}
 
-	// resumeMvcEndpoint
+	// resumeEndpoint
 	@Test
-	public void resumeMvcEndpointDisabled() {
-		beanNotCreated("resumeMvcEndpoint",
+	public void resumeEndpointDisabled() {
+		beanNotCreated("resumeEndpoint",
 				"endpoints.restart.enabled=true",
 				"endpoints.resume.enabled=false");
 	}
 
 	@Test
-	public void resumeMvcEndpointRestartDisabled() {
-		beanNotCreated("resumeMvcEndpoint",
+	public void resumeEndpointRestartDisabled() {
+		beanNotCreated("resumeEndpoint",
 				"endpoints.restart.enabled=false",
 				"endpoints.resume.enabled=true");
 	}
 
 	@Test
-	public void resumeMvcEndpointGloballyDisabled() {
-		beanNotCreated("resumeMvcEndpoint",
-				"endpoints.enabled=false");
+	public void resumeEndpointGloballyDisabled() {
+		beanNotCreated("resumeEndpoint",
+				"endpoints.default.enabled=false");
 	}
 
 	@Test
-	public void resumeMvcEndpointEnabled() {
-		beanCreatedAndEndpointEnabled("resumeMvcEndpoint",
+	public void resumeEndpointEnabled() {
+		beanCreatedAndEndpointEnabled("resumeEndpoint", RestartEndpoint.ResumeEndpoint.class,
+				RestartEndpoint.ResumeEndpoint::resume,
 				"endpoints.restart.enabled=true",
 				"endpoints.resume.enabled=true");
 	}
@@ -128,12 +132,13 @@ public class LifecycleMvcAutoConfigurationTests {
 		}
 	}
 
-	private void beanCreatedAndEndpointEnabled(String beanName, String... properties) {
+	@SuppressWarnings("unchecked")
+	private <T> void beanCreatedAndEndpointEnabled(String beanName, Class<T> type, Function<T, Object> function, String... properties) {
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class, properties)) {
 			assertThat("bean was not created", context.containsBeanDefinition(beanName), equalTo(true));
 
-			EndpointMvcAdapter endpoint = context.getBean(beanName, EndpointMvcAdapter.class);
-			Object result = endpoint.invoke();
+			Object endpoint = context.getBean(beanName, type);
+			Object result = function.apply((T) endpoint);
 
 			assertThat("result is wrong type", result,
 					is(not(instanceOf(ResponseEntity.class))));

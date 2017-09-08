@@ -45,7 +45,7 @@ public class RestartIntegrationTests {
 		RestartEndpoint endpoint = context.getBean(RestartEndpoint.class);
 		assertNotNull(context.getParent());
 		assertNull(context.getParent().getParent());
-		context = endpoint.restart();
+		context = endpoint.doRestart();
 
 		assertNotNull(context);
 		assertNotNull(context.getParent());
@@ -53,7 +53,7 @@ public class RestartIntegrationTests {
 
 		RestartEndpoint next = context.getBean(RestartEndpoint.class);
 		assertNotSame(endpoint, next);
-		context = next.restart();
+		context = next.doRestart();
 
 		assertNotNull(context);
 		assertNotNull(context.getParent());
