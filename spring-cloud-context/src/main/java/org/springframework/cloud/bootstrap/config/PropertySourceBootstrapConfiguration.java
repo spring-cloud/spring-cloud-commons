@@ -71,6 +71,9 @@ public class PropertySourceBootstrapConfiguration implements
 	@Autowired(required = false)
 	private List<PropertySourceLocator> propertySourceLocators = new ArrayList<>();
 
+	@Autowired(required = false)
+	private PropertySourceBootstrapProperties remotePropertiesForOverriding;
+
 	@Override
 	public int getOrder() {
 		return this.order;
@@ -152,7 +155,9 @@ public class PropertySourceBootstrapConfiguration implements
 			CompositePropertySource composite) {
 		MutablePropertySources incoming = new MutablePropertySources();
 		incoming.addFirst(composite);
-		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
+		PropertySourceBootstrapProperties remoteProperties = remotePropertiesForOverriding == null
+				? new PropertySourceBootstrapProperties()
+				: remotePropertiesForOverriding;
 		new RelaxedDataBinder(remoteProperties, "spring.cloud.config")
 				.bind(new PropertySourcesPropertyValues(incoming));
 		if (!remoteProperties.isAllowOverride() || (!remoteProperties.isOverrideNone()

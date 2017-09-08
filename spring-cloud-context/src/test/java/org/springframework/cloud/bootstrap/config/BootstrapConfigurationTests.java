@@ -78,7 +78,7 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void pickupExternalBootstrapProperties() {
-		String externalPropertiesPath = getExternalProperties();
+		String externalPropertiesPath = getExternalProperties("");
 
 		this.context = new SpringApplicationBuilder().web(false)
 				.sources(BareConfiguration.class)
@@ -114,16 +114,16 @@ public class BootstrapConfigurationTests {
 	 *
 	 * @return
 	 */
-	private String getExternalProperties() {
+	private String getExternalProperties(String postfix) {
 		String externalPropertiesPath = "";
 		File externalProperties = new File(
-				"src/test/resources/external-properties/bootstrap.properties");
+				"src/test/resources/external-properties/bootstrap" + postfix + ".properties");
 		if (externalProperties.exists()) {
 			externalPropertiesPath = externalProperties.getAbsolutePath();
 		}
 		else {
 			externalProperties = new File(
-					"spring-cloud-context/src/test/resources/external-properties/bootstrap.properties");
+					"spring-cloud-context/src/test/resources/external-properties/bootstrap" + postfix + ".properties");
 			externalPropertiesPath = externalProperties.getAbsolutePath();
 		}
 		return externalPropertiesPath;
@@ -369,6 +369,51 @@ public class BootstrapConfigurationTests {
 		assertTrue(this.context.getEnvironment().acceptsProfiles("baz"));
 		assertTrue(this.context.getEnvironment().acceptsProfiles("bar"));
 	}
+
+	@Test
+	public void localPropertyOverrideFalseWhenOverrideAllowedInBootstrap(){
+		PropertySourceConfiguration.MAP.put("message", "hello world!");
+        String externalPropertiesPath = getExternalProperties("-not-override-local");
+
+        this.context = new SpringApplicationBuilder().web(false)
+                .sources(BareConfiguration.class)
+                .properties("spring.cloud.bootstrap.location:" + externalPropertiesPath)
+                .run();
+        assertEquals("Hello scope!",
+                this.context.getEnvironment().getProperty("message"));
+        assertTrue(this.context.getEnvironment().getPropertySources().contains(
+                PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME));
+	}
+
+    @Test
+    public void localPropertyOverrideWhenOverrideAllowedInBootstrap(){
+        PropertySourceConfiguration.MAP.put("message", "hello world!");
+        String externalPropertiesPath = getExternalProperties("-override-local");
+
+        this.context = new SpringApplicationBuilder().web(false)
+                .sources(BareConfiguration.class)
+                .properties("spring.cloud.bootstrap.location:" + externalPropertiesPath)
+                .run();
+        assertEquals("hello world!",
+                this.context.getEnvironment().getProperty("message"));
+        assertTrue(this.context.getEnvironment().getPropertySources().contains(
+                PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME));
+    }
+
+    @Test
+    public void systemPropertyOverrideFalseWhenOverrideAllowedInBootstrap(){
+        System.setProperty("message", "hello world!");
+        String externalPropertiesPath = getExternalProperties("-not-override-system");
+
+        this.context = new SpringApplicationBuilder().web(false)
+                .sources(BareConfiguration.class)
+                .properties("spring.cloud.bootstrap.location:" + externalPropertiesPath)
+                .run();
+        assertEquals("hello world!",
+                this.context.getEnvironment().getProperty("message"));
+        assertTrue(this.context.getEnvironment().getPropertySources().contains(
+                PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME));
+    }
 
 	@Configuration
 	@EnableConfigurationProperties
