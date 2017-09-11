@@ -2,7 +2,6 @@ package org.springframework.cloud.autoconfigure;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -12,7 +11,7 @@ import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Spencer Gibb
@@ -25,8 +24,8 @@ public class RefreshAutoConfigurationClassPathTests {
 	public void refreshEventListenerCreated() {
 		try (ConfigurableApplicationContext context = getApplicationContext(
 				Config.class)) {
-			assertFalse(context.getBeansOfType(RefreshEventListener.class).isEmpty());
-			assertFalse(context.containsBean("refreshEndpoint"));
+			assertThat(context.getBeansOfType(RefreshEventListener.class)).as("RefreshEventListeners not created").isNotEmpty();
+			assertThat(context.containsBean("refreshEndpoint")).as("refreshEndpoint created").isFalse();
 		}
 	}
 
