@@ -15,8 +15,8 @@
  */
 package org.springframework.cloud.autoconfigure;
 
-import org.springframework.boot.actuate.autoconfigure.endpoint.ConditionalOnEnabledEndpoint;
-import org.springframework.boot.actuate.endpoint.EnvironmentEndpoint;
+import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnEnabledEndpoint;
+import org.springframework.boot.actuate.env.EnvironmentEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

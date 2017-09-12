@@ -17,9 +17,9 @@
 
 package org.springframework.cloud.client.serviceregistry.endpoint;
 
-import org.springframework.boot.endpoint.Endpoint;
-import org.springframework.boot.endpoint.ReadOperation;
-import org.springframework.boot.endpoint.WriteOperation;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
+import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.http.HttpStatus;

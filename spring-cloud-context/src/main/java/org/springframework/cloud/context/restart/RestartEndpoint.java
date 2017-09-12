@@ -19,15 +19,17 @@ package org.springframework.cloud.context.restart;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.endpoint.Endpoint;
-import org.springframework.boot.endpoint.WriteOperation;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.integration.monitor.IntegrationMBeanExporter;
 import org.springframework.util.ClassUtils;
+
+import static org.springframework.boot.actuate.endpoint.DefaultEnablement.DISABLED;
 
 /**
  * An endpoint that restarts the application context. Install as a bean and also register
@@ -38,7 +40,7 @@ import org.springframework.util.ClassUtils;
  * @author Dave Syer
  *
  */
-@Endpoint(id = "restart", enabledByDefault = false)
+@Endpoint(id = "restart", defaultEnablement = DISABLED)
 public class RestartEndpoint
 		implements ApplicationListener<ApplicationPreparedEvent> {
 

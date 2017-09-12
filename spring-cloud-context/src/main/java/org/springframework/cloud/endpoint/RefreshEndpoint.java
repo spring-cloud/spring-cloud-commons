@@ -19,8 +19,8 @@ package org.springframework.cloud.endpoint;
 import java.util.Collection;
 import java.util.Set;
 
-import org.springframework.boot.endpoint.Endpoint;
-import org.springframework.boot.endpoint.ReadOperation;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 
 /**

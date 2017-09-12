@@ -15,12 +15,13 @@
  */
 package org.springframework.cloud.context.environment;
 
+import org.springframework.boot.actuate.endpoint.annotation.DeleteOperation;
+import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
+import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpointExtension;
+import org.springframework.boot.actuate.env.EnvironmentEndpoint;
+
 import java.util.Map;
 
-import org.springframework.boot.actuate.endpoint.EnvironmentEndpoint;
-import org.springframework.boot.endpoint.DeleteOperation;
-import org.springframework.boot.endpoint.WriteOperation;
-import org.springframework.boot.endpoint.web.WebEndpointExtension;
 
 /**
  * MVC endpoint for the {@link EnvironmentManager} providing a POST to /env as a simple
