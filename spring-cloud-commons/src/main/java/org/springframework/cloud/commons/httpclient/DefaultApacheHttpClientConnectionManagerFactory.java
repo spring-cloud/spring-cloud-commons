@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 /**
  * Default implementation of {@link ApacheHttpClientConnectionManagerFactory}.
  * @author Ryan Baxter
+ * @author Michael Wirth
  */
 public class DefaultApacheHttpClientConnectionManagerFactory
 		implements ApacheHttpClientConnectionManagerFactory {
@@ -47,24 +48,11 @@ public class DefaultApacheHttpClientConnectionManagerFactory
 		if (disableSslValidation) {
 			try {
 				final SSLContext sslContext = SSLContext.getInstance("SSL");
-				sslContext.init(null, new TrustManager[] { new X509TrustManager() {
-					@Override
-					public void checkClientTrusted(X509Certificate[] x509Certificates,
-							String s) throws CertificateException {
-					}
-
-					@Override
-					public void checkServerTrusted(X509Certificate[] x509Certificates,
-							String s) throws CertificateException {
-					}
-
-					@Override
-					public X509Certificate[] getAcceptedIssuers() {
-						return null;
-					}
-				} }, new SecureRandom());
+				sslContext.init(null,
+					new TrustManager[] { new DisabledValidationTrustManager()},
+					new SecureRandom());
 				registryBuilder.register(HTTPS_SCHEME, new SSLConnectionSocketFactory(
-						sslContext, NoopHostnameVerifier.INSTANCE));
+					sslContext, NoopHostnameVerifier.INSTANCE));
 			}
 			catch (NoSuchAlgorithmException e) {
 				LOG.warn("Error creating SSLContext", e);
@@ -72,6 +60,8 @@ public class DefaultApacheHttpClientConnectionManagerFactory
 			catch (KeyManagementException e) {
 				LOG.warn("Error creating SSLContext", e);
 			}
+		} else {
+			registryBuilder.register("https", SSLConnectionSocketFactory.getSocketFactory());
 		}
 		final Registry<ConnectionSocketFactory> registry = registryBuilder.build();
 
@@ -81,5 +71,22 @@ public class DefaultApacheHttpClientConnectionManagerFactory
 		connectionManager.setDefaultMaxPerRoute(maxConnectionsPerRoute);
 
 		return connectionManager;
+	}
+
+	class DisabledValidationTrustManager implements X509TrustManager {
+		@Override
+		public void checkClientTrusted(X509Certificate[] x509Certificates,
+			String s) throws CertificateException {
+		}
+
+		@Override
+		public void checkServerTrusted(X509Certificate[] x509Certificates,
+			String s) throws CertificateException {
+		}
+
+		@Override
+		public X509Certificate[] getAcceptedIssuers() {
+			return null;
+		}
 	}
 }
