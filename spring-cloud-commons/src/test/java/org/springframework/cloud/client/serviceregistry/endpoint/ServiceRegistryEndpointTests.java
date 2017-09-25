@@ -1,9 +1,10 @@
 package org.springframework.cloud.client.serviceregistry.endpoint;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -55,10 +58,10 @@ public class ServiceRegistryEndpointTests {
 	}
 
 	@Test
-	@Ignore //FIXME: 2.0.0
 	public void testPost() throws Exception {
+		Map<String, String> status = Collections.singletonMap("status", UPDATED_STATUS);
 		this.mvc.perform(post("/application/service-registry")
-				.content(UPDATED_STATUS)
+				.content(new ObjectMapper().writeValueAsString(status))
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 		assertThat(this.serviceRegistry.getUpdatedStatus().get()).isEqualTo(UPDATED_STATUS);

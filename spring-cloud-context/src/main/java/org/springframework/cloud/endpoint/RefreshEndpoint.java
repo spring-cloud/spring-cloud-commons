@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
-import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
+import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 
 /**
@@ -36,7 +36,7 @@ public class RefreshEndpoint {
 		this.contextRefresher = contextRefresher;
 	}
 
-	@ReadOperation
+	@WriteOperation
 	public Collection<String> refresh() {
 		Set<String> keys = contextRefresher.refresh();
 		return keys;

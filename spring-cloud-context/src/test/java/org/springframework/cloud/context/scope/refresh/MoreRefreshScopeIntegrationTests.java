@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.context.scope.refresh;
 
+import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -28,27 +32,23 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
+import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.core.env.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -94,14 +94,40 @@ public class MoreRefreshScopeIntegrationTests {
 		assertEquals("Hello scope!", this.service.getMessage());
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
-		TestPropertyValues.of("message:Foo").applyTo(this.environment);
+		TestPropertyValues.of("message:Foo").applyTo(this.environment, Type.MAP, "morerefreshtests");
+		// apply(TestPropertyValues.of("message:Foo"));
 		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refreshAll();
 		String id2 = this.service.toString();
-		assertEquals("Foo", this.service.getMessage());
+		String message = this.service.getMessage();
+		assertEquals("Foo", message);
 		assertEquals(1, TestService.getInitCount());
 		assertEquals(1, TestService.getDestroyCount());
 		assertNotSame(id1, id2);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void apply(TestPropertyValues propertyValues) {
+		Field field = ReflectionUtils.findField(TestPropertyValues.class, "properties");
+		ReflectionUtils.makeAccessible(field);
+		Map<String, Object> properties = (Map<String, Object>) ReflectionUtils.getField(field, propertyValues);
+		MutablePropertySources sources = this.environment.getPropertySources();
+		addToSources(properties, sources, Type.MAP, "morerefreshtests");
+		ConfigurationPropertySources.attach(this.environment);
+	}
+
+	private void addToSources(Map<String, Object> properties, MutablePropertySources sources, Type type, String name) {
+		if (sources.contains(name)) {
+			PropertySource<?> propertySource = sources.get(name);
+			if (propertySource.getClass().equals(type.getSourceClass())) {
+				((Map<String, Object>) propertySource.getSource())
+						.putAll(properties);
+				return;
+			}
+		}
+		Map<String, Object> source = new LinkedHashMap<>(properties);
+		sources.addLast((type.equals(Type.MAP) ? new MapPropertySource(name, source)
+				: new SystemEnvironmentPropertySource(name, source)));
 	}
 
 	@Test
@@ -127,6 +153,7 @@ public class MoreRefreshScopeIntegrationTests {
 		this.scope.refreshAll();
 		assertEquals("Foo", this.service.getMessage());
 	}
+
 
 	public static class TestService implements InitializingBean, DisposableBean {
 
@@ -191,8 +218,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 	@Configuration
 	@EnableConfigurationProperties
-	@Import({ RefreshAutoConfiguration.class,
-			PropertyPlaceholderAutoConfiguration.class })
+	@EnableAutoConfiguration
 	protected static class TestConfiguration {
 
 		@Bean
@@ -213,14 +239,14 @@ public class MoreRefreshScopeIntegrationTests {
 	}
 
 	@ConfigurationProperties
-	@ManagedResource
+	// @ManagedResource
 	protected static class TestProperties {
 
 		private String message;
 
 		private int delay;
 
-		@ManagedAttribute
+		// @ManagedAttribute
 		public String getMessage() {
 			return this.message;
 		}
@@ -229,7 +255,7 @@ public class MoreRefreshScopeIntegrationTests {
 			this.message = message;
 		}
 
-		@ManagedAttribute
+		// @ManagedAttribute
 		public int getDelay() {
 			return this.delay;
 		}

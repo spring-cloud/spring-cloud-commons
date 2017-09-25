@@ -17,10 +17,9 @@ package org.springframework.cloud.context.scope.refresh;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,8 +37,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -51,20 +48,19 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  *
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ClientApp.class, webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = ClientApp.class, properties = "endpoints.default.web.enabled=true", webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
 
 	@LocalServerPort
 	private int port;
 
 	@Test
-	@Ignore //FIXME: 2.0.x
 	public void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
 		template.exchange(
 				getUrlEncodedEntity("http://localhost:" + this.port + "/application/env", "message",
 						"Hello Dave!"), String.class);
-		template.postForObject("http://localhost:" + this.port + "/application/refresh", "", String.class);
+		template.postForObject("http://localhost:" + this.port + "/application/refresh", null, String.class);
 		String message = template.getForObject("http://localhost:" + this.port + "/",
 				String.class);
 		assertEquals("Hello Dave!", message);
@@ -72,12 +68,13 @@ public class RefreshEndpointIntegrationTests {
 
 	private RequestEntity<?> getUrlEncodedEntity(String uri, String key, String value)
 			throws URISyntaxException {
-		MultiValueMap<String, String> env = new LinkedMultiValueMap<String, String>(
-				Collections.singletonMap(key, Arrays.asList(value)));
+		Map<String, String> property = new HashMap<>();
+		property.put("name", key);
+		property.put("value", value);
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		RequestEntity<MultiValueMap<String, String>> entity = new RequestEntity<MultiValueMap<String, String>>(
-				env, headers, HttpMethod.POST, new URI(uri));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		RequestEntity<Map<String, String>> entity = new RequestEntity<>(
+				property, headers, HttpMethod.POST, new URI(uri));
 		return entity;
 	}
 
