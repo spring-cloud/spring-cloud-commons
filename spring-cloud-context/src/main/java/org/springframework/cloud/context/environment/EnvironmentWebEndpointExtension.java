@@ -20,6 +20,7 @@ import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpointExtension;
 import org.springframework.boot.actuate.env.EnvironmentEndpoint;
 
+import java.util.Collections;
 import java.util.Map;
 
 
@@ -40,11 +41,9 @@ public class EnvironmentWebEndpointExtension {
 	}
 
 	@WriteOperation
-	public Object write(Map<String, String> params) {
-		for (String name : params.keySet()) {
-			environment.setProperty(name, params.get(name));
-		}
-		return params;
+	public Object write(String name, String value) {
+		environment.setProperty(name, value);
+		return Collections.singletonMap(name, value);
 	}
 
 	@DeleteOperation

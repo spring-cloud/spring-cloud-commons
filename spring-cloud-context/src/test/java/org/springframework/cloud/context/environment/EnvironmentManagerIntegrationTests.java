@@ -16,16 +16,15 @@
 
 package org.springframework.cloud.context.environment;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.ServletException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,9 +37,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Collections;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -68,13 +67,10 @@ public class EnvironmentManagerIntegrationTests {
 	}
 
 	@Test
-	@Ignore //FIXME: 2.0.0
 	public void testRefresh() throws Exception {
 		assertEquals("Hello scope!", properties.getMessage());
-		// Change the dynamic property source...
-		String content = mapper.writeValueAsString(singletonMap("params", singletonMap("message", "Foo")));
-		// String content = "{\"params\":\"{'message':'Foo'}\"}";
-		// String content = mapper.writeValueAsString(singletonMap("params", "value"));
+		String content = property("message", "Foo");
+
 		this.mvc.perform(post("/application/env")
 				.content(content)
 				.contentType(MediaType.APPLICATION_JSON))
@@ -83,11 +79,22 @@ public class EnvironmentManagerIntegrationTests {
 		assertEquals("Foo", properties.getMessage());
 	}
 
+	private String property(String name, String value) throws JsonProcessingException {
+		// Change the dynamic property source...
+		Map<String, String> property = new HashMap<>();
+		property.put("name", name);
+		property.put("value", value);
+
+		return mapper.writeValueAsString(property);
+	}
+
 	@Test
-	@Ignore //FIXME: 2.0.0
 	public void testRefreshFails() throws Exception {
 		try {
-			this.mvc.perform(post("/application/env").param("delay", "foo"))
+			this.mvc.perform(post("/application/env")
+					.content(property("delay", "foo"))
+					.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
 					.andExpect(status().is5xxServerError());
 			fail("expected ServletException");
 		}
@@ -95,10 +102,6 @@ public class EnvironmentManagerIntegrationTests {
 			// The underlying BindException is not handled by the dispatcher servlet
 		}
 		assertEquals(0, properties.getDelay());
-	}
-
-	public static void main(String[] args) {
-		SpringApplication.run(TestConfiguration.class, args);
 	}
 
 	@Configuration
