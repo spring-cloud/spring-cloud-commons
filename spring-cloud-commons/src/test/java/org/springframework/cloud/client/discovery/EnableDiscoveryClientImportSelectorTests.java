@@ -9,6 +9,8 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 /**
@@ -37,6 +39,7 @@ public class EnableDiscoveryClientImportSelectorTests {
 	public void autoRegistrationIsEnabled() {
 		configureAnnotation(true);
 		String[] imports = this.importSelector.selectImports(this.annotationMetadata);
+		assertTrue(environment.getProperty("spring.cloud.service-registry.auto-registration.enabled", Boolean.class, true));
 		assertThat(imports).hasSize(1);
 	}
 
@@ -44,6 +47,7 @@ public class EnableDiscoveryClientImportSelectorTests {
 	public void autoRegistrationIsDisabled() {
 		configureAnnotation(false);
 		String[] imports = this.importSelector.selectImports(this.annotationMetadata);
+		assertFalse(environment.getProperty("spring.cloud.service-registry.auto-registration.enabled", Boolean.class));
 		assertThat(imports).isEmpty();
 	}
 
