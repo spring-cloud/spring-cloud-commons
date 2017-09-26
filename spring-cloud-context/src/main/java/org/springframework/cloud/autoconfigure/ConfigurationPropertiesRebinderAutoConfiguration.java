@@ -64,10 +64,8 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
 	public ConfigurationPropertiesRebinder configurationPropertiesRebinder(
-			ConfigurationPropertiesBeans beans,
-			ConfigurationPropertiesBindingPostProcessor binder) {
-		ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(
-				binder, beans);
+			ConfigurationPropertiesBeans beans) {
+		ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(beans);
 		return rebinder;
 	}
 

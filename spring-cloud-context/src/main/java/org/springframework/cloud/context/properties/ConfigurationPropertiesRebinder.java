@@ -15,28 +15,32 @@
  */
 package org.springframework.cloud.context.properties;
 
-import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBinder;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBinderBuilder;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Listens for {@link EnvironmentChangeEvent} and rebinds beans that were bound to the
@@ -55,9 +59,12 @@ import org.springframework.util.ReflectionUtils;
 public class ConfigurationPropertiesRebinder
 		implements ApplicationContextAware, ApplicationListener<EnvironmentChangeEvent> {
 
+	private static final Log log = LogFactory
+			.getLog(ConfigurationPropertiesRebinder.class);
+
 	private ConfigurationPropertiesBeans beans;
 
-	private ConfigurationPropertiesBindingPostProcessor binder;
+	private ConfigurationPropertiesBinder binder;
 
 	private ApplicationContext applicationContext;
 
@@ -65,11 +72,27 @@ public class ConfigurationPropertiesRebinder
 
 	private boolean resetting = false;
 
-	public ConfigurationPropertiesRebinder(
-			ConfigurationPropertiesBindingPostProcessor binder,
-			ConfigurationPropertiesBeans beans) {
-		this.binder = binder;
+	public ConfigurationPropertiesRebinder(ConfigurationPropertiesBeans beans) {
 		this.beans = beans;
+	}
+
+	private ConfigurationPropertiesBinder getBinder() {
+		if (this.binder == null) {
+			ConfigurableEnvironment environment = null;
+			Environment object = this.applicationContext.getEnvironment();
+			if (!(object instanceof ConfigurableEnvironment)) {
+				log.warn("Environment is not of type ConfigurableEnvironment");
+				environment = new StandardEnvironment();
+			}
+			else {
+				environment = (ConfigurableEnvironment) object;
+			}
+			this.binder = new ConfigurationPropertiesBinderBuilder(
+					this.applicationContext)
+							.withPropertySources(environment.getPropertySources())
+							.build();
+		}
+		return this.binder;
 	}
 
 	@Override
@@ -114,7 +137,7 @@ public class ConfigurationPropertiesRebinder
 				if (AopUtils.isCglibProxy(bean)) {
 					bean = getTargetObject(bean);
 				}
-				this.binder.postProcessBeforeInitialization(bean, name);
+				getBinder().bind(bean);
 				this.applicationContext.getAutowireCapableBeanFactory()
 						.initializeBean(bean, name);
 				return true;
@@ -128,18 +151,7 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	private void resetBinder() {
-		try {
-			setField(binder, "propertySources", null);
-			binder.afterPropertiesSet();
-		}
-		catch (Exception e) {
-		}
-	}
-
-	private void setField(Object target, String name, Object value) {
-		Field field = ReflectionUtils.findField(target.getClass(), name);
-		ReflectionUtils.makeAccessible(field);
-		ReflectionUtils.setField(field, target, value);
+		this.binder = null;
 	}
 
 	@SuppressWarnings("unchecked")
