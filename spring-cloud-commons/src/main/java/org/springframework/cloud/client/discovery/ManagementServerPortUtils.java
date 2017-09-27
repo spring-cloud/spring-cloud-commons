@@ -31,7 +31,7 @@ public class ManagementServerPortUtils {
 	static {
 		boolean hasClass;
 		try {
-			Class.forName("org.springframework.boot.endpoint.Endpoint");
+			Class.forName("org.springframework.boot.actuate.endpoint.annotation.Endpoint");
 			hasClass = true;
 		} catch (ClassNotFoundException e) {
 			hasClass = false;
