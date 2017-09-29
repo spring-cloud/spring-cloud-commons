@@ -15,9 +15,10 @@
  */
 package org.springframework.cloud.context.properties;
 
+import static org.junit.Assert.assertEquals;
+
 import javax.annotation.PostConstruct;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderRefreshScopeIntegrationTests.TestConfiguration;
@@ -36,8 +38,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
 public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
@@ -47,10 +47,10 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 
 	@Autowired
 	private ConfigurationPropertiesRebinder rebinder;
-	
+
 	@Autowired
 	private org.springframework.cloud.context.scope.refresh.RefreshScope refreshScope;
-	
+
 	@Autowired
 	private ConfigurableEnvironment environment;
 
@@ -67,7 +67,6 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	@Ignore //FIXME: 2.0.x
 	public void testRefresh() throws Exception {
 		assertEquals(1, properties.getCount());
 		assertEquals("Hello scope!", properties.getMessage());
@@ -84,18 +83,20 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 		// It's a new instance so the initialization count is 1
 		assertEquals(1, properties.getCount());
 	}
-	
+
 	@Configuration
 	@EnableConfigurationProperties
-	@Import({RefreshAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class})
+	@Import({ RefreshAutoConfiguration.class,
+			ConfigurationPropertiesRebinderAutoConfiguration.class,
+			PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
-		
+
 		@Bean
 		@RefreshScope
 		protected TestProperties properties() {
 			return new TestProperties();
 		}
-		
+
 	}
 
 	@ConfigurationProperties
@@ -103,25 +104,31 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 		private String message;
 		private int delay;
 		private int count = 0;
+
 		public int getCount() {
 			return count;
 		}
+
 		public String getMessage() {
 			return message;
 		}
+
 		public void setMessage(String message) {
 			this.message = message;
 		}
+
 		public int getDelay() {
 			return delay;
 		}
+
 		public void setDelay(int delay) {
 			this.delay = delay;
 		}
+
 		@PostConstruct
 		public void init() {
-			this.count ++;
+			this.count++;
 		}
 	}
-	
+
 }

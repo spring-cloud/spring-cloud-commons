@@ -16,15 +16,15 @@
 
 package org.springframework.cloud.context.scope.refresh;
 
-import java.lang.reflect.Field;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.aop.framework.Advised;
@@ -35,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.util.TestPropertyValues.Type;
@@ -43,12 +42,9 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.*;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.ReflectionUtils;
-
-import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -89,13 +85,11 @@ public class MoreRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	@Ignore //FIXME: 2.0.x
 	public void testRefresh() throws Exception {
 		assertEquals("Hello scope!", this.service.getMessage());
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment, Type.MAP, "morerefreshtests");
-		// apply(TestPropertyValues.of("message:Foo"));
 		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refreshAll();
 		String id2 = this.service.toString();
@@ -106,33 +100,8 @@ public class MoreRefreshScopeIntegrationTests {
 		assertNotSame(id1, id2);
 	}
 
-	@SuppressWarnings("unchecked")
-	private void apply(TestPropertyValues propertyValues) {
-		Field field = ReflectionUtils.findField(TestPropertyValues.class, "properties");
-		ReflectionUtils.makeAccessible(field);
-		Map<String, Object> properties = (Map<String, Object>) ReflectionUtils.getField(field, propertyValues);
-		MutablePropertySources sources = this.environment.getPropertySources();
-		addToSources(properties, sources, Type.MAP, "morerefreshtests");
-		ConfigurationPropertySources.attach(this.environment);
-	}
-
-	private void addToSources(Map<String, Object> properties, MutablePropertySources sources, Type type, String name) {
-		if (sources.contains(name)) {
-			PropertySource<?> propertySource = sources.get(name);
-			if (propertySource.getClass().equals(type.getSourceClass())) {
-				((Map<String, Object>) propertySource.getSource())
-						.putAll(properties);
-				return;
-			}
-		}
-		Map<String, Object> source = new LinkedHashMap<>(properties);
-		sources.addLast((type.equals(Type.MAP) ? new MapPropertySource(name, source)
-				: new SystemEnvironmentPropertySource(name, source)));
-	}
-
 	@Test
 	@DirtiesContext
-	@Ignore //FIXME: 2.0.x
 	public void testRefreshFails() throws Exception {
 		assertEquals("Hello scope!", this.service.getMessage());
 		// Change the dynamic property source...

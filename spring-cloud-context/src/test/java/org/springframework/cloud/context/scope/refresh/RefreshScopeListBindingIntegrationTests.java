@@ -61,7 +61,6 @@ public class RefreshScopeListBindingIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	@Ignore //FIXME: 2.0.x
 	public void testAppendProperties() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
 		assertTrue(this.properties instanceof Advised);
@@ -72,7 +71,6 @@ public class RefreshScopeListBindingIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	@Ignore //FIXME: 2.0.x
 	public void testReplaceProperties() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
 		assertTrue(this.properties instanceof Advised);

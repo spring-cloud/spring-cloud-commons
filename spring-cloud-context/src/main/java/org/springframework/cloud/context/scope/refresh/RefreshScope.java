@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
+import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.util.ReflectionUtils;
@@ -151,7 +152,8 @@ public class RefreshScope extends GenericScope
 			try {
 				ConfigurationPropertiesBindingPostProcessor processor = context
 						.getBean(ConfigurationPropertiesBindingPostProcessor.class);
-				setField(processor, "propertySources", null);
+				setField(processor, "propertySources", ((ConfigurableEnvironment) this.context.getEnvironment()).getPropertySources());
+				setField(processor, "configurationPropertiesBinder", null);
 				processor.afterPropertiesSet();
 			}
 			catch (Exception e) {
