@@ -1,6 +1,7 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import org.junit.After;
 import org.junit.Before;
@@ -130,7 +131,8 @@ public class RetryLoadBalancerInterceptorTest {
     public void interceptRetryOnStatusCode() throws Throwable {
         HttpRequest request = mock(HttpRequest.class);
         when(request.getURI()).thenReturn(new URI("http://foo"));
-        ClientHttpResponse clientHttpResponseNotFound = new MockClientHttpResponse(new byte[]{}, HttpStatus.NOT_FOUND);
+        InputStream notFoundStream = mock(InputStream.class);
+        ClientHttpResponse clientHttpResponseNotFound = new MockClientHttpResponse(notFoundStream, HttpStatus.NOT_FOUND);
         ClientHttpResponse clientHttpResponseOk = new MockClientHttpResponse(new byte[]{}, HttpStatus.OK);
         LoadBalancedRetryPolicy policy = mock(LoadBalancedRetryPolicy.class);
         when(policy.retryableStatusCode(eq(HttpStatus.NOT_FOUND.value()))).thenReturn(true);
@@ -148,6 +150,7 @@ public class RetryLoadBalancerInterceptorTest {
         ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
         ClientHttpResponse rsp = interceptor.intercept(request, body, execution);
         verify(client, times(2)).execute(eq("foo"), eq(serviceInstance), any(LoadBalancerRequest.class));
+        verify(notFoundStream, times(1)).close();
         assertThat(rsp, is(clientHttpResponseOk));
         verify(lbRequestFactory, times(2)).createRequest(request, body, execution);
     }
