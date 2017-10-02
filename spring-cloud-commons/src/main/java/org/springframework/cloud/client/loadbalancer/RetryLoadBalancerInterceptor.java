@@ -83,8 +83,10 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 						ClientHttpResponse response = RetryLoadBalancerInterceptor.this.loadBalancer.execute(
 								serviceName, serviceInstance,
 								requestFactory.createRequest(request, body, execution));
-						if(retryPolicy != null && retryPolicy.retryableStatusCode(response.getRawStatusCode())) {
-							throw new RetryableStatusCodeException(serviceName, response.getRawStatusCode());
+						int statusCode = response.getRawStatusCode();
+						if(retryPolicy != null && retryPolicy.retryableStatusCode(statusCode)) {
+							response.close();
+							throw new RetryableStatusCodeException(serviceName, statusCode);
 						}
 						return response;
 					}
