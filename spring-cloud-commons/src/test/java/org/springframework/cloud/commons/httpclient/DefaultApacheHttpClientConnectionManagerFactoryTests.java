@@ -23,7 +23,7 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
 		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
 				"pool");
-		assertEquals(-1l, getField(pool, "timeToLive"));
+		assertEquals(new Long(-1), getField(pool, "timeToLive"));
 		TimeUnit timeUnit = getField(pool, "tunit");
 		assertEquals(TimeUnit.MILLISECONDS, timeUnit);
 	}
@@ -38,11 +38,12 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
 		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
 				"pool");
-		assertEquals(56l, getField(pool, "timeToLive"));
+		assertEquals(new Long(56), getField(pool, "timeToLive"));
 		TimeUnit timeUnit = getField(pool, "tunit");
 		assertEquals(TimeUnit.DAYS, timeUnit);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected <T> T getField(Object target, String name) {
 		Field field = ReflectionUtils.findField(target.getClass(), name);
 		ReflectionUtils.makeAccessible(field);
