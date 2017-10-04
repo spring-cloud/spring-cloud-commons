@@ -22,24 +22,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.scope.ScopedProxyFactoryBean;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.Scope;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.cloud.context.config.BeanLifecycleDecorator;
-import org.springframework.cloud.context.config.BeanLifecycleDecorator.Context;
-import org.springframework.cloud.context.config.StandardBeanLifecycleDecorator;
+import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -52,7 +64,8 @@ import org.springframework.util.StringUtils;
  * @since 3.1
  *
  */
-public class GenericScope implements Scope, BeanFactoryPostProcessor, DisposableBean {
+public class GenericScope implements Scope, BeanFactoryPostProcessor,
+		BeanDefinitionRegistryPostProcessor, DisposableBean {
 
 	private static final Log logger = LogFactory.getLog(GenericScope.class);
 
@@ -63,17 +76,15 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 
 	private String name = "generic";
 
-	private boolean proxyTargetClass = true;
-
 	private ConfigurableListableBeanFactory beanFactory;
 
 	private StandardEvaluationContext evaluationContext;
 
 	private String id;
 
-	private BeanLifecycleDecorator<?> lifecycle;
-
 	private Map<String, Exception> errors = new ConcurrentHashMap<>();
+
+	private ConcurrentMap<String, ReadWriteLock> locks = new ConcurrentHashMap<>();
 
 	/**
 	 * Manual override for the serialization id that will be used to identify the bean
@@ -95,31 +106,12 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 	}
 
 	/**
-	 * Flag to indicate that proxies should be created for the concrete type, not just the
-	 * interfaces, of the scoped beans.
-	 *
-	 * @param proxyTargetClass the flag value to set
-	 */
-	public void setProxyTargetClass(boolean proxyTargetClass) {
-		this.proxyTargetClass = proxyTargetClass;
-	}
-
-	/**
 	 * The cache implementation to use for bean instances in this scope.
 	 *
 	 * @param cache the cache to use
 	 */
 	public void setScopeCache(ScopeCache cache) {
 		this.cache = new BeanLifecycleWrapperCache(cache);
-	}
-
-	/**
-	 * Helper to manage the creation and destruction of beans.
-	 *
-	 * @param lifecycle the bean lifecycle to set
-	 */
-	public void setBeanLifecycleManager(BeanLifecycleDecorator<?> lifecycle) {
-		this.lifecycle = lifecycle;
 	}
 
 	/**
@@ -137,7 +129,14 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		Collection<BeanLifecycleWrapper> wrappers = this.cache.clear();
 		for (BeanLifecycleWrapper wrapper : wrappers) {
 			try {
-				wrapper.destroy();
+				Lock lock = locks.get(wrapper.getName()).writeLock();
+				lock.lock();
+				try {
+					wrapper.destroy();
+				}
+				finally {
+					lock.unlock();
+				}
 			}
 			catch (RuntimeException e) {
 				errors.add(e);
@@ -167,11 +166,9 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
-		if (this.lifecycle == null) {
-			this.lifecycle = new StandardBeanLifecycleDecorator(this.proxyTargetClass);
-		}
 		BeanLifecycleWrapper value = this.cache.put(name,
-				new BeanLifecycleWrapper(name, objectFactory, this.lifecycle));
+				new BeanLifecycleWrapper(name, objectFactory));
+		locks.putIfAbsent(name, new ReentrantReadWriteLock());
 		try {
 			return value.getBean();
 		}
@@ -233,8 +230,27 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
 			throws BeansException {
+		this.beanFactory = beanFactory;
 		beanFactory.registerScope(this.name, this);
 		setSerializationId(beanFactory);
+	}
+
+	@Override
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
+			throws BeansException {
+		for (String name : registry.getBeanDefinitionNames()) {
+			BeanDefinition definition = registry.getBeanDefinition(name);
+			if (definition instanceof RootBeanDefinition) {
+				RootBeanDefinition root = (RootBeanDefinition) definition;
+				if (root.getDecoratedDefinition() != null && root.hasBeanClass()
+						&& root.getBeanClass() == ScopedProxyFactoryBean.class) {
+					if (getName().equals(root.getDecoratedDefinition().getBeanDefinition()
+							.getScope())) {
+						root.setBeanClass(LockedScopedProxyFactoryBean.class);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -329,34 +345,30 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 
 		private Object bean;
 
-		private Context<?> context;
+		private Runnable callback;
 
 		private final String name;
 
-		@SuppressWarnings("rawtypes")
-		private final BeanLifecycleDecorator lifecycle;
-
 		private final ObjectFactory<?> objectFactory;
 
-		@SuppressWarnings("rawtypes")
-		public BeanLifecycleWrapper(String name, ObjectFactory<?> objectFactory,
-				BeanLifecycleDecorator lifecycle) {
+		public BeanLifecycleWrapper(String name, ObjectFactory<?> objectFactory) {
 			this.name = name;
 			this.objectFactory = objectFactory;
-			this.lifecycle = lifecycle;
+		}
+
+		public String getName() {
+			return this.name;
 		}
 
 		public void setDestroyCallback(Runnable callback) {
-			this.context = this.lifecycle.decorateDestructionCallback(callback);
+			this.callback = callback;
 		}
 
-		@SuppressWarnings("unchecked")
 		public Object getBean() {
 			if (this.bean == null) {
 				synchronized (this.name) {
 					if (this.bean == null) {
-						this.bean = this.lifecycle.decorateBean(
-								this.objectFactory.getObject(), this.context);
+						this.bean = this.objectFactory.getObject();
 					}
 				}
 			}
@@ -364,12 +376,16 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 		}
 
 		public void destroy() {
-			if (this.context == null) {
+			if (this.callback == null) {
 				return;
 			}
-			Runnable callback = this.context.getCallback();
-			if (callback != null) {
-				callback.run();
+			synchronized (this.name) {
+				Runnable callback = this.callback;
+				if (callback != null) {
+					callback.run();
+				}
+				this.callback = null;
+				this.bean = null;
 			}
 		}
 
@@ -404,6 +420,53 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor, Disposable
 			return true;
 		}
 
+	}
+
+	@SuppressWarnings("serial")
+	protected class LockedScopedProxyFactoryBean extends ScopedProxyFactoryBean
+			implements MethodInterceptor {
+
+		private String targetBeanName;
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) {
+			super.setBeanFactory(beanFactory);
+			Object proxy = getObject();
+			if (proxy instanceof Advised) {
+				Advised advised = (Advised) proxy;
+				advised.addAdvice(0, this);
+			}
+		}
+
+		@Override
+		public void setTargetBeanName(String targetBeanName) {
+			super.setTargetBeanName(targetBeanName);
+			this.targetBeanName = targetBeanName;
+		}
+
+		@Override
+		public Object invoke(MethodInvocation invocation) throws Throwable {
+			if (AopUtils.isEqualsMethod(invocation.getMethod())
+					|| AopUtils.isToStringMethod(invocation.getMethod())
+					|| AopUtils.isHashCodeMethod(invocation.getMethod())) {
+				return invocation.proceed();
+			}
+			Object proxy = getObject();
+			Lock lock = locks.get(this.targetBeanName).readLock();
+			lock.lock();
+			try {
+				if (proxy instanceof Advised) {
+					Advised advised = (Advised) proxy;
+					return ReflectionUtils.invokeMethod(invocation.getMethod(),
+							advised.getTargetSource().getTarget(),
+							invocation.getArguments());
+				}
+				return invocation.proceed();
+			}
+			finally {
+				lock.unlock();
+			}
+		}
 	}
 
 }
