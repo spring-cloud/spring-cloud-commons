@@ -13,10 +13,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Spencer Gibb
@@ -44,9 +42,14 @@ public class FeaturesEndpointTests {
 	public void invokeWorks() {
 		FeaturesEndpoint.Features features = this.context.getBean(FeaturesEndpoint.class)
 				.invoke();
-		assertThat(features, is(notNullValue()));
-		assertThat(features.getEnabled().size(), is(equalTo(2)));
-		assertThat(features.getDisabled().size(), is(equalTo(1)));
+		assertThat(features).isNotNull();
+		assertThat(features.getEnabled()).hasSize(2)
+				.contains(newFeature("foo", Foo.class), newFeature("Baz Feature", Baz.class));
+		assertThat(features.getDisabled()).hasSize(1).contains("Bar");
+	}
+
+	private FeaturesEndpoint.Feature newFeature(String name, Class<?> type) {
+		return new FeaturesEndpoint.Feature(name, type.getCanonicalName(), null, null);
 	}
 
 	@Configuration
@@ -60,7 +63,7 @@ public class FeaturesEndpointTests {
 		HasFeatures localFeatures() {
 			HasFeatures features = HasFeatures.namedFeatures(
 					new NamedFeature("foo", Foo.class),
-					new NamedFeature("Bar Feature", Bar.class));
+					new NamedFeature("Baz Feature", Baz.class));
 			features.getAbstractFeatures().add(Bar.class);
 			return features;
 		}
