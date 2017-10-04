@@ -15,6 +15,11 @@
  */
 package org.springframework.cloud.context.scope.refresh;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -26,35 +31,28 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeScaleTests.TestConfiguration;
+import org.springframework.cloud.context.scope.refresh.RefreshScopePureScaleTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import org.springframework.util.ObjectUtils;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
-public class RefreshScopeScaleTests {
+// , properties="logging.level.org.springframework.cloud.context.scope.refresh.RefreshScopePureScaleTests=DEBUG")
+public class RefreshScopePureScaleTests {
 
-	private static Log logger = LogFactory.getLog(RefreshScopeScaleTests.class);
+	private static Log logger = LogFactory.getLog(RefreshScopePureScaleTests.class);
 
 	private ExecutorService executor = Executors.newFixedThreadPool(8);
 
@@ -64,9 +62,6 @@ public class RefreshScopeScaleTests {
 	@Autowired
 	private ExampleService service;
 
-	@Autowired
-	private TestProperties properties;
-
 	@Test
 	@Repeat(10)
 	@DirtiesContext
@@ -74,32 +69,35 @@ public class RefreshScopeScaleTests {
 
 		// overload the thread pool and try to force Spring to create too many instances
 		int n = 80;
-		ExampleService.count = 0;
-		this.properties.setMessage("Foo");
-		this.properties.setDelay(500);
 		this.scope.refreshAll();
 		final CountDownLatch latch = new CountDownLatch(n);
-		Future<String> result = null;
+		List<Future<String>> results = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
-			result = this.executor.submit(new Callable<String>() {
+			results.add(this.executor.submit(new Callable<String>() {
 				@Override
 				public String call() throws Exception {
 					logger.debug("Background started.");
 					try {
-						return RefreshScopeScaleTests.this.service.getMessage();
+						return RefreshScopePureScaleTests.this.service.getMessage();
 					}
 					finally {
 						latch.countDown();
 						logger.debug("Background done.");
 					}
 				}
-			});
+			}));
+			this.executor.submit(new Runnable() {
+				@Override
+				public void run() {
+					logger.debug("Refreshing.");
+					RefreshScopePureScaleTests.this.scope.refreshAll();
+				}});
 		}
 		assertTrue(latch.await(15000, TimeUnit.MILLISECONDS));
 		assertEquals("Foo", this.service.getMessage());
-		assertNotNull(result.get());
-		assertEquals("Foo", result.get());
-		assertEquals(1, ExampleService.count);
+		for (Future<String> result : results) {
+			assertEquals("Foo", result.get());
+		}
 	}
 
 	public static interface Service {
@@ -115,7 +113,6 @@ public class RefreshScopeScaleTests {
 
 		private String message = null;
 		private volatile long delay = 0;
-		private static volatile int count;
 
 		public void setDelay(long delay) {
 			this.delay = delay;
@@ -123,78 +120,48 @@ public class RefreshScopeScaleTests {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
-			ExampleService.count++;
+			logger.debug("Initializing: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 			try {
 				Thread.sleep(this.delay);
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			logger.debug("Initializing message: " + this.message);
+			logger.debug("Initialized: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 		}
 
 		@Override
 		public void destroy() throws Exception {
-			logger.debug("Destroying message: " + this.message);
+			logger.debug("Destroying message: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 			this.message = null;
 		}
 
 		public void setMessage(String message) {
-			logger.debug("Setting message: " + message);
+			logger.debug("Setting message: " + ObjectUtils.getIdentityHexString(this) + ", " + message);
 			this.message = message;
 		}
 
 		@Override
 		public String getMessage() {
-			logger.debug("Returning message: " + this.message);
+			logger.debug("Returning message: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 			return this.message;
 		}
 
 	}
 
 	@Configuration
-	@EnableConfigurationProperties(TestProperties.class)
 	@Import({ RefreshAutoConfiguration.class,
 			PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
-
-		@Autowired
-		private TestProperties properties;
 
 		@Bean
 		@RefreshScope
 		public ExampleService service() {
 			ExampleService service = new ExampleService();
-			service.setMessage(this.properties.getMessage());
-			service.setDelay(this.properties.getDelay());
+			service.setMessage("Foo");
 			return service;
 		}
 
-	}
-
-	@ConfigurationProperties
-	@ManagedResource
-	protected static class TestProperties {
-		private String message;
-		private int delay;
-
-		@ManagedAttribute
-		public String getMessage() {
-			return this.message;
-		}
-
-		public void setMessage(String message) {
-			this.message = message;
-		}
-
-		@ManagedAttribute
-		public int getDelay() {
-			return this.delay;
-		}
-
-		public void setDelay(int delay) {
-			this.delay = delay;
-		}
 	}
 
 }

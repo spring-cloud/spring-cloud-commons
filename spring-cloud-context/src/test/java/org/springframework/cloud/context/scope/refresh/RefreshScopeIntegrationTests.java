@@ -115,6 +115,7 @@ public class RefreshScopeIntegrationTests {
 		this.scope.refresh("service");
 		String id2 = this.service.toString();
 		assertEquals("Foo", this.service.getMessage());
+		assertEquals("Foo", this.service.getMessage());
 		assertEquals(1, ExampleService.getInitCount());
 		assertEquals(1, ExampleService.getDestroyCount());
 		assertNotSame(id1, id2);

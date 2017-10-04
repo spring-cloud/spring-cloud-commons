@@ -1,5 +1,18 @@
 package org.springframework.cloud.commons.httpclient;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+import java.lang.reflect.Field;
+import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLContextSpi;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
+
 import org.apache.http.config.Lookup;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
@@ -7,16 +20,6 @@ import org.apache.http.impl.conn.DefaultHttpClientConnectionOperator;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.Test;
 import org.springframework.util.ReflectionUtils;
-
-import javax.net.ssl.SSLContextSpi;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
-import java.lang.reflect.Field;
-import java.util.concurrent.TimeUnit;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Ryan Baxter
@@ -31,8 +34,9 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 				.getDefaultMaxPerRoute());
 		assertEquals(2,
 				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
-		Object pool = getField((connectionManager), "pool");
-		assertEquals(-1l, ((Long)getField(pool, "timeToLive")).longValue());
+		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
+				"pool");
+		assertEquals(new Long(-1), getField(pool, "timeToLive"));
 		TimeUnit timeUnit = getField(pool, "tunit");
 		assertEquals(TimeUnit.MILLISECONDS, timeUnit);
 	}
@@ -45,8 +49,9 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 				.getDefaultMaxPerRoute());
 		assertEquals(2,
 				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
-		Object pool = getField((connectionManager), "pool");
-		assertEquals(56l, ((Long)getField(pool, "timeToLive")).longValue());
+		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
+				"pool");
+		assertEquals(new Long(56), getField(pool, "timeToLive"));
 		TimeUnit timeUnit = getField(pool, "tunit");
 		assertEquals(TimeUnit.DAYS, timeUnit);
 	}
