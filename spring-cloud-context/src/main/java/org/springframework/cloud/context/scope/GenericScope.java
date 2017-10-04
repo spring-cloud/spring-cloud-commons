@@ -157,7 +157,14 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	protected boolean destroy(String name) {
 		BeanLifecycleWrapper wrapper = this.cache.remove(name);
 		if (wrapper != null) {
-			wrapper.destroy();
+			Lock lock = locks.get(wrapper.getName()).writeLock();
+			lock.lock();
+			try {
+				wrapper.destroy();
+			}
+			finally {
+				lock.unlock();
+			}
 			this.errors.remove(name);
 			return true;
 		}
