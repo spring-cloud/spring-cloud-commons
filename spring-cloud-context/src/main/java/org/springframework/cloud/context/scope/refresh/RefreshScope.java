@@ -14,7 +14,6 @@
 package org.springframework.cloud.context.scope.refresh;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -29,7 +28,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * <p>
@@ -152,20 +150,14 @@ public class RefreshScope extends GenericScope
 			try {
 				ConfigurationPropertiesBindingPostProcessor processor = context
 						.getBean(ConfigurationPropertiesBindingPostProcessor.class);
-				setField(processor, "propertySources", ((ConfigurableEnvironment) this.context.getEnvironment()).getPropertySources());
-				setField(processor, "configurationPropertiesBinder", null);
+				processor.setPropertySources(((ConfigurableEnvironment) this.context.getEnvironment()).getPropertySources());
+				processor.destroy();
 				processor.afterPropertiesSet();
 			}
 			catch (Exception e) {
 			}
 		}
 		this.context.publishEvent(new RefreshScopeRefreshedEvent());
-	}
-
-	private void setField(Object target, String name, Object value) {
-		Field field = ReflectionUtils.findField(target.getClass(), name);
-		ReflectionUtils.makeAccessible(field);
-		ReflectionUtils.setField(field, target, value);
 	}
 
 	@Override
