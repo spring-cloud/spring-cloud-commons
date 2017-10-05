@@ -52,8 +52,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ObjectUtils;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class)
-// , properties = "logging.level.org.springframework.cloud.context.scope.refresh.RefreshScopeConfigurationScaleTests=DEBUG")
+@SpringBootTest(classes = TestConfiguration.class, properties = "logging.level.org.springframework.cloud.context.scope.refresh.RefreshScopeConfigurationScaleTests=DEBUG")
 public class RefreshScopeConfigurationScaleTests {
 
 	private static Log logger = LogFactory
@@ -74,6 +73,8 @@ public class RefreshScopeConfigurationScaleTests {
 	@Repeat(10)
 	@DirtiesContext
 	public void testConcurrentRefresh() throws Exception {
+
+		scope.setEager(false);
 
 		// overload the thread pool and try to force Spring to create too many instances
 		int n = 80;
