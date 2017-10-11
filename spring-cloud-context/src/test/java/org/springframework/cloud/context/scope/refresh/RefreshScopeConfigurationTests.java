@@ -160,7 +160,8 @@ public class RefreshScopeConfigurationTests {
 		String message;
 
 		@RequestMapping("/")
-		public String hello() {
+		// Deliberately use package scope
+		String hello() {
 			return message;
 		}
 
