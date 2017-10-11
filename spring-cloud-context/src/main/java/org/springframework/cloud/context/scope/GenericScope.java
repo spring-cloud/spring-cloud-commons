@@ -13,6 +13,7 @@
 
 package org.springframework.cloud.context.scope;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -453,9 +454,10 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 
 		@Override
 		public Object invoke(MethodInvocation invocation) throws Throwable {
-			if (AopUtils.isEqualsMethod(invocation.getMethod())
-					|| AopUtils.isToStringMethod(invocation.getMethod())
-					|| AopUtils.isHashCodeMethod(invocation.getMethod())) {
+			Method method = invocation.getMethod();
+			if (AopUtils.isEqualsMethod(method)
+					|| AopUtils.isToStringMethod(method)
+					|| AopUtils.isHashCodeMethod(method)) {
 				return invocation.proceed();
 			}
 			Object proxy = getObject();
@@ -464,7 +466,8 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 			try {
 				if (proxy instanceof Advised) {
 					Advised advised = (Advised) proxy;
-					return ReflectionUtils.invokeMethod(invocation.getMethod(),
+					ReflectionUtils.makeAccessible(method);
+					return ReflectionUtils.invokeMethod(method,
 							advised.getTargetSource().getTarget(),
 							invocation.getArguments());
 				}
