@@ -33,20 +33,12 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 @Deprecated
 public class NoopDiscoveryClient implements DiscoveryClient {
 
-	private final ServiceInstance instance;
-
 	public NoopDiscoveryClient(ServiceInstance instance) {
-		this.instance = instance;
 	}
 
 	@Override
 	public String description() {
 		return "Spring Cloud No-op DiscoveryClient";
-	}
-
-	@Override
-	public ServiceInstance getLocalServiceInstance() {
-		return this.instance;
 	}
 
 	@Override

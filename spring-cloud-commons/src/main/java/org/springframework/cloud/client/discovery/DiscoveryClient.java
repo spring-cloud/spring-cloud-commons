@@ -34,14 +34,6 @@ public interface DiscoveryClient {
 	String description();
 
 	/**
-	 * @deprecated use the {@link org.springframework.cloud.client.serviceregistry.Registration} bean instead
-	 *
-	 * @return ServiceInstance with information used to register the local service
-	 */
-	@Deprecated
-	ServiceInstance getLocalServiceInstance();
-
-	/**
 	 * Get all ServiceInstances associated with a particular serviceId
 	 * @param serviceId the serviceId to query
 	 * @return a List of ServiceInstance

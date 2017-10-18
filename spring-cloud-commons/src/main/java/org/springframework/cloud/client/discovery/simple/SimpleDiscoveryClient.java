@@ -27,11 +27,6 @@ public class SimpleDiscoveryClient implements DiscoveryClient {
 	}
 
 	@Override
-	public ServiceInstance getLocalServiceInstance() {
-		return this.simpleDiscoveryProperties.getLocal();
-	}
-
-	@Override
 	public List<ServiceInstance> getInstances(String serviceId) {
 		List<ServiceInstance> serviceInstances = new ArrayList<>();
 		List<SimpleServiceInstance> serviceInstanceForService = this.simpleDiscoveryProperties

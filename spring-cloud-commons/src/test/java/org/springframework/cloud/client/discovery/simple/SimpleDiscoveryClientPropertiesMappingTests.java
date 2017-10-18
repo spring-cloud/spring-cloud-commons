@@ -82,14 +82,6 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 		assertThat(this.discoveryClient.getInstances("nonexistent")).isEmpty();
 	}
 
-	@Test
-	public void testGetLocalInstance() {
-		assertThat(this.discoveryClient.getLocalServiceInstance().getServiceId())
-				.isEqualTo("service0");
-		assertThat(this.discoveryClient.getLocalServiceInstance().getPort())
-				.isEqualTo(8080);
-	}
-
 	@Configuration
 	@EnableAutoConfiguration
 	public static class SampleConfig {

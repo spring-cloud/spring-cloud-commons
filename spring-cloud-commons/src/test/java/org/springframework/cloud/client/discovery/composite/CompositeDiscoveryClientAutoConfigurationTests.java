@@ -60,11 +60,6 @@ public class CompositeDiscoveryClientAutoConfigurationTests {
 				}
 
 				@Override
-				public ServiceInstance getLocalServiceInstance() {
-					return null;
-				}
-
-				@Override
 				public List<ServiceInstance> getInstances(String serviceId) {
 					return null;
 				}

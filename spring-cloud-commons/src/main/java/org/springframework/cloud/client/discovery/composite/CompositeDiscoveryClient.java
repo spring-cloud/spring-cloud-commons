@@ -1,12 +1,12 @@
 package org.springframework.cloud.client.discovery.composite;
 
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
  * A {@link DiscoveryClient} composed of other Discovery Client's and will delegate the
@@ -25,19 +25,6 @@ public class CompositeDiscoveryClient implements DiscoveryClient {
 	@Override
 	public String description() {
 		return "Composite Discovery Client";
-	}
-
-	@Override
-	public ServiceInstance getLocalServiceInstance() {
-		if (this.discoveryClients != null) {
-			for (DiscoveryClient discoveryClient : discoveryClients) {
-				ServiceInstance serviceInstance = discoveryClient.getLocalServiceInstance();
-				if (serviceInstance != null) {
-					return serviceInstance;
-				}
-			}
-		}
-		return null;
 	}
 
 	@Override

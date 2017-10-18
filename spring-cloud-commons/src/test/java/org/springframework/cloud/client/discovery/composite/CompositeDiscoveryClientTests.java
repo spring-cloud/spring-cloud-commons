@@ -1,5 +1,10 @@
 package org.springframework.cloud.client.discovery.composite;
 
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +17,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -72,12 +72,6 @@ public class CompositeDiscoveryClientTests {
 		assertThat(this.discoveryClient.getInstances("unknown")).hasSize(0);
 	}
 
-	
-	@Test
-	public void localServiceInstanceShouldReturnTheFirstMatch() {
-		assertThat(this.discoveryClient.getLocalServiceInstance().getServiceId()).isEqualTo("service0");
-	}
-	
 	@EnableAutoConfiguration
 	@Configuration
 	public static class Config {
@@ -89,11 +83,6 @@ public class CompositeDiscoveryClientTests {
 				@Override
 				public String description() {
 					return "A custom discovery client";
-				}
-
-				@Override
-				public ServiceInstance getLocalServiceInstance() {
-					return null;
 				}
 
 				@Override
