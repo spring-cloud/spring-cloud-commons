@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.net.URI;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.Matchers.containsString;
@@ -75,6 +77,31 @@ public class ServiceRegistryEndpointTests {
 				@Override
 				public String getServiceId() {
 					return "testRegistration1";
+				}
+
+				@Override
+				public String getHost() {
+					return null;
+				}
+
+				@Override
+				public int getPort() {
+					return 0;
+				}
+
+				@Override
+				public boolean isSecure() {
+					return false;
+				}
+
+				@Override
+				public URI getUri() {
+					return null;
+				}
+
+				@Override
+				public Map<String, String> getMetadata() {
+					return null;
 				}
 			};
 		}
