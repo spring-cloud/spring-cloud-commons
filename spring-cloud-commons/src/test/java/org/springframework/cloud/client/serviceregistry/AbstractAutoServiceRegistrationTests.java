@@ -1,5 +1,7 @@
 package org.springframework.cloud.client.serviceregistry;
 
+import java.net.URI;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
@@ -63,6 +65,31 @@ public class AbstractAutoServiceRegistrationTests {
 		@Override
 		public String getServiceId() {
 			return "testRegistration2";
+		}
+
+		@Override
+		public String getHost() {
+			return null;
+		}
+
+		@Override
+		public int getPort() {
+			return 0;
+		}
+
+		@Override
+		public boolean isSecure() {
+			return false;
+		}
+
+		@Override
+		public URI getUri() {
+			return null;
+		}
+
+		@Override
+		public Map<String, String> getMetadata() {
+			return null;
 		}
 	}
 

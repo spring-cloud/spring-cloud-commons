@@ -1,5 +1,6 @@
 package org.springframework.cloud.client.serviceregistry.endpoint;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -72,7 +73,37 @@ public class ServiceRegistryEndpointTests {
 	public static class TestConfiguration {
 		@Bean
 		Registration registration() {
-			return () -> "testRegistration1";
+			return new Registration() {
+				@Override
+				public String getServiceId() {
+					return "testRegistration1";
+				}
+
+				@Override
+				public String getHost() {
+					return null;
+				}
+
+				@Override
+				public int getPort() {
+					return 0;
+				}
+
+				@Override
+				public boolean isSecure() {
+					return false;
+				}
+
+				@Override
+				public URI getUri() {
+					return null;
+				}
+
+				@Override
+				public Map<String, String> getMetadata() {
+					return null;
+				}
+			};
 		}
 
 		@Bean
