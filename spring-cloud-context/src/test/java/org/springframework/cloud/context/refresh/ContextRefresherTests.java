@@ -12,7 +12,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -49,8 +49,8 @@ public class ContextRefresherTests {
 		assertThat(names)
 				.contains("applicationConfig: [classpath:/bootstrap-refresh.properties]");
 		assertThat(names).containsSequence(
-				"applicationConfig: [classpath:/bootstrap-refresh.properties]",
-				"applicationConfig: [classpath:/bootstrap.properties]");
+				"applicationConfig: [classpath:/application.properties]",
+				"applicationConfig: [classpath:/bootstrap-refresh.properties]");
 	}
 
 	@Test
@@ -63,9 +63,9 @@ public class ContextRefresherTests {
 		List<String> names = names(context.getEnvironment().getPropertySources());
 		assertThat(names).doesNotContain("bootstrapProperties");
 		ContextRefresher refresher = new ContextRefresher(context, scope);
-		EnvironmentTestUtils.addEnvironment(context,
-				"spring.cloud.bootstrap.sources: org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration\n"
-						+ "");
+		TestPropertyValues.of(
+				"spring.cloud.bootstrap.sources: org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
+				.applyTo(context);
 		refresher.refresh();
 		names = names(context.getEnvironment().getPropertySources());
 		assertThat(names).first().isEqualTo("bootstrapProperties");
