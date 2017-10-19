@@ -92,12 +92,9 @@ public class ContextRefresher {
 							target.addAfter(targetName, source);
 						}
 						else {
-							if (target.contains("defaultProperties")) {
-								target.addBefore("defaultProperties", source);
-							}
-							else {
-								target.addLast(source);
-							}
+							// targetName was null so we are at the start of the list
+							target.addFirst(source);
+							targetName = name;
 						}
 					}
 				}
