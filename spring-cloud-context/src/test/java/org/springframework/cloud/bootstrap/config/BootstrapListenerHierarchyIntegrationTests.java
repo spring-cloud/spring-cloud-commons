@@ -22,7 +22,6 @@ import static org.junit.Assert.assertNull;
 import static org.springframework.boot.WebApplicationType.NONE;
 
 import org.junit.Test;
-import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;

@@ -46,7 +46,7 @@ public class EncryptionBootstrapConfigurationTests {
 	public void nonExistentKeystoreLocationShouldNotBeAllowed() {
 		try {
 			new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
-					.web(false)
+					.web(WebApplicationType.NONE)
 					.properties("encrypt.key-store.location:classpath:/server.jks1",
 							"encrypt.key-store.password:letmein",
 							"encrypt.key-store.alias:mytestkey",
