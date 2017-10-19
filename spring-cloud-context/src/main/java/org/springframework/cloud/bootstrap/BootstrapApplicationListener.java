@@ -46,6 +46,7 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
+import org.springframework.core.env.PropertySource.StubPropertySource;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -144,6 +145,9 @@ public class BootstrapApplicationListener
 		bootstrapProperties.addFirst(
 				new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME, bootstrapMap));
 		for (PropertySource<?> source : environment.getPropertySources()) {
+			if (source instanceof StubPropertySource) {
+				continue;
+			}
 			bootstrapProperties.addLast(source);
 		}
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

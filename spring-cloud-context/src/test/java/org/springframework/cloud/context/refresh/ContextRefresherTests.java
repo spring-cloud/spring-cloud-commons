@@ -41,7 +41,8 @@ public class ContextRefresherTests {
 					.contains("applicationConfig: [classpath:/bootstrap-refresh.properties]");
 			assertThat(names).containsSequence(
 					"applicationConfig: [classpath:/application.properties]",
-					"applicationConfig: [classpath:/bootstrap-refresh.properties]");
+					"applicationConfig: [classpath:/bootstrap-refresh.properties]",
+					"applicationConfig: [classpath:/bootstrap.properties]");
 		}
 	}
 
@@ -77,7 +78,7 @@ public class ContextRefresherTests {
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 
 		public static Map<String, Object> MAP = new HashMap<>(
-				Collections.<String, Object>singletonMap("bootstrap.context-refresh.foo", "refresh"));
+				Collections.<String, Object>singletonMap("bootstrap.foo", "refresh"));
 
 		@Override
 		public PropertySource<?> locate(Environment environment) {
