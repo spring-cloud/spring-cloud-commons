@@ -97,8 +97,12 @@ public class RefreshEndpointIntegrationTests {
 	@RestController
 	protected static class Controller {
 
-		@Value("${message:Hello World!}")
 		String message;
+		
+		@Value("${message:Hello World!}")
+		public void setMessage(String message) {
+			this.message = message;
+		}
 
 		@RequestMapping("/")
 		public String hello() {

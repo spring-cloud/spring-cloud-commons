@@ -39,7 +39,8 @@ public class ContextRefresher {
 					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME,
-					StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
+					StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, 
+					"configurationProperties"));
 
 	private ConfigurableApplicationContext context;
 	private RefreshScope scope;
@@ -118,6 +119,10 @@ public class ContextRefresher {
 			capturedPropertySources.remove(source.getName());
 		}
 		for (PropertySource<?> source : input.getPropertySources()) {
+			if ("configurationProperties".equals(source.getName())) {
+				// Spring Boot artifact, tracking values in the other sources
+				continue;
+			}
 			capturedPropertySources.addLast(source);
 		}
 		environment.setActiveProfiles(input.getActiveProfiles());
