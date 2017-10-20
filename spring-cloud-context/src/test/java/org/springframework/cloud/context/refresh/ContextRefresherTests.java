@@ -1,5 +1,7 @@
 package org.springframework.cloud.context.refresh;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,15 +21,13 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class ContextRefresherTests {
 
 	private RefreshScope scope = Mockito.mock(RefreshScope.class);
 
 	@Test
 	public void orderNewPropertiesConsistentWithNewContext() {
-		try (ConfigurableApplicationContext context = SpringApplication.run(ContextRefresherTests.class,
+		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
 				"--spring.main.webEnvironment=false", "--debug=false",
 				"--spring.main.bannerMode=OFF")) {
 			context.getEnvironment().setActiveProfiles("refresh");
@@ -50,10 +50,11 @@ public class ContextRefresherTests {
 	public void bootstrapPropertySourceAlwaysFirst() {
 		// Use spring.cloud.bootstrap.name to switch off the defaults (which would pick up
 		// a bootstrapProperties immediately
-		try (ConfigurableApplicationContext context = SpringApplication.run(ContextRefresherTests.class,
+		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
 				"--spring.main.webEnvironment=false", "--debug=false",
 				"--spring.main.bannerMode=OFF", "--spring.cloud.bootstrap.name=refresh")) {
 			List<String> names = names(context.getEnvironment().getPropertySources());
+			System.err.println("***** " + context.getEnvironment().getPropertySources());
 			assertThat(names).doesNotContain("bootstrapProperties");
 			ContextRefresher refresher = new ContextRefresher(context, scope);
 			TestPropertyValues.of(
@@ -73,6 +74,10 @@ public class ContextRefresherTests {
 		return list;
 	}
 
+	@Configuration
+	protected static class Empty {
+	}
+	
 	@Configuration
 	// This is added to bootstrap context as a source in bootstrap.properties
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {

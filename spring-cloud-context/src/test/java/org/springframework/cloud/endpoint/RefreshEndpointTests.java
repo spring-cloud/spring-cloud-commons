@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.WebApplicationType;
@@ -94,7 +93,6 @@ public class RefreshEndpointTests {
 	}
 
 	@Test
-	// @Ignore
 	public void keysComputedWhenChangesInExternalProperties() throws Exception {
 		this.context = new SpringApplicationBuilder(Empty.class)
 				.web(WebApplicationType.NONE).bannerMode(Mode.OFF)

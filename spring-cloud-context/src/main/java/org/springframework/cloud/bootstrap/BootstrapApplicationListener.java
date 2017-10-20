@@ -152,8 +152,8 @@ public class BootstrapApplicationListener
 		}
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		// Use names and ensure unique to protect against duplicates
-		List<String> names = SpringFactoriesLoader
-				.loadFactoryNames(BootstrapConfiguration.class, classLoader);
+		List<String> names = new ArrayList<>(SpringFactoriesLoader
+				.loadFactoryNames(BootstrapConfiguration.class, classLoader));
 		for (String name : StringUtils.commaDelimitedListToStringArray(
 				environment.getProperty("spring.cloud.bootstrap.sources", ""))) {
 			names.add(name);
