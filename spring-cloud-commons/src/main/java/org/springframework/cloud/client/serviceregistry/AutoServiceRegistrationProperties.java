@@ -17,6 +17,19 @@ public class AutoServiceRegistrationProperties {
 	/** Should startup fail if there is no AutoServiceRegistration, default to false. */
 	private boolean failFast = false;
 
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public boolean isRegisterManagement() {
+		return registerManagement;
+	}
+
+	@Deprecated
 	public boolean shouldRegisterManagement() {
 		return registerManagement;
 	}
