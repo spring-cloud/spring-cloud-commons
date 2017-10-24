@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.context.event.EventListener;
