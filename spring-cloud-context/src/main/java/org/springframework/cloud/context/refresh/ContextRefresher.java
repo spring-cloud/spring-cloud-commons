@@ -61,6 +61,7 @@ public class ContextRefresher {
 
 	private void addConfigFilesToEnvironment() {
 		ConfigurableApplicationContext capture = null;
+		BootstrapApplicationListener.AncestorInitializer ancestorInitializer = null;
 		try {
 			StandardEnvironment environment = copyEnvironment(
 					this.context.getEnvironment());
@@ -71,6 +72,9 @@ public class ContextRefresher {
 			builder.application()
 					.setListeners(Arrays.asList(new BootstrapApplicationListener(),
 							new ConfigFileApplicationListener()));
+			ancestorInitializer = new BootstrapApplicationListener.AncestorInitializer(null);
+			builder.application()
+					.addInitializers(ancestorInitializer);
 			capture = builder.run();
 			if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
 				environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
@@ -103,6 +107,10 @@ public class ContextRefresher {
 		finally {
 			ConfigurableApplicationContext closeable = capture;
 			closeable.close();
+			if (ancestorInitializer != null && ancestorInitializer.getParent() != null &&
+					ancestorInitializer.getParent().isActive()) {
+				ancestorInitializer.getParent().close();
+			}
 		}
 
 	}

@@ -299,13 +299,17 @@ public class BootstrapApplicationListener
 		return this.order;
 	}
 
-	private static class AncestorInitializer implements
+	public static class AncestorInitializer implements
 			ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
 		private ConfigurableApplicationContext parent;
 
 		public AncestorInitializer(ConfigurableApplicationContext parent) {
 			this.parent = parent;
+		}
+
+		public ConfigurableApplicationContext getParent() {
+			return parent;
 		}
 
 		public void setParent(ConfigurableApplicationContext parent) {
