@@ -34,7 +34,7 @@ public class ContextRefresher {
 
 	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
 
-	private Set<String> standardSources = new HashSet<String>(
+	private Set<String> standardSources = new HashSet<>(
 			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
 					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME,
@@ -61,7 +61,7 @@ public class ContextRefresher {
 		return keys;
 	}
 
-	private void addConfigFilesToEnvironment() {
+	/* for testing */ ConfigurableApplicationContext addConfigFilesToEnvironment() {
 		ConfigurableApplicationContext capture = null;
 		try {
 			StandardEnvironment environment = copyEnvironment(
@@ -105,9 +105,22 @@ public class ContextRefresher {
 		}
 		finally {
 			ConfigurableApplicationContext closeable = capture;
-			closeable.close();
+			while (closeable != null) {
+				try {
+					closeable.close();
+				}
+				catch (Exception e) {
+					// Ignore;
+				}
+				if (closeable.getParent() instanceof ConfigurableApplicationContext) {
+					closeable = (ConfigurableApplicationContext) closeable.getParent();
+				}
+				else {
+					break;
+				}
+			}
 		}
-
+		return capture;
 	}
 
 	// Don't use ConfigurableEnvironment.merge() in case there are clashes with property

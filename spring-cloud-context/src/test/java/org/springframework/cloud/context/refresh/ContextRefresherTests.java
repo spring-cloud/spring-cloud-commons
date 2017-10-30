@@ -66,6 +66,22 @@ public class ContextRefresherTests {
 		}
 	}
 
+	@Test
+	public void parentContextIsClosed() {
+		// Use spring.cloud.bootstrap.name to switch off the defaults (which would pick up
+		// a bootstrapProperties immediately
+		context = SpringApplication.run(ContextRefresherTests.class,
+				"--spring.main.webEnvironment=false", "--debug=false",
+				"--spring.main.bannerMode=OFF", "--spring.cloud.bootstrap.name=refresh");
+		ContextRefresher refresher = new ContextRefresher(context, scope);
+		EnvironmentTestUtils.addEnvironment(context,
+				"spring.cloud.bootstrap.sources: org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration\n"
+						+ "");
+		ConfigurableApplicationContext refresherContext = refresher.addConfigFilesToEnvironment();
+		assertThat(refresherContext.getParent()).isNotNull().isInstanceOf(ConfigurableApplicationContext.class);
+		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) refresherContext.getParent();
+		assertThat(parent.isActive()).isFalse();
+	}
 	private List<String> names(MutablePropertySources propertySources) {
 		List<String> list = new ArrayList<>();
 		for (PropertySource<?> p : propertySources) {
