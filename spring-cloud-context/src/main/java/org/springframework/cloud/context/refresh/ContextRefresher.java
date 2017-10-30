@@ -102,7 +102,20 @@ public class ContextRefresher {
 		}
 		finally {
 			ConfigurableApplicationContext closeable = capture;
-			closeable.close();
+			while (closeable != null) {
+				try {
+					closeable.close();
+				}
+				catch (Exception e) {
+					// Ignore;
+				}
+				if (closeable.getParent() instanceof ConfigurableApplicationContext) {
+					closeable = (ConfigurableApplicationContext) closeable.getParent();
+				}
+				else {
+					break;
+				}
+			}
 		}
 
 	}
