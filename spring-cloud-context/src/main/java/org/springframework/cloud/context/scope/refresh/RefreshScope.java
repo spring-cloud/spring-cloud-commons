@@ -14,7 +14,6 @@
 package org.springframework.cloud.context.scope.refresh;
 
 import java.io.Serializable;
-import java.lang.reflect.Field;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -26,11 +25,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MutablePropertySources;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * <p>
@@ -153,11 +149,6 @@ public class RefreshScope extends GenericScope
 			try {
 				ConfigurationPropertiesBindingPostProcessor processor = context
 						.getBean(ConfigurationPropertiesBindingPostProcessor.class);
-				//TODO: replace reflection with agreed upon contract
-				Field field = ReflectionUtils.findField(ConfigurationPropertiesBindingPostProcessor.class, "propertySources");
-				ReflectionUtils.makeAccessible(field);
-				MutablePropertySources propertySources = ((ConfigurableEnvironment) this.context.getEnvironment()).getPropertySources();
-				ReflectionUtils.setField(field, processor, propertySources);
 				processor.afterPropertiesSet();
 			}
 			catch (Exception e) {
