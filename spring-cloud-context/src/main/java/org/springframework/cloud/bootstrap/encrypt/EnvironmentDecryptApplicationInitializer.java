@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationContext;
@@ -34,10 +35,10 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
-import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 /**
@@ -97,7 +98,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 			// We have some decrypted properties
 			found.addAll(map.keySet());
 			insert(applicationContext,
-					new SystemEnvironmentPropertySource(DECRYPTED_PROPERTY_SOURCE_NAME, map));
+					new MapPropertySource(DECRYPTED_PROPERTY_SOURCE_NAME, map));
 		}
 		PropertySource<?> bootstrap = propertySources
 				.get(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME);
@@ -105,7 +106,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 			map = decrypt(bootstrap);
 			if (!map.isEmpty()) {
 				found.addAll(map.keySet());
-				insert(applicationContext, new SystemEnvironmentPropertySource(
+				insert(applicationContext, new MapPropertySource(
 						DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME, map));
 			}
 		}
@@ -122,7 +123,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 	}
 
 	private void insert(ApplicationContext applicationContext,
-			SystemEnvironmentPropertySource propertySource) {
+			MapPropertySource propertySource) {
 		ApplicationContext parent = applicationContext;
 		while (parent != null) {
 			if (parent.getEnvironment() instanceof ConfigurableEnvironment) {
@@ -135,7 +136,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 	}
 
 	private void insert(MutablePropertySources propertySources,
-			SystemEnvironmentPropertySource propertySource) {
+			MapPropertySource propertySource) {
 		if (propertySources
 				.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			if (DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME
@@ -214,8 +215,10 @@ public class EnvironmentDecryptApplicationInitializer implements
 						if (COLLECTION_PROPERTY.matcher(key).matches()) {
 							sourceHasDecryptedCollection = true;
 						}
-					} else if (COLLECTION_PROPERTY.matcher(key).matches()){
-						// put non-ecrypted properties so merging of index properties happens correctly
+					}
+					else if (COLLECTION_PROPERTY.matcher(key).matches()) {
+						// put non-ecrypted properties so merging of index properties
+						// happens correctly
 						otherCollectionProperties.put(key, value);
 					}
 				}

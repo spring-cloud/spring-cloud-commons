@@ -18,7 +18,6 @@ import java.io.Serializable;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.cloud.context.scope.GenericScope;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -144,16 +143,6 @@ public class RefreshScope extends GenericScope
 	@ManagedOperation(description = "Dispose of the current instance of all beans in this scope and force a refresh on next method execution.")
 	public void refreshAll() {
 		super.destroy();
-		if (this.context != null && this.context.getBeanNamesForType(
-				ConfigurationPropertiesBindingPostProcessor.class).length == 1) {
-			try {
-				ConfigurationPropertiesBindingPostProcessor processor = context
-						.getBean(ConfigurationPropertiesBindingPostProcessor.class);
-				processor.afterPropertiesSet();
-			}
-			catch (Exception e) {
-			}
-		}
 		this.context.publishEvent(new RefreshScopeRefreshedEvent());
 	}
 
