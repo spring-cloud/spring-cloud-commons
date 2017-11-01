@@ -20,23 +20,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBinder;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBinderBuilder;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -59,41 +52,16 @@ import org.springframework.stereotype.Component;
 public class ConfigurationPropertiesRebinder
 		implements ApplicationContextAware, ApplicationListener<EnvironmentChangeEvent> {
 
-	private static final Log log = LogFactory
-			.getLog(ConfigurationPropertiesRebinder.class);
-
 	private ConfigurationPropertiesBeans beans;
-
-	private ConfigurationPropertiesBinder binder;
 
 	private ApplicationContext applicationContext;
 
 	private Map<String, Exception> errors = new ConcurrentHashMap<>();
 
-	private boolean resetting = false;
-
 	public ConfigurationPropertiesRebinder(ConfigurationPropertiesBeans beans) {
 		this.beans = beans;
 	}
 
-	private ConfigurationPropertiesBinder getBinder() {
-		if (this.binder == null) {
-			ConfigurableEnvironment environment = null;
-			Environment object = this.applicationContext.getEnvironment();
-			if (!(object instanceof ConfigurableEnvironment)) {
-				log.warn("Environment is not of type ConfigurableEnvironment");
-				environment = new StandardEnvironment();
-			}
-			else {
-				environment = (ConfigurableEnvironment) object;
-			}
-			this.binder = new ConfigurationPropertiesBinderBuilder(
-					this.applicationContext)
-							.withPropertySources(environment.getPropertySources())
-							.build();
-		}
-		return this.binder;
-	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
@@ -113,14 +81,9 @@ public class ConfigurationPropertiesRebinder
 	@ManagedOperation
 	public void rebind() {
 		this.errors.clear();
-		if (this.binder != null) {
-			resetting = true;
-			resetBinder();
-		}
 		for (String name : this.beans.getBeanNames()) {
 			rebind(name);
 		}
-		resetting = false;
 	}
 
 	@ManagedOperation
@@ -128,16 +91,12 @@ public class ConfigurationPropertiesRebinder
 		if (!this.beans.getBeanNames().contains(name)) {
 			return false;
 		}
-		if (this.binder != null && !this.resetting) {
-			resetBinder();
-		}
 		if (this.applicationContext != null) {
 			try {
 				Object bean = this.applicationContext.getBean(name);
 				if (AopUtils.isCglibProxy(bean)) {
 					bean = getTargetObject(bean);
 				}
-				getBinder().bind(bean);
 				this.applicationContext.getAutowireCapableBeanFactory()
 						.initializeBean(bean, name);
 				return true;
@@ -148,10 +107,6 @@ public class ConfigurationPropertiesRebinder
 			}
 		}
 		return false;
-	}
-
-	private void resetBinder() {
-		this.binder = null;
 	}
 
 	@SuppressWarnings("unchecked")

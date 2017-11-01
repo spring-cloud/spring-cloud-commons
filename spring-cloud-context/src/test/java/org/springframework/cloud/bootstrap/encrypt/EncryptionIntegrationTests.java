@@ -1,5 +1,6 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.boot.WebApplicationType;
@@ -24,6 +25,7 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
+	@Ignore("https://github.com/spring-cloud/spring-cloud-commons/issues/269")
 	public void symmetricConfigurationProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
 				TestConfiguration.class).web(WebApplicationType.NONE).properties(

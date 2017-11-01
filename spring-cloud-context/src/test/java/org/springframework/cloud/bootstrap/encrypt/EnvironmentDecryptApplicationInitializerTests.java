@@ -57,7 +57,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	@Test
 	public void relaxedBinding() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of("FOO_TEXT: {cipher}bar").applyTo(context);
+		TestPropertyValues.of("FOO_TEXT: {cipher}bar").applyTo(context.getEnvironment(), TestPropertyValues.Type.SYSTEM);
 		this.listener.initialize(context);
 		assertEquals("bar", context.getEnvironment().getProperty("foo.text"));
 	}

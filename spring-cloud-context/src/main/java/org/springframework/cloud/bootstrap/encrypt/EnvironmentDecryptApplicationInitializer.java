@@ -35,10 +35,10 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
+import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 /**
@@ -97,8 +97,8 @@ public class EnvironmentDecryptApplicationInitializer implements
 		if (!map.isEmpty()) {
 			// We have some decrypted properties
 			found.addAll(map.keySet());
-			insert(applicationContext,
-					new MapPropertySource(DECRYPTED_PROPERTY_SOURCE_NAME, map));
+			insert(applicationContext, new SystemEnvironmentPropertySource(
+					DECRYPTED_PROPERTY_SOURCE_NAME, map));
 		}
 		PropertySource<?> bootstrap = propertySources
 				.get(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME);
@@ -106,7 +106,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 			map = decrypt(bootstrap);
 			if (!map.isEmpty()) {
 				found.addAll(map.keySet());
-				insert(applicationContext, new MapPropertySource(
+				insert(applicationContext, new SystemEnvironmentPropertySource(
 						DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME, map));
 			}
 		}
@@ -123,7 +123,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 	}
 
 	private void insert(ApplicationContext applicationContext,
-			MapPropertySource propertySource) {
+			PropertySource<?> propertySource) {
 		ApplicationContext parent = applicationContext;
 		while (parent != null) {
 			if (parent.getEnvironment() instanceof ConfigurableEnvironment) {
@@ -136,7 +136,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 	}
 
 	private void insert(MutablePropertySources propertySources,
-			MapPropertySource propertySource) {
+			PropertySource<?> propertySource) {
 		if (propertySources
 				.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			if (DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME
