@@ -431,7 +431,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	}
 
 	@SuppressWarnings("serial")
-	protected class LockedScopedProxyFactoryBean extends ScopedProxyFactoryBean
+	public class LockedScopedProxyFactoryBean extends ScopedProxyFactoryBean
 			implements MethodInterceptor {
 
 		private String targetBeanName;
