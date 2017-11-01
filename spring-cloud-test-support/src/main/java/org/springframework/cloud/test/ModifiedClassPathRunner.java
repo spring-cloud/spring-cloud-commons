@@ -18,6 +18,7 @@ package org.springframework.cloud.test;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -27,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
+import java.util.stream.Stream;
 
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
@@ -83,61 +85,73 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 	protected Object createTest() throws Exception {
 		ModifiedClassPathTestClass testClass = (ModifiedClassPathTestClass) getTestClass();
 		return testClass.doWithModifiedClassPathThreadContextClassLoader(
-				new ModifiedClassPathTestClass.ModifiedClassPathTcclAction<Object, Exception>() {
-
-					@Override
-					public Object perform() throws Exception {
-						return ModifiedClassPathRunner.super.createTest();
-					}
-				});
+				() -> ModifiedClassPathRunner.super.createTest());
 	}
 
 	private URLClassLoader createTestClassLoader(Class<?> testClass) throws Exception {
-		URLClassLoader classLoader = (URLClassLoader) this.getClass().getClassLoader();
+		ClassLoader classLoader = this.getClass().getClassLoader();
 		return new ModifiedClassPathClassLoader(
 				processUrls(extractUrls(classLoader), testClass), classLoader.getParent(),
 				classLoader);
 	}
 
-	private URL[] extractUrls(URLClassLoader classLoader) throws Exception {
-		List<URL> extractedUrls = new ArrayList<URL>();
-		for (URL url : classLoader.getURLs()) {
+	private URL[] extractUrls(ClassLoader classLoader) throws Exception {
+		List<URL> extractedUrls = new ArrayList<>();
+		doExtractUrls(classLoader).forEach((URL url) -> {
 			if (isSurefireBooterJar(url)) {
 				extractedUrls.addAll(extractUrlsFromManifestClassPath(url));
 			}
 			else {
 				extractedUrls.add(url);
 			}
-		}
+		});
 		return extractedUrls.toArray(new URL[extractedUrls.size()]);
+	}
+
+	private Stream<URL> doExtractUrls(ClassLoader classLoader) throws Exception {
+		if (classLoader instanceof URLClassLoader) {
+			return Stream.of(((URLClassLoader) classLoader).getURLs());
+		}
+		return Stream.of(ManagementFactory.getRuntimeMXBean().getClassPath()
+				.split(File.pathSeparator)).map(this::toURL);
+	}
+
+	private URL toURL(String entry) {
+		try {
+			return new File(entry).toURI().toURL();
+		}
+		catch (Exception ex) {
+			throw new IllegalArgumentException(ex);
+		}
 	}
 
 	private boolean isSurefireBooterJar(URL url) {
 		return url.getPath().contains("surefirebooter");
 	}
 
-	private List<URL> extractUrlsFromManifestClassPath(URL booterJar) throws Exception {
-		List<URL> urls = new ArrayList<URL>();
-		for (String entry : getClassPath(booterJar)) {
-			urls.add(new URL(entry));
+	private List<URL> extractUrlsFromManifestClassPath(URL booterJar) {
+		List<URL> urls = new ArrayList<>();
+		try {
+			for (String entry : getClassPath(booterJar)) {
+				urls.add(new URL(entry));
+			}
+		}
+		catch (Exception ex) {
+			throw new RuntimeException(ex);
 		}
 		return urls;
 	}
 
 	private String[] getClassPath(URL booterJar) throws Exception {
-		JarFile jarFile = new JarFile(new File(booterJar.toURI()));
-		try {
+		try (JarFile jarFile = new JarFile(new File(booterJar.toURI()))) {
 			return StringUtils.delimitedListToStringArray(jarFile.getManifest()
 					.getMainAttributes().getValue(Attributes.Name.CLASS_PATH), " ");
-		}
-		finally {
-			jarFile.close();
 		}
 	}
 
 	private URL[] processUrls(URL[] urls, Class<?> testClass) throws Exception {
 		ClassPathEntryFilter filter = new ClassPathEntryFilter(testClass);
-		List<URL> processedUrls = new ArrayList<URL>();
+		List<URL> processedUrls = new ArrayList<>();
 		processedUrls.addAll(getAdditionalUrls(testClass));
 		for (URL url : urls) {
 			if (!filter.isExcluded(url)) {
@@ -177,7 +191,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 		DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, null);
 		DependencyResult result = repositorySystem.resolveDependencies(session,
 				dependencyRequest);
-		List<URL> resolvedArtifacts = new ArrayList<URL>();
+		List<URL> resolvedArtifacts = new ArrayList<>();
 		for (ArtifactResult artifact : result.getArtifactResults()) {
 			resolvedArtifacts.add(artifact.getArtifact().getFile().toURI().toURL());
 		}
@@ -185,7 +199,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 	}
 
 	private List<Dependency> createDependencies(String[] allCoordinates) {
-		List<Dependency> dependencies = new ArrayList<Dependency>();
+		List<Dependency> dependencies = new ArrayList<>();
 		for (String coordinate : allCoordinates) {
 			dependencies.add(new Dependency(new DefaultArtifact(coordinate), null));
 		}
@@ -202,10 +216,13 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 		private final AntPathMatcher matcher = new AntPathMatcher();
 
 		private ClassPathEntryFilter(Class<?> testClass) throws Exception {
+			this.exclusions = new ArrayList<>();
+			this.exclusions.add("log4j-*.jar");
 			ClassPathExclusions exclusions = AnnotationUtils.findAnnotation(testClass,
 					ClassPathExclusions.class);
-			this.exclusions = exclusions == null ? Collections.<String>emptyList()
-					: Arrays.asList(exclusions.value());
+			if (exclusions != null) {
+				this.exclusions.addAll(Arrays.asList(exclusions.value()));
+			}
 		}
 
 		private boolean isExcluded(URL url) throws Exception {
@@ -258,8 +275,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 
 		private List<FrameworkMethod> wrapFrameworkMethods(
 				List<FrameworkMethod> methods) {
-			List<FrameworkMethod> wrapped = new ArrayList<FrameworkMethod>(
-					methods.size());
+			List<FrameworkMethod> wrapped = new ArrayList<>(methods.size());
 			for (FrameworkMethod frameworkMethod : methods) {
 				wrapped.add(new ModifiedClassPathFrameworkMethod(
 						frameworkMethod.getMethod()));
@@ -304,15 +320,8 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 			public Object invokeExplosively(final Object target, final Object... params)
 					throws Throwable {
 				return doWithModifiedClassPathThreadContextClassLoader(
-						new ModifiedClassPathTcclAction<Object, Throwable>() {
-
-							@Override
-							public Object perform() throws Throwable {
-								return ModifiedClassPathFrameworkMethod.super.invokeExplosively(
-										target, params);
-							}
-
-						});
+						() -> ModifiedClassPathFrameworkMethod.super.invokeExplosively(
+								target, params));
 			}
 
 		}
@@ -327,7 +336,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 		private final ClassLoader junitLoader;
 
 		ModifiedClassPathClassLoader(URL[] urls, ClassLoader parent,
-				ClassLoader junitLoader) {
+									 ClassLoader junitLoader) {
 			super(urls, parent);
 			this.junitLoader = junitLoader;
 		}
