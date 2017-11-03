@@ -63,7 +63,7 @@ public class ContextRefresherTests {
 		List<String> names = names(context.getEnvironment().getPropertySources());
 		assertThat(names).doesNotContain("bootstrapProperties");
 		ContextRefresher refresher = new ContextRefresher(context, scope);
-		EnvironmentTestUtils.addEnvironment(context,
+		EnvironmentTestUtils.addEnvironment("defaultProperties", context.getEnvironment(),
 				"spring.cloud.bootstrap.sources: org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration\n"
 						+ "");
 		refresher.refresh();
