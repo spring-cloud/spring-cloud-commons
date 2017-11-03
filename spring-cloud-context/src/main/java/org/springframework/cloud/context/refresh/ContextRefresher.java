@@ -34,6 +34,9 @@ public class ContextRefresher {
 
 	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
 
+	private static final String[] DEFAULT_PROPERTY_SOURCES = new String[] {
+			"defaultProperties" };
+
 	private Set<String> standardSources = new HashSet<>(
 			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
 					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
@@ -128,15 +131,18 @@ public class ContextRefresher {
 	private StandardEnvironment copyEnvironment(ConfigurableEnvironment input) {
 		StandardEnvironment environment = new StandardEnvironment();
 		MutablePropertySources capturedPropertySources = environment.getPropertySources();
-		for (PropertySource<?> source : capturedPropertySources) {
-			capturedPropertySources.remove(source.getName());
-		}
-		for (PropertySource<?> source : input.getPropertySources()) {
-			if ("configurationProperties".equals(source.getName())) {
-				// Spring Boot artifact, tracking values in the other sources
-				continue;
+		// Only copy the default property source(s) and the profiles over from the main
+		// environment (everything else should be pristine, just like it was on startup).
+		for (String name : DEFAULT_PROPERTY_SOURCES) {
+			if (input.getPropertySources().contains(name)) {
+				if (capturedPropertySources.contains(name)) {
+					capturedPropertySources.replace(name,
+							input.getPropertySources().get(name));
+				}
+				else {
+					capturedPropertySources.addLast(input.getPropertySources().get(name));
+				}
 			}
-			capturedPropertySources.addLast(source);
 		}
 		environment.setActiveProfiles(input.getActiveProfiles());
 		environment.setDefaultProfiles(input.getDefaultProfiles());

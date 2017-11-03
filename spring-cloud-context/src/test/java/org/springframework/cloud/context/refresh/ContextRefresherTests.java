@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -59,7 +60,7 @@ public class ContextRefresherTests {
 			ContextRefresher refresher = new ContextRefresher(context, scope);
 			TestPropertyValues.of(
 					"spring.cloud.bootstrap.sources: org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
-					.applyTo(context);
+					.applyTo(context.getEnvironment(), Type.MAP, "defaultProperties");
 			refresher.refresh();
 			names = names(context.getEnvironment().getPropertySources());
 			assertThat(names).first().isEqualTo("bootstrapProperties");

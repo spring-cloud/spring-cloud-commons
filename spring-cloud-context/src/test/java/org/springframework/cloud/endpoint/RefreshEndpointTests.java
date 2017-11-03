@@ -33,6 +33,7 @@ import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.refresh.ContextRefresher;
@@ -71,7 +72,7 @@ public class RefreshEndpointTests {
 				.properties("spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		TestPropertyValues.of("spring.profiles.active=local").applyTo(this.context);
+		context.getEnvironment().setActiveProfiles("local");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
@@ -85,7 +86,7 @@ public class RefreshEndpointTests {
 				.properties("spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		TestPropertyValues.of("spring.profiles.active=override").applyTo(this.context);
+		context.getEnvironment().setActiveProfiles("override");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
@@ -102,7 +103,7 @@ public class RefreshEndpointTests {
 		TestPropertyValues
 				.of("spring.cloud.bootstrap.sources="
 						+ ExternalPropertySourceLocator.class.getName())
-				.applyTo(this.context);
+				.applyTo(this.context.getEnvironment(), Type.MAP, "defaultProperties");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
