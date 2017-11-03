@@ -70,7 +70,7 @@ public class RefreshEndpointTests {
 				.run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		EnvironmentTestUtils.addEnvironment(this.context, "spring.profiles.active=local");
+		context.getEnvironment().setActiveProfiles("local");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.invoke();
@@ -84,8 +84,7 @@ public class RefreshEndpointTests {
 				.run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"spring.profiles.active=override");
+		context.getEnvironment().setActiveProfiles("override");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.invoke();
@@ -99,7 +98,7 @@ public class RefreshEndpointTests {
 				.run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		EnvironmentTestUtils.addEnvironment(this.context,
+		EnvironmentTestUtils.addEnvironment("defaultProperties", this.context.getEnvironment(),
 				"spring.cloud.bootstrap.sources="
 						+ ExternalPropertySourceLocator.class.getName());
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
