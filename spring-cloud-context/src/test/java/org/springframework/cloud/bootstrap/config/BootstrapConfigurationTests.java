@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.bootstrap.config;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -83,7 +82,7 @@ public class BootstrapConfigurationTests {
 
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.location:" + externalPropertiesPath)
+				.properties("spring.cloud.bootstrap.location=" + externalPropertiesPath)
 				.run();
 		assertEquals("externalPropertiesInfoName",
 				this.context.getEnvironment().getProperty("info.name"));
@@ -116,17 +115,7 @@ public class BootstrapConfigurationTests {
 	 * @return
 	 */
 	private String getExternalProperties() {
-		String externalPropertiesPath = "";
-		File externalProperties = new File(
-				"src/test/resources/external-properties/bootstrap.properties");
-		if (externalProperties.exists()) {
-			externalPropertiesPath = externalProperties.getAbsolutePath();
-		}
-		else {
-			externalProperties = new File(
-					"spring-cloud-context/src/test/resources/external-properties/bootstrap.properties");
-			externalPropertiesPath = externalProperties.getAbsolutePath();
-		}
+		String externalPropertiesPath = "classpath:bootstrap.properties,classpath:external-properties/bootstrap.properties";
 		return externalPropertiesPath;
 	}
 
