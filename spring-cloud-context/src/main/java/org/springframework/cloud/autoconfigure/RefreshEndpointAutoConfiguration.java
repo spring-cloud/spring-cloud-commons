@@ -26,7 +26,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.cloud.context.refresh.ContextRefresher;
@@ -93,14 +92,16 @@ public class RefreshEndpointAutoConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		@ConditionalOnEnabledEndpoint("pause")
-		public RestartEndpoint.PauseEndpoint pauseEndpoint(RestartEndpoint restartEndpoint) {
+		public RestartEndpoint.PauseEndpoint pauseEndpoint(
+				RestartEndpoint restartEndpoint) {
 			return restartEndpoint.getPauseEndpoint();
 		}
 
 		@Bean
 		@ConditionalOnMissingBean
 		@ConditionalOnEnabledEndpoint("resume")
-		public RestartEndpoint.ResumeEndpoint resumeEndpoint(RestartEndpoint restartEndpoint) {
+		public RestartEndpoint.ResumeEndpoint resumeEndpoint(
+				RestartEndpoint restartEndpoint) {
 			return restartEndpoint.getResumeEndpoint();
 		}
 
