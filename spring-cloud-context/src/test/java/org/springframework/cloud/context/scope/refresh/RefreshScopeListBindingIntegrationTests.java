@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -40,14 +41,12 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class,
-		properties = "messages=one,two")
+@SpringBootTest(classes = TestConfiguration.class, properties = "messages=one,two")
 public class RefreshScopeListBindingIntegrationTests {
 
 	@Autowired

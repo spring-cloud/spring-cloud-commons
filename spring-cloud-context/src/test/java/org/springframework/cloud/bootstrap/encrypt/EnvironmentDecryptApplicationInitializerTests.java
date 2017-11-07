@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -65,9 +66,9 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	public void propertySourcesOrderedCorrectly() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		addEnvironment(context, "foo: {cipher}bar");
-		context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
-				"test_override",
-				Collections.<String, Object> singletonMap("foo", "{cipher}spam")));
+		context.getEnvironment().getPropertySources()
+				.addFirst(new MapPropertySource("test_override",
+						Collections.<String, Object>singletonMap("foo", "{cipher}spam")));
 		this.listener.initialize(context);
 		assertEquals("spam", context.getEnvironment().getProperty("foo"));
 	}
@@ -98,8 +99,10 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	@SuppressWarnings("unchecked")
 	public void indexedPropertiesCopied() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
-		// tests that collections in another property source don't get copied into "decrypted" property source
-		addEnvironment(context, "yours[0].someValue: yourFoo", "yours[1].someValue: yourBar");
+		// tests that collections in another property source don't get copied into
+		// "decrypted" property source
+		addEnvironment(context, "yours[0].someValue: yourFoo",
+				"yours[1].someValue: yourBar");
 
 		// collection with some encrypted keys and some not encrypted
 		addEnvironment("combinedTest", context.getEnvironment(), "mine[0].someValue: Foo",
@@ -107,26 +110,30 @@ public class EnvironmentDecryptApplicationInitializerTests {
 				"mine[1].someKey: {cipher}Bar1", "nonindexed: nonindexval");
 		this.listener.initialize(context);
 
-		assertEquals("Foo",  context.getEnvironment().getProperty("mine[0].someValue"));
+		assertEquals("Foo", context.getEnvironment().getProperty("mine[0].someValue"));
 		assertEquals("Foo0", context.getEnvironment().getProperty("mine[0].someKey"));
-		assertEquals("Bar",  context.getEnvironment().getProperty("mine[1].someValue"));
+		assertEquals("Bar", context.getEnvironment().getProperty("mine[1].someValue"));
 		assertEquals("Bar1", context.getEnvironment().getProperty("mine[1].someKey"));
-		assertEquals("yourFoo",  context.getEnvironment().getProperty("yours[0].someValue"));
-		assertEquals("yourBar",  context.getEnvironment().getProperty("yours[1].someValue"));
+		assertEquals("yourFoo",
+				context.getEnvironment().getProperty("yours[0].someValue"));
+		assertEquals("yourBar",
+				context.getEnvironment().getProperty("yours[1].someValue"));
 
-		MutablePropertySources propertySources = context.getEnvironment().getPropertySources();
-		PropertySource<Map> decrypted = (PropertySource<Map>) propertySources.get(DECRYPTED_PROPERTY_SOURCE_NAME);
-		assertThat("decrypted property source had wrong size", decrypted.getSource().size(), is(4));
+		MutablePropertySources propertySources = context.getEnvironment()
+				.getPropertySources();
+		PropertySource<Map<?, ?>> decrypted = (PropertySource<Map<?, ?>>) propertySources
+				.get(DECRYPTED_PROPERTY_SOURCE_NAME);
+		assertThat("decrypted property source had wrong size",
+				decrypted.getSource().size(), is(4));
 	}
 
 	@Test
 	public void testDecryptNonStandardParent() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
-		EnvironmentDecryptApplicationInitializer initializer =
-				new EnvironmentDecryptApplicationInitializer(Encryptors.noOpText());
+		EnvironmentDecryptApplicationInitializer initializer = new EnvironmentDecryptApplicationInitializer(
+				Encryptors.noOpText());
 
 		addEnvironment(ctx, "key:{cipher}value");
-
 
 		ApplicationContext ctxParent = mock(ApplicationContext.class);
 		when(ctxParent.getEnvironment()).thenReturn(mock(Environment.class));

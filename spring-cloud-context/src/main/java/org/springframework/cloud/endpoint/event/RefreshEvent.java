@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationEvent;
  * Event that triggers a call to {@link RefreshEndpoint#refresh()}
  * @author Spencer Gibb
  */
+@SuppressWarnings("serial")
 public class RefreshEvent extends ApplicationEvent {
 
 	private Object event;
