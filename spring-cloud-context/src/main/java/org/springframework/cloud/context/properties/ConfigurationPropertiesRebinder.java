@@ -62,7 +62,6 @@ public class ConfigurationPropertiesRebinder
 		this.beans = beans;
 	}
 
-
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
@@ -97,6 +96,7 @@ public class ConfigurationPropertiesRebinder
 				if (AopUtils.isCglibProxy(bean)) {
 					bean = getTargetObject(bean);
 				}
+				this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
 				this.applicationContext.getAutowireCapableBeanFactory()
 						.initializeBean(bean, name);
 				return true;
