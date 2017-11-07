@@ -19,7 +19,8 @@ public class BootstrapSourcesOrderingTests {
 	@Test
 	public void sourcesAreOrderedCorrectly() {
 		Class<?> firstConstructedClass = firstToBeCreated.get();
-		assertThat(firstConstructedClass).as("bootstrap sources not ordered correctly").isEqualTo(TestHigherPriorityBootstrapConfiguration.class);
+		assertThat(firstConstructedClass).as("bootstrap sources not ordered correctly")
+				.isEqualTo(TestHigherPriorityBootstrapConfiguration.class);
 	}
 
 	@EnableAutoConfiguration
