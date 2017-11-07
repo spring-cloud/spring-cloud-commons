@@ -19,10 +19,13 @@ package org.springframework.cloud.bootstrap;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.Banner.Mode;
@@ -31,6 +34,7 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.ParentContextApplicationContextInitializer;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationListener;
@@ -44,9 +48,9 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.PropertySource.StubPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
-import org.springframework.core.env.PropertySource.StubPropertySource;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -165,6 +169,14 @@ public class BootstrapApplicationListener
 				// Don't use the default properties in this builder
 				.registerShutdownHook(false).logStartupInfo(false)
 				.web(WebApplicationType.NONE);
+		if (environment.getPropertySources().contains("refreshArgs")) {
+			// If we are doing a context refresh, really we only want to refresh the
+			// Environment, and there are some toxic listeners (like the
+			// LoggingApplicationListener) that affect global static state, so we need a
+			// way to switch those off.
+			builder.application()
+					.setListeners(filterListeners(builder.application().getListeners()));
+		}
 		List<Class<?>> sources = new ArrayList<>();
 		for (String name : names) {
 			Class<?> cls = ClassUtils.resolveClassName(name, null);
@@ -180,7 +192,8 @@ public class BootstrapApplicationListener
 		builder.sources(sources.toArray(new Class[sources.size()]));
 		final ConfigurableApplicationContext context = builder.run();
 		// gh-214 using spring.application.name=bootstrap to set the context id via
-		// `ContextIdApplicationContextInitializer` prevents apps from getting the actual spring.application.name
+		// `ContextIdApplicationContextInitializer` prevents apps from getting the actual
+		// spring.application.name
 		// during the bootstrap phase.
 		context.setId("bootstrap");
 		// Make the bootstrap context a parent of the app context
@@ -190,6 +203,18 @@ public class BootstrapApplicationListener
 		bootstrapProperties.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
 		mergeDefaultProperties(environment.getPropertySources(), bootstrapProperties);
 		return context;
+	}
+
+	private Collection<? extends ApplicationListener<?>> filterListeners(
+			Set<ApplicationListener<?>> listeners) {
+		Set<ApplicationListener<?>> result = new LinkedHashSet<>();
+		for (ApplicationListener<?> listener : listeners) {
+			if (!(listener instanceof LoggingApplicationListener)
+					&& !(listener instanceof LoggingSystemShutdownListener)) {
+				result.add(listener);
+			}
+		}
+		return result;
 	}
 
 	private void mergeDefaultProperties(MutablePropertySources environment,
