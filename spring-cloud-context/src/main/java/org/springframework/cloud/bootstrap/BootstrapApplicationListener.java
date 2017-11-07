@@ -19,10 +19,13 @@ package org.springframework.cloud.bootstrap;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.Banner.Mode;
@@ -30,6 +33,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.builder.ParentContextApplicationContextInitializer;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.logging.LoggingApplicationListener;
 import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationListener;
@@ -159,6 +163,14 @@ public class BootstrapApplicationListener
 				.environment(bootstrapEnvironment)
 				.properties("spring.application.name:" + configName)
 				.registerShutdownHook(false).logStartupInfo(false).web(false);
+		if (environment.getPropertySources().contains("refreshArgs")) {
+			// If we are doing a context refresh, really we only want to refresh the
+			// Environment, and there are some toxic listeners (like the
+			// LoggingApplicationListener) that affect global static state, so we need a
+			// way to switch those off.
+			builder.application()
+					.setListeners(filterListeners(builder.application().getListeners()));
+		}
 		List<Class<?>> sources = new ArrayList<>();
 		for (String name : names) {
 			Class<?> cls = ClassUtils.resolveClassName(name, null);
@@ -180,6 +192,18 @@ public class BootstrapApplicationListener
 		bootstrapProperties.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
 		mergeDefaultProperties(environment.getPropertySources(), bootstrapProperties);
 		return context;
+	}
+
+	private Collection<? extends ApplicationListener<?>> filterListeners(
+			Set<ApplicationListener<?>> listeners) {
+		Set<ApplicationListener<?>> result = new LinkedHashSet<>();
+		for (ApplicationListener<?> listener : listeners) {
+			if (!(listener instanceof LoggingApplicationListener)
+					&& !(listener instanceof LoggingSystemShutdownListener)) {
+				result.add(listener);
+			}
+		}
+		return result;
 	}
 
 	private void mergeDefaultProperties(MutablePropertySources environment,
