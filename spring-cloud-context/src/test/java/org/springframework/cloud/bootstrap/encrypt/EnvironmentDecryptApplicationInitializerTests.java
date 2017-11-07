@@ -15,17 +15,11 @@
  */
 package org.springframework.cloud.bootstrap.encrypt;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME;
-
 import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.context.ApplicationContext;
@@ -36,6 +30,13 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.security.crypto.encrypt.Encryptors;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME;
 
 /**
  * @author Dave Syer
@@ -57,7 +58,8 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	@Test
 	public void relaxedBinding() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of("FOO_TEXT: {cipher}bar").applyTo(context.getEnvironment(), TestPropertyValues.Type.SYSTEM);
+		TestPropertyValues.of("FOO_TEXT: {cipher}bar").applyTo(context.getEnvironment(),
+				TestPropertyValues.Type.SYSTEM_ENVIRONMENT);
 		this.listener.initialize(context);
 		assertEquals("bar", context.getEnvironment().getProperty("foo.text"));
 	}
@@ -107,10 +109,10 @@ public class EnvironmentDecryptApplicationInitializerTests {
 
 		// collection with some encrypted keys and some not encrypted
 		TestPropertyValues
-		.of("mine[0].someValue: Foo",
-				"mine[0].someKey: {cipher}Foo0", "mine[1].someValue: Bar",
-				"mine[1].someKey: {cipher}Bar1", "nonindexed: nonindexval")
-		.applyTo(context.getEnvironment(), Type.MAP, "combinedTest");
+				.of("mine[0].someValue: Foo", "mine[0].someKey: {cipher}Foo0",
+						"mine[1].someValue: Bar", "mine[1].someKey: {cipher}Bar1",
+						"nonindexed: nonindexval")
+				.applyTo(context.getEnvironment(), Type.MAP, "combinedTest");
 		this.listener.initialize(context);
 
 		assertEquals("Foo", context.getEnvironment().getProperty("mine[0].someValue"));
@@ -124,7 +126,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 
 		MutablePropertySources propertySources = context.getEnvironment()
 				.getPropertySources();
-		PropertySource<Map<?,?>> decrypted = (PropertySource<Map<?,?>>) propertySources
+		PropertySource<Map<?, ?>> decrypted = (PropertySource<Map<?, ?>>) propertySources
 				.get(DECRYPTED_PROPERTY_SOURCE_NAME);
 		assertThat("decrypted property source had wrong size",
 				decrypted.getSource().size(), is(4));
