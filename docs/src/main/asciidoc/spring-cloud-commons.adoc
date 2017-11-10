@@ -405,6 +405,26 @@ The properties you can use are `client.ribbon.MaxAutoRetries`,
 See the https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties[Ribbon documentation]
 for a description of what there properties do.
 
+If you would like to implement a `BackOffPolicy` in your retries you will need to
+create a bean of type `LoadBalancedBackOffPolicyFactory`, and return the `BackOffPolicy`
+you would like to use for a given service.
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+    @Bean
+    LoadBalancedBackOffPolicyFactory backOffPolciyFactory() {
+        return new LoadBalancedBackOffPolicyFactory() {
+            @Override
+            public BackOffPolicy createBackOffPolicy(String service) {
+        		return new ExponentialBackOffPolicy();
+        	}
+        };
+    }
+}
+----
+
 NOTE: `client` in the above examples should be replaced with your Ribbon client's
 name.
 
