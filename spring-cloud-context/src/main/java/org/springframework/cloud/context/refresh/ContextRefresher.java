@@ -17,6 +17,7 @@ import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.CommandLinePropertySource;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
@@ -34,8 +35,9 @@ public class ContextRefresher {
 
 	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
 
-	private static final String[] DEFAULT_PROPERTY_SOURCES = new String[] {
-			"defaultProperties" };
+	private static final String[] DEFAULT_PROPERTY_SOURCES = new String[] { //order matters, cli args aren't first, things get messy
+			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME,
+			"defaultProperties"};
 
 	private Set<String> standardSources = new HashSet<>(
 			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,

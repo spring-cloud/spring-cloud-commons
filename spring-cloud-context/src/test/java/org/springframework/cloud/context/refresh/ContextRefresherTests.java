@@ -9,11 +9,11 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.util.TestPropertyValues.Type;
+import org.springframework.cloud.bootstrap.TestBootstrapConfiguration;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -116,6 +116,27 @@ public class ContextRefresherTests {
 			assertThat(system.getCount()).isEqualTo(4);
 		}
 	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void commandLineArgsPassedToBootstrapConfiguration() {
+
+		TestBootstrapConfiguration.fooSightings = new ArrayList<>();
+
+		try (ConfigurableApplicationContext context = SpringApplication.run(ContextRefresherTests.class,
+				"--spring.main.webEnvironment=false", "--debug=false",
+				"--spring.main.bannerMode=OFF",
+				"--spring.cloud.bootstrap.name=refresh",
+				"--test.bootstrap.foo=bar")) {
+			context.getEnvironment().setActiveProfiles("refresh");
+			ContextRefresher refresher = new ContextRefresher(context, scope);
+			refresher.refresh();
+			assertThat(TestBootstrapConfiguration.fooSightings).containsExactly("bar", "bar");
+		}
+
+		TestBootstrapConfiguration.fooSightings = null;
+	}
+
 
 	private List<String> names(MutablePropertySources propertySources) {
 		List<String> list = new ArrayList<>();
