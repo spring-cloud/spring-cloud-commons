@@ -220,25 +220,25 @@ public class BootstrapApplicationListener
 	private void mergeDefaultProperties(MutablePropertySources environment,
 			MutablePropertySources bootstrap) {
 		String name = DEFAULT_PROPERTIES;
-		if (!bootstrap.contains(name)) {
-			return;
-		}
-		PropertySource<?> source = bootstrap.get(name);
-		if (!environment.contains(name)) {
-			environment.addLast(source);
-		}
-		else {
-			PropertySource<?> target = environment.get(name);
-			if (target instanceof MapPropertySource) {
-				Map<String, Object> targetMap = ((MapPropertySource) target).getSource();
-				if (target == source) {
-					return;
-				}
-				if (source instanceof MapPropertySource) {
-					Map<String, Object> map = ((MapPropertySource) source).getSource();
-					for (String key : map.keySet()) {
-						if (!target.containsProperty(key)) {
-							targetMap.put(key, map.get(key));
+		if (bootstrap.contains(name)) {
+			PropertySource<?> source = bootstrap.get(name);
+			if (!environment.contains(name)) {
+				environment.addLast(source);
+			}
+			else {
+				PropertySource<?> target = environment.get(name);
+				if (target instanceof MapPropertySource) {
+					Map<String, Object> targetMap = ((MapPropertySource) target)
+							.getSource();
+					if (target != source) {
+						if (source instanceof MapPropertySource) {
+							Map<String, Object> map = ((MapPropertySource) source)
+									.getSource();
+							for (String key : map.keySet()) {
+								if (!target.containsProperty(key)) {
+									targetMap.put(key, map.get(key));
+								}
+							}
 						}
 					}
 				}
@@ -252,7 +252,7 @@ public class BootstrapApplicationListener
 		PropertySource<?> defaultProperties = environment.get(DEFAULT_PROPERTIES);
 		ExtendedDefaultPropertySource result = defaultProperties instanceof ExtendedDefaultPropertySource
 				? (ExtendedDefaultPropertySource) defaultProperties
-				: new ExtendedDefaultPropertySource(defaultProperties.getName(),
+				: new ExtendedDefaultPropertySource(DEFAULT_PROPERTIES,
 						defaultProperties);
 		for (PropertySource<?> source : bootstrap) {
 			if (!environment.contains(source.getName())) {
@@ -262,8 +262,18 @@ public class BootstrapApplicationListener
 		for (String name : result.getPropertySourceNames()) {
 			bootstrap.remove(name);
 		}
-		environment.replace(DEFAULT_PROPERTIES, result);
-		bootstrap.replace(DEFAULT_PROPERTIES, result);
+		addOrReplace(environment, result);
+		addOrReplace(bootstrap, result);
+	}
+
+	private void addOrReplace(MutablePropertySources environment,
+			PropertySource<?> result) {
+		if (environment.contains(result.getName())) {
+			environment.replace(result.getName(), result);
+		}
+		else {
+			environment.addLast(result);
+		}
 	}
 
 	private void addAncestorInitializer(SpringApplication application,

@@ -194,8 +194,8 @@ public class BootstrapConfigurationTests {
 		ConfigurableEnvironment environment = new StandardEnvironment();
 		environment.getPropertySources().addLast(new MapPropertySource("last",
 				Collections.<String, Object>singletonMap("bootstrap.foo", "splat")));
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).environment(environment)
-				.sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+				.environment(environment).sources(BareConfiguration.class).run();
 		assertEquals("splat", this.context.getEnvironment().getProperty("bootstrap.foo"));
 	}
 
@@ -288,9 +288,11 @@ public class BootstrapConfigurationTests {
 		SpringApplicationBuilder builder = new SpringApplicationBuilder()
 				.sources(BareConfiguration.class);
 		this.sibling = builder.child(BareConfiguration.class)
-				.properties("spring.application.name=sibling").web(WebApplicationType.NONE).run();
+				.properties("spring.application.name=sibling")
+				.web(WebApplicationType.NONE).run();
 		this.context = builder.child(BareConfiguration.class)
-				.properties("spring.application.name=context").web(WebApplicationType.NONE).run();
+				.properties("spring.application.name=context")
+				.web(WebApplicationType.NONE).run();
 		assertEquals(1, TestHigherPriorityBootstrapConfiguration.count.get());
 		assertNotNull(context.getParent());
 		assertEquals("bootstrap", context.getParent().getParent().getId());
@@ -326,7 +328,8 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		// Profiles are always merged with the child
 		ConfigurableApplicationContext parent = new SpringApplicationBuilder()
-				.sources(BareConfiguration.class).profiles("parent").web(WebApplicationType.NONE).run();
+				.sources(BareConfiguration.class).profiles("parent")
+				.web(WebApplicationType.NONE).run();
 		this.context = new SpringApplicationBuilder(BareConfiguration.class)
 				.profiles("child").parent(parent).web(WebApplicationType.NONE).run();
 		assertNotSame(this.context.getEnvironment(),
@@ -354,15 +357,15 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void includeProfileFromBootstrapPropertySource() {
 		PropertySourceConfiguration.MAP.put("spring.profiles.include", "bar,baz");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).profiles("foo")
-				.sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+				.profiles("foo").sources(BareConfiguration.class).run();
 		assertTrue(this.context.getEnvironment().acceptsProfiles("baz"));
 		assertTrue(this.context.getEnvironment().acceptsProfiles("bar"));
 	}
 
 	@Test
 	public void includeProfileFromBootstrapProperties() {
-		this.context = new SpringApplicationBuilder().web(false)
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class)
 				.properties("spring.cloud.bootstrap.name=local").run();
 		assertTrue(this.context.getEnvironment().acceptsProfiles("local"));
