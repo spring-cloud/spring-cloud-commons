@@ -12,7 +12,7 @@ public class PropertySourceBootstrapProperties {
 	private boolean overrideSystemProperties = true;
 
 	/**
-	 * Flag to indicate that {@link #isSystemPropertiesOverride()
+	 * Flag to indicate that {@link #isOverrideSystemProperties()
 	 * systemPropertiesOverride} can be used. Set to false to prevent users from changing
 	 * the default accidentally. Default true.
 	 */
