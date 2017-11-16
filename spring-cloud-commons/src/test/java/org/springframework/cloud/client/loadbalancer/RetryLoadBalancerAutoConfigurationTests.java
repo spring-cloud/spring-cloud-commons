@@ -2,7 +2,10 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.util.List;
 
+import org.junit.Test;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -20,6 +23,14 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 		assertThat(interceptors, hasSize(1));
 		ClientHttpRequestInterceptor interceptor = interceptors.get(0);
 		assertThat(interceptor, is(instanceOf(RetryLoadBalancerInterceptor.class)));
+	}
+
+	@Test
+	public void testDefaultBackOffPolicy() throws Exception {
+		ConfigurableApplicationContext context = init(OneRestTemplate.class);
+		LoadBalancedBackOffPolicyFactory loadBalancedBackOffPolicyFactory = context.getBean(LoadBalancedBackOffPolicyFactory.class);
+		assertThat(loadBalancedBackOffPolicyFactory, is(instanceOf(LoadBalancedBackOffPolicyFactory.NoBackOffPolicyFactory.class)));
+		assertThat(loadBalancedBackOffPolicyFactory.createBackOffPolicy("foo"), is(instanceOf(NoBackOffPolicy.class)));
 	}
 }
 
