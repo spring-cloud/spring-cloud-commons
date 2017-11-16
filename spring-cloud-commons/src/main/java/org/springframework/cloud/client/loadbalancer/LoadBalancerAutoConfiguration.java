@@ -116,6 +116,12 @@ public class LoadBalancerAutoConfiguration {
 		public LoadBalancedRetryPolicyFactory loadBalancedRetryPolicyFactory() {
 			return new LoadBalancedRetryPolicyFactory.NeverRetryFactory();
 		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public LoadBalancedBackOffPolicyFactory loadBalancedBackOffPolicyFactory() {
+			return new LoadBalancedBackOffPolicyFactory.NoBackOffPolicyFactory();
+		}
 	}
 
 	@Configuration
@@ -126,9 +132,10 @@ public class LoadBalancerAutoConfiguration {
 		public RetryLoadBalancerInterceptor ribbonInterceptor(
 				LoadBalancerClient loadBalancerClient, LoadBalancerRetryProperties properties,
 				LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
-				LoadBalancerRequestFactory requestFactory) {
+				LoadBalancerRequestFactory requestFactory,
+				LoadBalancedBackOffPolicyFactory backOffPolicyFactory) {
 			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties,
-					lbRetryPolicyFactory, requestFactory);
+					lbRetryPolicyFactory, requestFactory, backOffPolicyFactory);
 		}
 
 		@Bean
