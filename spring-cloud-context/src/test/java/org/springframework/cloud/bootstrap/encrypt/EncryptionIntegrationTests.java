@@ -1,8 +1,6 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
-import org.junit.Ignore;
 import org.junit.Test;
-
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -25,7 +23,6 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
-	@Ignore("Re-instate after when we go past Boot 2.0.0.M6")
 	public void symmetricConfigurationProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
 				TestConfiguration.class).web(WebApplicationType.NONE).properties(
