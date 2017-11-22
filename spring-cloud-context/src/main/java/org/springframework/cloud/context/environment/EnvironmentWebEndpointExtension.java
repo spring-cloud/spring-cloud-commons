@@ -15,13 +15,13 @@
  */
 package org.springframework.cloud.context.environment;
 
-import org.springframework.boot.actuate.endpoint.annotation.DeleteOperation;
-import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
-import org.springframework.boot.actuate.endpoint.web.annotation.WebEndpointExtension;
-import org.springframework.boot.actuate.env.EnvironmentEndpoint;
-
 import java.util.Collections;
 import java.util.Map;
+
+import org.springframework.boot.actuate.endpoint.annotation.DeleteOperation;
+import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
+import org.springframework.boot.actuate.endpoint.web.annotation.EndpointWebExtension;
+import org.springframework.boot.actuate.env.EnvironmentEndpoint;
 
 
 /**
@@ -31,7 +31,7 @@ import java.util.Map;
  * @author Dave Syer
  * 
  */
-@WebEndpointExtension(endpoint = EnvironmentEndpoint.class)
+@EndpointWebExtension(endpoint = EnvironmentEndpoint.class)
 public class EnvironmentWebEndpointExtension {
 
 	private EnvironmentManager environment;

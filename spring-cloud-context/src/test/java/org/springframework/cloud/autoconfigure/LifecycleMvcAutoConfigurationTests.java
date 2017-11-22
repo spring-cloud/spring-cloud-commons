@@ -27,96 +27,96 @@ public class LifecycleMvcAutoConfigurationTests {
 	@Test
 	public void environmentWebEndpointExtensionDisabled() {
 		beanNotCreated("environmentWebEndpointExtension",
-				"endpoints.env.enabled=false");
+				"management.endpoint.env.enabled=false");
 	}
 
 	@Test
 	public void environmentWebEndpointExtensionGloballyDisabled() {
 		beanNotCreated("environmentWebEndpointExtension",
-				"endpoints.default.enabled=false");
+				"management.endpoints.enabled-by-default=false");
 	}
 
 	@Test
 	public void environmentWebEndpointExtensionEnabled() {
 		beanCreated("environmentWebEndpointExtension",
-				"endpoints.env.enabled=true");
+				"management.endpoint.env.enabled=true");
 	}
 
 	// restartEndpoint
 	@Test
 	public void restartEndpointDisabled() {
 		beanNotCreated("restartEndpoint",
-				"endpoints.restart.enabled=false");
+				"management.endpoint.restart.enabled=false");
 	}
 
 	@Test
 	public void restartEndpointGloballyDisabled() {
 		beanNotCreated("restartEndpoint",
-				"endpoints.default.enabled=false");
+				"management.endpoint.default.enabled=false");
 	}
 
 	@Test
 	public void restartEndpointEnabled() {
 		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class,
 				RestartEndpoint::restart,
-				"endpoints.restart.enabled=true");
+				"management.endpoint.restart.enabled=true");
 	}
 
 	// pauseEndpoint
 	@Test
 	public void pauseEndpointDisabled() {
 		beanNotCreated("pauseEndpoint",
-				"endpoints.pause.enabled=false");
+				"management.endpoint.pause.enabled=false");
 	}
 
 	@Test
 	public void pauseEndpointRestartDisabled() {
 		beanNotCreated("pauseEndpoint",
-				"endpoints.restart.enabled=false",
-				"endpoints.pause.enabled=true");
+				"management.endpoint.restart.enabled=false",
+				"management.endpoint.pause.enabled=true");
 	}
 
 	@Test
 	public void pauseEndpointGloballyDisabled() {
 		beanNotCreated("pauseEndpoint",
-				"endpoints.default.enabled=false");
+				"management.endpoint.default.enabled=false");
 	}
 
 	@Test
 	public void pauseEndpointEnabled() {
 		beanCreatedAndEndpointEnabled("pauseEndpoint", RestartEndpoint.PauseEndpoint.class,
 				RestartEndpoint.PauseEndpoint::pause,
-				"endpoints.restart.enabled=true",
-				"endpoints.pause.enabled=true");
+				"management.endpoint.restart.enabled=true",
+				"management.endpoint.pause.enabled=true");
 	}
 
 	// resumeEndpoint
 	@Test
 	public void resumeEndpointDisabled() {
 		beanNotCreated("resumeEndpoint",
-				"endpoints.restart.enabled=true",
-				"endpoints.resume.enabled=false");
+				"management.endpoint.restart.enabled=true",
+				"management.endpoint.resume.enabled=false");
 	}
 
 	@Test
 	public void resumeEndpointRestartDisabled() {
 		beanNotCreated("resumeEndpoint",
-				"endpoints.restart.enabled=false",
-				"endpoints.resume.enabled=true");
+				"management.endpoint.restart.enabled=false",
+				"management.endpoint.resume.enabled=true");
 	}
 
 	@Test
 	public void resumeEndpointGloballyDisabled() {
 		beanNotCreated("resumeEndpoint",
-				"endpoints.default.enabled=false");
+				"management.endpoint.default.enabled=false");
 	}
 
 	@Test
 	public void resumeEndpointEnabled() {
 		beanCreatedAndEndpointEnabled("resumeEndpoint", RestartEndpoint.ResumeEndpoint.class,
 				RestartEndpoint.ResumeEndpoint::resume,
-				"endpoints.restart.enabled=true",
-				"endpoints.resume.enabled=true");
+				"management.endpoint.restart.enabled=true",
+				"management.endpoint.resume.enabled=true");
 	}
 
 	private void beanNotCreated(String beanName, String... contextProperties) {

@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Spencer Gibb
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ServiceRegistryEndpointTests.TestConfiguration.class, properties = "endpoints.default.web.enabled=true")
+@SpringBootTest(classes = ServiceRegistryEndpointTests.TestConfiguration.class, properties = "management.endpoints.web.expose=*")
 public class ServiceRegistryEndpointTests {
 	private static final String UPDATED_STATUS = "updatedstatus";
 	private static final String MYSTATUS = "mystatus";

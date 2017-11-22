@@ -29,8 +29,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.integration.monitor.IntegrationMBeanExporter;
 import org.springframework.util.ClassUtils;
 
-import static org.springframework.boot.actuate.endpoint.DefaultEnablement.DISABLED;
-
 /**
  * An endpoint that restarts the application context. Install as a bean and also register
  * a {@link RestartListener} with the {@link SpringApplication} that starts the context.
@@ -40,7 +38,7 @@ import static org.springframework.boot.actuate.endpoint.DefaultEnablement.DISABL
  * @author Dave Syer
  *
  */
-@Endpoint(id = "restart", defaultEnablement = DISABLED)
+@Endpoint(id = "restart", enableByDefault = false)
 public class RestartEndpoint
 		implements ApplicationListener<ApplicationPreparedEvent> {
 
@@ -124,7 +122,7 @@ public class RestartEndpoint
 	}
 
 	@Endpoint(id = "resume")
-	@ConfigurationProperties("endpoints.resume")
+	@ConfigurationProperties("management.endpoint.resume")
 	public class ResumeEndpoint {
 
 		@WriteOperation

@@ -48,7 +48,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  *
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ClientApp.class, properties = "endpoints.default.web.enabled=true", webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = ClientApp.class, properties = "management.endpoints.web.expose=*", webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
 
 	@LocalServerPort
