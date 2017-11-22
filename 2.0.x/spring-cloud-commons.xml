@@ -4,7 +4,7 @@
 <book xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
 <info>
 <title>Cloud Native Applications</title>
-<date>2017-11-21</date>
+<date>2017-11-22</date>
 </info>
 <preface>
 <title></title>
@@ -412,6 +412,21 @@ The properties you can use are <literal>client.ribbon.MaxAutoRetries</literal>,
 <literal>client.ribbon.MaxAutoRetriesNextServer</literal>, and <literal>client.ribbon.OkToRetryOnAllOperations</literal>.
 See the <link xl:href="https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties">Ribbon documentation</link>
 for a description of what there properties do.</simpara>
+<simpara>If you would like to implement a <literal>BackOffPolicy</literal> in your retries you will need to
+create a bean of type <literal>LoadBalancedBackOffPolicyFactory</literal>, and return the <literal>BackOffPolicy</literal>
+you would like to use for a given service.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Configuration
+public class MyConfiguration {
+    @Bean
+    LoadBalancedBackOffPolicyFactory backOffPolciyFactory() {
+        return new LoadBalancedBackOffPolicyFactory() {
+            @Override
+            public BackOffPolicy createBackOffPolicy(String service) {
+        		return new ExponentialBackOffPolicy();
+        	}
+        };
+    }
+}</programlisting>
 <note>
 <simpara><literal>client</literal> in the above examples should be replaced with your Ribbon client&#8217;s
 name.</simpara>

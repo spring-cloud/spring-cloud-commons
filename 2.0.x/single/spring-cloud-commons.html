@@ -231,7 +231,20 @@ you can set <code class="literal">spring.cloud.loadbalancer.retry.enabled=false<
 The properties you can use are <code class="literal">client.ribbon.MaxAutoRetries</code>,
 <code class="literal">client.ribbon.MaxAutoRetriesNextServer</code>, and <code class="literal">client.ribbon.OkToRetryOnAllOperations</code>.
 See the <a class="link" href="https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties" target="_top">Ribbon documentation</a>
-for a description of what there properties do.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p><code class="literal">client</code> in the above examples should be replaced with your Ribbon client&#8217;s
+for a description of what there properties do.</p><p>If you would like to implement a <code class="literal">BackOffPolicy</code> in your retries you will need to
+create a bean of type <code class="literal">LoadBalancedBackOffPolicyFactory</code>, and return the <code class="literal">BackOffPolicy</code>
+you would like to use for a given service.</p><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
+<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
+    <em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+    LoadBalancedBackOffPolicyFactory backOffPolciyFactory() {
+        <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> LoadBalancedBackOffPolicyFactory() {
+            <em><span class="hl-annotation" style="color: gray">@Override</span></em>
+            <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> BackOffPolicy createBackOffPolicy(String service) {
+        		<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> ExponentialBackOffPolicy();
+        	}
+        };
+    }
+}</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p><code class="literal">client</code> in the above examples should be replaced with your Ribbon client&#8217;s
 name.</p></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_multiple_resttemplate_objects" href="#_multiple_resttemplate_objects"></a>2.3.2&nbsp;Multiple RestTemplate objects</h3></div></div></div><p>If you want a <code class="literal">RestTemplate</code> that is not load balanced, create a <code class="literal">RestTemplate</code>
 bean and inject it as normal.  To access the load balanced <code class="literal">RestTemplate</code> use
 the <code class="literal">@LoadBalanced</code> qualifier when you create your <code class="literal">@Bean</code>.</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Important"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="images/important.png"></td><th align="left">Important</th></tr><tr><td align="left" valign="top"><p>Notice the <code class="literal">@Primary</code> annotation on the plain <code class="literal">RestTemplate</code> declaration in the example below, to disambiguate the unqualified <code class="literal">@Autowired</code> injection.</p></td></tr></table></div><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
