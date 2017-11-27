@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -51,6 +52,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestConfiguration.class, properties = "management.endpoints.web.expose=*")
 public class EnvironmentManagerIntegrationTests {
 
+	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
+
 	@Autowired
 	private TestProperties properties;
 
@@ -72,7 +75,7 @@ public class EnvironmentManagerIntegrationTests {
 		assertEquals("Hello scope!", properties.getMessage());
 		String content = property("message", "Foo");
 
-		this.mvc.perform(post("/application/env")
+		this.mvc.perform(post(BASE_PATH + "/env")
 				.content(content)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -92,7 +95,7 @@ public class EnvironmentManagerIntegrationTests {
 	@Test
 	public void testRefreshFails() throws Exception {
 		try {
-			this.mvc.perform(post("/application/env")
+			this.mvc.perform(post(BASE_PATH + "/env")
 					.content(property("delay", "foo"))
 					.contentType(MediaType.APPLICATION_JSON))
 					.andExpect(status().isOk())

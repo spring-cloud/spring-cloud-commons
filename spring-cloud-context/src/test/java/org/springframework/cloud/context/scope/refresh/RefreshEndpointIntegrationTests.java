@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -50,7 +51,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ClientApp.class, properties = "management.endpoints.web.expose=*", webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
-
+	
+	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
+	
 	@LocalServerPort
 	private int port;
 
@@ -58,9 +61,9 @@ public class RefreshEndpointIntegrationTests {
 	public void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
 		template.exchange(
-				getUrlEncodedEntity("http://localhost:" + this.port + "/application/env", "message",
+				getUrlEncodedEntity("http://localhost:" + this.port + BASE_PATH + "/env", "message",
 						"Hello Dave!"), String.class);
-		template.postForObject("http://localhost:" + this.port + "/application/refresh", null, String.class);
+		template.postForObject("http://localhost:" + this.port + BASE_PATH + "/refresh", null, String.class);
 		String message = template.getForObject("http://localhost:" + this.port + "/",
 				String.class);
 		assertEquals("Hello Dave!", message);

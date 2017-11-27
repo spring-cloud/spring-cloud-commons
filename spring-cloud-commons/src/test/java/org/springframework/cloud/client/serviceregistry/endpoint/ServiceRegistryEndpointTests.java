@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.serviceregistry.Registration;
@@ -36,6 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryEndpointTests.TestConfiguration.class, properties = "management.endpoints.web.expose=*")
 public class ServiceRegistryEndpointTests {
+	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
+	
 	private static final String UPDATED_STATUS = "updatedstatus";
 	private static final String MYSTATUS = "mystatus";
 
@@ -54,14 +57,14 @@ public class ServiceRegistryEndpointTests {
 
 	@Test
 	public void testGet() throws Exception {
-		this.mvc.perform(get("/application/service-registry")).andExpect(status().isOk())
+		this.mvc.perform(get(BASE_PATH + "/service-registry")).andExpect(status().isOk())
 				.andExpect(content().string(containsString(MYSTATUS)));
 	}
 
 	@Test
 	public void testPost() throws Exception {
 		Map<String, String> status = Collections.singletonMap("status", UPDATED_STATUS);
-		this.mvc.perform(post("/application/service-registry")
+		this.mvc.perform(post(BASE_PATH + "/service-registry")
 				.content(new ObjectMapper().writeValueAsString(status))
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
