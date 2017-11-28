@@ -370,6 +370,15 @@ public class BootstrapConfigurationTests {
 		assertTrue(this.context.getEnvironment().acceptsProfiles("bar"));
 	}
 
+	@Test
+	public void includeProfileFromBootstrapProperties() {
+		this.context = new SpringApplicationBuilder().web(false)
+				.sources(BareConfiguration.class)
+				.properties("spring.cloud.bootstrap.name=local").run();
+		assertTrue(this.context.getEnvironment().acceptsProfiles("local"));
+		assertEquals("Hello added!", this.context.getEnvironment().getProperty("added"));
+	}
+
 	@Configuration
 	@EnableConfigurationProperties
 	protected static class BareConfiguration {

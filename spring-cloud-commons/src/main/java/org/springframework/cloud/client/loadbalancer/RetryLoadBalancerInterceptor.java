@@ -34,6 +34,8 @@ import org.springframework.retry.RecoveryCallback;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryException;
+import org.springframework.retry.backoff.BackOffPolicy;
+import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.policy.NeverRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.Assert;
@@ -49,8 +51,11 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 	private LoadBalancerClient loadBalancer;
 	private LoadBalancerRetryProperties lbProperties;
 	private LoadBalancerRequestFactory requestFactory;
+	private LoadBalancedBackOffPolicyFactory backOffPolicyFactory;
 
 
+	@Deprecated
+	//TODO remove in 2.0.x
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer,
 										LoadBalancerRetryProperties lbProperties,
 										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
@@ -59,6 +64,19 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		this.lbRetryPolicyFactory = lbRetryPolicyFactory;
 		this.lbProperties = lbProperties;
 		this.requestFactory = requestFactory;
+		this.backOffPolicyFactory = new LoadBalancedBackOffPolicyFactory.NoBackOffPolicyFactory();
+	}
+
+	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer,
+										LoadBalancerRetryProperties lbProperties,
+										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
+										LoadBalancerRequestFactory requestFactory,
+										LoadBalancedBackOffPolicyFactory backOffPolicyFactory) {
+		this.loadBalancer = loadBalancer;
+		this.lbRetryPolicyFactory = lbRetryPolicyFactory;
+		this.lbProperties = lbProperties;
+		this.requestFactory = requestFactory;
+		this.backOffPolicyFactory = backOffPolicyFactory;
 	}
 
 	@Override
@@ -70,6 +88,8 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		final LoadBalancedRetryPolicy retryPolicy = lbRetryPolicyFactory.create(serviceName,
 				loadBalancer);
 		RetryTemplate template = this.retryTemplate == null ? new RetryTemplate() : this.retryTemplate;
+		BackOffPolicy backOffPolicy = backOffPolicyFactory.createBackOffPolicy(serviceName);
+		template.setBackOffPolicy(backOffPolicy == null ? new NoBackOffPolicy() : backOffPolicy);
 		template.setThrowLastExceptionOnExhausted(true);
 		template.setRetryPolicy(
 				!lbProperties.isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
