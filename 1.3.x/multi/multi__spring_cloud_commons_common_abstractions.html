@@ -1,0 +1,121 @@
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+   <title>2.&nbsp;Spring Cloud Commons: Common Abstractions</title><link rel="stylesheet" type="text/css" href="css/manual-multipage.css"><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"><link rel="home" href="multi_spring-cloud-commons.html" title="Cloud Native Applications"><link rel="up" href="multi_spring-cloud-commons.html" title="Cloud Native Applications"><link rel="prev" href="multi__spring_cloud_context_application_context_services.html" title="1.&nbsp;Spring Cloud Context: Application Context Services"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">2.&nbsp;Spring Cloud Commons: Common Abstractions</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="multi__spring_cloud_context_application_context_services.html">Prev</a>&nbsp;</td><th width="60%" align="center">&nbsp;</th><td width="20%" align="right">&nbsp;</td></tr></table><hr></div><div class="chapter"><div class="titlepage"><div><div><h1 class="title"><a name="_spring_cloud_commons_common_abstractions" href="#_spring_cloud_commons_common_abstractions"></a>2.&nbsp;Spring Cloud Commons: Common Abstractions</h1></div></div></div><p>Patterns such as service discovery, load balancing and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (e.g. discovery via Eureka or Consul).</p><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="__enablediscoveryclient" href="#__enablediscoveryclient"></a>2.1&nbsp;@EnableDiscoveryClient</h2></div></div></div><p>Commons provides the <code class="literal">@EnableDiscoveryClient</code> annotation. This looks for implementations of the <code class="literal">DiscoveryClient</code> interface via <code class="literal">META-INF/spring.factories</code>. Implementations of Discovery Client will add a configuration class to <code class="literal">spring.factories</code> under the <code class="literal">org.springframework.cloud.client.discovery.EnableDiscoveryClient</code> key. Examples of <code class="literal">DiscoveryClient</code> implementations: are <a class="link" href="http://cloud.spring.io/spring-cloud-netflix/" target="_top">Spring Cloud Netflix Eureka</a>, <a class="link" href="http://cloud.spring.io/spring-cloud-consul/" target="_top">Spring Cloud Consul Discovery</a> and <a class="link" href="http://cloud.spring.io/spring-cloud-zookeeper/" target="_top">Spring Cloud Zookeeper Discovery</a>.</p><p>By default, implementations of <code class="literal">DiscoveryClient</code> will auto-register the local Spring Boot server with the remote discovery server. This can be disabled by setting <code class="literal">autoRegister=false</code> in <code class="literal">@EnableDiscoveryClient</code>.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p>The use of <code class="literal">@EnableDiscoveryClient</code> is no longer required.  It is enough to just have a <code class="literal">DiscoveryClient</code> implementation
+on the classpath to cause the Spring Boot application to register with the service discovery server.</p></td></tr></table></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_health_indicator" href="#_health_indicator"></a>2.1.1&nbsp;Health Indicator</h3></div></div></div><p>Commons creates a Spring Boot <code class="literal">HealthIndicator</code> that <code class="literal">DiscoveryClient</code> implementations can participate in by implementing <code class="literal">DiscoveryHealthIndicator</code>. To disable the composite <code class="literal">HealthIndicator</code> set <code class="literal">spring.cloud.discovery.client.composite-indicator.enabled=false</code>. A generic <code class="literal">HealthIndicator</code> based on <code class="literal">DiscoveryClient</code> is auto-configured (<code class="literal">DiscoveryClientHealthIndicator). To disable it, set `spring.cloud.discovery.client.health-indicator.enabled=false</code>. To disable the description field of the <code class="literal">DiscoveryClientHealthIndicator</code> set <code class="literal">spring.cloud.discovery.client.health-indicator.include-description=false</code>, otherwise it can bubble up as the <code class="literal">description</code> of the rolled up <code class="literal">HealthIndicator</code>.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="_serviceregistry" href="#_serviceregistry"></a>2.2&nbsp;ServiceRegistry</h2></div></div></div><p>Commons now provides a <code class="literal">ServiceRegistry</code> interface which provides methods like <code class="literal">register(Registration)</code> and <code class="literal">deregister(Registration)</code> which allow you to provide custom registered services. <code class="literal">Registration</code> is a marker interface.</p><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
+<em><span class="hl-annotation" style="color: gray">@EnableDiscoveryClient(autoRegister=false)</span></em>
+<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
+    <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">private</span> ServiceRegistry registry;
+
+    <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> MyConfiguration(ServiceRegistry registry) {
+        <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">this</span>.registry = registry;
+    }
+
+    <span xmlns:d="http://docbook.org/ns/docbook" class="hl-comment">// called via some external process, such as an event or a custom actuator endpoint</span>
+    <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">void</span> register() {
+        Registration registration = constructRegistration();
+        <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">this</span>.registry.register(registration);
+    }
+}</pre><p>Each <code class="literal">ServiceRegistry</code> implementation has its own <code class="literal">Registry</code> implementation.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_serviceregistry_auto_registration" href="#_serviceregistry_auto_registration"></a>2.2.1&nbsp;ServiceRegistry Auto-Registration</h3></div></div></div><p>By default, the <code class="literal">ServiceRegistry</code> implementation will auto-register the running service. To disable that behavior, there are two methods. You can set <code class="literal">@EnableDiscoveryClient(autoRegister=false)</code> to permanently disable auto-registration. You can also set <code class="literal">spring.cloud.service-registry.auto-registration.enabled=false</code> to disable the behavior via configuration.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_service_registry_actuator_endpoint" href="#_service_registry_actuator_endpoint"></a>2.2.2&nbsp;Service Registry Actuator Endpoint</h3></div></div></div><p>A <code class="literal">/service-registry</code> actuator endpoint is provided by Commons. This endpoint relys on a <code class="literal">Registration</code> bean in the Spring Application Context. Calling <code class="literal">/service-registry/instance-status</code> via a GET will return the status of the <code class="literal">Registration</code>. A POST to the same endpoint with a <code class="literal">String</code> body will change the status of the current <code class="literal">Registration</code> to the new value. Please see the documentation of the <code class="literal">ServiceRegistry</code> implementation you are using for the allowed values for updating the status and the values retured for the status.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="_spring_resttemplate_as_a_load_balancer_client" href="#_spring_resttemplate_as_a_load_balancer_client"></a>2.3&nbsp;Spring RestTemplate as a Load Balancer Client</h2></div></div></div><p><code class="literal">RestTemplate</code> can be automatically configured to use ribbon. To create a load balanced <code class="literal">RestTemplate</code> create a <code class="literal">RestTemplate</code> <code class="literal">@Bean</code> and use the <code class="literal">@LoadBalanced</code> qualifier.</p><div class="warning" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Warning"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="images/warning.png"></td><th align="left">Warning</th></tr><tr><td align="left" valign="top"><p>A <code class="literal">RestTemplate</code> bean is no longer created via auto configuration. It must be created by individual applications.</p></td></tr></table></div><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
+<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
+
+    <em><span class="hl-annotation" style="color: gray">@LoadBalanced</span></em>
+    <em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+    RestTemplate restTemplate() {
+        <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> RestTemplate();
+    }
+}
+
+<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyClass {
+    <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+    <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">private</span> RestTemplate restTemplate;
+
+    <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> String doOtherStuff() {
+        String results = restTemplate.getForObject(<span xmlns:d="http://docbook.org/ns/docbook" class="hl-string">"http://stores/stores"</span>, String.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>);
+        <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> results;
+    }
+}</pre><p>The URI needs to use a virtual host name (ie. service name, not a host name).
+The Ribbon client is used to create a full physical address. See
+<a class="link" href="https://github.com/spring-cloud/spring-cloud-netflix/blob/master/spring-cloud-netflix-core/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java" target="_top">RibbonAutoConfiguration</a>
+for details of how the <code class="literal">RestTemplate</code> is set up.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_retrying_failed_requests" href="#_retrying_failed_requests"></a>2.3.1&nbsp;Retrying Failed Requests</h3></div></div></div><p>A load balanced <code class="literal">RestTemplate</code> can be configured to retry failed requests.
+By default this logic is disabled, you can enable it by adding <a class="link" href="https://github.com/spring-projects/spring-retry" target="_top">Spring Retry</a> to your application&#8217;s classpath.  The load balanced <code class="literal">RestTemplate</code> will
+honor some of the Ribbon configuration values related to retrying failed requests.  If
+you would like to disable the retry logic with Spring Retry on the classpath
+you can set <code class="literal">spring.cloud.loadbalancer.retry.enabled=false</code>.
+The properties you can use are <code class="literal">client.ribbon.MaxAutoRetries</code>,
+<code class="literal">client.ribbon.MaxAutoRetriesNextServer</code>, and <code class="literal">client.ribbon.OkToRetryOnAllOperations</code>.
+See the <a class="link" href="https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties" target="_top">Ribbon documentation</a>
+for a description of what there properties do.</p><p>If you would like to implement a <code class="literal">BackOffPolicy</code> in your retries you will need to
+create a bean of type <code class="literal">LoadBalancedBackOffPolicyFactory</code>, and return the <code class="literal">BackOffPolicy</code>
+you would like to use for a given service.</p><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
+<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
+    <em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+    LoadBalancedBackOffPolicyFactory backOffPolciyFactory() {
+        <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> LoadBalancedBackOffPolicyFactory() {
+            <em><span class="hl-annotation" style="color: gray">@Override</span></em>
+            <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> BackOffPolicy createBackOffPolicy(String service) {
+        		<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> ExponentialBackOffPolicy();
+        	}
+        };
+    }
+}</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p><code class="literal">client</code> in the above examples should be replaced with your Ribbon client&#8217;s
+name.</p></td></tr></table></div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="_multiple_resttemplate_objects" href="#_multiple_resttemplate_objects"></a>2.4&nbsp;Multiple RestTemplate objects</h2></div></div></div><p>If you want a <code class="literal">RestTemplate</code> that is not load balanced, create a <code class="literal">RestTemplate</code>
+bean and inject it as normal.  To access the load balanced <code class="literal">RestTemplate</code> use
+the <code class="literal">@LoadBalanced</code> qualifier when you create your <code class="literal">@Bean</code>.</p><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Important"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="images/important.png"></td><th align="left">Important</th></tr><tr><td align="left" valign="top"><p>Notice the <code class="literal">@Primary</code> annotation on the plain <code class="literal">RestTemplate</code> declaration in the example below, to disambiguate the unqualified <code class="literal">@Autowired</code> injection.</p></td></tr></table></div><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
+<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
+
+    <em><span class="hl-annotation" style="color: gray">@LoadBalanced</span></em>
+    <em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+    RestTemplate loadBalanced() {
+        <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> RestTemplate();
+    }
+
+    <em><span class="hl-annotation" style="color: gray">@Primary</span></em>
+    <em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+    RestTemplate restTemplate() {
+        <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> RestTemplate();
+    }
+}
+
+<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyClass {
+    <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+    <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">private</span> RestTemplate restTemplate;
+
+    <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+    <em><span class="hl-annotation" style="color: gray">@LoadBalanced</span></em>
+    <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">private</span> RestTemplate loadBalanced;
+
+    <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> String doOtherStuff() {
+        <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> loadBalanced.getForObject(<span xmlns:d="http://docbook.org/ns/docbook" class="hl-string">"http://stores/stores"</span>, String.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>);
+    }
+
+    <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> String doStuff() {
+        <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> restTemplate.getForObject(<span xmlns:d="http://docbook.org/ns/docbook" class="hl-string">"http://example.com"</span>, String.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>);
+    }
+}</pre><div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Tip"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Tip]" src="images/tip.png"></td><th align="left">Tip</th></tr><tr><td align="left" valign="top"><p>If you see errors like <code class="literal">java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89</code> try injecting <code class="literal">RestOperations</code> instead or setting <code class="literal">spring.aop.proxyTargetClass=true</code>.</p></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="ignore-network-interfaces" href="#ignore-network-interfaces"></a>2.5&nbsp;Ignore Network Interfaces</h2></div></div></div><p>Sometimes it is useful to ignore certain named network interfaces so they can be excluded from Service Discovery registration (eg. running in a Docker container). A list of regular expressions can be set that will cause the desired network interfaces to be ignored. The following configuration will ignore the "docker0" interface and all interfaces that start with "veth".</p><p><b>application.yml.&nbsp;</b>
+</p><pre class="screen">spring:
+  cloud:
+    inetutils:
+      ignoredInterfaces:
+        - docker0
+        - veth.*</pre><p>
+</p><p>You can also force to use only specified network addresses using list of regular expressions:</p><p><b>application.yml.&nbsp;</b>
+</p><pre class="screen">spring:
+  cloud:
+    inetutils:
+      preferredNetworks:
+        - 192.168
+        - 10.0</pre><p>
+</p><p>You can also force to use only site local addresses. See <a class="link" href="https://docs.oracle.com/javase/8/docs/api/java/net/Inet4Address.html#isSiteLocalAddress--" target="_top">Inet4Address.html.isSiteLocalAddress()</a> for more details what is site local address.</p><p><b>application.yml.&nbsp;</b>
+</p><pre class="screen">spring:
+  cloud:
+    inetutils:
+      useOnlySiteLocalInterfaces: true</pre><p>
+</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="http-clients" href="#http-clients"></a>2.6&nbsp;HTTP Client Factories</h2></div></div></div><p>Spring Cloud Commons provides beans for creating both Apache HTTP clients (<code class="literal">ApacheHttpClientFactory</code>)
+as well as OK HTTP clients (<code class="literal">OkHttpClientFactory</code>).  The <code class="literal">OkHttpClientFactory</code> bean will only be created
+if the OK HTTP jar is on the classpath.  In addition, Spring Cloud Commons provides beans for creating
+the connection managers used by both clients, <code class="literal">ApacheHttpClientConnectionManagerFactory</code> for the Apache
+HTTP client and <code class="literal">OkHttpClientConnectionPoolFactory</code> for the OK HTTP client.  You can provide
+your own implementation of these beans if you would like to customize how the HTTP clients are created
+in downstream projects.  You can also disable the creation of these beans by setting
+<code class="literal">spring.cloud.httpclientfactories.apache.enabled</code> or <code class="literal">spring.cloud.httpclientfactories.ok.enabled</code> to
+<code class="literal">false</code>.</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="multi__spring_cloud_context_application_context_services.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;</td></tr><tr><td width="40%" align="left" valign="top">1.&nbsp;Spring Cloud Context: Application Context Services&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="multi_spring-cloud-commons.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;</td></tr></table></div></body></html>
