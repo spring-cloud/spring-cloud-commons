@@ -16,16 +16,23 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.retry.RecoveryCallback;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
+import org.springframework.retry.RetryException;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.policy.NeverRetryPolicy;
@@ -89,27 +96,90 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 						serviceName));
 		return template
 				.execute(new RetryCallback<ClientHttpResponse, IOException>() {
-					@Override
-					public ClientHttpResponse doWithRetry(RetryContext context)
-							throws IOException {
-						ServiceInstance serviceInstance = null;
-						if (context instanceof LoadBalancedRetryContext) {
-							LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
-							serviceInstance = lbContext.getServiceInstance();
-						}
-						if (serviceInstance == null) {
-							serviceInstance = loadBalancer.choose(serviceName);
-						}
-						ClientHttpResponse response = RetryLoadBalancerInterceptor.this.loadBalancer.execute(
-								serviceName, serviceInstance,
-								requestFactory.createRequest(request, body, execution));
-						int statusCode = response.getRawStatusCode();
-						if(retryPolicy != null && retryPolicy.retryableStatusCode(statusCode)) {
-							response.close();
-							throw new RetryableStatusCodeException(serviceName, statusCode);
-						}
-						return response;
-					}
-				});
+                    @Override
+                    public ClientHttpResponse doWithRetry(RetryContext context)
+                            throws IOException {
+                        ServiceInstance serviceInstance = null;
+                        if (context instanceof LoadBalancedRetryContext) {
+                            LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
+                            serviceInstance = lbContext.getServiceInstance();
+                        }
+                        if (serviceInstance == null) {
+                            serviceInstance = loadBalancer.choose(serviceName);
+                        }
+                        ClientHttpResponse response = RetryLoadBalancerInterceptor.this.loadBalancer.execute(
+                                serviceName, serviceInstance,
+                                requestFactory.createRequest(request, body, execution));
+                        int statusCode = response.getRawStatusCode();
+                        if (retryPolicy != null && retryPolicy.retryableStatusCode(statusCode)) {
+                            ClientHttpResponseWrapper wrapper = new ClientHttpResponseWrapper(response);
+                            wrapper.init();
+                            throw new RetryableStatusCodeException(serviceName, statusCode, wrapper, null);
+                        }
+                        return response;
+                    }
+                }, new RecoveryCallback<ClientHttpResponse>() {
+                    @Override
+                    public ClientHttpResponse recover(RetryContext retryContext) throws Exception {
+                        Throwable lastThrowable = retryContext.getLastThrowable();
+                        if (lastThrowable != null && lastThrowable instanceof RetryableStatusCodeException) {
+                            RetryableStatusCodeException ex = (RetryableStatusCodeException) lastThrowable;
+                            return (ClientHttpResponse) ex.getResponse();
+                        }
+                        throw new RetryException("Could not recover", lastThrowable);
+                    }
+                });
 	}
+
+    public static class ClientHttpResponseWrapper implements ClientHttpResponse {
+
+	    private ClientHttpResponse response;
+	    private InputStream content;
+
+        public ClientHttpResponseWrapper(ClientHttpResponse response) {
+            this.response = response;
+        }
+
+        public void init() throws IOException {
+            InputStream body = response.getBody();
+            ByteArrayOutputStream temp = new ByteArrayOutputStream();
+            byte[] buffer = new byte[4096];
+            int length = 0;
+            while ((length = body.read(buffer)) != -1) {
+                temp.write(buffer, 0, length);
+            }
+            content = new ByteArrayInputStream(temp.toByteArray());
+            response.close();
+        }
+
+        @Override
+        public HttpStatus getStatusCode() throws IOException {
+            return response.getStatusCode();
+        }
+
+        @Override
+        public int getRawStatusCode() throws IOException {
+            return response.getRawStatusCode();
+        }
+
+        @Override
+        public String getStatusText() throws IOException {
+            return response.getStatusText();
+        }
+
+        @Override
+        public void close() {
+            response.close();
+        }
+
+        @Override
+        public InputStream getBody() throws IOException {
+            return content;
+        }
+
+        @Override
+        public HttpHeaders getHeaders() {
+            return response.getHeaders();
+        }
+    }
 }
