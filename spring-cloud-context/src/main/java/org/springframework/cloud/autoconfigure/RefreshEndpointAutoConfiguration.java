@@ -65,6 +65,7 @@ public class RefreshEndpointAutoConfiguration {
 	protected static class RefreshEndpointConfiguration {
 
 		@Bean
+		@ConditionalOnBean(ContextRefresher.class)
 		@ConditionalOnEnabledEndpoint
 		@ConditionalOnMissingBean
 		public RefreshEndpoint refreshEndpoint(ContextRefresher contextRefresher) {
