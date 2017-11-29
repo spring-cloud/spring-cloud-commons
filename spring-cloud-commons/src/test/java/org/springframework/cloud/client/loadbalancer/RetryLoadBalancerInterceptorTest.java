@@ -16,6 +16,7 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.retry.RetryContext;
+import org.springframework.retry.RetryException;
 import org.springframework.retry.backoff.BackOffContext;
 import org.springframework.retry.backoff.BackOffInterruptedException;
 import org.springframework.retry.backoff.BackOffPolicy;
@@ -58,7 +59,7 @@ public class RetryLoadBalancerInterceptorTest {
         lbProperties = null;
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = RetryException.class)
     public void interceptDisableRetry() throws Throwable {
         HttpRequest request = mock(HttpRequest.class);
         when(request.getURI()).thenReturn(new URI("http://foo"));
@@ -225,7 +226,7 @@ public class RetryLoadBalancerInterceptorTest {
         assertThat(backOffPolicy.getBackoffAttempts(), is(1));
     }
 
-    @Test(expected = IOException.class)
+    @Test(expected = RetryException.class)
     public void interceptFailedRetry() throws Exception {
         HttpRequest request = mock(HttpRequest.class);
         when(request.getURI()).thenReturn(new URI("http://foo"));

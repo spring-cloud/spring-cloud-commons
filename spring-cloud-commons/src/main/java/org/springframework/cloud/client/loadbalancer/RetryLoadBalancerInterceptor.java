@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.HttpResponse;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -127,14 +126,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
                             RetryableStatusCodeException ex = (RetryableStatusCodeException) lastThrowable;
                             return (ClientHttpResponse) ex.getResponse();
                         }
-                        if (lastThrowable instanceof Error) {
-                            throw (Error) lastThrowable;
-                        }
-                        if (lastThrowable instanceof Exception) {
-                            throw (Exception) lastThrowable;
-                        } else {
-                            throw new RetryException("Exception in retry", lastThrowable);
-                        }
+                        throw new RetryException("Could not recover", lastThrowable);
                     }
                 });
 	}
