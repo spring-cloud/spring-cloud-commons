@@ -45,15 +45,16 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  */
 @Configuration
 @ConditionalOnClass(Health.class)
-@AutoConfigureAfter(EndpointAutoConfiguration.class)
+@AutoConfigureAfter({EndpointAutoConfiguration.class, RefreshAutoConfiguration.class})
 @Import({ RestartEndpointWithIntegrationConfiguration.class,
 		RestartEndpointWithoutIntegrationConfiguration.class,
 		PauseResumeEndpointsConfiguration.class })
 public class RefreshEndpointAutoConfiguration {
 
+	@Bean
+	@ConditionalOnBean(RefreshScope.class)
 	@ConditionalOnMissingBean
 	@ConditionalOnEnabledHealthIndicator("refresh")
-	@Bean
 	RefreshScopeHealthIndicator refreshScopeHealthIndicator(RefreshScope scope,
 			ConfigurationPropertiesRebinder rebinder) {
 		return new RefreshScopeHealthIndicator(scope, rebinder);
