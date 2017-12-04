@@ -19,9 +19,8 @@ package org.springframework.cloud.client;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Default implementation of {@link ServiceInstance}.
@@ -55,10 +54,25 @@ public class DefaultServiceInstance implements ServiceInstance {
 		this(serviceId, host, port, secure, new LinkedHashMap<String, String>());
 	}
 
-	@Override
-	public URI getUri() {
-		return getUri(this);
-	}
+    @Override
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    @Override
+    public String getHost() {
+        return host;
+    }
+
+    @Override
+    public int getPort() {
+        return port;
+    }
+
+    @Override
+    public boolean isSecure() {
+        return secure;
+    }
 
 	@Override
 	public Map<String, String> getMetadata() {
@@ -82,6 +96,11 @@ public class DefaultServiceInstance implements ServiceInstance {
 		}
 	}
 
+    @Override
+    public URI getUri() {
+        return getUri(this);
+    }
+
 	/**
 	 * Create a uri from the given ServiceInstance's host:port
 	 * @param instance
@@ -92,26 +111,6 @@ public class DefaultServiceInstance implements ServiceInstance {
 		String uri = String.format("%s://%s:%s", scheme, instance.getHost(),
 				instance.getPort());
 		return URI.create(uri);
-	}
-
-	@Override
-	public String getServiceId() {
-		return serviceId;
-	}
-
-	@Override
-	public String getHost() {
-		return host;
-	}
-
-	@Override
-	public int getPort() {
-		return port;
-	}
-
-	@Override
-	public boolean isSecure() {
-		return secure;
 	}
 
 	@Override
