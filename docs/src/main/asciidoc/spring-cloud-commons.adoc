@@ -317,6 +317,13 @@ Commons provides the `@EnableDiscoveryClient` annotation. This looks for impleme
 
 By default, implementations of `DiscoveryClient` will auto-register the local Spring Boot server with the remote discovery server. This can be disabled by setting `autoRegister=false` in `@EnableDiscoveryClient`.
 
+NOTE: The use of `@EnableDiscoveryClient` is no longer required.  It is enough to just have a `DiscoveryClient` implementation
+on the classpath to cause the Spring Boot application to register with the service discovery server.
+
+==== Health Indicator
+
+Commons creates a Spring Boot `HealthIndicator` that `DiscoveryClient` implementations can participate in by implementing `DiscoveryHealthIndicator`. To disable the composite `HealthIndicator` set `spring.cloud.discovery.client.composite-indicator.enabled=false`. A generic `HealthIndicator` based on `DiscoveryClient` is auto-configured (`DiscoveryClientHealthIndicator). To disable it, set `spring.cloud.discovery.client.health-indicator.enabled=false`. To disable the description field of the `DiscoveryClientHealthIndicator` set `spring.cloud.discovery.client.health-indicator.include-description=false`, otherwise it can bubble up as the `description` of the rolled up `HealthIndicator`.
+
 === ServiceRegistry
 
 Commons now provides a `ServiceRegistry` interface which provides methods like `register(Registration)` and `deregister(Registration)` which allow you to provide custom registered services. `Registration` is a marker interface.
@@ -398,10 +405,30 @@ The properties you can use are `client.ribbon.MaxAutoRetries`,
 See the https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties[Ribbon documentation]
 for a description of what there properties do.
 
+If you would like to implement a `BackOffPolicy` in your retries you will need to
+create a bean of type `LoadBalancedBackOffPolicyFactory`, and return the `BackOffPolicy`
+you would like to use for a given service.
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+    @Bean
+    LoadBalancedBackOffPolicyFactory backOffPolciyFactory() {
+        return new LoadBalancedBackOffPolicyFactory() {
+            @Override
+            public BackOffPolicy createBackOffPolicy(String service) {
+        		return new ExponentialBackOffPolicy();
+        	}
+        };
+    }
+}
+----
+
 NOTE: `client` in the above examples should be replaced with your Ribbon client's
 name.
 
-=== Multiple RestTemplate objects
+==== Multiple RestTemplate objects
 
 If you want a `RestTemplate` that is not load balanced, create a `RestTemplate`
 bean and inject it as normal.  To access the load balanced `RestTemplate` use
@@ -447,6 +474,32 @@ public class MyClass {
 
 TIP: If you see errors like `java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89` try injecting `RestOperations` instead or setting `spring.aop.proxyTargetClass=true`.
 
+[[loadbalanced-webclient]]
+=== Spring WebFlux WebClient as a Load Balancer Client
+
+`WebClient` can be configured to use the `LoadBalancerClient. A `LoadBalancerExchangeFilterFunction` is auto-configured if spring-webflux is on the classpath.
+
+[source,java,indent=0]
+----
+public class MyClass {
+    @Autowired
+    private LoadBalancerExchangeFilterFunction lbFunction;
+
+    public Mono<String> doOtherStuff() {
+        return WebClient.builder().baseUrl("http://stores")
+            .filter(lbFunction)
+            .build()
+            .get()
+            .uri("/stores")
+            .retrieve()
+            .bodyToMono(String.class);
+    }
+}
+----
+
+The URI needs to use a virtual host name (ie. service name, not a host name).
+The `LoadBalancerClient` is used to create a full physical address.
+
 [[ignore-network-interfaces]]
 === Ignore Network Interfaces
 
@@ -483,3 +536,16 @@ spring:
     inetutils:
       useOnlySiteLocalInterfaces: true
 ----
+
+[[http-clients]]
+=== HTTP Client Factories
+
+Spring Cloud Commons provides beans for creating both Apache HTTP clients (`ApacheHttpClientFactory`)
+as well as OK HTTP clients (`OkHttpClientFactory`).  The `OkHttpClientFactory` bean will only be created
+if the OK HTTP jar is on the classpath.  In addition, Spring Cloud Commons provides beans for creating
+the connection managers used by both clients, `ApacheHttpClientConnectionManagerFactory` for the Apache
+HTTP client and `OkHttpClientConnectionPoolFactory` for the OK HTTP client.  You can provide
+your own implementation of these beans if you would like to customize how the HTTP clients are created
+in downstream projects.  You can also disable the creation of these beans by setting
+`spring.cloud.httpclientfactories.apache.enabled` or `spring.cloud.httpclientfactories.ok.enabled` to
+`false`.

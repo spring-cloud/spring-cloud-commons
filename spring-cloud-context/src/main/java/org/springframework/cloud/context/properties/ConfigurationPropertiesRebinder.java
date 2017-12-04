@@ -24,7 +24,6 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationContext;
@@ -55,16 +54,11 @@ public class ConfigurationPropertiesRebinder
 
 	private ConfigurationPropertiesBeans beans;
 
-	private ConfigurationPropertiesBindingPostProcessor binder;
-
 	private ApplicationContext applicationContext;
 
 	private Map<String, Exception> errors = new ConcurrentHashMap<>();
 
-	public ConfigurationPropertiesRebinder(
-			ConfigurationPropertiesBindingPostProcessor binder,
-			ConfigurationPropertiesBeans beans) {
-		this.binder = binder;
+	public ConfigurationPropertiesRebinder(ConfigurationPropertiesBeans beans) {
 		this.beans = beans;
 	}
 
@@ -102,7 +96,7 @@ public class ConfigurationPropertiesRebinder
 				if (AopUtils.isCglibProxy(bean)) {
 					bean = getTargetObject(bean);
 				}
-				this.binder.postProcessBeforeInitialization(bean, name);
+				this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
 				this.applicationContext.getAutowireCapableBeanFactory()
 						.initializeBean(bean, name);
 				return true;

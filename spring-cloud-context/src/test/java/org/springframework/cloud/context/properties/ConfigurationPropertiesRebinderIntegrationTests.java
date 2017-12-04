@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2007 the original author or authors.
+ * Copyright 2006-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,18 @@
  */
 package org.springframework.cloud.context.properties;
 
+import static org.junit.Assert.assertEquals;
+
 import javax.annotation.PostConstruct;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderIntegrationTests.TestConfiguration;
@@ -34,8 +36,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -56,7 +56,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		assertEquals("Hello scope!", this.properties.getMessage());
 		assertEquals(2, this.properties.getCount());
 		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
+		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...but don't refresh, so the bean stays the same:
 		assertEquals("Hello scope!", this.properties.getMessage());
 		assertEquals(2, this.properties.getCount());
@@ -68,7 +68,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		assertEquals(2, this.properties.getCount());
 		assertEquals("Hello scope!", this.properties.getMessage());
 		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
+		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind();
 		assertEquals("Foo", this.properties.getMessage());
@@ -81,7 +81,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		assertEquals(2, this.properties.getCount());
 		assertEquals("Hello scope!", this.properties.getMessage());
 		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
+		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind("properties");
 		assertEquals("Foo", this.properties.getMessage());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2007 the original author or authors.
+ * Copyright 2006-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,27 @@
 
 package org.springframework.cloud.context.environment;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.ServletException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.context.environment.EnvironmentManagerIntegrationTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -41,14 +49,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class)
+@SpringBootTest(classes = TestConfiguration.class, properties = "management.endpoints.web.expose=*")
 public class EnvironmentManagerIntegrationTests {
+
+	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
 
 	@Autowired
 	private TestProperties properties;
 
 	@Autowired
 	private WebApplicationContext context;
+
+	@Autowired
+	private ObjectMapper mapper;
 
 	private MockMvc mvc;
 
@@ -60,26 +73,39 @@ public class EnvironmentManagerIntegrationTests {
 	@Test
 	public void testRefresh() throws Exception {
 		assertEquals("Hello scope!", properties.getMessage());
-		// Change the dynamic property source...
-		this.mvc.perform(post("/env").param("message", "Foo")).andExpect(status().isOk()).andExpect(
-				content().string("{\"message\":\"Foo\"}"));
+		String content = property("message", "Foo");
+
+		this.mvc.perform(post(BASE_PATH + "/env")
+				.content(content)
+				.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().string("{\"message\":\"Foo\"}"));
 		assertEquals("Foo", properties.getMessage());
+	}
+
+	private String property(String name, String value) throws JsonProcessingException {
+		// Change the dynamic property source...
+		Map<String, String> property = new HashMap<>();
+		property.put("name", name);
+		property.put("value", value);
+
+		return mapper.writeValueAsString(property);
 	}
 
 	@Test
 	public void testRefreshFails() throws Exception {
 		try {
-			this.mvc.perform(post("/env").param("delay", "foo")).andExpect(
-					status().is5xxServerError());
+			this.mvc.perform(post(BASE_PATH + "/env")
+					.content(property("delay", "foo"))
+					.contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk())
+					.andExpect(status().is5xxServerError());
 			fail("expected ServletException");
-		} catch (ServletException e) {
+		}
+		catch (ServletException e) {
 			// The underlying BindException is not handled by the dispatcher servlet
 		}
 		assertEquals(0, properties.getDelay());
-	}
-
-	public static void main(String[] args) {
-		SpringApplication.run(TestConfiguration.class, args);
 	}
 
 	@Configuration

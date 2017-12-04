@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2007 the original author or authors.
+ * Copyright 2006-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.context.scope.refresh;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
@@ -27,27 +32,19 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
-import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -79,7 +76,7 @@ public class MoreRefreshScopeIntegrationTests {
 		assertEquals("Hello scope!", this.service.getMessage());
 		assertTrue(this.service instanceof Advised);
 		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
+		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...but don't refresh, so the bean stays the same:
 		assertEquals("Hello scope!", this.service.getMessage());
 		assertEquals(0, TestService.getInitCount());
@@ -92,11 +89,12 @@ public class MoreRefreshScopeIntegrationTests {
 		assertEquals("Hello scope!", this.service.getMessage());
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo");
+		TestPropertyValues.of("message:Foo").applyTo(this.environment, Type.MAP, "morerefreshtests");
 		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refreshAll();
 		String id2 = this.service.toString();
-		assertEquals("Foo", this.service.getMessage());
+		String message = this.service.getMessage();
+		assertEquals("Foo", message);
 		assertEquals(1, TestService.getInitCount());
 		assertEquals(1, TestService.getDestroyCount());
 		assertNotSame(id1, id2);
@@ -107,7 +105,7 @@ public class MoreRefreshScopeIntegrationTests {
 	public void testRefreshFails() throws Exception {
 		assertEquals("Hello scope!", this.service.getMessage());
 		// Change the dynamic property source...
-		EnvironmentTestUtils.addEnvironment(this.environment, "message:Foo", "delay:foo");
+		TestPropertyValues.of("message:Foo", "delay:foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refreshAll();
 		try {
@@ -119,11 +117,12 @@ public class MoreRefreshScopeIntegrationTests {
 		catch (BeanCreationException e) {
 		}
 		// But we can fix it by fixing the binding error:
-		EnvironmentTestUtils.addEnvironment(this.environment, "delay:0");
+		TestPropertyValues.of("delay:0").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refreshAll();
 		assertEquals("Foo", this.service.getMessage());
 	}
+
 
 	public static class TestService implements InitializingBean, DisposableBean {
 
@@ -188,8 +187,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 	@Configuration
 	@EnableConfigurationProperties
-	@Import({ RefreshAutoConfiguration.class,
-			PropertyPlaceholderAutoConfiguration.class })
+	@EnableAutoConfiguration
 	protected static class TestConfiguration {
 
 		@Bean
@@ -210,14 +208,14 @@ public class MoreRefreshScopeIntegrationTests {
 	}
 
 	@ConfigurationProperties
-	@ManagedResource
+	// @ManagedResource
 	protected static class TestProperties {
 
 		private String message;
 
 		private int delay;
 
-		@ManagedAttribute
+		// @ManagedAttribute
 		public String getMessage() {
 			return this.message;
 		}
@@ -226,7 +224,7 @@ public class MoreRefreshScopeIntegrationTests {
 			this.message = message;
 		}
 
-		@ManagedAttribute
+		// @ManagedAttribute
 		public int getDelay() {
 			return this.delay;
 		}

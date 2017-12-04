@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.boot.Banner.Mode;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
@@ -16,6 +17,7 @@ import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.CommandLinePropertySource;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
@@ -33,12 +35,17 @@ public class ContextRefresher {
 
 	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
 
-	private Set<String> standardSources = new HashSet<String>(
+	private static final String[] DEFAULT_PROPERTY_SOURCES = new String[] { //order matters, cli args aren't first, things get messy
+			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME,
+			"defaultProperties"};
+
+	private Set<String> standardSources = new HashSet<>(
 			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
 					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME,
-					StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME));
+					StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, 
+					"configurationProperties"));
 
 	private ConfigurableApplicationContext context;
 	private RefreshScope scope;
@@ -59,13 +66,14 @@ public class ContextRefresher {
 		return keys;
 	}
 
-	private void addConfigFilesToEnvironment() {
+	/* for testing */ ConfigurableApplicationContext addConfigFilesToEnvironment() {
 		ConfigurableApplicationContext capture = null;
 		try {
 			StandardEnvironment environment = copyEnvironment(
 					this.context.getEnvironment());
 			SpringApplicationBuilder builder = new SpringApplicationBuilder(Empty.class)
-					.bannerMode(Mode.OFF).web(false).environment(environment);
+					.bannerMode(Mode.OFF).web(WebApplicationType.NONE)
+					.environment(environment);
 			// Just the listeners that affect the environment (e.g. excluding logging
 			// listener because it has side effects)
 			builder.application()
@@ -92,12 +100,9 @@ public class ContextRefresher {
 							target.addAfter(targetName, source);
 						}
 						else {
-							if (target.contains("defaultProperties")) {
-								target.addBefore("defaultProperties", source);
-							}
-							else {
-								target.addLast(source);
-							}
+							// targetName was null so we are at the start of the list
+							target.addFirst(source);
+							targetName = name;
 						}
 					}
 				}
@@ -105,9 +110,22 @@ public class ContextRefresher {
 		}
 		finally {
 			ConfigurableApplicationContext closeable = capture;
-			closeable.close();
+			while (closeable != null) {
+				try {
+					closeable.close();
+				}
+				catch (Exception e) {
+					// Ignore;
+				}
+				if (closeable.getParent() instanceof ConfigurableApplicationContext) {
+					closeable = (ConfigurableApplicationContext) closeable.getParent();
+				}
+				else {
+					break;
+				}
+			}
 		}
-
+		return capture;
 	}
 
 	// Don't use ConfigurableEnvironment.merge() in case there are clashes with property
@@ -115,11 +133,18 @@ public class ContextRefresher {
 	private StandardEnvironment copyEnvironment(ConfigurableEnvironment input) {
 		StandardEnvironment environment = new StandardEnvironment();
 		MutablePropertySources capturedPropertySources = environment.getPropertySources();
-		for (PropertySource<?> source : capturedPropertySources) {
-			capturedPropertySources.remove(source.getName());
-		}
-		for (PropertySource<?> source : input.getPropertySources()) {
-			capturedPropertySources.addLast(source);
+		// Only copy the default property source(s) and the profiles over from the main
+		// environment (everything else should be pristine, just like it was on startup).
+		for (String name : DEFAULT_PROPERTY_SOURCES) {
+			if (input.getPropertySources().contains(name)) {
+				if (capturedPropertySources.contains(name)) {
+					capturedPropertySources.replace(name,
+							input.getPropertySources().get(name));
+				}
+				else {
+					capturedPropertySources.addLast(input.getPropertySources().get(name));
+				}
+			}
 		}
 		environment.setActiveProfiles(input.getActiveProfiles());
 		environment.setDefaultProfiles(input.getDefaultProfiles());

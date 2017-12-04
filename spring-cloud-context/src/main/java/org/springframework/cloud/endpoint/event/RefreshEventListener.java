@@ -3,19 +3,20 @@ package org.springframework.cloud.endpoint.event;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.context.event.EventListener;
-
-import lombok.extern.apachecommons.CommonsLog;
 
 /**
  * Calls {@link RefreshEventListener#refresh} when a {@link RefreshEvent} is received.
  * Only responds to {@link RefreshEvent} after receiving an {@link ApplicationReadyEvent} as the RefreshEvent's might come to early in the application lifecycle.
  * @author Spencer Gibb
  */
-@CommonsLog
 public class RefreshEventListener {
+	private static Log log = LogFactory.getLog(RefreshEventListener.class);
 	private ContextRefresher refresh;
 	private AtomicBoolean ready = new AtomicBoolean(false);
 

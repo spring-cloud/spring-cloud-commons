@@ -18,7 +18,6 @@ package org.springframework.cloud.context.environment;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -53,8 +52,8 @@ public class EnvironmentManager implements ApplicationEventPublisherAware {
 		MutablePropertySources sources = environment.getPropertySources();
 		if (sources.contains(MANAGER_PROPERTY_SOURCE)) {
 			@SuppressWarnings("unchecked")
-			Map<String, Object> map = (Map<String, Object>) sources.get(
-					MANAGER_PROPERTY_SOURCE).getSource();
+			Map<String, Object> map = (Map<String, Object>) sources
+					.get(MANAGER_PROPERTY_SOURCE).getSource();
 			this.map = map;
 		}
 	}
@@ -68,9 +67,8 @@ public class EnvironmentManager implements ApplicationEventPublisherAware {
 	public Map<String, Object> reset() {
 		Map<String, Object> result = new LinkedHashMap<String, Object>(map);
 		if (!map.isEmpty()) {
-			Set<String> keys = map.keySet();
 			map.clear();
-			publish(new EnvironmentChangeEvent(keys));
+			publish(new EnvironmentChangeEvent(result.keySet()));
 		}
 		return result;
 	}

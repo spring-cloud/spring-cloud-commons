@@ -17,16 +17,18 @@ package org.springframework.cloud.context.scope.refresh;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.scope.refresh.RefreshEndpointIntegrationTests.ClientApp;
 import org.springframework.context.annotation.Bean;
@@ -36,8 +38,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,19 +49,21 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  *
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ClientApp.class, webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = ClientApp.class, properties = "management.endpoints.web.expose=*", webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
-
-	@Value("${local.server.port}")
+	
+	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
+	
+	@LocalServerPort
 	private int port;
 
 	@Test
 	public void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
 		template.exchange(
-				getUrlEncodedEntity("http://localhost:" + this.port + "/env", "message",
+				getUrlEncodedEntity("http://localhost:" + this.port + BASE_PATH + "/env", "message",
 						"Hello Dave!"), String.class);
-		template.postForObject("http://localhost:" + this.port + "/refresh", "", String.class);
+		template.postForObject("http://localhost:" + this.port + BASE_PATH + "/refresh", null, String.class);
 		String message = template.getForObject("http://localhost:" + this.port + "/",
 				String.class);
 		assertEquals("Hello Dave!", message);
@@ -69,12 +71,13 @@ public class RefreshEndpointIntegrationTests {
 
 	private RequestEntity<?> getUrlEncodedEntity(String uri, String key, String value)
 			throws URISyntaxException {
-		MultiValueMap<String, String> env = new LinkedMultiValueMap<String, String>(
-				Collections.singletonMap(key, Arrays.asList(value)));
+		Map<String, String> property = new HashMap<>();
+		property.put("name", key);
+		property.put("value", value);
 		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		RequestEntity<MultiValueMap<String, String>> entity = new RequestEntity<MultiValueMap<String, String>>(
-				env, headers, HttpMethod.POST, new URI(uri));
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		RequestEntity<Map<String, String>> entity = new RequestEntity<>(
+				property, headers, HttpMethod.POST, new URI(uri));
 		return entity;
 	}
 
@@ -97,8 +100,12 @@ public class RefreshEndpointIntegrationTests {
 	@RestController
 	protected static class Controller {
 
-		@Value("${message:Hello World!}")
 		String message;
+		
+		@Value("${message:Hello World!}")
+		public void setMessage(String message) {
+			this.message = message;
+		}
 
 		@RequestMapping("/")
 		public String hello() {

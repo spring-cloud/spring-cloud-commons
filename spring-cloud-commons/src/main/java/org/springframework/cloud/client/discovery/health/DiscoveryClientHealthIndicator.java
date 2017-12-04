@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.cloud.client.discovery.health;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -26,12 +28,10 @@ import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 
-import lombok.extern.apachecommons.CommonsLog;
 
 /**
  * @author Spencer Gibb
  */
-@CommonsLog
 public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator, Ordered,
 		ApplicationListener<InstanceRegisteredEvent<?>> {
 
@@ -39,10 +39,19 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
 
-	private DiscoveryClient discoveryClient;
+	private final DiscoveryClient discoveryClient;
+	private final DiscoveryClientHealthIndicatorProperties properties;
 
+	private final Log log = LogFactory.getLog(DiscoveryClientHealthIndicator.class);
+
+	@Deprecated
 	public DiscoveryClientHealthIndicator(DiscoveryClient discoveryClient) {
+		this(discoveryClient, new DiscoveryClientHealthIndicatorProperties());
+	}
+
+	public DiscoveryClientHealthIndicator(DiscoveryClient discoveryClient, DiscoveryClientHealthIndicatorProperties properties) {
 		this.discoveryClient = discoveryClient;
+		this.properties = properties;
 	}
 
 	@Override
@@ -59,7 +68,8 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 		if (this.discoveryInitialized.get()) {
 			try {
 				List<String> services = this.discoveryClient.getServices();
-				builder.status(new Status("UP", this.discoveryClient.description()))
+				String description = (this.properties.isIncludeDescription()) ? this.discoveryClient.description() : "";
+				builder.status(new Status("UP", description))
 						.withDetail("services", services);
 			}
 			catch (Exception e) {

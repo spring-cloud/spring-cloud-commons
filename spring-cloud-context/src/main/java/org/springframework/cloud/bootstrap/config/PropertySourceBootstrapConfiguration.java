@@ -26,12 +26,12 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.bind.PropertySourcesPropertyValues;
-import org.springframework.boot.bind.RelaxedDataBinder;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.boot.logging.LoggingSystem;
@@ -45,6 +45,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
@@ -114,8 +115,8 @@ public class PropertySourceBootstrapConfiguration implements
 
 	private void reinitializeLoggingSystem(ConfigurableEnvironment environment,
 			String oldLogConfig, LogFile oldLogFile) {
-		Map<String, Object> props = new RelaxedPropertyResolver(environment)
-				.getSubProperties("logging.");
+		Map<String, Object> props = Binder.get(environment)
+				.bind("logging", Bindable.mapOf(String.class, Object.class)).orElseGet(Collections::emptyMap);
 		if (!props.isEmpty()) {
 			String logConfig = environment.resolvePlaceholders("${logging.config:}");
 			LogFile logFile = LogFile.get(environment);
@@ -153,8 +154,7 @@ public class PropertySourceBootstrapConfiguration implements
 		MutablePropertySources incoming = new MutablePropertySources();
 		incoming.addFirst(composite);
 		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
-		new RelaxedDataBinder(remoteProperties, "spring.cloud.config")
-				.bind(new PropertySourcesPropertyValues(incoming));
+		Binder.get(environment(incoming)).bind("spring.cloud.config", Bindable.ofInstance(remoteProperties));
 		if (!remoteProperties.isAllowOverride() || (!remoteProperties.isOverrideNone()
 				&& remoteProperties.isOverrideSystemProperties())) {
 			propertySources.addFirst(composite);
@@ -180,6 +180,17 @@ public class PropertySourceBootstrapConfiguration implements
 		else {
 			propertySources.addLast(composite);
 		}
+	}
+
+	private Environment environment(MutablePropertySources incoming) {
+		StandardEnvironment environment = new StandardEnvironment();
+		for (PropertySource<?> source : environment.getPropertySources()) {
+			environment.getPropertySources().remove(source.getName());
+		}
+		for (PropertySource<?> source : incoming) {
+			environment.getPropertySources().addLast(source);
+		}
+		return environment;
 	}
 
 	private void handleIncludedProfiles(ConfigurableEnvironment environment) {

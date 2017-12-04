@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.endpoint;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,8 +30,10 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.boot.Banner.Mode;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.refresh.ContextRefresher;
@@ -43,10 +49,6 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dave Syer
@@ -65,77 +67,79 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void keysComputedWhenAdded() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class).web(false)
-				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
-				.run();
+		this.context = new SpringApplicationBuilder(Empty.class)
+				.web(WebApplicationType.NONE).bannerMode(Mode.OFF)
+				.properties("spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		EnvironmentTestUtils.addEnvironment(this.context, "spring.profiles.active=local");
+		context.getEnvironment().setActiveProfiles("local");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
-		Collection<String> keys = endpoint.invoke();
+		Collection<String> keys = endpoint.refresh();
 		assertTrue("Wrong keys: " + keys, keys.contains("added"));
 	}
 
 	@Test
 	public void keysComputedWhenOveridden() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class).web(false)
-				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
-				.run();
+		this.context = new SpringApplicationBuilder(Empty.class)
+				.web(WebApplicationType.NONE).bannerMode(Mode.OFF)
+				.properties("spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"spring.profiles.active=override");
+		context.getEnvironment().setActiveProfiles("override");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
-		Collection<String> keys = endpoint.invoke();
+		Collection<String> keys = endpoint.refresh();
 		assertTrue("Wrong keys: " + keys, keys.contains("message"));
 	}
 
 	@Test
 	public void keysComputedWhenChangesInExternalProperties() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class).web(false)
-				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
-				.run();
+		this.context = new SpringApplicationBuilder(Empty.class)
+				.web(WebApplicationType.NONE).bannerMode(Mode.OFF)
+				.properties("spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"spring.cloud.bootstrap.sources="
-						+ ExternalPropertySourceLocator.class.getName());
+		TestPropertyValues
+				.of("spring.cloud.bootstrap.sources="
+						+ ExternalPropertySourceLocator.class.getName())
+				.applyTo(this.context.getEnvironment(), Type.MAP, "defaultProperties");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
-		Collection<String> keys = endpoint.invoke();
+		Collection<String> keys = endpoint.refresh();
 		assertTrue("Wrong keys: " + keys, keys.contains("external.message"));
 	}
 
 	@Test
 	public void springMainSourcesEmptyInRefreshCycle() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class).web(false)
-				.bannerMode(Mode.OFF).properties("spring.cloud.bootstrap.name:none")
-				.run();
+		this.context = new SpringApplicationBuilder(Empty.class)
+				.web(WebApplicationType.NONE).bannerMode(Mode.OFF)
+				.properties("spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		// spring.main.sources should be empty when the refresh cycle starts (we don't
 		// want any config files from the application context getting into the one used to
 		// construct the environment for refresh)
-		EnvironmentTestUtils.addEnvironment(this.context,
-				"spring.main.sources=" + ExternalPropertySourceLocator.class.getName());
+		TestPropertyValues
+				.of("spring.main.sources="
+						+ ExternalPropertySourceLocator.class.getName())
+				.applyTo(this.context);
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
-		Collection<String> keys = endpoint.invoke();
+		Collection<String> keys = endpoint.refresh();
 		assertFalse("Wrong keys: " + keys, keys.contains("external.message"));
 	}
 
 	@Test
 	public void eventsPublishedInOrder() throws Exception {
-		this.context = new SpringApplicationBuilder(Empty.class).web(false)
-				.bannerMode(Mode.OFF).run();
+		this.context = new SpringApplicationBuilder(Empty.class)
+				.web(WebApplicationType.NONE).bannerMode(Mode.OFF).run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Empty empty = this.context.getBean(Empty.class);
-		endpoint.invoke();
+		endpoint.refresh();
 		int after = empty.events.size();
 		assertEquals("Shutdown hooks not cleaned on refresh", 2, after);
 		assertTrue(empty.events.get(0) instanceof EnvironmentChangeEvent);
@@ -144,13 +148,13 @@ public class RefreshEndpointTests {
 	@Test
 	public void shutdownHooksCleaned() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(Empty.class)
-				.web(false).bannerMode(Mode.OFF).run();
+				.web(WebApplicationType.NONE).bannerMode(Mode.OFF).run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(context);
 		ContextRefresher contextRefresher = new ContextRefresher(context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		int count = countShutdownHooks();
-		endpoint.invoke();
+		endpoint.refresh();
 		int after = countShutdownHooks();
 		assertEquals("Shutdown hooks not cleaned on refresh", count, after);
 	}
@@ -187,7 +191,7 @@ public class RefreshEndpointTests {
 		@Override
 		public PropertySource<?> locate(Environment environment) {
 			return new MapPropertySource("external", Collections
-					.<String, Object> singletonMap("external.message", "I'm External"));
+					.<String, Object>singletonMap("external.message", "I'm External"));
 		}
 
 	}

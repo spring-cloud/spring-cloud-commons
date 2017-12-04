@@ -18,12 +18,12 @@ package org.springframework.cloud.client.discovery;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.boot.actuate.autoconfigure.ManagementServerProperties;
+import org.springframework.boot.actuate.autoconfigure.web.server.ManagementServerProperties;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- *
+ * FIXME:
  * @author Spencer Gibb
  */
 public class ManagementServerPortUtils {
@@ -31,7 +31,7 @@ public class ManagementServerPortUtils {
 	static {
 		boolean hasClass;
 		try {
-			Class.forName("org.springframework.boot.actuate.autoconfigure.ManagementServerProperties");
+			Class.forName("org.springframework.boot.actuate.endpoint.annotation.Endpoint");
 			hasClass = true;
 		} catch (ClassNotFoundException e) {
 			hasClass = false;

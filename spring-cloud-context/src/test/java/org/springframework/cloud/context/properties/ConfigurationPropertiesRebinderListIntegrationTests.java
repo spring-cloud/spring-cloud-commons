@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2007 the original author or authors.
+ * Copyright 2006-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.context.properties;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.List;
 import java.util.Map;
 
@@ -24,11 +26,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderListIntegrationTests.TestConfiguration;
@@ -39,8 +41,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class,
@@ -60,9 +60,9 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	@DirtiesContext
 	public void testAppendProperties() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
-		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
+		TestPropertyValues.of("messages[0]:foo").applyTo(this.environment);
 		this.rebinder.rebind();
-		assertEquals("[foo, two]", this.properties.getMessages().toString());
+		assertEquals("[foo]", this.properties.getMessages().toString());
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
 		Map<String, Object> map = findTestProperties();
 		map.clear();
-		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
+		TestPropertyValues.of("messages[0]:foo").applyTo(this.environment);
 		this.rebinder.rebind();
 		assertEquals("[foo]", this.properties.getMessages().toString());
 	}
@@ -94,7 +94,7 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
 		Map<String, Object> map = findTestProperties();
 		map.clear();
-		EnvironmentTestUtils.addEnvironment(this.environment, "messages:foo");
+		TestPropertyValues.of("messages:foo").applyTo(this.environment);
 		this.rebinder.rebind();
 		assertEquals("[foo]", this.properties.getMessages().toString());
 	}

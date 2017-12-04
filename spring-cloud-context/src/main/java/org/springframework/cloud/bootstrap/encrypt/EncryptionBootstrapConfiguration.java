@@ -21,7 +21,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.bootstrap.encrypt.KeyProperties.KeyStore;
 import org.springframework.cloud.context.encrypt.EncryptorFactory;
@@ -33,6 +32,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.rsa.crypto.KeyStoreKeyFactory;
+import org.springframework.security.rsa.crypto.RsaAlgorithm;
 import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
 import org.springframework.util.StringUtils;
 
@@ -63,15 +63,20 @@ public class EncryptionBootstrapConfiguration {
 		@ConditionalOnMissingBean(TextEncryptor.class)
 		public TextEncryptor textEncryptor() {
 			KeyStore keyStore = this.key.getKeyStore();
-			if (keyStore.getLocation() != null && keyStore.getLocation().exists()) {
-				return new RsaSecretEncryptor(
-						new KeyStoreKeyFactory(keyStore.getLocation(),
-								keyStore.getPassword().toCharArray()).getKeyPair(
-										keyStore.getAlias(),
-										keyStore.getSecret().toCharArray()),
-						this.key.getRsa().getAlgorithm(), this.key.getRsa().getSalt(),
-						this.key.getRsa().isStrong());
+			if (keyStore.getLocation() != null) {
+				if (keyStore.getLocation().exists()) {
+					return new RsaSecretEncryptor(
+							new KeyStoreKeyFactory(keyStore.getLocation(),
+									keyStore.getPassword().toCharArray()).getKeyPair(
+									keyStore.getAlias(),
+									keyStore.getSecret().toCharArray()),
+							RsaAlgorithm.valueOf(this.key.getRsa().getAlgorithm()), this.key.getRsa().getSalt(),
+							this.key.getRsa().isStrong());
+				} 
+				
+				throw new IllegalStateException("Invalid keystore location");
 			}
+			
 			return new EncryptorFactory().create(this.key.getKey());
 		}
 
@@ -110,22 +115,21 @@ public class EncryptionBootstrapConfiguration {
 		public ConditionOutcome getMatchOutcome(ConditionContext context,
 				AnnotatedTypeMetadata metadata) {
 			Environment environment = context.getEnvironment();
-			RelaxedPropertyResolver propertyResolver = new RelaxedPropertyResolver(environment);
-			if (hasProperty(propertyResolver, environment, "encrypt.keyStore.location")) {
-				if (hasProperty(propertyResolver, environment, "encrypt.keyStore.password")) {
+			if (hasProperty(environment, "encrypt.key-store.location")) {
+				if (hasProperty(environment, "encrypt.key-store.password")) {
 					return ConditionOutcome.match("Keystore found in Environment");
 				}
 				return ConditionOutcome
 						.noMatch("Keystore found but no password in Environment");
 			}
-			else if (hasProperty(propertyResolver, environment, "encrypt.key")) {
+			else if (hasProperty(environment, "encrypt.key")) {
 				return ConditionOutcome.match("Key found in Environment");
 			}
 			return ConditionOutcome.noMatch("Keystore nor key found in Environment");
 		}
 
-		private boolean hasProperty(RelaxedPropertyResolver propertyResolver, Environment environment, String key) {
-			String value = propertyResolver.getProperty(key);
+		private boolean hasProperty(Environment environment, String key) {
+			String value = environment.getProperty(key);
 			if (value == null) {
 				return false;
 			}

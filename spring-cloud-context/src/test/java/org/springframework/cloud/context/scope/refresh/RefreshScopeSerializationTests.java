@@ -17,7 +17,9 @@
 package org.springframework.cloud.context.scope.refresh;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +39,7 @@ public class RefreshScopeSerializationTests {
 	@Test
 	public void defaultApplicationContextId() throws Exception {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
-				TestConfiguration.class).web(false).run();
+				TestConfiguration.class).web(WebApplicationType.NONE).run();
 		assertThat(context.getId(), is(equalTo("application")));
 	}
 
@@ -52,7 +54,7 @@ public class RefreshScopeSerializationTests {
 
 	private DefaultListableBeanFactory getBeanFactory() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
-				TestConfiguration.class).web(false).run();
+				TestConfiguration.class).web(WebApplicationType.NONE).run();
 		DefaultListableBeanFactory factory = (DefaultListableBeanFactory) context
 				.getAutowireCapableBeanFactory();
 		return factory;

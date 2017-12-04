@@ -16,42 +16,41 @@
 
 package org.springframework.cloud.client.discovery.health;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 import java.util.Arrays;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.OrderedHealthAggregator;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.CommonsClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Spencer Gibb
  */
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = { DiscoveryCompositeHealthIndicatorTests.Config.class,
+@SpringBootTest(classes = { DiscoveryCompositeHealthIndicatorTests.Config.class,
 		CommonsClientAutoConfiguration.class })
 public class DiscoveryCompositeHealthIndicatorTests {
 
 	@Autowired
-	DiscoveryCompositeHealthIndicator healthIndicator;
+	private DiscoveryCompositeHealthIndicator healthIndicator;
 
 	@Autowired
-	DiscoveryClientHealthIndicator clientHealthIndicator;
+	private DiscoveryClientHealthIndicator clientHealthIndicator;
 
 	@Configuration
 	public static class Config {
@@ -90,11 +89,11 @@ public class DiscoveryCompositeHealthIndicatorTests {
 		Health health = this.healthIndicator.health();
 		assertHealth(health, Status.UNKNOWN);
 
-		clientHealthIndicator.onApplicationEvent(new InstanceRegisteredEvent<Object>(this, null));
+		clientHealthIndicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
 
 		health = this.healthIndicator.health();
 		Status status = assertHealth(health, Status.UP);
-		assertEquals("status desciption was wrong", "TestDiscoveryClient",
+		assertEquals("status description was wrong", "",
 				status.getDescription());
 	}
 
@@ -104,10 +103,6 @@ public class DiscoveryCompositeHealthIndicatorTests {
 		assertNotNull("status was null", status);
 		assertEquals("status code was wrong", expected.getCode(), status.getCode());
 		return status;
-	}
-	
-	public static void main(String[] args) {
-		SpringApplication.run(new Object[]{Config.class,CommonsClientAutoConfiguration.class}, new String[] {"--debug", "--spring.main.webEnvironment=false"});
 	}
 
 }

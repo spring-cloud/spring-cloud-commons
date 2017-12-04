@@ -6,31 +6,31 @@
     "defaultValue": true
   },
   {
-    "name": "endpoints.env.post.enabled",
+    "name": "management.endpoint.env.post.enabled",
     "type": "java.lang.Boolean",
     "description": "Enable changing the Environment through a POST to /env.",
     "defaultValue": true
   },
   {
-    "name": "endpoints.refresh.enabled",
+    "name": "management.endpoint.refresh.enabled",
     "type": "java.lang.Boolean",
     "description": "Enable the /refresh endpoint to refresh configuration and re-initialize refresh scoped beans.",
     "defaultValue": true
   },
   {
-    "name": "endpoints.restart.enabled",
+    "name": "management.endpoint.restart.enabled",
     "type": "java.lang.Boolean",
     "description": "Enable the /restart endpoint to restart the application context.",
     "defaultValue": true
   },
   {
-    "name": "endpoints.pause.enabled",
+    "name": "management.endpoint.pause.enabled",
     "type": "java.lang.Boolean",
     "description": "Enable the /pause endpoint (to send Lifecycle.stop()).",
     "defaultValue": true
   },
   {
-    "name": "endpoints.resume.enabled",
+    "name": "management.endpoint.resume.enabled",
     "type": "java.lang.Boolean",
     "description": "Enable the /resume endpoint (to send Lifecycle.start()).",
     "defaultValue": true

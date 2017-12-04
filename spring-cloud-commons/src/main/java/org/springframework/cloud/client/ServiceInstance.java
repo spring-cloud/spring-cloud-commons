@@ -28,7 +28,7 @@ import java.util.Map;
 public interface ServiceInstance {
 
 	/**
-	 * @return the service id as register by the DiscoveryClient
+	 * @return the service id as registered.
 	 */
 	String getServiceId();
 

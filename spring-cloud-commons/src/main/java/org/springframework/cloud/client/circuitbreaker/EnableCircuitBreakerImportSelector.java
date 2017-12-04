@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.client.circuitbreaker;
 
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.cloud.commons.util.SpringFactoryImportSelector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -31,7 +30,7 @@ public class EnableCircuitBreakerImportSelector extends
 
 	@Override
 	protected boolean isEnabled() {
-		return new RelaxedPropertyResolver(getEnvironment()).getProperty(
+		return getEnvironment().getProperty(
 				"spring.cloud.circuit.breaker.enabled", Boolean.class, Boolean.TRUE);
 	}
 

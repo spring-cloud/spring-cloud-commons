@@ -17,16 +17,15 @@
 package org.springframework.cloud.autoconfigure;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.ConditionalOnEnabledHealthIndicator;
-import org.springframework.boot.actuate.autoconfigure.EndpointAutoConfiguration;
-import org.springframework.boot.actuate.endpoint.Endpoint;
+import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnEnabledEndpoint;
+import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
+import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.cloud.context.refresh.ContextRefresher;
@@ -36,6 +35,7 @@ import org.springframework.cloud.endpoint.RefreshEndpoint;
 import org.springframework.cloud.health.RefreshScopeHealthIndicator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.integration.monitor.IntegrationMBeanExporter;
 
 /**
@@ -44,70 +44,88 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  * @author Venil Noronha
  */
 @Configuration
-@ConditionalOnClass(Endpoint.class)
-@AutoConfigureAfter(EndpointAutoConfiguration.class)
+@ConditionalOnClass(Health.class)
+@AutoConfigureAfter({EndpointAutoConfiguration.class, RefreshAutoConfiguration.class})
+@Import({ RestartEndpointWithIntegrationConfiguration.class,
+		RestartEndpointWithoutIntegrationConfiguration.class,
+		PauseResumeEndpointsConfiguration.class })
 public class RefreshEndpointAutoConfiguration {
 
+	@Bean
+	@ConditionalOnBean(RefreshScope.class)
 	@ConditionalOnMissingBean
 	@ConditionalOnEnabledHealthIndicator("refresh")
-	@Bean
 	RefreshScopeHealthIndicator refreshScopeHealthIndicator(RefreshScope scope,
 			ConfigurationPropertiesRebinder rebinder) {
 		return new RefreshScopeHealthIndicator(scope, rebinder);
 	}
 
-	@ConditionalOnClass(IntegrationMBeanExporter.class)
-	protected static class RestartEndpointWithIntegration {
-
-		@Autowired(required = false)
-		private IntegrationMBeanExporter exporter;
+	@Configuration
+	@ConditionalOnBean(PropertySourceBootstrapConfiguration.class)
+	protected static class RefreshEndpointConfiguration {
 
 		@Bean
+		@ConditionalOnBean(ContextRefresher.class)
+		@ConditionalOnEnabledEndpoint
 		@ConditionalOnMissingBean
-		public RestartEndpoint restartEndpoint() {
-			RestartEndpoint endpoint = new RestartEndpoint();
-			if (this.exporter != null) {
-				endpoint.setIntegrationMBeanExporter(this.exporter);
-			}
-			return endpoint;
+		public RefreshEndpoint refreshEndpoint(ContextRefresher contextRefresher) {
+			return new RefreshEndpoint(contextRefresher);
 		}
 
 	}
+}
 
-	@ConditionalOnMissingClass("org.springframework.integration.monitor.IntegrationMBeanExporter")
-	protected static class RestartEndpointWithoutIntegration {
+@Configuration
+@ConditionalOnClass(IntegrationMBeanExporter.class)
+class RestartEndpointWithIntegrationConfiguration {
 
-		@Bean
-		@ConditionalOnMissingBean
-		public RestartEndpoint restartEndpoint() {
-			return new RestartEndpoint();
-		}
-	}
+	@Autowired(required = false)
+	private IntegrationMBeanExporter exporter;
 
 	@Bean
-	@ConfigurationProperties("endpoints.pause")
+	@ConditionalOnEnabledEndpoint
+	@ConditionalOnMissingBean
+	public RestartEndpoint restartEndpoint() {
+		RestartEndpoint endpoint = new RestartEndpoint();
+		if (this.exporter != null) {
+			endpoint.setIntegrationMBeanExporter(this.exporter);
+		}
+		return endpoint;
+	}
+
+}
+
+@Configuration
+@ConditionalOnMissingClass("org.springframework.integration.monitor.IntegrationMBeanExporter")
+class RestartEndpointWithoutIntegrationConfiguration {
+
+	@Bean
+	@ConditionalOnEnabledEndpoint
+	@ConditionalOnMissingBean
+	public RestartEndpoint restartEndpointWithoutIntegration() {
+		return new RestartEndpoint();
+	}
+
+}
+
+@Configuration
+class PauseResumeEndpointsConfiguration {
+
+	@Bean
+	@ConditionalOnBean(RestartEndpoint.class)
+	@ConditionalOnMissingBean
+	@ConditionalOnEnabledEndpoint
 	public RestartEndpoint.PauseEndpoint pauseEndpoint(RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getPauseEndpoint();
 	}
 
 	@Bean
-	@ConfigurationProperties("endpoints.resume")
+	@ConditionalOnBean(RestartEndpoint.class)
+	@ConditionalOnMissingBean
+	@ConditionalOnEnabledEndpoint
 	public RestartEndpoint.ResumeEndpoint resumeEndpoint(
 			RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getResumeEndpoint();
 	}
 
-	@Configuration
-	@ConditionalOnProperty(value = "endpoints.refresh.enabled", matchIfMissing = true)
-	@ConditionalOnBean(PropertySourceBootstrapConfiguration.class)
-	protected static class RefreshEndpointConfiguration {
-
-		@Bean
-		@ConditionalOnMissingBean
-		public RefreshEndpoint refreshEndpoint(ContextRefresher contextRefresher) {
-			RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
-			return endpoint;
-		}
-
-	}
 }

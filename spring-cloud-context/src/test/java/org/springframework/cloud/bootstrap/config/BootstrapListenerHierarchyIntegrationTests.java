@@ -19,6 +19,7 @@ package org.springframework.cloud.bootstrap.config;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.springframework.boot.WebApplicationType.NONE;
 
 import org.junit.Test;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -37,7 +38,7 @@ public class BootstrapListenerHierarchyIntegrationTests {
 	@Test
 	public void shouldAddInABootstrapContext() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.sources(BasicConfiguration.class).web(false).run();
+				.sources(BasicConfiguration.class).web(NONE).run();
 
 		assertNotNull(context.getParent());
 	}
@@ -45,8 +46,8 @@ public class BootstrapListenerHierarchyIntegrationTests {
 	@Test
 	public void shouldAddInOneBootstrapForABasicParentChildHierarchy() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.sources(RootConfiguration.class).web(false)
-				.child(BasicConfiguration.class).web(false).run();
+				.sources(RootConfiguration.class).web(NONE)
+				.child(BasicConfiguration.class).web(NONE).run();
 
 		// Should be RootConfiguration based context
 		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) context
@@ -66,9 +67,9 @@ public class BootstrapListenerHierarchyIntegrationTests {
 	@Test
 	public void shouldAddInOneBootstrapForSiblingsBasedHierarchy() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.sources(RootConfiguration.class).web(false)
-				.child(BasicConfiguration.class).web(false)
-				.sibling(BasicConfiguration.class).web(false).run();
+				.sources(RootConfiguration.class).web(NONE)
+				.child(BasicConfiguration.class).web(NONE)
+				.sibling(BasicConfiguration.class).web(NONE).run();
 
 		// Should be RootConfiguration based context
 		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) context

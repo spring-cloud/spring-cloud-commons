@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2007 the original author or authors.
+ * Copyright 2006-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,14 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeListBindingIntegrationTests.TestConfiguration;
@@ -40,14 +41,13 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class,
-		properties = "messages=one,two")
+@SpringBootTest(classes = TestConfiguration.class, properties = { "test.messages[0]=one",
+		"test.messages[1]=two" })
 public class RefreshScopeListBindingIntegrationTests {
 
 	@Autowired
@@ -64,9 +64,9 @@ public class RefreshScopeListBindingIntegrationTests {
 	public void testAppendProperties() throws Exception {
 		assertEquals("[one, two]", this.properties.getMessages().toString());
 		assertTrue(this.properties instanceof Advised);
-		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
+		TestPropertyValues.of("test.messages[0]:foo").applyTo(this.environment);
 		this.scope.refreshAll();
-		assertEquals("[foo, two]", this.properties.getMessages().toString());
+		assertEquals("[foo]", this.properties.getMessages().toString());
 	}
 
 	@Test
@@ -76,7 +76,7 @@ public class RefreshScopeListBindingIntegrationTests {
 		assertTrue(this.properties instanceof Advised);
 		Map<String, Object> map = findTestProperties();
 		map.clear();
-		EnvironmentTestUtils.addEnvironment(this.environment, "messages[0]:foo");
+		TestPropertyValues.of("test.messages[0]:foo").applyTo(this.environment);
 		this.scope.refreshAll();
 		assertEquals("[foo]", this.properties.getMessages().toString());
 	}
@@ -106,7 +106,7 @@ public class RefreshScopeListBindingIntegrationTests {
 
 	}
 
-	@ConfigurationProperties
+	@ConfigurationProperties("test")
 	@ManagedResource
 	protected static class TestProperties {
 

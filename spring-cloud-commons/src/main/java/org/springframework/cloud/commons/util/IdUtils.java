@@ -1,6 +1,5 @@
 package org.springframework.cloud.commons.util;
 
-import org.springframework.boot.bind.RelaxedPropertyResolver;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.util.StringUtils;
 
@@ -12,19 +11,18 @@ public class IdUtils {
 	private static final String SEPARATOR = ":";
 
 	public static String getDefaultInstanceId(PropertyResolver resolver) {
-		RelaxedPropertyResolver relaxed = new RelaxedPropertyResolver(resolver);
-		String vcapInstanceId = relaxed.getProperty("vcap.application.instance_id");
+		String vcapInstanceId = resolver.getProperty("vcap.application.instance_id");
 		if (StringUtils.hasText(vcapInstanceId)) {
 			return vcapInstanceId;
 		}
 
-		String hostname = relaxed.getProperty("spring.cloud.client.hostname");
-		String appName = relaxed.getProperty("spring.application.name");
+		String hostname = resolver.getProperty("spring.cloud.client.hostname");
+		String appName = resolver.getProperty("spring.application.name");
 
 		String namePart = combineParts(hostname, SEPARATOR, appName);
 
-		String indexPart = relaxed.getProperty("spring.application.instance_id",
-				relaxed.getProperty("server.port"));
+		String indexPart = resolver.getProperty("spring.application.instance_id",
+				resolver.getProperty("server.port"));
 
 		return combineParts(namePart, SEPARATOR, indexPart);
 	}

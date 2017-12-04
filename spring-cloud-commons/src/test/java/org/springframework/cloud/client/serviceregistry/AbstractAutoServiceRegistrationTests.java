@@ -1,14 +1,16 @@
 package org.springframework.cloud.client.serviceregistry;
 
+import java.net.URI;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.LocalManagementPort;
+import org.springframework.boot.actuate.autoconfigure.web.server.LocalManagementPort;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -63,6 +65,31 @@ public class AbstractAutoServiceRegistrationTests {
 		@Override
 		public String getServiceId() {
 			return "testRegistration2";
+		}
+
+		@Override
+		public String getHost() {
+			return null;
+		}
+
+		@Override
+		public int getPort() {
+			return 0;
+		}
+
+		@Override
+		public boolean isSecure() {
+			return false;
+		}
+
+		@Override
+		public URI getUri() {
+			return null;
+		}
+
+		@Override
+		public Map<String, String> getMetadata() {
+			return null;
 		}
 	}
 
@@ -137,12 +164,10 @@ public class AbstractAutoServiceRegistrationTests {
 			super(new TestServiceRegistry());
 		}
 
-		@Override
 		protected int getConfiguredPort() {
 			return port;
 		}
 
-		@Override
 		protected void setConfiguredPort(int port) {
 			this.port = port;
 		}

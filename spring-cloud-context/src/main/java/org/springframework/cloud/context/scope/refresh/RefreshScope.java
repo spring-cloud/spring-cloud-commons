@@ -18,7 +18,6 @@ import java.io.Serializable;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.cloud.context.scope.GenericScope;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -71,7 +70,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  */
 @ManagedResource
 public class RefreshScope extends GenericScope
-		implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor, Ordered {
+		implements ApplicationContextAware, Ordered {
 
 	private ApplicationContext context;
 	private BeanDefinitionRegistry registry;
@@ -108,6 +107,7 @@ public class RefreshScope extends GenericScope
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
 			throws BeansException {
 		this.registry = registry;
+		super.postProcessBeanDefinitionRegistry(registry);
 	}
 
 	@EventListener
@@ -118,7 +118,7 @@ public class RefreshScope extends GenericScope
 					BeanDefinition definition = this.registry.getBeanDefinition(name);
 					if (this.getName().equals(definition.getScope())
 							&& !definition.isLazyInit()) {
-						this.context.getBean(name);
+						this.context.getBean(name).getClass();
 					}
 				}
 			}
@@ -150,4 +150,5 @@ public class RefreshScope extends GenericScope
 	public void setApplicationContext(ApplicationContext context) throws BeansException {
 		this.context = context;
 	}
+
 }

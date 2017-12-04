@@ -35,11 +35,11 @@ import org.springframework.web.client.AsyncRestTemplate;
  * @author Rob Worsnop
  */
 @Configuration
+@ConditionalOnBean(LoadBalancerClient.class)
 @ConditionalOnClass(AsyncRestTemplate.class)
 public class AsyncLoadBalancerAutoConfiguration {
 
 
-	@ConditionalOnBean(AsyncRestTemplateCustomizer.class)
 	@Configuration
 	static class AsyncRestTemplateCustomizerConfig {
 		@LoadBalanced
@@ -62,7 +62,6 @@ public class AsyncLoadBalancerAutoConfiguration {
 		}
 	}
 
-	@ConditionalOnBean(LoadBalancerClient.class)
 	@Configuration
 	static class LoadBalancerInterceptorConfig {
 		@Bean
