@@ -60,16 +60,18 @@ public interface ServiceInstance {
 	/**
 	 * Add a key/value pair to the metadata map.
      *
-	 * @param key a metadata key as a String
+	 * @param key   a metadata key as a String
 	 * @param value a corresponding metadata value as a String
 	 */
-	void putMetadata(String key, String value);
+	default void putMetadata(String key, String value) {
+	}
 
 	/**
 	 * Replace the current metadata map for a new one.
      *
 	 * @param metadata a metadata map to replace the current metadata
 	 */
-	void setMetadata(Map<String, String> metadata);
+	default void setMetadata(Map<String, String> metadata) {
+	}
 
 }
