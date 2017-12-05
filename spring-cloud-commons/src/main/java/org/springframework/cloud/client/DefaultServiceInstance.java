@@ -49,9 +49,8 @@ public class DefaultServiceInstance implements ServiceInstance {
 		this.metadata = metadata;
 	}
 
-	public DefaultServiceInstance(String serviceId, String host, int port,
-			boolean secure) {
-		this(serviceId, host, port, secure, new LinkedHashMap<String, String>());
+	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure) {
+		this(serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
     @Override
@@ -103,7 +102,8 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	/**
 	 * Create a uri from the given ServiceInstance's host:port
-	 * @param instance
+     *
+	 * @param instance a {@link ServiceInstance} to create an {@link java.net.URI} out of.
 	 * @return URI of the form (secure)?https:http + "host:port"
 	 */
 	public static URI getUri(ServiceInstance instance) {
