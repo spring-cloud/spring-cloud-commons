@@ -39,6 +39,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Spencer Gibb
  * @author Dave Syer
  * @author Will Tran
+ * @author Gang Li
  */
 @Configuration
 @ConditionalOnClass(RestTemplate.class)
@@ -104,7 +105,9 @@ public class LoadBalancerAutoConfiguration {
 	@Configuration
 	@ConditionalOnClass(RetryTemplate.class)
 	public static class RetryAutoConfiguration {
+
 		@Bean
+		@ConditionalOnMissingBean
 		public RetryTemplate retryTemplate() {
 			RetryTemplate template =  new RetryTemplate();
 			template.setThrowLastExceptionOnExhausted(true);
