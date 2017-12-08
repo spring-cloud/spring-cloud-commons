@@ -414,7 +414,7 @@ you would like to use for a given service.
 @Configuration
 public class MyConfiguration {
     @Bean
-    LoadBalancedBackOffPolicyFactory backOffPolciyFactory() {
+    LoadBalancedBackOffPolicyFactory backOffPolicyFactory() {
         return new LoadBalancedBackOffPolicyFactory() {
             @Override
             public BackOffPolicy createBackOffPolicy(String service) {
@@ -427,6 +427,42 @@ public class MyConfiguration {
 
 NOTE: `client` in the above examples should be replaced with your Ribbon client's
 name.
+
+If you want to add one or more `RetryListener` to your retry you will need to
+create a bean of type `LoadBalancedRetryListenerFactory` and return the `RetryListener` array
+you would like to use for a given service.
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+    @Bean
+    LoadBalancedRetryListenerFactory retryListenerFactory() {
+        return new LoadBalancedRetryListenerFactory() {
+            @Override
+            public RetryListener[] createRetryListeners(String service) {
+                return new RetryListener[]{new RetryListener() {
+                    @Override
+                    public <T, E extends Throwable> boolean open(RetryContext context, RetryCallback<T, E> callback) {
+                        //TODO Do you business...
+                        return true;
+                    }
+
+                    @Override
+                    public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+                        //TODO Do you business...
+                    }
+
+                    @Override
+                    public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+                        //TODO Do you business...
+                    }
+                }};
+            }
+        };
+    }
+}
+----
 
 ==== Multiple RestTemplate objects
 
