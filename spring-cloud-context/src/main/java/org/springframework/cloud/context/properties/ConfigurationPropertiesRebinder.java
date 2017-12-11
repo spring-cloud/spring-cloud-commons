@@ -93,7 +93,7 @@ public class ConfigurationPropertiesRebinder
 		if (this.applicationContext != null) {
 			try {
 				Object bean = this.applicationContext.getBean(name);
-				if (AopUtils.isCglibProxy(bean)) {
+				if (AopUtils.isAopProxy(bean)) {
 					bean = getTargetObject(bean);
 				}
 				this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
