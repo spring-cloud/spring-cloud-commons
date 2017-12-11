@@ -39,6 +39,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Spencer Gibb
  * @author Dave Syer
  * @author Will Tran
+ * @author Gang Li
  */
 @Configuration
 @ConditionalOnClass(RestTemplate.class)
@@ -122,6 +123,12 @@ public class LoadBalancerAutoConfiguration {
 		public LoadBalancedBackOffPolicyFactory loadBalancedBackOffPolicyFactory() {
 			return new LoadBalancedBackOffPolicyFactory.NoBackOffPolicyFactory();
 		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public LoadBalancedRetryRecoveryCallbackFactory loadBalancedRetryRecoveryCallbackFactory() {
+			return new LoadBalancedRetryRecoveryCallbackFactory.NoRecoveryCallbackFactory();
+		}
 	}
 
 	@Configuration
@@ -133,9 +140,10 @@ public class LoadBalancerAutoConfiguration {
 				LoadBalancerClient loadBalancerClient, LoadBalancerRetryProperties properties,
 				LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
 				LoadBalancerRequestFactory requestFactory,
-				LoadBalancedBackOffPolicyFactory backOffPolicyFactory) {
+				LoadBalancedBackOffPolicyFactory backOffPolicyFactory,
+				LoadBalancedRetryRecoveryCallbackFactory recoveryCallbackFactory) {
 			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties,
-					lbRetryPolicyFactory, requestFactory, backOffPolicyFactory);
+					lbRetryPolicyFactory, requestFactory, backOffPolicyFactory, recoveryCallbackFactory);
 		}
 
 		@Bean
