@@ -44,6 +44,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 	private LoadBalancerRetryProperties lbProperties;
 	private LoadBalancerRequestFactory requestFactory;
 	private LoadBalancedBackOffPolicyFactory backOffPolicyFactory;
+	private LoadBalancedRetryRecoveryCallbackFactory recoveryCallbackFactory;
 
 
 	@Deprecated
@@ -63,12 +64,14 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 										LoadBalancerRetryProperties lbProperties,
 										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
 										LoadBalancerRequestFactory requestFactory,
-										LoadBalancedBackOffPolicyFactory backOffPolicyFactory) {
+										LoadBalancedBackOffPolicyFactory backOffPolicyFactory,
+										LoadBalancedRetryRecoveryCallbackFactory recoveryCallbackFactory) {
 		this.loadBalancer = loadBalancer;
 		this.lbRetryPolicyFactory = lbRetryPolicyFactory;
 		this.lbProperties = lbProperties;
 		this.requestFactory = requestFactory;
 		this.backOffPolicyFactory = backOffPolicyFactory;
+		this.recoveryCallbackFactory = recoveryCallbackFactory;
 	}
 
 	@Override
@@ -110,6 +113,6 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 						}
 						return response;
 					}
-				});
+				}, this.recoveryCallbackFactory.createRecoveryCallback(serviceName));
 	}
 }
