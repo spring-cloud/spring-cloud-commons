@@ -35,7 +35,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Ryan Baxter
- * @author Gang Li
  */
 @RunWith(MockitoJUnitRunner.class)
 public class RetryLoadBalancerInterceptorTest {
