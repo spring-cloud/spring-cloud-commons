@@ -35,7 +35,6 @@ import org.springframework.util.Assert;
 /**
  * @author Ryan Baxter
  * @author Will Tran
- * @author Gang Li
  */
 public class RetryLoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 
