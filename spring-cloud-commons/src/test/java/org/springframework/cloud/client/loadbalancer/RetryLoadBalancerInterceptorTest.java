@@ -1,13 +1,10 @@
 package org.springframework.cloud.client.loadbalancer;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
@@ -20,9 +17,11 @@ import org.springframework.retry.RetryException;
 import org.springframework.retry.backoff.BackOffContext;
 import org.springframework.retry.backoff.BackOffInterruptedException;
 import org.springframework.retry.backoff.BackOffPolicy;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.policy.NeverRetryPolicy;
-import org.springframework.retry.support.RetryTemplate;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -30,7 +29,6 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -171,25 +169,35 @@ public class RetryLoadBalancerInterceptorTest {
     public void interceptRetryFailOnStatusCode() throws Throwable {
         HttpRequest request = mock(HttpRequest.class);
         when(request.getURI()).thenReturn(new URI("http://foo"));
+
         InputStream notFoundStream = new ByteArrayInputStream("foo".getBytes());
         ClientHttpResponse clientHttpResponseNotFound = new MockClientHttpResponse(notFoundStream, HttpStatus.NOT_FOUND);
+
         LoadBalancedRetryPolicy policy = mock(LoadBalancedRetryPolicy.class);
         when(policy.retryableStatusCode(eq(HttpStatus.NOT_FOUND.value()))).thenReturn(true);
         when(policy.canRetryNextServer(any(LoadBalancedRetryContext.class))).thenReturn(false);
+
         LoadBalancedRetryPolicyFactory lbRetryPolicyFactory = mock(LoadBalancedRetryPolicyFactory.class);
         when(lbRetryPolicyFactory.create(eq("foo"), any(ServiceInstanceChooser.class))).thenReturn(policy);
+
         ServiceInstance serviceInstance = mock(ServiceInstance.class);
         when(client.choose(eq("foo"))).thenReturn(serviceInstance);
-        when(client.execute(eq("foo"), eq(serviceInstance), any(LoadBalancerRequest.class))).
-                thenReturn(clientHttpResponseNotFound);
+        when(client.execute(eq("foo"), eq(serviceInstance), ArgumentMatchers.<LoadBalancerRequest<ClientHttpResponse>>any()))
+                .thenReturn(clientHttpResponseNotFound);
+
         lbProperties.setEnabled(true);
-        RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(client, lbProperties, lbRetryPolicyFactory, lbRequestFactory);
         byte[] body = new byte[]{};
         ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
+
+        RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(client, lbProperties,
+                lbRetryPolicyFactory, lbRequestFactory, backOffPolicyFactory);
         ClientHttpResponse rsp = interceptor.intercept(request, body, execution);
-        verify(client, times(1)).execute(eq("foo"), eq(serviceInstance), any(LoadBalancerRequest.class));
+
+        verify(client, times(1)).execute(eq("foo"), eq(serviceInstance),
+                ArgumentMatchers.<LoadBalancerRequest<ClientHttpResponse>>any());
         verify(lbRequestFactory, times(1)).createRequest(request, body, execution);
         verify(policy, times(2)).canRetryNextServer(any(LoadBalancedRetryContext.class));
+
         //call twice in a retry attempt
         byte[] content = new byte[1024];
         int length = rsp.getBody().read(content);
