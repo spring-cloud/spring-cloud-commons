@@ -1,11 +1,5 @@
 package org.springframework.cloud.commons.httpclient;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
 import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 
@@ -19,7 +13,14 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.impl.conn.DefaultHttpClientConnectionOperator;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.Test;
+
 import org.springframework.util.ReflectionUtils;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Ryan Baxter
@@ -59,35 +60,40 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 	@Test
 	public void newConnectionManagerWithSSL() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
-			.newConnectionManager(false, 2, 6);
+				.newConnectionManager(false, 2, 6);
 
 		Lookup<ConnectionSocketFactory> socketFactoryRegistry = getConnectionSocketFactoryLookup(
-			connectionManager);
+				connectionManager);
 		assertThat(socketFactoryRegistry.lookup("https"), is(notNullValue()));
-		assertThat(getX509TrustManager(socketFactoryRegistry).getAcceptedIssuers(), is(notNullValue()));
+		assertThat(getX509TrustManager(socketFactoryRegistry).getAcceptedIssuers(),
+				is(notNullValue()));
 	}
 
 	@Test
 	public void newConnectionManagerWithDisabledSSLValidation() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
-			.newConnectionManager(true, 2, 6);
+				.newConnectionManager(true, 2, 6);
 
 		Lookup<ConnectionSocketFactory> socketFactoryRegistry = getConnectionSocketFactoryLookup(
-			connectionManager);
+				connectionManager);
 		assertThat(socketFactoryRegistry.lookup("https"), is(notNullValue()));
-		assertThat(getX509TrustManager(socketFactoryRegistry).getAcceptedIssuers(), is(nullValue()));
+		assertThat(getX509TrustManager(socketFactoryRegistry).getAcceptedIssuers(),
+				is(nullValue()));
 	}
 
 	private Lookup<ConnectionSocketFactory> getConnectionSocketFactoryLookup(
-		HttpClientConnectionManager connectionManager) {
-		DefaultHttpClientConnectionOperator connectionOperator = getField(connectionManager, "connectionOperator");
+			HttpClientConnectionManager connectionManager) {
+		DefaultHttpClientConnectionOperator connectionOperator = getField(
+				connectionManager, "connectionOperator");
 		return getField(connectionOperator, "socketFactoryRegistry");
 	}
 
 	private X509TrustManager getX509TrustManager(
-		Lookup<ConnectionSocketFactory> socketFactoryRegistry) {
-		ConnectionSocketFactory connectionSocketFactory = socketFactoryRegistry.lookup("https");
-		SSLSocketFactory sslSocketFactory = getField(connectionSocketFactory, "socketfactory");
+			Lookup<ConnectionSocketFactory> socketFactoryRegistry) {
+		ConnectionSocketFactory connectionSocketFactory = socketFactoryRegistry
+				.lookup("https");
+		SSLSocketFactory sslSocketFactory = getField(connectionSocketFactory,
+				"socketfactory");
 		SSLContextSpi sslContext = getField(sslSocketFactory, "context");
 		return getField(sslContext, "trustManager");
 	}

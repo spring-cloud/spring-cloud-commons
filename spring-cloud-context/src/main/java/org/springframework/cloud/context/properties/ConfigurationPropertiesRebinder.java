@@ -129,7 +129,11 @@ public class ConfigurationPropertiesRebinder
 
 	@Override
 	public void onApplicationEvent(EnvironmentChangeEvent event) {
-		rebind();
+		if (this.applicationContext.equals(event.getSource())
+				// Backwards compatible
+				|| event.getKeys().equals(event.getSource())) {
+			rebind();
+		}
 	}
 
 }

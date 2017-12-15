@@ -24,6 +24,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -52,7 +53,7 @@ public class LoggingRebinderTests {
 		TestPropertyValues.of("logging.level.org.springframework.web=TRACE")
 				.applyTo(environment);
 		this.rebinder.setEnvironment(environment);
-		this.rebinder.onApplicationEvent(new EnvironmentChangeEvent(
+		this.rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment,
 				Collections.singleton("logging.level.org.springframework.web")));
 		assertTrue(this.logger.isTraceEnabled());
 	}
@@ -64,7 +65,7 @@ public class LoggingRebinderTests {
 		TestPropertyValues.of("logging.level.org.springframework.web=trace")
 				.applyTo(environment);
 		this.rebinder.setEnvironment(environment);
-		this.rebinder.onApplicationEvent(new EnvironmentChangeEvent(
+		this.rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment,
 				Collections.singleton("logging.level.org.springframework.web")));
 		assertTrue(this.logger.isTraceEnabled());
 	}

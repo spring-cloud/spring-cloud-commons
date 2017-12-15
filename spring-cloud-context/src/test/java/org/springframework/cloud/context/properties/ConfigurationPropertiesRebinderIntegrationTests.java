@@ -15,13 +15,13 @@
  */
 package org.springframework.cloud.context.properties;
 
-import static org.junit.Assert.assertEquals;
-
 import javax.annotation.PostConstruct;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -35,14 +35,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
+@ActiveProfiles("config")
 public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	@Autowired
 	private TestProperties properties;
+
+	@Autowired
+	private ConfigProperties config;
 
 	@Autowired
 	private ConfigurationPropertiesRebinder rebinder;
@@ -54,44 +61,55 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 	@DirtiesContext
 	public void testSimpleProperties() throws Exception {
 		assertEquals("Hello scope!", this.properties.getMessage());
-		assertEquals(2, this.properties.getCount());
+		assertEquals(1, this.properties.getCount());
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...but don't refresh, so the bean stays the same:
 		assertEquals("Hello scope!", this.properties.getMessage());
-		assertEquals(2, this.properties.getCount());
+		assertEquals(1, this.properties.getCount());
+	}
+
+	@Test
+	@DirtiesContext
+	public void testRefreshInParent() throws Exception {
+		assertEquals("main", this.config.getName());
+		// Change the dynamic property source...
+		TestPropertyValues.of("config.name=foo").applyTo(this.environment);
+		// ...and then refresh, so the bean is re-initialized:
+		this.rebinder.rebind();
+		assertEquals("foo", this.config.getName());
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefresh() throws Exception {
-		assertEquals(2, this.properties.getCount());
+		assertEquals(1, this.properties.getCount());
 		assertEquals("Hello scope!", this.properties.getMessage());
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind();
 		assertEquals("Foo", this.properties.getMessage());
-		assertEquals(3, this.properties.getCount());
+		assertEquals(2, this.properties.getCount());
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefreshByName() throws Exception {
-		assertEquals(2, this.properties.getCount());
+		assertEquals(1, this.properties.getCount());
 		assertEquals("Hello scope!", this.properties.getMessage());
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind("properties");
 		assertEquals("Foo", this.properties.getMessage());
-		assertEquals(3, this.properties.getCount());
+		assertEquals(2, this.properties.getCount());
 	}
 
 	@Configuration
 	@EnableConfigurationProperties
 	@Import({ RefreshConfiguration.RebinderConfiguration.class,
-		PropertyPlaceholderAutoConfiguration.class })
+			PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 
 		@Bean
@@ -104,8 +122,8 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 	// Hack out a protected inner class for testing
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
 		@Configuration
-		protected static class RebinderConfiguration extends
-		ConfigurationPropertiesRebinderAutoConfiguration {
+		protected static class RebinderConfiguration
+				extends ConfigurationPropertiesRebinderAutoConfiguration {
 
 		}
 	}
@@ -142,4 +160,17 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		}
 	}
 
+	@ConfigurationProperties("config")
+	@ConditionalOnMissingBean(ConfigProperties.class)
+	public static class ConfigProperties {
+		private String name;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
 }

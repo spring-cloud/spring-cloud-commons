@@ -35,9 +35,15 @@ public class ContextRefresher {
 
 	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
 
-	private static final String[] DEFAULT_PROPERTY_SOURCES = new String[] { //order matters, cli args aren't first, things get messy
+	private static final String[] DEFAULT_PROPERTY_SOURCES = new String[] { // order
+																			// matters,
+																			// cli args
+																			// aren't
+																			// first,
+																			// things get
+																			// messy
 			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME,
-			"defaultProperties"};
+			"defaultProperties" };
 
 	private Set<String> standardSources = new HashSet<>(
 			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
@@ -61,7 +67,7 @@ public class ContextRefresher {
 		addConfigFilesToEnvironment();
 		Set<String> keys = changes(before,
 				extract(this.context.getEnvironment().getPropertySources())).keySet();
-		this.context.publishEvent(new EnvironmentChangeEvent(keys));
+		this.context.publishEvent(new EnvironmentChangeEvent(context, keys));
 		this.scope.refreshAll();
 		return keys;
 	}
