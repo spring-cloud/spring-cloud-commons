@@ -68,7 +68,7 @@ public class EnvironmentManager implements ApplicationEventPublisherAware {
 		Map<String, Object> result = new LinkedHashMap<String, Object>(map);
 		if (!map.isEmpty()) {
 			map.clear();
-			publish(new EnvironmentChangeEvent(result.keySet()));
+			publish(new EnvironmentChangeEvent(publisher, result.keySet()));
 		}
 		return result;
 	}
@@ -88,7 +88,7 @@ public class EnvironmentManager implements ApplicationEventPublisherAware {
 
 		if (!value.equals(environment.getProperty(name))) {
 			map.put(name, value);
-			publish(new EnvironmentChangeEvent(Collections.singleton(name)));
+			publish(new EnvironmentChangeEvent(publisher, Collections.singleton(name)));
 		}
 
 	}

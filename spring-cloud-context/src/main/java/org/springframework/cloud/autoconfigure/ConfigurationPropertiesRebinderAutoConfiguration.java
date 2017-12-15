@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.autoconfigure;
 
-import java.util.Collections;
-
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -25,7 +23,6 @@ import org.springframework.boot.autoconfigure.condition.SearchStrategy;
 import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetaData;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessorRegistrar;
-import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesBeans;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.context.ApplicationContext;
@@ -64,19 +61,27 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
 	public ConfigurationPropertiesRebinder configurationPropertiesRebinder(
-			ConfigurationPropertiesBeans beans,
-			ConfigurationPropertiesBindingPostProcessor binder) {
+			ConfigurationPropertiesBeans beans) {
 		ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(
-				binder, beans);
+				beans);
 		return rebinder;
 	}
 
 	@Override
 	public void afterSingletonsInstantiated() {
-		// After all beans are initialized send a pre-emptive EnvironmentChangeEvent
-		// so that anything that needs to rebind gets a chance now (especially for
-		// beans in the parent context)
-		this.context.publishEvent(
-				new EnvironmentChangeEvent(Collections.<String> emptySet()));
+		// After all beans are initialized explicitly rebind beans from the parent
+		// so that changes during the initialization of the current context are
+		// reflected. In particular this can be important when low level services like
+		// decryption are bootstrapped in the parent, but need to change their
+		// configuration before the child context is processed.
+		if (this.context.getParent() != null) {
+			// TODO: make this optional? (E.g. when creating child contexts that prefer to
+			// be isolated.)
+			ConfigurationPropertiesRebinder rebinder = context
+					.getBean(ConfigurationPropertiesRebinder.class);
+			for (String name : context.getParent().getBeanDefinitionNames()) {
+				rebinder.rebind(name);
+			}
+		}
 	}
 }
