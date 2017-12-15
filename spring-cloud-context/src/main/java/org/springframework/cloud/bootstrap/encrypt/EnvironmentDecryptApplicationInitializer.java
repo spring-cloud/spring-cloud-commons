@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.context.ApplicationContext;
@@ -96,8 +97,8 @@ public class EnvironmentDecryptApplicationInitializer implements
 		if (!map.isEmpty()) {
 			// We have some decrypted properties
 			found.addAll(map.keySet());
-			insert(applicationContext,
-					new SystemEnvironmentPropertySource(DECRYPTED_PROPERTY_SOURCE_NAME, map));
+			insert(applicationContext, new SystemEnvironmentPropertySource(
+					DECRYPTED_PROPERTY_SOURCE_NAME, map));
 		}
 		PropertySource<?> bootstrap = propertySources
 				.get(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME);
@@ -115,7 +116,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 				// The parent is actually the bootstrap context, and it is fully
 				// initialized, so we can fire an EnvironmentChangeEvent there to rebind
 				// @ConfigurationProperties, in case they were encrypted.
-				parent.publishEvent(new EnvironmentChangeEvent(found));
+				parent.publishEvent(new EnvironmentChangeEvent(parent, found));
 			}
 
 		}
@@ -214,8 +215,10 @@ public class EnvironmentDecryptApplicationInitializer implements
 						if (COLLECTION_PROPERTY.matcher(key).matches()) {
 							sourceHasDecryptedCollection = true;
 						}
-					} else if (COLLECTION_PROPERTY.matcher(key).matches()){
-						// put non-ecrypted properties so merging of index properties happens correctly
+					}
+					else if (COLLECTION_PROPERTY.matcher(key).matches()) {
+						// put non-ecrypted properties so merging of index properties
+						// happens correctly
 						otherCollectionProperties.put(key, value);
 					}
 				}
