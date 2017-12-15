@@ -35,13 +35,8 @@ public class ContextRefresher {
 
 	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
 
-	private static final String[] DEFAULT_PROPERTY_SOURCES = new String[] { // order
-																			// matters,
-																			// cli args
-																			// aren't
-																			// first,
-																			// things get
-																			// messy
+	private static final String[] DEFAULT_PROPERTY_SOURCES = new String[] {
+			// order matters, if cli args aren't first, things get messy
 			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME,
 			"defaultProperties" };
 
