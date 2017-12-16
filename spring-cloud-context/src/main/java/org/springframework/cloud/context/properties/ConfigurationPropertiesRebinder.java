@@ -93,7 +93,7 @@ public class ConfigurationPropertiesRebinder
 		if (this.applicationContext != null) {
 			try {
 				Object bean = this.applicationContext.getBean(name);
-				if (AopUtils.isCglibProxy(bean)) {
+				if (AopUtils.isAopProxy(bean)) {
 					bean = getTargetObject(bean);
 				}
 				this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
@@ -129,7 +129,11 @@ public class ConfigurationPropertiesRebinder
 
 	@Override
 	public void onApplicationEvent(EnvironmentChangeEvent event) {
-		rebind();
+		if (this.applicationContext.equals(event.getSource())
+				// Backwards compatible
+				|| event.getKeys().equals(event.getSource())) {
+			rebind();
+		}
 	}
 
 }

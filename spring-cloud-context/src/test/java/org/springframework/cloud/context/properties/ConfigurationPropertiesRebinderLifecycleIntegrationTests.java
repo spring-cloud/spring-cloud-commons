@@ -55,14 +55,14 @@ public class ConfigurationPropertiesRebinderLifecycleIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testRefresh() throws Exception {
-		assertEquals(1, this.properties.getCount());
+		assertEquals(0, this.properties.getCount());
 		assertEquals("Hello scope!", this.properties.getMessage());
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind();
 		assertEquals("Foo", this.properties.getMessage());
-		assertEquals(2, this.properties.getCount());
+		assertEquals(1, this.properties.getCount());
 	}
 
 	@Configuration

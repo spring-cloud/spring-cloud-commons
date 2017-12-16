@@ -108,7 +108,7 @@ public class PropertySourceBootstrapConfiguration implements
 			}
 			insertPropertySources(propertySources, composite);
 			reinitializeLoggingSystem(environment, logConfig, logFile);
-			setLogLevels(environment);
+			setLogLevels(applicationContext, environment);
 			handleIncludedProfiles(environment);
 		}
 	}
@@ -140,13 +140,14 @@ public class PropertySourceBootstrapConfiguration implements
 		}
 	}
 
-	private void setLogLevels(ConfigurableEnvironment environment) {
+	private void setLogLevels(ConfigurableApplicationContext applicationContext,
+			ConfigurableEnvironment environment) {
 		LoggingRebinder rebinder = new LoggingRebinder();
 		rebinder.setEnvironment(environment);
 		// We can't fire the event in the ApplicationContext here (too early), but we can
 		// create our own listener and poke it (it doesn't need the key changes)
-		rebinder.onApplicationEvent(
-				new EnvironmentChangeEvent(Collections.<String> emptySet()));
+		rebinder.onApplicationEvent(new EnvironmentChangeEvent(applicationContext,
+				Collections.<String>emptySet()));
 	}
 
 	private void insertPropertySources(MutablePropertySources propertySources,

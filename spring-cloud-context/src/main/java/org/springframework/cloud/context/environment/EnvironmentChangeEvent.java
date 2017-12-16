@@ -32,10 +32,15 @@ public class EnvironmentChangeEvent extends ApplicationEvent {
 	private Set<String> keys;
 
 	public EnvironmentChangeEvent(Set<String> keys) {
-		super(keys);
+		// Backwards compatible constructor with less utility (practically no use at all)
+		this(keys, keys);
+	}
+
+	public EnvironmentChangeEvent(Object context, Set<String> keys) {
+		super(context);
 		this.keys = keys;
 	}
-	
+
 	/**
 	 * @return the keys
 	 */

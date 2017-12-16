@@ -116,7 +116,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 				// The parent is actually the bootstrap context, and it is fully
 				// initialized, so we can fire an EnvironmentChangeEvent there to rebind
 				// @ConfigurationProperties, in case they were encrypted.
-				parent.publishEvent(new EnvironmentChangeEvent(found));
+				parent.publishEvent(new EnvironmentChangeEvent(parent, found));
 			}
 
 		}
