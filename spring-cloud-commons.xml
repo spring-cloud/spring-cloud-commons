@@ -401,6 +401,31 @@ public class MyClass {
 The Ribbon client is used to create a full physical address. See
 <link xl:href="https://github.com/spring-cloud/spring-cloud-netflix/blob/master/spring-cloud-netflix-core/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java">RibbonAutoConfiguration</link>
 for details of how the <literal>RestTemplate</literal> is set up.</simpara>
+</section>
+<section xml:id="_spring_webclient_as_a_load_balancer_client">
+<title>Spring WebClient as a Load Balancer Client</title>
+<simpara><literal>WebClient</literal> can be automatically configured to use the <literal>LoadBalancerClient</literal>. To create a load balanced <literal>WebClient</literal> create a <literal>WebClient.Builder</literal> <literal>@Bean</literal> and use the <literal>@LoadBalanced</literal> qualifier.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Configuration
+public class MyConfiguration {
+
+	@Bean
+	@LoadBalanced
+	public WebClient.Builder loadBalancedWebClientBuilder() {
+		return WebClient.builder();
+	}
+}
+
+public class MyClass {
+    @Autowired
+    private WebClient.Builder webClientBuilder;
+
+    public Mono&lt;String&gt; doOtherStuff() {
+        return webClientBuilder.build().get().uri("http://stores/stores")
+        				.retrieve().bodyToMono(String.class);
+    }
+}</programlisting>
+<simpara>The URI needs to use a virtual host name (ie. service name, not a host name).
+The Ribbon client is used to create a full physical address.</simpara>
 <section xml:id="_retrying_failed_requests">
 <title>Retrying Failed Requests</title>
 <simpara>A load balanced <literal>RestTemplate</literal> can be configured to retry failed requests.
