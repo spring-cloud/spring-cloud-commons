@@ -16,10 +16,7 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -32,6 +29,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Auto configuration for Ribbon (client side load balancing).
@@ -51,18 +52,15 @@ public class LoadBalancerAutoConfiguration {
 	private List<RestTemplate> restTemplates = Collections.emptyList();
 
 	@Bean
-	public SmartInitializingSingleton loadBalancedRestTemplateInitializer(
-			final List<RestTemplateCustomizer> customizers) {
-		return new SmartInitializingSingleton() {
-			@Override
-			public void afterSingletonsInstantiated() {
-				for (RestTemplate restTemplate : LoadBalancerAutoConfiguration.this.restTemplates) {
-					for (RestTemplateCustomizer customizer : customizers) {
-						customizer.customize(restTemplate);
-					}
-				}
-			}
-		};
+	public SmartInitializingSingleton loadBalancedRestTemplateInitializerDeprecated(
+			final ObjectProvider<List<RestTemplateCustomizer>> restTemplateCustomizers) {
+		return () -> restTemplateCustomizers.ifAvailable(customizers -> {
+            for (RestTemplate restTemplate : LoadBalancerAutoConfiguration.this.restTemplates) {
+                for (RestTemplateCustomizer customizer : customizers) {
+                    customizer.customize(restTemplate);
+                }
+            }
+        });
 	}
 
 	@Autowired(required = false)
@@ -89,15 +87,12 @@ public class LoadBalancerAutoConfiguration {
 		@ConditionalOnMissingBean
 		public RestTemplateCustomizer restTemplateCustomizer(
 				final LoadBalancerInterceptor loadBalancerInterceptor) {
-			return new RestTemplateCustomizer() {
-				@Override
-				public void customize(RestTemplate restTemplate) {
-					List<ClientHttpRequestInterceptor> list = new ArrayList<>(
-							restTemplate.getInterceptors());
-					list.add(loadBalancerInterceptor);
-					restTemplate.setInterceptors(list);
-				}
-			};
+			return restTemplate -> {
+                List<ClientHttpRequestInterceptor> list = new ArrayList<>(
+                        restTemplate.getInterceptors());
+                list.add(loadBalancerInterceptor);
+                restTemplate.setInterceptors(list);
+            };
 		}
 	}
 
@@ -143,15 +138,12 @@ public class LoadBalancerAutoConfiguration {
 		@ConditionalOnMissingBean
 		public RestTemplateCustomizer restTemplateCustomizer(
 				final RetryLoadBalancerInterceptor loadBalancerInterceptor) {
-			return new RestTemplateCustomizer() {
-				@Override
-				public void customize(RestTemplate restTemplate) {
-					List<ClientHttpRequestInterceptor> list = new ArrayList<>(
-							restTemplate.getInterceptors());
-					list.add(loadBalancerInterceptor);
-					restTemplate.setInterceptors(list);
-				}
-			};
+			return restTemplate -> {
+                List<ClientHttpRequestInterceptor> list = new ArrayList<>(
+                        restTemplate.getInterceptors());
+                list.add(loadBalancerInterceptor);
+                restTemplate.setInterceptors(list);
+            };
 		}
 	}
 }
