@@ -112,17 +112,22 @@ public class RefreshScope extends GenericScope
 
 	@EventListener
 	public void start(ContextRefreshedEvent event) {
-		if (event.getApplicationContext() == this.context) {
-			if (this.eager && this.registry != null) {
-				for (String name : this.context.getBeanDefinitionNames()) {
-					BeanDefinition definition = this.registry.getBeanDefinition(name);
-					if (this.getName().equals(definition.getScope())
-							&& !definition.isLazyInit()) {
-						this.context.getBean(name).getClass();
-					}
-				}
-			}
+		if (event.getApplicationContext() == this.context && this.eager
+				&& this.registry != null) {
+            eagerlyInitialize();
 		}
+	}
+
+	private void eagerlyInitialize() {
+		for (String name : this.context.getBeanDefinitionNames()) {
+            BeanDefinition definition = this.registry.getBeanDefinition(name);
+            if (this.getName().equals(definition.getScope()) && !definition.isLazyInit()) {
+                Object bean = this.context.getBean(name);
+                if (bean != null) {
+                    bean.getClass();
+                }
+            }
+        }
 	}
 
 	@ManagedOperation(description = "Dispose of the current instance of bean name provided and force a refresh on next method execution.")
