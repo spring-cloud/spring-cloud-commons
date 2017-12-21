@@ -26,7 +26,7 @@ public interface LoadBalancedRetryListenerFactory {
 
     RetryListener[] createRetryListeners(String service);
 
-    class NoRetryListenerFactory implements LoadBalancedRetryListenerFactory {
+    class DefaultRetryListenerFactory implements LoadBalancedRetryListenerFactory {
 
         @Override
         public RetryListener[] createRetryListeners(String service) {

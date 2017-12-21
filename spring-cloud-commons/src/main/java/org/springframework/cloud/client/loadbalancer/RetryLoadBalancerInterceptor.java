@@ -67,22 +67,38 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		this.lbProperties = lbProperties;
 		this.requestFactory = requestFactory;
 		this.backOffPolicyFactory = new LoadBalancedBackOffPolicyFactory.NoBackOffPolicyFactory();
-		this.retryListenerFactory = new LoadBalancedRetryListenerFactory.NoRetryListenerFactory();
+		this.retryListenerFactory = new LoadBalancedRetryListenerFactory.DefaultRetryListenerFactory();
 	}
 
+	@Deprecated
+    //TODO remove in 2.0.x
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer,
 										LoadBalancerRetryProperties lbProperties,
 										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
 										LoadBalancerRequestFactory requestFactory,
-										LoadBalancedBackOffPolicyFactory backOffPolicyFactory,
-                                        LoadBalancedRetryListenerFactory retryListenerFactory) {
+										LoadBalancedBackOffPolicyFactory backOffPolicyFactory) {
 		this.loadBalancer = loadBalancer;
 		this.lbRetryPolicyFactory = lbRetryPolicyFactory;
 		this.lbProperties = lbProperties;
 		this.requestFactory = requestFactory;
 		this.backOffPolicyFactory = backOffPolicyFactory;
-		this.retryListenerFactory = retryListenerFactory;
+		this.retryListenerFactory = new LoadBalancedRetryListenerFactory.DefaultRetryListenerFactory();;
 	}
+
+	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer,
+                                        LoadBalancerRetryProperties lbProperties,
+                                        LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
+                                        LoadBalancerRequestFactory requestFactory,
+                                        LoadBalancedBackOffPolicyFactory backOffPolicyFactory,
+                                        LoadBalancedRetryListenerFactory retryListenerFactory) {
+        this.loadBalancer = loadBalancer;
+        this.lbRetryPolicyFactory = lbRetryPolicyFactory;
+        this.lbProperties = lbProperties;
+        this.requestFactory = requestFactory;
+        this.backOffPolicyFactory = backOffPolicyFactory;
+        this.retryListenerFactory = retryListenerFactory;
+
+    }
 
 	@Override
 	public ClientHttpResponse intercept(final HttpRequest request, final byte[] body,
@@ -96,7 +112,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		BackOffPolicy backOffPolicy = backOffPolicyFactory.createBackOffPolicy(serviceName);
 		template.setBackOffPolicy(backOffPolicy == null ? new NoBackOffPolicy() : backOffPolicy);
 		template.setThrowLastExceptionOnExhausted(true);
-        RetryListener[] retryListeners = this.retryListenerFactory.createRetryListeners(serviceName);
+		RetryListener[] retryListeners = this.retryListenerFactory.createRetryListeners(serviceName);
         if (retryListeners != null && retryListeners.length != 0) {
             template.setListeners(retryListeners);
         }

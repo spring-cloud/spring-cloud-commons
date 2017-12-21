@@ -46,7 +46,7 @@ public class RetryLoadBalancerInterceptorTest {
     private LoadBalancerRetryProperties lbProperties;
     private LoadBalancerRequestFactory lbRequestFactory;
     private LoadBalancedBackOffPolicyFactory backOffPolicyFactory = new LoadBalancedBackOffPolicyFactory.NoBackOffPolicyFactory();
-    private LoadBalancedRetryListenerFactory retryListenerFactory = new LoadBalancedRetryListenerFactory.NoRetryListenerFactory();
+    private LoadBalancedRetryListenerFactory retryListenerFactory = new LoadBalancedRetryListenerFactory.DefaultRetryListenerFactory();
 
     @Before
     public void setUp() throws Exception {

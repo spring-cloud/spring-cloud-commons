@@ -128,7 +128,7 @@ public class LoadBalancerAutoConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		public LoadBalancedRetryListenerFactory loadBalancedRetryListenerFactory() {
-			return new LoadBalancedRetryListenerFactory.NoRetryListenerFactory();
+			return new LoadBalancedRetryListenerFactory.DefaultRetryListenerFactory();
 		}
 	}
 
