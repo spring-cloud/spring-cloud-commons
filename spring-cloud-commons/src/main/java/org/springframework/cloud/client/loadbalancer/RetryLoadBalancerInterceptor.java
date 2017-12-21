@@ -71,7 +71,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 	}
 
 	@Deprecated
-        //TODO remove in 2.0.x
+       //TODO remove in 2.0.x
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer,
 										LoadBalancerRetryProperties lbProperties,
 										LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
@@ -113,9 +113,9 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		template.setBackOffPolicy(backOffPolicy == null ? new NoBackOffPolicy() : backOffPolicy);
 		template.setThrowLastExceptionOnExhausted(true);
 		RetryListener[] retryListeners = this.retryListenerFactory.createRetryListeners(serviceName);
-                if (retryListeners != null && retryListeners.length != 0) {
-                    template.setListeners(retryListeners);
-                }
+               if (retryListeners != null && retryListeners.length != 0) {
+                   template.setListeners(retryListeners);
+               }
 		template.setRetryPolicy(
 				!lbProperties.isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
 						: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer,
