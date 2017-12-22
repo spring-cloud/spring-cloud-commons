@@ -252,7 +252,7 @@ public class RetryLoadBalancerInterceptorTest {
     }
 
     @Test
-    public void RetryListenerTest() throws Throwable {
+    public void retryListenerTest() throws Throwable {
         HttpRequest request = mock(HttpRequest.class);
         when(request.getURI()).thenReturn(new URI("http://listener"));
         ClientHttpResponse clientHttpResponse = new MockClientHttpResponse(new byte[]{}, HttpStatus.OK);
@@ -281,7 +281,7 @@ public class RetryLoadBalancerInterceptorTest {
     }
 
     @Test(expected = TerminatedRetryException.class)
-    public void RetryListenerTestNoRetry() throws Throwable {
+    public void retryListenerTestNoRetry() throws Throwable {
         HttpRequest request = mock(HttpRequest.class);
         when(request.getURI()).thenReturn(new URI("http://noRetry"));
         ClientHttpResponse clientHttpResponse = new MockClientHttpResponse(new byte[]{}, HttpStatus.OK);
@@ -302,6 +302,33 @@ public class RetryLoadBalancerInterceptorTest {
         byte[] body = new byte[]{};
         ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
         ClientHttpResponse rsp = interceptor.intercept(request, body, execution);
+    }
+
+    @Test
+    public void retryWithDefaultConstructorTest() throws Throwable {
+        HttpRequest request = mock(HttpRequest.class);
+        when(request.getURI()).thenReturn(new URI("http://default"));
+        ClientHttpResponse clientHttpResponse = new MockClientHttpResponse(new byte[]{}, HttpStatus.OK);
+        LoadBalancedRetryPolicy policy = mock(LoadBalancedRetryPolicy.class);
+        when(policy.canRetryNextServer(any(LoadBalancedRetryContext.class))).thenReturn(true);
+        LoadBalancedRetryPolicyFactory lbRetryPolicyFactory = mock(LoadBalancedRetryPolicyFactory.class);
+        when(lbRetryPolicyFactory.create(eq("default"), any(ServiceInstanceChooser.class))).thenReturn(policy);
+        LoadBalancedBackOffPolicyFactory backOffPolicyFactory = mock(LoadBalancedBackOffPolicyFactory.class);
+        MyBackOffPolicy backOffPolicy = new MyBackOffPolicy();
+        when(backOffPolicyFactory.createBackOffPolicy(eq("default"))).thenReturn(backOffPolicy);
+        ServiceInstance serviceInstance = mock(ServiceInstance.class);
+        when(client.choose(eq("default"))).thenReturn(serviceInstance);
+        when(client.execute(eq("default"), eq(serviceInstance), any(LoadBalancerRequest.class))).thenThrow(new IOException()).thenReturn(clientHttpResponse);
+        lbProperties.setEnabled(true);
+        RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(client, lbProperties, lbRetryPolicyFactory, lbRequestFactory,
+            backOffPolicyFactory);
+        byte[] body = new byte[]{};
+        ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
+        ClientHttpResponse rsp = interceptor.intercept(request, body, execution);
+        verify(client, times(2)).execute(eq("default"), eq(serviceInstance), any(LoadBalancerRequest.class));
+        assertThat(rsp, is(clientHttpResponse));
+        verify(lbRequestFactory, times(2)).createRequest(request, body, execution);
+        assertThat(backOffPolicy.getBackoffAttempts(), is(1));
     }
 
     class MyBackOffPolicy implements BackOffPolicy {
