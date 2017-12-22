@@ -431,6 +431,37 @@ public class MyConfiguration {
 <simpara><literal>client</literal> in the above examples should be replaced with your Ribbon client&#8217;s
 name.</simpara>
 </note>
+<simpara>If you want to add one or more <literal>RetryListener</literal> to your retry you will need to
+create a bean of type <literal>LoadBalancedRetryListenerFactory</literal> and return the <literal>RetryListener</literal> array
+you would like to use for a given service.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Configuration
+public class MyConfiguration {
+    @Bean
+    LoadBalancedRetryListenerFactory retryListenerFactory() {
+        return new LoadBalancedRetryListenerFactory() {
+            @Override
+            public RetryListener[] createRetryListeners(String service) {
+                return new RetryListener[]{new RetryListener() {
+                    @Override
+                    public &lt;T, E extends Throwable&gt; boolean open(RetryContext context, RetryCallback&lt;T, E&gt; callback) {
+                        //TODO Do you business...
+                        return true;
+                    }
+
+                    @Override
+                     public &lt;T, E extends Throwable&gt; void close(RetryContext context, RetryCallback&lt;T, E&gt; callback, Throwable throwable) {
+                        //TODO Do you business...
+                    }
+
+                    @Override
+                    public &lt;T, E extends Throwable&gt; void onError(RetryContext context, RetryCallback&lt;T, E&gt; callback, Throwable throwable) {
+                        //TODO Do you business...
+                    }
+                }};
+            }
+        };
+    }
+}</programlisting>
 </section>
 </section>
 <section xml:id="_multiple_resttemplate_objects">
