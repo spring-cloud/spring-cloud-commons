@@ -32,7 +32,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.rsa.crypto.KeyStoreKeyFactory;
-import org.springframework.security.rsa.crypto.RsaAlgorithm;
 import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
 import org.springframework.util.StringUtils;
 
@@ -68,15 +67,15 @@ public class EncryptionBootstrapConfiguration {
 					return new RsaSecretEncryptor(
 							new KeyStoreKeyFactory(keyStore.getLocation(),
 									keyStore.getPassword().toCharArray()).getKeyPair(
-									keyStore.getAlias(),
-									keyStore.getSecret().toCharArray()),
-							RsaAlgorithm.valueOf(this.key.getRsa().getAlgorithm()), this.key.getRsa().getSalt(),
+											keyStore.getAlias(),
+											keyStore.getSecret().toCharArray()),
+							this.key.getRsa().getAlgorithm(), this.key.getRsa().getSalt(),
 							this.key.getRsa().isStrong());
-				} 
-				
+				}
+
 				throw new IllegalStateException("Invalid keystore location");
 			}
-			
+
 			return new EncryptorFactory().create(this.key.getKey());
 		}
 
