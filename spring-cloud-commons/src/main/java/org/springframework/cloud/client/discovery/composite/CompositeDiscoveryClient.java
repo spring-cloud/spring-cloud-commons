@@ -32,7 +32,7 @@ public class CompositeDiscoveryClient implements DiscoveryClient {
 		if (this.discoveryClients != null) {
 			for (DiscoveryClient discoveryClient : discoveryClients) {
 				List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
-				if (instances != null && instances.size() > 0) {
+				if (instances != null && !instances.isEmpty()) {
 					return instances;
 				}
 			}

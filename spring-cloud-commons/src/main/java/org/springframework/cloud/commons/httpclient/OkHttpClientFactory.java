@@ -1,14 +1,11 @@
 package org.springframework.cloud.commons.httpclient;
 
-import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 
 /**

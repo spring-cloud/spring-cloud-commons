@@ -1,11 +1,9 @@
 package org.springframework.cloud.commons.httpclient;
 
-import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
