@@ -17,6 +17,7 @@ package org.springframework.cloud.bootstrap.encrypt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
+import org.springframework.security.rsa.crypto.RsaAlgorithm;
 import org.springframework.util.ClassUtils;
 
 @ConfigurationProperties("encrypt")
@@ -45,7 +46,8 @@ public class KeyProperties {
 	private Rsa rsa;
 
 	{
-		if (ClassUtils.isPresent("org.springframework.security.rsa.crypto.RsaAlgorithm", null)) {
+		if (ClassUtils.isPresent("org.springframework.security.rsa.crypto.RsaAlgorithm",
+				null)) {
 			this.rsa = new Rsa();
 		}
 	}
@@ -137,19 +139,18 @@ public class KeyProperties {
 	public static class Rsa {
 
 		/**
-		 * The RSA algorithm to use (DEFAULT or OEAP). Once it is set do not change it (or
+		 * The RSA algorithm to use (DEFAULT or OAEP). Once it is set do not change it (or
 		 * existing ciphers will not a decryptable).
 		 */
-		//TODO: move from String to RsaAlgorithm
-		private String algorithm = "DEFAULT";
+		private RsaAlgorithm algorithm = RsaAlgorithm.OAEP;
 
 		/**
 		 * Flag to indicate that "strong" AES encryption should be used internally. If
-		 * true then the GCM algorithm is applied to the AES encrypted bytes. Default is
-		 * false (in which case "standard" CBC is used instead). Once it is set do not
-		 * change it (or existing ciphers will not a decryptable).
+		 * true then the GCM algorithm is applied to the AES encrypted bytes. If false
+		 * then the "standard" CBC is used instead. Once it is set do not change it (or
+		 * existing ciphers will not a decryptable).
 		 */
-		private boolean strong = false;
+		private boolean strong = true;
 
 		/**
 		 * Salt for the random secret used to encrypt cipher text. Once it is set do not
@@ -157,11 +158,11 @@ public class KeyProperties {
 		 */
 		private String salt = "deadbeef";
 
-		public String getAlgorithm() {
+		public RsaAlgorithm getAlgorithm() {
 			return this.algorithm;
 		}
 
-		public void setAlgorithm(String algorithm) {
+		public void setAlgorithm(RsaAlgorithm algorithm) {
 			this.algorithm = algorithm;
 		}
 
