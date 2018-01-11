@@ -143,6 +143,10 @@ public class BootstrapApplicationListener
 				.resolvePlaceholders("${spring.cloud.bootstrap.location:}");
 		Map<String, Object> bootstrapMap = new HashMap<>();
 		bootstrapMap.put("spring.config.name", configName);
+		// if an app (or test) uses spring.main.web-application-type=reactive, bootstrap will fail
+		// force the environment to use none, because if though it is set below in the builder
+		// the environment overrides it
+		bootstrapMap.put("spring.main.web-application-type", "none");
 		if (StringUtils.hasText(configLocation)) {
 			bootstrapMap.put("spring.config.location", configLocation);
 		}
