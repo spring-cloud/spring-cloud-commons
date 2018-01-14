@@ -21,7 +21,9 @@ import java.util.Map;
 
 /**
  * Represents an instance of a Service in a Discovery System
+ *
  * @author Spencer Gibb
+ * @author Steven van Beelen
  */
 public interface ServiceInstance {
 
@@ -54,4 +56,22 @@ public interface ServiceInstance {
 	 * @return the key value pair metadata associated with the service instance
 	 */
 	Map<String, String> getMetadata();
+
+	/**
+	 * Add a key/value pair to the metadata map.
+     *
+	 * @param key   a metadata key as a String
+	 * @param value a corresponding metadata value as a String
+	 */
+	default void putMetadata(String key, String value) {
+	}
+
+	/**
+	 * Replace the current metadata map for a new one.
+     *
+	 * @param metadata a metadata map to replace the current metadata
+	 */
+	default void setMetadata(Map<String, String> metadata) {
+	}
+
 }

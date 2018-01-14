@@ -16,16 +16,17 @@
 
 package org.springframework.cloud.client;
 
-
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Default implementation of {@link ServiceInstance}.
  *
  * @author Spencer Gibb
+ * @author Steven van Beelen
  */
 public class DefaultServiceInstance implements ServiceInstance {
 
@@ -48,24 +49,61 @@ public class DefaultServiceInstance implements ServiceInstance {
 		this.metadata = metadata;
 	}
 
-	public DefaultServiceInstance(String serviceId, String host, int port,
-			boolean secure) {
-		this(serviceId, host, port, secure, new LinkedHashMap<String, String>());
+	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure) {
+		this(serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
-	@Override
-	public URI getUri() {
-		return getUri(this);
-	}
+    @Override
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    @Override
+    public String getHost() {
+        return host;
+    }
+
+    @Override
+    public int getPort() {
+        return port;
+    }
+
+    @Override
+    public boolean isSecure() {
+        return secure;
+    }
 
 	@Override
 	public Map<String, String> getMetadata() {
 		return this.metadata;
 	}
 
+	@Override
+	public void putMetadata(String key, String value) {
+		this.metadata.put(key, value);
+	}
+
+	@Override
+	public void setMetadata(Map<String, String> metadata) {
+		Set<String> keySet = this.metadata.keySet();
+		for (String key : keySet) {
+			this.metadata.remove(key);
+		}
+
+		for (Map.Entry<String, String> newEntry : metadata.entrySet()) {
+			this.metadata.put(newEntry.getKey(), newEntry.getValue());
+		}
+	}
+
+    @Override
+    public URI getUri() {
+        return getUri(this);
+    }
+
 	/**
 	 * Create a uri from the given ServiceInstance's host:port
-	 * @param instance
+     *
+	 * @param instance a {@link ServiceInstance} to create an {@link java.net.URI} out of.
 	 * @return URI of the form (secure)?https:http + "host:port"
 	 */
 	public static URI getUri(ServiceInstance instance) {
@@ -73,26 +111,6 @@ public class DefaultServiceInstance implements ServiceInstance {
 		String uri = String.format("%s://%s:%s", scheme, instance.getHost(),
 				instance.getPort());
 		return URI.create(uri);
-	}
-
-	@Override
-	public String getServiceId() {
-		return serviceId;
-	}
-
-	@Override
-	public String getHost() {
-		return host;
-	}
-
-	@Override
-	public int getPort() {
-		return port;
-	}
-
-	@Override
-	public boolean isSecure() {
-		return secure;
 	}
 
 	@Override
