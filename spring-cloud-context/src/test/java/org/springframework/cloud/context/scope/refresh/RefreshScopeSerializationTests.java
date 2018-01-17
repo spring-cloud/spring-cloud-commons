@@ -40,7 +40,7 @@ public class RefreshScopeSerializationTests {
 	public void defaultApplicationContextId() throws Exception {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
 				TestConfiguration.class).web(WebApplicationType.NONE).run();
-		assertThat(context.getId(), is(equalTo("application")));
+		assertThat(context.getId(), is(equalTo("application-1")));
 	}
 
 	@Test
