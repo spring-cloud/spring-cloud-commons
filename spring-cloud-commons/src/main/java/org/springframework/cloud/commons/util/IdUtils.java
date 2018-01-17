@@ -11,12 +11,19 @@ public class IdUtils {
 	private static final String SEPARATOR = ":";
 
 	public static String getDefaultInstanceId(PropertyResolver resolver) {
+	   	return getDefaultInstanceId(resolver, true);
+    }
+
+    public static String getDefaultInstanceId(PropertyResolver resolver, boolean includeHostname) {
 		String vcapInstanceId = resolver.getProperty("vcap.application.instance_id");
 		if (StringUtils.hasText(vcapInstanceId)) {
 			return vcapInstanceId;
 		}
 
-		String hostname = resolver.getProperty("spring.cloud.client.hostname");
+		String hostname = null;
+		if (includeHostname) {
+			hostname = resolver.getProperty("spring.cloud.client.hostname");
+		}
 		String appName = resolver.getProperty("spring.application.name");
 
 		String namePart = combineParts(hostname, SEPARATOR, appName);
