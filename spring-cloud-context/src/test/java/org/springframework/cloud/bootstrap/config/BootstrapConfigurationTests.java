@@ -216,7 +216,6 @@ public class BootstrapConfigurationTests {
 		assertEquals(this.context.getEnvironment().getPropertySources().get("bootstrap"),
 				((ConfigurableEnvironment) this.context.getParent().getEnvironment())
 						.getPropertySources().get("bootstrap"));
-		//TODO: is this correct based on the new boot 2 ContextIdApplicationContextInitializer
 		assertEquals("main-1", this.context.getId());
 	}
 
@@ -249,7 +248,6 @@ public class BootstrapConfigurationTests {
 		// other.properties (the bootstrap properties this time)
 		assertEquals("main", this.context.getParent().getEnvironment()
 				.getProperty("spring.application.name"));
-		//TODO: is this correct based on the new boot 2 ContextIdApplicationContextInitializer
 		assertEquals("main-1", this.context.getId());
 	}
 
