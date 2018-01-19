@@ -4,7 +4,7 @@
 <book xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
 <info>
 <title>Cloud Native Applications</title>
-<date>2018-01-18</date>
+<date>2018-01-19</date>
 </info>
 <preface>
 <title></title>
@@ -456,6 +456,38 @@ public class MyConfiguration {
 <simpara><literal>client</literal> in the above examples should be replaced with your Ribbon client&#8217;s
 name.</simpara>
 </note>
+<simpara>If you want to add one or more <literal>RetryListener</literal> to your retry you will need to
+create a bean of type <literal>LoadBalancedRetryListenerFactory</literal> and return the <literal>RetryListener</literal> array
+you would like to use for a given service.</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Configuration
+public class MyConfiguration {
+    @Bean
+    LoadBalancedRetryListenerFactory retryListenerFactory() {
+        return new LoadBalancedRetryListenerFactory() {
+            @Override
+            public RetryListener[] createRetryListeners(String service) {
+                return new RetryListener[]{new RetryListener() {
+                    @Override
+                    public &lt;T, E extends Throwable&gt; boolean open(RetryContext context, RetryCallback&lt;T, E&gt; callback) {
+                        //TODO Do you business...
+                        return true;
+                    }
+
+                    @Override
+                     public &lt;T, E extends Throwable&gt; void close(RetryContext context, RetryCallback&lt;T, E&gt; callback, Throwable throwable) {
+                        //TODO Do you business...
+                    }
+
+                    @Override
+                    public &lt;T, E extends Throwable&gt; void onError(RetryContext context, RetryCallback&lt;T, E&gt; callback, Throwable throwable) {
+                        //TODO Do you business...
+                    }
+                }};
+            }
+        };
+    }
+}</programlisting>
+</section>
 </section>
 <section xml:id="_multiple_resttemplate_objects">
 <title>Multiple RestTemplate objects</title>
@@ -500,7 +532,6 @@ public class MyClass {
 <tip>
 <simpara>If you see errors like <literal>java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89</literal> try injecting <literal>RestOperations</literal> instead or setting <literal>spring.aop.proxyTargetClass=true</literal>.</simpara>
 </tip>
-</section>
 </section>
 <section xml:id="loadbalanced-webclient">
 <title>Spring WebFlux WebClient as a Load Balancer Client</title>
