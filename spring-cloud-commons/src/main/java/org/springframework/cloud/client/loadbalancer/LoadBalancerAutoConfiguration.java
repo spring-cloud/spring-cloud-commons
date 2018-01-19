@@ -40,6 +40,7 @@ import java.util.List;
  * @author Spencer Gibb
  * @author Dave Syer
  * @author Will Tran
+ * @author Gang Li
  */
 @Configuration
 @ConditionalOnClass(RestTemplate.class)
@@ -118,6 +119,12 @@ public class LoadBalancerAutoConfiguration {
 		public LoadBalancedBackOffPolicyFactory loadBalancedBackOffPolicyFactory() {
 			return new LoadBalancedBackOffPolicyFactory.NoBackOffPolicyFactory();
 		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public LoadBalancedRetryListenerFactory loadBalancedRetryListenerFactory() {
+			return new LoadBalancedRetryListenerFactory.DefaultRetryListenerFactory();
+		}
 	}
 
 	@Configuration
@@ -129,9 +136,10 @@ public class LoadBalancerAutoConfiguration {
 				LoadBalancerClient loadBalancerClient, LoadBalancerRetryProperties properties,
 				LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
 				LoadBalancerRequestFactory requestFactory,
-				LoadBalancedBackOffPolicyFactory backOffPolicyFactory) {
+				LoadBalancedBackOffPolicyFactory backOffPolicyFactory,
+				LoadBalancedRetryListenerFactory retryListenerFactory) {
 			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties,
-					lbRetryPolicyFactory, requestFactory, backOffPolicyFactory);
+					lbRetryPolicyFactory, requestFactory, backOffPolicyFactory, retryListenerFactory);
 		}
 
 		@Bean
