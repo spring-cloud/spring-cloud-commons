@@ -99,10 +99,6 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		LoadBalancerClient loadBalancerClient() {
 			return new NoopLoadBalancerClient();
 		}
-
-		@Bean
-		LoadBalancedRetryPolicyFactory loadBalancedRetryPolicyFactory() { return new LoadBalancedRetryPolicyFactory.NeverRetryFactory();}
-
 	}
 
 	@Configuration
@@ -124,9 +120,6 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		LoadBalancerClient loadBalancerClient() {
 			return new NoopLoadBalancerClient();
 		}
-
-		@Bean
-		LoadBalancedRetryPolicyFactory loadBalancedRetryPolicyFactory() { return new LoadBalancedRetryPolicyFactory.NeverRetryFactory();}
 
 		@Configuration
 		protected static class Two {

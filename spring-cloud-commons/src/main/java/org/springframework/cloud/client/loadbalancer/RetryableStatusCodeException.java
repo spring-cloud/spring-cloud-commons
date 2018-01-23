@@ -15,10 +15,6 @@ public class RetryableStatusCodeException extends IOException {
 
 	private URI uri;
 
-	public RetryableStatusCodeException(String serviceId, int statusCode) {
-		super(String.format(MESSAGE, serviceId, statusCode));
-	}
-
 	public RetryableStatusCodeException(String serviceId, int statusCode, Object response, URI uri) {
 		super(String.format(MESSAGE, serviceId, statusCode));
 		this.response = response;

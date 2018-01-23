@@ -102,6 +102,7 @@ public class LoadBalancerAutoConfiguration {
 	public static class RetryAutoConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
+		//TODO remove this?
 		public RetryTemplate retryTemplate() {
 			RetryTemplate template =  new RetryTemplate();
 			template.setThrowLastExceptionOnExhausted(true);
@@ -110,20 +111,8 @@ public class LoadBalancerAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public LoadBalancedRetryPolicyFactory loadBalancedRetryPolicyFactory() {
-			return new LoadBalancedRetryPolicyFactory.NeverRetryFactory();
-		}
-
-		@Bean
-		@ConditionalOnMissingBean
-		public LoadBalancedBackOffPolicyFactory loadBalancedBackOffPolicyFactory() {
-			return new LoadBalancedBackOffPolicyFactory.NoBackOffPolicyFactory();
-		}
-
-		@Bean
-		@ConditionalOnMissingBean
-		public LoadBalancedRetryListenerFactory loadBalancedRetryListenerFactory() {
-			return new LoadBalancedRetryListenerFactory.DefaultRetryListenerFactory();
+		public LoadBalancedRetryFactory loadBalancedRetryFactory() {
+			return new LoadBalancedRetryFactory.DefaultRetryFactory();
 		}
 	}
 
@@ -134,12 +123,10 @@ public class LoadBalancerAutoConfiguration {
 		@ConditionalOnMissingBean
 		public RetryLoadBalancerInterceptor ribbonInterceptor(
 				LoadBalancerClient loadBalancerClient, LoadBalancerRetryProperties properties,
-				LoadBalancedRetryPolicyFactory lbRetryPolicyFactory,
 				LoadBalancerRequestFactory requestFactory,
-				LoadBalancedBackOffPolicyFactory backOffPolicyFactory,
-				LoadBalancedRetryListenerFactory retryListenerFactory) {
+				LoadBalancedRetryFactory loadBalancedRetryFactory) {
 			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties,
-					lbRetryPolicyFactory, requestFactory, backOffPolicyFactory, retryListenerFactory);
+					requestFactory, loadBalancedRetryFactory);
 		}
 
 		@Bean
