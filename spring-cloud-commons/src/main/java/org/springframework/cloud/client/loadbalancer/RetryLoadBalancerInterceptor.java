@@ -16,30 +16,20 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.retry.RecoveryCallback;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
-import org.springframework.retry.RetryException;
 import org.springframework.retry.RetryListener;
 import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.policy.NeverRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
 
 /**
  * @author Ryan Baxter
@@ -98,58 +88,14 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 					requestFactory.createRequest(request, body, execution));
 			int statusCode = response.getRawStatusCode();
 			if (retryPolicy != null && retryPolicy.retryableStatusCode(statusCode)) {
-				ClientHttpResponseWrapper wrapper = new ClientHttpResponseWrapper(response);
-				throw new RetryableStatusCodeException(serviceName, statusCode, wrapper, null);
+				throw new ClientHttpResponseStatusCodeException(serviceName, response);
 			}
 			return response;
-		}, new LoadBalancedRecoveryCallback<ClientHttpResponse, ClientHttpResponseWrapper>() {
+		}, new LoadBalancedRecoveryCallback<ClientHttpResponse, ClientHttpResponse>() {
 			@Override
-			protected ClientHttpResponse createResponse(ClientHttpResponseWrapper response, URI uri) {
+			protected ClientHttpResponse createResponse(ClientHttpResponse response, URI uri) {
 				return response;
 			}
 		});
 	}
-
-    public static class ClientHttpResponseWrapper implements ClientHttpResponse {
-
-	    private ClientHttpResponse response;
-	    private InputStream content;
-
-        public ClientHttpResponseWrapper(ClientHttpResponse response) throws IOException {
-            this.response = response;
-			InputStream body = response.getBody();
-			content = new ByteArrayInputStream(StreamUtils.copyToByteArray(body));
-			response.close();
-        }
-
-        @Override
-        public HttpStatus getStatusCode() throws IOException {
-            return response.getStatusCode();
-        }
-
-        @Override
-        public int getRawStatusCode() throws IOException {
-            return response.getRawStatusCode();
-        }
-
-        @Override
-        public String getStatusText() throws IOException {
-            return response.getStatusText();
-        }
-
-        @Override
-        public void close() {
-            response.close();
-        }
-
-        @Override
-        public InputStream getBody() throws IOException {
-            return content;
-        }
-
-        @Override
-        public HttpHeaders getHeaders() {
-            return response.getHeaders();
-        }
-    }
 }
