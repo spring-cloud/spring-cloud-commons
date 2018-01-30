@@ -269,9 +269,9 @@ initialized values. To force a bean to re-initialize on the next
 method call you just need to invalidate its cache entry.</simpara>
 <simpara>The <literal>RefreshScope</literal> is a bean in the context and it has a public method
 <literal>refreshAll()</literal> to refresh all beans in the scope by clearing the
-target cache. There is also a <literal>refresh(String)</literal> method to refresh an
-individual bean by name. This functionality is exposed in the
-<literal>/refresh</literal> endpoint (over HTTP or JMX).</simpara>
+target cache.  This functionality is exposed in the
+<literal>/refresh</literal> endpoint (over HTTP or JMX).  There is also a <literal>refresh(String)</literal> method to refresh an
+individual bean by name.</simpara>
 <note>
 <simpara><literal>@RefreshScope</literal> works (technically) on an <literal>@Configuration</literal>
 class, but it might lead to surprising behaviour: e.g. it does <emphasis role="strong">not</emphasis>

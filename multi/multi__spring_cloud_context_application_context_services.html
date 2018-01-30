@@ -169,9 +169,9 @@ used (i.e. when a method is called), and the scope acts as a cache of
 initialized values. To force a bean to re-initialize on the next
 method call you just need to invalidate its cache entry.</p><p>The <code class="literal">RefreshScope</code> is a bean in the context and it has a public method
 <code class="literal">refreshAll()</code> to refresh all beans in the scope by clearing the
-target cache. There is also a <code class="literal">refresh(String)</code> method to refresh an
-individual bean by name. This functionality is exposed in the
-<code class="literal">/refresh</code> endpoint (over HTTP or JMX).</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p><code class="literal">@RefreshScope</code> works (technically) on an <code class="literal">@Configuration</code>
+target cache.  This functionality is exposed in the
+<code class="literal">/refresh</code> endpoint (over HTTP or JMX).  There is also a <code class="literal">refresh(String)</code> method to refresh an
+individual bean by name.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p><code class="literal">@RefreshScope</code> works (technically) on an <code class="literal">@Configuration</code>
 class, but it might lead to surprising behaviour: e.g. it does <span class="strong"><strong>not</strong></span>
 mean that all the <code class="literal">@Beans</code> defined in that class are themselves
 <code class="literal">@RefreshScope</code>. Specifically, anything that depends on those beans
