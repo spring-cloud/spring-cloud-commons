@@ -269,9 +269,9 @@ method call you just need to invalidate its cache entry.
 
 The `RefreshScope` is a bean in the context and it has a public method
 `refreshAll()` to refresh all beans in the scope by clearing the
-target cache. There is also a `refresh(String)` method to refresh an
-individual bean by name. This functionality is exposed in the
-`/refresh` endpoint (over HTTP or JMX).
+target cache.  This functionality is exposed in the
+`/refresh` endpoint (over HTTP or JMX).  There is also a `refresh(String)` method to refresh an
+individual bean by name.
 
 NOTE: `@RefreshScope` works (technically) on an `@Configuration`
 class, but it might lead to surprising behaviour: e.g. it does *not*
