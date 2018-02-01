@@ -51,8 +51,14 @@ public class HttpClientConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public OkHttpClientFactory okHttpClientFactory() {
-			return new DefaultOkHttpClientFactory();
+		public OkHttpClient.Builder okHttpClientBuilder() {
+			return new OkHttpClient.Builder();
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public OkHttpClientFactory okHttpClientFactory(OkHttpClient.Builder builder) {
+			return new DefaultOkHttpClientFactory(builder);
 		}
 	}
 }

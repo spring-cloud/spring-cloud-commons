@@ -15,56 +15,63 @@
  */
 package org.springframework.cloud.commons.httpclient;
 
-import org.apache.http.impl.client.HttpClientBuilder;
+import okhttp3.OkHttpClient;
+
+import java.lang.reflect.Field;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Ryan Baxter
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = CustomHttpClientBuilderApplication.class)
-public class CustomHttpClientBuilderConfigurationTests {
+@SpringBootTest(classes = CustomOkHttpClientBuilderApplication.class)
+public class CustomOkHttpClientBuilderConfigurationTests {
 
 	@Autowired
-	ApacheHttpClientFactory apacheHttpClientFactory;
+	private OkHttpClientFactory okHttpClientFactory;
 
 	@Test
 	public void testCustomBuilder() {
-		HttpClientBuilder builder = apacheHttpClientFactory.createBuilder();
-		assertTrue(CustomHttpClientBuilderApplication.MyHttpClientBuilder.class.isInstance(builder));
+		OkHttpClient.Builder builder = okHttpClientFactory.createBuilder(false);
+		Integer timeout = getField(builder, "connectTimeout");
+		assertEquals(1, timeout.intValue());
 	}
+
+	protected <T> T getField(Object target, String name) {
+		Field field = ReflectionUtils.findField(target.getClass(), name);
+		ReflectionUtils.makeAccessible(field);
+		Object value = ReflectionUtils.getField(field, target);
+		return (T) value;
+	}
+
 }
 
 @Configuration
 @EnableAutoConfiguration
-class CustomHttpClientBuilderApplication {
+class CustomOkHttpClientBuilderApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MyApplication.class, args);
 	}
 
 	@Configuration
-	@AutoConfigureBefore(value = HttpClientConfiguration.class)
 	static class MyConfig {
 
 		@Bean
-		public MyHttpClientBuilder builder() {
-			return new MyHttpClientBuilder();
+		public OkHttpClient.Builder builder() {
+			return new OkHttpClient.Builder().connectTimeout(1, TimeUnit.MILLISECONDS);
 		}
-
-	}
-
-	static class MyHttpClientBuilder extends HttpClientBuilder {
 	}
 }
