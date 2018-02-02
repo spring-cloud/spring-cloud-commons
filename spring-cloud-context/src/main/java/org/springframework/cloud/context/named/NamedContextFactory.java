@@ -113,10 +113,15 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 			// Uses Environment from parent as well as beans
 			context.setParent(this.parent);
 		}
+		context.setDisplayName(generateDisplayName(name));
 		context.refresh();
 		return context;
 	}
 
+	protected String generateDisplayName(String name) {
+		return this.getClass().getSimpleName() + "-" + name;
+	}
+	
 	public <T> T getInstance(String name, Class<T> type) {
 		AnnotationConfigApplicationContext context = getContext(name);
 		if (BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context,
