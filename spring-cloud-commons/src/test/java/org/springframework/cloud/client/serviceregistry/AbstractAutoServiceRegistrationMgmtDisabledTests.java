@@ -1,70 +1,51 @@
 package org.springframework.cloud.client.serviceregistry;
 
-import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.LocalManagementPort;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import java.net.URI;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * @author Spencer Gibb
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = AbstractAutoServiceRegistrationTests.Config.class,
-		properties = "management.port=0", webEnvironment = RANDOM_PORT)
-public class AbstractAutoServiceRegistrationTests {
+@SpringBootTest(classes = AbstractAutoServiceRegistrationMgmtDisabledTests.Config.class,
+		properties = {"management.port=0", "spring.cloud.service-registry.auto-registration.register-management=false"},
+		webEnvironment = RANDOM_PORT)
+public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 
 	@Autowired
 	private TestAutoServiceRegistration autoRegistration;
 
-	@LocalServerPort
-	private int port;
-
-	@LocalManagementPort
-	private int managementPort;
-
 	@Test
 	public void portsWork() {
-		assertNotEquals("Lifecycle port is zero", 0, autoRegistration.getPort().get());
-		assertNotEquals("Lifecycle port is management port", managementPort, autoRegistration.getPort().get());
-		assertEquals("Lifecycle port is wrong", port, autoRegistration.getPort().get());
-		assertTrue("Lifecycle not running", autoRegistration.isRunning());
-		assertThat("ServiceRegistry is wrong type", autoRegistration.getServiceRegistry(), is(instanceOf(TestServiceRegistry.class)));
-		TestServiceRegistry serviceRegistry = (TestServiceRegistry) autoRegistration.getServiceRegistry();
-		assertTrue("Lifecycle not registered", serviceRegistry.isRegistered());
-		assertEquals("Lifecycle appName is wrong", "application", autoRegistration.getAppName());
+		Assertions.assertThat(autoRegistration.shouldRegisterManagement()).isFalse();
 	}
 
 	@EnableAutoConfiguration
 	@Configuration
 	public static class Config {
 		@Bean
-		public TestAutoServiceRegistration testAutoServiceRegistration() {
-			return new TestAutoServiceRegistration();
+		public TestAutoServiceRegistration testAutoServiceRegistration(AutoServiceRegistrationProperties properties) {
+			return new TestAutoServiceRegistration(properties);
 		}
 	}
 
 	public static class TestRegistration implements Registration {
 		@Override
 		public String getServiceId() {
-			return "testRegistration2";
+			return "testRegistration3";
 		}
 
 		@Override
@@ -96,7 +77,7 @@ public class AbstractAutoServiceRegistrationTests {
 	public static class TestMgmtRegistration extends TestRegistration {
 		@Override
 		public String getServiceId() {
-			return "testMgmtRegistration2";
+			return "testMgmtRegistration3";
 		}
 	}
 
@@ -151,7 +132,7 @@ public class AbstractAutoServiceRegistrationTests {
 		private int port = 0;
 
 		public TestAutoServiceRegistration(AutoServiceRegistrationProperties properties) {
-			super(null, properties);
+			super(new TestServiceRegistry(), properties);
 		}
 
 		@Override
