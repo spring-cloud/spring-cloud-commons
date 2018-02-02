@@ -37,7 +37,7 @@ public class EncryptorFactory {
 				encryptor = new RsaSecretEncryptor(data);
 			}
 			catch (IllegalArgumentException e) {
-				throw new KeyFormatException();
+				throw new KeyFormatException(e);
 			}
 
 		}
