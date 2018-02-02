@@ -80,12 +80,6 @@ public class RefreshAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public EnvironmentManager environmentManager(ConfigurableEnvironment environment) {
-		return new EnvironmentManager(environment);
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
 	public ContextRefresher contextRefresher(ConfigurableApplicationContext context,
 			RefreshScope scope) {
 		return new ContextRefresher(context, scope);

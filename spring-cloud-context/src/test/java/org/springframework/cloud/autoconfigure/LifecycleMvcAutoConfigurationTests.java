@@ -37,7 +37,7 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	@Test
 	public void postEnvMvcEndpointEnabled() {
-		beanCreated("environmentManagerEndpoint",
+		beanCreated("environmentManagerMvcEndpoint",
 				"endpoints.env.post.enabled=true");
 	}
 
