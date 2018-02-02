@@ -19,9 +19,14 @@ public class DefaultOkHttpClientFactory implements OkHttpClientFactory {
 
 	private static final Log LOG = LogFactory.getLog(DefaultOkHttpClientFactory.class);
 
+	private OkHttpClient.Builder builder;
+
+	public DefaultOkHttpClientFactory(OkHttpClient.Builder builder) {
+		this.builder = builder;
+	}
+
 	@Override
 	public OkHttpClient.Builder createBuilder(boolean disableSslValidation) {
-		OkHttpClient.Builder builder = new OkHttpClient.Builder();
 		if (disableSslValidation) {
 			try {
 				X509TrustManager disabledTrustManager = new DisableValidationTrustManager();
