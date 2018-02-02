@@ -4,7 +4,7 @@
 <book xmlns="http://docbook.org/ns/docbook" xmlns:xl="http://www.w3.org/1999/xlink" version="5.0" xml:lang="en">
 <info>
 <title>Cloud Native Applications</title>
-<date>2018-02-01</date>
+<date>2018-02-02</date>
 </info>
 <preface>
 <title></title>
@@ -598,7 +598,9 @@ if the OK HTTP jar is on the classpath.  In addition, Spring Cloud Commons provi
 the connection managers used by both clients, <literal>ApacheHttpClientConnectionManagerFactory</literal> for the Apache
 HTTP client and <literal>OkHttpClientConnectionPoolFactory</literal> for the OK HTTP client.  You can provide
 your own implementation of these beans if you would like to customize how the HTTP clients are created
-in downstream projects.  You can also disable the creation of these beans by setting
+in downstream projects.  In addition, if you provide a bean of type <literal>HttpClientBuilder</literal> and/or <literal>OkHttpClient.Builder</literal>,
+the default factories will use these builders as the basis for the builders returned to downstream projects.
+You can also disable the creation of these beans by setting
 <literal>spring.cloud.httpclientfactories.apache.enabled</literal> or <literal>spring.cloud.httpclientfactories.ok.enabled</literal> to
 <literal>false</literal>.</simpara>
 </section>
