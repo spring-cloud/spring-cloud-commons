@@ -24,6 +24,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
+import org.springframework.cloud.autoconfigure.LifecycleMvcEndpointAutoConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentManager;
@@ -65,7 +66,7 @@ public class RefreshScopeConfigurationTests {
 	@Test
 	public void configurationWithRefreshScope() throws Exception {
 		context = new AnnotationConfigApplicationContext(Application.class,
-				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class);
+				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class, LifecycleMvcEndpointAutoConfiguration.class);
 		Application application = context.getBean(Application.class);
 		assertEquals("refresh", context.getBeanDefinition("scopedTarget.application").getScope());
 		application.hello();
@@ -77,7 +78,7 @@ public class RefreshScopeConfigurationTests {
 	@Test
 	public void refreshScopeOnBean() throws Exception {
 		context = new AnnotationConfigApplicationContext(ClientApp.class,
-				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class);
+				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class, LifecycleMvcEndpointAutoConfiguration.class);
 		Controller application = context.getBean(Controller.class);
 		application.hello();
 		refresh();
@@ -88,7 +89,7 @@ public class RefreshScopeConfigurationTests {
 	@Test
 	public void refreshScopeOnNested() throws Exception {
 		context = new AnnotationConfigApplicationContext(NestedApp.class,
-				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class);
+				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class, LifecycleMvcEndpointAutoConfiguration.class);
 		NestedController application = context.getBean(NestedController.class);
 		application.hello();
 		refresh();
