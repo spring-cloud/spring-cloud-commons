@@ -612,6 +612,8 @@ if the OK HTTP jar is on the classpath.  In addition, Spring Cloud Commons provi
 the connection managers used by both clients, `ApacheHttpClientConnectionManagerFactory` for the Apache
 HTTP client and `OkHttpClientConnectionPoolFactory` for the OK HTTP client.  You can provide
 your own implementation of these beans if you would like to customize how the HTTP clients are created
-in downstream projects.  You can also disable the creation of these beans by setting
+in downstream projects.  In addition, if you provide a bean of type `HttpClientBuilder` and/or `OkHttpClient.Builder`,
+the default factories will use these builders as the basis for the builders returned to downstream projects.
+You can also disable the creation of these beans by setting
 `spring.cloud.httpclientfactories.apache.enabled` or `spring.cloud.httpclientfactories.ok.enabled` to
 `false`.

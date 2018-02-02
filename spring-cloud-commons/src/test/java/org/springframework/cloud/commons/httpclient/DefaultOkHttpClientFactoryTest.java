@@ -18,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 public class DefaultOkHttpClientFactoryTest {
 	@Test
 	public void create() throws Exception {
-		DefaultOkHttpClientFactory okHttpClientFactory = new DefaultOkHttpClientFactory();
+		DefaultOkHttpClientFactory okHttpClientFactory = new DefaultOkHttpClientFactory(new OkHttpClient.Builder());
 		DefaultOkHttpClientConnectionPoolFactory poolFactory = new DefaultOkHttpClientConnectionPoolFactory();
 		ConnectionPool pool = poolFactory.create(4, 5, TimeUnit.DAYS);
 		OkHttpClient httpClient = okHttpClientFactory.createBuilder(true).
