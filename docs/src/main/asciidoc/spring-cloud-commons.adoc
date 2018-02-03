@@ -628,11 +628,12 @@ A `/features` actuator endpoint is provided by Commons. This endpoint returns fe
 There are two types of 'features': abstract and named.
 
 Abstract features are features where an interface or abstract class is defined that an implementation creates, such as `DiscoveryClient`, `LoadBalancerClient` or `LockService`. The abstract class or interface is used to find a bean of that type in the context. The version displayed is `bean.getClass().getPackage().getImplementationVersion()`.
+
 Named features are features that don't have a particular class they implement, such as "Circuit Breaker", "API Gateway", "Spring Cloud Bus", etc... These features require a name and a bean type.
 
-==== Declare features
+==== Declaring features
 
-Any module can declare any number of `HasFeature` beans. Examples:
+Any module can declare any number of `HasFeature` beans. Some examples:
 
 [source,java,indent=0]
 ----
