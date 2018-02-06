@@ -150,16 +150,6 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 		}
 
 		@Override
-		protected int getConfiguredPort() {
-			return port;
-		}
-
-		@Override
-		protected void setConfiguredPort(int port) {
-			this.port = port;
-		}
-
-		@Override
 		protected TestRegistration getRegistration() {
 			return new TestRegistration();
 		}

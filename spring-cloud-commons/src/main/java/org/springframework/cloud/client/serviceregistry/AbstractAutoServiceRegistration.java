@@ -45,6 +45,19 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	private AtomicInteger port = new AtomicInteger(0);
 
+	private final ServiceRegistry<R> serviceRegistry;
+	private AutoServiceRegistrationProperties properties;
+
+	@Deprecated
+	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry) {
+		this.serviceRegistry = serviceRegistry;
+	}
+
+	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry, AutoServiceRegistrationProperties properties) {
+		this.serviceRegistry = serviceRegistry;
+		this.properties = properties;
+	}
+
 	protected ApplicationContext getContext() {
 		return context;
 	}
@@ -110,8 +123,11 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	 * {@link ServiceRegistry}
 	 */
 	protected boolean shouldRegisterManagement() {
-		return getManagementPort() != null
-				&& ManagementServerPortUtils.isDifferent(this.context);
+		if (this.properties == null || this.properties.isRegisterManagement()) {
+			return getManagementPort() != null
+					&& ManagementServerPortUtils.isDifferent(this.context);
+		}
+		return false;
 	}
 
 	/**
@@ -180,19 +196,6 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		return 0;
 	}
 
-	private final ServiceRegistry<R> serviceRegistry;
-	private AutoServiceRegistrationProperties properties;
-
-	@Deprecated
-	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry) {
-		this.serviceRegistry = serviceRegistry;
-	}
-
-	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry, AutoServiceRegistrationProperties properties) {
-		this.serviceRegistry = serviceRegistry;
-		this.properties = properties;
-	}
-
 	protected ServiceRegistry<R> getServiceRegistry() {
 		return this.serviceRegistry;
 	}
@@ -243,13 +246,5 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 			}
 			this.serviceRegistry.close();
 		}
-	}
-
-	@Override
-	protected boolean shouldRegisterManagement() {
-		if (this.properties == null || this.properties.isRegisterManagement()) {
-			return super.shouldRegisterManagement();
-		}
-		return false;
 	}
 }
