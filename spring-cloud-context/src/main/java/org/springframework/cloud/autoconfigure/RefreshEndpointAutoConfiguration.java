@@ -45,7 +45,7 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  * @author Venil Noronha
  */
 @Configuration
-@ConditionalOnClass(Health.class)
+@ConditionalOnClass({EndpointAutoConfiguration.class, Health.class})
 @AutoConfigureAfter({EndpointAutoConfiguration.class, RefreshAutoConfiguration.class})
 @Import({ RestartEndpointWithIntegrationConfiguration.class,
 		RestartEndpointWithoutIntegrationConfiguration.class,
