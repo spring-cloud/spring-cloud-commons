@@ -181,9 +181,16 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	}
 
 	private final ServiceRegistry<R> serviceRegistry;
+	private AutoServiceRegistrationProperties properties;
 
+	@Deprecated
 	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry) {
 		this.serviceRegistry = serviceRegistry;
+	}
+
+	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry, AutoServiceRegistrationProperties properties) {
+		this.serviceRegistry = serviceRegistry;
+		this.properties = properties;
 	}
 
 	protected ServiceRegistry<R> getServiceRegistry() {
@@ -238,4 +245,11 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		}
 	}
 
+	@Override
+	protected boolean shouldRegisterManagement() {
+		if (this.properties == null || this.properties.isRegisterManagement()) {
+			return super.shouldRegisterManagement();
+		}
+		return false;
+	}
 }
