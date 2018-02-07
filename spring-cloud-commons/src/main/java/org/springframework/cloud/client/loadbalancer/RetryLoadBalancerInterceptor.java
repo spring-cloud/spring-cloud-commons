@@ -32,6 +32,7 @@ import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.policy.NeverRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
 
 /**
  * @author Ryan Baxter
@@ -131,7 +132,9 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 								requestFactory.createRequest(request, body, execution));
 						int statusCode = response.getRawStatusCode();
 						if (retryPolicy != null && retryPolicy.retryableStatusCode(statusCode)) {
-							throw new ClientHttpResponseStatusCodeException(serviceName, response);
+							byte[] body = StreamUtils.copyToByteArray(response.getBody());
+							response.close();
+							throw new ClientHttpResponseStatusCodeException(serviceName, response, body);
 						}
 						return response;
 					}

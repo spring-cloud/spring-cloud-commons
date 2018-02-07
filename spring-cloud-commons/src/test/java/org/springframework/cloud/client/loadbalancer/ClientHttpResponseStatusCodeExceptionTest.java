@@ -25,8 +25,8 @@ public class ClientHttpResponseStatusCodeExceptionTest {
 	public void testCreation() throws Exception {
 		MyClientHttpResponse response = new MyClientHttpResponse();
 		assertFalse(response.isClosed());
-		ClientHttpResponseStatusCodeException exp = new ClientHttpResponseStatusCodeException("service", response);
-		assertTrue(response.isClosed());
+		ClientHttpResponseStatusCodeException exp = new ClientHttpResponseStatusCodeException("service",
+				response, response.getStatusText().getBytes());
 		ClientHttpResponse expResponse = exp.getResponse();
 		assertEquals(response.getRawStatusCode(), expResponse.getRawStatusCode());
 		assertEquals(response.getStatusText(), expResponse.getStatusText());
