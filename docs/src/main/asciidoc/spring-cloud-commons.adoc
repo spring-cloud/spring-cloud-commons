@@ -322,7 +322,7 @@ on the classpath to cause the Spring Boot application to register with the servi
 
 ==== Health Indicator
 
-Commons creates a Spring Boot `HealthIndicator` that `DiscoveryClient` implementations can participate in by implementing `DiscoveryHealthIndicator`. To disable the composite `HealthIndicator` set `spring.cloud.discovery.client.composite-indicator.enabled=false`. A generic `HealthIndicator` based on `DiscoveryClient` is auto-configured (`DiscoveryClientHealthIndicator). To disable it, set `spring.cloud.discovery.client.health-indicator.enabled=false`. To disable the description field of the `DiscoveryClientHealthIndicator` set `spring.cloud.discovery.client.health-indicator.include-description=false`, otherwise it can bubble up as the `description` of the rolled up `HealthIndicator`.
+Commons creates a Spring Boot `HealthIndicator` that `DiscoveryClient` implementations can participate in by implementing `DiscoveryHealthIndicator`. To disable the composite `HealthIndicator` set `spring.cloud.discovery.client.composite-indicator.enabled=false`. A generic `HealthIndicator` based on `DiscoveryClient` is auto-configured (`DiscoveryClientHealthIndicator`). To disable it, set `spring.cloud.discovery.client.health-indicator.enabled=false`. To disable the description field of the `DiscoveryClientHealthIndicator` set `spring.cloud.discovery.client.health-indicator.include-description=false`, otherwise it can bubble up as the `description` of the rolled up `HealthIndicator`.
 
 === ServiceRegistry
 
@@ -357,7 +357,7 @@ By default, the `ServiceRegistry` implementation will auto-register the running 
 
 ==== Service Registry Actuator Endpoint
 
-A `/service-registry` actuator endpoint is provided by Commons. This endpoint relys on a `Registration` bean in the Spring Application Context. Calling `/service-registry/instance-status` via a GET will return the status of the `Registration`. A POST to the same endpoint with a `String` body will change the status of the current `Registration` to the new value. Please see the documentation of the `ServiceRegistry` implementation you are using for the allowed values for updating the status and the values retured for the status.
+A `/service-registry` actuator endpoint is provided by Commons. This endpoint relies on a `Registration` bean in the Spring Application Context. Calling `/service-registry` via a GET will return the status of the `Registration`. A POST to the same endpoint with a JSON body will change the status of the current `Registration` to the new value. The JSON body has to include the `status` field with the preferred value. Please see the documentation of the `ServiceRegistry` implementation you are using for the allowed values for updating the status and the values returned for the status. For instance, Eureka's supported statuses are `UP`, `DOWN`, `OUT_OF_SERVICE` and `UNKNOWN`.
 
 === Spring RestTemplate as a Load Balancer Client
 
@@ -617,3 +617,46 @@ the default factories will use these builders as the basis for the builders retu
 You can also disable the creation of these beans by setting
 `spring.cloud.httpclientfactories.apache.enabled` or `spring.cloud.httpclientfactories.ok.enabled` to
 `false`.
+
+[[enabled-features]]
+=== Enabled Features
+
+A `/features` actuator endpoint is provided by Commons. This endpoint returns features available on the classpath and if they are enabled or not. The information returned includes the feature type, name, version and vendor.
+
+==== Feature types
+
+There are two types of 'features': abstract and named.
+
+Abstract features are features where an interface or abstract class is defined that an implementation creates, such as `DiscoveryClient`, `LoadBalancerClient` or `LockService`. The abstract class or interface is used to find a bean of that type in the context. The version displayed is `bean.getClass().getPackage().getImplementationVersion()`.
+
+Named features are features that don't have a particular class they implement, such as "Circuit Breaker", "API Gateway", "Spring Cloud Bus", etc... These features require a name and a bean type.
+
+==== Declaring features
+
+Any module can declare any number of `HasFeature` beans. Some examples:
+
+[source,java,indent=0]
+----
+@Bean
+public HasFeatures commonsFeatures() {
+  return HasFeatures.abstractFeatures(DiscoveryClient.class, LoadBalancerClient.class);
+}
+
+@Bean
+public HasFeatures consulFeatures() {
+  return HasFeatures.namedFeatures(
+    new NamedFeature("Spring Cloud Bus", ConsulBusAutoConfiguration.class),
+    new NamedFeature("Circuit Breaker", HystrixCommandAspect.class));
+}
+
+@Bean
+HasFeatures localFeatures() {
+  return HasFeatures.builder()
+      .abstractFeature(Foo.class)
+      .namedFeature(new NamedFeature("Bar Feature", Bar.class))
+      .abstractFeature(Baz.class)
+      .build();
+}
+----
+
+Each of these beans should go in an appropriately guarded `@Configuration`.
