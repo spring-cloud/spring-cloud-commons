@@ -357,7 +357,7 @@ By default, the `ServiceRegistry` implementation will auto-register the running 
 
 ==== Service Registry Actuator Endpoint
 
-A `/service-registry` actuator endpoint is provided by Commons. This endpoint relies on a `Registration` bean in the Spring Application Context. Calling `/service-registry` via a GET will return the status of the `Registration`. A POST to the same endpoint with a JSON body will change the status of the current `Registration` to the new value. The JSON body has to include both the `status` and `overridenStatus` field with the preferred value. Please see the documentation of the `ServiceRegistry` implementation you are using for the allowed values for updating the status and the values returned for the status. For instance, Eureka's supported statuses are `UP`, `DOWN`, `OUT_OF_SERVICE` and `UNKNOWN`.
+A `/service-registry` actuator endpoint is provided by Commons. This endpoint relies on a `Registration` bean in the Spring Application Context. Calling `/service-registry` via a GET will return the status of the `Registration`. A POST to the same endpoint with a JSON body will change the status of the current `Registration` to the new value. The JSON body has to include the `status` field with the preferred value. Please see the documentation of the `ServiceRegistry` implementation you are using for the allowed values for updating the status and the values returned for the status. For instance, Eureka's supported statuses are `UP`, `DOWN`, `OUT_OF_SERVICE` and `UNKNOWN`.
 
 === Spring RestTemplate as a Load Balancer Client
 
