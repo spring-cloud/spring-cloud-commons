@@ -49,7 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class, properties = "management.endpoints.web.expose=*")
+@SpringBootTest(classes = TestConfiguration.class, properties = "management.endpoints.web.exposure.include=*")
 public class EnvironmentManagerIntegrationTests {
 
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
