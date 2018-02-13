@@ -21,6 +21,7 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.BDDMockito;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
  */
 public class RefreshScopeHealthIndicatorTests {
 
+	@SuppressWarnings("unchecked")
 	private ObjectProvider<RefreshScope> scopeProvider = mock(ObjectProvider.class);
 	private ConfigurationPropertiesRebinder rebinder =
 			mock(ConfigurationPropertiesRebinder.class);

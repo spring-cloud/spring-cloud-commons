@@ -43,7 +43,8 @@ public class RefreshScopeNullBeanIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testRefreshBean() {
-		assertThat(this.myCustomComponent).isNotNull();
+		assertThat(this.myCustomComponent.optionalService).isNotNull();
+		assertThat(this.scope).isNotNull();
 		// ...and then refresh, so the bean is re-initialized:
 		// this.scope.refreshAll();
 	}
