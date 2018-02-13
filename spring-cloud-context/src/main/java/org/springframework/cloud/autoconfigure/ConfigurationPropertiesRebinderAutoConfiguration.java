@@ -20,7 +20,7 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
-import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;
+import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetaData;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessorRegistrar;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesBeans;
@@ -49,10 +49,10 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 		// cause a cascade of bean instantiation. Knowing the *name* of the beans we
 		// need is super optimal, but a little brittle (unfortunately we have no
 		// choice).
-		ConfigurationBeanFactoryMetadata metaData = this.context.getBean(
+		ConfigurationBeanFactoryMetaData metaData = this.context.getBean(
 				ConfigurationPropertiesBindingPostProcessorRegistrar.BINDER_BEAN_NAME
 						+ ".store",
-				ConfigurationBeanFactoryMetadata.class);
+						ConfigurationBeanFactoryMetaData.class);
 		ConfigurationPropertiesBeans beans = new ConfigurationPropertiesBeans();
 		beans.setBeanMetaDataStore(metaData);
 		return beans;

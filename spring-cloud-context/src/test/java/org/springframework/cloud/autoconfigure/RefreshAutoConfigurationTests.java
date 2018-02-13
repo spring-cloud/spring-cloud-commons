@@ -40,7 +40,7 @@ public class RefreshAutoConfigurationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(
             WebApplicationType type, Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).web(type).properties(properties).run();
+		return new SpringApplicationBuilder(configuration).web(type).properties(properties).properties("server.port=0").run();
 	}
 
 	@Configuration
