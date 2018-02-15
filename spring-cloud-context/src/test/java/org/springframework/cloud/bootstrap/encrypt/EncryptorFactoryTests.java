@@ -35,13 +35,18 @@ public class EncryptorFactoryTests {
 		String key = StreamUtils.copyToString(
 				new ClassPathResource("/example-test-rsa-private-key").getInputStream(),
 				Charset.forName("ASCII"));
-		//RSA private key needs to be with no new lines 
-		//-----BEGIN RSA PRIVATE KEY-----MIIEowI....iX8htsO-----END RSA PRIVATE KEY-----
-		String keyNoNewLines = key.replaceAll("\\n", "");
-		TextEncryptor encryptor = new EncryptorFactory().create(keyNoNewLines);
+
+		TextEncryptor encryptor = new EncryptorFactory().create(key);
 		String toEncrypt = "sample text to encrypt";
 		String encrypted = encryptor.encrypt(toEncrypt);
 
 		assertEquals(toEncrypt, encryptor.decrypt(encrypted));
+	}
+
+	@Test(expected = RuntimeException.class)
+	public void testWithInvalidRsaPrivateKey() {
+		String key = "-----BEGIN RSA PRIVATE KEY-----\n"
+				+ "MIIEowIBAAKCAQEAwClFgrRa/PUHPIJr9gvIPL6g6Rjp/TVZmVNOf2fL96DYbkj5\n";
+		new EncryptorFactory().create(key);
 	}
 }
