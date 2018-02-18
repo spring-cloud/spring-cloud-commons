@@ -50,8 +50,7 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 		// need is super optimal, but a little brittle (unfortunately we have no
 		// choice).
 		ConfigurationBeanFactoryMetadata metaData = this.context.getBean(
-				ConfigurationPropertiesBindingPostProcessorRegistrar.BINDER_BEAN_NAME
-						+ ".store",
+				ConfigurationBeanFactoryMetadata.BEAN_NAME,
 						ConfigurationBeanFactoryMetadata.class);
 		ConfigurationPropertiesBeans beans = new ConfigurationPropertiesBeans();
 		beans.setBeanMetaDataStore(metaData);
