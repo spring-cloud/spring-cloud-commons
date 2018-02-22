@@ -76,7 +76,7 @@ public class EncryptionBootstrapConfiguration {
 				throw new IllegalStateException("Invalid keystore location");
 			}
 
-			return new EncryptorFactory().create(this.key.getKey());
+			return new EncryptorFactory(this.key.getSalt()).create(this.key.getKey());
 		}
 
 	}
@@ -92,7 +92,7 @@ public class EncryptionBootstrapConfiguration {
 		@Bean
 		@ConditionalOnMissingBean(TextEncryptor.class)
 		public TextEncryptor textEncryptor() {
-			return new EncryptorFactory().create(this.key.getKey());
+			return new EncryptorFactory(this.key.getSalt()).create(this.key.getKey());
 		}
 
 	}

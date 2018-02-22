@@ -29,6 +29,12 @@ public class KeyProperties {
 	private String key;
 
 	/**
+	 * A salt for the symmetric key in the form of a hex-encoded byte array. As a stronger
+	 * alternative consider using a keystore.
+	 */
+	private String salt = "deadbeef";
+
+	/**
 	 * Flag to say that a process should fail if there is an encryption or decryption
 	 * error.
 	 */
@@ -70,6 +76,14 @@ public class KeyProperties {
 
 	public void setKey(String key) {
 		this.key = key;
+	}
+
+	public String getSalt() {
+		return salt;
+	}
+
+	public void setSalt(String salt) {
+		this.salt = salt;
 	}
 
 	public KeyStore getKeyStore() {

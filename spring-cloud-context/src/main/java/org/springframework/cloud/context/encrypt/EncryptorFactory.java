@@ -15,19 +15,20 @@
  */
 package org.springframework.cloud.context.encrypt;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.MiscPEMGenerator;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.util.io.pem.PemObjectGenerator;
 import org.bouncycastle.util.io.pem.PemWriter;
+
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 
 /**
  * @author Dave Syer
@@ -35,8 +36,14 @@ import java.io.StringWriter;
  */
 public class EncryptorFactory {
 
-	// TODO: expose as config property
-	private static final String SALT = "deadbeef";
+	private String salt = "deadbeef";
+
+	public EncryptorFactory() {
+	}
+
+	public EncryptorFactory(String salt) {
+		this.salt = salt;
+	}
 
 	public TextEncryptor create(String data) {
 
@@ -45,7 +52,8 @@ public class EncryptorFactory {
 
 			try {
 				String normalizedPemData = normalizePem(data);
-				encryptor = new RsaSecretEncryptor(normalizedPemData.replaceAll("\\n", "").replaceAll("\\r", ""));
+				encryptor = new RsaSecretEncryptor(
+						normalizedPemData.replaceAll("\\n", "").replaceAll("\\r", ""));
 			}
 			catch (IllegalArgumentException e) {
 				throw new KeyFormatException(e);
@@ -56,26 +64,27 @@ public class EncryptorFactory {
 			throw new KeyFormatException();
 		}
 		else {
-			encryptor = Encryptors.text(data, SALT);
+			encryptor = Encryptors.text(data, salt);
 		}
 
 		return encryptor;
 	}
 
 	private String normalizePem(String data) {
-		PEMParser pemParser = new PEMParser(new StringReader(data));
 		PEMKeyPair pemKeyPair = null;
-		try {
+		try (PEMParser pemParser = new PEMParser(new StringReader(data))) {
 			pemKeyPair = (PEMKeyPair) pemParser.readObject();
 			PrivateKeyInfo privateKeyInfo = pemKeyPair.getPrivateKeyInfo();
 
 			StringWriter textWriter = new StringWriter();
-			PemWriter pemWriter = new PemWriter(textWriter);
-			PemObjectGenerator pemObjectGenerator = new MiscPEMGenerator(privateKeyInfo);
+			try (PemWriter pemWriter = new PemWriter(textWriter)) {
+				PemObjectGenerator pemObjectGenerator = new MiscPEMGenerator(
+						privateKeyInfo);
 
-			pemWriter.writeObject(pemObjectGenerator);
-			pemWriter.flush();
-			return textWriter.toString();
+				pemWriter.writeObject(pemObjectGenerator);
+				pemWriter.flush();
+				return textWriter.toString();
+			}
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
@@ -83,5 +92,3 @@ public class EncryptorFactory {
 	}
 
 }
-
-
