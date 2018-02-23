@@ -19,6 +19,7 @@ package org.springframework.cloud.health;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.health.AbstractHealthIndicator;
 import org.springframework.boot.actuate.health.Health.Builder;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
@@ -33,18 +34,18 @@ import org.springframework.cloud.context.scope.refresh.RefreshScope;
  */
 public class RefreshScopeHealthIndicator extends AbstractHealthIndicator {
 
-	private RefreshScope scope;
+	private ObjectProvider<RefreshScope> scope;
 	private ConfigurationPropertiesRebinder rebinder;
 
-	public RefreshScopeHealthIndicator(RefreshScope scope,
-			ConfigurationPropertiesRebinder rebinder) {
+	public RefreshScopeHealthIndicator(ObjectProvider<RefreshScope> scope,
+									   ConfigurationPropertiesRebinder rebinder) {
 		this.scope = scope;
 		this.rebinder = rebinder;
 	}
 
 	@Override
 	protected void doHealthCheck(Builder builder) throws Exception {
-		Map<String, Exception> errors = new HashMap<>(this.scope.getErrors());
+		Map<String, Exception> errors = new HashMap<>(this.scope.getIfAvailable().getErrors());
 		errors.putAll(this.rebinder.getErrors());
 		if (errors.isEmpty()) {
 			builder.up();

@@ -17,4 +17,11 @@ package org.springframework.cloud.context.encrypt;
 
 @SuppressWarnings("serial")
 public class KeyFormatException extends RuntimeException {
+	public KeyFormatException() {
+		super();
+	}
+	
+	public KeyFormatException(Throwable t) {
+		super(t);
+	}
 }

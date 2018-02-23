@@ -24,7 +24,7 @@ public class RefreshAutoConfigurationTests {
 	@Test
 	public void noWarnings() {
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				Config.class)) {
+                WebApplicationType.NONE, Config.class)) {
 			assertThat(context.containsBean("refreshScope")).isTrue();
 			assertThat(output.toString()).doesNotContain("WARN");
 		}
@@ -33,14 +33,14 @@ public class RefreshAutoConfigurationTests {
 	@Test
 	public void disabled() {
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				Config.class, "spring.cloud.refresh.enabled:false")) {
+                WebApplicationType.SERVLET, Config.class, "spring.cloud.refresh.enabled:false")) {
 			assertThat(context.containsBean("refreshScope")).isFalse();
 		}
 	}
 
 	private static ConfigurableApplicationContext getApplicationContext(
-			Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE).properties(properties).run();
+            WebApplicationType type, Class<?> configuration, String... properties) {
+		return new SpringApplicationBuilder(configuration).web(type).properties(properties).properties("server.port=0").run();
 	}
 
 	@Configuration
