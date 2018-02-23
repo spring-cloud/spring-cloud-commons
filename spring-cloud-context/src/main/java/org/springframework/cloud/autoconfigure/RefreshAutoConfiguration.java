@@ -28,7 +28,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
-import org.springframework.cloud.context.environment.EnvironmentManager;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.event.RefreshEventListener;
@@ -36,7 +35,6 @@ import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.stereotype.Component;
 
 /**
@@ -77,12 +75,6 @@ public class RefreshAutoConfiguration {
 	@ConditionalOnMissingBean
 	public static LoggingRebinder loggingRebinder() {
 		return new LoggingRebinder();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public EnvironmentManager environmentManager(ConfigurableEnvironment environment) {
-		return new EnvironmentManager(environment);
 	}
 
 	@Bean

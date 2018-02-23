@@ -23,7 +23,7 @@ import java.util.Set;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetaData;
+import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 public class ConfigurationPropertiesBeans implements BeanPostProcessor,
 ApplicationContextAware {
 
-	private ConfigurationBeanFactoryMetaData metaData;
+	private ConfigurationBeanFactoryMetadata metaData;
 
 	private Map<String, Object> beans = new HashMap<String, Object>();
 
@@ -76,7 +76,7 @@ ApplicationContextAware {
 	/**
 	 * @param beans the bean meta data to set
 	 */
-	public void setBeanMetaDataStore(ConfigurationBeanFactoryMetaData beans) {
+	public void setBeanMetaDataStore(ConfigurationBeanFactoryMetadata beans) {
 		this.metaData = beans;
 	}
 

@@ -20,12 +20,14 @@ import org.springframework.boot.actuate.env.EnvironmentEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentManager;
 import org.springframework.cloud.context.environment.EnvironmentWebEndpointExtension;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
  * Autoconfiguration for some MVC endpoints governing the application context lifecycle.
@@ -36,18 +38,27 @@ import org.springframework.context.annotation.Configuration;
  *
  */
 @Configuration
-@ConditionalOnClass(EnvironmentEndpoint.class)
-@ConditionalOnWebApplication
 @AutoConfigureAfter({ WebMvcAutoConfiguration.class,
 		RefreshEndpointAutoConfiguration.class })
 public class LifecycleMvcEndpointAutoConfiguration {
 
-	@Bean
-	@ConditionalOnBean(EnvironmentEndpoint.class)
-	@ConditionalOnEnabledEndpoint
-	public EnvironmentWebEndpointExtension environmentWebEndpointExtension(
-			EnvironmentManager environment) {
-		return new EnvironmentWebEndpointExtension(environment);
-	}
+    @Bean
+    @ConditionalOnMissingBean
+    public EnvironmentManager environmentManager(ConfigurableEnvironment environment) {
+        return new EnvironmentManager(environment);
+    }
+
+    @Configuration
+    @ConditionalOnClass(EnvironmentEndpoint.class)
+    @ConditionalOnWebApplication
+    protected static class EndpointConfiguration {
+        @Bean
+        @ConditionalOnBean(EnvironmentEndpoint.class)
+        @ConditionalOnEnabledEndpoint
+        public EnvironmentWebEndpointExtension environmentWebEndpointExtension(
+                EnvironmentManager environment) {
+            return new EnvironmentWebEndpointExtension(environment);
+        }
+    }
 
 }

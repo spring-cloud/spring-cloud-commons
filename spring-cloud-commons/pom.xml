@@ -66,7 +66,7 @@
 
 	<properties>
 		<okhttp3.version>3.6.0</okhttp3.version>
-		<apachehttpclient.version>4.5.1</apachehttpclient.version>
+		<apachehttpclient.version>4.5.4</apachehttpclient.version>
 	</properties>
 	<dependencies>
 		<dependency>

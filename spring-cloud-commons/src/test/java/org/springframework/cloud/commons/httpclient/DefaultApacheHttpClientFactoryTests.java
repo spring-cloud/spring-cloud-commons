@@ -22,7 +22,7 @@ public class DefaultApacheHttpClientFactoryTests {
 	public void createClient() throws Exception {
 		final RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(100)
 				.setConnectTimeout(200).setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
-		CloseableHttpClient httpClient = new DefaultApacheHttpClientFactory().createBuilder().
+		CloseableHttpClient httpClient = new DefaultApacheHttpClientFactory(HttpClientBuilder.create()).createBuilder().
 				setConnectionManager(mock(HttpClientConnectionManager.class)).
 				setDefaultRequestConfig(requestConfig).build();
 		Assertions.assertThat(httpClient).isInstanceOf(Configurable.class);

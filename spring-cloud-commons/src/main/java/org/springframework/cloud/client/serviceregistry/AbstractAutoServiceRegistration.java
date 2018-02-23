@@ -1,22 +1,20 @@
 package org.springframework.cloud.client.serviceregistry;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PreDestroy;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
+import org.springframework.boot.web.context.ConfigurableWebServerApplicationContext;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.cloud.client.discovery.ManagementServerPortUtils;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
+
+import javax.annotation.PreDestroy;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Lifecycle methods that may be useful and common to {@link ServiceRegistry}
@@ -45,6 +43,19 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	private AtomicInteger port = new AtomicInteger(0);
 
+	private final ServiceRegistry<R> serviceRegistry;
+	private AutoServiceRegistrationProperties properties;
+
+	@Deprecated
+	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry) {
+		this.serviceRegistry = serviceRegistry;
+	}
+
+	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry, AutoServiceRegistrationProperties properties) {
+		this.serviceRegistry = serviceRegistry;
+		this.properties = properties;
+	}
+
 	protected ApplicationContext getContext() {
 		return context;
 	}
@@ -52,9 +63,9 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	@EventListener(WebServerInitializedEvent.class)
 	public void bind(WebServerInitializedEvent event) {
 		ApplicationContext context = event.getApplicationContext();
-		if (context instanceof ServletWebServerApplicationContext) {
+		if (context instanceof ConfigurableWebServerApplicationContext) {
 			if ("management".equals(
-					((ServletWebServerApplicationContext) context).getNamespace())) {
+					((ConfigurableWebServerApplicationContext) context).getServerNamespace())) {
 				return;
 			}
 		}
@@ -110,8 +121,11 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	 * {@link ServiceRegistry}
 	 */
 	protected boolean shouldRegisterManagement() {
-		return getManagementPort() != null
-				&& ManagementServerPortUtils.isDifferent(this.context);
+		if (this.properties == null || this.properties.isRegisterManagement()) {
+			return getManagementPort() != null
+					&& ManagementServerPortUtils.isDifferent(this.context);
+		}
+		return false;
 	}
 
 	/**
@@ -180,12 +194,6 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		return 0;
 	}
 
-	private final ServiceRegistry<R> serviceRegistry;
-
-	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry) {
-		this.serviceRegistry = serviceRegistry;
-	}
-
 	protected ServiceRegistry<R> getServiceRegistry() {
 		return this.serviceRegistry;
 	}
@@ -237,5 +245,4 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 			this.serviceRegistry.close();
 		}
 	}
-
 }

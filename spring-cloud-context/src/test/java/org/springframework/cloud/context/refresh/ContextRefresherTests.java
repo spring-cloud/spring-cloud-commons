@@ -118,7 +118,6 @@ public class ContextRefresherTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void commandLineArgsPassedToBootstrapConfiguration() {
 
 		TestBootstrapConfiguration.fooSightings = new ArrayList<>();

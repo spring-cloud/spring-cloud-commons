@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.autoconfigure;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnEnabledEndpoint;
@@ -44,7 +45,7 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  * @author Venil Noronha
  */
 @Configuration
-@ConditionalOnClass(Health.class)
+@ConditionalOnClass({EndpointAutoConfiguration.class, Health.class})
 @AutoConfigureAfter({EndpointAutoConfiguration.class, RefreshAutoConfiguration.class})
 @Import({ RestartEndpointWithIntegrationConfiguration.class,
 		RestartEndpointWithoutIntegrationConfiguration.class,
@@ -52,11 +53,10 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
 public class RefreshEndpointAutoConfiguration {
 
 	@Bean
-	@ConditionalOnBean(RefreshScope.class)
 	@ConditionalOnMissingBean
 	@ConditionalOnEnabledHealthIndicator("refresh")
-	RefreshScopeHealthIndicator refreshScopeHealthIndicator(RefreshScope scope,
-			ConfigurationPropertiesRebinder rebinder) {
+	RefreshScopeHealthIndicator refreshScopeHealthIndicator(ObjectProvider<RefreshScope> scope,
+															ConfigurationPropertiesRebinder rebinder) {
 		return new RefreshScopeHealthIndicator(scope, rebinder);
 	}
 
