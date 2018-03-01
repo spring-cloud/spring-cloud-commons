@@ -49,21 +49,15 @@ public class LoadBalancerRequestFactory {
 
 	public LoadBalancerRequest<ClientHttpResponse> createRequest(final HttpRequest request,
 			final byte[] body, final ClientHttpRequestExecution execution) {
-		return new LoadBalancerRequest<ClientHttpResponse>() {
-
-			@Override
-			public ClientHttpResponse apply(final ServiceInstance instance)
-					throws Exception {
-				HttpRequest serviceRequest = new ServiceRequestWrapper(request, instance, loadBalancer);
-				if (transformers != null) {
-					for (LoadBalancerRequestTransformer transformer : transformers) {
-						serviceRequest = transformer.transformRequest(serviceRequest, instance);
-					}
-				}
-				return execution.execute(serviceRequest, body);
-			}
-
-		};
+		return instance -> {
+            HttpRequest serviceRequest = new ServiceRequestWrapper(request, instance, loadBalancer);
+            if (transformers != null) {
+                for (LoadBalancerRequestTransformer transformer : transformers) {
+                    serviceRequest = transformer.transformRequest(serviceRequest, instance);
+                }
+            }
+            return execution.execute(serviceRequest, body);
+        };
 	}
 
 }
