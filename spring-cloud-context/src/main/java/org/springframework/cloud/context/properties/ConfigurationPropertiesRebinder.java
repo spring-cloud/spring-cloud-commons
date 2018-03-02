@@ -96,11 +96,6 @@ public class ConfigurationPropertiesRebinder
 				if (AopUtils.isAopProxy(bean)) {
 					bean = getTargetObject(bean);
 				}
-				// TODO: determine a more general approach to fix this.
-				// see https://github.com/spring-cloud/spring-cloud-commons/issues/318
-				if (bean.getClass().getName().equals("com.zaxxer.hikari.HikariDataSource")) {
-					return false; //ignore
-				}
 				this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
 				this.applicationContext.getAutowireCapableBeanFactory()
 						.initializeBean(bean, name);
@@ -109,6 +104,10 @@ public class ConfigurationPropertiesRebinder
 			catch (RuntimeException e) {
 				this.errors.put(name, e);
 				throw e;
+			}
+			catch (Exception e) {
+				this.errors.put(name, e);
+				throw new IllegalStateException("Cannot rebind to " + name, e);
 			}
 		}
 		return false;
