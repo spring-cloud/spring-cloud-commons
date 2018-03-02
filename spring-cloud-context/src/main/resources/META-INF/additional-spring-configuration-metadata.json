@@ -34,6 +34,12 @@
     "type": "java.lang.Boolean",
     "description": "Enable the /resume endpoint (to send Lifecycle.start()).",
     "defaultValue": true
+  },
+  {
+    "name": "spring.cloud.refresh.extra-refreshable",
+    "type": "java.util.Set<java.lang.String>",
+    "description": "Additional class names for beans to post process into refresh scope.",
+    "defaultValue": true
   }
 ]}
 
