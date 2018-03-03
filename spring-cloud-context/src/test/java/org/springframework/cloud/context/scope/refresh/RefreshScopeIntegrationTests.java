@@ -27,7 +27,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -41,8 +40,6 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import javax.sql.DataSource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -215,11 +212,6 @@ public class RefreshScopeIntegrationTests {
 			return service;
 		}
 
-		@Bean
-		@RefreshScope
-		public DataSource dataSource(DataSourceProperties dataSourceProperties) {
-			return dataSourceProperties.initializeDataSourceBuilder().build();
-		}
 	}
 
 	@ConfigurationProperties
