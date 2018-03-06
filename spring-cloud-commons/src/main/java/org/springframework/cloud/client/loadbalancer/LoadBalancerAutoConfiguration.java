@@ -100,14 +100,6 @@ public class LoadBalancerAutoConfiguration {
 	@Configuration
 	@ConditionalOnClass(RetryTemplate.class)
 	public static class RetryAutoConfiguration {
-		@Bean
-		@ConditionalOnMissingBean
-		//TODO remove this?
-		public RetryTemplate retryTemplate() {
-			RetryTemplate template =  new RetryTemplate();
-			template.setThrowLastExceptionOnExhausted(true);
-			return template;
-		}
 
 		@Bean
 		@ConditionalOnMissingBean
