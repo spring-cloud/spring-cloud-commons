@@ -16,15 +16,14 @@
 
 package org.springframework.cloud.commons.util;
 
-import java.net.InetAddress;
-import java.util.Arrays;
-
 import org.junit.Test;
 import org.springframework.cloud.commons.util.InetUtils.HostInfo;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Dave Syer
@@ -55,7 +54,7 @@ public class InetUtilsTests {
 	}
 
 	@Test
-	public void testHostInfo() throws Exception {
+	public void testHostInfo() {
 		try (InetUtils utils = new InetUtils(new InetUtilsProperties())) {
 			HostInfo info = utils.findFirstNonLoopbackHostInfo();
 			assertNotNull(info.getIpAddressAsInt());
@@ -92,30 +91,46 @@ public class InetUtilsTests {
 		properties.setUseOnlySiteLocalInterfaces(true);
 
 		try (InetUtils utils = new InetUtils(properties)) {
-			assertFalse(utils.ignoreAddress(InetAddress.getByName("192.168.0.1")));
-			assertTrue(utils.ignoreAddress(InetAddress.getByName("5.5.8.1")));
+			assertTrue(utils.isPreferredAddress(InetAddress.getByName("192.168.0.1")));
+			assertFalse(utils.isPreferredAddress(InetAddress.getByName("5.5.8.1")));
 		}
 	}
 	
 	@Test
-	public void testPrefferedNetworksRegex() throws Exception {
+	public void testPreferredNetworksRegex() throws Exception {
 		InetUtilsProperties properties = new InetUtilsProperties();
-		properties.setPreferredNetworks(Arrays.asList("192.168.*"));
+		properties.setPreferredNetworks(Arrays.asList("192.168.*", "10.0.*"));
 
 		try (InetUtils utils = new InetUtils(properties)) {
-			assertFalse(utils.ignoreAddress(InetAddress.getByName("192.168.0.1")));
-			assertTrue(utils.ignoreAddress(InetAddress.getByName("5.5.8.1")));
+			assertTrue(utils.isPreferredAddress(InetAddress.getByName("192.168.0.1")));
+			assertFalse(utils.isPreferredAddress(InetAddress.getByName("5.5.8.1")));
+			assertTrue(utils.isPreferredAddress(InetAddress.getByName("10.0.10.1")));
+			assertFalse(utils.isPreferredAddress(InetAddress.getByName("10.255.10.1")));
 		}
 	}
 	
 	@Test
-	public void testPrefferedNetworksSimple() throws Exception {
+	public void testPreferredNetworksSimple() throws Exception {
 		InetUtilsProperties properties = new InetUtilsProperties();
-		properties.setPreferredNetworks(Arrays.asList("192"));
-		
+		properties.setPreferredNetworks(Arrays.asList("192", "10.0"));
+
 		try (InetUtils utils = new InetUtils(properties)) {
-			assertFalse(utils.ignoreAddress(InetAddress.getByName("192.168.0.1")));
-			assertTrue(utils.ignoreAddress(InetAddress.getByName("5.5.8.1")));
+			assertTrue(utils.isPreferredAddress(InetAddress.getByName("192.168.0.1")));
+			assertFalse(utils.isPreferredAddress(InetAddress.getByName("5.5.8.1")));
+			assertFalse(utils.isPreferredAddress(InetAddress.getByName("10.255.10.1")));
+			assertTrue(utils.isPreferredAddress(InetAddress.getByName("10.0.10.1")));
+		}
+	}
+
+	@Test
+	public void testPreferredNetworksListIsEmpty() throws Exception {
+		InetUtilsProperties properties = new InetUtilsProperties();
+		properties.setPreferredNetworks(Collections.emptyList());
+		try (InetUtils utils = new InetUtils(properties)) {
+			assertTrue(utils.isPreferredAddress(InetAddress.getByName("192.168.0.1")));
+			assertTrue(utils.isPreferredAddress(InetAddress.getByName("5.5.8.1")));
+			assertTrue(utils.isPreferredAddress(InetAddress.getByName("10.255.10.1")));
+			assertTrue(utils.isPreferredAddress(InetAddress.getByName("10.0.10.1")));
 		}
 	}
 }
