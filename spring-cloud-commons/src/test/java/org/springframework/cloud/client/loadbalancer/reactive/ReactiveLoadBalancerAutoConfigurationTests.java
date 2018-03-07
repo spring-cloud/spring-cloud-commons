@@ -111,7 +111,7 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		}
 
 		@Bean
-		LoadBalancedRetryFactory loadBalancedRetryFactory() {return new LoadBalancedRetryFactory.DefaultRetryFactory();}
+		LoadBalancedRetryFactory loadBalancedRetryFactory() {return new LoadBalancedRetryFactory(){};}
 
 	}
 

@@ -27,6 +27,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
@@ -104,7 +105,7 @@ public class LoadBalancerAutoConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		public LoadBalancedRetryFactory loadBalancedRetryFactory() {
-			return new LoadBalancedRetryFactory.DefaultRetryFactory();
+			return new LoadBalancedRetryFactory() {};
 		}
 	}
 

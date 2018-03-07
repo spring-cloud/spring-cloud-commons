@@ -109,7 +109,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 		}
 
 		@Bean
-		LoadBalancedRetryFactory loadBalancedRetryFactory() {return new LoadBalancedRetryFactory.DefaultRetryFactory();}
+		LoadBalancedRetryFactory loadBalancedRetryFactory() {return new LoadBalancedRetryFactory(){};}
 
 	}
 

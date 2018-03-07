@@ -25,6 +25,7 @@ import org.springframework.retry.TerminatedRetryException;
 import org.springframework.retry.backoff.BackOffContext;
 import org.springframework.retry.backoff.BackOffInterruptedException;
 import org.springframework.retry.backoff.BackOffPolicy;
+import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.listener.RetryListenerSupport;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,7 +48,7 @@ public class RetryLoadBalancerInterceptorTest {
     private LoadBalancerClient client;
     private LoadBalancerRetryProperties lbProperties;
     private LoadBalancerRequestFactory lbRequestFactory;
-    private LoadBalancedRetryFactory loadBalancedRetryFactory = new LoadBalancedRetryFactory.DefaultRetryFactory();
+    private LoadBalancedRetryFactory loadBalancedRetryFactory = new LoadBalancedRetryFactory(){};
 
     @Before
     public void setUp() throws Exception {
@@ -308,7 +309,7 @@ public class RetryLoadBalancerInterceptorTest {
         assertThat(backOffPolicy.getBackoffAttempts(), is(1));
     }
 
-    class MyLoadBalancedRetryFactory extends LoadBalancedRetryFactory.DefaultRetryFactory {
+    class MyLoadBalancedRetryFactory implements LoadBalancedRetryFactory {
         private LoadBalancedRetryPolicy loadBalancedRetryPolicy;
         private BackOffPolicy backOffPolicy;
         private RetryListener[] retryListeners;
@@ -336,7 +337,7 @@ public class RetryLoadBalancerInterceptorTest {
 		@Override
 		public BackOffPolicy createBackOffPolicy(String service) {
 			if(backOffPolicy == null) {
-				return super.createBackOffPolicy(service);
+				return new NoBackOffPolicy();
 			} else {
 				return backOffPolicy;
 			}
@@ -345,7 +346,7 @@ public class RetryLoadBalancerInterceptorTest {
 		@Override
 		public RetryListener[] createRetryListeners(String service) {
 			if(retryListeners == null) {
-				return super.createRetryListeners(service);
+				return new RetryListener[0];
 			} else {
 				return retryListeners;
 			}
