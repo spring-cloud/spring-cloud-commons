@@ -92,6 +92,8 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 			}
 			return response;
 		}, new LoadBalancedRecoveryCallback<ClientHttpResponse, ClientHttpResponse>() {
+			//This is a special case, where both parameters to LoadBalancedRecoveryCallback are
+			//the same.  In most cases they would be different.
 			@Override
 			protected ClientHttpResponse createResponse(ClientHttpResponse response, URI uri) {
 				return response;
