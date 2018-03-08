@@ -16,12 +16,17 @@
 
 package org.springframework.cloud.context.restart;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -155,13 +160,26 @@ public class RestartEndpoint extends AbstractEndpoint<Boolean>
 				this.integrationShutdown.stop(this.timeout);
 			}
 			this.application.setEnvironment(this.context.getEnvironment());
-			this.context.close();
+			close();
 			// If running in a webapp then the context classloader is probably going to
 			// die so we need to revert to a safe place before starting again
 			overrideClassLoaderForRestart();
 			this.context = this.application.run(this.args);
 		}
 		return this.context;
+	}
+
+	private void close() {
+		ApplicationContext context = this.context;
+		while (context instanceof Closeable) {
+			try {
+				((Closeable) context).close();
+			}
+			catch (IOException e) {
+				logger.error("Cannot close context: " + context.getId(), e);
+			}
+			context = context.getParent();
+		}
 	}
 
 	@ManagedAttribute

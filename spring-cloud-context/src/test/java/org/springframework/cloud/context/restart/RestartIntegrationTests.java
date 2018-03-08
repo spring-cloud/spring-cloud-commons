@@ -16,16 +16,19 @@
 
 package org.springframework.cloud.context.restart;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-
 import org.junit.After;
 import org.junit.Test;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.LiveBeansView;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 
 public class RestartIntegrationTests {
 
@@ -41,7 +44,10 @@ public class RestartIntegrationTests {
 	@Test
 	public void testRestartTwice() throws Exception {
 
-		context = SpringApplication.run(TestConfiguration.class, "--endpoints.restart.enabled=true", "--server.port=0");
+		context = SpringApplication.run(TestConfiguration.class,
+				"--endpoints.restart.enabled=true", "--server.port=0",
+				"--spring.liveBeansView.mbeanDomain=livebeans");
+
 		RestartEndpoint endpoint = context.getBean(RestartEndpoint.class);
 		assertNotNull(context.getParent());
 		assertNull(context.getParent().getParent());
@@ -59,6 +65,10 @@ public class RestartIntegrationTests {
 		assertNotNull(context.getParent());
 		assertNull(context.getParent().getParent());
 
+		LiveBeansView beans = new LiveBeansView();
+		String json = beans.getSnapshotAsJson();
+		assertThat(json).containsOnlyOnce("parent\": \"bootstrap");
+		assertThat(json).containsOnlyOnce("parent\": null");
 	}
 
 	public static void main(String[] args) {
