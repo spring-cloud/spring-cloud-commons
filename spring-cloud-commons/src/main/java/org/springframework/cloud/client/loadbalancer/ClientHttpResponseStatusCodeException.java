@@ -21,7 +21,6 @@ import java.io.InputStream;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.AbstractClientHttpResponse;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.util.StreamUtils;
 
 /**
  * {@link RetryableStatusCodeException} that captures a {@link ClientHttpResponse}
@@ -35,12 +34,11 @@ public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeEx
 	 * Constructor
 	 * @param serviceId The service id
 	 * @param response The response object
-	 * @throws IOException Thrown if the {@link ClientHttpResponse} body cannot be retrieved
+	 * @throws IOException Thrown if the {@link ClientHttpResponse} response code cant be retrieved
 	 */
-	public ClientHttpResponseStatusCodeException(String serviceId, ClientHttpResponse response) throws IOException {
+	public ClientHttpResponseStatusCodeException(String serviceId, ClientHttpResponse response, byte[] body) throws IOException {
 		super(serviceId, response.getRawStatusCode(), response, null);
-		this.response = new ClientHttpResponseWrapper(response);
-		response.close();
+		this.response = new ClientHttpResponseWrapper(response, body);
 	}
 
 	@Override
@@ -53,9 +51,9 @@ public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeEx
 		private ClientHttpResponse response;
 		private byte[] body;
 
-		public ClientHttpResponseWrapper(ClientHttpResponse response) throws IOException {
+		public ClientHttpResponseWrapper(ClientHttpResponse response, byte[] body) {
 			this.response = response;
-			this.body = StreamUtils.copyToByteArray(response.getBody());
+			this.body = body;
 		}
 
 		@Override
