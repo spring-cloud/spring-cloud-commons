@@ -28,9 +28,9 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 	@Test
 	public void testDefaultBackOffPolicy() throws Exception {
 		ConfigurableApplicationContext context = init(OneRestTemplate.class);
-		LoadBalancedBackOffPolicyFactory loadBalancedBackOffPolicyFactory = context.getBean(LoadBalancedBackOffPolicyFactory.class);
-		assertThat(loadBalancedBackOffPolicyFactory, is(instanceOf(LoadBalancedBackOffPolicyFactory.NoBackOffPolicyFactory.class)));
-		assertThat(loadBalancedBackOffPolicyFactory.createBackOffPolicy("foo"), is(instanceOf(NoBackOffPolicy.class)));
+		LoadBalancedRetryFactory loadBalancedRetryFactory = context.getBean(LoadBalancedRetryFactory.class);
+		assertThat(loadBalancedRetryFactory, is(instanceOf(LoadBalancedRetryFactory.class)));
+		assertThat(loadBalancedRetryFactory.createBackOffPolicy("foo"), is(instanceOf(NoBackOffPolicy.class)));
 	}
 }
 

@@ -27,7 +27,7 @@ import java.net.URI;
  * the request
  * @author LiYuan Lee
  */
-public abstract class RibbonRecoveryCallback<T, R> implements RecoveryCallback<T> {
+public abstract class LoadBalancedRecoveryCallback<T, R> implements RecoveryCallback<T> {
 
 	/**
 	 * Create the response returned in the {@link RecoveryCallback}
