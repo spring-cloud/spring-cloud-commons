@@ -63,18 +63,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
 		final LoadBalancedRetryPolicy retryPolicy = lbRetryFactory.createRetryPolicy(serviceName,
 				loadBalancer);
-		RetryTemplate template = new RetryTemplate();
-		BackOffPolicy backOffPolicy = lbRetryFactory.createBackOffPolicy(serviceName);
-		template.setBackOffPolicy(backOffPolicy == null ? new NoBackOffPolicy() : backOffPolicy);
-		template.setThrowLastExceptionOnExhausted(true);
-		RetryListener[] retryListeners = lbRetryFactory.createRetryListeners(serviceName);
-               if (retryListeners != null && retryListeners.length != 0) {
-                   template.setListeners(retryListeners);
-               }
-		template.setRetryPolicy(
-				!lbProperties.isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
-						: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer,
-						serviceName));
+		RetryTemplate template = createRetryTemplate(serviceName, request, retryPolicy);
 		return template.execute(context -> {
 			ServiceInstance serviceInstance = null;
 			if (context instanceof LoadBalancedRetryContext) {
@@ -102,5 +91,21 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 				return response;
 			}
 		});
+	}
+
+	private RetryTemplate createRetryTemplate(String serviceName, HttpRequest request, LoadBalancedRetryPolicy retryPolicy) {
+		RetryTemplate template = new RetryTemplate();
+		BackOffPolicy backOffPolicy = lbRetryFactory.createBackOffPolicy(serviceName);
+		template.setBackOffPolicy(backOffPolicy == null ? new NoBackOffPolicy() : backOffPolicy);
+		template.setThrowLastExceptionOnExhausted(true);
+		RetryListener[] retryListeners = lbRetryFactory.createRetryListeners(serviceName);
+		if (retryListeners != null && retryListeners.length != 0) {
+			template.setListeners(retryListeners);
+		}
+		template.setRetryPolicy(
+				!lbProperties.isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
+						: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer,
+						serviceName));
+		return template;
 	}
 }
