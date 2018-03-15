@@ -32,6 +32,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyFactoryBean;
@@ -256,6 +257,9 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 					if (getName().equals(root.getDecoratedDefinition().getBeanDefinition()
 							.getScope())) {
 						root.setBeanClass(LockedScopedProxyFactoryBean.class);
+						// surprising that a scoped proxy bean definition is not already
+						// marked as synthetic?
+						root.setSynthetic(true);
 					}
 				}
 			}
@@ -456,8 +460,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 		@Override
 		public Object invoke(MethodInvocation invocation) throws Throwable {
 			Method method = invocation.getMethod();
-			if (AopUtils.isEqualsMethod(method)
-					|| AopUtils.isToStringMethod(method)
+			if (AopUtils.isEqualsMethod(method) || AopUtils.isToStringMethod(method)
 					|| AopUtils.isHashCodeMethod(method)
 					|| isScopedObjectGetTargetObject(method)) {
 				return invocation.proceed();

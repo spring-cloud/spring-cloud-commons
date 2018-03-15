@@ -30,12 +30,6 @@ public class RetryableStatusCodeException extends IOException {
 
 	private URI uri;
 
-	@Deprecated
-	//TODO Remove in 2.0.x
-	public RetryableStatusCodeException(String serviceId, int statusCode) {
-		super(String.format(MESSAGE, serviceId, statusCode));
-	}
-
 	public RetryableStatusCodeException(String serviceId, int statusCode, Object response, URI uri) {
 		super(String.format(MESSAGE, serviceId, statusCode));
 		this.response = response;
