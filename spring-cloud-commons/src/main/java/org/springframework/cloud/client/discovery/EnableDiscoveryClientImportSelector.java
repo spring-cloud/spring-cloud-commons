@@ -33,6 +33,7 @@ import java.util.List;
 
 /**
  * @author Spencer Gibb
+ * @author Ryan Baxter
  */
 @Order(Ordered.LOWEST_PRECEDENCE - 100)
 public class EnableDiscoveryClientImportSelector
@@ -55,7 +56,6 @@ public class EnableDiscoveryClientImportSelector
 			disableAutoRegistration();
 
 		}
-
 		return imports;
 	}
 
