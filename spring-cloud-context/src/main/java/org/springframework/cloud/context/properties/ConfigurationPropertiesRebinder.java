@@ -96,10 +96,12 @@ public class ConfigurationPropertiesRebinder
 				if (AopUtils.isAopProxy(bean)) {
 					bean = getTargetObject(bean);
 				}
-				this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
-				this.applicationContext.getAutowireCapableBeanFactory()
-						.initializeBean(bean, name);
-				return true;
+				if (bean != null) {
+					this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
+                    this.applicationContext.getAutowireCapableBeanFactory()
+                            .initializeBean(bean, name);
+					return true;
+				}
 			}
 			catch (RuntimeException e) {
 				this.errors.put(name, e);
