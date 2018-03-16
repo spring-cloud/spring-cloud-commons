@@ -32,7 +32,7 @@ public class RefreshAutoConfigurationTests {
 	@Test
 	public void disabled() {
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				true, Config.class, "spring.cloud.refresh.enabled:false")) {
+				true, Config.class, "spring.cloud.refresh.enabled:false", "server.port:0")) {
 			assertThat(context.containsBean("refreshScope")).isFalse();
 		}
 	}

@@ -33,6 +33,7 @@ import java.util.List;
 
 /**
  * @author Spencer Gibb
+ * @author Ryan Baxter
  */
 @Order(Ordered.LOWEST_PRECEDENCE - 100)
 public class EnableDiscoveryClientImportSelector
@@ -52,25 +53,34 @@ public class EnableDiscoveryClientImportSelector
 			importsList.add("org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
 			imports = importsList.toArray(new String[0]);
 		} else {
-			Environment env = getEnvironment();
-			if(ConfigurableEnvironment.class.isInstance(env)) {
-				ConfigurableEnvironment configEnv = (ConfigurableEnvironment)env;
+			disableAutoRegistration();
+
+		}
+		return imports;
+	}
+
+	private void disableAutoRegistration() {
+		Environment env = getEnvironment();
+		if(!env.containsProperty("spring.cloud.service-registry.auto-registration.enabled")) {
+			if (ConfigurableEnvironment.class.isInstance(env)) {
+				ConfigurableEnvironment configEnv = (ConfigurableEnvironment) env;
 				LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 				map.put("spring.cloud.service-registry.auto-registration.enabled", false);
 				MapPropertySource propertySource = new MapPropertySource(
 						"springCloudDiscoveryClient", map);
 				configEnv.getPropertySources().addLast(propertySource);
 			}
-
 		}
-
-		return imports;
 	}
 
 	@Override
 	protected boolean isEnabled() {
-		return new RelaxedPropertyResolver(getEnvironment()).getProperty(
+		boolean enabled =  new RelaxedPropertyResolver(getEnvironment()).getProperty(
 				"spring.cloud.discovery.enabled", Boolean.class, Boolean.TRUE);
+		if(!enabled) {
+			disableAutoRegistration();
+		}
+		return enabled;
 	}
 
 	@Override
