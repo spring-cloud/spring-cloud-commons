@@ -16,13 +16,15 @@ package org.springframework.cloud.bootstrap.encrypt;
  */
 
 import java.util.Map;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.ClassPathExclusions;
-import org.springframework.cloud.FilteredClassPathRunner;
+import org.springframework.cloud.test.ClassPathExclusions;
+import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,7 +33,7 @@ import static org.hamcrest.Matchers.hasSize;
 /**
  * @author Ryan Baxter
  */
-@RunWith(FilteredClassPathRunner.class)
+@RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions({"spring-security-rsa*.jar"})
 public class RsaDisabledTests {
 
