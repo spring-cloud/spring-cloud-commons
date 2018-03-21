@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  */
 @Configuration
 @ConditionalOnClass({ TextEncryptor.class })
-@EnableConfigurationProperties(KeyProperties.class)
+@EnableConfigurationProperties({KeyProperties.class})
 public class EncryptionBootstrapConfiguration {
 
 	@Autowired(required = false)
@@ -54,10 +54,14 @@ public class EncryptionBootstrapConfiguration {
 	@Configuration
 	@Conditional(KeyCondition.class)
 	@ConditionalOnClass(RsaSecretEncryptor.class)
+	@EnableConfigurationProperties({RsaProperties.class})
 	protected static class RsaEncryptionConfiguration {
 
 		@Autowired
 		private KeyProperties key;
+
+		@Autowired
+		private RsaProperties rsaProperties;
 
 		@Bean
 		@ConditionalOnMissingBean(TextEncryptor.class)
@@ -70,8 +74,8 @@ public class EncryptionBootstrapConfiguration {
 									keyStore.getPassword().toCharArray()).getKeyPair(
 									keyStore.getAlias(),
 									keyStore.getSecret().toCharArray()),
-							this.key.getRsa().getAlgorithm(), this.key.getRsa().getSalt(),
-							this.key.getRsa().isStrong());
+							this.rsaProperties.getAlgorithm(), this.rsaProperties.getSalt(),
+							this.rsaProperties.isStrong());
 				} 
 				
 				throw new IllegalStateException("Invalid keystore location");
