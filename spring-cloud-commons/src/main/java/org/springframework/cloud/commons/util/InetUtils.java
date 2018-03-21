@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.commons.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -24,15 +27,13 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Spencer Gibb
@@ -99,7 +100,7 @@ public class InetUtils implements Closeable {
 							InetAddress address = addrs.nextElement();
 							if (address instanceof Inet4Address
 									&& !address.isLoopbackAddress()
-									&& !ignoreAddress(address)) {
+									&& isPreferredAddress(address)) {
 								log.trace("Found non-loopback interface: "
 										+ ifc.getDisplayName());
 								result = address;
@@ -128,19 +129,26 @@ public class InetUtils implements Closeable {
 		return null;
 	}
 
-	/** for testing */ boolean ignoreAddress(InetAddress address) {
+	/** for testing */ boolean isPreferredAddress(InetAddress address) {
 
-		if (this.properties.isUseOnlySiteLocalInterfaces() && !address.isSiteLocalAddress()) {
-			log.trace("Ignoring address: " + address.getHostAddress());
+		if (this.properties.isUseOnlySiteLocalInterfaces()) {
+			final boolean siteLocalAddress = address.isSiteLocalAddress();
+			if (!siteLocalAddress) {
+				log.trace("Ignoring address: " + address.getHostAddress());
+			}
+			return siteLocalAddress;
+		}
+		final List<String> preferredNetworks = this.properties.getPreferredNetworks();
+		if (preferredNetworks.isEmpty()) {
 			return true;
 		}
-	
-		for (String regex : this.properties.getPreferredNetworks()) {
-		if (!address.getHostAddress().matches(regex) && !address.getHostAddress().startsWith(regex)) {
-			log.trace("Ignoring address: " + address.getHostAddress());
+		for (String regex : preferredNetworks) {
+			final String hostAddress = address.getHostAddress();
+			if (hostAddress.matches(regex) || hostAddress.startsWith(regex)) {
 				return true;
 			}
 		}
+		log.trace("Ignoring address: " + address.getHostAddress());
 		return false;
 	}
 
