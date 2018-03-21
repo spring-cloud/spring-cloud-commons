@@ -43,22 +43,18 @@ public class InetUtils implements Closeable {
 	// TODO: maybe shutdown the thread pool if it isn't being used?
 	private final ExecutorService executorService;
 	private final InetUtilsProperties properties;
-	private static final InetUtils instance = new InetUtils(new InetUtilsProperties());
-	
+
 	private final Log log = LogFactory.getLog(InetUtils.class);
 	
 	public InetUtils(final InetUtilsProperties properties) {
 		this.properties = properties;
 		this.executorService = Executors
-				.newSingleThreadExecutor(new ThreadFactory() {
-					@Override
-					public Thread newThread(Runnable r) {
-						Thread thread = new Thread(r);
-						thread.setName(InetUtilsProperties.PREFIX);
-						thread.setDaemon(true);
-						return thread;
-					}
-				});
+				.newSingleThreadExecutor(r -> {
+                    Thread thread = new Thread(r);
+                    thread.setName(InetUtilsProperties.PREFIX);
+                    thread.setDaemon(true);
+                    return thread;
+                });
 	}
 
 	@Override
@@ -182,31 +178,6 @@ public class InetUtils implements Closeable {
 		hostInfo.setHostname(hostname);
 		hostInfo.setIpAddress(address.getHostAddress());
 		return hostInfo;
-	}
-
-	/**
-	 * Find the first non-loopback host info. If there were errors return a host info with
-	 * 'localhost' and '127.0.0.1' for hostname and ipAddress respectively.
-	 *
-	 * @deprecated use the non-static findFirstNonLoopbackHostInfo() instead
-	 */
-	@Deprecated
-	public static HostInfo getFirstNonLoopbackHostInfo() {
-		return instance.findFirstNonLoopbackHostInfo();
-	}
-
-	/**
-	 * Convert an internet address to a HostInfo.
-	 *
-	 * @deprecated use the non-static convertAddress() instead
-	 */
-	@Deprecated
-	public static HostInfo convert(final InetAddress address) {
-		return instance.convertAddress(address);
-	}
-
-	public static int getIpAddressAsInt(String host) {
-		return new HostInfo(host).getIpAddressAsInt();
 	}
 
 	public static class HostInfo {

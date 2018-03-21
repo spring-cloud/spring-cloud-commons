@@ -53,7 +53,6 @@ public class InetUtilsTests {
 		try (InetUtils utils = new InetUtils(new InetUtilsProperties())) {
 			assertNotNull(utils.convertAddress(InetAddress.getByName("localhost")));
 		}
-		assertNotNull(InetUtils.convert(InetAddress.getByName("localhost")));
 	}
 
 	@Test
