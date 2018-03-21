@@ -160,12 +160,7 @@ public class InetUtils implements Closeable {
 
 	public HostInfo convertAddress(final InetAddress address) {
 		HostInfo hostInfo = new HostInfo();
-		Future<String> result = executorService.submit(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return address.getHostName();
-			}
-		});
+		Future<String> result = executorService.submit(address::getHostName);
 
 		String hostname;
 		try {
