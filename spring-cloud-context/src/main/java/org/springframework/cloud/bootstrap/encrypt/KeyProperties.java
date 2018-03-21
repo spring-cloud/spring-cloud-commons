@@ -17,8 +17,6 @@ package org.springframework.cloud.bootstrap.encrypt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.core.io.Resource;
-import org.springframework.security.rsa.crypto.RsaAlgorithm;
-import org.springframework.util.ClassUtils;
 
 @ConfigurationProperties("encrypt")
 public class KeyProperties {
@@ -45,22 +43,6 @@ public class KeyProperties {
 	 * defined and understood by the JVM).
 	 */
 	private KeyStore keyStore = new KeyStore();
-
-	/**
-	 * Rsa algorithm properties when using asymmetric encryption.
-	 */
-	private Rsa rsa;
-
-	{
-		if (ClassUtils.isPresent("org.springframework.security.rsa.crypto.RsaAlgorithm",
-				null)) {
-			this.rsa = new Rsa();
-		}
-	}
-
-	public Rsa getRsa() {
-		return this.rsa;
-	}
 
 	public boolean isFailOnError() {
 		return this.failOnError;
@@ -146,54 +128,6 @@ public class KeyProperties {
 
 		public void setSecret(String secret) {
 			this.secret = secret;
-		}
-
-	}
-
-	public static class Rsa {
-
-		/**
-		 * The RSA algorithm to use (DEFAULT or OAEP). Once it is set do not change it (or
-		 * existing ciphers will not a decryptable).
-		 */
-		private RsaAlgorithm algorithm = RsaAlgorithm.OAEP;
-
-		/**
-		 * Flag to indicate that "strong" AES encryption should be used internally. If
-		 * true then the GCM algorithm is applied to the AES encrypted bytes. If false
-		 * then the "standard" CBC is used instead. Once it is set do not change it (or
-		 * existing ciphers will not a decryptable).
-		 */
-		private boolean strong = true;
-
-		/**
-		 * Salt for the random secret used to encrypt cipher text. Once it is set do not
-		 * change it (or existing ciphers will not a decryptable).
-		 */
-		private String salt = "deadbeef";
-
-		public RsaAlgorithm getAlgorithm() {
-			return this.algorithm;
-		}
-
-		public void setAlgorithm(RsaAlgorithm algorithm) {
-			this.algorithm = algorithm;
-		}
-
-		public boolean isStrong() {
-			return this.strong;
-		}
-
-		public void setStrong(boolean strong) {
-			this.strong = strong;
-		}
-
-		public String getSalt() {
-			return this.salt;
-		}
-
-		public void setSalt(String salt) {
-			this.salt = salt;
 		}
 
 	}
