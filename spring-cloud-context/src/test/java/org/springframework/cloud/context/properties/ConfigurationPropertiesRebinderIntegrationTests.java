@@ -17,9 +17,11 @@ package org.springframework.cloud.context.properties;
 
 import javax.annotation.PostConstruct;
 
+import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -117,6 +119,16 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 			return new TestProperties();
 		}
 
+		// exposes https://github.com/spring-cloud/spring-cloud-commons/issues/337
+		@Bean
+		@ConfigurationProperties("some.service")
+		public SomeService someService() {
+			return ProxyFactory.getProxy(SomeService.class, (MethodInterceptor) methodInvocation -> null);
+		}
+	}
+
+	interface SomeService {
+		void foo();
 	}
 
 	// Hack out a protected inner class for testing

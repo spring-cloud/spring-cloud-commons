@@ -24,6 +24,7 @@ import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,22 +43,18 @@ public class InetUtils implements Closeable {
 	// TODO: maybe shutdown the thread pool if it isn't being used?
 	private final ExecutorService executorService;
 	private final InetUtilsProperties properties;
-	private static final InetUtils instance = new InetUtils(new InetUtilsProperties());
-	
+
 	private final Log log = LogFactory.getLog(InetUtils.class);
 	
 	public InetUtils(final InetUtilsProperties properties) {
 		this.properties = properties;
 		this.executorService = Executors
-				.newSingleThreadExecutor(new ThreadFactory() {
-					@Override
-					public Thread newThread(Runnable r) {
-						Thread thread = new Thread(r);
-						thread.setName(InetUtilsProperties.PREFIX);
-						thread.setDaemon(true);
-						return thread;
-					}
-				});
+				.newSingleThreadExecutor(r -> {
+                    Thread thread = new Thread(r);
+                    thread.setName(InetUtilsProperties.PREFIX);
+                    thread.setDaemon(true);
+                    return thread;
+                });
 	}
 
 	@Override
@@ -99,7 +96,7 @@ public class InetUtils implements Closeable {
 							InetAddress address = addrs.nextElement();
 							if (address instanceof Inet4Address
 									&& !address.isLoopbackAddress()
-									&& !ignoreAddress(address)) {
+									&& isPreferredAddress(address)) {
 								log.trace("Found non-loopback interface: "
 										+ ifc.getDisplayName());
 								result = address;
@@ -128,19 +125,26 @@ public class InetUtils implements Closeable {
 		return null;
 	}
 
-	/** for testing */ boolean ignoreAddress(InetAddress address) {
+	/** for testing */ boolean isPreferredAddress(InetAddress address) {
 
-		if (this.properties.isUseOnlySiteLocalInterfaces() && !address.isSiteLocalAddress()) {
-			log.trace("Ignoring address: " + address.getHostAddress());
+		if (this.properties.isUseOnlySiteLocalInterfaces()) {
+			final boolean siteLocalAddress = address.isSiteLocalAddress();
+			if (!siteLocalAddress) {
+				log.trace("Ignoring address: " + address.getHostAddress());
+			}
+			return siteLocalAddress;
+		}
+		final List<String> preferredNetworks = this.properties.getPreferredNetworks();
+		if (preferredNetworks.isEmpty()) {
 			return true;
 		}
-	
-		for (String regex : this.properties.getPreferredNetworks()) {
-		if (!address.getHostAddress().matches(regex) && !address.getHostAddress().startsWith(regex)) {
-			log.trace("Ignoring address: " + address.getHostAddress());
+		for (String regex : preferredNetworks) {
+			final String hostAddress = address.getHostAddress();
+			if (hostAddress.matches(regex) || hostAddress.startsWith(regex)) {
 				return true;
 			}
 		}
+		log.trace("Ignoring address: " + address.getHostAddress());
 		return false;
 	}
 
@@ -156,12 +160,7 @@ public class InetUtils implements Closeable {
 
 	public HostInfo convertAddress(final InetAddress address) {
 		HostInfo hostInfo = new HostInfo();
-		Future<String> result = executorService.submit(new Callable<String>() {
-			@Override
-			public String call() throws Exception {
-				return address.getHostName();
-			}
-		});
+		Future<String> result = executorService.submit(address::getHostName);
 
 		String hostname;
 		try {
@@ -174,31 +173,6 @@ public class InetUtils implements Closeable {
 		hostInfo.setHostname(hostname);
 		hostInfo.setIpAddress(address.getHostAddress());
 		return hostInfo;
-	}
-
-	/**
-	 * Find the first non-loopback host info. If there were errors return a host info with
-	 * 'localhost' and '127.0.0.1' for hostname and ipAddress respectively.
-	 *
-	 * @deprecated use the non-static findFirstNonLoopbackHostInfo() instead
-	 */
-	@Deprecated
-	public static HostInfo getFirstNonLoopbackHostInfo() {
-		return instance.findFirstNonLoopbackHostInfo();
-	}
-
-	/**
-	 * Convert an internet address to a HostInfo.
-	 *
-	 * @deprecated use the non-static convertAddress() instead
-	 */
-	@Deprecated
-	public static HostInfo convert(final InetAddress address) {
-		return instance.convertAddress(address);
-	}
-
-	public static int getIpAddressAsInt(String host) {
-		return new HostInfo(host).getIpAddressAsInt();
 	}
 
 	public static class HostInfo {
