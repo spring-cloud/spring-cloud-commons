@@ -184,9 +184,15 @@ To force a bean to re-initialize on the next method call, you must invalidate it
 <simpara>The <literal>RefreshScope</literal> is a bean in the context and has a public  <literal>refreshAll()</literal> method to refresh all beans in the scope by clearing the target cache.
 The <literal>/refresh</literal> endpoint exposes this functionality (over HTTP or JMX).
 To refresh an individual bean by name, there is also a <literal>refresh(String)</literal> method.</simpara>
+<simpara>To expose the <literal>/refresh</literal> endpoint, you need to add following configuration to your application:</simpara>
+<programlisting language="yaml" linenumbering="unnumbered">management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh</programlisting>
 <note>
 <simpara><literal>@RefreshScope</literal> works (technically) on an <literal>@Configuration</literal> class, but it might lead to surprising behavior.
-For example, it does <emphasis role="strong">not</emphasis> mean that all the <literal>@Beans</literal> defined in that class are themselves in <literal>@RefreshScope</literal>.
+For example, it does not mean that all the <literal>@Beans</literal> defined in that class are themselves in <literal>@RefreshScope</literal>.
 Specifically, anything that depends on those beans cannot rely on them being updated when a refresh is initiated, unless it is itself in <literal>@RefreshScope</literal>.
 In that case, it is rebuilt on a refresh and its dependencies are re-injected. At that point, they are re-initialized from the refreshed <literal>@Configuration</literal>).</simpara>
 </note>
