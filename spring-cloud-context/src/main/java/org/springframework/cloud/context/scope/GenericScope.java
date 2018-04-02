@@ -14,6 +14,7 @@
 package org.springframework.cloud.context.scope;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -484,6 +485,10 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 							invocation.getArguments());
 				}
 				return invocation.proceed();
+			}
+			// see gh-349. Throw the original exception rather than the UndeclaredThrowableException
+			catch (UndeclaredThrowableException e) {
+				throw e.getUndeclaredThrowable();
 			}
 			finally {
 				lock.unlock();

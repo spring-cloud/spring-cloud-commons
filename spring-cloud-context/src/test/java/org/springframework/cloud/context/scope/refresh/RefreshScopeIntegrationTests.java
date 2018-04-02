@@ -122,9 +122,18 @@ public class RefreshScopeIntegrationTests {
 				ExampleService.event.getName());
 	}
 
-	public static interface Service {
+	// see gh-349
+	@Test(expected = ServiceException.class)
+	@DirtiesContext
+	public void testCheckedException() throws Exception {
+		this.service.throwsException();
+	}
+
+	public interface Service {
 
 		String getMessage();
+
+		String throwsException() throws ServiceException;
 
 	}
 
@@ -190,10 +199,17 @@ public class RefreshScopeIntegrationTests {
 		}
 
 		@Override
+		public String throwsException() throws ServiceException {
+			throw new ServiceException();
+		}
+
+		@Override
 		public void onApplicationEvent(RefreshScopeRefreshedEvent e) {
 			event = e;
 		}
 	}
+
+	public static class ServiceException extends Exception {}
 
 	@Configuration
 	@EnableConfigurationProperties(TestProperties.class)
