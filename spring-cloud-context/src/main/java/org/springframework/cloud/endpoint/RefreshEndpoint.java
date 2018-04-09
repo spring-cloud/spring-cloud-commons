@@ -37,6 +37,7 @@ public class RefreshEndpoint {
 	}
 
 	@WriteOperation
+	@Timed(value ="consul.force-refresh-endpoint")
 	public Collection<String> refresh() {
 		Set<String> keys = contextRefresher.refresh();
 		return keys;
