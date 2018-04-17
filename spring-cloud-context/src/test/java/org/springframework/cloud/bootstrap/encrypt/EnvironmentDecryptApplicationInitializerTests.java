@@ -25,15 +25,18 @@ import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME;
@@ -150,4 +153,24 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		assertEquals("value", ctx.getEnvironment().getProperty("key"));
 	}
 
+	@Test
+	public void testDecryptCompositePropertySource() {
+		String expected = "always";
+		TextEncryptor textEncryptor = mock(TextEncryptor.class);
+		when(textEncryptor.decrypt(anyString())).thenReturn(expected);
+
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
+		EnvironmentDecryptApplicationInitializer initializer = new EnvironmentDecryptApplicationInitializer(
+				textEncryptor);
+
+		MapPropertySource source = new MapPropertySource("nobody",
+				Collections.singletonMap("key", "{cipher}value"));
+		CompositePropertySource cps = mock(CompositePropertySource.class);
+		when(cps.getPropertyNames()).thenReturn(source.getPropertyNames());
+		when(cps.getPropertySources()).thenReturn(Collections.singleton(source));
+		ctx.getEnvironment().getPropertySources().addLast(cps);
+
+		initializer.initialize(ctx);
+		assertEquals(expected, ctx.getEnvironment().getProperty("key"));
+	}
 }
