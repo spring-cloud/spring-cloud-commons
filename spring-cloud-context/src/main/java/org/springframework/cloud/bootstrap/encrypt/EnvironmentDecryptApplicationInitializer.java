@@ -179,13 +179,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 	private void decrypt(PropertySource<?> source, Map<String, Object> overrides) {
 
-		if (source instanceof CompositePropertySource) {
-			for (PropertySource<?> nested : ((CompositePropertySource) source)
-					.getPropertySources()) {
-				decrypt(nested, overrides);
-			}
-		}
-		else if (source instanceof EnumerablePropertySource) {
+		if (source instanceof EnumerablePropertySource) {
 			Map<String, Object> otherCollectionProperties = new LinkedHashMap<>();
 			boolean sourceHasDecryptedCollection = false;
 
@@ -233,7 +227,17 @@ public class EnvironmentDecryptApplicationInitializer implements
 			if (sourceHasDecryptedCollection && !otherCollectionProperties.isEmpty()) {
 				overrides.putAll(otherCollectionProperties);
 			}
+
 		}
+		else if (source instanceof CompositePropertySource) {
+
+			for (PropertySource<?> nested : ((CompositePropertySource) source)
+					.getPropertySources()) {
+				decrypt(nested, overrides);
+			}
+
+		}
+
 	}
 
 }
