@@ -2,6 +2,7 @@ package org.springframework.cloud.commons.httpclient;
 
 import okhttp3.OkHttpClient;
 
+import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -17,6 +18,7 @@ public class HttpClientConfiguration {
 
 	@Configuration
 	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.apache.enabled", matchIfMissing = true)
+	@ConditionalOnClass(HttpClient.class)
 	static class ApacheHttpClientConfiguration {
 
 		@Bean
