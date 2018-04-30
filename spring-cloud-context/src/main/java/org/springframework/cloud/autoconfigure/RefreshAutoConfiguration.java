@@ -102,8 +102,8 @@ public class RefreshAutoConfiguration {
 		public void setRefreshable(Set<String> refreshables) {
 			if (this.refreshables != refreshables) {
 				this.refreshables.clear();
+				this.refreshables.addAll(refreshables);
 			}
-			this.refreshables.addAll(refreshables);
 		}
 
 		public void setExtraRefreshable(Set<String> refreshables) {
