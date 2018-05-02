@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -61,9 +62,24 @@ import org.springframework.stereotype.Component;
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class RefreshAutoConfiguration {
 
-	@Bean
-	public static RefreshScope refreshScope() {
-		return new RefreshScope();
+	@Component
+	@ConditionalOnMissingBean(RefreshScope.class)
+	protected static class RefreshScopeConfiguration
+			implements BeanDefinitionRegistryPostProcessor {
+
+		@Override
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
+				throws BeansException {
+		}
+
+		@Override
+		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
+				throws BeansException {
+			registry.registerBeanDefinition("refreshScope",
+					BeanDefinitionBuilder.genericBeanDefinition(RefreshScope.class)
+							.setRole(BeanDefinition.ROLE_INFRASTRUCTURE)
+							.getBeanDefinition());
+		}
 	}
 
 	@Component
@@ -110,7 +126,6 @@ public class RefreshAutoConfiguration {
 					BeanDefinitionHolder proxy = ScopedProxyUtils
 							.createScopedProxy(holder, registry, true);
 					definition.setScope("refresh");
-					definition.setLazyInit(true);
 					registry.registerBeanDefinition(proxy.getBeanName(),
 							proxy.getBeanDefinition());
 				}
