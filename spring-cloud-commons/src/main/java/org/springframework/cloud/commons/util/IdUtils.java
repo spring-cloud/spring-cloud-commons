@@ -5,6 +5,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * @author Spencer Gibb
+ * @author Na Yan
  */
 public class IdUtils {
 
@@ -14,7 +15,15 @@ public class IdUtils {
 	   	return getDefaultInstanceId(resolver, true);
     }
 
+    public static String getDefaultInstanceId(PropertyResolver resolver,String defaultServerPort) {
+	   	return getDefaultInstanceId(resolver, true,defaultServerPort);
+    }
+
     public static String getDefaultInstanceId(PropertyResolver resolver, boolean includeHostname) {
+	    return getDefaultInstanceId(resolver,includeHostname,resolver.getProperty("server.port"));
+    }
+
+    public static String getDefaultInstanceId(PropertyResolver resolver, boolean includeHostname,String defaultServerPort) {
 		String vcapInstanceId = resolver.getProperty("vcap.application.instance_id");
 		if (StringUtils.hasText(vcapInstanceId)) {
 			return vcapInstanceId;
@@ -28,8 +37,7 @@ public class IdUtils {
 
 		String namePart = combineParts(hostname, SEPARATOR, appName);
 
-		String indexPart = resolver.getProperty("spring.application.instance_id",
-				resolver.getProperty("server.port"));
+		String indexPart = resolver.getProperty("spring.application.instance_id",defaultServerPort);
 
 		return combineParts(namePart, SEPARATOR, indexPart);
 	}
