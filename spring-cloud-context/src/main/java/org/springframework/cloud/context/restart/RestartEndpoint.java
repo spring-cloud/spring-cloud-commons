@@ -18,6 +18,7 @@ package org.springframework.cloud.context.restart;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collections;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -86,8 +87,14 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 	}
 
 	@WriteOperation
-	// FIXME: map with "message: Restarting" or couldn't restart
-	public Boolean restart() {
+	public Object restartOnNewThread() {
+		Thread thread = new Thread(this::restart);
+		thread.setDaemon(false);
+		thread.start();
+		return Collections.singletonMap("message", "Restarting");
+	}
+
+	private Boolean restart() {
 		try {
 			doRestart();
 			logger.info("Restarted");
