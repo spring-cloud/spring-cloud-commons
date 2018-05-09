@@ -87,14 +87,14 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 	}
 
 	@WriteOperation
-	public Object restartOnNewThread() {
-		Thread thread = new Thread(this::restart);
+	public Object restart() {
+		Thread thread = new Thread(this::safeRestart);
 		thread.setDaemon(false);
 		thread.start();
 		return Collections.singletonMap("message", "Restarting");
 	}
 
-	private Boolean restart() {
+	private Boolean safeRestart() {
 		try {
 			doRestart();
 			logger.info("Restarted");
