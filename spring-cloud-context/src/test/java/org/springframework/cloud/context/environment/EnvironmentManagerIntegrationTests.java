@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2017 the original author or authors.
+ * Copyright 2006-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cloud.context.environment;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 
@@ -44,6 +45,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -106,6 +108,12 @@ public class EnvironmentManagerIntegrationTests {
 			// The underlying BindException is not handled by the dispatcher servlet
 		}
 		assertEquals(0, properties.getDelay());
+	}
+
+	@Test
+	public void coreWebExtensionAvailable() throws Exception {
+		this.mvc.perform(get(BASE_PATH + "/env/" + UUID.randomUUID().toString()))
+				.andExpect(status().isNotFound());
 	}
 
 	@Configuration
