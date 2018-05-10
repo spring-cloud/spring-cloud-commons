@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2013-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import java.util.Map;
 import org.springframework.boot.actuate.endpoint.annotation.DeleteOperation;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.boot.actuate.endpoint.web.annotation.EndpointWebExtension;
-import org.springframework.boot.actuate.env.EnvironmentEndpoint;
-
+import org.springframework.boot.actuate.env.EnvironmentEndpointWebExtension;
 
 /**
  * MVC endpoint for the {@link EnvironmentManager} providing a POST to /env as a simple
@@ -31,13 +30,16 @@ import org.springframework.boot.actuate.env.EnvironmentEndpoint;
  * @author Dave Syer
  * 
  */
-@EndpointWebExtension(endpoint = EnvironmentEndpoint.class)
-public class EnvironmentWebEndpointExtension {
+@EndpointWebExtension(endpoint = WritableEnvironmentEndpoint.class)
+public class WritableEnvironmentEndpointWebExtension
+		extends EnvironmentEndpointWebExtension {
 
 	private EnvironmentManager environment;
 
-	public EnvironmentWebEndpointExtension(EnvironmentManager enviroment) {
-		environment = enviroment;
+	public WritableEnvironmentEndpointWebExtension(WritableEnvironmentEndpoint endpoint,
+			EnvironmentManager environment) {
+		super(endpoint);
+		this.environment = environment;
 	}
 
 	@WriteOperation

@@ -46,7 +46,8 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  */
 @Configuration
 @ConditionalOnClass({EndpointAutoConfiguration.class, Health.class})
-@AutoConfigureAfter({EndpointAutoConfiguration.class, RefreshAutoConfiguration.class})
+@AutoConfigureAfter({ LifecycleMvcEndpointAutoConfiguration.class,
+		RefreshAutoConfiguration.class})
 @Import({ RestartEndpointWithIntegrationConfiguration.class,
 		RestartEndpointWithoutIntegrationConfiguration.class,
 		PauseResumeEndpointsConfiguration.class })
