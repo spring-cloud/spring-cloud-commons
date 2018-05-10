@@ -25,7 +25,6 @@ import javax.servlet.ServletException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -33,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.context.environment.EnvironmentManagerIntegrationTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -40,8 +40,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -52,6 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class, properties = "management.endpoints.web.exposure.include=*")
+@AutoConfigureMockMvc
 public class EnvironmentManagerIntegrationTests {
 
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
@@ -60,17 +59,10 @@ public class EnvironmentManagerIntegrationTests {
 	private TestProperties properties;
 
 	@Autowired
-	private WebApplicationContext context;
-
-	@Autowired
 	private ObjectMapper mapper;
 
+	@Autowired
 	private MockMvc mvc;
-
-	@Before
-	public void setUp() {
-		this.mvc = MockMvcBuilders.webAppContextSetup(this.context).build();
-	}
 
 	@Test
 	public void testRefresh() throws Exception {
