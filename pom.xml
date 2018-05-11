@@ -125,6 +125,7 @@
 		<module>spring-cloud-commons-dependencies</module>
 		<module>spring-cloud-test-support</module>
 		<module>spring-cloud-context</module>
+		<module>spring-cloud-context-integration-tests</module>
 		<module>spring-cloud-commons</module>
 		<module>spring-cloud-starter</module>
 		<module>docs</module>

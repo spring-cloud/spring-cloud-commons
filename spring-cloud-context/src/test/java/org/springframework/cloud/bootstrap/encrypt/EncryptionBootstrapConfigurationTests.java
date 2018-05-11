@@ -74,7 +74,7 @@ public class EncryptionBootstrapConfigurationTests {
 	@Test
 	public void rsaProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
-				EncryptionBootstrapConfiguration.class).web(false).properties(
+				EncryptionBootstrapConfiguration.class).web(WebApplicationType.NONE).properties(
 				"encrypt.key-store.location:classpath:/server.jks",
 				"encrypt.key-store.password:letmein",
 				"encrypt.key-store.alias:mytestkey", "encrypt.key-store.secret:changeme",

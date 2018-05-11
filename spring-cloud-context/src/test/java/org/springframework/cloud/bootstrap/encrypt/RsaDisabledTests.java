@@ -22,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.test.ClassPathExclusions;
 import org.springframework.cloud.test.ModifiedClassPathRunner;
@@ -41,8 +42,8 @@ public class RsaDisabledTests {
 
 	@Before
 	public void setUp() {
-		context = new SpringApplicationBuilder().web(false)
-				.sources(EncryptionBootstrapConfiguration.class).web(false).properties(
+		context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+				.sources(EncryptionBootstrapConfiguration.class).web(WebApplicationType.NONE).properties(
 						"encrypt.key:mykey",
 						"encrypt.rsa.strong:true",
 						"encrypt.rsa.salt:foobar").run();
