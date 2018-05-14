@@ -524,7 +524,7 @@ public class MyClass {
 </formalpara>
 <simpara>You can also force to use only specified network addresses using list of regular expressions:</simpara>
 <formalpara>
-<title>application.yml</title>
+<title>bootstrap.yml</title>
 <para>
 <screen>spring:
   cloud:
