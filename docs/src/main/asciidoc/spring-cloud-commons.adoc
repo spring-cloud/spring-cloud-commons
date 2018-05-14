@@ -527,7 +527,7 @@ spring:
 
 You can also force to use only specified network addresses using list of regular expressions:
 
-.application.yml
+.bootstrap.yml
 ----
 spring:
   cloud:
