@@ -46,6 +46,6 @@ public class SimpleDiscoveryClient implements DiscoveryClient {
 
 	@Override
 	public int getOrder() {
-		return simpleDiscoveryProperties.getOrder();
+		return this.simpleDiscoveryProperties.getOrder();
 	}
 }

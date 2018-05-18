@@ -32,7 +32,7 @@ public class CompositeDiscoveryClientOrderTest {
 	@Test
 	public void shouldGetOrderedDiscoveryClients() {
 		// when:
-		List<DiscoveryClient> discoveryClients = ((CompositeDiscoveryClient) discoveryClient)
+		List<DiscoveryClient> discoveryClients = ((CompositeDiscoveryClient) this.discoveryClient)
 				.getDiscoveryClients();
 
 		// then:
@@ -47,7 +47,7 @@ public class CompositeDiscoveryClientOrderTest {
 	@Test
 	public void shouldOnlyReturnServiceInstancesForTheHighestPrecedenceDiscoveryClient() {
 		// when:
-		List<ServiceInstance> serviceInstances = discoveryClient
+		List<ServiceInstance> serviceInstances = this.discoveryClient
 				.getInstances(CUSTOM_SERVICE_ID);
 
 		// then:

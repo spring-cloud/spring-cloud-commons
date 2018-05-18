@@ -38,7 +38,7 @@ public class SimpleDiscoveryProperties {
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	public Map<String, List<SimpleServiceInstance>> getInstances() {
-		return instances;
+		return this.instances;
 	}
 
 	public void setInstances(Map<String, List<SimpleServiceInstance>> instances) {
@@ -46,11 +46,11 @@ public class SimpleDiscoveryProperties {
 	}
 
 	public SimpleServiceInstance getLocal() {
-		return local;
+		return this.local;
 	}
 
 	public int getOrder() {
-		return order;
+		return this.order;
 	}
 
 	public void setOrder(int order) {

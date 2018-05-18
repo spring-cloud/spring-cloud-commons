@@ -35,11 +35,11 @@ public class CompositeDiscoveryClientTests {
 
 	@Test
 	public void getInstancesByServiceIdShouldDelegateCall() {
-		assertThat(discoveryClient).isInstanceOf(CompositeDiscoveryClient.class);
+		assertThat(this.discoveryClient).isInstanceOf(CompositeDiscoveryClient.class);
 
-		assertThat(discoveryClient.getInstances("service1")).hasSize(2);
+		assertThat(this.discoveryClient.getInstances("service1")).hasSize(2);
 
-		ServiceInstance s1 = discoveryClient.getInstances("service1").get(0);
+		ServiceInstance s1 = this.discoveryClient.getInstances("service1").get(0);
 		assertThat(s1.getHost()).isEqualTo("s1-1");
 		assertThat(s1.getPort()).isEqualTo(8080);
 		assertThat(s1.getUri()).isEqualTo(URI.create("http://s1-1:8080"));
@@ -48,23 +48,22 @@ public class CompositeDiscoveryClientTests {
 	
 	@Test
 	public void getServicesShouldAggregateAllServiceNames() {
-		assertThat(discoveryClient.getServices()).containsOnlyOnce("service1", "service2",
-				CUSTOM_SERVICE_ID);
+		assertThat(this.discoveryClient.getServices()).containsOnlyOnce("service1", "service2", "custom");
 	}
 	
 	@Test
 	public void getDescriptionShouldBeComposite() {
-		assertThat(discoveryClient.description()).isEqualTo("Composite Discovery Client");
+		assertThat(this.discoveryClient.description()).isEqualTo("Composite Discovery Client");
 	}
 	
 	@Test
 	public void getInstancesShouldRespectOrder() {
-		assertThat(discoveryClient.getInstances(CUSTOM_SERVICE_ID)).hasSize(1);
-		assertThat(discoveryClient.getInstances(CUSTOM_SERVICE_ID)).hasSize(1);
+		assertThat(this.discoveryClient.getInstances(CUSTOM_SERVICE_ID)).hasSize(1);
+		assertThat(this.discoveryClient.getInstances(CUSTOM_SERVICE_ID)).hasSize(1);
 	}
 
 	@Test
 	public void getInstancesByUnknownServiceIdShouldReturnAnEmptyList() {
-		assertThat(discoveryClient.getInstances("unknown")).hasSize(0);
+		assertThat(this.discoveryClient.getInstances("unknown")).hasSize(0);
 	}
 }
