@@ -235,6 +235,30 @@ To disable it, set `spring.cloud.discovery.client.health-indicator.enabled=false
 To disable the description field of the `DiscoveryClientHealthIndicator`, set `spring.cloud.discovery.client.health-indicator.include-description=false`.
 Otherwise, it can bubble up as the `description` of the rolled up `HealthIndicator`.
 
+==== Ordering `DiscoveryClient` instances
+`DiscoveryClient` interface extends `Ordered` to let you define the order of the returned discovery clients, similar to
+how you can order the beans loaded by a Spring application. By default, the order of any `DiscoveryClient` is set to
+`Ordered.LOWEST_PRECEDENCE`, which equals `Integer.MAX_VALUE`. If you want to set a different order for your custom
+`DiscoveryClient` implementations, you just need to override the `getOrder()` method so that it returns the value that
+is suitable for your setup. Apart from this, you can use properties to set the order of the `DiscoveryClient`
+implementations provided by Spring Cloud, among others  `ConsulDiscoveryClient`, `EurekaDiscoveryClient` and
+`ZookeeperDiscoveryClient`. In order to do it, you just need to set the
+`spring.cloud.discovery.client.{clientIdentifier}.order` property to the desired value.
+
+The following example shows how to set order value for Spring Cloud `DiscoveryClient` implementations:
+
+[source,yaml,indent=0]
+----
+spring:
+    cloud:
+        discovery:
+            client:
+                eureka: 1
+----
+
+The following client identifiers are currently supported with this syntax: `eureka`, `consul`, `zookeeper`,
+`cloudfoundry`, `simple`.
+
 === ServiceRegistry
 
 Commons now provides a `ServiceRegistry` interface that provides methods such as `register(Registration)` and `deregister(Registration)`, which let you provide custom registered services.
