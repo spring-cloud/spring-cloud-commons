@@ -7,18 +7,21 @@ import java.util.List;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
- * A {@link DiscoveryClient} composed of other Discovery Client's and will delegate the
+ * A {@link DiscoveryClient} composed of other Discovery Clients that will delegate the
  * calls to each of them in order
  * 
  * @author Biju Kunjummen
+ * @author Olga Maciaszek-Sharma
  */
 public class CompositeDiscoveryClient implements DiscoveryClient {
 
 	private final List<DiscoveryClient> discoveryClients;
 
 	public CompositeDiscoveryClient(List<DiscoveryClient> discoveryClients) {
+		AnnotationAwareOrderComparator.sort(discoveryClients);
 		this.discoveryClients = discoveryClients;
 	}
 

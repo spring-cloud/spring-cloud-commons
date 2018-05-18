@@ -19,13 +19,15 @@ package org.springframework.cloud.client.discovery;
 import java.util.List;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.core.Ordered;
 
 /**
  * DiscoveryClient represents read operations commonly available to Discovery service such as
  * Netflix Eureka or consul.io
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
-public interface DiscoveryClient {
+public interface DiscoveryClient extends Ordered {
 
 	/**
 	 * A human readable description of the implementation, used in HealthIndicator
@@ -45,4 +47,8 @@ public interface DiscoveryClient {
 	 */
 	List<String> getServices();
 
+	@Override
+	default int getOrder() {
+		return Ordered.LOWEST_PRECEDENCE;
+	}
 }

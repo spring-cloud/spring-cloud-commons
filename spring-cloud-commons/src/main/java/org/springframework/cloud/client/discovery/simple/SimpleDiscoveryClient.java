@@ -12,6 +12,7 @@ import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperti
  * properties file as a source of service instances
  *
  * @author Biju Kunjummen
+ * @author Olga Maciaszek-Sharma
  */
 public class SimpleDiscoveryClient implements DiscoveryClient {
 
@@ -41,5 +42,10 @@ public class SimpleDiscoveryClient implements DiscoveryClient {
 	@Override
 	public List<String> getServices() {
 		return new ArrayList<>(this.simpleDiscoveryProperties.getInstances().keySet());
+	}
+
+	@Override
+	public int getOrder() {
+		return simpleDiscoveryProperties.getOrder();
 	}
 }

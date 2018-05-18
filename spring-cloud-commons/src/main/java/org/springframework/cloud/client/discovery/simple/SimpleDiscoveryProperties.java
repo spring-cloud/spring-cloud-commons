@@ -10,13 +10,18 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.core.Ordered;
 
 /**
  * Properties to hold the details of a
  * {@link org.springframework.cloud.client.discovery.DiscoveryClient} service instances
- * for a given service
+ * for a given service.
+ * It also holds the user-configurable order that will be used to establish the
+ * precedence of this client in the list of clients
+ * used by {@link org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClient}.
  *
  * @author Biju Kunjummen
+ * @author Olga Maciaszek-Sharma
  */
 
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
@@ -30,8 +35,10 @@ public class SimpleDiscoveryProperties {
 	 */
 	private SimpleServiceInstance local = new SimpleServiceInstance();
 
+	private int order = Ordered.LOWEST_PRECEDENCE;
+
 	public Map<String, List<SimpleServiceInstance>> getInstances() {
-		return this.instances;
+		return instances;
 	}
 
 	public void setInstances(Map<String, List<SimpleServiceInstance>> instances) {
@@ -39,7 +46,15 @@ public class SimpleDiscoveryProperties {
 	}
 
 	public SimpleServiceInstance getLocal() {
-		return this.local;
+		return local;
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	@PostConstruct
