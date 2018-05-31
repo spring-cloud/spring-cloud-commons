@@ -54,7 +54,7 @@ public class WritableEnvironmentEndpointAutoConfiguration {
 
 	@Bean
 	@ConditionalOnEnabledEndpoint
-	public WritableEnvironmentEndpointWebExtension environmentWebEndpointExtension(
+	public WritableEnvironmentEndpointWebExtension environmentEndpointWebExtension(
 			WritableEnvironmentEndpoint endpoint, EnvironmentManager environment) {
 		return new WritableEnvironmentEndpointWebExtension(endpoint, environment);
 	}
