@@ -363,6 +363,20 @@ public class MyConfiguration {
     }
 }</programlisting>
 <simpara>Each <literal>ServiceRegistry</literal> implementation has its own <literal>Registry</literal> implementation.</simpara>
+<itemizedlist>
+<listitem>
+<simpara><literal>ZookeeperRegistration</literal> used with <literal>ZookeeperServiceRegistry</literal></simpara>
+</listitem>
+<listitem>
+<simpara><literal>EurekaRegistration</literal> used with <literal>EurekaServiceRegistry</literal></simpara>
+</listitem>
+<listitem>
+<simpara><literal>ConsulRegistration</literal> used with <literal>ConsulServiceRegistry</literal></simpara>
+</listitem>
+</itemizedlist>
+<simpara>If you are using the <literal>ServiceRegistry</literal> interface, you are going to need to pass the
+correct <literal>Registry</literal> implementation for the <literal>ServiceRegistry</literal> implementation you
+are using.</simpara>
 <section xml:id="_serviceregistry_auto_registration">
 <title>ServiceRegistry Auto-Registration</title>
 <simpara>By default, the <literal>ServiceRegistry</literal> implementation will auto-register the running service. To disable that behavior, there are two methods. You can set <literal>@EnableDiscoveryClient(autoRegister=false)</literal> to permanently disable auto-registration. You can also set <literal>spring.cloud.service-registry.auto-registration.enabled=false</literal> to disable the behavior via configuration.</simpara>
