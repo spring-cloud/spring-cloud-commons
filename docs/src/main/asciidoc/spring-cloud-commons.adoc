@@ -349,6 +349,14 @@ public class MyConfiguration {
 
 Each `ServiceRegistry` implementation has its own `Registry` implementation.
 
+* `ZookeeperRegistration` used with `ZookeeperServiceRegistry`
+* `EurekaRegistration` used with `EurekaServiceRegistry`
+* `ConsulRegistration` used with `ConsulServiceRegistry`
+
+If you are using the `ServiceRegistry` interface, you are going to need to pass the
+correct `Registry` implementation for the `ServiceRegistry` implementation you
+are using.
+
 
 ==== ServiceRegistry Auto-Registration
 
