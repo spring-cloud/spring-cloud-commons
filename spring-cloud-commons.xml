@@ -283,6 +283,20 @@ public class MyConfiguration {
     }
 }</programlisting>
 <simpara>Each <literal>ServiceRegistry</literal> implementation has its own <literal>Registry</literal> implementation.</simpara>
+<itemizedlist>
+<listitem>
+<simpara><literal>ZookeeperRegistration</literal> used with <literal>ZookeeperServiceRegistry</literal></simpara>
+</listitem>
+<listitem>
+<simpara><literal>EurekaRegistration</literal> used with <literal>EurekaServiceRegistry</literal></simpara>
+</listitem>
+<listitem>
+<simpara><literal>ConsulRegistration</literal> used with <literal>ConsulServiceRegistry</literal></simpara>
+</listitem>
+</itemizedlist>
+<simpara>If you are using the <literal>ServiceRegistry</literal> interface, you are going to need to pass the
+correct <literal>Registry</literal> implementation for the <literal>ServiceRegistry</literal> implementation you
+are using.</simpara>
 <section xml:id="_serviceregistry_auto_registration">
 <title>ServiceRegistry Auto-Registration</title>
 <simpara>By default, the <literal>ServiceRegistry</literal> implementation auto-registers the running service.
@@ -496,7 +510,7 @@ The following configuration ignores the <literal>docker0</literal> interface and
 </formalpara>
 <simpara>You can also force the use of only specified network addresses by using a list of regular expressions, as shown in the following example:</simpara>
 <formalpara>
-<title>application.yml</title>
+<title>bootstrap.yml</title>
 <para>
 <screen>spring:
   cloud:

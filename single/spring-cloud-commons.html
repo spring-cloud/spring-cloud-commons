@@ -112,7 +112,9 @@ Otherwise, it can bubble up as the <code class="literal">description</code> of t
         Registration registration = constructRegistration();
         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">this</span>.registry.register(registration);
     }
-}</pre><p>Each <code class="literal">ServiceRegistry</code> implementation has its own <code class="literal">Registry</code> implementation.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_serviceregistry_auto_registration" href="#_serviceregistry_auto_registration"></a>2.2.1&nbsp;ServiceRegistry Auto-Registration</h3></div></div></div><p>By default, the <code class="literal">ServiceRegistry</code> implementation auto-registers the running service.
+}</pre><p>Each <code class="literal">ServiceRegistry</code> implementation has its own <code class="literal">Registry</code> implementation.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><code class="literal">ZookeeperRegistration</code> used with <code class="literal">ZookeeperServiceRegistry</code></li><li class="listitem"><code class="literal">EurekaRegistration</code> used with <code class="literal">EurekaServiceRegistry</code></li><li class="listitem"><code class="literal">ConsulRegistration</code> used with <code class="literal">ConsulServiceRegistry</code></li></ul></div><p>If you are using the <code class="literal">ServiceRegistry</code> interface, you are going to need to pass the
+correct <code class="literal">Registry</code> implementation for the <code class="literal">ServiceRegistry</code> implementation you
+are using.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_serviceregistry_auto_registration" href="#_serviceregistry_auto_registration"></a>2.2.1&nbsp;ServiceRegistry Auto-Registration</h3></div></div></div><p>By default, the <code class="literal">ServiceRegistry</code> implementation auto-registers the running service.
 To disable that behavior, you can set:
 * <code class="literal">@EnableDiscoveryClient(autoRegister=false)</code> to permanently disable auto-registration.
 * <code class="literal">spring.cloud.service-registry.auto-registration.enabled=false</code> to disable the behavior through configuration.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_service_registry_actuator_endpoint" href="#_service_registry_actuator_endpoint"></a>2.2.2&nbsp;Service Registry Actuator Endpoint</h3></div></div></div><p>Spring Cloud Commons provides a <code class="literal">/service-registry</code> actuator endpoint.
@@ -264,7 +266,7 @@ The following configuration ignores the <code class="literal">docker0</code> int
       ignoredInterfaces:
         - docker0
         - veth.*</pre><p>
-</p><p>You can also force the use of only specified network addresses by using a list of regular expressions, as shown in the following example:</p><p><b>application.yml.&nbsp;</b>
+</p><p>You can also force the use of only specified network addresses by using a list of regular expressions, as shown in the following example:</p><p><b>bootstrap.yml.&nbsp;</b>
 </p><pre class="screen">spring:
   cloud:
     inetutils:
