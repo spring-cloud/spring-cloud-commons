@@ -21,10 +21,11 @@ Spring Cloud builds on top of that and adds a few features that probably all com
 
 === The Bootstrap Application Context
 
+<<<<<<< HEAD
 A Spring Cloud application operates by creating a "`bootstrap`" context, which is a parent context for the main application.
 It is responsible for loading configuration properties from the external sources and for decrypting properties in the local external configuration files.
 The two contexts share an `Environment`, which is the source of external properties for any Spring application.
-By default, bootstrap properties are added with high precedence, so they cannot be overridden by local configuration.
+By default, bootstrap properties (not `bootstrap.properties` but properties that are loaded during the bootstrap phase) are added with high precedence, so they cannot be overridden by local configuration.
 
 The bootstrap context uses a different convention for locating external configuration than the main application context.
 Instead of `application.yml` (or `.properties`), you can use `bootstrap.yml`, keeping the external configuration for bootstrap and main context
