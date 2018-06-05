@@ -306,6 +306,9 @@ For a Spring Boot Actuator application there are some additional management endp
 * `/restart` for closing the `ApplicationContext` and restarting it (disabled by default)
 * `/pause` and `/resume` for calling the `Lifecycle` methods (`stop()` and `start()` on the `ApplicationContext`)
 
+NOTE: If you disable the `/restart` endpoint then the `/pause` and `/resume` endpoints
+will also be disabled since they are just a special case of `/restart`.
+
 == Spring Cloud Commons: Common Abstractions
 
 Patterns such as service discovery, load balancing and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (e.g. discovery via Eureka or Consul).
