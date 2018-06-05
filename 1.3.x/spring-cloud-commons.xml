@@ -42,7 +42,8 @@ the box it is responsible for loading configuration properties from
 the external sources, and also decrypting properties in the local
 external configuration files. The two contexts share an <literal>Environment</literal>
 which is the source of external properties for any Spring
-application. Bootstrap properties are added with high precedence, so
+application. Bootstrap properties (not <literal>bootstrap.properties</literal> but properties
+ that are loaded during the bootstrap phase) are added with high precedence, so
 they cannot be overridden by local configuration, by default.</simpara>
 <simpara>The bootstrap context uses a different convention for locating
 external configuration than the main application context, so instead
