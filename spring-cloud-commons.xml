@@ -235,6 +235,10 @@ See the following links for more information:</simpara>
 <simpara><literal>/actuator/pause</literal> and <literal>/actuator/resume</literal> for calling the <literal>Lifecycle</literal> methods (<literal>stop()</literal> and <literal>start()</literal> on the <literal>ApplicationContext</literal>).</simpara>
 </listitem>
 </itemizedlist>
+<note>
+<simpara>If you disable the <literal>/actuator/restart</literal> endpoint then the <literal>/actuator/pause</literal> and <literal>/actuator/resume</literal> endpoints
+will also be disabled since they are just a special case of <literal>/actuator/restart</literal>.</simpara>
+</note>
 </section>
 </chapter>
 <chapter xml:id="_spring_cloud_commons_common_abstractions">
