@@ -21,7 +21,6 @@ Spring Cloud builds on top of that and adds a few features that probably all com
 
 === The Bootstrap Application Context
 
-<<<<<<< HEAD
 A Spring Cloud application operates by creating a "`bootstrap`" context, which is a parent context for the main application.
 It is responsible for loading configuration properties from the external sources and for decrypting properties in the local external configuration files.
 The two contexts share an `Environment`, which is the source of external properties for any Spring application.
