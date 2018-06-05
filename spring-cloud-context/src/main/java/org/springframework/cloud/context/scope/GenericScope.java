@@ -127,7 +127,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 
 	@Override
 	public void destroy() {
-		List<Throwable> errors = new ArrayList<Throwable>();
+		List<Throwable> errors = new ArrayList<>();
 		Collection<BeanLifecycleWrapper> wrappers = this.cache.clear();
 		for (BeanLifecycleWrapper wrapper : wrappers) {
 			try {
@@ -256,6 +256,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 					if (getName().equals(root.getDecoratedDefinition().getBeanDefinition()
 							.getScope())) {
 						root.setBeanClass(LockedScopedProxyFactoryBean.class);
+						root.getConstructorArgumentValues().addGenericArgumentValue(this);
 					}
 				}
 			}
@@ -311,6 +312,10 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 		return this.name;
 	}
 
+	ReadWriteLock getLock(String beanName) {
+		return locks.get(beanName);
+	}
+
 	private static class BeanLifecycleWrapperCache {
 
 		private final ScopeCache cache;
@@ -325,7 +330,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 
 		public Collection<BeanLifecycleWrapper> clear() {
 			Collection<Object> values = this.cache.clear();
-			Collection<BeanLifecycleWrapper> wrappers = new LinkedHashSet<BeanLifecycleWrapper>();
+			Collection<BeanLifecycleWrapper> wrappers = new LinkedHashSet<>();
 			for (Object object : values) {
 				wrappers.add((BeanLifecycleWrapper) object);
 			}
@@ -432,10 +437,15 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	}
 
 	@SuppressWarnings("serial")
-	public class LockedScopedProxyFactoryBean extends ScopedProxyFactoryBean
-			implements MethodInterceptor {
+	public static class LockedScopedProxyFactoryBean<S extends GenericScope>
+			extends ScopedProxyFactoryBean implements MethodInterceptor {
 
+		private final S scope;
 		private String targetBeanName;
+
+		public LockedScopedProxyFactoryBean(S scope) {
+			this.scope = scope;
+		}
 
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) {
@@ -463,7 +473,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 				return invocation.proceed();
 			}
 			Object proxy = getObject();
-			Lock lock = locks.get(this.targetBeanName).readLock();
+			Lock lock = scope.getLock(this.targetBeanName).readLock();
 			lock.lock();
 			try {
 				if (proxy instanceof Advised) {
