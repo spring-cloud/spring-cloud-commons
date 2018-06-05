@@ -103,7 +103,7 @@ context you are building), properties in that profile get loaded as well, the sa
 <section xml:id="overriding-bootstrap-properties">
 <title>Overriding the Values of Remote Properties</title>
 <simpara>The property sources that are added to your application by the bootstrap context are often &#8220;remote&#8221; (from example, from Spring Cloud Config Server).
-By default, they cannot be overridden locally, except on the command line.
+By default, they cannot be overridden locally.
 If you want to let your applications override the remote properties with their own System properties or config files, the remote property source has to grant it permission by setting <literal>spring.cloud.config.allowOverride=true</literal> (it does not work to set this locally).
 Once that flag is set, two finer-grained settings control the location of the remote properties in relation to system properties and the application&#8217;s local configuration:</simpara>
 <itemizedlist>
@@ -111,7 +111,7 @@ Once that flag is set, two finer-grained settings control the location of the re
 <simpara><literal>spring.cloud.config.overrideNone=true</literal>: Override from any local property source.</simpara>
 </listitem>
 <listitem>
-<simpara><literal>spring.cloud.config.overrideSystemProperties=false</literal>: Only system properties and environment variables (but not the local config files) should override the remote settings.</simpara>
+<simpara><literal>spring.cloud.config.overrideSystemProperties=false</literal>: Only system properties, command line arguments, and environment variables (but not the local config files) should override the remote settings.</simpara>
 </listitem>
 </itemizedlist>
 </section>
