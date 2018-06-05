@@ -326,6 +326,10 @@ the full strength JCE extensions in your JVM.</simpara>
 <simpara><literal>/pause</literal> and <literal>/resume</literal> for calling the <literal>Lifecycle</literal> methods (<literal>stop()</literal> and <literal>start()</literal> on the <literal>ApplicationContext</literal>)</simpara>
 </listitem>
 </itemizedlist>
+<note>
+<simpara>If you disable the <literal>/restart</literal> endpoint then the <literal>/pause</literal> and <literal>/resume</literal> endpoints
+will also be disabled since they are just a special case of <literal>/restart</literal>.</simpara>
+</note>
 </section>
 </chapter>
 <chapter xml:id="_spring_cloud_commons_common_abstractions">
