@@ -40,10 +40,11 @@ For instance, it has conventional locations for common configuration files and h
 Spring Cloud builds on top of that and adds a few features that probably all components in a system would use or occasionally need.</simpara>
 <section xml:id="_the_bootstrap_application_context">
 <title>The Bootstrap Application Context</title>
-<simpara>A Spring Cloud application operates by creating a &#8220;bootstrap&#8221; context, which is a parent context for the main application.
+<simpara>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+A Spring Cloud application operates by creating a &#8220;bootstrap&#8221; context, which is a parent context for the main application.
 It is responsible for loading configuration properties from the external sources and for decrypting properties in the local external configuration files.
 The two contexts share an <literal>Environment</literal>, which is the source of external properties for any Spring application.
-By default, bootstrap properties are added with high precedence, so they cannot be overridden by local configuration.</simpara>
+By default, bootstrap properties (not <literal>bootstrap.properties</literal> but properties that are loaded during the bootstrap phase) are added with high precedence, so they cannot be overridden by local configuration.</simpara>
 <simpara>The bootstrap context uses a different convention for locating external configuration than the main application context.
 Instead of <literal>application.yml</literal> (or <literal>.properties</literal>), you can use <literal>bootstrap.yml</literal>, keeping the external configuration for bootstrap and main context
 nicely separate.
