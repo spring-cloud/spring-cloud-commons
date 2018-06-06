@@ -215,6 +215,12 @@ Config Server property source locator).</simpara>
 <simpara>then the "customProperty" <literal>PropertySource</literal> will show up in any
 application that includes that jar on its classpath.</simpara>
 </section>
+<section xml:id="_logging_configuration">
+<title>Logging Configuration</title>
+<simpara>If you are going to use Spring Boot to configure log settings than
+you should place this configuration in `bootstrap.[yml | properties]
+if you would like it to apply to all events.</simpara>
+</section>
 <section xml:id="_environment_changes">
 <title>Environment Changes</title>
 <simpara>The application will listen for an <literal>EnvironmentChangeEvent</literal> and react
