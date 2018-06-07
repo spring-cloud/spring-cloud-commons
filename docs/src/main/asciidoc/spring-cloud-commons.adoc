@@ -140,6 +140,12 @@ If you create a jar with this class in it and then add a `META-INF/spring.factor
 org.springframework.cloud.bootstrap.BootstrapConfiguration=sample.custom.CustomPropertySourceLocator
 ----
 
+=== Logging Configuration
+
+If you are going to use Spring Boot to configure log settings than
+you should place this configuration in `bootstrap.[yml | properties]
+if you would like it to apply to all events.
+
 === Environment Changes
 
 The application listens for an `EnvironmentChangeEvent` and reacts to the change in a couple of standard ways (additional `ApplicationListeners` can be added as `@Beans` by the user in the normal way).
