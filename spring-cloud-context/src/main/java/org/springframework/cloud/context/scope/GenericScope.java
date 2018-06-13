@@ -258,6 +258,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 					if (getName().equals(root.getDecoratedDefinition().getBeanDefinition()
 							.getScope())) {
 						root.setBeanClass(LockedScopedProxyFactoryBean.class);
+						root.getConstructorArgumentValues().addGenericArgumentValue(this);
 						// surprising that a scoped proxy bean definition is not already
 						// marked as synthetic?
 						root.setSynthetic(true);
@@ -314,6 +315,10 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 
 	protected String getName() {
 		return this.name;
+	}
+
+	protected ReadWriteLock getLock(String beanName) {
+		return locks.get(beanName);
 	}
 
 	private static class BeanLifecycleWrapperCache {
@@ -437,10 +442,15 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	}
 
 	@SuppressWarnings("serial")
-	public class LockedScopedProxyFactoryBean extends ScopedProxyFactoryBean
-			implements MethodInterceptor {
+	public static class LockedScopedProxyFactoryBean<S extends GenericScope>
+			extends ScopedProxyFactoryBean implements MethodInterceptor {
 
+		private final S scope;
 		private String targetBeanName;
+
+		public LockedScopedProxyFactoryBean(S scope) {
+			this.scope = scope;
+		}
 
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) {
@@ -467,14 +477,14 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 				return invocation.proceed();
 			}
 			Object proxy = getObject();
-			ReadWriteLock readWriteLock = locks.get(this.targetBeanName);
-			if (readWriteLock == null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("For bean with name [" + this.targetBeanName + "] there is no read write lock. Will create a new one to avoid NPE");
-				}
-				readWriteLock = new ReentrantReadWriteLock();
-			}
-			Lock lock = readWriteLock.readLock();
+            ReadWriteLock readWriteLock = scope.getLock(this.targetBeanName);
+            if (readWriteLock == null) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("For bean with name [" + this.targetBeanName + "] there is no read write lock. Will create a new one to avoid NPE");
+                }
+                readWriteLock = new ReentrantReadWriteLock();
+            }
+            Lock lock = readWriteLock.readLock();
 			lock.lock();
 			try {
 				if (proxy instanceof Advised) {
