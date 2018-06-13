@@ -477,14 +477,15 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 				return invocation.proceed();
 			}
 			Object proxy = getObject();
-            ReadWriteLock readWriteLock = scope.getLock(this.targetBeanName);
-            if (readWriteLock == null) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("For bean with name [" + this.targetBeanName + "] there is no read write lock. Will create a new one to avoid NPE");
-                }
-                readWriteLock = new ReentrantReadWriteLock();
-            }
-            Lock lock = readWriteLock.readLock();
+			ReadWriteLock readWriteLock = scope.getLock(this.targetBeanName);
+			if (readWriteLock == null) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("For bean with name [" + this.targetBeanName
+							+ "] there is no read write lock. Will create a new one to avoid NPE");
+				}
+				readWriteLock = new ReentrantReadWriteLock();
+			}
+			Lock lock = readWriteLock.readLock();
 			lock.lock();
 			try {
 				if (proxy instanceof Advised) {
