@@ -179,7 +179,7 @@ For instance, a <literal>DataSource</literal> can have its <literal>maxPoolSize<
 Re-binding <literal>@ConfigurationProperties</literal> does not cover another large class of use cases, where you need more control over the refresh and where you need a change to be atomic over the whole <literal>ApplicationContext</literal>.
 To address those concerns, we have <literal>@RefreshScope</literal>.</simpara>
 </section>
-<section xml:id="_refresh_scope">
+<section xml:id="refresh-scope">
 <title>Refresh Scope</title>
 <simpara>When there is a configuration change, a Spring <literal>@Bean</literal> that is marked as <literal>@RefreshScope</literal> gets special treatment.
 This feature addresses the problem of stateful beans that only get their configuration injected when they are initialized.
