@@ -49,6 +49,7 @@ import org.springframework.beans.factory.config.Scope;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.DefaultSingletonBeanRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -360,7 +361,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	 * @author Dave Syer
 	 *
 	 */
-	private static class BeanLifecycleWrapper {
+	private class BeanLifecycleWrapper {
 
 		private Object bean;
 
@@ -385,9 +386,23 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 
 		public Object getBean() {
 			if (this.bean == null) {
-				synchronized (this.name) {
-					if (this.bean == null) {
-						this.bean = this.objectFactory.getObject();
+				if (beanFactory instanceof DefaultSingletonBeanRegistry
+						&& this.callback == null) {
+					// DefaultSingletonBeanRegistry takes a lock in here that we need to
+					// have in case two threads want to create a bean at the same time.
+					this.bean = ((DefaultSingletonBeanRegistry) beanFactory)
+							.getSingleton(this.name, this.objectFactory);
+					// The callback is null at this point so nothing will happen, but we
+					// don't want the bean registered as a singleton, otherwise it won't
+					// be scoped.
+					((DefaultSingletonBeanRegistry) beanFactory)
+							.destroySingleton(this.name);
+				}
+				else {
+					synchronized (this.name) {
+						if (this.bean == null) {
+							this.bean = this.objectFactory.getObject();
+						}
 					}
 				}
 			}
@@ -497,7 +512,8 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 				}
 				return invocation.proceed();
 			}
-			// see gh-349. Throw the original exception rather than the UndeclaredThrowableException
+			// see gh-349. Throw the original exception rather than the
+			// UndeclaredThrowableException
 			catch (UndeclaredThrowableException e) {
 				throw e.getUndeclaredThrowable();
 			}
