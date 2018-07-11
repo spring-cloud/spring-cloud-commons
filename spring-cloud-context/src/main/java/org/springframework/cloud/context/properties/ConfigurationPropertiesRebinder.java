@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -34,7 +33,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
-import org.springframework.cloud.commons.util.ProxyUtils;
+import org.springframework.cloud.util.ProxyUtils;
 
 /**
  * Listens for {@link EnvironmentChangeEvent} and rebinds beans that were bound to the

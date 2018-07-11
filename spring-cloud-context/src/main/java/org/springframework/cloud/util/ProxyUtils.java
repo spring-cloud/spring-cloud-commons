@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.commons.util;
+package org.springframework.cloud.util;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
