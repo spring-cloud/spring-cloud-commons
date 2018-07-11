@@ -34,6 +34,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
+import org.springframework.cloud.commons.util.ProxyUtils;
 
 /**
  * Listens for {@link EnvironmentChangeEvent} and rebinds beans that were bound to the
@@ -94,7 +95,7 @@ public class ConfigurationPropertiesRebinder
 			try {
 				Object bean = this.applicationContext.getBean(name);
 				if (AopUtils.isAopProxy(bean)) {
-					bean = getTargetObject(bean);
+					bean = ProxyUtils.getTargetObject(bean);
 				}
 				this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
 				this.applicationContext.getAutowireCapableBeanFactory()
@@ -107,19 +108,6 @@ public class ConfigurationPropertiesRebinder
 			}
 		}
 		return false;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> T getTargetObject(Object candidate) {
-		try {
-			if (AopUtils.isAopProxy(candidate) && (candidate instanceof Advised)) {
-				return (T) ((Advised) candidate).getTargetSource().getTarget();
-			}
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException("Failed to unwrap proxied object", ex);
-		}
-		return (T) candidate;
 	}
 
 	@ManagedAttribute
