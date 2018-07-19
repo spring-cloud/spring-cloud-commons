@@ -155,6 +155,10 @@ It already has its normal Spring Boot-provided property sources, so you can use 
 <simpara>If you are going to use Spring Boot to configure log settings than
 you should place this configuration in `bootstrap.[yml | properties]
 if you would like it to apply to all events.</simpara>
+<note>
+<simpara>For Spring Cloud to initialize logging configuration properly you cannot use a custom prefix.  For example,
+using <literal>custom.loggin.logpath</literal> will not be recognized by Spring Cloud when initializing the logging system.</simpara>
+</note>
 </section>
 <section xml:id="_environment_changes">
 <title>Environment Changes</title>
