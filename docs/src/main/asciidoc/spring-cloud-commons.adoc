@@ -146,6 +146,9 @@ If you are going to use Spring Boot to configure log settings than
 you should place this configuration in `bootstrap.[yml | properties]
 if you would like it to apply to all events.
 
+NOTE: For Spring Cloud to initialize logging configuration properly you cannot use a custom prefix.  For example,
+using `custom.loggin.logpath` will not be recognized by Spring Cloud when initializing the logging system.
+
 === Environment Changes
 
 The application listens for an `EnvironmentChangeEvent` and reacts to the change in a couple of standard ways (additional `ApplicationListeners` can be added as `@Beans` by the user in the normal way).
