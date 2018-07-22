@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
@@ -31,6 +33,8 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * @author Venil Noronha
  */
 public class ContextRefresher {
+
+	static final Logger logger=LoggerFactory.getLogger(ContextRefresher.class);
 
 	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
 
@@ -65,8 +69,17 @@ public class ContextRefresher {
 		addConfigFilesToEnvironment();
 		Set<String> keys = changes(before,
 				extract(this.context.getEnvironment().getPropertySources())).keySet();
+		if(keys.isEmpty()){
+			if(logger.isDebugEnabled()){
+				logger.debug("environment don't changed,refresh exit");
+			}
+			return keys;
+		}
 		this.context.publishEvent(new EnvironmentChangeEvent(context, keys));
 		this.scope.refreshAll();
+
+		this.context.publishEvent(new RefreshCompleteEvent(context,keys));
+
 		return keys;
 	}
 
