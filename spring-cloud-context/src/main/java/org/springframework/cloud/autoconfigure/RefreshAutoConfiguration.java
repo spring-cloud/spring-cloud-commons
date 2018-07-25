@@ -102,7 +102,7 @@ public class RefreshAutoConfiguration {
 		 * control the bean definition (e.g. it came from auto-configuration).
 		 */
 		private Set<String> refreshables = new HashSet<>(
-				Arrays.asList("com.zaxxer.hikari.HikariDataSource"));
+				Arrays.asList(new String[] { "javax.sql.DataSource", "com.zaxxer.hikari.HikariDataSource" }));
 
 		private Environment environment;
 
