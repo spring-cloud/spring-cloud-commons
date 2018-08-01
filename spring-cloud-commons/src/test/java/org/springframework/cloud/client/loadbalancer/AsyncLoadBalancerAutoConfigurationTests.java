@@ -19,6 +19,7 @@ package org.springframework.cloud.client.loadbalancer;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -89,7 +90,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 	}
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
-		return new SpringApplicationBuilder().web(false)
+		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.aop.proxyTargetClass=true")
 				.sources(config, AsyncLoadBalancerAutoConfiguration.class).run();
 	}

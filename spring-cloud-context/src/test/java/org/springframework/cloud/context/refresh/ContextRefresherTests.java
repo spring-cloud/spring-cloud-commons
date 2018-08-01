@@ -38,7 +38,7 @@ public class ContextRefresherTests {
 	@Test
 	public void orderNewPropertiesConsistentWithNewContext() {
 		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
-				"--spring.main.webEnvironment=false", "--debug=false",
+				"--spring.main.web-application-type=none", "--debug=false",
 				"--spring.main.bannerMode=OFF")) {
 			context.getEnvironment().setActiveProfiles("refresh");
 			List<String> names = names(context.getEnvironment().getPropertySources());
@@ -61,7 +61,7 @@ public class ContextRefresherTests {
 		// Use spring.cloud.bootstrap.name to switch off the defaults (which would pick up
 		// a bootstrapProperties immediately
 		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
-				"--spring.main.webEnvironment=false", "--debug=false",
+				"--spring.main.web-application-type=none", "--debug=false",
 				"--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh")) {
 			List<String> names = names(context.getEnvironment().getPropertySources());
@@ -82,7 +82,7 @@ public class ContextRefresherTests {
 		// Use spring.cloud.bootstrap.name to switch off the defaults (which would pick up
 		// a bootstrapProperties immediately
 		try (ConfigurableApplicationContext context = SpringApplication.run(
-				ContextRefresherTests.class, "--spring.main.webEnvironment=false",
+				ContextRefresherTests.class, "--spring.main.web-application-type=none",
 				"--debug=false", "--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh")) {
 			ContextRefresher refresher = new ContextRefresher(context, scope);
@@ -107,7 +107,7 @@ public class ContextRefresherTests {
 				.get(getClass().getClassLoader());
 		assertThat(system.getCount()).isEqualTo(0);
 		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
-				"--spring.main.webEnvironment=false", "--debug=false",
+				"--spring.main.web-application-type=none", "--debug=false",
 				"--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh")) {
 			assertThat(system.getCount()).isEqualTo(4);
@@ -123,7 +123,7 @@ public class ContextRefresherTests {
 		TestBootstrapConfiguration.fooSightings = new ArrayList<>();
 
 		try (ConfigurableApplicationContext context = SpringApplication.run(ContextRefresherTests.class,
-				"--spring.main.webEnvironment=false", "--debug=false",
+				"--spring.main.web-application-type=none", "--debug=false",
 				"--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh",
 				"--test.bootstrap.foo=bar")) {

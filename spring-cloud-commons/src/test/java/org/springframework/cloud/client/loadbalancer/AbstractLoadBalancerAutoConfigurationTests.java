@@ -31,6 +31,7 @@ import java.util.Random;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -81,7 +82,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	}
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
-		return new SpringApplicationBuilder().web(false)
+		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.aop.proxyTargetClass=true")
 				.sources(config, LoadBalancerAutoConfiguration.class).run();
 	}
