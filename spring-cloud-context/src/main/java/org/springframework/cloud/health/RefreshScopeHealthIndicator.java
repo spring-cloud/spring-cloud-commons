@@ -46,16 +46,18 @@ public class RefreshScopeHealthIndicator extends AbstractHealthIndicator {
 	@Override
 	protected void doHealthCheck(Builder builder) throws Exception {
 		RefreshScope refreshScope = this.scope.getIfAvailable();
-		if(refreshScope != null) {
+		if (refreshScope != null) {
 			Map<String, Exception> errors = new HashMap<>(refreshScope.getErrors());
 			errors.putAll(this.rebinder.getErrors());
 			if (errors.isEmpty()) {
 				builder.up();
-			} else {
+			}
+			else {
 				builder.down();
 				if (errors.size() == 1) {
 					builder.withException(errors.values().iterator().next());
-				} else {
+				}
+				else {
 					for (String name : errors.keySet()) {
 						builder.withDetail(name, errors.get(name));
 					}
