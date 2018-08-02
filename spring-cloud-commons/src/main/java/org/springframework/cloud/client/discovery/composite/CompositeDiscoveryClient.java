@@ -9,8 +9,8 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
- * A {@link DiscoveryClient} composed of other Discovery Client's and will delegate the
- * calls to each of them in order
+ * A {@link DiscoveryClient} that is composed of other discovery clients and delegates
+ * calls to each of them in order.
  * 
  * @author Biju Kunjummen
  */

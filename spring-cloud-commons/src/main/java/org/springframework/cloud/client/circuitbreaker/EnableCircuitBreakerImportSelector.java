@@ -21,7 +21,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
 /**
- * Import a single circuit breaker implementation Configuration
+ * Imports a single circuit breaker implementation configuration.
  * @author Spencer Gibb
  */
 @Order(Ordered.LOWEST_PRECEDENCE - 100)

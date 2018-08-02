@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Primary;
 import java.util.List;
 
 /**
- * Auto-configuration for Composite Discovery Client.
+ * Auto-configuration for composite discovery client.
  * 
  * @author Biju Kunjummen
  */

@@ -27,9 +27,9 @@ import org.springframework.cloud.client.ServiceInstance;
 public interface ServiceInstanceChooser {
 
     /**
-     * Choose a ServiceInstance from the LoadBalancer for the specified service
-     * @param serviceId the service id to look up the LoadBalancer
-     * @return a ServiceInstance that matches the serviceId
+     * Chooses a ServiceInstance from the LoadBalancer for the specified service.
+     * @param serviceId The service ID to look up the LoadBalancer.
+     * @return A ServiceInstance that matches the serviceId.
      */
     ServiceInstance choose(String serviceId);
 }

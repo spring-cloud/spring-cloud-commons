@@ -26,7 +26,7 @@ import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 public interface TraversalDefinition {
 
 	/**
-	 * @param traverson the Traverson instance to run the traversal on.
+	 * @param traverson The Traverson instance to run the traversal on.
 	 */
 	TraversalBuilder buildTraversal(Traverson traverson);
 }

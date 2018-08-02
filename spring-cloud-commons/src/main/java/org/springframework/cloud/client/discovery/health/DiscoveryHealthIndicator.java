@@ -19,7 +19,7 @@ package org.springframework.cloud.client.discovery.health;
 import org.springframework.boot.actuate.health.Health;
 
 /**
- * A health indicator interface specific for a DiscoveryClient implementation
+ * A health indicator interface specific to a DiscoveryClient implementation.
  * @author Spencer Gibb
  */
 public interface DiscoveryHealthIndicator {
@@ -27,7 +27,7 @@ public interface DiscoveryHealthIndicator {
 	String getName();
 
 	/**
-	 * @return an indication of health
+	 * @return An indication of health.
 	 */
 	Health health();
 

@@ -32,10 +32,10 @@ public class InterceptorRetryPolicy implements RetryPolicy {
 
     /**
      * Creates a new retry policy.
-     * @param request the request that will be retried
-     * @param policy the retry policy from the load balancer
-     * @param serviceInstanceChooser the load balancer client
-     * @param serviceName the name of the service
+     * @param request The request that will be retried.
+     * @param policy The retry policy from the load balancer.
+     * @param serviceInstanceChooser The load balancer client.
+     * @param serviceName The name of the service.
      */
     public InterceptorRetryPolicy(HttpRequest request, LoadBalancedRetryPolicy policy,
 								  ServiceInstanceChooser serviceInstanceChooser, String serviceName) {

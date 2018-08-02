@@ -36,28 +36,29 @@ public class InetUtilsProperties {
 	private String defaultHostname = "localhost";
 
 	/**
-	 * The default ipaddress. Used in case of errors.
+	 * The default IP address. Used in case of errors.
 	 */
 	private String defaultIpAddress = "127.0.0.1";
 
 	/**
-	 * Timeout in seconds for calculating hostname.
+	 * Timeout, in seconds, for calculating hostname.
 	 */
 	@Value("${spring.util.timeout.sec:${SPRING_UTIL_TIMEOUT_SEC:1}}")
 	private int timeoutSeconds = 1;
 
 	/**
-	 * List of Java regex expressions for network interfaces that will be ignored.
+	 * List of Java regular expressions for network interfaces that will be ignored.
 	 */
 	private List<String> ignoredInterfaces = new ArrayList<>();
 	
 	/**
-	 * Use only interfaces with site local addresses. See {@link InetAddress#isSiteLocalAddress()} for more details.
+	 * Whether to use only interfaces with site local addresses.
+   * See {@link InetAddress#isSiteLocalAddress()} for more details.
 	 */
 	private boolean useOnlySiteLocalInterfaces = false;
 	
 	/**
-	 * List of Java regex expressions for network addresses that will be preferred.
+	 * List of Java regular expressions for network addresses that will be preferred.
 	 */
 	private List<String> preferredNetworks = new ArrayList<>();
 
