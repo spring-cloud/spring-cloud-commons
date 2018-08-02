@@ -12,7 +12,7 @@ import org.springframework.context.event.EventListener;
 
 /**
  * Calls {@link RefreshEventListener#refresh} when a {@link RefreshEvent} is received.
- * Only responds to {@link RefreshEvent} after receiving an {@link ApplicationReadyEvent} as the RefreshEvent's might come to early in the application lifecycle.
+ * Only responds to {@link RefreshEvent} after receiving an {@link ApplicationReadyEvent}, as the RefreshEvents might come too early in the application lifecycle.
  * @author Spencer Gibb
  */
 public class RefreshEventListener {

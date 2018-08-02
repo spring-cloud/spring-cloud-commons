@@ -39,10 +39,10 @@ import org.springframework.cloud.util.ProxyUtils;
  * Listens for {@link EnvironmentChangeEvent} and rebinds beans that were bound to the
  * {@link Environment} using {@link ConfigurationProperties
  * <code>@ConfigurationProperties</code>}. When these beans are re-bound and
- * re-initialized the changes are available immediately to any component that is using the
+ * re-initialized, the changes are available immediately to any component that is using the
  * <code>@ConfigurationProperties</code> bean.
  *
- * @see RefreshScope for a deeper and optionally more focused refresh of bean components
+ * @see RefreshScope for a deeper and optionally more focused refresh of bean components.
  *
  * @author Dave Syer
  *
@@ -71,7 +71,7 @@ public class ConfigurationPropertiesRebinder
 	/**
 	 * A map of bean name to errors when instantiating the bean.
 	 *
-	 * @return the errors accumulated since the latest destroy
+	 * @return The errors accumulated since the latest destroy.
 	 */
 	public Map<String, Exception> getErrors() {
 		return this.errors;

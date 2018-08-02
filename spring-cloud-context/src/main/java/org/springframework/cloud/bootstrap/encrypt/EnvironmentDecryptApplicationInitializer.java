@@ -42,7 +42,7 @@ import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 /**
- * Decrypt properties from the environment and insert them with high priority so they
+ * Decrypts properties from the environment and inserts them with high priority so they
  * override the encrypted values.
  *
  * @author Dave Syer
@@ -67,7 +67,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 	/**
 	 * Strategy to determine how to handle exceptions during decryption.
 	 *
-	 * @param failOnError the flag value (default true)
+	 * @param failOnError The flag value (default true).
 	 */
 	public void setFailOnError(boolean failOnError) {
 		this.failOnError = failOnError;

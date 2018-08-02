@@ -27,7 +27,7 @@ import org.springframework.cloud.context.scope.refresh.RefreshScope;
 
 /**
  * Health indicator for the refresh scope and configuration properties rebinding. If an
- * environment change causes a bean to fail in instantiate or bind this indicator will
+ * environment change causes a bean to fail in instantiate or bind, this indicator will
  * generally say what the problem was and switch to DOWN.
  *
  * @author Dave Syer
