@@ -27,15 +27,15 @@ public class LoadBalancerRetryProperties {
 
     /**
      * Returns true if the load balancer should retry failed requests.
-     * @return true if the load balancer should retry failed request, false otherwise.
+     * @return True if the load balancer should retry failed requests; false otherwise.
      */
     public boolean isEnabled() {
         return enabled;
     }
 
     /**
-     * Sets whether the load balancer should retry failed request.
-     * @param enabled whether the load balancer should retry failed requests
+     * Sets whether the load balancer should retry failed requests.
+     * @param enabled Whether the load balancer should retry failed requests.
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;

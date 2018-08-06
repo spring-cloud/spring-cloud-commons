@@ -24,7 +24,7 @@ import org.springframework.boot.actuate.endpoint.web.annotation.EndpointWebExten
 import org.springframework.boot.actuate.env.EnvironmentEndpointWebExtension;
 
 /**
- * MVC endpoint for the {@link EnvironmentManager} providing a POST to /env as a simple
+ * MVC endpoint for the {@link EnvironmentManager}, providing a POST to /env as a simple
  * way to change the Environment.
  * 
  * @author Dave Syer

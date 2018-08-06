@@ -33,13 +33,13 @@ public interface ApacheHttpClientConnectionManagerFactory {
 
 	/**
 	 * Creates a new {@link HttpClientConnectionManager}.
-	 * @param disableSslValidation True to disable SSL validation, false otherwise
-	 * @param maxTotalConnections The total number of connections
-	 * @param maxConnectionsPerRoute The total number of connections per route
-	 * @param timeToLive The time a connection is allowed to exist
-	 * @param timeUnit The time unit for the time to live value
-	 * @param registryBuilder The {@link RegistryBuilder} to use in the connection manager
-	 * @return A new {@link HttpClientConnectionManager}
+	 * @param disableSslValidation If true, SSL validation will be disabled.
+	 * @param maxTotalConnections The total number of connections.
+	 * @param maxConnectionsPerRoute The total number of connections per route.
+	 * @param timeToLive The time a connection is allowed to exist.
+	 * @param timeUnit The time unit for the time-to-live value.
+	 * @param registryBuilder The {@link RegistryBuilder} to use in the connection manager.
+	 * @return A new {@link HttpClientConnectionManager}.
 	 */
 	public HttpClientConnectionManager newConnectionManager(boolean disableSslValidation,
 			int maxTotalConnections, int maxConnectionsPerRoute, long timeToLive,

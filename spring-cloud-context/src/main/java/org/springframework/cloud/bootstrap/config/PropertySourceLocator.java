@@ -29,10 +29,10 @@ import org.springframework.core.env.PropertySource;
 public interface PropertySourceLocator {
 
 	/**
-	 * @param environment the current Environment
-	 * @return a PropertySource or null if there is none
+	 * @param environment The current Environment.
+	 * @return A PropertySource, or null if there is none.
 	 * 
-	 * @throws IllegalStateException if there is a fail fast condition
+	 * @throws IllegalStateException if there is a fail-fast condition.
 	 */
 	PropertySource<?> locate(Environment environment);
 

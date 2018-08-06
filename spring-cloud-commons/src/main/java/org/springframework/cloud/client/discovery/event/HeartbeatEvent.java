@@ -19,9 +19,9 @@ package org.springframework.cloud.client.discovery.event;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Event DiscoveryClient implementation can broadcast if they support heartbeat's from the
- * discovery server. Provides listeners with a basic indication of a state change in the
- * service catalog.
+ * An event that a DiscoveryClient implementation can broadcast if it supports
+ * heartbeats from the discovery server. Provides listeners with a basic indication
+ * of a state change in the service catalog.
  *
  * @author Spencer Gibb
  * @author Dave Syer
@@ -32,11 +32,11 @@ public class HeartbeatEvent extends ApplicationEvent {
 	private final Object state;
 
 	/**
-	 * Create a new event with a source (for example a discovery client) and a value.
+	 * Creates a new event with a source (for example, a discovery client) and a value.
 	 * Neither parameter should be relied on to have specific content or format.
 	 *
-	 * @param source the source of the event
-	 * @param state the value indicating state of the catalog
+	 * @param source The source of the event.
+	 * @param state The value indicating state of the catalog.
 	 */
 	public HeartbeatEvent(Object source, Object state) {
 		super(source);
@@ -45,12 +45,12 @@ public class HeartbeatEvent extends ApplicationEvent {
 
 	/**
 	 * A value representing the state of the service catalog. The only requirement is that
-	 * it changes when the catalog is updated, so it can be as simple as a version
-	 * conuter, or a hash. Implementations can provide information to help users visualize
+	 * it changes when the catalog is updated; it can be as simple as a version counter or
+   * a hash. Implementations can provide information to help users visualize
 	 * what is going on in the catalog, but users should not rely on the content (since
 	 * the implementation of the underlying discovery might change).
 	 *
-	 * @return A value representing state of the service catalog
+	 * @return A value representing state of the service catalog.
 	 */
 	public Object getValue() {
 		return this.state;

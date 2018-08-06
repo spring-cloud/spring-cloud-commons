@@ -53,7 +53,7 @@ public class DiscoveredResource implements RemoteResource {
 	/**
 	 * Configures the {@link RestOperations} to use to execute the traversal and verifying HEAD calls.
 	 * 
-	 * @param restOperations can be {@literal null}, resorting to a default {@link RestTemplate} in that case.
+	 * @param restOperations Can be {@literal null}; resorts to a default {@link RestTemplate} in that case.
 	 */
 	public void setRestOperations(RestOperations restOperations) {
 		this.restOperations = restOperations == null ? new RestTemplate() : restOperations;
@@ -81,7 +81,7 @@ public class DiscoveredResource implements RemoteResource {
 	}
 
 	/**
-	 * Verifies the link to the current
+	 * Verifies the link to the current.
 	 */
 	public void verifyOrDiscover() {
 		this.link = link == null ? discoverLink() : verify(link);
@@ -90,7 +90,7 @@ public class DiscoveredResource implements RemoteResource {
 	/**
 	 * Verifies the given {@link Link} by issuing an HTTP HEAD request to the resource.
 	 * 
-	 * @param link must not be {@literal null}.
+	 * @param link Must not be {@literal null}.
 	 * @return
 	 */
 	private Link verify(Link link) {

@@ -22,18 +22,18 @@ import org.springframework.retry.RetryException;
 import java.net.URI;
 
 /**
- * An implementation of {@link RecoveryCallback} which relies on an implemtation
+ * An implementation of {@link RecoveryCallback} which relies on an implementation
  * of {@link RetryableStatusCodeException} to contain the last response object from
- * the request
+ * the request.
  * @author LiYuan Lee
  */
 public abstract class LoadBalancedRecoveryCallback<T, R> implements RecoveryCallback<T> {
 
 	/**
-	 * Create the response returned in the {@link RecoveryCallback}
-	 * @param response The response from the HTTP client
-	 * @param uri The URI the response is from
-	 * @return The response to be returned
+	 * Creates the response returned in the {@link RecoveryCallback}.
+	 * @param response The response from the HTTP client.
+	 * @param uri The URI the response is from.
+	 * @return The response to be returned.
 	 */
 	protected abstract T createResponse(R response, URI uri);
 

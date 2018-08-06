@@ -9,20 +9,20 @@ package org.springframework.cloud.client.serviceregistry;
 public interface ServiceRegistry<R extends Registration> {
 
 	/**
-	 * Register the registration. Registrations typically have information about
-	 * instances such as: hostname and port.
-	 * @param registration the registraion
+	 * Registers the registration. A registration typically has information about
+	 * an instance, such as its hostname and port.
+	 * @param registration The registration.
 	 */
 	void register(R registration);
 
 	/**
-	 * Deregister the registration.
+	 * Deregisters the registration.
 	 * @param registration
 	 */
 	void deregister(R registration);
 
 	/**
-	 * Close the ServiceRegistry. This a lifecycle method.
+	 * Closes the ServiceRegistry. This is a lifecycle method.
 	 */
 	void close();
 
@@ -31,8 +31,8 @@ public interface ServiceRegistry<R extends Registration> {
 	 * by the individual implementations.
 	 *
 	 * @see org.springframework.cloud.client.serviceregistry.endpoint.ServiceRegistryEndpoint
-	 * @param registration the registration to update
-	 * @param status the status to set
+	 * @param registration The registration to update.
+	 * @param status The status to set.
 	 */
 	void setStatus(R registration, String status);
 
@@ -40,9 +40,9 @@ public interface ServiceRegistry<R extends Registration> {
 	 * Gets the status of a particular registration.
 	 *
 	 * @see org.springframework.cloud.client.serviceregistry.endpoint.ServiceRegistryEndpoint
-	 * @param registration the registration to query
-	 * @param <T> the type of the status
-	 * @return the status of the registration
+	 * @param registration The registration to query.
+	 * @param <T> The type of the status.
+	 * @return The status of the registration.
 	 */
 	<T> T getStatus(R registration);
 }

@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
 
 
 /**
- * Selects configurations to load defined by the generic type T. Loads implementations
+ * Selects configurations to load, defined by the generic type T. Loads implementations
  * using {@link SpringFactoriesLoader}.
  *
  * @author Spencer Gibb

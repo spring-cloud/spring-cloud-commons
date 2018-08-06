@@ -27,7 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 
 /**
- * Endpoint to display and set the service instance status using the service registry.
+ * Endpoint to display and set the service instance status using the ServiceRegistry.
  *
  * @author Spencer Gibb
  */

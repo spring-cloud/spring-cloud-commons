@@ -67,7 +67,7 @@ public class ContextRefresher {
 		return keys;
 	}
 
-	/* for testing */ ConfigurableApplicationContext addConfigFilesToEnvironment() {
+	/* For testing. */ ConfigurableApplicationContext addConfigFilesToEnvironment() {
 		ConfigurableApplicationContext capture = null;
 		try {
 			StandardEnvironment environment = copyEnvironment(

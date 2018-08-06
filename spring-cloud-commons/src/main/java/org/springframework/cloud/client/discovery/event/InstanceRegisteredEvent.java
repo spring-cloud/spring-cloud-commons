@@ -30,9 +30,9 @@ public class InstanceRegisteredEvent<T> extends ApplicationEvent {
 	private T config;
 
 	/**
-	 * Create a new {@link InstanceRegisteredEvent} instance.
-	 * @param source the component that published the event (never {@code null})
-	 * @param config the configuration of the instance
+	 * Creates a new {@link InstanceRegisteredEvent} instance.
+	 * @param source The component that published the event (never {@code null}).
+	 * @param config The configuration of the instance.
 	 */
 	public InstanceRegisteredEvent(Object source, T config) {
 		super(source);

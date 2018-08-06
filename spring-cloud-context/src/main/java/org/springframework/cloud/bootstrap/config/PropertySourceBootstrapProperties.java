@@ -20,7 +20,7 @@ public class PropertySourceBootstrapProperties {
 
 	/**
 	 * Flag to indicate that when {@link #setAllowOverride(boolean) allowOverride} is
-	 * true, external properties should take lowest priority, and not override any
+	 * true, external properties should take lowest priority and should not override any
 	 * existing property sources (including local config files). Default false.
 	 */
 	private boolean overrideNone = false;

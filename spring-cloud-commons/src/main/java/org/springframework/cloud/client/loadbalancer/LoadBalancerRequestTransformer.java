@@ -20,8 +20,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpRequest;
 
 /**
- * Allows applications to transform the load balanced {@link HttpRequest} given
- * the chosen {@link ServiceInstance}
+ * Allows applications to transform the load-balanced {@link HttpRequest} given
+ * the chosen {@link ServiceInstance}.
  * 
  * @author Will Tran
  */

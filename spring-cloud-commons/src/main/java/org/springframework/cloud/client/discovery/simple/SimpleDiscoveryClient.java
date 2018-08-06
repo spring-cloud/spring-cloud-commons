@@ -9,7 +9,7 @@ import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperti
 
 /**
  * A {@link org.springframework.cloud.client.discovery.DiscoveryClient} that will use the
- * properties file as a source of service instances
+ * properties file as a source of service instances.
  *
  * @author Biju Kunjummen
  */

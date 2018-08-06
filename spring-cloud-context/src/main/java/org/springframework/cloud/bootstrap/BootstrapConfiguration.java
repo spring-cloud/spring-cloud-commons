@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 public @interface BootstrapConfiguration {
 
 	/**
-	 * Exclude specific auto-configuration classes such that they will never be applied.
+	 * Excludes specific auto-configuration classes such that they will never be applied.
 	 */
 	Class<?>[] exclude() default {};
 

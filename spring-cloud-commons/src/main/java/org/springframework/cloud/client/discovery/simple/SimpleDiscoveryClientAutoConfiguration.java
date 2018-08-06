@@ -19,7 +19,7 @@ import org.springframework.util.ClassUtils;
 import java.net.URI;
 
 /**
- * Spring Boot Auto-Configuration for Simple Properties based Discovery Client
+ * Spring Boot auto-configuration for simple properties-based discovery client.
  *
  * @author Biju Kunjummen
  */
