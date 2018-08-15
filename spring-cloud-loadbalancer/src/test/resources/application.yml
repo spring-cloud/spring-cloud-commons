@@ -1,0 +1,36 @@
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            myservice:
+            -
+              service-id: myservice
+              uri: http://a.host
+            -
+              service-id: myservice
+              uri: http://c.host
+            -
+              service-id: myservice
+              uri: https://b.host
+            anotherservice:
+            -
+              service-id: myservice
+              uri: http://d.host
+            -
+              service-id: myservice
+              uri: http://f.host
+            -
+              service-id: myservice
+              uri: https://e.host
+            thirdservice:
+            -
+              service-id: myservice
+              uri: http://g.host
+            -
+              service-id: myservice
+              uri: http://h.host
+            -
+              service-id: myservice
+              uri: https://i.host
