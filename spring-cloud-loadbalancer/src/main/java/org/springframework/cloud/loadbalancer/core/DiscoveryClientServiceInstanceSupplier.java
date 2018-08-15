@@ -20,7 +20,6 @@ import java.util.List;
 
 import reactor.core.publisher.Flux;
 
-import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.reactive.ServiceInstanceSupplier;
@@ -31,26 +30,15 @@ import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientF
 /**
  * @author Spencer Gibb
  */
-//TODO: how to eagerly invoke cache, such that the first client use is already cached
 public class DiscoveryClientServiceInstanceSupplier implements ServiceInstanceSupplier {
 
 	private final DiscoveryClient delegate;
-	// private final CacheManager cacheManager;
 	private final String serviceId;
 
-	public DiscoveryClientServiceInstanceSupplier(DiscoveryClient delegate, Environment environment, CacheManager cacheManager) {
+	public DiscoveryClientServiceInstanceSupplier(DiscoveryClient delegate, Environment environment) {
 		this.delegate = delegate;
 		serviceId = environment.getProperty(PROPERTY_NAME);
-		// this.cacheManager = cacheManager;
-
 	}
-
-	// @Cacheable(cacheNames = "discovery-client-service-instances", key = "${loadbalancer.client.name}")
-	/*public List<ServiceInstance> get() {
-		// Cache cache = this.cacheManager.getCache("discovery-client-service-instances");
-		// return cache.get(serviceId, () -> delegate.getInstances(serviceId));
-		return delegate.getInstances(serviceId);
-	}*/
 
 	@Override
 	public Flux<ServiceInstance> get() {

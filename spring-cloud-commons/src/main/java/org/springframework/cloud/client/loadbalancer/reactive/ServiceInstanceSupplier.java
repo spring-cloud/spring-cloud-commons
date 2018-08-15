@@ -16,15 +16,16 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import java.util.List;
 import java.util.function.Supplier;
 
-import org.reactivestreams.Publisher;
-import org.springframework.cloud.client.ServiceInstance;
 import reactor.core.publisher.Flux;
+
+import org.springframework.cloud.client.ServiceInstance;
 
 /**
  * @author Spencer Gibb
  */
 public interface ServiceInstanceSupplier extends Supplier<Flux<ServiceInstance>> {
+
+	String getServiceId();
 }
