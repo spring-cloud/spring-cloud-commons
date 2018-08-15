@@ -56,14 +56,27 @@ public class ContextRefresher {
 		this.scope = scope;
 	}
 
+	protected ConfigurableApplicationContext getContext() {
+		return this.context;
+	}
+
+	protected RefreshScope getScope() {
+		return this.scope;
+	}
+
 	public synchronized Set<String> refresh() {
+		Set<String> keys = refreshEnvironment();
+		this.scope.refreshAll();
+		return keys;
+	}
+
+	public synchronized Set<String> refreshEnvironment() {
 		Map<String, Object> before = extract(
 				this.context.getEnvironment().getPropertySources());
 		addConfigFilesToEnvironment();
 		Set<String> keys = changes(before,
 				extract(this.context.getEnvironment().getPropertySources())).keySet();
 		this.context.publishEvent(new EnvironmentChangeEvent(context, keys));
-		this.scope.refreshAll();
 		return keys;
 	}
 
