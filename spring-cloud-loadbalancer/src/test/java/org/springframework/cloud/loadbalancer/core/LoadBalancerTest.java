@@ -37,6 +37,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringRunner;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,24 +64,25 @@ public class LoadBalancerTest {
 		List<String> hosts = Arrays.asList("a.host", "c.host", "b.host", "a.host");
 
 		for (String host : hosts) {
-			Response<ServiceInstance> response = loadBalancer.choose().block();
+			Mono<Response<ServiceInstance>> source = loadBalancer.choose();
+			StepVerifier.create(source).consumeNextWith(response -> {
+				assertThat(response).isNotNull();
+				assertThat(response.hasServer()).isTrue();
 
-			assertThat(response).isNotNull();
-			assertThat(response.hasServer()).isTrue();
+				ServiceInstance instance = response.getServer();
+				assertThat(instance).isNotNull();
+				assertThat(instance.getHost())
+						.as("instance host is incorrent %s", host)
+						.isEqualTo(host);
 
-			ServiceInstance instance = response.getServer();
-			assertThat(instance).isNotNull();
-			assertThat(instance.getHost())
-					.as("instance host is incorrent %s", host)
-					.isEqualTo(host);
+				if (host.equals("b.host")) {
+					assertThat(instance.isSecure()).isTrue();
+				} else {
+					assertThat(instance.isSecure()).isFalse();
+				}
 
-			if (host.equals("b.host")) {
-				assertThat(instance.isSecure()).isTrue();
-			} else {
-				assertThat(instance.isSecure()).isFalse();
-			}
-
-			response.onComplete(new CompletionContext(Status.SUCCESSS));
+				response.onComplete(new CompletionContext(Status.SUCCESSS));
+			}).verifyComplete();
 		}
 	}
 
@@ -90,10 +93,11 @@ public class LoadBalancerTest {
 
 		assertThat(loadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
 
-		Response<ServiceInstance> response = loadBalancer.choose().block();
-
-		assertThat(response).isNotNull();
-		assertThat(response.hasServer()).isFalse();
+		Mono<Response<ServiceInstance>> source = loadBalancer.choose();
+		StepVerifier.create(source).consumeNextWith(response -> {
+			assertThat(response).isNotNull();
+			assertThat(response.hasServer()).isFalse();
+		}).verifyComplete();
 	}
 
 	@EnableAutoConfiguration
