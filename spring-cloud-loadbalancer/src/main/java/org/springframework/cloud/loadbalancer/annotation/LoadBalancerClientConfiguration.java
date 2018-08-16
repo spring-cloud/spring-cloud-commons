@@ -19,8 +19,8 @@ package org.springframework.cloud.loadbalancer.annotation;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.reactive.CacheSupplier;
 import org.springframework.cloud.client.loadbalancer.reactive.ServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceSupplier;
@@ -38,11 +38,11 @@ public class LoadBalancerClientConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public ServiceInstanceSupplier discoveryClientServiceInstanceSupplier(
-			DiscoveryClient discoveryClient, Environment env, ObjectProvider<CacheSupplier> cacheSupplier) {
+			DiscoveryClient discoveryClient, Environment env, ObjectProvider<CacheManager> cacheManager) {
 		//TODO: bean post processor to enable caching?
 		DiscoveryClientServiceInstanceSupplier delegate = new DiscoveryClientServiceInstanceSupplier(discoveryClient, env);
-		if (cacheSupplier.getIfUnique() != null) {
-			return new CachingServiceInstanceSupplier(delegate, cacheSupplier.getIfUnique());
+		if (cacheManager.getIfAvailable() != null) {
+			return new CachingServiceInstanceSupplier(delegate, cacheManager.getIfAvailable());
 		}
 		return delegate;
 	}
