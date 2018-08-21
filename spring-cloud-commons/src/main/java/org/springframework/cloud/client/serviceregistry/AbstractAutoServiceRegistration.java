@@ -1,7 +1,13 @@
 package org.springframework.cloud.client.serviceregistry;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.boot.web.context.ConfigurableWebServerApplicationContext;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
@@ -9,12 +15,8 @@ import org.springframework.cloud.client.discovery.ManagementServerPortUtils;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
-
-import javax.annotation.PreDestroy;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Lifecycle methods that may be useful and common to {@link ServiceRegistry}
@@ -27,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Spencer Gibb
  */
 public abstract class AbstractAutoServiceRegistration<R extends Registration>
-		implements AutoServiceRegistration, ApplicationContextAware {
+		implements AutoServiceRegistration, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
 	private static final Log logger = LogFactory
 			.getLog(AbstractAutoServiceRegistration.class);
 
@@ -60,7 +62,13 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		return context;
 	}
 
-	@EventListener(WebServerInitializedEvent.class)
+	@Override
+	@SuppressWarnings("deprecation")
+	public void onApplicationEvent(WebServerInitializedEvent event) {
+		bind(event);
+	}
+
+	@Deprecated
 	public void bind(WebServerInitializedEvent event) {
 		ApplicationContext context = event.getApplicationContext();
 		if (context instanceof ConfigurableWebServerApplicationContext) {
