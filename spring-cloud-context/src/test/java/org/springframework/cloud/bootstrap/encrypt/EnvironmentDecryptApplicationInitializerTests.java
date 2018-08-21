@@ -18,8 +18,9 @@ package org.springframework.cloud.bootstrap.encrypt;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.Rule;
 import org.junit.Test;
-
+import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.context.ApplicationContext;
@@ -31,9 +32,11 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.security.crypto.encrypt.Encryptors;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME;
@@ -46,6 +49,9 @@ public class EnvironmentDecryptApplicationInitializerTests {
 
 	private EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
 			Encryptors.noOpText());
+	
+	@Rule
+	public OutputCapture outputCapture = new OutputCapture();
 
 	@Test
 	public void decryptCipherKey() {
@@ -75,14 +81,22 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		assertEquals("spam", context.getEnvironment().getProperty("foo"));
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void errorOnDecrypt() {
 		this.listener = new EnvironmentDecryptApplicationInitializer(
 				Encryptors.text("deadbeef", "AFFE37"));
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("foo: {cipher}bar").applyTo(context);
-		this.listener.initialize(context);
-		assertEquals("bar", context.getEnvironment().getProperty("foo"));
+		// catch IllegalStateException and verify
+		try {
+			this.listener.initialize(context);
+		} catch (Exception e) {
+			assertTrue(e instanceof IllegalStateException);
+		}
+		// Assert logs contain warning even when exception thrown
+		String sysOutput = this.outputCapture.toString();
+		assertThat("Decryption error log message missing", sysOutput, containsString(
+				"EnvironmentDecryptApplicationInitializer - Cannot decrypt: key=foo"));
 	}
 
 	@Test
@@ -93,6 +107,10 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("foo: {cipher}bar").applyTo(context);
 		this.listener.initialize(context);
+		// Assert logs contain warning
+		String sysOutput = this.outputCapture.toString();
+		assertThat("Decryption error log message missing", sysOutput, containsString(
+				"EnvironmentDecryptApplicationInitializer - Cannot decrypt: key=foo"));
 		// Empty is safest fallback for undecryptable cipher
 		assertEquals("", context.getEnvironment().getProperty("foo"));
 	}
