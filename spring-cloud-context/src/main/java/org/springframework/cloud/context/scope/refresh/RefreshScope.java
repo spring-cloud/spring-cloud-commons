@@ -21,8 +21,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.cloud.context.scope.GenericScope;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.core.Ordered;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -70,7 +70,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  */
 @ManagedResource
 public class RefreshScope extends GenericScope
-		implements ApplicationContextAware, Ordered {
+		implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, Ordered {
 
 	private ApplicationContext context;
 	private BeanDefinitionRegistry registry;
@@ -110,7 +110,11 @@ public class RefreshScope extends GenericScope
 		super.postProcessBeanDefinitionRegistry(registry);
 	}
 
-	@EventListener
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		start(event);
+	}
+
 	public void start(ContextRefreshedEvent event) {
 		if (event.getApplicationContext() == this.context && this.eager
 				&& this.registry != null) {
