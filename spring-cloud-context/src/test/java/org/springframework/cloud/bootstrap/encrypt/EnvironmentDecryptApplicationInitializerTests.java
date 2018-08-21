@@ -96,7 +96,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		// Assert logs contain warning even when exception thrown
 		String sysOutput = this.outputCapture.toString();
 		assertThat("Decryption error log message missing", sysOutput, containsString(
-				"EnvironmentDecryptApplicationInitializer - Cannot decrypt: key=foo"));
+				"Cannot decrypt: key=foo"));
 	}
 
 	@Test
@@ -110,7 +110,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		// Assert logs contain warning
 		String sysOutput = this.outputCapture.toString();
 		assertThat("Decryption error log message missing", sysOutput, containsString(
-				"EnvironmentDecryptApplicationInitializer - Cannot decrypt: key=foo"));
+				"Cannot decrypt: key=foo"));
 		// Empty is safest fallback for undecryptable cipher
 		assertEquals("", context.getEnvironment().getProperty("foo"));
 	}
