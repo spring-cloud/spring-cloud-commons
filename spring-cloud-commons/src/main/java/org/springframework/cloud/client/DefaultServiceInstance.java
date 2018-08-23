@@ -50,7 +50,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	public DefaultServiceInstance(String serviceId, String host, int port,
 			boolean secure) {
-		this(serviceId, host, port, secure, new LinkedHashMap<String, String>());
+		this(serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
 	@Override
