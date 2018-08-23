@@ -29,6 +29,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
@@ -37,6 +38,7 @@ import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.cloud.loadbalancer.support.ServiceInstanceSuppliers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
@@ -64,8 +66,12 @@ public class LoadBalancerTest {
 		ReactorLoadBalancer<ServiceInstance> loadBalancer = (ReactorLoadBalancer<ServiceInstance>) reactiveLoadBalancer;
 
 		//order dependent on seedPosition -1 of RoundRobinLoadBalancer
-		List<String> hosts = Arrays.asList("a.host", "c.host", "b.host", "a.host");
+		List<String> hosts = Arrays.asList("a.host", "c.host", "b.host-secure", "a.host");
 
+		assertLoadBalancer(loadBalancer, hosts);
+	}
+
+	private void assertLoadBalancer(ReactorLoadBalancer<ServiceInstance> loadBalancer, List<String> hosts) {
 		for (String host : hosts) {
 			Mono<Response<ServiceInstance>> source = loadBalancer.choose();
 			StepVerifier.create(source).consumeNextWith(response -> {
@@ -78,7 +84,7 @@ public class LoadBalancerTest {
 						.as("instance host is incorrent %s", host)
 						.isEqualTo(host);
 
-				if (host.equals("b.host")) {
+				if (host.contains("secure")) {
 					assertThat(instance.isSecure()).isTrue();
 				} else {
 					assertThat(instance.isSecure()).isFalse();
@@ -101,6 +107,20 @@ public class LoadBalancerTest {
 			assertThat(response).isNotNull();
 			assertThat(response.hasServer()).isFalse();
 		}).verifyComplete();
+	}
+
+	@Test
+	public void staticConfigurationWorks() {
+		String serviceId = "test1";
+		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(serviceId,
+				ServiceInstanceSuppliers.toProvider(serviceId, instance(serviceId, "1.host", false),
+						instance(serviceId, "2.host-secure", true)),
+				-1);
+		assertLoadBalancer(loadBalancer, Arrays.asList("1.host", "2.host-secure"));
+	}
+
+	private DefaultServiceInstance instance(String serviceId, String host, boolean secure) {
+		return new DefaultServiceInstance(serviceId, host, 80, secure);
 	}
 
 	@EnableAutoConfiguration

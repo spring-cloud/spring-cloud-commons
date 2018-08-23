@@ -13,7 +13,7 @@ spring:
               uri: http://c.host
             -
               service-id: myservice
-              uri: https://b.host
+              uri: https://b.host-secure
             anotherservice:
             -
               service-id: myservice
