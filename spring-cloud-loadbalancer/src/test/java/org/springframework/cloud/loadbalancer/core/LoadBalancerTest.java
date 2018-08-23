@@ -34,7 +34,6 @@ import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
-import org.springframework.cloud.client.loadbalancer.reactive.ServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;

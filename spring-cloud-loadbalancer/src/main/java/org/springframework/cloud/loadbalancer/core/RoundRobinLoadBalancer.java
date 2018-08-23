@@ -29,7 +29,6 @@ import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
-import org.springframework.cloud.client.loadbalancer.reactive.ServiceInstanceSupplier;
 
 /**
  * @author Spencer Gibb

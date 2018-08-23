@@ -25,7 +25,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.ServiceInstanceSupplier;
 
 /**
  * @author Spencer Gibb
