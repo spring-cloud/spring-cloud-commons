@@ -115,7 +115,9 @@ public class LoadBalancerTest {
 	protected static class MyServiceConfig {
 		@Bean
 		public RoundRobinLoadBalancer roundRobinContextLoadBalancer(LoadBalancerClientFactory clientFactory, Environment env) {
-			return new RoundRobinLoadBalancer(clientFactory, env, -1);
+			String serviceId = clientFactory.getName(env);
+			// ObjectProvider<ServiceInstanceSupplier> serviceInstanceSuppliers = clientFactory.getProvider(serviceId, ServiceInstanceSupplier.class);
+			return new RoundRobinLoadBalancer(serviceId, clientFactory, -1);
 		}
 	}
 }

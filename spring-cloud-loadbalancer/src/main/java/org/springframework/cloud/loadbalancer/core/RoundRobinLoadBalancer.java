@@ -30,7 +30,6 @@ import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.client.loadbalancer.reactive.ServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
-import org.springframework.core.env.Environment;
 
 /**
  * @author Spencer Gibb
@@ -43,14 +42,13 @@ public class RoundRobinLoadBalancer implements ReactorLoadBalancer<ServiceInstan
 	private final LoadBalancerClientFactory clientFactory;
 	private final String serviceId;
 
-	public RoundRobinLoadBalancer(LoadBalancerClientFactory clientFactory,
-								  Environment environment) {
-		this(clientFactory, environment, new Random().nextInt(1000));
+	public RoundRobinLoadBalancer(String serviceId, LoadBalancerClientFactory clientFactory) {
+		this(serviceId, clientFactory, new Random().nextInt(1000));
 	}
 
-	public RoundRobinLoadBalancer(LoadBalancerClientFactory clientFactory,
-			Environment environment, int seedPosition) {
-		this.serviceId = clientFactory.getName(environment);
+	public RoundRobinLoadBalancer(String serviceId, LoadBalancerClientFactory clientFactory,
+								  int seedPosition) {
+		this.serviceId = serviceId;
 		this.clientFactory = clientFactory;
 		this.position = new AtomicInteger(seedPosition);
 	}
