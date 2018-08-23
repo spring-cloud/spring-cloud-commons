@@ -23,13 +23,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.client.loadbalancer.reactive.ServiceInstanceSupplier;
-import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 
 /**
  * @author Spencer Gibb
@@ -39,17 +39,17 @@ public class RoundRobinLoadBalancer implements ReactorLoadBalancer<ServiceInstan
 	private static final Log log = LogFactory.getLog(RoundRobinLoadBalancer.class);
 
 	private final AtomicInteger position;
-	private final LoadBalancerClientFactory clientFactory;
+	private final ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier;
 	private final String serviceId;
 
-	public RoundRobinLoadBalancer(String serviceId, LoadBalancerClientFactory clientFactory) {
-		this(serviceId, clientFactory, new Random().nextInt(1000));
+	public RoundRobinLoadBalancer(String serviceId, ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier) {
+		this(serviceId, serviceInstanceSupplier, new Random().nextInt(1000));
 	}
 
-	public RoundRobinLoadBalancer(String serviceId, LoadBalancerClientFactory clientFactory,
+	public RoundRobinLoadBalancer(String serviceId, ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier,
 								  int seedPosition) {
 		this.serviceId = serviceId;
-		this.clientFactory = clientFactory;
+		this.serviceInstanceSupplier = serviceInstanceSupplier;
 		this.position = new AtomicInteger(seedPosition);
 	}
 
@@ -59,8 +59,7 @@ public class RoundRobinLoadBalancer implements ReactorLoadBalancer<ServiceInstan
 	 */
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		// TODO: move supplier to Request?
-		ServiceInstanceSupplier supplier = clientFactory.getInstance(this.serviceId,
-				ServiceInstanceSupplier.class);
+		ServiceInstanceSupplier supplier = serviceInstanceSupplier.getIfAvailable();
 		return supplier.get().collectList().map(instances -> {
 			if (instances.isEmpty()) {
 				log.warn("No servers available for service: " + this.serviceId);
