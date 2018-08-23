@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -38,18 +39,28 @@ public class RoundRobinLoadBalancer implements ReactorLoadBalancer<ServiceInstan
 
 	private static final Log log = LogFactory.getLog(RoundRobinLoadBalancer.class);
 
-	private final AtomicInteger nextServerCyclicCounter = new AtomicInteger(-1);
+	private final AtomicInteger position;
 	private final LoadBalancerClientFactory clientFactory;
 	private final String serviceId;
 
 	public RoundRobinLoadBalancer(LoadBalancerClientFactory clientFactory,
-			Environment environment) {
-		serviceId = clientFactory.getName(environment);
+								  Environment environment) {
+		this(clientFactory, environment, new Random().nextInt(1000));
+	}
+
+	public RoundRobinLoadBalancer(LoadBalancerClientFactory clientFactory,
+			Environment environment, int seedPosition) {
+		this.serviceId = clientFactory.getName(environment);
 		this.clientFactory = clientFactory;
+		this.position = new AtomicInteger(seedPosition);
 	}
 
 	@Override
+	/**
+	 * see original https://github.com/Netflix/ocelli/blob/master/ocelli-core/src/main/java/netflix/ocelli/loadbalancer/RoundRobinLoadBalancer.java
+	 */
 	public Mono<Response<ServiceInstance>> choose(Request request) {
+		// TODO: move supplier to Request?
 		ServiceInstanceSupplier supplier = clientFactory.getInstance(this.serviceId,
 				ServiceInstanceSupplier.class);
 		return supplier.get().collectList().map(instances -> {
@@ -58,30 +69,11 @@ public class RoundRobinLoadBalancer implements ReactorLoadBalancer<ServiceInstan
 				return new EmptyResponse();
 			}
 			// TODO: enforce order?
-			int nextServerIndex = incrementAndGetModulo(instances.size());
+			int pos = Math.abs(position.incrementAndGet());
 
-			ServiceInstance instance = instances.get(nextServerIndex);
+			ServiceInstance instance = instances.get(pos % instances.size());
 
 			return new DefaultResponse(instance);
 		});
-	}
-
-	/**
-	 * Inspired by the implementation of {@link AtomicInteger#incrementAndGet()}.
-	 * <p>
-	 * original
-	 * https://github.com/Netflix/ribbon/blob/master/ribbon-loadbalancer/src/main/java/com/netflix/loadbalancer/RoundRobinRule.java#L94-L107
-	 *
-	 * @param modulo The modulo to bound the value of the counter.
-	 * @return The next value.
-	 */
-	private int incrementAndGetModulo(int modulo) {
-		for (;;) {
-			int current = nextServerCyclicCounter.get();
-			int next = (current + 1) % modulo;
-			if (nextServerCyclicCounter.compareAndSet(current, next))
-				return next;
-		}
-
 	}
 }

@@ -63,6 +63,7 @@ public class LoadBalancerTest {
 		assertThat(reactiveLoadBalancer).isInstanceOf(ReactorLoadBalancer.class);
 		ReactorLoadBalancer<ServiceInstance> loadBalancer = (ReactorLoadBalancer<ServiceInstance>) reactiveLoadBalancer;
 
+		//order dependent on seedPosition -1 of RoundRobinLoadBalancer
 		List<String> hosts = Arrays.asList("a.host", "c.host", "b.host", "a.host");
 
 		for (String host : hosts) {
@@ -114,7 +115,7 @@ public class LoadBalancerTest {
 	protected static class MyServiceConfig {
 		@Bean
 		public RoundRobinLoadBalancer roundRobinContextLoadBalancer(LoadBalancerClientFactory clientFactory, Environment env) {
-			return new RoundRobinLoadBalancer(clientFactory, env);
+			return new RoundRobinLoadBalancer(clientFactory, env, -1);
 		}
 	}
 }
