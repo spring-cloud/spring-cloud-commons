@@ -57,8 +57,8 @@ public class LoadBalancerTest {
 
 	@Test
 	public void roundRobbinLoadbalancerWorks() {
-		ResolvableType type = ResolvableType.forClassWithGenerics(ReactiveLoadBalancer.class, ServiceInstance.class);
-		ReactiveLoadBalancer<ServiceInstance> reactiveLoadBalancer = this.clientFactory.getInstance("myservice", type);
+		ReactiveLoadBalancer<ServiceInstance> reactiveLoadBalancer = this.clientFactory
+				.getInstance("myservice", ReactiveLoadBalancer.class, ServiceInstance.class);
 
 		assertThat(reactiveLoadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
 		assertThat(reactiveLoadBalancer).isInstanceOf(ReactorLoadBalancer.class);
