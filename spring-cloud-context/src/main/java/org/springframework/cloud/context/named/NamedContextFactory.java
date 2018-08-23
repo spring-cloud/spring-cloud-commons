@@ -28,6 +28,7 @@ import org.springframework.core.env.MapPropertySource;
  * @author Spencer Gibb
  * @author Dave Syer
  */
+//TODO: add javadoc
 public abstract class NamedContextFactory<C extends NamedContextFactory.Specification>
 		implements DisposableBean, ApplicationContextAware {
 
