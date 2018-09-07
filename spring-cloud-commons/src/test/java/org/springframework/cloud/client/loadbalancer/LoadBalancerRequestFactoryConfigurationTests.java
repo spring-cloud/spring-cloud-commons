@@ -28,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -62,7 +63,7 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 	}
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
-		ConfigurableApplicationContext context = new SpringApplicationBuilder().web(false)
+		ConfigurableApplicationContext context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.aop.proxyTargetClass=true")
 				.sources(config, LoadBalancerAutoConfiguration.class).run();
 

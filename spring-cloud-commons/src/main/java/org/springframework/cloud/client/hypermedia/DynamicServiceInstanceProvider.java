@@ -21,7 +21,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
- * {@link ServiceInstanceProvider} to work with a {@link DiscoveryClient} to lookup a service by name. Will pick the
+ * {@link ServiceInstanceProvider} to work with a {@link DiscoveryClient} to look up a service by name. Picks the
  * first one returned by the configured {@link DiscoveryClient}.
  * 
  * @author Oliver Gierke

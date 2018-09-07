@@ -38,7 +38,7 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	@Test
 	public void environmentWebEndpointExtensionEnabled() {
-		beanCreated("environmentWebEndpointExtension",
+		beanCreated("environmentEndpointWebExtension",
 				"management.endpoint.env.enabled=true");
 	}
 

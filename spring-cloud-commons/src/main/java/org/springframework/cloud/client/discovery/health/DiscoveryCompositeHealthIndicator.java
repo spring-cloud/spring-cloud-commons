@@ -26,8 +26,8 @@ import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 
 /**
- * Gathers all DiscoveryHealthIndicator's from a DiscoveryClient implementation
- * and aggregates the statuses.
+ * Gathers all instances of DiscoveryHealthIndicator from a DiscoveryClient
+ * implementation and aggregates the statuses.
  * @author Spencer Gibb
  */
 //TODO: do we need this? Can they just be independent HealthIndicators?

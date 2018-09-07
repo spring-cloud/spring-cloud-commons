@@ -16,7 +16,8 @@ public class DefaultApacheHttpClientFactory implements ApacheHttpClientFactory {
 
 	/**
 	 * A default {@link HttpClientBuilder}. The {@link HttpClientBuilder} returned will
-	 * have content compression disabled, cookie management disabled, and use system properties.
+	 * have content compression disabled, have cookie management disabled, and use system
+   * properties.
 	 */
 	@Override
 	public HttpClientBuilder createBuilder() {

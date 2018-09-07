@@ -2,6 +2,7 @@ package org.springframework.cloud.client;
 
 import org.junit.Test;
 import org.springframework.beans.BeansException;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.actuator.FeaturesEndpoint;
@@ -81,7 +82,7 @@ public class CommonsClientAutoConfigurationTests {
 	}
 
 	protected ConfigurableApplicationContext init(String... pairs) {
-		return new SpringApplicationBuilder().web(false).sources(Config.class)
+		return new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(Config.class)
 				.properties(pairs).run();
 	}
 

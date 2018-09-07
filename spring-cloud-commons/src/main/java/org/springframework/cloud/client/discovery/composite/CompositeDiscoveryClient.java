@@ -10,8 +10,8 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
- * A {@link DiscoveryClient} composed of other Discovery Clients that will delegate the
- * calls to each of them in order
+ * A {@link DiscoveryClient} that is composed of other discovery clients and delegates
+ * calls to each of them in order.
  * 
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma

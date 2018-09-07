@@ -69,8 +69,8 @@ public class SimpleDiscoveryProperties {
 	public static class SimpleServiceInstance implements ServiceInstance {
 
 		/**
-		 * The URI of the service instance. Will be parsed to extract the scheme, hos and
-		 * port.
+		 * The URI of the service instance. Will be parsed to extract the scheme, host,
+     * and port.
 		 */
 		private URI uri;
 		private String host;
@@ -83,7 +83,7 @@ public class SimpleDiscoveryProperties {
 		private Map<String, String> metadata = new LinkedHashMap<>();
 		/**
 		 * The identifier or name for the service. Multiple instances might share the same
-		 * service id.
+		 * service ID.
 		 */
 		private String serviceId;
 

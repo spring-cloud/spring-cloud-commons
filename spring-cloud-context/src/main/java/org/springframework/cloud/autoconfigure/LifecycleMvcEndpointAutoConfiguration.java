@@ -24,8 +24,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 /**
- * Autoconfiguration for some MVC endpoints governing the application context lifecycle.
- * Provides restart, pause, resume, refresh (environment) and environment update
+ * Auto-configuration for some MVC endpoints governing the application context lifecycle.
+ * Provides restart, pause, resume, refresh (environment), and environment update
  * endpoints.
  *
  * @author Dave Syer

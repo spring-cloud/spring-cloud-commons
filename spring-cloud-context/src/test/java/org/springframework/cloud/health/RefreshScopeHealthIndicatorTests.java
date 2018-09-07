@@ -81,4 +81,11 @@ public class RefreshScopeHealthIndicatorTests {
 		assertEquals(Status.DOWN, this.indicator.health().getStatus());
 	}
 
+	@Test
+	public void nullRefreshScope() {
+		ObjectProvider<RefreshScope> scopeProvider = mock(ObjectProvider.class);
+		BDDMockito.willReturn(null).given(scopeProvider).getIfAvailable();
+		assertEquals(Status.UP, this.indicator.health().getStatus());
+	}
+
 }

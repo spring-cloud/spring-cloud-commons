@@ -69,7 +69,7 @@ public class RefreshAutoConfigurationTests {
 
 	@Configuration
 	@EnableAutoConfiguration(exclude = DataSourceAutoConfiguration.class)
-	@EnableConfigurationProperties(ConfigProps.class)
+	@EnableConfigurationProperties
 	static class Config {
 
 	}

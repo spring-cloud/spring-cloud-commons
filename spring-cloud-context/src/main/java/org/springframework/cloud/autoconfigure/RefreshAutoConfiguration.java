@@ -23,13 +23,14 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -62,9 +63,13 @@ import org.springframework.stereotype.Component;
  */
 @Configuration
 @ConditionalOnClass(RefreshScope.class)
-@ConditionalOnProperty(name = "spring.cloud.refresh.enabled", matchIfMissing = true)
+@ConditionalOnProperty(name = RefreshAutoConfiguration.REFRESH_SCOPE_ENABLED, matchIfMissing = true)
 @AutoConfigureBefore(HibernateJpaAutoConfiguration.class)
 public class RefreshAutoConfiguration {
+
+	public static final String REFRESH_SCOPE_NAME = "refresh";
+	public static final String REFRESH_SCOPE_PREFIX = "spring.cloud.refresh";
+	public static final String REFRESH_SCOPE_ENABLED = REFRESH_SCOPE_PREFIX + ".enabled";
 
 	@Bean
 	@ConditionalOnMissingBean(RefreshScope.class)
@@ -95,7 +100,9 @@ public class RefreshAutoConfiguration {
 
 	@Component
 	protected static class RefreshScopeBeanDefinitionEnhancer
-			implements BeanDefinitionRegistryPostProcessor {
+			implements BeanPostProcessor, BeanDefinitionRegistryPostProcessor {
+
+		private BeanDefinitionRegistry registry;
 
 		/**
 		 * Class names for beans to post process into refresh scope. Useful when you don't
@@ -103,8 +110,6 @@ public class RefreshAutoConfiguration {
 		 */
 		private Set<String> refreshables = new HashSet<>(
 				Arrays.asList("com.zaxxer.hikari.HikariDataSource"));
-
-		private Environment environment;
 
 		public Set<String> getRefreshable() {
 			return this.refreshables;
@@ -124,29 +129,42 @@ public class RefreshAutoConfiguration {
 		@Override
 		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
 				throws BeansException {
+			Environment environment = beanFactory.getBean(Environment.class);
+			if (environment == null) {
+				environment = new StandardEnvironment();
+			}
+			Binder.get(environment).bind(REFRESH_SCOPE_PREFIX, Bindable.ofInstance(this));
 		}
 
 		@Override
 		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
 				throws BeansException {
-			for (String name : registry.getBeanDefinitionNames()) {
-				BeanDefinition definition = registry.getBeanDefinition(name);
-				if (isApplicable(registry, name, definition)) {
-					BeanDefinitionHolder holder = new BeanDefinitionHolder(definition,
-							name);
-					BeanDefinitionHolder proxy = ScopedProxyUtils
-							.createScopedProxy(holder, registry, true);
-					definition.setScope("refresh");
-					registry.registerBeanDefinition(proxy.getBeanName(),
-							proxy.getBeanDefinition());
-				}
+			this.registry = registry;
+		}
+
+		@Override
+		public Object postProcessAfterInitialization(Object bean, String beanName)
+				throws BeansException {
+			BeanDefinition definition = null;
+			try {
+				definition = registry.getBeanDefinition(beanName);
 			}
+			catch (NoSuchBeanDefinitionException e) {
+				// just ignore and move on
+				return bean;
+			}
+			if (isApplicable(registry, beanName, definition)) {
+				definition.setScope(REFRESH_SCOPE_NAME);
+				ProxyFactory proxyFactory = new ProxyFactory(bean);
+				return proxyFactory.getProxy();
+			}
+			return bean;
 		}
 
 		private boolean isApplicable(BeanDefinitionRegistry registry, String name,
 				BeanDefinition definition) {
 			String scope = definition.getScope();
-			if ("refresh".equals(scope)) {
+			if (REFRESH_SCOPE_NAME.equals(scope)) {
 				// Already refresh scoped
 				return false;
 			}
@@ -158,15 +176,6 @@ public class RefreshAutoConfiguration {
 				}
 			}
 			if (type != null) {
-				if (this.environment == null && registry instanceof BeanFactory) {
-					this.environment = ((BeanFactory) registry)
-							.getBean(Environment.class);
-				}
-				if (this.environment == null) {
-					this.environment = new StandardEnvironment();
-				}
-				Binder.get(environment).bind("spring.cloud.refresh",
-						Bindable.ofInstance(this));
 				return this.refreshables.contains(type);
 			}
 			return false;

@@ -19,8 +19,8 @@ package org.springframework.cloud.client.discovery.event;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Helper class for listeners to the {@link HeartbeatEvent} providing a convenient way to
- * determine if there has been a change in state.
+ * Helper class for listeners to the {@link HeartbeatEvent}, providing a convenient way
+ * to determine if there has been a change in state.
  *
  * @author Dave Syer
  */
@@ -29,8 +29,8 @@ public class HeartbeatMonitor {
 	private AtomicReference<Object> latestHeartbeat = new AtomicReference<>();
 
 	/**
-	 * @param value the latest heartbeat
-	 * @return true if the state changed
+	 * @param value The latest heartbeat.
+	 * @return True if the state changed.
 	 */
 	public boolean update(Object value) {
 		Object last = this.latestHeartbeat.get();

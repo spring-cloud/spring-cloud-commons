@@ -22,28 +22,28 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.Ordered;
 
 /**
- * DiscoveryClient represents read operations commonly available to Discovery service such as
- * Netflix Eureka or consul.io
+ * Represents read operations commonly available to discovery services such as Netflix
+ * Eureka or consul.io.
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
 public interface DiscoveryClient extends Ordered {
 
 	/**
-	 * A human readable description of the implementation, used in HealthIndicator
-	 * @return the description
+	 * A human-readable description of the implementation, used in HealthIndicator.
+	 * @return The description.
 	 */
 	String description();
 
 	/**
-	 * Get all ServiceInstances associated with a particular serviceId
-	 * @param serviceId the serviceId to query
-	 * @return a List of ServiceInstance
+	 * Gets all ServiceInstances associated with a particular serviceId.
+	 * @param serviceId The serviceId to query.
+	 * @return A List of ServiceInstance.
 	 */
 	List<ServiceInstance> getInstances(String serviceId);
 
 	/**
-	 * @return all known service ids
+	 * @return All known service IDs.
 	 */
 	List<String> getServices();
 

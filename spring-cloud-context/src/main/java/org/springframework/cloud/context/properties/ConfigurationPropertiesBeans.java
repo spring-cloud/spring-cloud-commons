@@ -74,7 +74,7 @@ ApplicationContextAware {
 	}
 
 	/**
-	 * @param beans the bean meta data to set
+	 * @param beans The bean meta data to set.
 	 */
 	public void setBeanMetaDataStore(ConfigurationBeanFactoryMetadata beans) {
 		this.metaData = beans;

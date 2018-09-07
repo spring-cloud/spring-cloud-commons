@@ -22,13 +22,13 @@ import org.springframework.core.io.Resource;
 public class KeyProperties {
 
 	/**
-	 * A symmetric key. As a stronger alternative consider using a keystore.
+	 * A symmetric key. As a stronger alternative, consider using a keystore.
 	 */
 	private String key;
 
 	/**
-	 * A salt for the symmetric key in the form of a hex-encoded byte array. As a stronger
-	 * alternative consider using a keystore.
+	 * A salt for the symmetric key, in the form of a hex-encoded byte array. As a stronger
+	 * alternative, consider using a keystore.
 	 */
 	private String salt = "deadbeef";
 

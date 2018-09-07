@@ -41,7 +41,7 @@ import org.springframework.core.env.Environment;
 /**
  *
  * @deprecated Use
- * {@link org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration instead}
+ * {@link org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration instead}.
  *
  * @author Dave Syer
  */

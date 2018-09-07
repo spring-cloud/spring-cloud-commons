@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2013-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer;
+package org.springframework.cloud.util;
 
-import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.aop.framework.Advised;
+import org.springframework.aop.support.AopUtils;
 
 /**
- * Implemented by classes which use a load balancer to choose a server to
- * send a request to.
- *
  * @author Ryan Baxter
  */
-public interface ServiceInstanceChooser {
+public class ProxyUtils {
 
-    /**
-     * Chooses a ServiceInstance from the LoadBalancer for the specified service.
-     * @param serviceId The service ID to look up the LoadBalancer.
-     * @return A ServiceInstance that matches the serviceId.
-     */
-    ServiceInstance choose(String serviceId);
+	@SuppressWarnings("unchecked")
+	public static <T> T getTargetObject(Object candidate) {
+		try {
+			if (AopUtils.isAopProxy(candidate) && (candidate instanceof Advised)) {
+				return (T) ((Advised) candidate).getTargetSource().getTarget();
+			}
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("Failed to unwrap proxied object", ex);
+		}
+		return (T) candidate;
+	}
 }

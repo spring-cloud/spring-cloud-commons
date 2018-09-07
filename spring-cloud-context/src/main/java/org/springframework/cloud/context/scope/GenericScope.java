@@ -91,10 +91,10 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	private ConcurrentMap<String, ReadWriteLock> locks = new ConcurrentHashMap<>();
 
 	/**
-	 * Manual override for the serialization id that will be used to identify the bean
+	 * Manual override for the serialization ID that will be used to identify the bean
 	 * factory. The default is a unique key based on the bean names in the bean factory.
 	 *
-	 * @param id the id to set
+	 * @param id The ID to set.
 	 */
 	public void setId(String id) {
 		this.id = id;
@@ -103,7 +103,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	/**
 	 * The name of this scope. Default "generic".
 	 *
-	 * @param name the name value to set
+	 * @param name The name value to set.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -112,7 +112,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	/**
 	 * The cache implementation to use for bean instances in this scope.
 	 *
-	 * @param cache the cache to use
+	 * @param cache The cache to use.
 	 */
 	public void setScopeCache(ScopeCache cache) {
 		this.cache = new BeanLifecycleWrapperCache(cache);
@@ -121,7 +121,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	/**
 	 * A map of bean name to errors when instantiating the bean.
 	 *
-	 * @return the errors accumulated since the latest destroy
+	 * @return The errors accumulated since the latest destroy.
 	 */
 	public Map<String, Exception> getErrors() {
 		return this.errors;
@@ -153,10 +153,10 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	}
 
 	/**
-	 * Destroy the named bean (i.e. flush it from the cache by default).
+	 * Destroys the named bean (i.e. flushes it from the cache by default).
 	 *
-	 * @param name the bean name to flush
-	 * @return true if the bean was already cached, false otherwise
+	 * @param name The bean name to flush.
+	 * @return True if the bean was already cached; false otherwise.
 	 */
 	protected boolean destroy(String name) {
 		BeanLifecycleWrapper wrapper = this.cache.remove(name);
@@ -258,6 +258,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 					if (getName().equals(root.getDecoratedDefinition().getBeanDefinition()
 							.getScope())) {
 						root.setBeanClass(LockedScopedProxyFactoryBean.class);
+						root.getConstructorArgumentValues().addGenericArgumentValue(this);
 						// surprising that a scoped proxy bean definition is not already
 						// marked as synthetic?
 						root.setSynthetic(true);
@@ -268,13 +269,13 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	}
 
 	/**
-	 * If the bean factory is a DefaultListableBeanFactory then it can serialize scoped
+	 * If the bean factory is a DefaultListableBeanFactory, then it can serialize scoped
 	 * beans and deserialize them in another context (even in another JVM), as long as the
-	 * ids of the bean factories match. This method sets up the serialization id to be
-	 * either the id provided to the scope instance, or if that is null, a hash of all the
+	 * IDs of the bean factories match. This method sets up the serialization ID to be
+	 * either the ID provided to the scope instance, or if that is null, a hash of all the
 	 * bean names.
 	 *
-	 * @param beanFactory the bean factory to configure
+	 * @param beanFactory The bean factory to configure.
 	 */
 	private void setSerializationId(ConfigurableListableBeanFactory beanFactory) {
 
@@ -314,6 +315,10 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 
 	protected String getName() {
 		return this.name;
+	}
+
+	protected ReadWriteLock getLock(String beanName) {
+		return locks.get(beanName);
 	}
 
 	private static class BeanLifecycleWrapperCache {
@@ -437,10 +442,15 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 	}
 
 	@SuppressWarnings("serial")
-	public class LockedScopedProxyFactoryBean extends ScopedProxyFactoryBean
-			implements MethodInterceptor {
+	public static class LockedScopedProxyFactoryBean<S extends GenericScope>
+			extends ScopedProxyFactoryBean implements MethodInterceptor {
 
+		private final S scope;
 		private String targetBeanName;
+
+		public LockedScopedProxyFactoryBean(S scope) {
+			this.scope = scope;
+		}
 
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) {
@@ -467,10 +477,11 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 				return invocation.proceed();
 			}
 			Object proxy = getObject();
-			ReadWriteLock readWriteLock = locks.get(this.targetBeanName);
+			ReadWriteLock readWriteLock = scope.getLock(this.targetBeanName);
 			if (readWriteLock == null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("For bean with name [" + this.targetBeanName + "] there is no read write lock. Will create a new one to avoid NPE");
+					logger.debug("For bean with name [" + this.targetBeanName
+							+ "] there is no read write lock. Will create a new one to avoid NPE");
 				}
 				readWriteLock = new ReentrantReadWriteLock();
 			}

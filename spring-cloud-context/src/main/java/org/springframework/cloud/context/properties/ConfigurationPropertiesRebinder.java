@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -34,15 +33,16 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
+import org.springframework.cloud.util.ProxyUtils;
 
 /**
  * Listens for {@link EnvironmentChangeEvent} and rebinds beans that were bound to the
  * {@link Environment} using {@link ConfigurationProperties
  * <code>@ConfigurationProperties</code>}. When these beans are re-bound and
- * re-initialized the changes are available immediately to any component that is using the
+ * re-initialized, the changes are available immediately to any component that is using the
  * <code>@ConfigurationProperties</code> bean.
  *
- * @see RefreshScope for a deeper and optionally more focused refresh of bean components
+ * @see RefreshScope for a deeper and optionally more focused refresh of bean components.
  *
  * @author Dave Syer
  *
@@ -71,7 +71,7 @@ public class ConfigurationPropertiesRebinder
 	/**
 	 * A map of bean name to errors when instantiating the bean.
 	 *
-	 * @return the errors accumulated since the latest destroy
+	 * @return The errors accumulated since the latest destroy.
 	 */
 	public Map<String, Exception> getErrors() {
 		return this.errors;
@@ -94,7 +94,7 @@ public class ConfigurationPropertiesRebinder
 			try {
 				Object bean = this.applicationContext.getBean(name);
 				if (AopUtils.isAopProxy(bean)) {
-					bean = getTargetObject(bean);
+					bean = ProxyUtils.getTargetObject(bean);
 				}
 				if (bean != null) {
 					this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
@@ -113,19 +113,6 @@ public class ConfigurationPropertiesRebinder
 			}
 		}
 		return false;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <T> T getTargetObject(Object candidate) {
-		try {
-			if (AopUtils.isAopProxy(candidate) && (candidate instanceof Advised)) {
-				return (T) ((Advised) candidate).getTargetSource().getTarget();
-			}
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException("Failed to unwrap proxied object", ex);
-		}
-		return (T) candidate;
 	}
 
 	@ManagedAttribute

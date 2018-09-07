@@ -27,7 +27,7 @@ import org.springframework.cloud.context.scope.refresh.RefreshScope;
 
 /**
  * Health indicator for the refresh scope and configuration properties rebinding. If an
- * environment change causes a bean to fail in instantiate or bind this indicator will
+ * environment change causes a bean to fail in instantiate or bind, this indicator will
  * generally say what the problem was and switch to DOWN.
  *
  * @author Dave Syer
@@ -45,19 +45,22 @@ public class RefreshScopeHealthIndicator extends AbstractHealthIndicator {
 
 	@Override
 	protected void doHealthCheck(Builder builder) throws Exception {
-		Map<String, Exception> errors = new HashMap<>(this.scope.getIfAvailable().getErrors());
-		errors.putAll(this.rebinder.getErrors());
-		if (errors.isEmpty()) {
-			builder.up();
-		}
-		else {
-			builder.down();
-			if (errors.size() == 1) {
-				builder.withException(errors.values().iterator().next());
+		RefreshScope refreshScope = this.scope.getIfAvailable();
+		if (refreshScope != null) {
+			Map<String, Exception> errors = new HashMap<>(refreshScope.getErrors());
+			errors.putAll(this.rebinder.getErrors());
+			if (errors.isEmpty()) {
+				builder.up();
 			}
 			else {
-				for (String name : errors.keySet()) {
-					builder.withDetail(name, errors.get(name));
+				builder.down();
+				if (errors.size() == 1) {
+					builder.withException(errors.values().iterator().next());
+				}
+				else {
+					for (String name : errors.keySet()) {
+						builder.withDetail(name, errors.get(name));
+					}
 				}
 			}
 		}

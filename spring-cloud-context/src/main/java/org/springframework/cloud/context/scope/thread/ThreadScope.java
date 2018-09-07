@@ -25,7 +25,7 @@ import org.springframework.cloud.context.scope.GenericScope;
 public class ThreadScope extends GenericScope {
 
 	/**
-	 * Create a scope instance and give it the default name: "thread".
+	 * Creates a scope instance and gives it the default name: "thread".
 	 */
 	public ThreadScope() {
 		super();

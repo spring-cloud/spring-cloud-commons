@@ -24,7 +24,7 @@ Spring Cloud builds on top of that and adds a few features that probably all com
 A Spring Cloud application operates by creating a "`bootstrap`" context, which is a parent context for the main application.
 It is responsible for loading configuration properties from the external sources and for decrypting properties in the local external configuration files.
 The two contexts share an `Environment`, which is the source of external properties for any Spring application.
-By default, bootstrap properties are added with high precedence, so they cannot be overridden by local configuration.
+By default, bootstrap properties (not `bootstrap.properties` but properties that are loaded during the bootstrap phase) are added with high precedence, so they cannot be overridden by local configuration.
 
 The bootstrap context uses a different convention for locating external configuration than the main application context.
 Instead of `application.yml` (or `.properties`), you can use `bootstrap.yml`, keeping the external configuration for bootstrap and main context
@@ -87,12 +87,12 @@ context you are building), properties in that profile get loaded as well, the sa
 === Overriding the Values of Remote Properties
 
 The property sources that are added to your application by the bootstrap context are often "`remote`" (from example, from Spring Cloud Config Server).
-By default, they cannot be overridden locally, except on the command line.
+By default, they cannot be overridden locally.
 If you want to let your applications override the remote properties with their own System properties or config files, the remote property source has to grant it permission by setting `spring.cloud.config.allowOverride=true` (it does not work to set this locally).
 Once that flag is set, two finer-grained settings control the location of the remote properties in relation to system properties and the application's local configuration:
 
 * `spring.cloud.config.overrideNone=true`: Override from any local property source.
-* `spring.cloud.config.overrideSystemProperties=false`: Only system properties and environment variables (but not the local config files) should override the remote settings.
+* `spring.cloud.config.overrideSystemProperties=false`: Only system properties, command line arguments, and environment variables (but not the local config files) should override the remote settings.
 
 === Customizing the Bootstrap Configuration
 
@@ -140,6 +140,15 @@ If you create a jar with this class in it and then add a `META-INF/spring.factor
 org.springframework.cloud.bootstrap.BootstrapConfiguration=sample.custom.CustomPropertySourceLocator
 ----
 
+=== Logging Configuration
+
+If you are going to use Spring Boot to configure log settings than
+you should place this configuration in `bootstrap.[yml | properties]
+if you would like it to apply to all events.
+
+NOTE: For Spring Cloud to initialize logging configuration properly you cannot use a custom prefix.  For example,
+using `custom.loggin.logpath` will not be recognized by Spring Cloud when initializing the logging system.
+
 === Environment Changes
 
 The application listens for an `EnvironmentChangeEvent` and reacts to the change in a couple of standard ways (additional `ApplicationListeners` can be added as `@Beans` by the user in the normal way).
@@ -160,12 +169,19 @@ For instance, a `DataSource` can have its `maxPoolSize` changed at runtime (the 
 Re-binding `@ConfigurationProperties` does not cover another large class of use cases, where you need more control over the refresh and where you need a change to be atomic over the whole `ApplicationContext`.
 To address those concerns, we have `@RefreshScope`.
 
+[[refresh-scope]]
 === Refresh Scope
 
 When there is a configuration change, a Spring `@Bean` that is marked as `@RefreshScope` gets special treatment.
 This feature addresses the problem of stateful beans that only get their configuration injected when they are initialized.
 For instance, if a `DataSource` has open connections when the database URL is changed via the `Environment`, you probably want the holders of those connections to be able to complete what they are doing.
 Then, the next time something borrows a connection from the pool, it gets one with the new URL.
+
+Sometimes, it might even be mandatory to apply the `@RefreshScope`
+annotation on some beans which can be only initialized once. If a bean
+is "immutable", you will have to either annotate the bean with `@RefreshScope`
+or specify the classname under the property key
+`spring.cloud.refresh.extra-refreshable`.
 
 Refresh scope beans are lazy proxies that initialize when they are used (that is, when a method is called), and the scope acts as a cache of initialized values.
 To force a bean to re-initialize on the next method call, you must invalidate its cache entry.
@@ -207,6 +223,9 @@ For a Spring Boot Actuator application, some additional management endpoints are
 * `/actuator/refresh` to re-load the boot strap context and refresh the `@RefreshScope` beans.
 * `/actuator/restart` to close the `ApplicationContext` and restart it (disabled by default).
 * `/actuator/pause` and `/actuator/resume` for calling the `Lifecycle` methods (`stop()` and `start()` on the `ApplicationContext`).
+
+NOTE: If you disable the `/actuator/restart` endpoint then the `/actuator/pause` and `/actuator/resume` endpoints
+will also be disabled since they are just a special case of `/actuator/restart`.
 
 == Spring Cloud Commons: Common Abstractions
 
@@ -286,6 +305,14 @@ public class MyConfiguration {
 ----
 
 Each `ServiceRegistry` implementation has its own `Registry` implementation.
+
+* `ZookeeperRegistration` used with `ZookeeperServiceRegistry`
+* `EurekaRegistration` used with `EurekaServiceRegistry`
+* `ConsulRegistration` used with `ConsulServiceRegistry`
+
+If you are using the `ServiceRegistry` interface, you are going to need to pass the
+correct `Registry` implementation for the `ServiceRegistry` implementation you
+are using.
 
 
 ==== ServiceRegistry Auto-Registration
@@ -527,7 +554,7 @@ spring:
 
 You can also force the use of only specified network addresses by using a list of regular expressions, as shown in the following example:
 
-.application.yml
+.bootstrap.yml
 ----
 spring:
   cloud:
