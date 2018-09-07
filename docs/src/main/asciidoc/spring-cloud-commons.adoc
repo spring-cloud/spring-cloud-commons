@@ -262,21 +262,7 @@ the `getOrder()` method so that it returns the value that is suitable for your s
 properties to set the order of the `DiscoveryClient`
 implementations provided by Spring Cloud, among others  `ConsulDiscoveryClient`, `EurekaDiscoveryClient` and
 `ZookeeperDiscoveryClient`. In order to do it, you just need to set the
-`spring.cloud.discovery.client.{clientIdentifier}.order` property to the desired value.
-
-The following example shows how to set order value for Spring Cloud `DiscoveryClient` implementations:
-
-[source,yaml,indent=0]
-----
-spring:
-    cloud:
-        discovery:
-            client:
-                eureka: 1
-----
-
-The following client identifiers are currently supported with this syntax: `eureka`, `consul`, `zookeeper`,
-`cloudfoundry`, `simple`.
+`spring.cloud.{clientIdentifier}.discovery.order` (or `eureka.client.order` for Eureka) property to the desired value.
 
 === ServiceRegistry
 
