@@ -10,7 +10,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.core.Ordered;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
  * Properties to hold the details of a
@@ -35,7 +35,7 @@ public class SimpleDiscoveryProperties {
 	 */
 	private SimpleServiceInstance local = new SimpleServiceInstance();
 
-	private int order = Ordered.LOWEST_PRECEDENCE;
+	private int order = DiscoveryClient.DEFAULT_ORDER;
 
 	public Map<String, List<SimpleServiceInstance>> getInstances() {
 		return this.instances;
