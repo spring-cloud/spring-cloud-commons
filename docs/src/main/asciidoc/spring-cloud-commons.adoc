@@ -257,9 +257,9 @@ Otherwise, it can bubble up as the `description` of the rolled up `HealthIndicat
 ==== Ordering `DiscoveryClient` instances
 `DiscoveryClient` interface extends `Ordered` to let you define the order of the returned discovery clients, similar to
 how you can order the beans loaded by a Spring application. By default, the order of any `DiscoveryClient` is set to
-`Ordered.LOWEST_PRECEDENCE`, which equals `Integer.MAX_VALUE`. If you want to set a different order for your custom
-`DiscoveryClient` implementations, you just need to override the `getOrder()` method so that it returns the value that
-is suitable for your setup. Apart from this, you can use properties to set the order of the `DiscoveryClient`
+`0`. If you want to set a different order for your custom `DiscoveryClient` implementations, you just need to override
+the `getOrder()` method so that it returns the value that is suitable for your setup. Apart from this, you can use
+properties to set the order of the `DiscoveryClient`
 implementations provided by Spring Cloud, among others  `ConsulDiscoveryClient`, `EurekaDiscoveryClient` and
 `ZookeeperDiscoveryClient`. In order to do it, you just need to set the
 `spring.cloud.discovery.client.{clientIdentifier}.order` property to the desired value.

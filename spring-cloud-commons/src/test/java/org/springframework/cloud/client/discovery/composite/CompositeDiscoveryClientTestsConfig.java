@@ -21,21 +21,27 @@ import org.springframework.context.annotation.Configuration;
 @EnableAutoConfiguration
 public class CompositeDiscoveryClientTestsConfig {
 
-	static final String A_CUSTOM_DISCOVERY_CLIENT = "A custom discovery client";
-	static final String THIRD_DISCOVERY_CLIENT = "Third discovery client";
+	static final String DEFAULT_ORDER_DISCOVERY_CLIENT = "Default order discovery client";
+	static final String CUSTOM_DISCOVERY_CLIENT = "A custom discovery client";
+	static final String FOURTH_DISCOVERY_CLIENT = "Fourth discovery client";
 	static final String CUSTOM_SERVICE_ID = "custom";
 
 	@Bean
 	public DiscoveryClient customDiscoveryClient() {
-		return aDiscoveryClient(1, A_CUSTOM_DISCOVERY_CLIENT);
+		return aDiscoveryClient(-1, CUSTOM_DISCOVERY_CLIENT);
 	}
 
 	@Bean
 	public DiscoveryClient thirdOrderCustomDiscoveryClient() {
-		return aDiscoveryClient(3, THIRD_DISCOVERY_CLIENT);
+		return aDiscoveryClient(3, FOURTH_DISCOVERY_CLIENT);
 	}
 
-	private DiscoveryClient aDiscoveryClient(int order, String description) {
+	@Bean
+	public DiscoveryClient defaultOrderDiscoveryClient() {
+		return aDiscoveryClient(null, DEFAULT_ORDER_DISCOVERY_CLIENT);
+	}
+
+	private DiscoveryClient aDiscoveryClient(Integer order, String description) {
 		return new DiscoveryClient() {
 			@Override
 			public String description() {
@@ -59,7 +65,7 @@ public class CompositeDiscoveryClientTestsConfig {
 
 			@Override
 			public int getOrder() {
-				return order;
+				return order != null ? order : DiscoveryClient.super.getOrder();
 			}
 		};
 	}

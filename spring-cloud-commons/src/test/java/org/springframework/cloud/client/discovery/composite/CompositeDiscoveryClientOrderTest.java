@@ -1,9 +1,10 @@
 package org.springframework.cloud.client.discovery.composite;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.A_CUSTOM_DISCOVERY_CLIENT;
+import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.CUSTOM_DISCOVERY_CLIENT;
 import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.CUSTOM_SERVICE_ID;
-import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.THIRD_DISCOVERY_CLIENT;
+import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.DEFAULT_ORDER_DISCOVERY_CLIENT;
+import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.FOURTH_DISCOVERY_CLIENT;
 
 import java.util.List;
 
@@ -37,11 +38,13 @@ public class CompositeDiscoveryClientOrderTest {
 
 		// then:
 		assertThat(discoveryClients.get(0).description())
-				.isEqualTo(A_CUSTOM_DISCOVERY_CLIENT);
+				.isEqualTo(CUSTOM_DISCOVERY_CLIENT);
 		assertThat(discoveryClients.get(1).description())
-				.isEqualTo("Simple Discovery Client");
+				.isEqualTo(DEFAULT_ORDER_DISCOVERY_CLIENT);
 		assertThat(discoveryClients.get(2).description())
-				.isEqualTo(THIRD_DISCOVERY_CLIENT);
+				.isEqualTo("Simple Discovery Client");
+		assertThat(discoveryClients.get(3).description())
+				.isEqualTo(FOURTH_DISCOVERY_CLIENT);
 	}
 
 	@Test
