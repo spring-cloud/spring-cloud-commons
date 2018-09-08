@@ -22,9 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
-import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.annotation.Conditional;
 
 /**
@@ -37,7 +35,6 @@ import org.springframework.context.annotation.Conditional;
 @Target({ ElementType.TYPE, ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@ConditionalOnClass(RefreshScope.class)
 @ConditionalOnBean(RefreshAutoConfiguration.class)
 @interface ConditionalOnRefreshScope {
 
