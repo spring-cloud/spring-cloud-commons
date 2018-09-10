@@ -280,6 +280,18 @@ To disable it, set <literal>spring.cloud.discovery.client.health-indicator.enabl
 To disable the description field of the <literal>DiscoveryClientHealthIndicator</literal>, set <literal>spring.cloud.discovery.client.health-indicator.include-description=false</literal>.
 Otherwise, it can bubble up as the <literal>description</literal> of the rolled up <literal>HealthIndicator</literal>.</simpara>
 </section>
+<section xml:id="_ordering_literal_discoveryclient_literal_instances">
+<title>Ordering <literal>DiscoveryClient</literal> instances</title>
+<simpara><literal>DiscoveryClient</literal> interface extends <literal>Ordered</literal>. This is useful when using multiple discovery
+ clients, as it allows you to define the order of the returned discovery clients, similar to
+how you can order the beans loaded by a Spring application. By default, the order of any <literal>DiscoveryClient</literal> is set to
+<literal>0</literal>. If you want to set a different order for your custom <literal>DiscoveryClient</literal> implementations, you just need to override
+the <literal>getOrder()</literal> method so that it returns the value that is suitable for your setup. Apart from this, you can use
+properties to set the order of the <literal>DiscoveryClient</literal>
+implementations provided by Spring Cloud, among others  <literal>ConsulDiscoveryClient</literal>, <literal>EurekaDiscoveryClient</literal> and
+<literal>ZookeeperDiscoveryClient</literal>. In order to do it, you just need to set the
+<literal>spring.cloud.{clientIdentifier}.discovery.order</literal> (or <literal>eureka.client.order</literal> for Eureka) property to the desired value.</simpara>
+</section>
 </section>
 <section xml:id="_serviceregistry">
 <title>ServiceRegistry</title>
