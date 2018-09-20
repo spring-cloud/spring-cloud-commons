@@ -18,6 +18,7 @@ package org.springframework.cloud.context.encrypt;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.regex.Pattern;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.MiscPEMGenerator;
@@ -36,6 +37,8 @@ import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
  */
 public class EncryptorFactory {
 
+	private static final Pattern NEWLINE_ESCAPE_PATTERN = Pattern.compile("\\r|\\n");
+
 	private String salt = "deadbeef";
 
 	public EncryptorFactory() {
@@ -53,7 +56,7 @@ public class EncryptorFactory {
 			try {
 				String normalizedPemData = normalizePem(data);
 				encryptor = new RsaSecretEncryptor(
-						normalizedPemData.replaceAll("\\n", "").replaceAll("\\r", ""));
+						NEWLINE_ESCAPE_PATTERN.matcher(normalizedPemData).replaceAll(""));
 			}
 			catch (IllegalArgumentException e) {
 				throw new KeyFormatException(e);
