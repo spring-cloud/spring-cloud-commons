@@ -38,6 +38,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  *
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma
+ * @author Tim Ysewyn
  */
 
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
@@ -98,6 +99,10 @@ public class SimpleDiscoveryProperties {
 		 */
 		private Map<String, String> metadata = new LinkedHashMap<>();
 		/**
+		 * The unique identifier or name for the service instance.
+		 */
+		private String instanceId;
+		/**
 		 * The identifier or name for the service. Multiple instances might share the same
 		 * service ID.
 		 */
@@ -118,6 +123,15 @@ public class SimpleDiscoveryProperties {
 			if ("https".equals(scheme)) {
 				this.secure = true;
 			}
+		}
+
+		@Override
+		public String getInstanceId() {
+			return this.instanceId;
+		}
+
+		public void setInstanceId(String id) {
+			this.instanceId = id;
 		}
 
 		@Override

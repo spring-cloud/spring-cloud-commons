@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 the original author or authors.
+ * Copyright 2013-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,11 @@ import java.util.Objects;
  * Default implementation of {@link ServiceInstance}.
  *
  * @author Spencer Gibb
+ * @author Tim Ysewyn
  */
 public class DefaultServiceInstance implements ServiceInstance {
+
+	private final String instanceId;
 
 	private final String serviceId;
 
@@ -39,8 +42,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private final Map<String, String> metadata;
 
-	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure,
+	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
 			Map<String, String> metadata) {
+		this.instanceId = instanceId;
 		this.serviceId = serviceId;
 		this.host = host;
 		this.port = port;
@@ -48,9 +52,26 @@ public class DefaultServiceInstance implements ServiceInstance {
 		this.metadata = metadata;
 	}
 
+	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure) {
+		this(instanceId, serviceId, host, port, secure, new LinkedHashMap<>());
+	}
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
+	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure,
+								  Map<String, String> metadata) {
+		this(null, serviceId, host, port, secure, metadata);
+	}
+
+	/**
+	 * @deprecated
+	 */
+	@Deprecated
 	public DefaultServiceInstance(String serviceId, String host, int port,
-			boolean secure) {
-		this(serviceId, host, port, secure, new LinkedHashMap<String, String>());
+								  boolean secure) {
+		this(serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
 	@Override
@@ -73,6 +94,11 @@ public class DefaultServiceInstance implements ServiceInstance {
 		String uri = String.format("%s://%s:%s", scheme, instance.getHost(),
 				instance.getPort());
 		return URI.create(uri);
+	}
+
+	@Override
+	public String getInstanceId() {
+		return instanceId;
 	}
 
 	@Override
