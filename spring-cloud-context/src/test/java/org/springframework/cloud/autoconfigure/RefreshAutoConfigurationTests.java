@@ -47,6 +47,7 @@ public class RefreshAutoConfigurationTests {
 		try (ConfigurableApplicationContext context = getApplicationContext(
 				WebApplicationType.NONE, Config.class, "config.foo=bar",
 				"spring.cloud.refresh.refreshable:" + ConfigProps.class.getName())) {
+			context.getBean(ConfigProps.class);
 			context.getBean(ContextRefresher.class).refresh();
 		}
 	}
@@ -57,6 +58,7 @@ public class RefreshAutoConfigurationTests {
 				WebApplicationType.NONE, Config.class, "config.foo=bar",
 				"spring.cloud.refresh.extra-refreshable:"
 						+ ConfigProps.class.getName())) {
+			context.getBean(ConfigProps.class);
 			context.getBean(ContextRefresher.class).refresh();
 		}
 	}
@@ -69,7 +71,7 @@ public class RefreshAutoConfigurationTests {
 
 	@Configuration
 	@EnableAutoConfiguration(exclude = DataSourceAutoConfiguration.class)
-	@EnableConfigurationProperties
+	@EnableConfigurationProperties(ConfigProps.class)
 	static class Config {
 
 	}
