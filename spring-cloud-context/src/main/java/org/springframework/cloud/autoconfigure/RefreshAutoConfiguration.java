@@ -136,14 +136,6 @@ public class RefreshAutoConfiguration {
 		@Override
 		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
 				throws BeansException {
-			// temporarily allow bean definition overriding
-			boolean allowBeanOverriding = false;
-			if (registry instanceof DefaultListableBeanFactory) {
-				DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) registry;
-				allowBeanOverriding = beanFactory.isAllowBeanDefinitionOverriding();
-				beanFactory.setAllowBeanDefinitionOverriding(true);
-			}
-
 			bindEnvironmentIfNeeded(registry);
 
 			for (String name : registry.getBeanDefinitionNames()) {
@@ -154,14 +146,12 @@ public class RefreshAutoConfiguration {
 					BeanDefinitionHolder proxy = ScopedProxyUtils
 							.createScopedProxy(holder, registry, true);
 					definition.setScope("refresh");
+					if (registry.containsBeanDefinition(proxy.getBeanName())) {
+						registry.removeBeanDefinition(proxy.getBeanName());
+					}
 					registry.registerBeanDefinition(proxy.getBeanName(),
 							proxy.getBeanDefinition());
 				}
-			}
-			// restore bean definition overriding
-			if (registry instanceof DefaultListableBeanFactory) {
-				DefaultListableBeanFactory beanFactory = (DefaultListableBeanFactory) registry;
-				beanFactory.setAllowBeanDefinitionOverriding(allowBeanOverriding);
 			}
 		}
 
