@@ -386,7 +386,8 @@ See the https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-fi
 
 If you would like to customize the retry functionality throughout Spring Cloud(Include `BackOffPolicy`、`RetryListener`、`LoadBalancedRetryPolicy`).You need to create a bean of type `LoadBalancedRetryFactory`.As shown in the following example:
 
----
+[source,java,indent=0]
+----
 @Configuration
 public class MyConfiguration {
 
@@ -427,7 +428,7 @@ public class MyConfiguration {
         };
     }
 }
----
+----
 
 === Multiple RestTemplate objects
 
