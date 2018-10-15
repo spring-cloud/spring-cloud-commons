@@ -298,6 +298,15 @@ To disable that behavior, you can set:
 * `@EnableDiscoveryClient(autoRegister=false)` to permanently disable auto-registration.
 * `spring.cloud.service-registry.auto-registration.enabled=false` to disable the behavior through configuration.
 
+===== ServiceRegistry Auto-Registration Events
+
+There are two events that will be fired when a service auto-registers.  The first event, called
+`InstancePreRegisteredEvent`, is fired before the service is registered.  The second
+event, called `InstanceRegisteredEvent`, is fired after the service is registered.  You can register an
+`ApplicationListener`(s) to listen to and react to these events.
+
+NOTE: These events will not be fired if `spring.cloud.service-registry.auto-registration.enabled` is set to `false`.
+
 ==== Service Registry Actuator Endpoint
 
 Spring Cloud Commons provides a `/service-registry` actuator endpoint.
