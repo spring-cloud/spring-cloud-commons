@@ -384,37 +384,21 @@ You can use `client.ribbon.MaxAutoRetries`, `client.ribbon.MaxAutoRetriesNextSer
 If you would like to disable the retry logic with Spring Retry on the classpath, you can set `spring.cloud.loadbalancer.retry.enabled=false`.
 See the https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties[Ribbon documentation] for a description of what these properties do.
 
-If you would like to implement a `BackOffPolicy` in your retries, you need to create a bean of type `LoadBalancedBackOffPolicyFactory` and return the `BackOffPolicy` you would like to use for a given service, as shown in the following example:
+If you would like to customize the retry functionality throughout Spring Cloud(Include `BackOffPolicy`、`RetryListener`、`LoadBalancedRetryPolicy`).You need to create a bean of type `LoadBalancedRetryFactory`.As shown in the following example:
 
-[source,java,indent=0]
-----
+---
 @Configuration
 public class MyConfiguration {
+
     @Bean
-    LoadBalancedBackOffPolicyFactory backOffPolciyFactory() {
-        return new LoadBalancedBackOffPolicyFactory() {
+    public LoadBalancedRetryFactory loadBalancedRetryFactory() {
+        return new LoadBalancedRetryFactory() {
+
             @Override
-            public BackOffPolicy createBackOffPolicy(String service) {
-        		return new ExponentialBackOffPolicy();
-        	}
-        };
-    }
-}
-----
+            public LoadBalancedRetryPolicy createRetryPolicy(String service, ServiceInstanceChooser serviceInstanceChooser) {
+                return new MyLoadBalancedRetryPolicy();
+            }
 
-NOTE: `client` in the preceding examples should be replaced with your Ribbon client's name.
-
-If you want to add one or more `RetryListener` implementations to your retry functionality, you need to
-create a bean of type `LoadBalancedRetryListenerFactory` and return the `RetryListener` array
-you would like to use for a given service, as shown in the following example:
-
-[source,java,indent=0]
-----
-@Configuration
-public class MyConfiguration {
-    @Bean
-    LoadBalancedRetryListenerFactory retryListenerFactory() {
-        return new LoadBalancedRetryListenerFactory() {
             @Override
             public RetryListener[] createRetryListeners(String service) {
                 return new RetryListener[]{new RetryListener() {
@@ -425,7 +409,7 @@ public class MyConfiguration {
                     }
 
                     @Override
-                     public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+                    public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
                         //TODO Do you business...
                     }
 
@@ -435,10 +419,15 @@ public class MyConfiguration {
                     }
                 }};
             }
+
+            @Override
+            public BackOffPolicy createBackOffPolicy(String service) {
+                return new MyBackOffPolicy();
+            }
         };
     }
 }
-----
+---
 
 === Multiple RestTemplate objects
 
