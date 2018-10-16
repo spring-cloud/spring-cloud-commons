@@ -175,7 +175,7 @@ public class BootstrapApplicationListener
 				.web(WebApplicationType.NONE);
 		final SpringApplication builderApplication = builder.application();
 		if(builderApplication.getMainApplicationClass() == null){
-			// gh-425:
+			// gh_425:
 			// SpringApplication cannot deduce the MainApplicationClass here
 			// if it is booted from SpringBootServletInitializer due to the
 			// absense of the "main" method in stackTraces.
