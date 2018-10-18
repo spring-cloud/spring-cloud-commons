@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Auto configuration for Ribbon (client side load balancing).
+ * Auto-configuration for Ribbon (client-side load balancing).
  *
  * @author Spencer Gibb
  * @author Dave Syer

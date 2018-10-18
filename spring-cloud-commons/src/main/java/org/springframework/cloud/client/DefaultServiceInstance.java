@@ -50,7 +50,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	public DefaultServiceInstance(String serviceId, String host, int port,
 			boolean secure) {
-		this(serviceId, host, port, secure, new LinkedHashMap<String, String>());
+		this(serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
 	@Override
@@ -64,9 +64,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 	}
 
 	/**
-	 * Create a uri from the given ServiceInstance's host:port
+	 * Creates a URI from the given ServiceInstance's host:port.
 	 * @param instance
-	 * @return URI of the form (secure)?https:http + "host:port"
+	 * @return URI of the form (secure)?https:http + "host:port".
 	 */
 	public static URI getUri(ServiceInstance instance) {
 		String scheme = (instance.isSecure()) ? "https" : "http";

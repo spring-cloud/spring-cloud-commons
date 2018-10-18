@@ -42,7 +42,7 @@ public class EnvironmentChangeEvent extends ApplicationEvent {
 	}
 
 	/**
-	 * @return the keys
+	 * @return The keys.
 	 */
 	public Set<String> getKeys() {
 		return keys;

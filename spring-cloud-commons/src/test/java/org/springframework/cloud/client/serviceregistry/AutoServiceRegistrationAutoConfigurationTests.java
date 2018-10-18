@@ -8,8 +8,9 @@ import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.boot.test.util.EnvironmentTestUtils;
+import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,7 +75,7 @@ public class AutoServiceRegistrationAutoConfigurationTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(list.toArray(new Class[0]));
 		if (StringUtils.hasText(property)) {
-			EnvironmentTestUtils.addEnvironment(context, property);
+			TestPropertyValues.of(property).applyTo(context);
 		}
 		context.refresh();
 		return context;

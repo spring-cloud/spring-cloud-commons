@@ -23,7 +23,7 @@ import org.springframework.http.client.AbstractClientHttpResponse;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
- * {@link RetryableStatusCodeException} that captures a {@link ClientHttpResponse}
+ * {@link RetryableStatusCodeException} that captures a {@link ClientHttpResponse}.
  * @author Ryan Baxter
  */
 public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeException {
@@ -31,10 +31,10 @@ public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeEx
 	private ClientHttpResponseWrapper response;
 
 	/**
-	 * Constructor
-	 * @param serviceId The service id
-	 * @param response The response object
-	 * @throws IOException Thrown if the {@link ClientHttpResponse} response code cant be retrieved
+	 * Constructor.
+	 * @param serviceId The service ID.
+	 * @param response The response object.
+	 * @throws IOException Thrown if the {@link ClientHttpResponse} response code cannot be retrieved.
 	 */
 	public ClientHttpResponseStatusCodeException(String serviceId, ClientHttpResponse response, byte[] body) throws IOException {
 		super(serviceId, response.getRawStatusCode(), response, null);

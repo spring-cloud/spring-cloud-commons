@@ -4,7 +4,7 @@ import org.springframework.cloud.endpoint.RefreshEndpoint;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Event that triggers a call to {@link RefreshEndpoint#refresh()}
+ * Event that triggers a call to {@link RefreshEndpoint#refresh()}.
  * @author Spencer Gibb
  */
 @SuppressWarnings("serial")

@@ -21,7 +21,7 @@ import org.springframework.retry.RetryContext;
 import org.springframework.retry.context.RetryContextSupport;
 
 /**
- * {@link RetryContext} for load balanced retries.
+ * {@link RetryContext} for load-balanced retries.
  * @author Ryan Baxter
  */
 public class LoadBalancedRetryContext extends RetryContextSupport {
@@ -30,9 +30,9 @@ public class LoadBalancedRetryContext extends RetryContextSupport {
     private ServiceInstance serviceInstance;
 
     /**
-     * Creates a new load balanced context.
-     * @param parent the parent context
-     * @param request the request that is being load balanced
+     * Creates a new load-balanced context.
+     * @param parent The parent context.
+     * @param request The request that is being load-balanced.
      */
     public LoadBalancedRetryContext(RetryContext parent, HttpRequest request) {
         super(parent);
@@ -40,16 +40,16 @@ public class LoadBalancedRetryContext extends RetryContextSupport {
     }
 
     /**
-     * Gets the request that is being load balanced.
-     * @return the request that is being load balanced
+     * Gets the request that is being load-balanced.
+     * @return The request that is being load-balanced.
      */
     public HttpRequest getRequest() {
         return request;
     }
 
     /**
-     * Sets the request that is being load baalnced.
-     * @param request the request to load balanced
+     * Sets the request that is being load-balanced.
+     * @param request The request to be load balanced.
      */
     public void setRequest(HttpRequest request) {
         this.request = request;
@@ -57,7 +57,7 @@ public class LoadBalancedRetryContext extends RetryContextSupport {
 
     /**
      * Gets the service instance used during the retry.
-     * @return the service instance used during the retry
+     * @return The service instance used during the retry.
      */
     public ServiceInstance getServiceInstance() {
         return serviceInstance;
@@ -65,7 +65,7 @@ public class LoadBalancedRetryContext extends RetryContextSupport {
 
     /**
      * Sets the service instance to use during the retry.
-     * @param serviceInstance the service instance to use during the retry
+     * @param serviceInstance The service instance to use during the retry.
      */
     public void setServiceInstance(ServiceInstance serviceInstance) {
         this.serviceInstance = serviceInstance;

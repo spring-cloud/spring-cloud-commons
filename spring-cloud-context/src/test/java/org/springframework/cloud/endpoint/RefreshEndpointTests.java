@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.endpoint;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +25,7 @@ import java.util.Map;
 
 import org.junit.After;
 import org.junit.Test;
+
 import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -42,13 +39,17 @@ import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEven
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dave Syer
@@ -147,16 +148,17 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void shutdownHooksCleaned() {
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(Empty.class)
-				.web(WebApplicationType.NONE).bannerMode(Mode.OFF).run();
-		RefreshScope scope = new RefreshScope();
-		scope.setApplicationContext(context);
-		ContextRefresher contextRefresher = new ContextRefresher(context, scope);
-		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
-		int count = countShutdownHooks();
-		endpoint.refresh();
-		int after = countShutdownHooks();
-		assertEquals("Shutdown hooks not cleaned on refresh", count, after);
+		try (ConfigurableApplicationContext context = new SpringApplicationBuilder(Empty.class)
+				.web(WebApplicationType.NONE).bannerMode(Mode.OFF).run()) {
+			RefreshScope scope = new RefreshScope();
+			scope.setApplicationContext(context);
+			ContextRefresher contextRefresher = new ContextRefresher(context, scope);
+			RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
+			int count = countShutdownHooks();
+			endpoint.refresh();
+			int after = countShutdownHooks();
+			assertEquals("Shutdown hooks not cleaned on refresh", count, after);
+		}
 	}
 
 	private int countShutdownHooks() {
@@ -170,17 +172,22 @@ public class RefreshEndpointTests {
 	}
 
 	@Configuration
-	protected static class Empty {
+	protected static class Empty implements SmartApplicationListener {
 		private List<ApplicationEvent> events = new ArrayList<ApplicationEvent>();
 
-		@EventListener(EnvironmentChangeEvent.class)
-		public void changed(EnvironmentChangeEvent event) {
-			this.events.add(event);
+
+		@Override
+		public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
+			return EnvironmentChangeEvent.class.isAssignableFrom(eventType)
+					|| RefreshScopeRefreshedEvent.class.isAssignableFrom(eventType);
 		}
 
-		@EventListener(RefreshScopeRefreshedEvent.class)
-		public void refreshed(RefreshScopeRefreshedEvent event) {
-			this.events.add(event);
+		@Override
+		public void onApplicationEvent(ApplicationEvent event) {
+			if (event instanceof EnvironmentChangeEvent ||
+				event instanceof RefreshScopeRefreshedEvent) {
+				this.events.add(event);
+			}
 		}
 	}
 

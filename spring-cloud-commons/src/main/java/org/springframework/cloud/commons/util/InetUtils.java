@@ -125,7 +125,7 @@ public class InetUtils implements Closeable {
 		return null;
 	}
 
-	/** for testing */ boolean isPreferredAddress(InetAddress address) {
+	/** For testing. */ boolean isPreferredAddress(InetAddress address) {
 
 		if (this.properties.isUseOnlySiteLocalInterfaces()) {
 			final boolean siteLocalAddress = address.isSiteLocalAddress();
@@ -148,7 +148,7 @@ public class InetUtils implements Closeable {
 		return false;
 	}
 
-	/** for testing */ boolean ignoreInterface(String interfaceName) {
+	/** For testing. */ boolean ignoreInterface(String interfaceName) {
 		for (String regex : this.properties.getIgnoredInterfaces()) {
 			if (interfaceName.matches(regex)) {
 				log.trace("Ignoring interface: " + interfaceName);

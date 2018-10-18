@@ -49,6 +49,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
+@SuppressWarnings("Duplicates")
 public class RefreshScopeIntegrationTests {
 
 	@Autowired

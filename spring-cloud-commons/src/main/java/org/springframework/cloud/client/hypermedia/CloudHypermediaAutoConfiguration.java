@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Registers a default {@link RemoteResourceRefresher} if at least one {@link RemoteResource} is declared in the system
- * and applies verification timings defined in the application properties.
+ * Registers a default {@link RemoteResourceRefresher} if at least one {@link RemoteResource} is declared in the system.
+ * Applies verification timings defined in the application properties.
  * 
  * @author Oliver Gierke
  */

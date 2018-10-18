@@ -19,8 +19,8 @@ package org.springframework.cloud.client.discovery.event;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Heartbeat Event that a Parent ApplicationContext can send to a child Context. Useful,
- * for example, when config server is located via DiscoveryClient, in which case the
+ * Heartbeat event that a parent ApplicationContext can send to a child context. Useful,
+ * for example, when a config server is located via a DiscoveryClient, in which case the
  * {@link HeartbeatEvent} that triggers this event is fired in the parent (bootstrap)
  * context.
  *
