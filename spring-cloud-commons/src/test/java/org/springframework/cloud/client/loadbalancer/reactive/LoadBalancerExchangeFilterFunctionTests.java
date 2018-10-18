@@ -22,9 +22,11 @@ import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperti
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -33,6 +35,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 /**
  * @author Spencer Gibb
+ * @author Ryan Baxter
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -66,6 +69,26 @@ public class LoadBalancerExchangeFilterFunctionTests {
 				.retrieve()
 				.bodyToMono(String.class).block();
 		assertThat(value).isEqualTo("Hello World");
+	}
+
+	@Test
+	public void testNoInstance() {
+		ClientResponse clientResponse = WebClient.builder()
+				.baseUrl("http://foobar")
+				.filter(lbFunction)
+				.build()
+				.get().exchange().block();
+		assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+	}
+
+	@Test
+	public void testNoHostName() {
+		ClientResponse clientResponse = WebClient.builder()
+				.baseUrl("http:///foobar")
+				.filter(lbFunction)
+				.build()
+				.get().exchange().block();
+		assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@EnableDiscoveryClient
@@ -106,6 +129,9 @@ public class LoadBalancerExchangeFilterFunctionTests {
 				@Override
 				public ServiceInstance choose(String serviceId) {
 					List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
+					if(instances.size() == 0) {
+						return null;
+					}
 					int instanceIdx = random.nextInt(instances.size());
 					return instances.get(instanceIdx);
 				}
