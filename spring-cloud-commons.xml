@@ -339,6 +339,16 @@ are using.</simpara>
 To disable that behavior, you can set:
 * <literal>@EnableDiscoveryClient(autoRegister=false)</literal> to permanently disable auto-registration.
 * <literal>spring.cloud.service-registry.auto-registration.enabled=false</literal> to disable the behavior through configuration.</simpara>
+<section xml:id="_serviceregistry_auto_registration_events">
+<title>ServiceRegistry Auto-Registration Events</title>
+<simpara>There are two events that will be fired when a service auto-registers.  The first event, called
+<literal>InstancePreRegisteredEvent</literal>, is fired before the service is registered.  The second
+event, called <literal>InstanceRegisteredEvent</literal>, is fired after the service is registered.  You can register an
+<literal>ApplicationListener</literal>(s) to listen to and react to these events.</simpara>
+<note>
+<simpara>These events will not be fired if <literal>spring.cloud.service-registry.auto-registration.enabled</literal> is set to <literal>false</literal>.</simpara>
+</note>
+</section>
 </section>
 <section xml:id="_service_registry_actuator_endpoint">
 <title>Service Registry Actuator Endpoint</title>
@@ -416,12 +426,12 @@ The load-balanced <literal>RestTemplate</literal> honors some of the Ribbon conf
 You can use <literal>client.ribbon.MaxAutoRetries</literal>, <literal>client.ribbon.MaxAutoRetriesNextServer</literal>, and <literal>client.ribbon.OkToRetryOnAllOperations</literal> properties.
 If you would like to disable the retry logic with Spring Retry on the classpath, you can set <literal>spring.cloud.loadbalancer.retry.enabled=false</literal>.
 See the <link xl:href="https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties">Ribbon documentation</link> for a description of what these properties do.</simpara>
-<simpara>If you would like to implement a <literal>BackOffPolicy</literal> in your retries, you need to create a bean of type <literal>LoadBalancedBackOffPolicyFactory</literal> and return the <literal>BackOffPolicy</literal> you would like to use for a given service, as shown in the following example:</simpara>
+<simpara>If you would like to implement a <literal>BackOffPolicy</literal> in your retries, you need to create a bean of type <literal>LoadBalancedRetryFactory</literal> and override the <literal>createBackOffPolicy</literal> method:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Configuration
 public class MyConfiguration {
     @Bean
-    LoadBalancedBackOffPolicyFactory backOffPolciyFactory() {
-        return new LoadBalancedBackOffPolicyFactory() {
+    LoadBalancedRetryFactory retryFactory() {
+        return new LoadBalancedRetryFactory() {
             @Override
             public BackOffPolicy createBackOffPolicy(String service) {
         		return new ExponentialBackOffPolicy();
