@@ -11,8 +11,12 @@ import org.springframework.boot.actuate.autoconfigure.web.server.LocalManagement
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.cloud.client.discovery.event.InstancePreRegisteredEvent;
+import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.Matchers.instanceOf;
@@ -34,6 +38,12 @@ public class AbstractAutoServiceRegistrationTests {
 	@Autowired
 	private TestAutoServiceRegistration autoRegistration;
 
+	@Autowired
+	private PreEventListener preEventListener;
+
+	@Autowired
+	public PostEventListener postEventListener;
+
 	@LocalServerPort
 	private int port;
 
@@ -52,12 +62,50 @@ public class AbstractAutoServiceRegistrationTests {
 		assertEquals("Lifecycle appName is wrong", "application", autoRegistration.getAppName());
 	}
 
+	@Test
+	public void eventsFireTest() {
+		assertTrue(preEventListener.wasFired);
+		assertEquals("testRegistration2", preEventListener.registration.getServiceId());
+		assertTrue(postEventListener.wasFired);
+		assertEquals("testRegistration2", postEventListener.config.getServiceId());
+	}
+
 	@EnableAutoConfiguration
 	@Configuration
 	public static class Config {
 		@Bean
 		public TestAutoServiceRegistration testAutoServiceRegistration() {
 			return new TestAutoServiceRegistration();
+		}
+
+		@Bean
+		public PreEventListener preRegisterListener() {
+			return new PreEventListener();
+		}
+
+		@Bean
+		public PostEventListener postEventListener() {
+			return new PostEventListener();
+		}
+	}
+
+	public static class PreEventListener implements ApplicationListener<InstancePreRegisteredEvent> {
+		public boolean wasFired = false;
+		public Registration registration;
+		@Override
+		public void onApplicationEvent(InstancePreRegisteredEvent event) {
+			this.registration = event.getRegistration();
+			this.wasFired = true;
+		}
+	}
+
+	public static class PostEventListener implements ApplicationListener<InstanceRegisteredEvent> {
+		public boolean wasFired = false;
+		public Registration config;
+		@Override
+		public void onApplicationEvent(InstanceRegisteredEvent event) {
+			this.config = (Registration)event.getConfig();
+			this.wasFired = true;
 		}
 	}
 
@@ -188,7 +236,7 @@ public class AbstractAutoServiceRegistrationTests {
 
 		@Override
 		protected Object getConfiguration() {
-			return null;
+			return getRegistration();
 		}
 
 		@Override
