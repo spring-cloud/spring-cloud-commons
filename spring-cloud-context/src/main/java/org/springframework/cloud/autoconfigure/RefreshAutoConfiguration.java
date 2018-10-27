@@ -45,6 +45,7 @@ import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
@@ -52,6 +53,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Autoconfiguration for the refresh scope and associated features to do with changes in
@@ -95,7 +97,7 @@ public class RefreshAutoConfiguration {
 
 	@Component
 	protected static class RefreshScopeBeanDefinitionEnhancer
-			implements BeanDefinitionRegistryPostProcessor {
+			implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
 
 		/**
 		 * Class names for beans to post process into refresh scope. Useful when you don't
@@ -151,17 +153,13 @@ public class RefreshAutoConfiguration {
 				return false;
 			}
 			String type = definition.getBeanClassName();
-			if (registry instanceof BeanFactory) {
+			if (!StringUtils.hasText(type) && registry instanceof BeanFactory) {
 				Class<?> cls = ((BeanFactory) registry).getType(name);
 				if (cls != null) {
 					type = cls.getName();
 				}
 			}
 			if (type != null) {
-				if (this.environment == null && registry instanceof BeanFactory) {
-					this.environment = ((BeanFactory) registry)
-							.getBean(Environment.class);
-				}
 				if (this.environment == null) {
 					this.environment = new StandardEnvironment();
 				}
@@ -172,6 +170,10 @@ public class RefreshAutoConfiguration {
 			return false;
 		}
 
+		@Override
+		public void setEnvironment(Environment environment) {
+			this.environment = environment;
+		}
 	}
 
 	@Bean
