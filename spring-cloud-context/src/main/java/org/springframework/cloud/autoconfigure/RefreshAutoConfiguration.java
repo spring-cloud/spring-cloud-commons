@@ -33,7 +33,6 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -46,6 +45,7 @@ import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
@@ -53,6 +53,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Autoconfiguration for the refresh scope and associated features to do with changes in
@@ -100,7 +101,7 @@ public class RefreshAutoConfiguration {
 
 	@Component
 	protected static class RefreshScopeBeanDefinitionEnhancer
-			implements BeanDefinitionRegistryPostProcessor {
+			implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
 
 		private Environment environment;
 
@@ -137,7 +138,6 @@ public class RefreshAutoConfiguration {
 		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
 				throws BeansException {
 			bindEnvironmentIfNeeded(registry);
-
 			for (String name : registry.getBeanDefinitionNames()) {
 				BeanDefinition definition = registry.getBeanDefinition(name);
 				if (isApplicable(registry, name, definition)) {
@@ -156,14 +156,14 @@ public class RefreshAutoConfiguration {
 		}
 
 		private boolean isApplicable(BeanDefinitionRegistry registry, String name,
-									 BeanDefinition definition) {
+				BeanDefinition definition) {
 			String scope = definition.getScope();
 			if (REFRESH_SCOPE_NAME.equals(scope)) {
 				// Already refresh scoped
 				return false;
 			}
 			String type = definition.getBeanClassName();
-			if (registry instanceof BeanFactory) {
+			if (!StringUtils.hasText(type) && registry instanceof BeanFactory) {
 				Class<?> cls = ((BeanFactory) registry).getType(name);
 				if (cls != null) {
 					type = cls.getName();
@@ -177,10 +177,6 @@ public class RefreshAutoConfiguration {
 
 		private void bindEnvironmentIfNeeded(BeanDefinitionRegistry registry) {
 			if (!bound) { // only bind once
-				if (this.environment == null && registry instanceof BeanFactory) {
-					this.environment = ((BeanFactory) registry)
-							.getBean(Environment.class);
-				}
 				if (this.environment == null) {
 					this.environment = new StandardEnvironment();
 				}
@@ -190,6 +186,10 @@ public class RefreshAutoConfiguration {
 			}
 		}
 
+		@Override
+		public void setEnvironment(Environment environment) {
+			this.environment = environment;
+		}
 	}
 
 	@Bean
