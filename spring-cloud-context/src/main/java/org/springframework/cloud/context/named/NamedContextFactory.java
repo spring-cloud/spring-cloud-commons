@@ -11,10 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.env.MapPropertySource;
 
 /**
@@ -26,6 +28,7 @@ import org.springframework.core.env.MapPropertySource;
  * @author Spencer Gibb
  * @author Dave Syer
  */
+//TODO: add javadoc
 public abstract class NamedContextFactory<C extends NamedContextFactory.Specification>
 		implements DisposableBean, ApplicationContextAware {
 
@@ -127,6 +130,35 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		if (BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context,
 				type).length > 0) {
 			return context.getBean(type);
+		}
+		return null;
+	}
+
+	public <T> ObjectProvider<T> getLazyProvider(String name, Class<T> type) {
+		return new ClientFactoryObjectProvider<>(this, name, type);
+	}
+
+	public <T> ObjectProvider<T> getProvider(String name, Class<T> type) {
+		AnnotationConfigApplicationContext context = getContext(name);
+		return context.getBeanProvider(type);
+	}
+
+	public <T> T getInstance(String name, Class<?> clazz, Class<?>... generics) {
+		ResolvableType type = ResolvableType.forClassWithGenerics(clazz, generics);
+		return getInstance(name, type);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getInstance(String name, ResolvableType type) {
+		AnnotationConfigApplicationContext context = getContext(name);
+		String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context,
+				type);
+		if (beanNames.length > 0) {
+			for (String beanName : beanNames) {
+				if (context.isTypeMatch(beanName, type)) {
+					return (T) context.getBean(beanName);
+				}
+			}
 		}
 		return null;
 	}

@@ -61,7 +61,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 */
 	@Deprecated
 	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure,
-								  Map<String, String> metadata) {
+			Map<String, String> metadata) {
 		this(null, serviceId, host, port, secure, metadata);
 	}
 
@@ -70,7 +70,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 */
 	@Deprecated
 	public DefaultServiceInstance(String serviceId, String host, int port,
-								  boolean secure) {
+			boolean secure) {
 		this(serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 

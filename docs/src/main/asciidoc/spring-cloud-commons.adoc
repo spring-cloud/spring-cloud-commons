@@ -183,6 +183,10 @@ is "immutable", you will have to either annotate the bean with `@RefreshScope`
 or specify the classname under the property key
 `spring.cloud.refresh.extra-refreshable`.
 
+IMPORTANT: If you create a `DataSource` bean yourself and the implementation is a `HikariDataSource`, return the
+most specific type, in this case `HikariDataSource`. Otherwise, you will need to set
+`spring.cloud.refresh.extra-refreshable=javax.sql.DataSource`.
+
 Refresh scope beans are lazy proxies that initialize when they are used (that is, when a method is called), and the scope acts as a cache of initialized values.
 To force a bean to re-initialize on the next method call, you must invalidate its cache entry.
 
@@ -309,6 +313,15 @@ To disable that behavior, you can set:
 * `@EnableDiscoveryClient(autoRegister=false)` to permanently disable auto-registration.
 * `spring.cloud.service-registry.auto-registration.enabled=false` to disable the behavior through configuration.
 
+===== ServiceRegistry Auto-Registration Events
+
+There are two events that will be fired when a service auto-registers.  The first event, called
+`InstancePreRegisteredEvent`, is fired before the service is registered.  The second
+event, called `InstanceRegisteredEvent`, is fired after the service is registered.  You can register an
+`ApplicationListener`(s) to listen to and react to these events.
+
+NOTE: These events will not be fired if `spring.cloud.service-registry.auto-registration.enabled` is set to `false`.
+
 ==== Service Registry Actuator Endpoint
 
 Spring Cloud Commons provides a `/service-registry` actuator endpoint.
@@ -395,15 +408,15 @@ You can use `client.ribbon.MaxAutoRetries`, `client.ribbon.MaxAutoRetriesNextSer
 If you would like to disable the retry logic with Spring Retry on the classpath, you can set `spring.cloud.loadbalancer.retry.enabled=false`.
 See the https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties[Ribbon documentation] for a description of what these properties do.
 
-If you would like to implement a `BackOffPolicy` in your retries, you need to create a bean of type `LoadBalancedBackOffPolicyFactory` and return the `BackOffPolicy` you would like to use for a given service, as shown in the following example:
+If you would like to implement a `BackOffPolicy` in your retries, you need to create a bean of type `LoadBalancedRetryFactory` and override the `createBackOffPolicy` method:
 
 [source,java,indent=0]
 ----
 @Configuration
 public class MyConfiguration {
     @Bean
-    LoadBalancedBackOffPolicyFactory backOffPolciyFactory() {
-        return new LoadBalancedBackOffPolicyFactory() {
+    LoadBalancedRetryFactory retryFactory() {
+        return new LoadBalancedRetryFactory() {
             @Override
             public BackOffPolicy createBackOffPolicy(String service) {
         		return new ExponentialBackOffPolicy();

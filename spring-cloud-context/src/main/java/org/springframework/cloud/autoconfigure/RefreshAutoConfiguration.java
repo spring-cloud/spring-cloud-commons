@@ -23,14 +23,13 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
@@ -46,6 +45,7 @@ import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
@@ -53,6 +53,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Autoconfiguration for the refresh scope and associated features to do with changes in
@@ -100,9 +101,11 @@ public class RefreshAutoConfiguration {
 
 	@Component
 	protected static class RefreshScopeBeanDefinitionEnhancer
-			implements BeanPostProcessor, BeanDefinitionRegistryPostProcessor {
+			implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
 
-		private BeanDefinitionRegistry registry;
+		private Environment environment;
+
+		private boolean bound = false;
 
 		/**
 		 * Class names for beans to post process into refresh scope. Useful when you don't
@@ -129,36 +132,27 @@ public class RefreshAutoConfiguration {
 		@Override
 		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
 				throws BeansException {
-			Environment environment = beanFactory.getBean(Environment.class);
-			if (environment == null) {
-				environment = new StandardEnvironment();
-			}
-			Binder.get(environment).bind(REFRESH_SCOPE_PREFIX, Bindable.ofInstance(this));
 		}
 
 		@Override
 		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
 				throws BeansException {
-			this.registry = registry;
-		}
-
-		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName)
-				throws BeansException {
-			BeanDefinition definition = null;
-			try {
-				definition = registry.getBeanDefinition(beanName);
+			bindEnvironmentIfNeeded(registry);
+			for (String name : registry.getBeanDefinitionNames()) {
+				BeanDefinition definition = registry.getBeanDefinition(name);
+				if (isApplicable(registry, name, definition)) {
+					BeanDefinitionHolder holder = new BeanDefinitionHolder(definition,
+							name);
+					BeanDefinitionHolder proxy = ScopedProxyUtils
+							.createScopedProxy(holder, registry, true);
+					definition.setScope("refresh");
+					if (registry.containsBeanDefinition(proxy.getBeanName())) {
+						registry.removeBeanDefinition(proxy.getBeanName());
+					}
+					registry.registerBeanDefinition(proxy.getBeanName(),
+							proxy.getBeanDefinition());
+				}
 			}
-			catch (NoSuchBeanDefinitionException e) {
-				// just ignore and move on
-				return bean;
-			}
-			if (isApplicable(registry, beanName, definition)) {
-				definition.setScope(REFRESH_SCOPE_NAME);
-				ProxyFactory proxyFactory = new ProxyFactory(bean);
-				return proxyFactory.getProxy();
-			}
-			return bean;
 		}
 
 		private boolean isApplicable(BeanDefinitionRegistry registry, String name,
@@ -169,7 +163,7 @@ public class RefreshAutoConfiguration {
 				return false;
 			}
 			String type = definition.getBeanClassName();
-			if (registry instanceof BeanFactory) {
+			if (!StringUtils.hasText(type) && registry instanceof BeanFactory) {
 				Class<?> cls = ((BeanFactory) registry).getType(name);
 				if (cls != null) {
 					type = cls.getName();
@@ -181,6 +175,21 @@ public class RefreshAutoConfiguration {
 			return false;
 		}
 
+		private void bindEnvironmentIfNeeded(BeanDefinitionRegistry registry) {
+			if (!bound) { // only bind once
+				if (this.environment == null) {
+					this.environment = new StandardEnvironment();
+				}
+				Binder.get(environment).bind("spring.cloud.refresh",
+						Bindable.ofInstance(this));
+				bound = true;
+			}
+		}
+
+		@Override
+		public void setEnvironment(Environment environment) {
+			this.environment = environment;
+		}
 	}
 
 	@Bean

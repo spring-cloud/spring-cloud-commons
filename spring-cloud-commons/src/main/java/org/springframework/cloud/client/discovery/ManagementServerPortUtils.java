@@ -27,16 +27,22 @@ import org.springframework.web.context.WebApplicationContext;
  * @author Spencer Gibb
  */
 public class ManagementServerPortUtils {
-	private static final boolean hasActuator;
+	/** for testing */ static final boolean hasActuator;
 	static {
+		boolean hasEndpointClass = hasClass("org.springframework.boot.actuate.endpoint.annotation.Endpoint");
+		boolean hasManagementServerPropertiesClass = hasClass("org.springframework.boot.actuate.autoconfigure.web.server.ManagementServerProperties");
+		hasActuator = hasEndpointClass && hasManagementServerPropertiesClass;
+	}
+
+	private static boolean hasClass(String className) {
 		boolean hasClass;
 		try {
-			Class.forName("org.springframework.boot.actuate.endpoint.annotation.Endpoint");
+			Class.forName(className);
 			hasClass = true;
 		} catch (ClassNotFoundException e) {
 			hasClass = false;
 		}
-		hasActuator = hasClass;
+		return hasClass;
 	}
 
 	public static ManagementServerPort get(BeanFactory beanFactory) {
