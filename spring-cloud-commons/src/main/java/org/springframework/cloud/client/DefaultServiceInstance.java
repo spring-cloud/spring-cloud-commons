@@ -42,6 +42,14 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private final Map<String, String> metadata;
 
+	/**
+	 * @param instanceId the id of the instance.
+	 * @param serviceId the id of the service.
+	 * @param host the host where the service instance can be found.
+	 * @param port the port on which the service is running.
+	 * @param secure indicates whether or not the connection needs to be secure.
+	 * @param metadata a map containing metadata.
+	 */
 	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
 			Map<String, String> metadata) {
 		this.instanceId = instanceId;
@@ -52,11 +60,23 @@ public class DefaultServiceInstance implements ServiceInstance {
 		this.metadata = metadata;
 	}
 
+	/**
+	 * @param instanceId the id of the instance.
+	 * @param serviceId the id of the service.
+	 * @param host the host where the service instance can be found.
+	 * @param port the port on which the service is running.
+	 * @param secure indicates whether or not the connection needs to be secure.
+	 */
 	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure) {
 		this(instanceId, serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
 	/**
+	 * @param serviceId the id of the service.
+	 * @param host the host where the service instance can be found.
+	 * @param port the port on which the service is running.
+	 * @param secure indicates whether or not the connection needs to be secure.
+	 * @param metadata a map containing metadata.
 	 * @deprecated
 	 */
 	@Deprecated
@@ -66,6 +86,10 @@ public class DefaultServiceInstance implements ServiceInstance {
 	}
 
 	/**
+	 * @param serviceId the id of the service.
+	 * @param host the host where the service instance can be found.
+	 * @param port the port on which the service is running.
+	 * @param secure indicates whether or not the connection needs to be secure.
 	 * @deprecated
 	 */
 	@Deprecated
@@ -86,7 +110,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	/**
 	 * Creates a URI from the given ServiceInstance's host:port.
-	 * @param instance
+	 * @param instance the ServiceInstance.
 	 * @return URI of the form (secure)?https:http + "host:port".
 	 */
 	public static URI getUri(ServiceInstance instance) {
