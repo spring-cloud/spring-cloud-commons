@@ -124,7 +124,8 @@ public class DefaultServiceInstance implements ServiceInstance {
 	@Override
 	public String toString() {
 		return "DefaultServiceInstance{" +
-				"serviceId='" + serviceId + '\'' +
+				"instanceId='" + instanceId + '\'' +
+				", serviceId='" + serviceId + '\'' +
 				", host='" + host + '\'' +
 				", port=" + port +
 				", secure=" + secure +
@@ -139,6 +140,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 		DefaultServiceInstance that = (DefaultServiceInstance) o;
 		return port == that.port &&
 				secure == that.secure &&
+				Objects.equals(instanceId, that.instanceId) &&
 				Objects.equals(serviceId, that.serviceId) &&
 				Objects.equals(host, that.host) &&
 				Objects.equals(metadata, that.metadata);
@@ -146,6 +148,6 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(serviceId, host, port, secure, metadata);
+		return Objects.hash(instanceId, serviceId, host, port, secure, metadata);
 	}
 }
