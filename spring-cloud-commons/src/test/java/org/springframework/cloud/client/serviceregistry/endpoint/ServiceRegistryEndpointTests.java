@@ -47,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Spencer Gibb
+ * @author Tim Ysewyn
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryEndpointTests.TestConfiguration.class, properties = "management.endpoints.web.exposure.include=*")
@@ -85,6 +86,11 @@ public class ServiceRegistryEndpointTests {
 		@Bean
 		Registration registration() {
 			return new Registration() {
+				@Override
+				public String getInstanceId() {
+					return "testRegistrationInstance1";
+				}
+
 				@Override
 				public String getServiceId() {
 					return "testRegistration1";

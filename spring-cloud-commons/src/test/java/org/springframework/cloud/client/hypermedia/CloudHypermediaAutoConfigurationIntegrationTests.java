@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import org.springframework.cloud.client.hypermedia.CloudHypermediaAutoConfigurat
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.hateoas.client.Traverson;
-import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.hasSize;
@@ -36,6 +34,7 @@ import static org.junit.Assert.assertThat;
  * Integration tests for {@link CloudHypermediaAutoConfiguration}.
  *
  * @author Oliver Gierke
+ * @author Tim Ysewyn
  */
 public class CloudHypermediaAutoConfigurationIntegrationTests {
 
@@ -106,14 +105,8 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 		public RemoteResource resource() {
 
 			ServiceInstanceProvider provider = new StaticServiceInstanceProvider(
-					new DefaultServiceInstance("service", "localhost", 80, false));
-			return new DiscoveredResource(provider, new TraversalDefinition() {
-
-				@Override
-				public TraversalBuilder buildTraversal(Traverson traverson) {
-					return traverson.follow("rel");
-				}
-			});
+					new DefaultServiceInstance("instance", "service", "localhost", 80, false));
+			return new DiscoveredResource(provider, traverson -> traverson.follow("rel"));
 		}
 	}
 }
