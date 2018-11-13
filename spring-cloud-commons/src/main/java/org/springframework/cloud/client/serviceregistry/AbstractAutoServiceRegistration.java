@@ -6,6 +6,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.boot.web.context.ConfigurableWebServerApplicationContext;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.client.discovery.ManagementServerPortUtils;
+import org.springframework.cloud.client.discovery.event.InstancePreRegisteredEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -105,6 +106,7 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		// only initialize if nonSecurePort is greater than 0 and it isn't already running
 		// because of containerPortInitializer below
 		if (!this.running.get()) {
+			this.context.publishEvent(new InstancePreRegisteredEvent(this, getRegistration()));
 			register();
 			if (shouldRegisterManagement()) {
 				registerManagement();

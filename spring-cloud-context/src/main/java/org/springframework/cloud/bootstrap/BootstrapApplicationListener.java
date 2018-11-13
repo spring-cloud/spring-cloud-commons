@@ -173,13 +173,24 @@ public class BootstrapApplicationListener
 				// Don't use the default properties in this builder
 				.registerShutdownHook(false).logStartupInfo(false)
 				.web(WebApplicationType.NONE);
+		final SpringApplication builderApplication = builder.application();
+		if(builderApplication.getMainApplicationClass() == null){
+			// gh_425:
+			// SpringApplication cannot deduce the MainApplicationClass here
+			// if it is booted from SpringBootServletInitializer due to the
+			// absense of the "main" method in stackTraces.
+			// But luckily this method's second parameter "application" here
+			// carries the real MainApplicationClass which has been explicitly
+			// set by SpringBootServletInitializer itself already.
+			builder.main(application.getMainApplicationClass());
+		}
 		if (environment.getPropertySources().contains("refreshArgs")) {
 			// If we are doing a context refresh, really we only want to refresh the
 			// Environment, and there are some toxic listeners (like the
 			// LoggingApplicationListener) that affect global static state, so we need a
 			// way to switch those off.
-			builder.application()
-					.setListeners(filterListeners(builder.application().getListeners()));
+			builderApplication
+					.setListeners(filterListeners(builderApplication.getListeners()));
 		}
 		List<Class<?>> sources = new ArrayList<>();
 		for (String name : names) {
