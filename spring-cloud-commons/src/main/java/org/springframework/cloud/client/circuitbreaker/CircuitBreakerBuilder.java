@@ -9,5 +9,5 @@ public interface CircuitBreakerBuilder {
 
 	public CircuitBreakerBuilder id(String id);
 
-	public CircuitBreaker<?> build();
+	public CircuitBreaker build();
 }

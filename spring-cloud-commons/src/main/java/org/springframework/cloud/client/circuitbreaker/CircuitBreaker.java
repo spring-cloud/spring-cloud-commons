@@ -4,10 +4,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Interface for common circuit breaker implementations.
+ *
  * @author Ryan Baxter
  */
-public interface CircuitBreaker<T> {
+public interface CircuitBreaker {
+
+	public <T> T run(Supplier<T> toRun);
 
 	public <T> T run(Supplier<T> toRun, Function<Throwable, T> fallback);
 
