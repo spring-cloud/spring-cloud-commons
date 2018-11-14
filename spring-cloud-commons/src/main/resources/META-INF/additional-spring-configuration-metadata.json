@@ -26,6 +26,18 @@
     },
     {
       "defaultValue": true,
+      "name": "spring.cloud.util.mismatch-verifier.enabled",
+      "description": "Enables creation of Spring Cloud dependency verification.",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": "1.5",
+      "name": "spring.cloud.util.mismatch-verifier.compatible-boot-versions",
+      "description": "Default accepted versions for the Boot dependency.",
+      "type": "java.lang.String"
+    },
+    {
+      "defaultValue": true,
       "name": "spring.cloud.features.enabled",
       "description": "Enables the features endpoint.",
       "type": "java.lang.Boolean"

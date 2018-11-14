@@ -577,3 +577,16 @@ your own implementation of these beans if you would like to customize how the HT
 in downstream projects.  You can also disable the creation of these beans by setting
 `spring.cloud.httpclientfactories.apache.enabled` or `spring.cloud.httpclientfactories.ok.enabled` to
 `false`.
+
+=== Spring Cloud Mismatch Verification
+
+Due to the fact that some users have problem with setting up Spring Cloud application, we've decided
+to add a mismatch verification mechanism. It will break if your current setup is not compatible
+with Spring Cloud requirements, together with a report, showing what exactly went wrong.
+
+At the moment we verify which version of Spring Boot is added to your classpath.
+
+In order to disable this feature, set `spring.cloud.util.mismatch-verifier.enabled` to `false`.
+If you want to override the compatible Spring Boot versions, just set the
+`spring.cloud.util.mismatch-verifier.compatible-boot-versions` property with a comma separated list
+of compatible Spring Boot versions.
