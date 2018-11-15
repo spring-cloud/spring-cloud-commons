@@ -55,6 +55,12 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	CompatibilityPredicate is1_5() {
 		return new CompatibilityPredicate() {
+
+			@Override
+			public String toString() {
+				return "Predicate for Boot 1.5";
+			}
+
 			@Override
 			public boolean isCompatible() {
 				try {
@@ -84,7 +90,13 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 	CompatibilityPredicate is2_0() {
 		return new CompatibilityPredicate() {
 			@Override
+			public String toString() {
+				return "Predicate for Boot 2.0";
+			}
+
+			@Override
 			public boolean isCompatible() {
+
 				try {
 					// present in 2.0, 1.5 missing in 2.1
 					SpringApplicationBuilder.class.getMethod("web", boolean.class);
@@ -99,6 +111,12 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	CompatibilityPredicate is2_1() {
 		return new CompatibilityPredicate() {
+
+			@Override
+			public String toString() {
+				return "Predicate for Boot 2.1";
+			}
+
 			@Override
 			public boolean isCompatible() {
 				try {
@@ -109,6 +127,8 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 				catch (ClassNotFoundException e) {
 					return false;
 				}
+
+
 			}
 		};
 	}
@@ -116,14 +136,13 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 	private String errorDescription() {
 		String versionFromManifest = getVersionFromManifest();
 		if (StringUtils.hasText(versionFromManifest)) {
-			return String.format("Spring Boot in an incompatible version [%s] for this release train was found", versionFromManifest);
+			return String.format("Spring Boot [%s] is not compatible with this Spring Cloud release train", versionFromManifest);
 		}
-		return "Spring Boot in an incompatible version for this release train was found";
+		return "Spring Boot is not compatible with this Spring Cloud release train";
 	}
 
 	private String action() {
-		return String.format("Change Spring Boot version to one of the following versions %s, where e.g. [2.0] "
-				+ "means Spring Boot in version [2.0.x] and [x] is the latest patch version of Spring Boot (e.g. 2.0.6.RELEASE).\n"
+		return String.format("Change Spring Boot version to one of the following versions %s .\n"
 						+ "You can find the latest Spring Boot versions here [%s]. \n"
 						+ "If you want to learn more about the Spring Cloud Release train compatibility, you "
 						+ "can visit this page [%s] and check the [Release Trains] section.",
@@ -137,12 +156,23 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			}
 			else {
 				// 2.0, 2.1
-				CompatibilityPredicate predicate = ACCEPTED_VERSIONS.get(acceptedVersion);
+				CompatibilityPredicate predicate = ACCEPTED_VERSIONS.get(
+						acceptedVersionWithoutX(acceptedVersion));
 				if (predicate != null && predicate.isCompatible()) {
+					if (log.isDebugEnabled()) {
+						log.debug("Predicate [" + predicate + "] was matched");
+					}
 					return true;
 				}
 			}
 		}
 		return false;
+	}
+
+	private String acceptedVersionWithoutX(String acceptedVersion) {
+		if (acceptedVersion.endsWith(".x")) {
+			return acceptedVersion.substring(0, acceptedVersion.indexOf(".x"));
+		}
+		return acceptedVersion;
 	}
 }

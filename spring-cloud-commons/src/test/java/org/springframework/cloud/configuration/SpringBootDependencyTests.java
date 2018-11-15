@@ -170,6 +170,25 @@ public class SpringBootDependencyTests {
 	}
 
 	@Test
+	public void should_match_against_current_predicate_with_version_ending_with_x() {
+		List<String> acceptedVersions = Collections.singletonList("1.5.x");
+		SpringBootVersionVerifier
+				versionVerifier = new SpringBootVersionVerifier(acceptedVersions){
+			@Override
+			String getVersionFromManifest() {
+				return "";
+			}
+		};
+		versionVerifier.ACCEPTED_VERSIONS.clear();
+		versionVerifier.ACCEPTED_VERSIONS.put("1.5", versionVerifier.is1_5());
+
+		VerificationResult verificationResult = versionVerifier.verify();
+
+		BDDAssertions.then(verificationResult.description).isEmpty();
+		BDDAssertions.then(verificationResult.action).isEmpty();
+	}
+
+	@Test
 	public void should_fail_to_match_against_predicate_for_non_current_versions() {
 		List<String> acceptedVersions = Collections.singletonList("1.5");
 		SpringBootVersionVerifier

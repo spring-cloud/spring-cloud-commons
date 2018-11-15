@@ -34,7 +34,7 @@ public class CompatibilityVerifierFailureAutoConfigurationTests {
 	public void contextFailsToLoad() {
 		try {
 			SpringApplication.run(TestConfiguration.class,
-					"--spring.cloud.compatibility-verifier.compatible-boot-versions=1.2,1.3");
+					"--spring.cloud.compatibility-verifier.compatible-boot-versions=1.2.x,1.3.x");
 			BDDAssertions.fail("should throw exception");
 		} catch (BeanCreationException ex) {
 			Throwable cause = NestedExceptionUtils.getRootCause(ex);

@@ -578,10 +578,10 @@ in downstream projects.  You can also disable the creation of these beans by set
 `spring.cloud.httpclientfactories.apache.enabled` or `spring.cloud.httpclientfactories.ok.enabled` to
 `false`.
 
-=== Spring Cloud Mismatch Verification
+=== Spring Cloud Compatibility Verification
 
 Due to the fact that some users have problem with setting up Spring Cloud application, we've decided
-to add a mismatch verification mechanism. It will break if your current setup is not compatible
+to add a compatibility verification mechanism. It will break if your current setup is not compatible
 with Spring Cloud requirements, together with a report, showing what exactly went wrong.
 
 At the moment we verify which version of Spring Boot is added to your classpath.
@@ -604,7 +604,7 @@ Action:
 
 Consider applying the following actions:
 
-- Change Spring Boot version to one of the following versions [2.0,2.1], where e.g. [2.0] means Spring Boot in version [2.0.x] and [x] is the latest patch version of Spring Boot (e.g. 2.0.6.RELEASE).
+- Change Spring Boot version to one of the following versions [2.0,2.1], where e.g. [2.0] means Spring Boot in version [2.0.x].
 You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
 If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.
 ----

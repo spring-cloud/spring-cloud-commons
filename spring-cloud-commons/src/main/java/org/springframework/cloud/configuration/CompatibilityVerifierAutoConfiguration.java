@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Configuration;
 public class CompatibilityVerifierAutoConfiguration {
 
 	@Bean
-	CompositeCompatibilityVerifier compositeMismatchVerifier(List<CompatibilityVerifier> verifiers) {
+	CompositeCompatibilityVerifier compositeCompatibilityVerifier(List<CompatibilityVerifier> verifiers) {
 		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(verifiers);
 		verifier.verifyDependencies();
 		return verifier;
