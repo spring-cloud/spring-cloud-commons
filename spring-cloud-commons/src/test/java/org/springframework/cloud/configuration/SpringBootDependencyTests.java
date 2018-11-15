@@ -139,7 +139,7 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_manifest() {
-		List<String> acceptedVersions = Collections.singletonList("1.5");
+		List<String> acceptedVersions = Collections.singletonList("2.0");
 		SpringBootVersionVerifier
 				versionVerifier = new SpringBootVersionVerifier(acceptedVersions);
 		versionVerifier.ACCEPTED_VERSIONS.clear();
@@ -152,7 +152,7 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_predicate() {
-		List<String> acceptedVersions = Collections.singletonList("1.5");
+		List<String> acceptedVersions = Collections.singletonList("2.0");
 		SpringBootVersionVerifier
 				versionVerifier = new SpringBootVersionVerifier(acceptedVersions){
 			@Override
@@ -161,7 +161,7 @@ public class SpringBootDependencyTests {
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("1.5", versionVerifier.is1_5());
+		versionVerifier.ACCEPTED_VERSIONS.put("2.0", versionVerifier.is2_0());
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
@@ -171,7 +171,7 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_predicate_with_version_ending_with_x() {
-		List<String> acceptedVersions = Collections.singletonList("1.5.x");
+		List<String> acceptedVersions = Collections.singletonList("2.0.x");
 		SpringBootVersionVerifier
 				versionVerifier = new SpringBootVersionVerifier(acceptedVersions){
 			@Override
@@ -180,7 +180,7 @@ public class SpringBootDependencyTests {
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("1.5", versionVerifier.is1_5());
+		versionVerifier.ACCEPTED_VERSIONS.put("2.0", versionVerifier.is2_0());
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
@@ -190,7 +190,7 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_fail_to_match_against_predicate_for_non_current_versions() {
-		List<String> acceptedVersions = Collections.singletonList("1.5");
+		List<String> acceptedVersions = Collections.singletonList("2.0");
 		SpringBootVersionVerifier
 				versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
@@ -198,7 +198,7 @@ public class SpringBootDependencyTests {
 				return "";
 			}
 		};
-		versionVerifier.ACCEPTED_VERSIONS.remove("1.5");
+		versionVerifier.ACCEPTED_VERSIONS.remove("2.0");
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
