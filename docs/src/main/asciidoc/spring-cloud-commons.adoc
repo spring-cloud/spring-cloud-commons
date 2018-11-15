@@ -597,14 +597,14 @@ Description:
 
 Your project setup is incompatible with our requirements due to following reasons:
 
-- Spring Boot in an incompatible version [1.5.16.RELEASE] for this release train was found
+- Spring Boot [1.5.16.RELEASE] is not compatible with this Spring Cloud release train
 
 
 Action:
 
 Consider applying the following actions:
 
-- Change Spring Boot version to one of the following versions [2.0,2.1], where e.g. [2.0] means Spring Boot in version [2.0.x].
+- Change Spring Boot version to one of the following versions [1.2.x, 1.3.x] .
 You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
 If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.
 ----
