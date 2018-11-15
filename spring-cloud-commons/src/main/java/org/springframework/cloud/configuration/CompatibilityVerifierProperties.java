@@ -33,7 +33,7 @@ public class CompatibilityVerifierProperties {
 	 * for the patch version if you don't want to specify a concrete value.
 	 * Example: {@code 3.4.x}
 	 */
-	private List<String> compatibleBootVersions = Collections.singletonList("2.0.x");
+	private List<String> compatibleBootVersions = Collections.singletonList("2.1.x");
 
 	public boolean isEnabled() {
 		return this.enabled;
