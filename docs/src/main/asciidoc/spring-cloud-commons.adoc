@@ -577,3 +577,40 @@ your own implementation of these beans if you would like to customize how the HT
 in downstream projects.  You can also disable the creation of these beans by setting
 `spring.cloud.httpclientfactories.apache.enabled` or `spring.cloud.httpclientfactories.ok.enabled` to
 `false`.
+
+=== Spring Cloud Compatibility Verification
+
+Due to the fact that some users have problem with setting up Spring Cloud application, we've decided
+to add a compatibility verification mechanism. It will break if your current setup is not compatible
+with Spring Cloud requirements, together with a report, showing what exactly went wrong.
+
+At the moment we verify which version of Spring Boot is added to your classpath.
+
+Example of a report
+
+----
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Your project setup is incompatible with our requirements due to following reasons:
+
+- Spring Boot [1.5.16.RELEASE] is not compatible with this Spring Cloud release train
+
+
+Action:
+
+Consider applying the following actions:
+
+- Change Spring Boot version to one of the following versions [1.2.x, 1.3.x] .
+You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
+If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.
+----
+
+
+In order to disable this feature, set `spring.cloud.compatibility-verifier.enabled` to `false`.
+If you want to override the compatible Spring Boot versions, just set the
+`spring.cloud.compatibility-verifier.compatible-boot-versions` property with a comma separated list
+of compatible Spring Boot versions.

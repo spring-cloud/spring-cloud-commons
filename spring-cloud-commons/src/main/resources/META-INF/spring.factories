@@ -7,6 +7,7 @@ org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration
 org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration,\
 org.springframework.cloud.client.serviceregistry.ServiceRegistryAutoConfiguration,\
 org.springframework.cloud.commons.util.UtilAutoConfiguration,\
+org.springframework.cloud.configuration.CompatibilityVerifierAutoConfiguration,\
 org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientAutoConfiguration,\
 org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration,\
 org.springframework.cloud.commons.httpclient.HttpClientConfiguration,\
@@ -16,3 +17,7 @@ org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConf
 # Environment Post Processors
 org.springframework.boot.env.EnvironmentPostProcessor=\
 org.springframework.cloud.client.HostInfoEnvironmentPostProcessor
+
+# Failure Analyzers
+org.springframework.boot.diagnostics.FailureAnalyzer=\
+org.springframework.cloud.configuration.CompatibilityNotMetFailureAnalyzer
