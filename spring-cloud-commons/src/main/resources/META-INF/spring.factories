@@ -11,9 +11,14 @@ org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoC
 org.springframework.cloud.client.serviceregistry.ServiceRegistryAutoConfiguration,\
 org.springframework.cloud.commons.httpclient.HttpClientConfiguration,\
 org.springframework.cloud.commons.util.UtilAutoConfiguration,\
+org.springframework.cloud.configuration.CompatibilityVerifierAutoConfiguration,\
 org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConfiguration
 
 
 # Environment Post Processors
 org.springframework.boot.env.EnvironmentPostProcessor=\
 org.springframework.cloud.client.HostInfoEnvironmentPostProcessor
+
+# Failure Analyzers
+org.springframework.boot.diagnostics.FailureAnalyzer=\
+org.springframework.cloud.configuration.CompatibilityNotMetFailureAnalyzer
