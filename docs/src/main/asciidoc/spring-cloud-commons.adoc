@@ -586,7 +586,31 @@ with Spring Cloud requirements, together with a report, showing what exactly wen
 
 At the moment we verify which version of Spring Boot is added to your classpath.
 
-In order to disable this feature, set `spring.cloud.util.mismatch-verifier.enabled` to `false`.
+Example of a report
+
+----
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Your project setup is incompatible with our requirements due to following reasons:
+
+- Spring Boot in an incompatible version [1.5.16.RELEASE] for this release train was found
+
+
+Action:
+
+Consider applying the following actions:
+
+- Change Spring Boot version to one of the following versions [2.0,2.1], where e.g. [2.0] means Spring Boot in version [2.0.x] and [x] is the latest patch version of Spring Boot (e.g. 2.0.6.RELEASE).
+You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
+If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.
+----
+
+
+In order to disable this feature, set `spring.cloud.compatibility-verifier.enabled` to `false`.
 If you want to override the compatible Spring Boot versions, just set the
-`spring.cloud.util.mismatch-verifier.compatible-boot-versions` property with a comma separated list
+`spring.cloud.compatibility-verifier.compatible-boot-versions` property with a comma separated list
 of compatible Spring Boot versions.

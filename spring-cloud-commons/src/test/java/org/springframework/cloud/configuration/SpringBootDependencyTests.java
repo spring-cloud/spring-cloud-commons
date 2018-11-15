@@ -1,4 +1,16 @@
-package org.springframework.cloud.commons.util;
+/*
+ * Copyright 2002-2018 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+package org.springframework.cloud.configuration;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +38,7 @@ public class SpringBootDependencyTests {
 		VerificationResult verificationResult = versionVerifier.verify();
 
 		BDDAssertions.then(verificationResult.description).isEmpty();
+		BDDAssertions.then(verificationResult.action).isEmpty();
 	}
 
 	@Test
@@ -43,6 +56,7 @@ public class SpringBootDependencyTests {
 		VerificationResult verificationResult = versionVerifier.verify();
 
 		BDDAssertions.then(verificationResult.description).isNotEmpty();
+		BDDAssertions.then(verificationResult.action).isNotEmpty();
 	}
 
 	@Test
@@ -60,6 +74,7 @@ public class SpringBootDependencyTests {
 		VerificationResult verificationResult = versionVerifier.verify();
 
 		BDDAssertions.then(verificationResult.description).isNotEmpty();
+		BDDAssertions.then(verificationResult.action).isNotEmpty();
 	}
 
 	@Test
@@ -77,6 +92,7 @@ public class SpringBootDependencyTests {
 		VerificationResult verificationResult = versionVerifier.verify();
 
 		BDDAssertions.then(verificationResult.description).isEmpty();
+		BDDAssertions.then(verificationResult.action).isEmpty();
 	}
 
 	@Test
@@ -90,9 +106,9 @@ public class SpringBootDependencyTests {
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("2.5", new MismatchPredicate() {
+		versionVerifier.ACCEPTED_VERSIONS.put("2.5", new CompatibilityPredicate() {
 			@Override
-			public boolean accept() {
+			public boolean isCompatible() {
 				return true;
 			}
 		});
@@ -100,6 +116,7 @@ public class SpringBootDependencyTests {
 		VerificationResult verificationResult = versionVerifier.verify();
 
 		BDDAssertions.then(verificationResult.description).isEmpty();
+		BDDAssertions.then(verificationResult.action).isEmpty();
 	}
 
 	@Test
@@ -117,6 +134,7 @@ public class SpringBootDependencyTests {
 		VerificationResult verificationResult = versionVerifier.verify();
 
 		BDDAssertions.then(verificationResult.description).isNotEmpty();
+		BDDAssertions.then(verificationResult.action).isNotEmpty();
 	}
 
 	@Test
@@ -129,6 +147,7 @@ public class SpringBootDependencyTests {
 		VerificationResult verificationResult = versionVerifier.verify();
 
 		BDDAssertions.then(verificationResult.description).isEmpty();
+		BDDAssertions.then(verificationResult.action).isEmpty();
 	}
 
 	@Test
@@ -147,6 +166,7 @@ public class SpringBootDependencyTests {
 		VerificationResult verificationResult = versionVerifier.verify();
 
 		BDDAssertions.then(verificationResult.description).isEmpty();
+		BDDAssertions.then(verificationResult.action).isEmpty();
 	}
 
 	@Test
@@ -164,6 +184,7 @@ public class SpringBootDependencyTests {
 		VerificationResult verificationResult = versionVerifier.verify();
 
 		BDDAssertions.then(verificationResult.description).isNotEmpty();
+		BDDAssertions.then(verificationResult.action).isNotEmpty();
 	}
 
 }
