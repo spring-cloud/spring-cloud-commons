@@ -637,7 +637,7 @@ Description:
 
 Your project setup is incompatible with our requirements due to following reasons:
 
-- Spring Boot [1.5.16.RELEASE] is not compatible with this Spring Cloud release train
+- Spring Boot [2.0.6.RELEASE] is not compatible with this Spring Cloud release train
 
 
 Action:
