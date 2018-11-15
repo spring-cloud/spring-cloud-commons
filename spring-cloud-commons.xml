@@ -622,5 +622,35 @@ HasFeatures localFeatures() {
 <simpara>Each of these beans should go in an appropriately guarded <literal>@Configuration</literal>.</simpara>
 </section>
 </section>
+<section xml:id="_spring_cloud_compatibility_verification">
+<title>Spring Cloud Compatibility Verification</title>
+<simpara>Due to the fact that some users have problem with setting up Spring Cloud application, we&#8217;ve decided
+to add a compatibility verification mechanism. It will break if your current setup is not compatible
+with Spring Cloud requirements, together with a report, showing what exactly went wrong.</simpara>
+<simpara>At the moment we verify which version of Spring Boot is added to your classpath.</simpara>
+<simpara>Example of a report</simpara>
+<screen>***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Your project setup is incompatible with our requirements due to following reasons:
+
+- Spring Boot [2.1.0.RELEASE] is not compatible with this Spring Cloud release train
+
+
+Action:
+
+Consider applying the following actions:
+
+- Change Spring Boot version to one of the following versions [1.2.x, 1.3.x] .
+You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
+If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.</screen>
+<simpara>In order to disable this feature, set <literal>spring.cloud.compatibility-verifier.enabled</literal> to <literal>false</literal>.
+If you want to override the compatible Spring Boot versions, just set the
+<literal>spring.cloud.compatibility-verifier.compatible-boot-versions</literal> property with a comma separated list
+of compatible Spring Boot versions.</simpara>
+</section>
 </chapter>
 </book>

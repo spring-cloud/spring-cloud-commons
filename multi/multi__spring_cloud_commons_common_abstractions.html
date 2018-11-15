@@ -229,4 +229,26 @@ HasFeatures localFeatures() {
       .namedFeature(<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> NamedFeature(<span xmlns:d="http://docbook.org/ns/docbook" class="hl-string">"Bar Feature"</span>, Bar.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>))
       .abstractFeature(Baz.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>)
       .build();
-}</pre><p>Each of these beans should go in an appropriately guarded <code class="literal">@Configuration</code>.</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="multi__spring_cloud_context_application_context_services.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;</td></tr><tr><td width="40%" align="left" valign="top">1.&nbsp;Spring Cloud Context: Application Context Services&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="multi_spring-cloud-commons.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;</td></tr></table></div></body></html>
+}</pre><p>Each of these beans should go in an appropriately guarded <code class="literal">@Configuration</code>.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="_spring_cloud_compatibility_verification" href="#_spring_cloud_compatibility_verification"></a>2.10&nbsp;Spring Cloud Compatibility Verification</h2></div></div></div><p>Due to the fact that some users have problem with setting up Spring Cloud application, we&#8217;ve decided
+to add a compatibility verification mechanism. It will break if your current setup is not compatible
+with Spring Cloud requirements, together with a report, showing what exactly went wrong.</p><p>At the moment we verify which version of Spring Boot is added to your classpath.</p><p>Example of a report</p><pre class="screen">***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Your project setup is incompatible with our requirements due to following reasons:
+
+- Spring Boot [2.1.0.RELEASE] is not compatible with this Spring Cloud release train
+
+
+Action:
+
+Consider applying the following actions:
+
+- Change Spring Boot version to one of the following versions [1.2.x, 1.3.x] .
+You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
+If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.</pre><p>In order to disable this feature, set <code class="literal">spring.cloud.compatibility-verifier.enabled</code> to <code class="literal">false</code>.
+If you want to override the compatible Spring Boot versions, just set the
+<code class="literal">spring.cloud.compatibility-verifier.compatible-boot-versions</code> property with a comma separated list
+of compatible Spring Boot versions.</p></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="multi__spring_cloud_context_application_context_services.html">Prev</a>&nbsp;</td><td width="20%" align="center">&nbsp;</td><td width="40%" align="right">&nbsp;</td></tr><tr><td width="40%" align="left" valign="top">1.&nbsp;Spring Cloud Context: Application Context Services&nbsp;</td><td width="20%" align="center"><a accesskey="h" href="multi_spring-cloud-commons.html">Home</a></td><td width="40%" align="right" valign="top">&nbsp;</td></tr></table></div></body></html>
