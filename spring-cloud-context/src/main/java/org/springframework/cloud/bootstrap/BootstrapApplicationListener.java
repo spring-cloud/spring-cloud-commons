@@ -34,6 +34,7 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.ParentContextApplicationContextInitializer;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.event.ApplicationFailedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer;
 import org.springframework.context.ApplicationContextInitializer;
@@ -51,8 +52,6 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySource.StubPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
-import org.springframework.core.io.support.SpringFactoriesLoader;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -103,7 +102,11 @@ public class BootstrapApplicationListener
 		if (context == null) {
 			context = bootstrapServiceContext(environment, event.getSpringApplication(),
 					configName);
+			ConfigurableApplicationContext bootstrapContext = context;
+			event.getSpringApplication().addListeners((ApplicationListener<ApplicationFailedEvent>) afe ->
+					bootstrapContext.close());
 		}
+
 		apply(context, event.getSpringApplication(), environment);
 	}
 
