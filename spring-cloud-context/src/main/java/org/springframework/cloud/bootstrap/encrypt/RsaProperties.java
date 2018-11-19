@@ -27,22 +27,22 @@ import org.springframework.security.rsa.crypto.RsaAlgorithm;
 public class RsaProperties {
 
 	/**
-	 * The RSA algorithm to use (DEFAULT or OEAP). Once it is set do not change it (or
-	 * existing ciphers will not a decryptable).
+	 * The RSA algorithm to use (DEFAULT or OEAP). Once it is set, do not change it (or
+	 * existing ciphers will not be decryptable).
 	 */
 	private RsaAlgorithm algorithm = RsaAlgorithm.DEFAULT;
 
 	/**
 	 * Flag to indicate that "strong" AES encryption should be used internally. If
-	 * true then the GCM algorithm is applied to the AES encrypted bytes. Default is
-	 * false (in which case "standard" CBC is used instead). Once it is set do not
-	 * change it (or existing ciphers will not a decryptable).
+	 * true, then the GCM algorithm is applied to the AES encrypted bytes. Default is
+	 * false (in which case "standard" CBC is used instead). Once it is set, do not
+	 * change it (or existing ciphers will not be decryptable).
 	 */
 	private boolean strong = false;
 
 	/**
-	 * Salt for the random secret used to encrypt cipher text. Once it is set do not
-	 * change it (or existing ciphers will not a decryptable).
+	 * Salt for the random secret used to encrypt cipher text. Once it is set, do not
+	 * change it (or existing ciphers will not be decryptable).
 	 */
 	private String salt = "deadbeef";
 

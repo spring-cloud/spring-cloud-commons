@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Oliver Gierke
+ * @author Tim Ysewyn
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DiscoveredResourceUnitTests {
@@ -69,7 +70,7 @@ public class DiscoveredResourceUnitTests {
 
 		Link link = new Link("target", "rel");
 
-		when(provider.getServiceInstance()).thenReturn(new DefaultServiceInstance("service", "localhost", 8080, false));
+		when(provider.getServiceInstance()).thenReturn(new DefaultServiceInstance("instance", "service", "localhost", 8080, false));
 		when(builder.asTemplatedLink()).thenReturn(link);
 
 		resource.verifyOrDiscover();

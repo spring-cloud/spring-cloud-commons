@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cloud.client.loadbalancer;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -45,6 +46,7 @@ import static org.hamcrest.Matchers.empty;
 
 /**
  * @author Rob Worsnop
+ * @author Tim Ysewyn
  */
 public class AsyncLoadBalancerAutoConfigurationTests {
 
@@ -89,7 +91,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 	}
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
-		return new SpringApplicationBuilder().web(false)
+		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.aop.proxyTargetClass=true")
 				.sources(config, AsyncLoadBalancerAutoConfiguration.class).run();
 	}
@@ -150,7 +152,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public ServiceInstance choose(String serviceId) {
-			return new DefaultServiceInstance(serviceId, serviceId,
+			return new DefaultServiceInstance(serviceId, serviceId, serviceId,
 					this.random.nextInt(40000), false);
 		}
 

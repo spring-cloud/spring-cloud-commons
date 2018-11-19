@@ -29,7 +29,7 @@ public interface ApacheHttpClientFactory {
 
 	/**
 	 * Creates an {@link HttpClientBuilder} that can be used to create a new {@link CloseableHttpClient}.
-	 * @return A {@link HttpClientBuilder}
+	 * @return A {@link HttpClientBuilder}.
 	 */
 	public HttpClientBuilder createBuilder();
 }

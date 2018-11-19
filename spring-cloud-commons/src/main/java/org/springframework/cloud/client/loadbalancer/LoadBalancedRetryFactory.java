@@ -20,7 +20,7 @@ import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 
 /**
- * Factory class used to customize the retry functionality throughout Spring Cloud
+ * Factory class used to customize the retry functionality throughout Spring Cloud.
  * @author Ryan Baxter
  */
 public interface LoadBalancedRetryFactory {
@@ -28,7 +28,7 @@ public interface LoadBalancedRetryFactory {
 	/**
 	 * Creates a {@link LoadBalancedRetryPolicy}.
 	 * @param service The ID of the service to create the retry policy for.
-	 * @param serviceInstanceChooser Used to get the next server from a load balancer
+	 * @param serviceInstanceChooser Used to get the next server from a load balancer.
 	 * @return A retry policy for the service.
 	 */
 	default LoadBalancedRetryPolicy createRetryPolicy(String service, ServiceInstanceChooser serviceInstanceChooser) {
@@ -36,18 +36,18 @@ public interface LoadBalancedRetryFactory {
 	}
 
 	/**
-	 * Creates an array of {@link RetryListener}s for a given service
-	 * @param service The service to create the {@link RetryListener}s for
-	 * @return An array of {@link RetryListener}s
+	 * Creates an array of {@link RetryListener}s for a given service.
+	 * @param service The service to create the {@link RetryListener}s for.
+	 * @return An array of {@link RetryListener}s.
 	 */
 	default RetryListener[] createRetryListeners(String service) {
 		return new RetryListener[0];
 	}
 
 	/**
-	 * Creates a {@link BackOffPolicy} for a given service
-	 * @param service The service to create the {@link BackOffPolicy} for
-	 * @return The {@link BackOffPolicy}
+	 * Creates a {@link BackOffPolicy} for a given service.
+	 * @param service The service to create the {@link BackOffPolicy} for.
+	 * @return The {@link BackOffPolicy}.
 	 */
 	default BackOffPolicy createBackOffPolicy(String service) {
 		return new NoBackOffPolicy();

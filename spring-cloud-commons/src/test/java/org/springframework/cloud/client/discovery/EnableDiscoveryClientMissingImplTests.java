@@ -1,6 +1,7 @@
 package org.springframework.cloud.client.discovery;
 
 import org.junit.Test;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -19,7 +20,7 @@ public class EnableDiscoveryClientMissingImplTests {
 	@Test
 	public void testContextFails() {
 		try (ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.sources(App.class).web(false).run(new String[0]);) {
+				.sources(App.class).web(WebApplicationType.NONE).run(new String[0]);) {
 		}
 		catch (NestedRuntimeException e) {
 			Throwable rootCause = e.getRootCause();

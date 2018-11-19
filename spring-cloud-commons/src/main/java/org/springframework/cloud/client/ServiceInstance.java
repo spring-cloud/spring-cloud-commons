@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,43 +20,51 @@ import java.net.URI;
 import java.util.Map;
 
 /**
- * Represents an instance of a Service in a Discovery System
+ * Represents an instance of a service in a discovery system.
  * @author Spencer Gibb
+ * @author Tim Ysewyn
  */
 public interface ServiceInstance {
 
 	/**
-	 * @return the service id as registered.
+	 * @return The unique instance ID as registered.
+	 */
+	default String getInstanceId() {
+		return null;
+	}
+
+	/**
+	 * @return The service ID as registered.
 	 */
 	String getServiceId();
 
 	/**
-	 * @return the hostname of the registered ServiceInstance
+	 * @return The hostname of the registered service instance.
 	 */
 	String getHost();
 
 	/**
-	 * @return the port of the registered ServiceInstance
+	 * @return The port of the registered service instance.
 	 */
 	int getPort();
 
 	/**
-	 * @return if the port of the registered ServiceInstance is https or not
+	 * @return Whether the port of the registered service instance uses HTTPS.
 	 */
 	boolean isSecure();
 
 	/**
-	 * @return the service uri address
+	 * @return The service URI address.
 	 */
 	URI getUri();
 
 	/**
-	 * @return the key value pair metadata associated with the service instance
+	 * @return The key / value pair metadata associated with the service instance.
 	 */
 	Map<String, String> getMetadata();
 
 	/**
-	 * @return the scheme of the instance
+	 * @return The scheme of the service instance.
 	 */
 	default String getScheme() {
 		return null;

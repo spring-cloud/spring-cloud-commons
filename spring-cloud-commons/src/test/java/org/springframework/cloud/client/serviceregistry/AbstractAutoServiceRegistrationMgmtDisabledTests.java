@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.serviceregistry;
 
 import org.assertj.core.api.Assertions;
@@ -18,6 +34,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 /**
  * @author Spencer Gibb
+ * @author Tim Ysewyn
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AbstractAutoServiceRegistrationMgmtDisabledTests.Config.class,
@@ -43,6 +60,11 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 	}
 
 	public static class TestRegistration implements Registration {
+		@Override
+		public String getInstanceId() {
+			return "testRegistrationInstance3";
+		}
+
 		@Override
 		public String getServiceId() {
 			return "testRegistration3";

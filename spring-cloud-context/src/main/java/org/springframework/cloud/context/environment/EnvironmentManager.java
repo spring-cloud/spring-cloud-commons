@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 /**
  * Entry point for making local (but volatile) changes to the {@link Environment} of a
  * running application. Allows properties to be added and values changed, simply by adding
- * them to a high priority property source in the existing Environment.
+ * them to a high-priority property source in the existing Environment.
  * 
  * @author Dave Syer
  * 

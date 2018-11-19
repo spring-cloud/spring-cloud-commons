@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.discovery.simple;
 
 import java.net.URI;
@@ -10,13 +26,19 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
  * Properties to hold the details of a
  * {@link org.springframework.cloud.client.discovery.DiscoveryClient} service instances
- * for a given service
+ * for a given service.
+ * It also holds the user-configurable order that will be used to establish the
+ * precedence of this client in the list of clients
+ * used by {@link org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClient}.
  *
  * @author Biju Kunjummen
+ * @author Olga Maciaszek-Sharma
+ * @author Tim Ysewyn
  */
 
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
@@ -30,6 +52,8 @@ public class SimpleDiscoveryProperties {
 	 */
 	private SimpleServiceInstance local = new SimpleServiceInstance();
 
+	private int order = DiscoveryClient.DEFAULT_ORDER;
+
 	public Map<String, List<SimpleServiceInstance>> getInstances() {
 		return this.instances;
 	}
@@ -40,6 +64,14 @@ public class SimpleDiscoveryProperties {
 
 	public SimpleServiceInstance getLocal() {
 		return this.local;
+	}
+
+	public int getOrder() {
+		return this.order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	@PostConstruct
@@ -54,8 +86,8 @@ public class SimpleDiscoveryProperties {
 	public static class SimpleServiceInstance implements ServiceInstance {
 
 		/**
-		 * The URI of the service instance. Will be parsed to extract the scheme, hos and
-		 * port.
+		 * The URI of the service instance. Will be parsed to extract the scheme, host,
+     * and port.
 		 */
 		private URI uri;
 		private String host;
@@ -67,8 +99,12 @@ public class SimpleDiscoveryProperties {
 		 */
 		private Map<String, String> metadata = new LinkedHashMap<>();
 		/**
+		 * The unique identifier or name for the service instance.
+		 */
+		private String instanceId;
+		/**
 		 * The identifier or name for the service. Multiple instances might share the same
-		 * service id.
+		 * service ID.
 		 */
 		private String serviceId;
 
@@ -87,6 +123,15 @@ public class SimpleDiscoveryProperties {
 			if ("https".equals(scheme)) {
 				this.secure = true;
 			}
+		}
+
+		@Override
+		public String getInstanceId() {
+			return this.instanceId;
+		}
+
+		public void setInstanceId(String id) {
+			this.instanceId = id;
 		}
 
 		@Override

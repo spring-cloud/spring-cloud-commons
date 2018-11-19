@@ -22,7 +22,7 @@ import org.springframework.scheduling.config.IntervalTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 /**
- * A {@link ScheduledTaskRegistrar} that verifies all {@link DiscoveredResource} instances in the system based
+ * A {@link ScheduledTaskRegistrar} that verifies all {@link DiscoveredResource} instances in the system, based
  * on the given timing configuration.
  * 
  * @author Oliver Gierke

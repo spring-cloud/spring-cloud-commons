@@ -158,14 +158,6 @@ public class BootstrapApplicationListener
 			}
 			bootstrapProperties.addLast(source);
 		}
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		// Use names and ensure unique to protect against duplicates
-		List<String> names = new ArrayList<>(SpringFactoriesLoader
-				.loadFactoryNames(BootstrapConfiguration.class, classLoader));
-		for (String name : StringUtils.commaDelimitedListToStringArray(
-				environment.getProperty("spring.cloud.bootstrap.sources", ""))) {
-			names.add(name);
-		}
 		// TODO: is it possible or sensible to share a ResourceLoader?
 		SpringApplicationBuilder builder = new SpringApplicationBuilder()
 				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)
@@ -192,19 +184,7 @@ public class BootstrapApplicationListener
 			builderApplication
 					.setListeners(filterListeners(builderApplication.getListeners()));
 		}
-		List<Class<?>> sources = new ArrayList<>();
-		for (String name : names) {
-			Class<?> cls = ClassUtils.resolveClassName(name, null);
-			try {
-				cls.getDeclaredAnnotations();
-			}
-			catch (Exception e) {
-				continue;
-			}
-			sources.add(cls);
-		}
-		AnnotationAwareOrderComparator.sort(sources);
-		builder.sources(sources.toArray(new Class[sources.size()]));
+		builder.sources(BootstrapImportSelectorConfiguration.class);
 		final ConfigurableApplicationContext context = builder.run();
 		// gh-214 using spring.application.name=bootstrap to set the context id via
 		// `ContextIdApplicationContextInitializer` prevents apps from getting the actual
