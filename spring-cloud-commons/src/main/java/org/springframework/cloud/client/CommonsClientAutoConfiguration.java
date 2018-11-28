@@ -19,6 +19,7 @@ package org.springframework.cloud.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnEnabledEndpoint;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
@@ -59,7 +60,7 @@ public class CommonsClientAutoConfiguration {
 		@Bean
 		@ConditionalOnProperty(value = "spring.cloud.discovery.client.health-indicator.enabled", matchIfMissing = true)
 		public DiscoveryClientHealthIndicator discoveryClientHealthIndicator(
-				DiscoveryClient discoveryClient, DiscoveryClientHealthIndicatorProperties properties) {
+				ObjectProvider<DiscoveryClient> discoveryClient, DiscoveryClientHealthIndicatorProperties properties) {
 			return new DiscoveryClientHealthIndicator(discoveryClient, properties);
 		}
 

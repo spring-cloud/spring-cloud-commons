@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -39,17 +40,12 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 
 	private int order = Ordered.HIGHEST_PRECEDENCE;
 
-	private final DiscoveryClient discoveryClient;
+	private final ObjectProvider<DiscoveryClient> discoveryClient;
 	private final DiscoveryClientHealthIndicatorProperties properties;
 
 	private final Log log = LogFactory.getLog(DiscoveryClientHealthIndicator.class);
 
-	@Deprecated
-	public DiscoveryClientHealthIndicator(DiscoveryClient discoveryClient) {
-		this(discoveryClient, new DiscoveryClientHealthIndicatorProperties());
-	}
-
-	public DiscoveryClientHealthIndicator(DiscoveryClient discoveryClient, DiscoveryClientHealthIndicatorProperties properties) {
+	public DiscoveryClientHealthIndicator(ObjectProvider<DiscoveryClient> discoveryClient, DiscoveryClientHealthIndicatorProperties properties) {
 		this.discoveryClient = discoveryClient;
 		this.properties = properties;
 	}
@@ -67,8 +63,9 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 
 		if (this.discoveryInitialized.get()) {
 			try {
-				List<String> services = this.discoveryClient.getServices();
-				String description = (this.properties.isIncludeDescription()) ? this.discoveryClient.description() : "";
+				DiscoveryClient client = this.discoveryClient.getIfAvailable();
+				List<String> services = client.getServices();
+				String description = (this.properties.isIncludeDescription()) ? client.description() : "";
 				builder.status(new Status("UP", description))
 						.withDetail("services", services);
 			}
