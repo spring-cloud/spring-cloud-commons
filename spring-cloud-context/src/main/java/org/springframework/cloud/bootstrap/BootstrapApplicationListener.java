@@ -38,8 +38,10 @@ import org.springframework.boot.context.event.ApplicationFailedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
@@ -102,9 +104,7 @@ public class BootstrapApplicationListener
 		if (context == null) {
 			context = bootstrapServiceContext(environment, event.getSpringApplication(),
 					configName);
-			ConfigurableApplicationContext bootstrapContext = context;
-			event.getSpringApplication().addListeners((ApplicationListener<ApplicationFailedEvent>) afe ->
-					bootstrapContext.close());
+			event.getSpringApplication().addListeners(new CloseContextOnFailureApplicationListener(context));
 		}
 
 		apply(context, event.getSpringApplication(), environment);
@@ -469,6 +469,28 @@ public class BootstrapApplicationListener
 			return new LinkedHashMap<String, Object>();
 		}
 
+	}
+
+	private static class CloseContextOnFailureApplicationListener implements SmartApplicationListener {
+
+		private final ConfigurableApplicationContext context;
+
+		public CloseContextOnFailureApplicationListener(ConfigurableApplicationContext context) {
+			this.context = context;
+		}
+
+		@Override
+		public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
+			return ApplicationFailedEvent.class.isAssignableFrom(eventType);
+		}
+
+		@Override
+		public void onApplicationEvent(ApplicationEvent event) {
+			if (event instanceof ApplicationFailedEvent) {
+				this.context.close();
+			}
+
+		}
 	}
 
 }
