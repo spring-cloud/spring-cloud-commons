@@ -34,11 +34,14 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.ParentContextApplicationContextInitializer;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.event.ApplicationFailedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
@@ -51,8 +54,6 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySource.StubPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
-import org.springframework.core.io.support.SpringFactoriesLoader;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -103,7 +104,9 @@ public class BootstrapApplicationListener
 		if (context == null) {
 			context = bootstrapServiceContext(environment, event.getSpringApplication(),
 					configName);
+			event.getSpringApplication().addListeners(new CloseContextOnFailureApplicationListener(context));
 		}
+
 		apply(context, event.getSpringApplication(), environment);
 	}
 
@@ -466,6 +469,28 @@ public class BootstrapApplicationListener
 			return new LinkedHashMap<String, Object>();
 		}
 
+	}
+
+	private static class CloseContextOnFailureApplicationListener implements SmartApplicationListener {
+
+		private final ConfigurableApplicationContext context;
+
+		public CloseContextOnFailureApplicationListener(ConfigurableApplicationContext context) {
+			this.context = context;
+		}
+
+		@Override
+		public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
+			return ApplicationFailedEvent.class.isAssignableFrom(eventType);
+		}
+
+		@Override
+		public void onApplicationEvent(ApplicationEvent event) {
+			if (event instanceof ApplicationFailedEvent) {
+				this.context.close();
+			}
+
+		}
 	}
 
 }
