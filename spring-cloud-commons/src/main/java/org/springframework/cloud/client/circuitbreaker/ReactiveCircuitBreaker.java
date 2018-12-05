@@ -15,17 +15,26 @@
  */
 package org.springframework.cloud.client.circuitbreaker;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
- *
  * @author Ryan Baxter
  */
-public interface CircuitBreaker {
+public interface ReactiveCircuitBreaker {
 
-	public <T> T run(Supplier<T> toRun);
+	default public <T> Mono<T> run(Mono<T> toRun) {
+		return run(toRun, null);
+	}
 
-	public <T> T run(Supplier<T> toRun, Function<Throwable, T> fallback);
+	public <T> Mono<T> run(Mono<T> toRun, Function<Throwable, Mono<T>> fallback);
+
+	default public <T> Flux<T> run(Flux<T> toRun) {
+		return run(toRun, null);
+	}
+
+	public <T> Flux<T> run(Flux<T> toRun, Function<Throwable, Flux<T>> fallback);
 
 }
