@@ -41,6 +41,12 @@
       "name": "spring.cloud.discovery.client.composite-indicator.enabled",
       "description": "Enables discovery client composite health indicator.",
       "type": "java.lang.Boolean"
+    },
+    {
+      "defaultValue": true,
+      "name": "management.endpoint.env.post.enabled",
+      "description": "Enables writable environment endpoint.",
+      "type": "java.lang.Boolean"
     }
   ]
 }

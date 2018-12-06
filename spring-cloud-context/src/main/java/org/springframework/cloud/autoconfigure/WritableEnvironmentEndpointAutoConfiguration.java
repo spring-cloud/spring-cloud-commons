@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.context.environment.EnvironmentManager;
 import org.springframework.cloud.context.environment.WritableEnvironmentEndpoint;
@@ -31,6 +32,7 @@ import org.springframework.core.env.Environment;
 @AutoConfigureBefore(EnvironmentEndpointAutoConfiguration.class)
 @AutoConfigureAfter(LifecycleMvcEndpointAutoConfiguration.class)
 @EnableConfigurationProperties({ EnvironmentEndpointProperties.class })
+@ConditionalOnProperty(value = "management.endpoint.env.post.enabled", matchIfMissing = true)
 public class WritableEnvironmentEndpointAutoConfiguration {
 
 	private final EnvironmentEndpointProperties properties;
