@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
+import org.springframework.cloud.loadbalancer.core.ReactiveLoadBalancerExchangeFilterFunction;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,6 +49,12 @@ public class LoadBalancerAutoConfiguration {
 		clientFactory.setConfigurations(
 				this.configurations.getIfAvailable(Collections::emptyList));
 		return clientFactory;
+	}
+	
+	@Bean
+	public ReactiveLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction() {
+		return new ReactiveLoadBalancerExchangeFilterFunction(
+				loadBalancerClientFactory());
 	}
 
 }
