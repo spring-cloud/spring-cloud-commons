@@ -37,6 +37,14 @@ import org.springframework.context.annotation.Configuration;
 // @AutoConfigureBefore(CacheAutoConfiguration.class)
 public class LoadBalancerAutoConfiguration {
 
+	@LoadBalanced
+	@Autowired(required = false)
+	private List<WebClient.Builder> webClientBuilders = Collections.emptyList();
+
+	public List<WebClient.Builder> getBuilders() {
+		return webClientBuilders;
+	}
+
 	private final ObjectProvider<List<LoadBalancerClientSpecification>> configurations;
 
 	public LoadBalancerAutoConfiguration(
@@ -51,11 +59,28 @@ public class LoadBalancerAutoConfiguration {
 				this.configurations.getIfAvailable(Collections::emptyList));
 		return clientFactory;
 	}
-	
+
+	@Bean
+	public SmartInitializingSingleton reactiveLoadBalancedWebClientInitializer(
+			final List<WebClientCustomizer> customizers) {
+		return () -> {
+			for (WebClient.Builder webClientBuilder : getBuilders()) {
+				for (WebClientCustomizer customizer : customizers) {
+					customizer.customize(webClientBuilder);
+				}
+			}
+		};
+	}
+
+	@Bean
+	public WebClientCustomizer reactiveLoadbalanceClientWebClientCustomizer(
+			ReactiveLoadBalancerExchangeFilterFunction filterFunction) {
+		return builder -> builder.filter(filterFunction);
+	}
+
 	@Bean
 	public ReactiveLoadBalancerExchangeFilterFunction reactiveLoadBalancerExchangeFilterFunction() {
 		return new ReactiveLoadBalancerExchangeFilterFunction(
 				loadBalancerClientFactory());
 	}
-
 }
