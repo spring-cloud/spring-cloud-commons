@@ -53,7 +53,7 @@ public class LoadBalancerAutoConfiguration {
 	}
 	
 	@Bean
-	public ReactiveLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction() {
+	public ReactiveLoadBalancerExchangeFilterFunction reactiveLoadBalancerExchangeFilterFunction() {
 		return new ReactiveLoadBalancerExchangeFilterFunction(
 				loadBalancerClientFactory());
 	}
