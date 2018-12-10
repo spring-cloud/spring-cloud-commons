@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Spencer Gibb
+ * @author Nikola Kološnjaji
  */
 @Configuration
 @LoadBalancerClients
