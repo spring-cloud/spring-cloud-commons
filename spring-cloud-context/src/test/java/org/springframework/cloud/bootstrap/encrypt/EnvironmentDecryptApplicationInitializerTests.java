@@ -78,6 +78,17 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		assertEquals("spam", context.getEnvironment().getProperty("foo"));
 	}
 
+	@Test
+	public void propertySourcesOrderedCorrectlyWithUnencryptedOverrides() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of("foo: {cipher}bar").applyTo(context);
+		context.getEnvironment().getPropertySources()
+				.addFirst(new MapPropertySource("test_override",
+						Collections.<String, Object>singletonMap("foo", "spam")));
+		this.listener.initialize(context);
+		assertEquals("spam", context.getEnvironment().getProperty("foo"));
+	}
+
 	@Test(expected = IllegalStateException.class)
 	public void errorOnDecrypt() {
 		this.listener = new EnvironmentDecryptApplicationInitializer(

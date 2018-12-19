@@ -225,9 +225,12 @@ public class EnvironmentDecryptApplicationInitializer implements
 						}
 					}
 					else if (COLLECTION_PROPERTY.matcher(key).matches()) {
-						// put non-ecrypted properties so merging of index properties
+						// put non-encrypted properties so merging of index properties
 						// happens correctly
 						otherCollectionProperties.put(key, value);
+					}
+					else {
+						overrides.remove(key);
 					}
 				}
 			}
