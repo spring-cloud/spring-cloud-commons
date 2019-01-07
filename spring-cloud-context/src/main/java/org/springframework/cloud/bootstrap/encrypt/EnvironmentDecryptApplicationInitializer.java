@@ -163,31 +163,34 @@ public class EnvironmentDecryptApplicationInitializer implements
 			sources.add(0, source);
 		}
 		for (PropertySource<?> source : sources) {
-			decrypt(source, overrides);
+			collectEncryptedProperties(source, overrides);
 		}
+
+		doDecrypt(overrides);
 		return overrides;
 	}
 
 	private Map<String, Object> decrypt(PropertySource<?> source) {
 		Map<String, Object> overrides = new LinkedHashMap<>();
-		decrypt(source, overrides);
+		collectEncryptedProperties(source, overrides);
+		doDecrypt(overrides);
 		return overrides;
 	}
 
 	private static final Pattern COLLECTION_PROPERTY = Pattern
 			.compile("(\\S+)?\\[(\\d+)\\](\\.\\S+)?");
 
-	private void decrypt(PropertySource<?> source, Map<String, Object> overrides) {
+	private void collectEncryptedProperties(PropertySource<?> source,
+			Map<String, Object> overrides) {
 
 		if (source instanceof CompositePropertySource) {
 
 			for (PropertySource<?> nested : ((CompositePropertySource) source)
 					.getPropertySources()) {
-				decrypt(nested, overrides);
+				collectEncryptedProperties(nested, overrides);
 			}
 
-		}
-		else if (source instanceof EnumerablePropertySource) {
+		} else if (source instanceof EnumerablePropertySource) {
 			Map<String, Object> otherCollectionProperties = new LinkedHashMap<>();
 			boolean sourceHasDecryptedCollection = false;
 
@@ -197,37 +200,16 @@ public class EnvironmentDecryptApplicationInitializer implements
 				if (property != null) {
 					String value = property.toString();
 					if (value.startsWith("{cipher}")) {
-						value = value.substring("{cipher}".length());
-						try {
-							value = this.encryptor.decrypt(value);
-							if (logger.isDebugEnabled()) {
-								logger.debug("Decrypted: key=" + key);
-							}
-						}
-						catch (Exception e) {
-							String message = "Cannot decrypt: key=" + key;
-							if (this.failOnError) {
-								throw new IllegalStateException(message, e);
-							}
-							if (logger.isDebugEnabled()) {
-								logger.warn(message, e);
-							}
-							else {
-								logger.warn(message);
-							}
-							// Set value to empty to avoid making a password out of the
-							// cipher text
-							value = "";
-						}
 						overrides.put(key, value);
 						if (COLLECTION_PROPERTY.matcher(key).matches()) {
 							sourceHasDecryptedCollection = true;
 						}
-					}
-					else if (COLLECTION_PROPERTY.matcher(key).matches()) {
-						// put non-ecrypted properties so merging of index properties
+					} else if (COLLECTION_PROPERTY.matcher(key).matches()) {
+						// put non-encrypted properties so merging of index properties
 						// happens correctly
 						otherCollectionProperties.put(key, value);
+					} else {
+						overrides.remove(key);
 					}
 				}
 			}
@@ -236,6 +218,37 @@ public class EnvironmentDecryptApplicationInitializer implements
 				overrides.putAll(otherCollectionProperties);
 			}
 
+		}
+	}
+
+	private void doDecrypt(Map<String, Object> overrides) {
+		for (String key : overrides.keySet()) {
+			String value = overrides.get(key).toString();
+			if (value.startsWith("{cipher}")) {
+				value = value.substring("{cipher}".length());
+				try {
+					value = this.encryptor.decrypt(value);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Decrypted: key=" + key);
+					}
+				}
+				catch (Exception e) {
+					String message = "Cannot decrypt: key=" + key;
+					if (this.failOnError) {
+						throw new IllegalStateException(message, e);
+					}
+					if (logger.isDebugEnabled()) {
+						logger.warn(message, e);
+					}
+					else {
+						logger.warn(message);
+					}
+					// Set value to empty to avoid making a password out of the
+					// cipher text
+					value = "";
+				}
+				overrides.put(key, value);
+			}
 		}
 	}
 
