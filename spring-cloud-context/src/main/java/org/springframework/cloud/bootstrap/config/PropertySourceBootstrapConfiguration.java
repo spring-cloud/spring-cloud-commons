@@ -222,7 +222,12 @@ public class PropertySourceBootstrapConfiguration implements
 
 	private String[] getProfilesForValue(Object property) {
 		final String value = (property == null ? null : property.toString());
-		return StringUtils.commaDelimitedListToStringArray(value);
+		String[] values = StringUtils.commaDelimitedListToStringArray(value);
+		String[] trimmedValues = new String[values.length];
+		for(int i = 0; i < values.length; i++) {
+			trimmedValues[i] = values[i].trim();
+		}
+		return trimmedValues;
 	}
 
 }
