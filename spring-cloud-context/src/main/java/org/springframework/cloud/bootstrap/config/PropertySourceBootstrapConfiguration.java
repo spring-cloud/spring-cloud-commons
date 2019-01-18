@@ -134,8 +134,7 @@ public class PropertySourceBootstrapConfiguration implements
 			}
 			catch (Exception ex) {
 				PropertySourceBootstrapConfiguration.logger
-						.warn("Logging config file location '" + logConfig
-								+ "' cannot be opened and will be ignored");
+						.warn("Error opening logging config file " + logConfig, ex);
 			}
 		}
 	}
