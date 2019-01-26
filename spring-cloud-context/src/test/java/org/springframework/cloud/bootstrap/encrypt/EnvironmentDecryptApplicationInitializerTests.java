@@ -197,11 +197,29 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		TestPropertyValues.of("foo: {cipher}bar", "foo2: {cipher}bar2").applyTo(context);
 		context.getEnvironment().getPropertySources()
 				.addFirst(new MapPropertySource("test_override",
-						Collections.<String, Object>singletonMap("foo", "spam")));
+						Collections.singletonMap("foo", "spam")));
 		initializer.initialize(context);
 		assertEquals("spam", context.getEnvironment().getProperty("foo"));
 		assertEquals("bar2", context.getEnvironment().getProperty("foo2"));
 		verify(encryptor).decrypt("bar2");
 		verifyNoMoreInteractions(encryptor);
+	}
+
+	@Test
+	public void testDoesNotRemoveFromOverridesIfAlreadyDecrypted() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
+		EnvironmentDecryptApplicationInitializer initializer = new EnvironmentDecryptApplicationInitializer(
+				Encryptors.noOpText());
+
+		TestPropertyValues.of("foo: {cipher}bar").applyTo(context);
+		initializer.initialize(context);
+
+		context.getEnvironment().getPropertySources()
+				.addAfter(EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME,
+						new MapPropertySource("test_override",
+						Collections.singletonMap("foo", "encryped_overriden")));
+
+		initializer.initialize(context);
+		assertEquals("bar", context.getEnvironment().getProperty("foo"));
 	}
 }

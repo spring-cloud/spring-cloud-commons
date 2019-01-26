@@ -208,7 +208,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 						// put non-encrypted properties so merging of index properties
 						// happens correctly
 						otherCollectionProperties.put(key, value);
-					} else {
+					} else if (!enumerable.getName().equals(DECRYPTED_PROPERTY_SOURCE_NAME)) {
 						overrides.remove(key);
 					}
 				}
