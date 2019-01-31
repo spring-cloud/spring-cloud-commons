@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.loadbalancer;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -26,48 +27,48 @@ import org.springframework.retry.context.RetryContextSupport;
  */
 public class LoadBalancedRetryContext extends RetryContextSupport {
 
-    private HttpRequest request;
-    private ServiceInstance serviceInstance;
+	private HttpRequest request;
+	private ServiceInstance serviceInstance;
 
-    /**
-     * Creates a new load-balanced context.
-     * @param parent The parent context.
-     * @param request The request that is being load-balanced.
-     */
-    public LoadBalancedRetryContext(RetryContext parent, HttpRequest request) {
-        super(parent);
-        this.request = request;
-    }
+	/**
+	 * Creates a new load-balanced context.
+	 * @param parent The parent context.
+	 * @param request The request that is being load-balanced.
+	 */
+	public LoadBalancedRetryContext(RetryContext parent, HttpRequest request) {
+		super(parent);
+		this.request = request;
+	}
 
-    /**
-     * Gets the request that is being load-balanced.
-     * @return The request that is being load-balanced.
-     */
-    public HttpRequest getRequest() {
-        return request;
-    }
+	/**
+	 * Gets the request that is being load-balanced.
+	 * @return The request that is being load-balanced.
+	 */
+	public HttpRequest getRequest() {
+		return this.request;
+	}
 
-    /**
-     * Sets the request that is being load-balanced.
-     * @param request The request to be load balanced.
-     */
-    public void setRequest(HttpRequest request) {
-        this.request = request;
-    }
+	/**
+	 * Sets the request that is being load-balanced.
+	 * @param request The request to be load balanced.
+	 */
+	public void setRequest(HttpRequest request) {
+		this.request = request;
+	}
 
-    /**
-     * Gets the service instance used during the retry.
-     * @return The service instance used during the retry.
-     */
-    public ServiceInstance getServiceInstance() {
-        return serviceInstance;
-    }
+	/**
+	 * Gets the service instance used during the retry.
+	 * @return The service instance used during the retry.
+	 */
+	public ServiceInstance getServiceInstance() {
+		return this.serviceInstance;
+	}
 
-    /**
-     * Sets the service instance to use during the retry.
-     * @param serviceInstance The service instance to use during the retry.
-     */
-    public void setServiceInstance(ServiceInstance serviceInstance) {
-        this.serviceInstance = serviceInstance;
-    }
+	/**
+	 * Sets the service instance to use during the retry.
+	 * @param serviceInstance The service instance to use during the retry.
+	 */
+	public void setServiceInstance(ServiceInstance serviceInstance) {
+		this.serviceInstance = serviceInstance;
+	}
 }

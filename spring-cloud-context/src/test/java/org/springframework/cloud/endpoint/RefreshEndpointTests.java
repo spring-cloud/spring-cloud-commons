@@ -73,7 +73,7 @@ public class RefreshEndpointTests {
 				.properties("spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		context.getEnvironment().setActiveProfiles("local");
+		this.context.getEnvironment().setActiveProfiles("local");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
@@ -87,7 +87,7 @@ public class RefreshEndpointTests {
 				.properties("spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
-		context.getEnvironment().setActiveProfiles("override");
+		this.context.getEnvironment().setActiveProfiles("override");
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
@@ -148,8 +148,8 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void shutdownHooksCleaned() {
-		try (ConfigurableApplicationContext context = new SpringApplicationBuilder(Empty.class)
-				.web(WebApplicationType.NONE).bannerMode(Mode.OFF).run()) {
+		try (ConfigurableApplicationContext context = new SpringApplicationBuilder(
+				Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF).run()) {
 			RefreshScope scope = new RefreshScope();
 			scope.setApplicationContext(context);
 			ContextRefresher contextRefresher = new ContextRefresher(context, scope);
@@ -173,8 +173,8 @@ public class RefreshEndpointTests {
 
 	@Configuration
 	protected static class Empty implements SmartApplicationListener {
-		private List<ApplicationEvent> events = new ArrayList<ApplicationEvent>();
 
+		private List<ApplicationEvent> events = new ArrayList<ApplicationEvent>();
 
 		@Override
 		public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
@@ -184,11 +184,12 @@ public class RefreshEndpointTests {
 
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
-			if (event instanceof EnvironmentChangeEvent ||
-				event instanceof RefreshScopeRefreshedEvent) {
+			if (event instanceof EnvironmentChangeEvent
+					|| event instanceof RefreshScopeRefreshedEvent) {
 				this.events.add(event);
 			}
 		}
+
 	}
 
 	@Component
@@ -202,4 +203,5 @@ public class RefreshEndpointTests {
 		}
 
 	}
+
 }

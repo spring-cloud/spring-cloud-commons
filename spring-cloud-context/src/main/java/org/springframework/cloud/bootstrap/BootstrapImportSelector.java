@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,10 +39,12 @@ import org.springframework.util.StringUtils;
 
 /**
  * This class uses {@link SpringFactoriesLoader} to load {@link BootstrapConfiguration}
- * entries from {@code spring.factories}. The classes are then loaded so they can
- * be sorted using {@link AnnotationAwareOrderComparator#sort(List)}.
- * This class is a {@link DeferredImportSelector} so {@code @Conditional} annotations
- * on imported classes are supported.
+ * entries from {@code spring.factories}. The classes are then loaded so they can be
+ * sorted using {@link AnnotationAwareOrderComparator#sort(List)}. This class is a
+ * {@link DeferredImportSelector} so {@code @Conditional} annotations on imported classes
+ * are supported.
+ *
+ * @author Spencer Gibb
  */
 public class BootstrapImportSelector implements EnvironmentAware, DeferredImportSelector {
 
@@ -62,21 +64,21 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 		List<String> names = new ArrayList<>(SpringFactoriesLoader
 				.loadFactoryNames(BootstrapConfiguration.class, classLoader));
 		names.addAll(Arrays.asList(StringUtils.commaDelimitedListToStringArray(
-				environment.getProperty("spring.cloud.bootstrap.sources", ""))));
+				this.environment.getProperty("spring.cloud.bootstrap.sources", ""))));
 
 		List<OrderedAnnotatedElement> elements = new ArrayList<>();
 		for (String name : names) {
 			try {
-				elements.add(new OrderedAnnotatedElement(metadataReaderFactory, name));
-			} catch (IOException e) {
+				elements.add(
+						new OrderedAnnotatedElement(this.metadataReaderFactory, name));
+			}
+			catch (IOException e) {
 				continue;
 			}
 		}
 		AnnotationAwareOrderComparator.sort(elements);
 
-		String[] classNames = elements.stream()
-				.map(e -> e.name)
-				.toArray(String[]::new);
+		String[] classNames = elements.stream().map(e -> e.name).toArray(String[]::new);
 
 		return classNames;
 	}
@@ -84,17 +86,21 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 	class OrderedAnnotatedElement implements AnnotatedElement {
 
 		private final String name;
+
 		private Order order = null;
+
 		private Integer value;
 
-		public OrderedAnnotatedElement(MetadataReaderFactory metadataReaderFactory, String name) throws IOException {
+		OrderedAnnotatedElement(MetadataReaderFactory metadataReaderFactory, String name)
+				throws IOException {
 			MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(name);
 			AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-			Map<String, Object> attributes = metadata.getAnnotationAttributes(Order.class.getName());
+			Map<String, Object> attributes = metadata
+					.getAnnotationAttributes(Order.class.getName());
 			this.name = name;
 			if (attributes != null && attributes.containsKey("value")) {
-				value = (Integer) attributes.get("value");
-				order = new Order() {
+				this.value = (Integer) attributes.get("value");
+				this.order = new Order() {
 					@Override
 					public Class<? extends Annotation> annotationType() {
 						return Order.class;
@@ -102,7 +108,7 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 
 					@Override
 					public int value() {
-						return value;
+						return OrderedAnnotatedElement.this.value;
 					}
 				};
 			}
@@ -112,14 +118,15 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 		@SuppressWarnings("unchecked")
 		public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
 			if (annotationClass == Order.class) {
-				return (T) order;
+				return (T) this.order;
 			}
 			return null;
 		}
 
 		@Override
 		public Annotation[] getAnnotations() {
-			return order == null ? new Annotation[0] : new Annotation[]{order};
+			return this.order == null ? new Annotation[0]
+					: new Annotation[] { this.order };
 		}
 
 		@Override
@@ -129,10 +136,10 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 
 		@Override
 		public String toString() {
-			return new ToStringCreator(this)
-					.append("name", name)
-					.append("value", value)
-					.toString();
+			return new ToStringCreator(this).append("name", this.name)
+					.append("value", this.value).toString();
 		}
+
 	}
+
 }

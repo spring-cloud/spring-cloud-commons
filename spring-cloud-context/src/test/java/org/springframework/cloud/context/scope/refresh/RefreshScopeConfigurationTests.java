@@ -41,23 +41,26 @@ import static org.junit.Assert.assertEquals;
  *
  */
 public class RefreshScopeConfigurationTests {
-	
-	private AnnotationConfigApplicationContext context;
-	
+
 	@Rule
 	public ExpectedException expected = ExpectedException.none();
 
+	private AnnotationConfigApplicationContext context;
+
 	@After
 	public void init() {
-		if (context!=null) {
-			context.close();
+		if (this.context != null) {
+			this.context.close();
 		}
 	}
 
 	private void refresh() {
-		EnvironmentManager environmentManager = context.getBean(EnvironmentManager.class);
+		EnvironmentManager environmentManager = this.context
+				.getBean(EnvironmentManager.class);
 		environmentManager.setProperty("message", "Hello Dave!");
-		org.springframework.cloud.context.scope.refresh.RefreshScope scope = context.getBean(org.springframework.cloud.context.scope.refresh.RefreshScope.class);
+		org.springframework.cloud.context.scope.refresh.RefreshScope scope = this.context
+				.getBean(
+						org.springframework.cloud.context.scope.refresh.RefreshScope.class);
 		scope.refreshAll();
 	}
 
@@ -66,10 +69,13 @@ public class RefreshScopeConfigurationTests {
 	 */
 	@Test
 	public void configurationWithRefreshScope() throws Exception {
-		context = new AnnotationConfigApplicationContext(Application.class,
-				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class, LifecycleMvcEndpointAutoConfiguration.class);
-		Application application = context.getBean(Application.class);
-		assertEquals("refresh", context.getBeanDefinition("scopedTarget.application").getScope());
+		this.context = new AnnotationConfigApplicationContext(Application.class,
+				PropertyPlaceholderAutoConfiguration.class,
+				RefreshAutoConfiguration.class,
+				LifecycleMvcEndpointAutoConfiguration.class);
+		Application application = this.context.getBean(Application.class);
+		assertEquals("refresh",
+				this.context.getBeanDefinition("scopedTarget.application").getScope());
 		application.hello();
 		refresh();
 		String message = application.hello();
@@ -78,9 +84,11 @@ public class RefreshScopeConfigurationTests {
 
 	@Test
 	public void refreshScopeOnBean() throws Exception {
-		context = new AnnotationConfigApplicationContext(ClientApp.class,
-				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class, LifecycleMvcEndpointAutoConfiguration.class);
-		Controller application = context.getBean(Controller.class);
+		this.context = new AnnotationConfigApplicationContext(ClientApp.class,
+				PropertyPlaceholderAutoConfiguration.class,
+				RefreshAutoConfiguration.class,
+				LifecycleMvcEndpointAutoConfiguration.class);
+		Controller application = this.context.getBean(Controller.class);
 		application.hello();
 		refresh();
 		String message = application.hello();
@@ -89,9 +97,11 @@ public class RefreshScopeConfigurationTests {
 
 	@Test
 	public void refreshScopeOnNested() throws Exception {
-		context = new AnnotationConfigApplicationContext(NestedApp.class,
-				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class, LifecycleMvcEndpointAutoConfiguration.class);
-		NestedController application = context.getBean(NestedController.class);
+		this.context = new AnnotationConfigApplicationContext(NestedApp.class,
+				PropertyPlaceholderAutoConfiguration.class,
+				RefreshAutoConfiguration.class,
+				LifecycleMvcEndpointAutoConfiguration.class);
+		NestedController application = this.context.getBean(NestedController.class);
 		application.hello();
 		refresh();
 		String message = application.hello();
@@ -101,7 +111,11 @@ public class RefreshScopeConfigurationTests {
 	// WTF? Maven can't compile without the FQN on this one (not the others).
 	@org.springframework.context.annotation.Configuration
 	protected static class NestedApp {
-		
+
+		public static void main(String[] args) {
+			SpringApplication.run(ClientApp.class, args);
+		}
+
 		@RestController
 		@RefreshScope
 		protected static class NestedController {
@@ -111,13 +125,9 @@ public class RefreshScopeConfigurationTests {
 
 			@RequestMapping("/")
 			public String hello() {
-				return message;
+				return this.message;
 			}
 
-		}
-
-		public static void main(String[] args) {
-			SpringApplication.run(ClientApp.class, args);
 		}
 
 	}
@@ -129,28 +139,28 @@ public class RefreshScopeConfigurationTests {
 		@Value("${message:Hello World!}")
 		String message = "Hello World";
 
-		@RequestMapping("/")
-		public String hello() {
-			return message;
-		}
-
 		public static void main(String[] args) {
 			SpringApplication.run(Application.class, args);
+		}
+
+		@RequestMapping("/")
+		public String hello() {
+			return this.message;
 		}
 
 	}
 
 	@Configuration
 	protected static class ClientApp {
-		
+
+		public static void main(String[] args) {
+			SpringApplication.run(ClientApp.class, args);
+		}
+
 		@Bean
 		@RefreshScope
 		public Controller controller() {
 			return new Controller();
-		}
-
-		public static void main(String[] args) {
-			SpringApplication.run(ClientApp.class, args);
 		}
 
 	}
@@ -164,7 +174,7 @@ public class RefreshScopeConfigurationTests {
 		@RequestMapping("/")
 		// Deliberately use package scope
 		String hello() {
-			return message;
+			return this.message;
 		}
 
 	}

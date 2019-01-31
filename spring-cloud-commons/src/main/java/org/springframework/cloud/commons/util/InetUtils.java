@@ -25,11 +25,9 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -45,21 +43,21 @@ public class InetUtils implements Closeable {
 	private final InetUtilsProperties properties;
 
 	private final Log log = LogFactory.getLog(InetUtils.class);
-	
+
 	public InetUtils(final InetUtilsProperties properties) {
 		this.properties = properties;
 		this.executorService = Executors
-				.newSingleThreadExecutor(r -> {
-                    Thread thread = new Thread(r);
-                    thread.setName(InetUtilsProperties.PREFIX);
-                    thread.setDaemon(true);
-                    return thread;
-                });
+			.newSingleThreadExecutor(r -> {
+				Thread thread = new Thread(r);
+				thread.setName(InetUtilsProperties.PREFIX);
+				thread.setDaemon(true);
+				return thread;
+			});
 	}
 
 	@Override
 	public void close() {
-		executorService.shutdown();
+		this.executorService.shutdown();
 	}
 
 	public HostInfo findFirstNonLoopbackHostInfo() {
@@ -78,10 +76,10 @@ public class InetUtils implements Closeable {
 		try {
 			int lowest = Integer.MAX_VALUE;
 			for (Enumeration<NetworkInterface> nics = NetworkInterface
-					.getNetworkInterfaces(); nics.hasMoreElements();) {
+				.getNetworkInterfaces(); nics.hasMoreElements(); ) {
 				NetworkInterface ifc = nics.nextElement();
 				if (ifc.isUp()) {
-					log.trace("Testing interface: " + ifc.getDisplayName());
+					this.log.trace("Testing interface: " + ifc.getDisplayName());
 					if (ifc.getIndex() < lowest || result == null) {
 						lowest = ifc.getIndex();
 					}
@@ -97,7 +95,7 @@ public class InetUtils implements Closeable {
 							if (address instanceof Inet4Address
 									&& !address.isLoopbackAddress()
 									&& isPreferredAddress(address)) {
-								log.trace("Found non-loopback interface: "
+								this.log.trace("Found non-loopback interface: "
 										+ ifc.getDisplayName());
 								result = address;
 							}
@@ -108,7 +106,7 @@ public class InetUtils implements Closeable {
 			}
 		}
 		catch (IOException ex) {
-			log.error("Cannot get first non-loopback address", ex);
+			this.log.error("Cannot get first non-loopback address", ex);
 		}
 
 		if (result != null) {
@@ -119,18 +117,19 @@ public class InetUtils implements Closeable {
 			return InetAddress.getLocalHost();
 		}
 		catch (UnknownHostException e) {
-			log.warn("Unable to retrieve localhost");
+			this.log.warn("Unable to retrieve localhost");
 		}
 
 		return null;
 	}
 
-	/** For testing. */ boolean isPreferredAddress(InetAddress address) {
+	// For testing.
+	boolean isPreferredAddress(InetAddress address) {
 
 		if (this.properties.isUseOnlySiteLocalInterfaces()) {
 			final boolean siteLocalAddress = address.isSiteLocalAddress();
 			if (!siteLocalAddress) {
-				log.trace("Ignoring address: " + address.getHostAddress());
+				this.log.trace("Ignoring address: " + address.getHostAddress());
 			}
 			return siteLocalAddress;
 		}
@@ -144,14 +143,15 @@ public class InetUtils implements Closeable {
 				return true;
 			}
 		}
-		log.trace("Ignoring address: " + address.getHostAddress());
+		this.log.trace("Ignoring address: " + address.getHostAddress());
 		return false;
 	}
 
-	/** For testing. */ boolean ignoreInterface(String interfaceName) {
+	// For testing
+	boolean ignoreInterface(String interfaceName) {
 		for (String regex : this.properties.getIgnoredInterfaces()) {
 			if (interfaceName.matches(regex)) {
-				log.trace("Ignoring interface: " + interfaceName);
+				this.log.trace("Ignoring interface: " + interfaceName);
 				return true;
 			}
 		}
@@ -160,14 +160,14 @@ public class InetUtils implements Closeable {
 
 	public HostInfo convertAddress(final InetAddress address) {
 		HostInfo hostInfo = new HostInfo();
-		Future<String> result = executorService.submit(address::getHostName);
+		Future<String> result = this.executorService.submit(address::getHostName);
 
 		String hostname;
 		try {
 			hostname = result.get(this.properties.getTimeoutSeconds(), TimeUnit.SECONDS);
 		}
 		catch (Exception e) {
-			log.info("Cannot determine local hostname");
+			this.log.info("Cannot determine local hostname");
 			hostname = "localhost";
 		}
 		hostInfo.setHostname(hostname);
@@ -175,7 +175,13 @@ public class InetUtils implements Closeable {
 		return hostInfo;
 	}
 
+	/**
+	 * Host information pojo.
+	 */
 	public static class HostInfo {
+		/**
+		 * Should override the host info.
+		 */
 		public boolean override;
 		private String ipAddress;
 		private String hostname;
@@ -203,7 +209,7 @@ public class InetUtils implements Closeable {
 		}
 
 		public boolean isOverride() {
-			return override;
+			return this.override;
 		}
 
 		public void setOverride(boolean override) {
@@ -211,7 +217,7 @@ public class InetUtils implements Closeable {
 		}
 
 		public String getIpAddress() {
-			return ipAddress;
+			return this.ipAddress;
 		}
 
 		public void setIpAddress(String ipAddress) {
@@ -219,7 +225,7 @@ public class InetUtils implements Closeable {
 		}
 
 		public String getHostname() {
-			return hostname;
+			return this.hostname;
 		}
 
 		public void setHostname(String hostname) {

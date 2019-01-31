@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,11 +83,11 @@ public class SimpleDiscoveryProperties {
 		}
 	}
 
-	public static class SimpleServiceInstance implements ServiceInstance {
+	static class SimpleServiceInstance implements ServiceInstance {
 
 		/**
 		 * The URI of the service instance. Will be parsed to extract the scheme, host,
-     * and port.
+		 * and port.
 		 */
 		private URI uri;
 		private String host;
@@ -108,21 +108,11 @@ public class SimpleDiscoveryProperties {
 		 */
 		private String serviceId;
 
-		public SimpleServiceInstance() {
+		SimpleServiceInstance() {
 		}
 
-		public SimpleServiceInstance(URI uri) {
+		SimpleServiceInstance(URI uri) {
 			setUri(uri);
-		}
-
-		public void setUri(URI uri) {
-			this.uri = uri;
-			this.host = this.uri.getHost();
-			this.port = this.uri.getPort();
-			String scheme = this.uri.getScheme();
-			if ("https".equals(scheme)) {
-				this.secure = true;
-			}
 		}
 
 		@Override
@@ -161,6 +151,16 @@ public class SimpleDiscoveryProperties {
 		@Override
 		public URI getUri() {
 			return this.uri;
+		}
+
+		public void setUri(URI uri) {
+			this.uri = uri;
+			this.host = this.uri.getHost();
+			this.port = this.uri.getPort();
+			String scheme = this.uri.getScheme();
+			if ("https".equals(scheme)) {
+				this.secure = true;
+			}
 		}
 
 		@Override

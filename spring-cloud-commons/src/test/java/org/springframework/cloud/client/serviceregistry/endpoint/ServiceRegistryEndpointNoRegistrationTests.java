@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2018 the original author or authors.
+ * Copyright 2006-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cloud.client.serviceregistry.endpoint;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
 import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration;
@@ -50,12 +51,14 @@ public class ServiceRegistryEndpointNoRegistrationTests {
 
 	@Test
 	public void testGet() throws Exception {
-		this.mvc.perform(get("/service-registry/instance-status")).andExpect(status().isNotFound());
+		this.mvc.perform(get("/service-registry/instance-status"))
+				.andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void testPost() throws Exception {
-		this.mvc.perform(post("/service-registry/instance-status").content("newstatus")).andExpect(status().isNotFound());
+		this.mvc.perform(post("/service-registry/instance-status").content("newstatus"))
+				.andExpect(status().isNotFound());
 	}
 
 	@Import({JacksonAutoConfiguration.class,
@@ -72,7 +75,7 @@ public class ServiceRegistryEndpointNoRegistrationTests {
 
 		@Bean
 		ServiceRegistry serviceRegistry() {
-			return new TestServiceRegistry() ;
+			return new TestServiceRegistry();
 		}
 	}
 }

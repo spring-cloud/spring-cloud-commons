@@ -23,31 +23,31 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * A simple cache implementation backed by a concurrent map.
- * 
+ *
  * @author Dave Syer
  *
  */
 public class StandardScopeCache implements ScopeCache {
-	
+
 	private final ConcurrentMap<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
 	public Object remove(String name) {
-		return cache.remove(name);
+		return this.cache.remove(name);
 	}
 
 	public Collection<Object> clear() {
-		Collection<Object> values = new ArrayList<Object>(cache.values());
-		cache.clear();
+		Collection<Object> values = new ArrayList<Object>(this.cache.values());
+		this.cache.clear();
 		return values;
 	}
 
 	public Object get(String name) {
-		return cache.get(name);
+		return this.cache.get(name);
 	}
 
 	public Object put(String name, Object value) {
-		Object result = cache.putIfAbsent(name, value);
-		if (result!=null) {
+		Object result = this.cache.putIfAbsent(name, value);
+		if (result != null) {
 			return result;
 		}
 		return value;

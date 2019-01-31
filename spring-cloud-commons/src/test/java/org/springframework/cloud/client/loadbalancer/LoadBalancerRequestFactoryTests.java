@@ -15,12 +15,6 @@
  */
 package org.springframework.cloud.client.loadbalancer;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -32,10 +26,17 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LoadBalancerRequestFactoryTests {
@@ -64,16 +65,17 @@ public class LoadBalancerRequestFactoryTests {
 
 	@Before
 	public void setup() {
-		httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+		this.httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
 	}
 
 	@Test
 	public void testNullTransformers() throws Exception {
 		executeLbRequest(null);
 
-		verify(execution).execute(httpRequestCaptor.capture(), eq(body));
-		Assert.assertEquals("request should be of type ServiceRequestWrapper", ServiceRequestWrapper.class,
-				httpRequestCaptor.getValue().getClass());
+		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
+		Assert
+			.assertEquals("request should be of type ServiceRequestWrapper", ServiceRequestWrapper.class,
+				this.httpRequestCaptor.getValue().getClass());
 	}
 
 	@Test
@@ -82,42 +84,49 @@ public class LoadBalancerRequestFactoryTests {
 
 		executeLbRequest(transformers);
 
-		verify(execution).execute(httpRequestCaptor.capture(), eq(body));
-		Assert.assertEquals("request should be of type ServiceRequestWrapper", ServiceRequestWrapper.class,
-				httpRequestCaptor.getValue().getClass());
+		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
+		Assert
+			.assertEquals("request should be of type ServiceRequestWrapper", ServiceRequestWrapper.class,
+				this.httpRequestCaptor.getValue().getClass());
 	}
 
 	@Test
 	public void testOneTransformer() throws Exception {
-		List<LoadBalancerRequestTransformer> transformers = Arrays.asList(transformer1);
-		when(transformer1.transformRequest(any(ServiceRequestWrapper.class), eq(instance))).thenReturn(transformedRequest1);
+		List<LoadBalancerRequestTransformer> transformers = Arrays.asList(this.transformer1);
+		when(this.transformer1
+			.transformRequest(any(ServiceRequestWrapper.class), eq(this.instance)))
+			.thenReturn(this.transformedRequest1);
 
 		executeLbRequest(transformers);
 
-		verify(execution).execute(httpRequestCaptor.capture(), eq(body));
-		assertEquals("transformer1 should have transformed request into transformedRequest1", transformedRequest1,
-				httpRequestCaptor.getValue());
+		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
+		assertEquals("transformer1 should have transformed request into transformedRequest1", this.transformedRequest1,
+			this.httpRequestCaptor.getValue());
 	}
 
 	@Test
 	public void testTwoTransformers() throws Exception {
-		List<LoadBalancerRequestTransformer> transformers = Arrays.asList(transformer1, transformer2);
-		when(transformer1.transformRequest(any(ServiceRequestWrapper.class), eq(instance))).thenReturn(transformedRequest1);
-		when(transformer2.transformRequest(transformedRequest1, instance))
-				.thenReturn(transformedRequest2);
+		List<LoadBalancerRequestTransformer> transformers = Arrays
+			.asList(this.transformer1, this.transformer2);
+		when(this.transformer1
+			.transformRequest(any(ServiceRequestWrapper.class), eq(this.instance)))
+			.thenReturn(this.transformedRequest1);
+		when(this.transformer2.transformRequest(this.transformedRequest1, this.instance))
+			.thenReturn(this.transformedRequest2);
 
 		executeLbRequest(transformers);
 
-		verify(execution).execute(httpRequestCaptor.capture(), eq(body));
+		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
 		assertEquals("transformer2 should have transformed transformedRequest1 into transformedRequest2",
-				transformedRequest2,
-				httpRequestCaptor.getValue());
+			this.transformedRequest2,
+			this.httpRequestCaptor.getValue());
 	}
 
 	private void executeLbRequest(List<LoadBalancerRequestTransformer> transformers) throws Exception {
-		LoadBalancerRequestFactory lbReqFactory = new LoadBalancerRequestFactory(loadBalancer, transformers);
-		LoadBalancerRequest<ClientHttpResponse> lbRequest = lbReqFactory.createRequest(request, body, execution);
-		lbRequest.apply(instance);
+		LoadBalancerRequestFactory lbReqFactory = new LoadBalancerRequestFactory(this.loadBalancer, transformers);
+		LoadBalancerRequest<ClientHttpResponse> lbRequest = lbReqFactory
+			.createRequest(this.request, this.body, this.execution);
+		lbRequest.apply(this.instance);
 	}
 
 }

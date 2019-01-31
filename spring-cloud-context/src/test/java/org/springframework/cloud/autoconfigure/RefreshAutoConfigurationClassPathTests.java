@@ -2,6 +2,7 @@ package org.springframework.cloud.autoconfigure;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -17,21 +18,25 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Spencer Gibb
  */
 @RunWith(ModifiedClassPathRunner.class)
-@ClassPathExclusions({"spring-boot-actuator-*.jar", "spring-boot-starter-actuator-*.jar"})
+@ClassPathExclusions({ "spring-boot-actuator-*.jar",
+		"spring-boot-starter-actuator-*.jar" })
 public class RefreshAutoConfigurationClassPathTests {
+
+	private static ConfigurableApplicationContext getApplicationContext(
+			Class<?> configuration, String... properties) {
+		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE)
+				.properties(properties).run();
+	}
 
 	@Test
 	public void refreshEventListenerCreated() {
 		try (ConfigurableApplicationContext context = getApplicationContext(
 				Config.class)) {
-			assertThat(context.getBeansOfType(RefreshEventListener.class)).as("RefreshEventListeners not created").isNotEmpty();
-			assertThat(context.containsBean("refreshEndpoint")).as("refreshEndpoint created").isFalse();
+			assertThat(context.getBeansOfType(RefreshEventListener.class))
+					.as("RefreshEventListeners not created").isNotEmpty();
+			assertThat(context.containsBean("refreshEndpoint"))
+					.as("refreshEndpoint created").isFalse();
 		}
-	}
-
-	private static ConfigurableApplicationContext getApplicationContext(
-			Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE).properties(properties).run();
 	}
 
 	@Configuration
@@ -39,4 +44,5 @@ public class RefreshAutoConfigurationClassPathTests {
 	static class Config {
 
 	}
+
 }

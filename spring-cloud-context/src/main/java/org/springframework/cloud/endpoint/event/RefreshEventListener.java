@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.endpoint.event;
 
 import java.util.Set;
@@ -13,12 +29,17 @@ import org.springframework.context.event.SmartApplicationListener;
 
 /**
  * Calls {@link RefreshEventListener#refresh} when a {@link RefreshEvent} is received.
- * Only responds to {@link RefreshEvent} after receiving an {@link ApplicationReadyEvent}, as the RefreshEvents might come too early in the application lifecycle.
+ * Only responds to {@link RefreshEvent} after receiving an {@link ApplicationReadyEvent},
+ * as the RefreshEvents might come too early in the application lifecycle.
+ *
  * @author Spencer Gibb
  */
 public class RefreshEventListener implements SmartApplicationListener {
+
 	private static Log log = LogFactory.getLog(RefreshEventListener.class);
+
 	private ContextRefresher refresh;
+
 	private AtomicBoolean ready = new AtomicBoolean(false);
 
 	public RefreshEventListener(ContextRefresher refresh) {
@@ -35,7 +56,8 @@ public class RefreshEventListener implements SmartApplicationListener {
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof ApplicationReadyEvent) {
 			handle((ApplicationReadyEvent) event);
-		} else if (event instanceof RefreshEvent) {
+		}
+		else if (event instanceof RefreshEvent) {
 			handle((RefreshEvent) event);
 		}
 	}
@@ -51,4 +73,5 @@ public class RefreshEventListener implements SmartApplicationListener {
 			log.info("Refresh keys changed: " + keys);
 		}
 	}
+
 }

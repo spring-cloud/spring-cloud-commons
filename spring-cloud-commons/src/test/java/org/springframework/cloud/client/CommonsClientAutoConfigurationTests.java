@@ -1,6 +1,7 @@
 package org.springframework.cloud.client;
 
 import org.junit.Test;
+
 import org.springframework.beans.BeansException;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -30,12 +31,12 @@ public class CommonsClientAutoConfigurationTests {
 	public void beansCreatedNormally() {
 		try (ConfigurableApplicationContext ctxt = init()) {
 			assertThat(ctxt.getBean(DiscoveryClientHealthIndicator.class),
-					is(notNullValue()));
+				is(notNullValue()));
 			assertThat(ctxt.getBean(DiscoveryCompositeHealthIndicator.class),
-					is(notNullValue()));
+				is(notNullValue()));
 			assertThat(ctxt.getBean(FeaturesEndpoint.class), is(notNullValue()));
 			assertThat(ctxt.getBeansOfType(HasFeatures.class).values(),
-					not(emptyCollectionOf(HasFeatures.class)));
+				not(emptyCollectionOf(HasFeatures.class)));
 		}
 	}
 
@@ -44,7 +45,8 @@ public class CommonsClientAutoConfigurationTests {
 		try (ConfigurableApplicationContext ctxt = init("spring.cloud.discovery.enabled=false")) {
 			assertBeanNonExistant(ctxt, DiscoveryClientHealthIndicator.class);
 			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthIndicator.class);
-			assertThat(ctxt.getBean(FeaturesEndpoint.class), is(notNullValue())); // features actuator is independent of discovery
+			assertThat(ctxt
+				.getBean(FeaturesEndpoint.class), is(notNullValue())); // features actuator is independent of discovery
 			assertBeanNonExistant(ctxt, HasFeatures.class);
 		}
 	}
@@ -52,9 +54,9 @@ public class CommonsClientAutoConfigurationTests {
 	@Test
 	public void disableAllIndividually() {
 		try (ConfigurableApplicationContext ctxt = init(
-				"spring.cloud.discovery.client.health-indicator.enabled=false",
-				"spring.cloud.discovery.client.composite-indicator.enabled=false",
-				"spring.cloud.features.enabled=false")) {
+			"spring.cloud.discovery.client.health-indicator.enabled=false",
+			"spring.cloud.discovery.client.composite-indicator.enabled=false",
+			"spring.cloud.features.enabled=false")) {
 			assertBeanNonExistant(ctxt, DiscoveryClientHealthIndicator.class);
 			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthIndicator.class);
 			assertBeanNonExistant(ctxt, FeaturesEndpoint.class);
@@ -64,14 +66,14 @@ public class CommonsClientAutoConfigurationTests {
 	@Test
 	public void disableHealthIndicator() {
 		try (ConfigurableApplicationContext ctxt = init(
-				"spring.cloud.discovery.client.health-indicator.enabled=false")) {
+			"spring.cloud.discovery.client.health-indicator.enabled=false")) {
 			assertBeanNonExistant(ctxt, DiscoveryClientHealthIndicator.class);
 			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthIndicator.class);
 		}
 	}
 
 	private void assertBeanNonExistant(ConfigurableApplicationContext ctxt,
-			Class<?> beanClass) {
+		Class<?> beanClass) {
 		try {
 			ctxt.getBean(beanClass);
 			fail("Bean of type " + beanClass + " should not have been created");
@@ -82,8 +84,9 @@ public class CommonsClientAutoConfigurationTests {
 	}
 
 	protected ConfigurableApplicationContext init(String... pairs) {
-		return new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(Config.class)
-				.properties(pairs).run();
+		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.sources(Config.class)
+			.properties(pairs).run();
 	}
 
 	@Configuration

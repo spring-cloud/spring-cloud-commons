@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,11 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = { "spring.application.name=service0",
+@SpringBootTest(properties = {"spring.application.name=service0",
 		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s1-1:8080",
 		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s1-2:8443",
 		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s2-1:8080",
-		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s2-2:443" })
+		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s2-2:443"})
 public class SimpleDiscoveryClientPropertiesMappingTests {
 
 	@Autowired

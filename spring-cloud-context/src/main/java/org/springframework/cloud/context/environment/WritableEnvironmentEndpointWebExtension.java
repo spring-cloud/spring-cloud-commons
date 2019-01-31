@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.environment;
 
 import java.util.Collections;
@@ -26,9 +27,9 @@ import org.springframework.boot.actuate.env.EnvironmentEndpointWebExtension;
 /**
  * MVC endpoint for the {@link EnvironmentManager}, providing a POST to /env as a simple
  * way to change the Environment.
- * 
+ *
  * @author Dave Syer
- * 
+ *
  */
 @EndpointWebExtension(endpoint = WritableEnvironmentEndpoint.class)
 public class WritableEnvironmentEndpointWebExtension
@@ -44,13 +45,13 @@ public class WritableEnvironmentEndpointWebExtension
 
 	@WriteOperation
 	public Object write(String name, String value) {
-		environment.setProperty(name, value);
+		this.environment.setProperty(name, value);
 		return Collections.singletonMap(name, value);
 	}
 
 	@DeleteOperation
 	public Map<String, Object> reset() {
-		return environment.reset();
+		return this.environment.reset();
 	}
 
 	public void setEnvironmentManager(EnvironmentManager environment) {

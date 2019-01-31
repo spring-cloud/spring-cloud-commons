@@ -145,11 +145,28 @@ public class RefreshScopeIntegrationTests {
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 
 		private volatile static int initCount = 0;
+
 		private volatile static int destroyCount = 0;
+
 		private volatile static RefreshScopeRefreshedEvent event;
 
 		private String message = null;
+
 		private volatile long delay = 0;
+
+		public static void reset() {
+			initCount = 0;
+			destroyCount = 0;
+			event = null;
+		}
+
+		public static int getInitCount() {
+			return initCount;
+		}
+
+		public static int getDestroyCount() {
+			return destroyCount;
+		}
 
 		public void setDelay(long delay) {
 			this.delay = delay;
@@ -168,25 +185,6 @@ public class RefreshScopeIntegrationTests {
 			this.message = null;
 		}
 
-		public static void reset() {
-			initCount = 0;
-			destroyCount = 0;
-			event = null;
-		}
-
-		public static int getInitCount() {
-			return initCount;
-		}
-
-		public static int getDestroyCount() {
-			return destroyCount;
-		}
-
-		public void setMessage(String message) {
-			logger.debug("Setting message: " + message);
-			this.message = message;
-		}
-
 		@Override
 		public String getMessage() {
 			logger.debug("Getting message: " + this.message);
@@ -200,6 +198,11 @@ public class RefreshScopeIntegrationTests {
 			return this.message;
 		}
 
+		public void setMessage(String message) {
+			logger.debug("Setting message: " + message);
+			this.message = message;
+		}
+
 		@Override
 		public String throwsException() throws ServiceException {
 			throw new ServiceException();
@@ -209,10 +212,13 @@ public class RefreshScopeIntegrationTests {
 		public void onApplicationEvent(RefreshScopeRefreshedEvent e) {
 			event = e;
 		}
+
 	}
 
 	@SuppressWarnings("serial")
-	public static class ServiceException extends Exception {}
+	public static class ServiceException extends Exception {
+
+	}
 
 	@Configuration
 	@EnableConfigurationProperties(TestProperties.class)
@@ -236,7 +242,9 @@ public class RefreshScopeIntegrationTests {
 	@ConfigurationProperties
 	@ManagedResource
 	protected static class TestProperties {
+
 		private String message;
+
 		private int delay;
 
 		@ManagedAttribute
@@ -256,6 +264,7 @@ public class RefreshScopeIntegrationTests {
 		public void setDelay(int delay) {
 			this.delay = delay;
 		}
+
 	}
 
 }

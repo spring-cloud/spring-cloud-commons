@@ -1,12 +1,13 @@
 package org.springframework.cloud.commons.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.mock.env.MockEnvironment;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Spencer Gibb
@@ -56,9 +57,9 @@ public class IdUtilsTests {
 	@Test
 	public void hostnameAndAppNameWorks() {
 		this.env.setProperty("spring.application.name", DEFAULT_ID);
-		this.env.setProperty("spring.cloud.client.hostname", DEFAULT_ID+"2");
+		this.env.setProperty("spring.cloud.client.hostname", DEFAULT_ID + "2");
 		String instanceId = IdUtils.getDefaultInstanceId(this.env);
-		assertEquals("instanceId was wrong", DEFAULT_ID+"2"+":"+DEFAULT_ID, instanceId);
+		assertEquals("instanceId was wrong", DEFAULT_ID + "2" + ":" + DEFAULT_ID, instanceId);
 	}
 
 	@Test
@@ -80,7 +81,7 @@ public class IdUtilsTests {
 		this.env.setProperty("spring.application.name", DEFAULT_ID);
 		this.env.setProperty("server.port", "80");
 		String instanceId = IdUtils.getDefaultInstanceId(this.env);
-		assertEquals("instanceId was wrong", DEFAULT_ID+":80", instanceId);
+		assertEquals("instanceId was wrong", DEFAULT_ID + ":80", instanceId);
 	}
 
 	@Test
@@ -89,7 +90,7 @@ public class IdUtilsTests {
 		this.env.setProperty("spring.application.name", DEFAULT_ID);
 		this.env.setProperty("server.port", "80");
 		String instanceId = IdUtils.getDefaultInstanceId(this.env);
-		assertEquals("instanceId was wrong", "myhost:"+DEFAULT_ID+":80", instanceId);
+		assertEquals("instanceId was wrong", "myhost:" + DEFAULT_ID + ":80", instanceId);
 	}
 
 }

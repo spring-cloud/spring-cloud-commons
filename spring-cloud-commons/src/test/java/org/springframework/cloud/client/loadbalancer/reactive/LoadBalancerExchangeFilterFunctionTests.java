@@ -9,6 +9,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -55,14 +56,14 @@ public class LoadBalancerExchangeFilterFunctionTests {
 		SimpleServiceInstance instance = new SimpleServiceInstance();
 		instance.setServiceId("testservice");
 		instance.setUri(URI.create("http://localhost:" + this.port));
-		properties.getInstances().put("testservice", Arrays.asList(instance));
+		this.properties.getInstances().put("testservice", Arrays.asList(instance));
 	}
 
 	@Test
 	public void testFilterFunctionWorks() {
 		String value = WebClient.builder()
 				.baseUrl("http://testservice")
-				.filter(lbFunction)
+				.filter(this.lbFunction)
 				.build()
 				.get()
 				.uri("/hello")
@@ -75,7 +76,7 @@ public class LoadBalancerExchangeFilterFunctionTests {
 	public void testNoInstance() {
 		ClientResponse clientResponse = WebClient.builder()
 				.baseUrl("http://foobar")
-				.filter(lbFunction)
+				.filter(this.lbFunction)
 				.build()
 				.get().exchange().block();
 		assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
@@ -85,7 +86,7 @@ public class LoadBalancerExchangeFilterFunctionTests {
 	public void testNoHostName() {
 		ClientResponse clientResponse = WebClient.builder()
 				.baseUrl("http:///foobar")
-				.filter(lbFunction)
+				.filter(this.lbFunction)
 				.build()
 				.get().exchange().block();
 		assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -128,11 +129,12 @@ public class LoadBalancerExchangeFilterFunctionTests {
 
 				@Override
 				public ServiceInstance choose(String serviceId) {
-					List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
-					if(instances.size() == 0) {
+					List<ServiceInstance> instances = discoveryClient
+							.getInstances(serviceId);
+					if (instances.size() == 0) {
 						return null;
 					}
-					int instanceIdx = random.nextInt(instances.size());
+					int instanceIdx = this.random.nextInt(instances.size());
 					return instances.get(instanceIdx);
 				}
 			};

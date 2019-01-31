@@ -1,15 +1,19 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package org.springframework.cloud.configuration;
 
 import java.util.HashMap;
@@ -24,7 +28,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.util.StringUtils;
 
 /**
- * Verifies if Spring Boot has proper version
+ * Verifies if Spring Boot has proper version.
  */
 class SpringBootVersionVerifier implements CompatibilityVerifier {
 
@@ -65,7 +69,8 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			public boolean isCompatible() {
 				try {
 					// deprecated 1.5
-					Class.forName("org.springframework.boot.context.config.ResourceNotFoundException");
+					Class
+						.forName("org.springframework.boot.context.config.ResourceNotFoundException");
 					return true;
 				}
 				catch (ClassNotFoundException e) {
@@ -128,7 +133,6 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 					return false;
 				}
 
-
 			}
 		};
 	}
@@ -136,29 +140,32 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 	private String errorDescription() {
 		String versionFromManifest = getVersionFromManifest();
 		if (StringUtils.hasText(versionFromManifest)) {
-			return String.format("Spring Boot [%s] is not compatible with this Spring Cloud release train", versionFromManifest);
+			return String
+				.format("Spring Boot [%s] is not compatible with this Spring Cloud release train", versionFromManifest);
 		}
 		return "Spring Boot is not compatible with this Spring Cloud release train";
 	}
 
 	private String action() {
-		return String.format("Change Spring Boot version to one of the following versions %s .\n"
-						+ "You can find the latest Spring Boot versions here [%s]. \n"
-						+ "If you want to learn more about the Spring Cloud Release train compatibility, you "
-						+ "can visit this page [%s] and check the [Release Trains] section.\n"
-						+ "If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]",
-				this.acceptedVersions, "https://spring.io/projects/spring-boot#learn", "https://spring.io/projects/spring-cloud#overview");
+		return String
+			.format("Change Spring Boot version to one of the following versions %s .\n"
+					+ "You can find the latest Spring Boot versions here [%s]. \n"
+					+ "If you want to learn more about the Spring Cloud Release train compatibility, you "
+					+ "can visit this page [%s] and check the [Release Trains] section.\n"
+					+ "If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]",
+				this.acceptedVersions,
+				"https://spring.io/projects/spring-boot#learn", "https://spring.io/projects/spring-cloud#overview");
 	}
 
 	private boolean springBootVersionMatches() {
-		for (String acceptedVersion : acceptedVersions) {
+		for (String acceptedVersion : this.acceptedVersions) {
 			if (bootVersionFromManifest(acceptedVersion)) {
 				return true;
 			}
 			else {
 				// 2.0, 2.1
-				CompatibilityPredicate predicate = ACCEPTED_VERSIONS.get(
-						acceptedVersionWithoutX(acceptedVersion));
+				CompatibilityPredicate predicate = this.ACCEPTED_VERSIONS.get(
+					acceptedVersionWithoutX(acceptedVersion));
 				if (predicate != null && predicate.isCompatible()) {
 					if (log.isDebugEnabled()) {
 						log.debug("Predicate [" + predicate + "] was matched");

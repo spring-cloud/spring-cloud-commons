@@ -25,7 +25,7 @@ import org.springframework.cloud.context.scope.ScopeCache;
 
 /**
  * @author Dave Syer
- * 
+ *
  */
 public class ThreadLocalScopeCache implements ScopeCache {
 
@@ -36,23 +36,23 @@ public class ThreadLocalScopeCache implements ScopeCache {
 	};
 
 	public Object remove(String name) {
-		return data.get().remove(name);
+		return this.data.get().remove(name);
 	}
 
 	public Collection<Object> clear() {
-		ConcurrentMap<String, Object> map = data.get();
+		ConcurrentMap<String, Object> map = this.data.get();
 		Collection<Object> values = new ArrayList<Object>(map.values());
 		map.clear();
 		return values;
 	}
 
 	public Object get(String name) {
-		return data.get().get(name);
+		return this.data.get().get(name);
 	}
 
 	public Object put(String name, Object value) {
-		Object result = data.get().putIfAbsent(name, value);
-		if (result!=null) {
+		Object result = this.data.get().putIfAbsent(name, value);
+		if (result != null) {
 			return result;
 		}
 		return value;

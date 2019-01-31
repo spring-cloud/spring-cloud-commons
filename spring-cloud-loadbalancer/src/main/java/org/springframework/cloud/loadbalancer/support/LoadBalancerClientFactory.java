@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,14 @@ import org.springframework.core.env.Environment;
  */
 public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerClientSpecification> {
 
+	/**
+	 * Property source name for load balancer.
+	 */
 	public static final String NAMESPACE = "loadbalancer";
+
+	/**
+	 * Property for client name within the load balancer namespace.
+	 */
 	public static final String PROPERTY_NAME = NAMESPACE + ".client.name";
 
 	public LoadBalancerClientFactory() {

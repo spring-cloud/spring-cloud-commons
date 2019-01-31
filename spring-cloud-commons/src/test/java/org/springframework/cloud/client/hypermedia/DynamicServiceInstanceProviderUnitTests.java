@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
@@ -37,11 +38,13 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class DynamicServiceInstanceProviderUnitTests {
 
-	@Mock DiscoveryClient client;
+	@Mock
+	DiscoveryClient client;
 
 	@Test
 	public void returnsNoServiceInCaseNoneIsAvailable() {
-		assertThat(new DynamicServiceInstanceProvider(client, "service").getServiceInstance(), is(nullValue()));
+		assertThat(new DynamicServiceInstanceProvider(this.client, "service")
+			.getServiceInstance(), is(nullValue()));
 	}
 
 	@Test
@@ -50,8 +53,9 @@ public class DynamicServiceInstanceProviderUnitTests {
 		ServiceInstance first = mock(ServiceInstance.class);
 		ServiceInstance second = mock(ServiceInstance.class);
 
-		when(client.getInstances(anyString())).thenReturn(Arrays.asList(first, second));
+		when(this.client.getInstances(anyString())).thenReturn(Arrays.asList(first, second));
 
-		assertThat(new DynamicServiceInstanceProvider(client, "service").getServiceInstance(), is(first));
+		assertThat(new DynamicServiceInstanceProvider(this.client, "service")
+			.getServiceInstance(), is(first));
 	}
 }

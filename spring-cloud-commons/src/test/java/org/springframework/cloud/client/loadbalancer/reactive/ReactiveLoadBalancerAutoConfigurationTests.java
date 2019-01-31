@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,8 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 
 	@SuppressWarnings("unchecked")
 	private List<ExchangeFilterFunction> getFilters(WebClient.Builder builder) {
-		return (List<ExchangeFilterFunction>) ReflectionTestUtils.getField(builder, "filters");
+		return (List<ExchangeFilterFunction>) ReflectionTestUtils
+				.getField(builder, "filters");
 	}
 
 	@Test
@@ -123,7 +124,9 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		}
 
 		@Bean
-		LoadBalancedRetryFactory loadBalancedRetryFactory() {return new LoadBalancedRetryFactory(){};}
+		LoadBalancedRetryFactory loadBalancedRetryFactory() {
+			return new LoadBalancedRetryFactory() { };
+		}
 
 	}
 
@@ -172,7 +175,8 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -181,7 +185,8 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}

@@ -3,6 +3,7 @@ package org.springframework.cloud.client.loadbalancer;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.backoff.NoBackOffPolicy;
@@ -28,9 +29,11 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 	@Test
 	public void testDefaultBackOffPolicy() throws Exception {
 		ConfigurableApplicationContext context = init(OneRestTemplate.class);
-		LoadBalancedRetryFactory loadBalancedRetryFactory = context.getBean(LoadBalancedRetryFactory.class);
+		LoadBalancedRetryFactory loadBalancedRetryFactory = context
+			.getBean(LoadBalancedRetryFactory.class);
 		assertThat(loadBalancedRetryFactory, is(instanceOf(LoadBalancedRetryFactory.class)));
-		assertThat(loadBalancedRetryFactory.createBackOffPolicy("foo"), is(instanceOf(NoBackOffPolicy.class)));
+		assertThat(loadBalancedRetryFactory
+			.createBackOffPolicy("foo"), is(instanceOf(NoBackOffPolicy.class)));
 	}
 }
 

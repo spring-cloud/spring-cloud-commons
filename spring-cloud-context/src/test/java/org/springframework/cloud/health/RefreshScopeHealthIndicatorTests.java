@@ -38,19 +38,20 @@ public class RefreshScopeHealthIndicatorTests {
 
 	@SuppressWarnings("unchecked")
 	private ObjectProvider<RefreshScope> scopeProvider = mock(ObjectProvider.class);
-	private ConfigurationPropertiesRebinder rebinder =
-			mock(ConfigurationPropertiesRebinder.class);
+
+	private ConfigurationPropertiesRebinder rebinder = mock(
+			ConfigurationPropertiesRebinder.class);
+
 	private RefreshScope scope = mock(RefreshScope.class);
+
 	private RefreshScopeHealthIndicator indicator = new RefreshScopeHealthIndicator(
 			this.scopeProvider, this.rebinder);
 
 	@Before
 	public void init() {
-		BDDMockito.willReturn(scope).given(scopeProvider).getIfAvailable();
-		when(this.rebinder.getErrors())
-				.thenReturn(Collections.emptyMap());
-		when(this.scope.getErrors())
-				.thenReturn(Collections.emptyMap());
+		BDDMockito.willReturn(this.scope).given(this.scopeProvider).getIfAvailable();
+		when(this.rebinder.getErrors()).thenReturn(Collections.emptyMap());
+		when(this.scope.getErrors()).thenReturn(Collections.emptyMap());
 	}
 
 	@Test
@@ -60,24 +61,24 @@ public class RefreshScopeHealthIndicatorTests {
 
 	@Test
 	public void binderError() {
-		when(this.rebinder.getErrors()).thenReturn(Collections
-				.singletonMap("foo", new RuntimeException("FOO")));
+		when(this.rebinder.getErrors())
+				.thenReturn(Collections.singletonMap("foo", new RuntimeException("FOO")));
 		assertEquals(Status.DOWN, this.indicator.health().getStatus());
 	}
 
 	@Test
 	public void scopeError() {
-		when(this.scope.getErrors()).thenReturn(Collections
-				.singletonMap("foo", new RuntimeException("FOO")));
+		when(this.scope.getErrors())
+				.thenReturn(Collections.singletonMap("foo", new RuntimeException("FOO")));
 		assertEquals(Status.DOWN, this.indicator.health().getStatus());
 	}
 
 	@Test
 	public void bothError() {
-		when(this.rebinder.getErrors()).thenReturn(Collections
-				.singletonMap("foo", new RuntimeException("FOO")));
-		when(this.scope.getErrors()).thenReturn(Collections
-				.singletonMap("bar", new RuntimeException("BAR")));
+		when(this.rebinder.getErrors())
+				.thenReturn(Collections.singletonMap("foo", new RuntimeException("FOO")));
+		when(this.scope.getErrors())
+				.thenReturn(Collections.singletonMap("bar", new RuntimeException("BAR")));
 		assertEquals(Status.DOWN, this.indicator.health().getStatus());
 	}
 

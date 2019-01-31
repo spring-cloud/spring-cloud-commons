@@ -38,6 +38,7 @@ public @interface EnableDiscoveryClient {
 
 	/**
 	 * If true, the ServiceRegistry will automatically register the local server.
+	 * @return - {@code true} if you want to automatically register.
 	 */
 	boolean autoRegister() default true;
 }

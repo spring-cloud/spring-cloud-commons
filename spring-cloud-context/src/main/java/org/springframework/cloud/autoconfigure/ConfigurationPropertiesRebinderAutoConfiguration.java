@@ -29,6 +29,11 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Auto-configuration for {@link ConfigurationPropertiesRebinder}.
+ *
+ * @author Dave Syer
+ */
 @Configuration
 @ConditionalOnBean(ConfigurationPropertiesBindingPostProcessor.class)
 public class ConfigurationPropertiesRebinderAutoConfiguration
@@ -50,7 +55,7 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 		// choice).
 		ConfigurationBeanFactoryMetadata metaData = this.context.getBean(
 				ConfigurationBeanFactoryMetadata.BEAN_NAME,
-						ConfigurationBeanFactoryMetadata.class);
+				ConfigurationBeanFactoryMetadata.class);
 		ConfigurationPropertiesBeans beans = new ConfigurationPropertiesBeans();
 		beans.setBeanMetaDataStore(metaData);
 		return beans;
@@ -75,11 +80,12 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 		if (this.context.getParent() != null) {
 			// TODO: make this optional? (E.g. when creating child contexts that prefer to
 			// be isolated.)
-			ConfigurationPropertiesRebinder rebinder = context
+			ConfigurationPropertiesRebinder rebinder = this.context
 					.getBean(ConfigurationPropertiesRebinder.class);
-			for (String name : context.getParent().getBeanDefinitionNames()) {
+			for (String name : this.context.getParent().getBeanDefinitionNames()) {
 				rebinder.rebind(name);
 			}
 		}
 	}
+
 }

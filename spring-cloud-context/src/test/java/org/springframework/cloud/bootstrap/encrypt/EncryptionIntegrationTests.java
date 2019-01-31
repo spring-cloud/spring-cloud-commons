@@ -1,6 +1,7 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
 import org.junit.Test;
+
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -40,14 +41,17 @@ public class EncryptionIntegrationTests {
 
 	@ConfigurationProperties("foo")
 	protected static class PasswordProperties {
+
 		private String password;
 
 		public String getPassword() {
-			return password;
+			return this.password;
 		}
 
 		public void setPassword(String password) {
 			this.password = password;
 		}
+
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.web.server.LocalManagementPort;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -32,7 +33,6 @@ import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.Matchers.instanceOf;
@@ -49,18 +49,15 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AbstractAutoServiceRegistrationTests.Config.class,
-		properties = "management.port=0", webEnvironment = RANDOM_PORT)
+	properties = "management.port=0", webEnvironment = RANDOM_PORT)
 public class AbstractAutoServiceRegistrationTests {
 
 	@Autowired
+	public PostEventListener postEventListener;
+	@Autowired
 	private TestAutoServiceRegistration autoRegistration;
-
 	@Autowired
 	private PreEventListener preEventListener;
-
-	@Autowired
-	public PostEventListener postEventListener;
-
 	@LocalServerPort
 	private int port;
 
@@ -69,22 +66,26 @@ public class AbstractAutoServiceRegistrationTests {
 
 	@Test
 	public void portsWork() {
-		assertNotEquals("Lifecycle port is zero", 0, autoRegistration.getPort().get());
-		assertNotEquals("Lifecycle port is management port", managementPort, autoRegistration.getPort().get());
-		assertEquals("Lifecycle port is wrong", port, autoRegistration.getPort().get());
-		assertTrue("Lifecycle not running", autoRegistration.isRunning());
-		assertThat("ServiceRegistry is wrong type", autoRegistration.getServiceRegistry(), is(instanceOf(TestServiceRegistry.class)));
-		TestServiceRegistry serviceRegistry = (TestServiceRegistry) autoRegistration.getServiceRegistry();
+		assertNotEquals("Lifecycle port is zero", 0, this.autoRegistration.getPort().get());
+		assertNotEquals("Lifecycle port is management port", this.managementPort, this.autoRegistration
+			.getPort().get());
+		assertEquals("Lifecycle port is wrong", this.port, this.autoRegistration.getPort().get());
+		assertTrue("Lifecycle not running", this.autoRegistration.isRunning());
+		assertThat("ServiceRegistry is wrong type", this.autoRegistration
+			.getServiceRegistry(), is(instanceOf(TestServiceRegistry.class)));
+		TestServiceRegistry serviceRegistry = (TestServiceRegistry) this.autoRegistration
+			.getServiceRegistry();
 		assertTrue("Lifecycle not registered", serviceRegistry.isRegistered());
-		assertEquals("Lifecycle appName is wrong", "application", autoRegistration.getAppName());
+		assertEquals("Lifecycle appName is wrong", "application", this.autoRegistration
+			.getAppName());
 	}
 
 	@Test
 	public void eventsFireTest() {
-		assertTrue(preEventListener.wasFired);
-		assertEquals("testRegistration2", preEventListener.registration.getServiceId());
-		assertTrue(postEventListener.wasFired);
-		assertEquals("testRegistration2", postEventListener.config.getServiceId());
+		assertTrue(this.preEventListener.wasFired);
+		assertEquals("testRegistration2", this.preEventListener.registration.getServiceId());
+		assertTrue(this.postEventListener.wasFired);
+		assertEquals("testRegistration2", this.postEventListener.config.getServiceId());
 	}
 
 	@EnableAutoConfiguration
@@ -109,6 +110,7 @@ public class AbstractAutoServiceRegistrationTests {
 	public static class PreEventListener implements ApplicationListener<InstancePreRegisteredEvent> {
 		public boolean wasFired = false;
 		public Registration registration;
+
 		@Override
 		public void onApplicationEvent(InstancePreRegisteredEvent event) {
 			this.registration = event.getRegistration();
@@ -119,9 +121,10 @@ public class AbstractAutoServiceRegistrationTests {
 	public static class PostEventListener implements ApplicationListener<InstanceRegisteredEvent> {
 		public boolean wasFired = false;
 		public Registration config;
+
 		@Override
 		public void onApplicationEvent(InstanceRegisteredEvent event) {
-			this.config = (Registration)event.getConfig();
+			this.config = (Registration) event.getConfig();
 			this.wasFired = true;
 		}
 	}
@@ -195,7 +198,8 @@ public class AbstractAutoServiceRegistrationTests {
 		}
 
 		@Override
-		public void close() { }
+		public void close() {
+		}
 
 		@Override
 		public void setStatus(TestRegistration registration, String status) {
@@ -209,11 +213,11 @@ public class AbstractAutoServiceRegistrationTests {
 		}
 
 		boolean isRegistered() {
-			return registered;
+			return this.registered;
 		}
 
 		boolean isDeregistered() {
-			return deregistered;
+			return this.deregistered;
 		}
 	}
 
@@ -222,6 +226,10 @@ public class AbstractAutoServiceRegistrationTests {
 
 		public TestAutoServiceRegistration(AutoServiceRegistrationProperties properties) {
 			super(null, properties);
+		}
+
+		protected TestAutoServiceRegistration() {
+			super(new TestServiceRegistry());
 		}
 
 		@Override
@@ -234,12 +242,8 @@ public class AbstractAutoServiceRegistrationTests {
 			return super.getAppName();
 		}
 
-		protected TestAutoServiceRegistration() {
-			super(new TestServiceRegistry());
-		}
-
 		protected int getConfiguredPort() {
-			return port;
+			return this.port;
 		}
 
 		protected void setConfiguredPort(int port) {
@@ -265,7 +269,6 @@ public class AbstractAutoServiceRegistrationTests {
 		protected boolean isEnabled() {
 			return true;
 		}
-
 
 	}
 }

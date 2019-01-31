@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.context.scope.refresh;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -31,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,17 +45,21 @@ import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ObjectUtils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
-// , properties="logging.level.org.springframework.cloud.context.scope.refresh.RefreshScopePureScaleTests=DEBUG")
+// ,
+// properties="logging.level.org.springframework.cloud.context.scope.refresh.RefreshScopePureScaleTests=DEBUG")
 public class RefreshScopePureScaleTests {
 
 	private static Log logger = LogFactory.getLog(RefreshScopePureScaleTests.class);
 
-	private ExecutorService executor = Executors.newFixedThreadPool(8);
-
 	@Autowired
 	org.springframework.cloud.context.scope.refresh.RefreshScope scope;
+
+	private ExecutorService executor = Executors.newFixedThreadPool(8);
 
 	@Autowired
 	private ExampleService service;
@@ -91,7 +93,8 @@ public class RefreshScopePureScaleTests {
 				public void run() {
 					logger.debug("Refreshing.");
 					RefreshScopePureScaleTests.this.scope.refreshAll();
-				}});
+				}
+			});
 		}
 		assertTrue(latch.await(15000, TimeUnit.MILLISECONDS));
 		assertEquals("Foo", this.service.getMessage());
@@ -112,6 +115,7 @@ public class RefreshScopePureScaleTests {
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 
 		private String message = null;
+
 		private volatile long delay = 0;
 
 		public void setDelay(long delay) {
@@ -120,31 +124,36 @@ public class RefreshScopePureScaleTests {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
-			logger.debug("Initializing: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
+			logger.debug("Initializing: " + ObjectUtils.getIdentityHexString(this) + ", "
+					+ this.message);
 			try {
 				Thread.sleep(this.delay);
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			logger.debug("Initialized: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
+			logger.debug("Initialized: " + ObjectUtils.getIdentityHexString(this) + ", "
+					+ this.message);
 		}
 
 		@Override
 		public void destroy() throws Exception {
-			logger.debug("Destroying message: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
+			logger.debug("Destroying message: " + ObjectUtils.getIdentityHexString(this)
+					+ ", " + this.message);
 			this.message = null;
-		}
-
-		public void setMessage(String message) {
-			logger.debug("Setting message: " + ObjectUtils.getIdentityHexString(this) + ", " + message);
-			this.message = message;
 		}
 
 		@Override
 		public String getMessage() {
-			logger.debug("Returning message: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
+			logger.debug("Returning message: " + ObjectUtils.getIdentityHexString(this)
+					+ ", " + this.message);
 			return this.message;
+		}
+
+		public void setMessage(String message) {
+			logger.debug("Setting message: " + ObjectUtils.getIdentityHexString(this)
+					+ ", " + message);
+			this.message = message;
 		}
 
 	}

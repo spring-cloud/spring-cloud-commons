@@ -9,6 +9,7 @@ import java.util.Map;
 import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -44,7 +45,7 @@ public class ContextRefresherTests {
 			List<String> names = names(context.getEnvironment().getPropertySources());
 			assertThat(names).doesNotContain(
 					"applicationConfig: [classpath:/bootstrap-refresh.properties]");
-			ContextRefresher refresher = new ContextRefresher(context, scope);
+			ContextRefresher refresher = new ContextRefresher(context, this.scope);
 			refresher.refresh();
 			names = names(context.getEnvironment().getPropertySources());
 			assertThat(names).contains(
@@ -67,7 +68,7 @@ public class ContextRefresherTests {
 			List<String> names = names(context.getEnvironment().getPropertySources());
 			System.err.println("***** " + context.getEnvironment().getPropertySources());
 			assertThat(names).doesNotContain("bootstrapProperties");
-			ContextRefresher refresher = new ContextRefresher(context, scope);
+			ContextRefresher refresher = new ContextRefresher(context, this.scope);
 			TestPropertyValues.of(
 					"spring.cloud.bootstrap.sources: org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
 					.applyTo(context.getEnvironment(), Type.MAP, "defaultProperties");
@@ -85,7 +86,7 @@ public class ContextRefresherTests {
 				ContextRefresherTests.class, "--spring.main.web-application-type=none",
 				"--debug=false", "--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh")) {
-			ContextRefresher refresher = new ContextRefresher(context, scope);
+			ContextRefresher refresher = new ContextRefresher(context, this.scope);
 			TestPropertyValues.of(
 					"spring.cloud.bootstrap.sources: org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
 					.applyTo(context);
@@ -111,7 +112,7 @@ public class ContextRefresherTests {
 				"--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh")) {
 			assertThat(system.getCount()).isEqualTo(4);
-			ContextRefresher refresher = new ContextRefresher(context, scope);
+			ContextRefresher refresher = new ContextRefresher(context, this.scope);
 			refresher.refresh();
 			assertThat(system.getCount()).isEqualTo(4);
 		}
@@ -122,20 +123,19 @@ public class ContextRefresherTests {
 
 		TestBootstrapConfiguration.fooSightings = new ArrayList<>();
 
-		try (ConfigurableApplicationContext context = SpringApplication.run(ContextRefresherTests.class,
-				"--spring.main.web-application-type=none", "--debug=false",
-				"--spring.main.bannerMode=OFF",
-				"--spring.cloud.bootstrap.name=refresh",
-				"--test.bootstrap.foo=bar")) {
+		try (ConfigurableApplicationContext context = SpringApplication.run(
+				ContextRefresherTests.class, "--spring.main.web-application-type=none",
+				"--debug=false", "--spring.main.bannerMode=OFF",
+				"--spring.cloud.bootstrap.name=refresh", "--test.bootstrap.foo=bar")) {
 			context.getEnvironment().setActiveProfiles("refresh");
-			ContextRefresher refresher = new ContextRefresher(context, scope);
+			ContextRefresher refresher = new ContextRefresher(context, this.scope);
 			refresher.refresh();
-			assertThat(TestBootstrapConfiguration.fooSightings).containsExactly("bar", "bar");
+			assertThat(TestBootstrapConfiguration.fooSightings).containsExactly("bar",
+					"bar");
 		}
 
 		TestBootstrapConfiguration.fooSightings = null;
 	}
-
 
 	private List<String> names(MutablePropertySources propertySources) {
 		List<String> list = new ArrayList<>();
@@ -147,6 +147,7 @@ public class ContextRefresherTests {
 
 	@Configuration
 	protected static class Empty {
+
 	}
 
 	@Configuration

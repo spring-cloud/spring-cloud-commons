@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.loadbalancer;
 
 import org.springframework.http.HttpRequest;
@@ -25,78 +26,89 @@ import org.springframework.retry.RetryPolicy;
  */
 public class InterceptorRetryPolicy implements RetryPolicy {
 
-    private HttpRequest request;
-    private LoadBalancedRetryPolicy policy;
-    private ServiceInstanceChooser serviceInstanceChooser;
-    private String serviceName;
+	private HttpRequest request;
+	private LoadBalancedRetryPolicy policy;
+	private ServiceInstanceChooser serviceInstanceChooser;
+	private String serviceName;
 
-    /**
-     * Creates a new retry policy.
-     * @param request The request that will be retried.
-     * @param policy The retry policy from the load balancer.
-     * @param serviceInstanceChooser The load balancer client.
-     * @param serviceName The name of the service.
-     */
-    public InterceptorRetryPolicy(HttpRequest request, LoadBalancedRetryPolicy policy,
-								  ServiceInstanceChooser serviceInstanceChooser, String serviceName) {
-        this.request = request;
-        this.policy = policy;
-        this.serviceInstanceChooser = serviceInstanceChooser;
-        this.serviceName = serviceName;
-    }
+	/**
+	 * Creates a new retry policy.
+	 * @param request The request that will be retried.
+	 * @param policy The retry policy from the load balancer.
+	 * @param serviceInstanceChooser The load balancer client.
+	 * @param serviceName The name of the service.
+	 */
+	public InterceptorRetryPolicy(HttpRequest request, LoadBalancedRetryPolicy policy,
+		ServiceInstanceChooser serviceInstanceChooser, String serviceName) {
+		this.request = request;
+		this.policy = policy;
+		this.serviceInstanceChooser = serviceInstanceChooser;
+		this.serviceName = serviceName;
+	}
 
-    @Override
-    public boolean canRetry(RetryContext context) {
-        LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext)context;
-        if(lbContext.getRetryCount() == 0  && lbContext.getServiceInstance() == null) {
-            //We haven't even tried to make the request yet so return true so we do
-            lbContext.setServiceInstance(serviceInstanceChooser.choose(serviceName));
-            return true;
-        }
-        return policy.canRetryNextServer(lbContext);
-    }
+	@Override
+	public boolean canRetry(RetryContext context) {
+		LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
+		if (lbContext.getRetryCount() == 0 && lbContext.getServiceInstance() == null) {
+			//We haven't even tried to make the request yet so return true so we do
+			lbContext.setServiceInstance(this.serviceInstanceChooser
+				.choose(this.serviceName));
+			return true;
+		}
+		return this.policy.canRetryNextServer(lbContext);
+	}
 
-    @Override
-    public RetryContext open(RetryContext parent) {
-        return new LoadBalancedRetryContext(parent, request);
-    }
-
-
-    @Override
-    public void close(RetryContext context) {
-        policy.close((LoadBalancedRetryContext)context);
-    }
+	@Override
+	public RetryContext open(RetryContext parent) {
+		return new LoadBalancedRetryContext(parent, this.request);
+	}
 
 
-    @Override
-    public void registerThrowable(RetryContext context, Throwable throwable) {
-        LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
-        //this is important as it registers the last exception in the context and also increases the retry count
-        lbContext.registerThrowable(throwable);
-        //let the policy know about the exception as well
-        policy.registerThrowable(lbContext, throwable);
-    }
+	@Override
+	public void close(RetryContext context) {
+		this.policy.close((LoadBalancedRetryContext) context);
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
 
-        InterceptorRetryPolicy that = (InterceptorRetryPolicy) o;
+	@Override
+	public void registerThrowable(RetryContext context, Throwable throwable) {
+		LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
+		//this is important as it registers the last exception in the context and also increases the retry count
+		lbContext.registerThrowable(throwable);
+		//let the policy know about the exception as well
+		this.policy.registerThrowable(lbContext, throwable);
+	}
 
-        if (!request.equals(that.request)) return false;
-        if (!policy.equals(that.policy)) return false;
-        if (!serviceInstanceChooser.equals(that.serviceInstanceChooser)) return false;
-        return serviceName.equals(that.serviceName);
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 
-    }
+		InterceptorRetryPolicy that = (InterceptorRetryPolicy) o;
 
-    @Override
-    public int hashCode() {
-        int result = request.hashCode();
-        result = 31 * result + policy.hashCode();
-        result = 31 * result + serviceInstanceChooser.hashCode();
-        result = 31 * result + serviceName.hashCode();
-        return result;
-    }
+		if (!this.request.equals(that.request)) {
+			return false;
+		}
+		if (!this.policy.equals(that.policy)) {
+			return false;
+		}
+		if (!this.serviceInstanceChooser.equals(that.serviceInstanceChooser)) {
+			return false;
+		}
+		return this.serviceName.equals(that.serviceName);
+
+	}
+
+	@Override
+	public int hashCode() {
+		int result = this.request.hashCode();
+		result = 31 * result + this.policy.hashCode();
+		result = 31 * result + this.serviceInstanceChooser.hashCode();
+		result = 31 * result + this.serviceName.hashCode();
+		return result;
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.bootstrap.encrypt;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ import org.springframework.util.StringUtils;
  */
 @Configuration
 @ConditionalOnClass({ TextEncryptor.class })
-@EnableConfigurationProperties({KeyProperties.class})
+@EnableConfigurationProperties({ KeyProperties.class })
 public class EncryptionBootstrapConfiguration {
 
 	@Autowired(required = false)
@@ -50,10 +51,21 @@ public class EncryptionBootstrapConfiguration {
 	@Autowired
 	private KeyProperties key;
 
+	@Bean
+	public EnvironmentDecryptApplicationInitializer environmentDecryptApplicationListener() {
+		if (this.encryptor == null) {
+			this.encryptor = new FailsafeTextEncryptor();
+		}
+		EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
+				this.encryptor);
+		listener.setFailOnError(this.key.isFailOnError());
+		return listener;
+	}
+
 	@Configuration
 	@Conditional(KeyCondition.class)
 	@ConditionalOnClass(RsaSecretEncryptor.class)
-	@EnableConfigurationProperties({RsaProperties.class})
+	@EnableConfigurationProperties({ RsaProperties.class })
 	protected static class RsaEncryptionConfiguration {
 
 		@Autowired
@@ -73,10 +85,10 @@ public class EncryptionBootstrapConfiguration {
 									keyStore.getPassword().toCharArray()).getKeyPair(
 											keyStore.getAlias(),
 											keyStore.getSecret().toCharArray()),
-							this.rsaProperties.getAlgorithm(), this.rsaProperties.getSalt(),
-							this.rsaProperties.isStrong());
-				} 
-				
+							this.rsaProperties.getAlgorithm(),
+							this.rsaProperties.getSalt(), this.rsaProperties.isStrong());
+				}
+
 				throw new IllegalStateException("Invalid keystore location");
 			}
 
@@ -101,17 +113,9 @@ public class EncryptionBootstrapConfiguration {
 
 	}
 
-	@Bean
-	public EnvironmentDecryptApplicationInitializer environmentDecryptApplicationListener() {
-		if (this.encryptor == null) {
-			this.encryptor = new FailsafeTextEncryptor();
-		}
-		EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
-				this.encryptor);
-		listener.setFailOnError(this.key.isFailOnError());
-		return listener;
-	}
-
+	/**
+	 * A Spring Boot condition for key encryption.
+	 */
 	public static class KeyCondition extends SpringBootCondition {
 
 		@Override

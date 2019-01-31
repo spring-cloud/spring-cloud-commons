@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.logging;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Collections;
 
 import org.junit.After;
@@ -31,6 +28,9 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.core.env.StandardEnvironment;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author Dave Syer
  *
@@ -38,6 +38,7 @@ import org.springframework.core.env.StandardEnvironment;
 public class LoggingRebinderTests {
 
 	private LoggingRebinder rebinder = new LoggingRebinder();
+
 	private Logger logger = LoggerFactory.getLogger("org.springframework.web");
 
 	@After

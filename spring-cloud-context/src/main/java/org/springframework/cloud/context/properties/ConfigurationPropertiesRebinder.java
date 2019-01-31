@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.properties;
 
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
+import org.springframework.cloud.util.ProxyUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
@@ -33,17 +35,15 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
-import org.springframework.cloud.util.ProxyUtils;
 
 /**
  * Listens for {@link EnvironmentChangeEvent} and rebinds beans that were bound to the
  * {@link Environment} using {@link ConfigurationProperties
  * <code>@ConfigurationProperties</code>}. When these beans are re-bound and
- * re-initialized, the changes are available immediately to any component that is using the
- * <code>@ConfigurationProperties</code> bean.
+ * re-initialized, the changes are available immediately to any component that is using
+ * the <code>@ConfigurationProperties</code> bean.
  *
  * @see RefreshScope for a deeper and optionally more focused refresh of bean components.
- *
  * @author Dave Syer
  *
  */
@@ -70,7 +70,6 @@ public class ConfigurationPropertiesRebinder
 
 	/**
 	 * A map of bean name to errors when instantiating the bean.
-	 *
 	 * @return The errors accumulated since the latest destroy.
 	 */
 	public Map<String, Exception> getErrors() {
@@ -97,9 +96,10 @@ public class ConfigurationPropertiesRebinder
 					bean = ProxyUtils.getTargetObject(bean);
 				}
 				if (bean != null) {
-					this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
-                    this.applicationContext.getAutowireCapableBeanFactory()
-                            .initializeBean(bean, name);
+					this.applicationContext.getAutowireCapableBeanFactory()
+							.destroyBean(bean);
+					this.applicationContext.getAutowireCapableBeanFactory()
+							.initializeBean(bean, name);
 					return true;
 				}
 			}
@@ -117,7 +117,7 @@ public class ConfigurationPropertiesRebinder
 
 	@ManagedAttribute
 	public Set<String> getBeanNames() {
-		return new HashSet<String>(this.beans.getBeanNames());
+		return new HashSet<>(this.beans.getBeanNames());
 	}
 
 	@Override

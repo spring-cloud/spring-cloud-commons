@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,14 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Random;
 
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -41,6 +35,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
 /**
  * @author Ryan Baxter
  * @author Tim Ysewyn
@@ -51,7 +51,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	public void restTemplateGetsLoadBalancerInterceptor() {
 		ConfigurableApplicationContext context = init(OneRestTemplate.class);
 		final Map<String, RestTemplate> restTemplates = context
-				.getBeansOfType(RestTemplate.class);
+			.getBeansOfType(RestTemplate.class);
 
 		assertThat(restTemplates, is(notNullValue()));
 		assertThat(restTemplates.values(), hasSize(1));
@@ -67,7 +67,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	public void multipleRestTemplates() {
 		ConfigurableApplicationContext context = init(TwoRestTemplates.class);
 		final Map<String, RestTemplate> restTemplates = context
-				.getBeansOfType(RestTemplate.class);
+			.getBeansOfType(RestTemplate.class);
 
 		assertThat(restTemplates, is(notNullValue()));
 		Collection<RestTemplate> templates = restTemplates.values();
@@ -84,8 +84,8 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
 		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.aop.proxyTargetClass=true")
-				.sources(config, LoadBalancerAutoConfiguration.class).run();
+			.properties("spring.aop.proxyTargetClass=true")
+			.sources(config, LoadBalancerAutoConfiguration.class).run();
 	}
 
 	@Configuration
@@ -141,14 +141,15 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		@Override
 		public ServiceInstance choose(String serviceId) {
 			return new DefaultServiceInstance(serviceId, serviceId, serviceId,
-					this.random.nextInt(40000), false);
+				this.random.nextInt(40000), false);
 		}
 
 		@Override
 		public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -157,7 +158,8 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}

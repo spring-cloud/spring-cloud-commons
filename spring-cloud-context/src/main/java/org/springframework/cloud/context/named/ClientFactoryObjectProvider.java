@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,34 @@
 
 package org.springframework.cloud.context.named;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.lang.Nullable;
-
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.lang.Nullable;
+
 /**
- * Special ObjectProvider that allows the actual ObjectProvider to be resolved
- * later because of the creation of the named child context.
- * @param <T>
+ * Special ObjectProvider that allows the actual ObjectProvider to be resolved later
+ * because of the creation of the named child context.
+ *
+ * @param <T> - type of the provided object
  */
 class ClientFactoryObjectProvider<T> implements ObjectProvider<T> {
-	
+
 	private final NamedContextFactory clientFactory;
+
 	private final String name;
+
 	private final Class<T> type;
+
 	private ObjectProvider<T> provider;
 
-	public ClientFactoryObjectProvider(NamedContextFactory clientFactory, String name, Class<T> type) {
+	ClientFactoryObjectProvider(NamedContextFactory clientFactory, String name,
+			Class<T> type) {
 		this.clientFactory = clientFactory;
 		this.name = name;
 		this.type = type;
@@ -109,8 +114,9 @@ class ClientFactoryObjectProvider<T> implements ObjectProvider<T> {
 	@SuppressWarnings("unchecked")
 	private ObjectProvider<T> delegate() {
 		if (this.provider == null) {
-			provider = this.clientFactory.getProvider(name, type);
+			this.provider = this.clientFactory.getProvider(this.name, this.type);
 		}
-		return provider;
+		return this.provider;
 	}
+
 }

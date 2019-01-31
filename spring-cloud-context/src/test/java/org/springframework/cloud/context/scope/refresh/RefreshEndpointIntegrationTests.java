@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
@@ -51,9 +52,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ClientApp.class, properties = "management.endpoints.web.exposure.include=*", webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
-	
+
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
-	
+
 	@LocalServerPort
 	private int port;
 
@@ -61,9 +62,11 @@ public class RefreshEndpointIntegrationTests {
 	public void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
 		template.exchange(
-				getUrlEncodedEntity("http://localhost:" + this.port + BASE_PATH + "/env", "message",
-						"Hello Dave!"), String.class);
-		template.postForObject("http://localhost:" + this.port + BASE_PATH + "/refresh", null, String.class);
+				getUrlEncodedEntity("http://localhost:" + this.port + BASE_PATH + "/env",
+						"message", "Hello Dave!"),
+				String.class);
+		template.postForObject("http://localhost:" + this.port + BASE_PATH + "/refresh",
+				null, String.class);
 		String message = template.getForObject("http://localhost:" + this.port + "/",
 				String.class);
 		assertEquals("Hello Dave!", message);
@@ -76,8 +79,8 @@ public class RefreshEndpointIntegrationTests {
 		property.put("value", value);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		RequestEntity<Map<String, String>> entity = new RequestEntity<>(
-				property, headers, HttpMethod.POST, new URI(uri));
+		RequestEntity<Map<String, String>> entity = new RequestEntity<>(property, headers,
+				HttpMethod.POST, new URI(uri));
 		return entity;
 	}
 
@@ -85,14 +88,14 @@ public class RefreshEndpointIntegrationTests {
 	@EnableAutoConfiguration
 	protected static class ClientApp {
 
+		public static void main(String[] args) {
+			SpringApplication.run(ClientApp.class, args);
+		}
+
 		@Bean
 		@RefreshScope
 		public Controller controller() {
 			return new Controller();
-		}
-
-		public static void main(String[] args) {
-			SpringApplication.run(ClientApp.class, args);
 		}
 
 	}
@@ -101,7 +104,7 @@ public class RefreshEndpointIntegrationTests {
 	protected static class Controller {
 
 		String message;
-		
+
 		@Value("${message:Hello World!}")
 		public void setMessage(String message) {
 			this.message = message;
@@ -113,6 +116,5 @@ public class RefreshEndpointIntegrationTests {
 		}
 
 	}
-
 
 }

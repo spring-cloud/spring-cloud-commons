@@ -17,6 +17,7 @@
 package org.springframework.cloud.client;
 
 import org.junit.Test;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
@@ -34,14 +35,14 @@ public class HostInfoEnvironmentPostProcessorTests {
 	@Test
 	public void hostname() {
 		this.processor.postProcessEnvironment(this.environment,
-				new SpringApplication());
+			new SpringApplication());
 		assertNotNull(this.environment.getProperty("spring.cloud.client.hostname"));
 	}
 
 	@Test
 	public void ipAddress() {
 		this.processor.postProcessEnvironment(this.environment,
-				new SpringApplication());
+			new SpringApplication());
 		String address = this.environment.getProperty("spring.cloud.client.ip-address");
 		assertNotNull(address);
 	}

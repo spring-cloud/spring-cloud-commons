@@ -24,15 +24,16 @@ import static org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapCon
 @EnableConfigurationProperties
 public class TestBootstrapConfiguration {
 
+	public static List<String> fooSightings = null;
+
 	public TestBootstrapConfiguration() {
 		firstToBeCreated.compareAndSet(null, TestBootstrapConfiguration.class);
 	}
 
-	public static List<String> fooSightings = null;
-
 	@Bean
 	@Qualifier("foo-during-bootstrap")
-	public String fooDuringBootstrap(ConfigurableEnvironment environment, ApplicationEventPublisher publisher) {
+	public String fooDuringBootstrap(ConfigurableEnvironment environment,
+			ApplicationEventPublisher publisher) {
 		String property = environment.getProperty("test.bootstrap.foo", "undefined");
 
 		if (fooSightings != null) {

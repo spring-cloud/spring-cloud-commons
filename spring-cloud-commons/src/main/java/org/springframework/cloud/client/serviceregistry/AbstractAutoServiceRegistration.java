@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.serviceregistry;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,23 +46,16 @@ import org.springframework.core.env.Environment;
  * @author Spencer Gibb
  */
 public abstract class AbstractAutoServiceRegistration<R extends Registration>
-		implements AutoServiceRegistration, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
+	implements AutoServiceRegistration, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
 	private static final Log logger = LogFactory
-			.getLog(AbstractAutoServiceRegistration.class);
-
-	private boolean autoStartup = true;
-
-	private AtomicBoolean running = new AtomicBoolean(false);
-
-	private int order = 0;
-
-	private ApplicationContext context;
-
-	private Environment environment;
-
-	private AtomicInteger port = new AtomicInteger(0);
-
+		.getLog(AbstractAutoServiceRegistration.class);
 	private final ServiceRegistry<R> serviceRegistry;
+	private boolean autoStartup = true;
+	private AtomicBoolean running = new AtomicBoolean(false);
+	private int order = 0;
+	private ApplicationContext context;
+	private Environment environment;
+	private AtomicInteger port = new AtomicInteger(0);
 	private AutoServiceRegistrationProperties properties;
 
 	@Deprecated
@@ -54,13 +63,14 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		this.serviceRegistry = serviceRegistry;
 	}
 
-	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry, AutoServiceRegistrationProperties properties) {
+	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry,
+		AutoServiceRegistrationProperties properties) {
 		this.serviceRegistry = serviceRegistry;
 		this.properties = properties;
 	}
 
 	protected ApplicationContext getContext() {
-		return context;
+		return this.context;
 	}
 
 	@Override
@@ -74,7 +84,8 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		ApplicationContext context = event.getApplicationContext();
 		if (context instanceof ConfigurableWebServerApplicationContext) {
 			if ("management".equals(
-					((ConfigurableWebServerApplicationContext) context).getServerNamespace())) {
+				((ConfigurableWebServerApplicationContext) context)
+					.getServerNamespace())) {
 				return;
 			}
 		}
@@ -84,19 +95,19 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
+		throws BeansException {
 		this.context = applicationContext;
 		this.environment = this.context.getEnvironment();
 	}
 
 	@Deprecated
 	protected Environment getEnvironment() {
-		return environment;
+		return this.environment;
 	}
 
 	@Deprecated
 	protected AtomicInteger getPort() {
-		return port;
+		return this.port;
 	}
 
 	public boolean isAutoStartup() {
@@ -114,13 +125,14 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		// only initialize if nonSecurePort is greater than 0 and it isn't already running
 		// because of containerPortInitializer below
 		if (!this.running.get()) {
-			this.context.publishEvent(new InstancePreRegisteredEvent(this, getRegistration()));
+			this.context
+				.publishEvent(new InstancePreRegisteredEvent(this, getRegistration()));
 			register();
 			if (shouldRegisterManagement()) {
 				registerManagement();
 			}
 			this.context.publishEvent(
-					new InstanceRegisteredEvent<>(this, getConfiguration()));
+				new InstanceRegisteredEvent<>(this, getConfiguration()));
 			this.running.compareAndSet(false, true);
 		}
 
@@ -133,7 +145,7 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	protected boolean shouldRegisterManagement() {
 		if (this.properties == null || this.properties.isRegisterManagement()) {
 			return getManagementPort() != null
-					&& ManagementServerPortUtils.isDifferent(this.context);
+				&& ManagementServerPortUtils.isDifferent(this.context);
 		}
 		return false;
 	}
@@ -193,7 +205,7 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	}
 
 	protected AtomicBoolean getRunning() {
-		return running;
+		return this.running;
 	}
 
 	public int getOrder() {

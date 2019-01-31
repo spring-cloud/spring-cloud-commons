@@ -1,12 +1,14 @@
 package org.springframework.cloud.commons.httpclient;
 
-import okhttp3.ConnectionPool;
-import okhttp3.OkHttpClient;
-
 import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
+
 import javax.net.ssl.HostnameVerifier;
+
+import okhttp3.ConnectionPool;
+import okhttp3.OkHttpClient;
 import org.junit.Test;
+
 import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.assertEquals;
@@ -22,10 +24,10 @@ public class DefaultOkHttpClientFactoryTest {
 		DefaultOkHttpClientConnectionPoolFactory poolFactory = new DefaultOkHttpClientConnectionPoolFactory();
 		ConnectionPool pool = poolFactory.create(4, 5, TimeUnit.DAYS);
 		OkHttpClient httpClient = okHttpClientFactory.createBuilder(true).
-				connectTimeout(2, TimeUnit.MILLISECONDS).
-				readTimeout(3, TimeUnit.HOURS).
-				followRedirects(true).
-				connectionPool(pool).build();
+			connectTimeout(2, TimeUnit.MILLISECONDS).
+			readTimeout(3, TimeUnit.HOURS).
+			followRedirects(true).
+			connectionPool(pool).build();
 		int connectTimeout = getField(httpClient, "connectTimeout");
 		assertEquals(2, connectTimeout);
 		int readTimeout = getField(httpClient, "readTimeout");
@@ -35,7 +37,8 @@ public class DefaultOkHttpClientFactoryTest {
 		ConnectionPool poolFromClient = getField(httpClient, "connectionPool");
 		assertEquals(pool, poolFromClient);
 		HostnameVerifier hostnameVerifier = getField(httpClient, "hostnameVerifier");
-		assertTrue(OkHttpClientFactory.TrustAllHostnames.class.isInstance(hostnameVerifier));
+		assertTrue(OkHttpClientFactory.TrustAllHostnames.class
+			.isInstance(hostnameVerifier));
 	}
 
 	protected <T> T getField(Object target, String name) {

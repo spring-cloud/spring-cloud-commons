@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,8 @@ public class LoadBalancerTest {
 
 				if (host.contains("secure")) {
 					assertThat(instance.isSecure()).isTrue();
-				} else {
+				}
+				else {
 					assertThat(instance.isSecure()).isFalse();
 				}
 
@@ -97,8 +98,10 @@ public class LoadBalancerTest {
 
 	@Test
 	public void emptyHosts() {
-		ResolvableType type = ResolvableType.forClassWithGenerics(ReactorLoadBalancer.class, ServiceInstance.class);
-		ReactorLoadBalancer<ServiceInstance> loadBalancer = this.clientFactory.getInstance("unknownservice", type);
+		ResolvableType type = ResolvableType
+				.forClassWithGenerics(ReactorLoadBalancer.class, ServiceInstance.class);
+		ReactorLoadBalancer<ServiceInstance> loadBalancer = this.clientFactory
+				.getInstance("unknownservice", type);
 
 		assertThat(loadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
 
@@ -113,8 +116,9 @@ public class LoadBalancerTest {
 	public void staticConfigurationWorks() {
 		String serviceId = "test1";
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(serviceId,
-				ServiceInstanceSuppliers.toProvider(serviceId, instance(serviceId, "1.host", false),
-						instance(serviceId, "2.host-secure", true)),
+				ServiceInstanceSuppliers
+						.toProvider(serviceId, instance(serviceId, "1.host", false),
+								instance(serviceId, "2.host-secure", true)),
 				-1);
 		assertLoadBalancer(loadBalancer, Arrays.asList("1.host", "2.host-secure"));
 	}
@@ -137,7 +141,8 @@ public class LoadBalancerTest {
 		public RoundRobinLoadBalancer roundRobinContextLoadBalancer(LoadBalancerClientFactory clientFactory, Environment env) {
 			String serviceId = clientFactory.getName(env);
 			return new RoundRobinLoadBalancer(serviceId,
-					clientFactory.getLazyProvider(serviceId, ServiceInstanceSupplier.class),
+					clientFactory
+							.getLazyProvider(serviceId, ServiceInstanceSupplier.class),
 					-1);
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2018 the original author or authors.
+ * Copyright 2006-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,15 +72,13 @@ public class EnvironmentManagerIntegrationTests {
 
 	@Test
 	public void testRefresh() throws Exception {
-		assertEquals("Hello scope!", properties.getMessage());
+		assertEquals("Hello scope!", this.properties.getMessage());
 		String content = property("message", "Foo");
 
-		this.mvc.perform(post(BASE_PATH + "/env")
-				.content(content)
-				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
+		this.mvc.perform(post(BASE_PATH + "/env").content(content)
+				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(content().string("{\"message\":\"Foo\"}"));
-		assertEquals("Foo", properties.getMessage());
+		assertEquals("Foo", this.properties.getMessage());
 	}
 
 	private String property(String name, String value) throws JsonProcessingException {
@@ -89,23 +87,21 @@ public class EnvironmentManagerIntegrationTests {
 		property.put("name", name);
 		property.put("value", value);
 
-		return mapper.writeValueAsString(property);
+		return this.mapper.writeValueAsString(property);
 	}
 
 	@Test
 	public void testRefreshFails() throws Exception {
 		try {
-			this.mvc.perform(post(BASE_PATH + "/env")
-					.content(property("delay", "foo"))
-					.contentType(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk())
+			this.mvc.perform(post(BASE_PATH + "/env").content(property("delay", "foo"))
+					.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 					.andExpect(status().is5xxServerError());
 			fail("expected ServletException");
 		}
 		catch (ServletException e) {
 			// The underlying BindException is not handled by the dispatcher servlet
 		}
-		assertEquals(0, properties.getDelay());
+		assertEquals(0, this.properties.getDelay());
 	}
 
 	@Test
@@ -116,15 +112,15 @@ public class EnvironmentManagerIntegrationTests {
 
 	@Test
 	public void environmentBeansConfiguredCorrectly() {
-		Map<String, EnvironmentEndpoint> envbeans = this.context.getBeansOfType(EnvironmentEndpoint.class);
-		assertThat(envbeans).hasSize(1)
-				.containsKey("environmentEndpoint");
+		Map<String, EnvironmentEndpoint> envbeans = this.context
+				.getBeansOfType(EnvironmentEndpoint.class);
+		assertThat(envbeans).hasSize(1).containsKey("environmentEndpoint");
 		assertThat(envbeans.get("environmentEndpoint"))
 				.isInstanceOf(WritableEnvironmentEndpoint.class);
 
-		Map<String, EnvironmentEndpointWebExtension> extbeans = this.context.getBeansOfType(EnvironmentEndpointWebExtension.class);
-		assertThat(extbeans).hasSize(1)
-				.containsKey("environmentEndpointWebExtension");
+		Map<String, EnvironmentEndpointWebExtension> extbeans = this.context
+				.getBeansOfType(EnvironmentEndpointWebExtension.class);
+		assertThat(extbeans).hasSize(1).containsKey("environmentEndpointWebExtension");
 		assertThat(extbeans.get("environmentEndpointWebExtension"))
 				.isInstanceOf(WritableEnvironmentEndpointWebExtension.class);
 	}
@@ -148,7 +144,7 @@ public class EnvironmentManagerIntegrationTests {
 		private int delay;
 
 		public String getMessage() {
-			return message;
+			return this.message;
 		}
 
 		public void setMessage(String message) {
@@ -156,12 +152,13 @@ public class EnvironmentManagerIntegrationTests {
 		}
 
 		public int getDelay() {
-			return delay;
+			return this.delay;
 		}
 
 		public void setDelay(int delay) {
 			this.delay = delay;
 		}
+
 	}
 
 }

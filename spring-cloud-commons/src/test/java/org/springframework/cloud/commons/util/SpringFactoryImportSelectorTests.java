@@ -29,14 +29,14 @@ public class SpringFactoryImportSelectorTests {
 	public void testFindAnnotation() {
 		MyAnnotationImportSelector selector = new MyAnnotationImportSelector();
 		assertEquals("annotationClass was wrong", MyAnnotation.class,
-				selector.getAnnotationClass());
+			selector.getAnnotationClass());
 	}
 
 	public @interface MyAnnotation {
 	}
 
 	public static class MyAnnotationImportSelector extends
-			SpringFactoryImportSelector<MyAnnotation> {
+		SpringFactoryImportSelector<MyAnnotation> {
 
 		@Override
 		protected boolean isEnabled() {

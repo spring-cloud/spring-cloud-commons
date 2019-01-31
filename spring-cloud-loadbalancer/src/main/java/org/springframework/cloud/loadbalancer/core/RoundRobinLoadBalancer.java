@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,26 +46,26 @@ public class RoundRobinLoadBalancer implements ReactorLoadBalancer<ServiceInstan
 	}
 
 	public RoundRobinLoadBalancer(String serviceId, ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier,
-								  int seedPosition) {
+			int seedPosition) {
 		this.serviceId = serviceId;
 		this.serviceInstanceSupplier = serviceInstanceSupplier;
 		this.position = new AtomicInteger(seedPosition);
 	}
 
 	@Override
-	/**
-	 * see original https://github.com/Netflix/ocelli/blob/master/ocelli-core/src/main/java/netflix/ocelli/loadbalancer/RoundRobinLoadBalancer.java
-	 */
+	// see original
+	// https://github.com/Netflix/ocelli/blob/master/ocelli-core/
+	// src/main/java/netflix/ocelli/loadbalancer/RoundRobinLoadBalancer.java
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		// TODO: move supplier to Request?
-		ServiceInstanceSupplier supplier = serviceInstanceSupplier.getIfAvailable();
+		ServiceInstanceSupplier supplier = this.serviceInstanceSupplier.getIfAvailable();
 		return supplier.get().collectList().map(instances -> {
 			if (instances.isEmpty()) {
 				log.warn("No servers available for service: " + this.serviceId);
 				return new EmptyResponse();
 			}
 			// TODO: enforce order?
-			int pos = Math.abs(position.incrementAndGet());
+			int pos = Math.abs(this.position.incrementAndGet());
 
 			ServiceInstance instance = instances.get(pos % instances.size());
 

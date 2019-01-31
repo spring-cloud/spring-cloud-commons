@@ -35,7 +35,8 @@ public class NamedContextFactoryTests {
 		Bar bar = factory.getInstance("bar", Bar.class);
 		assertThat("bar was null", bar, is(notNullValue()));
 
-		assertThat("context names not exposed", factory.getContextNames(), hasItems("foo", "bar"));
+		assertThat("context names not exposed", factory.getContextNames(),
+				hasItems("foo", "bar"));
 
 		Bar foobar = factory.getInstance("foo", Bar.class);
 		assertThat("bar was not null", foobar, is(nullValue()));
@@ -60,7 +61,7 @@ public class NamedContextFactoryTests {
 	}
 
 	private TestSpec getSpec(String name, Class<?> configClass) {
-		return new TestSpec(name, new Class[]{configClass});
+		return new TestSpec(name, new Class[] { configClass });
 	}
 
 	static class TestClientFactory extends NamedContextFactory<TestSpec> {
@@ -68,9 +69,11 @@ public class NamedContextFactoryTests {
 		public TestClientFactory() {
 			super(TestSpec.class, "testfactory", "test.client.name");
 		}
+
 	}
 
 	static class TestSpec implements NamedContextFactory.Specification {
+
 		private String name;
 
 		private Class<?>[] configuration;
@@ -85,7 +88,7 @@ public class NamedContextFactoryTests {
 
 		@Override
 		public String getName() {
-			return name;
+			return this.name;
 		}
 
 		public void setName(String name) {
@@ -94,31 +97,43 @@ public class NamedContextFactoryTests {
 
 		@Override
 		public Class<?>[] getConfiguration() {
-			return configuration;
+			return this.configuration;
 		}
 
 		public void setConfiguration(Class<?>[] configuration) {
 			this.configuration = configuration;
 		}
+
 	}
 
 	static class BaseConfig {
+
 		@Bean
 		Baz baz1() {
 			return new Baz();
 		}
+
 	}
-	static class Baz{}
+
+	static class Baz {
+
+	}
 
 	static class FooConfig {
+
 		@Bean
 		Foo foo() {
 			return new Foo();
 		}
+
 	}
-	static class Foo{}
+
+	static class Foo {
+
+	}
 
 	static class BarConfig {
+
 		@Bean
 		Bar bar() {
 			return new Bar();
@@ -128,7 +143,11 @@ public class NamedContextFactoryTests {
 		Baz baz2() {
 			return new Baz();
 		}
+
 	}
-	static class Bar{}
+
+	static class Bar {
+
+	}
 
 }

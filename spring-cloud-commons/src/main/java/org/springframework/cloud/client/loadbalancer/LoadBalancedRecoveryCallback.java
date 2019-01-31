@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.loadbalancer;
+
+import java.net.URI;
 
 import org.springframework.retry.RecoveryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryException;
 
-import java.net.URI;
-
 /**
  * An implementation of {@link RecoveryCallback} which relies on an implementation
  * of {@link RetryableStatusCodeException} to contain the last response object from
  * the request.
+ * @param <T> - response type to return
+ * @param <R> - response type from the HTTP client
  * @author LiYuan Lee
  */
 public abstract class LoadBalancedRecoveryCallback<T, R> implements RecoveryCallback<T> {
@@ -44,8 +47,9 @@ public abstract class LoadBalancedRecoveryCallback<T, R> implements RecoveryCall
 			if (lastThrowable instanceof RetryableStatusCodeException) {
 				RetryableStatusCodeException ex = (RetryableStatusCodeException) lastThrowable;
 				return createResponse((R) ex.getResponse(), ex.getUri());
-			} else if (lastThrowable instanceof Exception){
-				throw (Exception)lastThrowable;
+			}
+			else if (lastThrowable instanceof Exception) {
+				throw (Exception) lastThrowable;
 			}
 		}
 		throw new RetryException("Could not recover", lastThrowable);

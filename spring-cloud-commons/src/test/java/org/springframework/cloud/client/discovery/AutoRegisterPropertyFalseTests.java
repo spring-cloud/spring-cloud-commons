@@ -2,6 +2,7 @@ package org.springframework.cloud.client.discovery;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -35,10 +36,10 @@ public class AutoRegisterPropertyFalseTests {
 
 	@Test
 	public void veryifyBeans() {
-		assertNull(autoConfiguration);
-		assertNull(autoServiceRegistration);
-		assertNull(autoServiceRegistrationProperties);
-		assertFalse(autoRegisterProperty);
+		assertNull(this.autoConfiguration);
+		assertNull(this.autoServiceRegistration);
+		assertNull(this.autoServiceRegistrationProperties);
+		assertFalse(this.autoRegisterProperty);
 	}
 
 

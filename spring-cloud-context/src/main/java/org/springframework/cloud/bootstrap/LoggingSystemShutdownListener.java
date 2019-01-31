@@ -33,6 +33,9 @@ import org.springframework.util.ClassUtils;
 public class LoggingSystemShutdownListener
 		implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
+	/**
+	 * Default order for the listener.
+	 */
 	public static final int DEFAULT_ORDER = BootstrapApplicationListener.DEFAULT_ORDER
 			+ 1;
 
@@ -50,13 +53,13 @@ public class LoggingSystemShutdownListener
 		loggingSystem.beforeInitialize();
 	}
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
 	@Override
 	public int getOrder() {
 		return this.order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 }

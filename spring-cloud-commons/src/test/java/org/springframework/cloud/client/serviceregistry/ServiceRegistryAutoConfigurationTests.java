@@ -22,11 +22,13 @@ public class ServiceRegistryAutoConfigurationTests {
 
 	@Test
 	public void runsWithoutActuator() {
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfig.class).web(WebApplicationType.NONE).run();
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfig.class)
+			.web(WebApplicationType.NONE).run();
 		try {
 			context.getBean("serviceRegistryEndpoint");
 			fail("found a bean that shouldn't be there");
-		} catch (NoSuchBeanDefinitionException e) {
+		}
+		catch (NoSuchBeanDefinitionException e) {
 			// success
 		}
 	}

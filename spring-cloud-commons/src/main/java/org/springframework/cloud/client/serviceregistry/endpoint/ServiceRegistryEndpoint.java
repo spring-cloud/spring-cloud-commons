@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.springframework.cloud.client.serviceregistry.endpoint;
@@ -52,7 +51,8 @@ public class ServiceRegistryEndpoint {
 		Assert.notNull(status, "status may not by null");
 
 		if (this.registration == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no registration found");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body("no registration found");
 		}
 
 		this.serviceRegistry.setStatus(this.registration, status);
@@ -62,10 +62,12 @@ public class ServiceRegistryEndpoint {
 	@ReadOperation
 	public ResponseEntity getStatus() {
 		if (this.registration == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no registration found");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND)
+					.body("no registration found");
 		}
 
-		return ResponseEntity.ok().body(this.serviceRegistry.getStatus(this.registration));
+		return ResponseEntity.ok()
+				.body(this.serviceRegistry.getStatus(this.registration));
 	}
 
 }

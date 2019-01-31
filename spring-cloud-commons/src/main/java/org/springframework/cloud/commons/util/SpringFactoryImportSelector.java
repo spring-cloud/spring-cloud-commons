@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.DeferredImportSelector;
@@ -37,24 +38,23 @@ import org.springframework.util.Assert;
  * Selects configurations to load, defined by the generic type T. Loads implementations
  * using {@link SpringFactoriesLoader}.
  *
+ * @param <T> type of annotation class
+ *
  * @author Spencer Gibb
  * @author Dave Syer
  */
 public abstract class SpringFactoryImportSelector<T>
-		implements DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
-
-	private ClassLoader beanClassLoader;
-
-	private Class<T> annotationClass;
-
-	private Environment environment;
+	implements DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
 
 	private final Log log = LogFactory.getLog(SpringFactoryImportSelector.class);
+	private ClassLoader beanClassLoader;
+	private Class<T> annotationClass;
+	private Environment environment;
 
 	@SuppressWarnings("unchecked")
 	protected SpringFactoryImportSelector() {
 		this.annotationClass = (Class<T>) GenericTypeResolver
-				.resolveTypeArgument(this.getClass(), SpringFactoryImportSelector.class);
+			.resolveTypeArgument(this.getClass(), SpringFactoryImportSelector.class);
 	}
 
 	@Override
@@ -63,25 +63,25 @@ public abstract class SpringFactoryImportSelector<T>
 			return new String[0];
 		}
 		AnnotationAttributes attributes = AnnotationAttributes.fromMap(
-				metadata.getAnnotationAttributes(this.annotationClass.getName(), true));
+			metadata.getAnnotationAttributes(this.annotationClass.getName(), true));
 
 		Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is "
-				+ metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
+			+ metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
 
 		// Find all possible auto configuration classes, filtering duplicates
 		List<String> factories = new ArrayList<>(new LinkedHashSet<>(SpringFactoriesLoader
-				.loadFactoryNames(this.annotationClass, this.beanClassLoader)));
+			.loadFactoryNames(this.annotationClass, this.beanClassLoader)));
 
 		if (factories.isEmpty() && !hasDefaultFactory()) {
 			throw new IllegalStateException("Annotation @" + getSimpleName()
-					+ " found, but there are no implementations. Did you forget to include a starter?");
+				+ " found, but there are no implementations. Did you forget to include a starter?");
 		}
 
 		if (factories.size() > 1) {
 			// there should only ever be one DiscoveryClient, but there might be more than
 			// one factory
-			log.warn("More than one implementation " + "of @" + getSimpleName()
-					+ " (now relying on @Conditionals to pick one): " + factories);
+			this.log.warn("More than one implementation " + "of @" + getSimpleName()
+				+ " (now relying on @Conditionals to pick one): " + factories);
 		}
 
 		return factories.toArray(new String[factories.size()]);

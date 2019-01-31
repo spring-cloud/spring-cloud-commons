@@ -75,7 +75,7 @@ public class InetUtilsTests {
 
 			assertTrue("docker0 not ignored", inetUtils.ignoreInterface("docker0"));
 			assertTrue("vethAQI2QT0 not ignored",
-					inetUtils.ignoreInterface("vethAQI2QT"));
+				inetUtils.ignoreInterface("vethAQI2QT"));
 			assertFalse("docker1 ignored", inetUtils.ignoreInterface("docker1"));
 		}
 	}
@@ -97,7 +97,7 @@ public class InetUtilsTests {
 			assertFalse(utils.isPreferredAddress(InetAddress.getByName("5.5.8.1")));
 		}
 	}
-	
+
 	@Test
 	public void testPreferredNetworksRegex() throws Exception {
 		InetUtilsProperties properties = new InetUtilsProperties();
@@ -110,7 +110,7 @@ public class InetUtilsTests {
 			assertFalse(utils.isPreferredAddress(InetAddress.getByName("10.255.10.1")));
 		}
 	}
-	
+
 	@Test
 	public void testPreferredNetworksSimple() throws Exception {
 		InetUtilsProperties properties = new InetUtilsProperties();

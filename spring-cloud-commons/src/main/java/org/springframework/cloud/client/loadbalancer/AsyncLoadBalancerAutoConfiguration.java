@@ -48,7 +48,7 @@ public class AsyncLoadBalancerAutoConfiguration {
 
 		@Bean
 		public SmartInitializingSingleton loadBalancedAsyncRestTemplateInitializer(
-				final List<AsyncRestTemplateCustomizer> customizers) {
+			final List<AsyncRestTemplateCustomizer> customizers) {
 			return new SmartInitializingSingleton() {
 				@Override
 				public void afterSingletonsInstantiated() {
@@ -71,12 +71,12 @@ public class AsyncLoadBalancerAutoConfiguration {
 
 		@Bean
 		public AsyncRestTemplateCustomizer asyncRestTemplateCustomizer(
-				final AsyncLoadBalancerInterceptor loadBalancerInterceptor) {
+			final AsyncLoadBalancerInterceptor loadBalancerInterceptor) {
 			return new AsyncRestTemplateCustomizer() {
 				@Override
 				public void customize(AsyncRestTemplate restTemplate) {
 					List<AsyncClientHttpRequestInterceptor> list = new ArrayList<>(
-							restTemplate.getInterceptors());
+						restTemplate.getInterceptors());
 					list.add(loadBalancerInterceptor);
 					restTemplate.setInterceptors(list);
 				}

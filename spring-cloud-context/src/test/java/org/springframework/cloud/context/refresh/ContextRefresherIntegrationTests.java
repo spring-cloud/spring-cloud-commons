@@ -74,7 +74,7 @@ public class ContextRefresherIntegrationTests {
 	public void testUpdateHikari() throws Exception {
 		assertEquals("Hello scope!", this.properties.getMessage());
 		TestPropertyValues.of("spring.datasource.hikari.read-only=true")
-				.applyTo(environment);
+				.applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.refresher.refresh();
 		assertEquals("Hello scope!", this.properties.getMessage());
@@ -84,12 +84,15 @@ public class ContextRefresherIntegrationTests {
 	@EnableConfigurationProperties(TestProperties.class)
 	@EnableAutoConfiguration
 	protected static class TestConfiguration {
+
 	}
 
 	@ConfigurationProperties
 	@ManagedResource
 	protected static class TestProperties {
+
 		private String message;
+
 		private int delay;
 
 		@ManagedAttribute
@@ -109,6 +112,7 @@ public class ContextRefresherIntegrationTests {
 		public void setDelay(int delay) {
 			this.delay = delay;
 		}
+
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,13 @@ import org.springframework.context.ConfigurableApplicationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(ModifiedClassPathRunner.class)
-@ClassPathExclusions({ "spring-boot-actuator-autoconfigure-*" })
+@ClassPathExclusions({"spring-boot-actuator-autoconfigure-*"})
 public class ManagementServerPortUtilsTests {
 
 	@Test
 	public void contextStarts() {
 		try (ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.web(WebApplicationType.NONE).sources(TestApp.class).run()) {
+			.web(WebApplicationType.NONE).sources(TestApp.class).run()) {
 
 			assertThat(ManagementServerPortUtils.hasActuator).isFalse();
 		}
@@ -44,5 +44,5 @@ public class ManagementServerPortUtilsTests {
 
 	@SpringBootConfiguration
 	@EnableAutoConfiguration
-	protected static class TestApp {}
+	protected static class TestApp { }
 }

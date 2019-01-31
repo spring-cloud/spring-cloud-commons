@@ -42,14 +42,17 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 		for (DiscoveryHealthIndicator indicator : indicators) {
 			Holder holder = new Holder(indicator);
 			addHealthIndicator(indicator.getName(), holder);
-			healthIndicators.add(holder);
+			this.healthIndicators.add(holder);
 		}
 	}
 
 	public ArrayList<Holder> getHealthIndicators() {
-		return healthIndicators;
+		return this.healthIndicators;
 	}
 
+	/**
+	 * Holder for the Health Indicator.
+	 */
 	public static class Holder implements HealthIndicator {
 		private DiscoveryHealthIndicator delegate;
 
@@ -63,7 +66,7 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 		}
 
 		public DiscoveryHealthIndicator getDelegate() {
-			return delegate;
+			return this.delegate;
 		}
 	}
 

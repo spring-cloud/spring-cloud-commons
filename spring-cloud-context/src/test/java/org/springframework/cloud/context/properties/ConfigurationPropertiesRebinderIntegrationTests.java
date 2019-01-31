@@ -108,6 +108,12 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		assertEquals(2, this.properties.getCount());
 	}
 
+	interface SomeService {
+
+		void foo();
+
+	}
+
 	@Configuration
 	@EnableConfigurationProperties
 	@Import({ RefreshConfiguration.RebinderConfiguration.class,
@@ -123,27 +129,30 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		@Bean
 		@ConfigurationProperties("some.service")
 		public SomeService someService() {
-			return ProxyFactory.getProxy(SomeService.class, (MethodInterceptor) methodInvocation -> null);
+			return ProxyFactory.getProxy(SomeService.class,
+					(MethodInterceptor) methodInvocation -> null);
 		}
-	}
 
-	interface SomeService {
-		void foo();
 	}
 
 	// Hack out a protected inner class for testing
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
+
 		@Configuration
 		protected static class RebinderConfiguration
 				extends ConfigurationPropertiesRebinderAutoConfiguration {
 
 		}
+
 	}
 
 	@ConfigurationProperties
 	protected static class TestProperties {
+
 		private String message;
+
 		private int delay;
+
 		private int count = 0;
 
 		public int getCount() {
@@ -170,19 +179,23 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		public void init() {
 			this.count++;
 		}
+
 	}
 
 	@ConfigurationProperties("config")
 	@ConditionalOnMissingBean(ConfigProperties.class)
 	public static class ConfigProperties {
+
 		private String name;
 
 		public String getName() {
-			return name;
+			return this.name;
 		}
 
 		public void setName(String name) {
 			this.name = name;
 		}
+
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,16 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -30,18 +38,11 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.web.client.AsyncRestTemplate;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.notNullValue;
 
 
 /**
@@ -54,7 +55,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 	public void restTemplateGetsLoadBalancerInterceptor() {
 		ConfigurableApplicationContext context = init(OneRestTemplate.class);
 		final Map<String, AsyncRestTemplate> restTemplates = context
-				.getBeansOfType(AsyncRestTemplate.class);
+			.getBeansOfType(AsyncRestTemplate.class);
 
 		MatcherAssert.assertThat(restTemplates, is(notNullValue()));
 		MatcherAssert.assertThat(restTemplates.values(), hasSize(1));
@@ -65,17 +66,19 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 	}
 
 	private void assertLoadBalanced(AsyncRestTemplate restTemplate) {
-		List<AsyncClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+		List<AsyncClientHttpRequestInterceptor> interceptors = restTemplate
+			.getInterceptors();
 		MatcherAssert.assertThat(interceptors, hasSize(1));
 		AsyncClientHttpRequestInterceptor interceptor = interceptors.get(0);
-		MatcherAssert.assertThat(interceptor, is(instanceOf(AsyncLoadBalancerInterceptor.class)));
+		MatcherAssert
+			.assertThat(interceptor, is(instanceOf(AsyncLoadBalancerInterceptor.class)));
 	}
 
 	@Test
 	public void multipleRestTemplates() {
 		ConfigurableApplicationContext context = init(TwoRestTemplates.class);
 		final Map<String, AsyncRestTemplate> restTemplates = context
-				.getBeansOfType(AsyncRestTemplate.class);
+			.getBeansOfType(AsyncRestTemplate.class);
 
 		MatcherAssert.assertThat(restTemplates, is(notNullValue()));
 		Collection<AsyncRestTemplate> templates = restTemplates.values();
@@ -92,8 +95,8 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
 		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.aop.proxyTargetClass=true")
-				.sources(config, AsyncLoadBalancerAutoConfiguration.class).run();
+			.properties("spring.aop.proxyTargetClass=true")
+			.sources(config, AsyncLoadBalancerAutoConfiguration.class).run();
 	}
 
 	@Configuration
@@ -111,7 +114,9 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 		}
 
 		@Bean
-		LoadBalancedRetryFactory loadBalancedRetryFactory() {return new LoadBalancedRetryFactory(){};}
+		LoadBalancedRetryFactory loadBalancedRetryFactory() {
+			return new LoadBalancedRetryFactory() { };
+		}
 
 	}
 
@@ -153,14 +158,15 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 		@Override
 		public ServiceInstance choose(String serviceId) {
 			return new DefaultServiceInstance(serviceId, serviceId, serviceId,
-					this.random.nextInt(40000), false);
+				this.random.nextInt(40000), false);
 		}
 
 		@Override
 		public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -169,7 +175,8 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 		public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}

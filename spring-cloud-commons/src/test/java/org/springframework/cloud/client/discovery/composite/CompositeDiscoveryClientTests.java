@@ -64,12 +64,14 @@ public class CompositeDiscoveryClientTests {
 
 	@Test
 	public void getServicesShouldAggregateAllServiceNames() {
-		assertThat(this.discoveryClient.getServices()).containsOnlyOnce("service1", "service2", "custom");
+		assertThat(this.discoveryClient.getServices())
+				.containsOnlyOnce("service1", "service2", "custom");
 	}
 
 	@Test
 	public void getDescriptionShouldBeComposite() {
-		assertThat(this.discoveryClient.description()).isEqualTo("Composite Discovery Client");
+		assertThat(this.discoveryClient.description())
+				.isEqualTo("Composite Discovery Client");
 	}
 
 	@Test

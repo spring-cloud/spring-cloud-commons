@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ public class InstancePreRegisteredEvent extends ApplicationEvent {
 	 * Create a new pre registration event.
 	 *
 	 * @param source the object on which the event initially occurred (never {@code null})
+	 * @param registration the registration meta data
 	 */
 	public InstancePreRegisteredEvent(Object source, Registration registration) {
 		super(source);
@@ -42,6 +43,6 @@ public class InstancePreRegisteredEvent extends ApplicationEvent {
 	 * @return the registration data
 	 */
 	public Registration getRegistration() {
-		return registration;
+		return this.registration;
 	}
 }

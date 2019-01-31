@@ -46,7 +46,7 @@ public class HeartbeatEvent extends ApplicationEvent {
 	/**
 	 * A value representing the state of the service catalog. The only requirement is that
 	 * it changes when the catalog is updated; it can be as simple as a version counter or
-   * a hash. Implementations can provide information to help users visualize
+	 * a hash. Implementations can provide information to help users visualize
 	 * what is going on in the catalog, but users should not rely on the content (since
 	 * the implementation of the underlying discovery might change).
 	 *

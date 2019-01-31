@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.context.ApplicationContextAware;
  */
 @Endpoint(id = "features")
 public class FeaturesEndpoint
-		implements ApplicationContextAware {
+	implements ApplicationContextAware {
 
 	private final List<HasFeatures> hasFeaturesList;
 	private ApplicationContext context;
@@ -84,9 +84,9 @@ public class FeaturesEndpoint
 	private void addFeature(Features features, NamedFeature feature) {
 		Class<?> type = feature.getType();
 		features.getEnabled()
-				.add(new Feature(feature.getName(), type.getCanonicalName(),
-						type.getPackage().getImplementationVersion(),
-						type.getPackage().getImplementationVendor()));
+			.add(new Feature(feature.getName(), type.getCanonicalName(),
+				type.getPackage().getImplementationVersion(),
+				type.getPackage().getImplementationVendor()));
 	}
 
 	static class Features {
@@ -94,22 +94,22 @@ public class FeaturesEndpoint
 		final List<String> disabled = new ArrayList<>();
 
 		public List<Feature> getEnabled() {
-			return enabled;
+			return this.enabled;
 		}
 
 		public List<String> getDisabled() {
-			return disabled;
+			return this.disabled;
 		}
 	}
 
-	
+
 	static class Feature {
 		final String type;
 		final String name;
 		final String version;
 		final String vendor;
 
-		public Feature(String name, String type, String version, String vendor) {
+		Feature(String name, String type, String version, String vendor) {
 			this.type = type;
 			this.name = name;
 			this.version = version;
@@ -117,50 +117,62 @@ public class FeaturesEndpoint
 		}
 
 		public String getType() {
-			return type;
+			return this.type;
 		}
 
 		public String getName() {
-			return name;
+			return this.name;
 		}
 
 		public String getVersion() {
-			return version;
+			return this.version;
 		}
 
 		public String getVendor() {
-			return vendor;
+			return this.vendor;
 		}
 
 		@Override
 		public String toString() {
 			return "Feature{" +
-					"type='" + type + '\'' +
-					", name='" + name + '\'' +
-					", version='" + version + '\'' +
-					", vendor='" + vendor + '\'' +
-					'}';
+				"type='" + this.type + '\'' +
+				", name='" + this.name + '\'' +
+				", version='" + this.version + '\'' +
+				", vendor='" + this.vendor + '\'' +
+				'}';
 		}
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
 
 			Feature feature = (Feature) o;
 
-			if (type != null ? !type.equals(feature.type) : feature.type != null) return false;
-			if (name != null ? !name.equals(feature.name) : feature.name != null) return false;
-			if (version != null ? !version.equals(feature.version) : feature.version != null) return false;
-			return vendor != null ? vendor.equals(feature.vendor) : feature.vendor == null;
+			if (this.type != null ? !this.type.equals(feature.type) : feature.type != null) {
+				return false;
+			}
+			if (this.name != null ? !this.name.equals(feature.name) : feature.name != null) {
+				return false;
+			}
+			if (this.version != null ? !this.version
+				.equals(feature.version) : feature.version != null) {
+				return false;
+			}
+			return this.vendor != null ? this.vendor
+				.equals(feature.vendor) : feature.vendor == null;
 		}
 
 		@Override
 		public int hashCode() {
-			int result = type != null ? type.hashCode() : 0;
-			result = 31 * result + (name != null ? name.hashCode() : 0);
-			result = 31 * result + (version != null ? version.hashCode() : 0);
-			result = 31 * result + (vendor != null ? vendor.hashCode() : 0);
+			int result = this.type != null ? this.type.hashCode() : 0;
+			result = 31 * result + (this.name != null ? this.name.hashCode() : 0);
+			result = 31 * result + (this.version != null ? this.version.hashCode() : 0);
+			result = 31 * result + (this.vendor != null ? this.vendor.hashCode() : 0);
 			return result;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 package org.springframework.cloud.client.discovery.composite;
 
@@ -28,7 +29,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 /**
  * A {@link DiscoveryClient} that is composed of other discovery clients and delegates
  * calls to each of them in order.
- * 
+ *
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma
  */
@@ -49,7 +50,7 @@ public class CompositeDiscoveryClient implements DiscoveryClient {
 	@Override
 	public List<ServiceInstance> getInstances(String serviceId) {
 		if (this.discoveryClients != null) {
-			for (DiscoveryClient discoveryClient : discoveryClients) {
+			for (DiscoveryClient discoveryClient : this.discoveryClients) {
 				List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
 				if (instances != null && !instances.isEmpty()) {
 					return instances;
@@ -63,7 +64,7 @@ public class CompositeDiscoveryClient implements DiscoveryClient {
 	public List<String> getServices() {
 		LinkedHashSet<String> services = new LinkedHashSet<>();
 		if (this.discoveryClients != null) {
-			for (DiscoveryClient discoveryClient : discoveryClients) {
+			for (DiscoveryClient discoveryClient : this.discoveryClients) {
 				List<String> serviceForClient = discoveryClient.getServices();
 				if (serviceForClient != null) {
 					services.addAll(serviceForClient);
@@ -74,6 +75,6 @@ public class CompositeDiscoveryClient implements DiscoveryClient {
 	}
 
 	public List<DiscoveryClient> getDiscoveryClients() {
-		return discoveryClients;
+		return this.discoveryClients;
 	}
 }

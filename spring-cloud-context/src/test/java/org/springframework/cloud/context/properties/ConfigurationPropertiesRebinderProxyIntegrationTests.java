@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.context.properties;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +22,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -41,9 +40,11 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class,
-		properties = { "messages.expiry.one=168", "messages.expiry.two=76" })
+@SpringBootTest(classes = TestConfiguration.class, properties = {
+		"messages.expiry.one=168", "messages.expiry.two=76" })
 public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 
 	@Autowired
@@ -81,39 +82,44 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 
 	@Aspect
 	protected static class Interceptor {
+
 		@Before("execution(* *..TestProperties.*(..))")
 		public void before() {
 			System.err.println("Before");
 		}
+
 	}
 
 	// Hack out a protected inner class for testing
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
+
 		@Configuration
 		protected static class RebinderConfiguration
 				extends ConfigurationPropertiesRebinderAutoConfiguration {
 
 		}
+
 	}
 
 	@ConfigurationProperties("messages")
 	protected static class TestProperties {
-		private String name;
 
 		private final Map<String, Integer> expiry = new HashMap<>();
 
+		private String name;
+
 		public Map<String, Integer> getExpiry() {
-			return expiry;
+			return this.expiry;
 		}
 
 		public String getName() {
-			return name;
+			return this.name;
 		}
 
 		public void setName(String name) {
 			this.name = name;
 		}
+
 	}
 
 }
-

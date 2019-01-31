@@ -30,13 +30,13 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 	@Test
 	public void newConnectionManager() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
-				.newConnectionManager(false, 2, 6);
+			.newConnectionManager(false, 2, 6);
 		assertEquals(6, ((PoolingHttpClientConnectionManager) connectionManager)
-				.getDefaultMaxPerRoute());
+			.getDefaultMaxPerRoute());
 		assertEquals(2,
-				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
+			((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
 		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
-				"pool");
+			"pool");
 		assertEquals(new Long(-1), getField(pool, "timeToLive"));
 		TimeUnit timeUnit = getField(pool, "tunit");
 		assertEquals(TimeUnit.MILLISECONDS, timeUnit);
@@ -45,13 +45,13 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 	@Test
 	public void newConnectionManagerWithTTL() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
-				.newConnectionManager(false, 2, 6, 56l, TimeUnit.DAYS, null);
+			.newConnectionManager(false, 2, 6, 56l, TimeUnit.DAYS, null);
 		assertEquals(6, ((PoolingHttpClientConnectionManager) connectionManager)
-				.getDefaultMaxPerRoute());
+			.getDefaultMaxPerRoute());
 		assertEquals(2,
-				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
+			((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
 		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
-				"pool");
+			"pool");
 		assertEquals(new Long(56), getField(pool, "timeToLive"));
 		TimeUnit timeUnit = getField(pool, "tunit");
 		assertEquals(TimeUnit.DAYS, timeUnit);
@@ -60,40 +60,40 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 	@Test
 	public void newConnectionManagerWithSSL() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
-				.newConnectionManager(false, 2, 6);
+			.newConnectionManager(false, 2, 6);
 
 		Lookup<ConnectionSocketFactory> socketFactoryRegistry = getConnectionSocketFactoryLookup(
-				connectionManager);
+			connectionManager);
 		assertThat(socketFactoryRegistry.lookup("https"), is(notNullValue()));
 		assertThat(getX509TrustManager(socketFactoryRegistry).getAcceptedIssuers(),
-				is(notNullValue()));
+			is(notNullValue()));
 	}
 
 	@Test
 	public void newConnectionManagerWithDisabledSSLValidation() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
-				.newConnectionManager(true, 2, 6);
+			.newConnectionManager(true, 2, 6);
 
 		Lookup<ConnectionSocketFactory> socketFactoryRegistry = getConnectionSocketFactoryLookup(
-				connectionManager);
+			connectionManager);
 		assertThat(socketFactoryRegistry.lookup("https"), is(notNullValue()));
 		assertThat(getX509TrustManager(socketFactoryRegistry).getAcceptedIssuers(),
-				is(nullValue()));
+			is(nullValue()));
 	}
 
 	private Lookup<ConnectionSocketFactory> getConnectionSocketFactoryLookup(
-			HttpClientConnectionManager connectionManager) {
+		HttpClientConnectionManager connectionManager) {
 		DefaultHttpClientConnectionOperator connectionOperator = getField(
-				connectionManager, "connectionOperator");
+			connectionManager, "connectionOperator");
 		return getField(connectionOperator, "socketFactoryRegistry");
 	}
 
 	private X509TrustManager getX509TrustManager(
-			Lookup<ConnectionSocketFactory> socketFactoryRegistry) {
+		Lookup<ConnectionSocketFactory> socketFactoryRegistry) {
 		ConnectionSocketFactory connectionSocketFactory = socketFactoryRegistry
-				.lookup("https");
+			.lookup("https");
 		SSLSocketFactory sslSocketFactory = getField(connectionSocketFactory,
-				"socketfactory");
+			"socketfactory");
 		SSLContextSpi sslContext = getField(sslSocketFactory, "context");
 		return getField(sslContext, "trustManager");
 	}

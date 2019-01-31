@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -27,7 +28,7 @@ public class FeaturesEndpointTests {
 	public void setup() {
 		this.context = new AnnotationConfigApplicationContext();
 		this.context.register(JacksonAutoConfiguration.class, FeaturesConfig.class,
-				Config.class);
+			Config.class);
 		this.context.refresh();
 	}
 
@@ -41,10 +42,10 @@ public class FeaturesEndpointTests {
 	@Test
 	public void invokeWorks() {
 		FeaturesEndpoint.Features features = this.context.getBean(FeaturesEndpoint.class)
-				.features();
+			.features();
 		assertThat(features).isNotNull();
 		assertThat(features.getEnabled()).hasSize(2)
-				.contains(newFeature("foo", Foo.class), newFeature("Baz Feature", Baz.class));
+			.contains(newFeature("foo", Foo.class), newFeature("Baz Feature", Baz.class));
 		assertThat(features.getDisabled()).hasSize(1).contains("Bar");
 	}
 
@@ -62,8 +63,8 @@ public class FeaturesEndpointTests {
 		@Bean
 		HasFeatures localFeatures() {
 			HasFeatures features = HasFeatures.namedFeatures(
-					new NamedFeature("foo", Foo.class),
-					new NamedFeature("Baz Feature", Baz.class));
+				new NamedFeature("foo", Foo.class),
+				new NamedFeature("Baz Feature", Baz.class));
 			features.getAbstractFeatures().add(Bar.class);
 			return features;
 		}

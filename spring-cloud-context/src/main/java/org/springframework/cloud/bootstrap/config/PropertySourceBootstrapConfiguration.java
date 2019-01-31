@@ -61,6 +61,9 @@ import org.springframework.util.StringUtils;
 public class PropertySourceBootstrapConfiguration implements
 		ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
+	/**
+	 * Bootstrap property source name.
+	 */
 	public static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME
 			+ "Properties";
 
@@ -116,7 +119,8 @@ public class PropertySourceBootstrapConfiguration implements
 	private void reinitializeLoggingSystem(ConfigurableEnvironment environment,
 			String oldLogConfig, LogFile oldLogFile) {
 		Map<String, Object> props = Binder.get(environment)
-				.bind("logging", Bindable.mapOf(String.class, Object.class)).orElseGet(Collections::emptyMap);
+				.bind("logging", Bindable.mapOf(String.class, Object.class))
+				.orElseGet(Collections::emptyMap);
 		if (!props.isEmpty()) {
 			String logConfig = environment.resolvePlaceholders("${logging.config:}");
 			LogFile logFile = LogFile.get(environment);
@@ -154,7 +158,8 @@ public class PropertySourceBootstrapConfiguration implements
 		MutablePropertySources incoming = new MutablePropertySources();
 		incoming.addFirst(composite);
 		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
-		Binder.get(environment(incoming)).bind("spring.cloud.config", Bindable.ofInstance(remoteProperties));
+		Binder.get(environment(incoming)).bind("spring.cloud.config",
+				Bindable.ofInstance(remoteProperties));
 		if (!remoteProperties.isAllowOverride() || (!remoteProperties.isOverrideNone()
 				&& remoteProperties.isOverrideSystemProperties())) {
 			propertySources.addFirst(composite);
@@ -231,7 +236,8 @@ public class PropertySourceBootstrapConfiguration implements
 
 	private String[] getProfilesForValue(Object property) {
 		final String value = (property == null ? null : property.toString());
-		return property == null ? new String[0] : StringUtils.tokenizeToStringArray(value, ",");
+		return property == null ? new String[0]
+				: StringUtils.tokenizeToStringArray(value, ",");
 	}
 
 }

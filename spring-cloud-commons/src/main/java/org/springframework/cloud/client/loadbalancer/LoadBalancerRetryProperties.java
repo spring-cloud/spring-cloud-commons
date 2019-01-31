@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2016 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.loadbalancer;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -23,21 +24,21 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties("spring.cloud.loadbalancer.retry")
 public class LoadBalancerRetryProperties {
-    private boolean enabled = true;
+	private boolean enabled = true;
 
-    /**
-     * Returns true if the load balancer should retry failed requests.
-     * @return True if the load balancer should retry failed requests; false otherwise.
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
+	/**
+	 * Returns true if the load balancer should retry failed requests.
+	 * @return True if the load balancer should retry failed requests; false otherwise.
+	 */
+	public boolean isEnabled() {
+		return this.enabled;
+	}
 
-    /**
-     * Sets whether the load balancer should retry failed requests.
-     * @param enabled Whether the load balancer should retry failed requests.
-     */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
+	/**
+	 * Sets whether the load balancer should retry failed requests.
+	 * @param enabled Whether the load balancer should retry failed requests.
+	 */
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
 }

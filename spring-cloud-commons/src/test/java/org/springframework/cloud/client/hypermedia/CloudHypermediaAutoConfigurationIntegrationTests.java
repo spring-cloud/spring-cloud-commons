@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.cloud.client.hypermedia;
 
 import org.junit.Test;
+
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.DefaultServiceInstance;
@@ -38,14 +39,20 @@ import static org.junit.Assert.assertThat;
  */
 public class CloudHypermediaAutoConfigurationIntegrationTests {
 
+	private static ConfigurableApplicationContext getApplicationContext(
+		Class<?> configuration) {
+		return new SpringApplicationBuilder(configuration).properties("server.port=0")
+			.run();
+	}
+
 	@Test
 	public void picksUpHypermediaProperties() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				ConfigWithRemoteResource.class)) {
+			ConfigWithRemoteResource.class)) {
 
 			CloudHypermediaProperties properties = context
-					.getBean(CloudHypermediaProperties.class);
+				.getBean(CloudHypermediaProperties.class);
 
 			assertThat(properties.getRefresh().getInitialDelay(), is(50000));
 			assertThat(properties.getRefresh().getFixedDelay(), is(10000));
@@ -56,9 +63,9 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	public void doesNotCreateCloudHypermediaPropertiesifNotActive() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				Config.class)) {
+			Config.class)) {
 			assertThat(context.getBeanNamesForType(CloudHypermediaProperties.class),
-					is(arrayWithSize(0)));
+				is(arrayWithSize(0)));
 		}
 	}
 
@@ -66,11 +73,11 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	public void doesNotRegisterResourceRefresherIfNoDiscoveredResourceIsDefined() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				Config.class)) {
+			Config.class)) {
 
 			assertThat(context.getBeansOfType(RemoteResource.class).values(), hasSize(0));
 			assertThat(context.getBeanNamesForType(RemoteResourceRefresher.class),
-					is(arrayWithSize(0)));
+				is(arrayWithSize(0)));
 		}
 	}
 
@@ -78,18 +85,12 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	public void registersResourceRefresherIfDiscoverredResourceIsDefined() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				ConfigWithRemoteResource.class)) {
+			ConfigWithRemoteResource.class)) {
 
 			assertThat(context.getBeansOfType(RemoteResource.class).values(), hasSize(1));
 			assertThat(context.getBean(RemoteResourceRefresher.class),
-					is(notNullValue()));
+				is(notNullValue()));
 		}
-	}
-
-	private static ConfigurableApplicationContext getApplicationContext(
-			Class<?> configuration) {
-		return new SpringApplicationBuilder(configuration).properties("server.port=0")
-				.run();
 	}
 
 	@Configuration
@@ -105,7 +106,7 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 		public RemoteResource resource() {
 
 			ServiceInstanceProvider provider = new StaticServiceInstanceProvider(
-					new DefaultServiceInstance("instance", "service", "localhost", 80, false));
+				new DefaultServiceInstance("instance", "service", "localhost", 80, false));
 			return new DiscoveredResource(provider, traverson -> traverson.follow("rel"));
 		}
 	}

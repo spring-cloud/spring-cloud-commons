@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.logging;
 
 import java.util.Collections;
@@ -64,7 +65,8 @@ public class LoggingRebinder
 
 	protected void setLogLevels(LoggingSystem system, Environment environment) {
 		Map<String, String> levels = Binder.get(environment)
-				.bind("logging.level", STRING_STRING_MAP).orElseGet(Collections::emptyMap);
+				.bind("logging.level", STRING_STRING_MAP)
+				.orElseGet(Collections::emptyMap);
 		for (Entry<String, String> entry : levels.entrySet()) {
 			setLogLevel(system, environment, entry.getKey(), entry.getValue().toString());
 		}

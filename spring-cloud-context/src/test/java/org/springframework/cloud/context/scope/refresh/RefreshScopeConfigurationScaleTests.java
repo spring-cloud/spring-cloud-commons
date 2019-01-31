@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.context.scope.refresh;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -31,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +49,9 @@ import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ObjectUtils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class, properties = "logging.level.org.springframework.cloud.context.scope.refresh.RefreshScopeConfigurationScaleTests=DEBUG")
 public class RefreshScopeConfigurationScaleTests {
@@ -58,10 +59,10 @@ public class RefreshScopeConfigurationScaleTests {
 	private static Log logger = LogFactory
 			.getLog(RefreshScopeConfigurationScaleTests.class);
 
-	private ExecutorService executor = Executors.newFixedThreadPool(8);
-
 	@Autowired
 	org.springframework.cloud.context.scope.refresh.RefreshScope scope;
+
+	private ExecutorService executor = Executors.newFixedThreadPool(8);
 
 	@Autowired
 	private ExampleService service;
@@ -74,11 +75,11 @@ public class RefreshScopeConfigurationScaleTests {
 	@DirtiesContext
 	public void testConcurrentRefresh() throws Exception {
 
-		scope.setEager(false);
+		this.scope.setEager(false);
 
 		// overload the thread pool and try to force Spring to create too many instances
 		int n = 80;
-		TestPropertyValues.of("message=Foo").applyTo(environment);
+		TestPropertyValues.of("message=Foo").applyTo(this.environment);
 		this.scope.refreshAll();
 		final CountDownLatch latch = new CountDownLatch(n);
 		List<Future<String>> results = new ArrayList<>();
@@ -124,6 +125,7 @@ public class RefreshScopeConfigurationScaleTests {
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 
 		private String message = null;
+
 		private volatile long delay = 0;
 
 		public void setDelay(long delay) {
@@ -151,17 +153,17 @@ public class RefreshScopeConfigurationScaleTests {
 			this.message = null;
 		}
 
-		public void setMessage(String message) {
-			logger.debug("Setting message: " + ObjectUtils.getIdentityHexString(this)
-					+ ", " + message);
-			this.message = message;
-		}
-
 		@Override
 		public String getMessage() {
 			logger.debug("Returning message: " + ObjectUtils.getIdentityHexString(this)
 					+ ", " + this.message);
 			return this.message;
+		}
+
+		public void setMessage(String message) {
+			logger.debug("Setting message: " + ObjectUtils.getIdentityHexString(this)
+					+ ", " + message);
+			this.message = message;
 		}
 
 	}
@@ -191,7 +193,9 @@ public class RefreshScopeConfigurationScaleTests {
 
 	@ConfigurationProperties
 	protected static class TestProperties {
+
 		private String message;
+
 		private int delay;
 
 		public String getMessage() {
@@ -209,6 +213,7 @@ public class RefreshScopeConfigurationScaleTests {
 		public void setDelay(int delay) {
 			this.delay = delay;
 		}
+
 	}
 
 }

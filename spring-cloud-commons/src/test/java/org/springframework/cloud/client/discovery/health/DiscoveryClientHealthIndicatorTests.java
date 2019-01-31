@@ -20,6 +20,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthAggregator;
@@ -43,8 +44,8 @@ import static org.mockito.Mockito.mock;
  * @author Spencer Gibb
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { DiscoveryClientHealthIndicatorTests.Config.class,
-		CommonsClientAutoConfiguration.class }, properties = "spring.cloud.discovery.client.health-indicator.include-description:true")
+@SpringBootTest(classes = {DiscoveryClientHealthIndicatorTests.Config.class,
+		CommonsClientAutoConfiguration.class}, properties = "spring.cloud.discovery.client.health-indicator.include-description:true")
 public class DiscoveryClientHealthIndicatorTests {
 
 	@Autowired
@@ -52,6 +53,29 @@ public class DiscoveryClientHealthIndicatorTests {
 
 	@Autowired
 	private DiscoveryClientHealthIndicator clientHealthIndicator;
+
+	@Test
+	public void testHealthIndicatorDescriptionDisabled() {
+		assertNotNull("healthIndicator was null", this.healthIndicator);
+		Health health = this.healthIndicator.health();
+		assertHealth(health, Status.UNKNOWN);
+
+		this.clientHealthIndicator
+				.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
+
+		health = this.healthIndicator.health();
+		Status status = assertHealth(health, Status.UP);
+		assertEquals("status description was wrong", "TestDiscoveryClient",
+				status.getDescription());
+	}
+
+	private Status assertHealth(Health health, Status expected) {
+		assertNotNull("health was null", health);
+		Status status = health.getStatus();
+		assertNotNull("status was null", status);
+		assertEquals("status code was wrong", expected.getCode(), status.getCode());
+		return status;
+	}
 
 	@Configuration
 	@EnableConfigurationProperties
@@ -83,27 +107,5 @@ public class DiscoveryClientHealthIndicatorTests {
 				}
 			};
 		}
-	}
-
-	@Test
-	public void testHealthIndicatorDescriptionDisabled() {
-		assertNotNull("healthIndicator was null", this.healthIndicator);
-		Health health = this.healthIndicator.health();
-		assertHealth(health, Status.UNKNOWN);
-
-		clientHealthIndicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
-
-		health = this.healthIndicator.health();
-		Status status = assertHealth(health, Status.UP);
-		assertEquals("status description was wrong", "TestDiscoveryClient",
-				status.getDescription());
-	}
-
-	private Status assertHealth(Health health, Status expected) {
-		assertNotNull("health was null", health);
-		Status status = health.getStatus();
-		assertNotNull("status was null", status);
-		assertEquals("status code was wrong", expected.getCode(), status.getCode());
-		return status;
 	}
 }

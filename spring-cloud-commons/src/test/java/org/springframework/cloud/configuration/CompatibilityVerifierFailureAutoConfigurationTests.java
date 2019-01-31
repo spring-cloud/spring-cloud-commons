@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -28,15 +28,17 @@ import org.springframework.core.NestedExceptionUtils;
  */
 public class CompatibilityVerifierFailureAutoConfigurationTests {
 
-	@Rule public OutputCapture outputCapture = new OutputCapture();
+	@Rule
+	public OutputCapture outputCapture = new OutputCapture();
 
 	@Test
 	public void contextFailsToLoad() {
 		try {
 			SpringApplication.run(TestConfiguration.class,
-					"--spring.cloud.compatibility-verifier.compatible-boot-versions=1.2.x,1.3.x");
+				"--spring.cloud.compatibility-verifier.compatible-boot-versions=1.2.x,1.3.x");
 			BDDAssertions.fail("should throw exception");
-		} catch (BeanCreationException ex) {
+		}
+		catch (BeanCreationException ex) {
 			Throwable cause = NestedExceptionUtils.getRootCause(ex);
 			BDDAssertions.then(((CompatibilityNotMetException) cause).results).hasSize(1);
 		}

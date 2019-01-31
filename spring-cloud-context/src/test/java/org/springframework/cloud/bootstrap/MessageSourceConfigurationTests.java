@@ -26,6 +26,7 @@ import java.util.Locale;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,8 +36,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestApplication.class,
-		properties = "debug=true")
+@SpringBootTest(classes = TestApplication.class, properties = "debug=true")
 public class MessageSourceConfigurationTests {
 
 	@Autowired
@@ -44,7 +44,8 @@ public class MessageSourceConfigurationTests {
 
 	@Test
 	public void loadsMessage() {
-		Assert.assertEquals("Hello World!", this.messageSource.getMessage("hello.message", null, Locale.getDefault()));
+		Assert.assertEquals("Hello World!", this.messageSource.getMessage("hello.message",
+				null, Locale.getDefault()));
 	}
 
 	@Configuration

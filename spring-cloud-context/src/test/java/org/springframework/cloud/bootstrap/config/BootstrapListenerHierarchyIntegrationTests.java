@@ -16,21 +16,22 @@
 
 package org.springframework.cloud.bootstrap.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.springframework.boot.WebApplicationType.NONE;
-
 import org.junit.Test;
+
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.springframework.boot.WebApplicationType.NONE;
+
 /**
  * Integration tests for Bootstrap Listener's functionality of adding a bootstrap context
  * as the root Application Context
- * 
+ *
  * @author Biju Kunjummen
  */
 public class BootstrapListenerHierarchyIntegrationTests {
@@ -88,6 +89,7 @@ public class BootstrapListenerHierarchyIntegrationTests {
 
 	@Configuration
 	static class BasicConfiguration {
+
 	}
 
 	@Configuration
@@ -97,5 +99,7 @@ public class BootstrapListenerHierarchyIntegrationTests {
 		public String rootBean() {
 			return "rootBean";
 		}
+
 	}
+
 }

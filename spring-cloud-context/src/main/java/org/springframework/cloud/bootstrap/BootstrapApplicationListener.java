@@ -71,10 +71,19 @@ import org.springframework.util.StringUtils;
 public class BootstrapApplicationListener
 		implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
+	/**
+	 * Property source name for bootstrap.
+	 */
 	public static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 
+	/**
+	 * The default order for this listener.
+	 */
 	public static final int DEFAULT_ORDER = Ordered.HIGHEST_PRECEDENCE + 5;
 
+	/**
+	 * The name of the default properties.
+	 */
 	public static final String DEFAULT_PROPERTIES = "defaultProperties";
 
 	private int order = DEFAULT_ORDER;
@@ -104,7 +113,8 @@ public class BootstrapApplicationListener
 		if (context == null) {
 			context = bootstrapServiceContext(environment, event.getSpringApplication(),
 					configName);
-			event.getSpringApplication().addListeners(new CloseContextOnFailureApplicationListener(context));
+			event.getSpringApplication()
+					.addListeners(new CloseContextOnFailureApplicationListener(context));
 		}
 
 		apply(context, event.getSpringApplication(), environment);
@@ -146,8 +156,10 @@ public class BootstrapApplicationListener
 				.resolvePlaceholders("${spring.cloud.bootstrap.location:}");
 		Map<String, Object> bootstrapMap = new HashMap<>();
 		bootstrapMap.put("spring.config.name", configName);
-		// if an app (or test) uses spring.main.web-application-type=reactive, bootstrap will fail
-		// force the environment to use none, because if though it is set below in the builder
+		// if an app (or test) uses spring.main.web-application-type=reactive, bootstrap
+		// will fail
+		// force the environment to use none, because if though it is set below in the
+		// builder
 		// the environment overrides it
 		bootstrapMap.put("spring.main.web-application-type", "none");
 		if (StringUtils.hasText(configLocation)) {
@@ -169,7 +181,7 @@ public class BootstrapApplicationListener
 				.registerShutdownHook(false).logStartupInfo(false)
 				.web(WebApplicationType.NONE);
 		final SpringApplication builderApplication = builder.application();
-		if(builderApplication.getMainApplicationClass() == null){
+		if (builderApplication.getMainApplicationClass() == null) {
 			// gh_425:
 			// SpringApplication cannot deduce the MainApplicationClass here
 			// if it is booted from SpringBootServletInitializer due to the
@@ -225,18 +237,14 @@ public class BootstrapApplicationListener
 			}
 			else {
 				PropertySource<?> target = environment.get(name);
-				if (target instanceof MapPropertySource) {
+				if (target instanceof MapPropertySource && target != source
+						&& source instanceof MapPropertySource) {
 					Map<String, Object> targetMap = ((MapPropertySource) target)
 							.getSource();
-					if (target != source) {
-						if (source instanceof MapPropertySource) {
-							Map<String, Object> map = ((MapPropertySource) source)
-									.getSource();
-							for (String key : map.keySet()) {
-								if (!target.containsProperty(key)) {
-									targetMap.put(key, map.get(key));
-								}
-							}
+					Map<String, Object> map = ((MapPropertySource) source).getSource();
+					for (String key : map.keySet()) {
+						if (!target.containsProperty(key)) {
+							targetMap.put(key, map.get(key));
 						}
 					}
 				}
@@ -303,13 +311,11 @@ public class BootstrapApplicationListener
 
 	private void addBootstrapDecryptInitializer(SpringApplication application) {
 		DelegatingEnvironmentDecryptApplicationInitializer decrypter = null;
-		for (ApplicationContextInitializer<?> initializer : application
-				.getInitializers()) {
-			if (initializer instanceof EnvironmentDecryptApplicationInitializer) {
+		for (ApplicationContextInitializer<?> ini : application.getInitializers()) {
+			if (ini instanceof EnvironmentDecryptApplicationInitializer) {
 				@SuppressWarnings("unchecked")
-				ApplicationContextInitializer<ConfigurableApplicationContext> delegate = (ApplicationContextInitializer<ConfigurableApplicationContext>) initializer;
-				decrypter = new DelegatingEnvironmentDecryptApplicationInitializer(
-						delegate);
+				ApplicationContextInitializer del = (ApplicationContextInitializer) ini;
+				decrypter = new DelegatingEnvironmentDecryptApplicationInitializer(del);
 			}
 		}
 		if (decrypter != null) {
@@ -327,13 +333,13 @@ public class BootstrapApplicationListener
 		return result;
 	}
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
 	@Override
 	public int getOrder() {
 		return this.order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	private static class AncestorInitializer implements
@@ -341,7 +347,7 @@ public class BootstrapApplicationListener
 
 		private ConfigurableApplicationContext parent;
 
-		public AncestorInitializer(ConfigurableApplicationContext parent) {
+		AncestorInitializer(ConfigurableApplicationContext parent) {
 			this.parent = parent;
 		}
 
@@ -397,7 +403,7 @@ public class BootstrapApplicationListener
 
 		private ApplicationContextInitializer<ConfigurableApplicationContext> delegate;
 
-		public DelegatingEnvironmentDecryptApplicationInitializer(
+		DelegatingEnvironmentDecryptApplicationInitializer(
 				ApplicationContextInitializer<ConfigurableApplicationContext> delegate) {
 			this.delegate = delegate;
 		}
@@ -413,12 +419,20 @@ public class BootstrapApplicationListener
 			extends SystemEnvironmentPropertySource {
 
 		private final CompositePropertySource sources;
+
 		private final List<String> names = new ArrayList<>();
 
-		public ExtendedDefaultPropertySource(String name,
-				PropertySource<?> propertySource) {
+		ExtendedDefaultPropertySource(String name, PropertySource<?> propertySource) {
 			super(name, findMap(propertySource));
 			this.sources = new CompositePropertySource(name);
+		}
+
+		@SuppressWarnings("unchecked")
+		private static Map<String, Object> findMap(PropertySource<?> propertySource) {
+			if (propertySource instanceof MapPropertySource) {
+				return (Map<String, Object>) propertySource.getSource();
+			}
+			return new LinkedHashMap<String, Object>();
 		}
 
 		public CompositePropertySource getPropertySources() {
@@ -461,21 +475,14 @@ public class BootstrapApplicationListener
 			return names.toArray(new String[0]);
 		}
 
-		@SuppressWarnings("unchecked")
-		private static Map<String, Object> findMap(PropertySource<?> propertySource) {
-			if (propertySource instanceof MapPropertySource) {
-				return (Map<String, Object>) propertySource.getSource();
-			}
-			return new LinkedHashMap<String, Object>();
-		}
-
 	}
 
-	private static class CloseContextOnFailureApplicationListener implements SmartApplicationListener {
+	private static class CloseContextOnFailureApplicationListener
+			implements SmartApplicationListener {
 
 		private final ConfigurableApplicationContext context;
 
-		public CloseContextOnFailureApplicationListener(ConfigurableApplicationContext context) {
+		CloseContextOnFailureApplicationListener(ConfigurableApplicationContext context) {
 			this.context = context;
 		}
 
@@ -491,6 +498,7 @@ public class BootstrapApplicationListener
 			}
 
 		}
+
 	}
 
 }

@@ -24,12 +24,18 @@ public class RefreshAutoConfigurationTests {
 	@Rule
 	public OutputCapture output = new OutputCapture();
 
+	private static ConfigurableApplicationContext getApplicationContext(
+			WebApplicationType type, Class<?> configuration, String... properties) {
+		return new SpringApplicationBuilder(configuration).web(type)
+				.properties(properties).properties("server.port=0").run();
+	}
+
 	@Test
 	public void noWarnings() {
 		try (ConfigurableApplicationContext context = getApplicationContext(
 				WebApplicationType.NONE, Config.class)) {
 			assertThat(context.containsBean("refreshScope")).isTrue();
-			assertThat(output.toString()).doesNotContain("WARN");
+			assertThat(this.output.toString()).doesNotContain("WARN");
 		}
 	}
 
@@ -63,12 +69,6 @@ public class RefreshAutoConfigurationTests {
 		}
 	}
 
-	private static ConfigurableApplicationContext getApplicationContext(
-			WebApplicationType type, Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).web(type)
-				.properties(properties).properties("server.port=0").run();
-	}
-
 	@Configuration
 	@EnableAutoConfiguration(exclude = DataSourceAutoConfiguration.class)
 	@EnableConfigurationProperties(ConfigProps.class)
@@ -78,7 +78,9 @@ public class RefreshAutoConfigurationTests {
 
 	@ConfigurationProperties("config")
 	static class ConfigProps {
+
 		private String foo;
+
 		private boolean sealed;
 
 		public String getFoo() {
@@ -92,5 +94,7 @@ public class RefreshAutoConfigurationTests {
 			this.foo = foo;
 			this.sealed = true;
 		}
+
 	}
+
 }

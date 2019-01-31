@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,11 @@ import org.springframework.cloud.client.ServiceInstance;
  */
 public class CachingServiceInstanceSupplier implements ServiceInstanceSupplier {
 
-	public static final String SERVICE_INSTANCE_CACHE_NAME = CachingServiceInstanceSupplier.class.getSimpleName()+"Cache";
+	/**
+	 * Name of the service cache instance.
+	 */
+	public static final String SERVICE_INSTANCE_CACHE_NAME = CachingServiceInstanceSupplier.class
+			.getSimpleName() + "Cache";
 
 	private final ServiceInstanceSupplier delegate;
 	private final Flux<ServiceInstance> serviceInstances;
@@ -40,7 +44,8 @@ public class CachingServiceInstanceSupplier implements ServiceInstanceSupplier {
 	public CachingServiceInstanceSupplier(ServiceInstanceSupplier delegate, CacheManager cacheManager) {
 		this.delegate = delegate;
 		this.serviceInstances = CacheFlux.lookup(key -> {
-			Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME); //TODO: configurable cache name
+			Cache cache = cacheManager
+					.getCache(SERVICE_INSTANCE_CACHE_NAME); //TODO: configurable cache name
 			List<ServiceInstance> list = cache.get(key, List.class);
 			if (list == null || list.isEmpty()) {
 				return Mono.empty();
@@ -55,7 +60,8 @@ public class CachingServiceInstanceSupplier implements ServiceInstanceSupplier {
 						.cast(ServiceInstance.class)
 						.collectList()
 						.doOnNext(instances -> {
-							Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
+							Cache cache = cacheManager
+									.getCache(SERVICE_INSTANCE_CACHE_NAME);
 							cache.put(key, instances);
 						})
 						.then());

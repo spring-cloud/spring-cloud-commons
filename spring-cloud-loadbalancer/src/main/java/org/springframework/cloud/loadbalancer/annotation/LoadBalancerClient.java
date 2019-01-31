@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +42,10 @@ import org.springframework.core.annotation.AliasFor;
 public @interface LoadBalancerClient {
 
 	/**
-	 * Synonym for name (the name of the client)
+	 * Synonym for name (the name of the client).
 	 *
 	 * @see #name()
+	 * @return the name of the load balancer client
 	 */
 	@AliasFor("name")
 	String value() default "";
@@ -52,6 +53,8 @@ public @interface LoadBalancerClient {
 	/**
 	 * The name of the load balancer client, uniquely identifying a set of client resources,
 	 * including a load balancer.
+	 *
+	 * @return the name of the load balancer client
 	 */
 	@AliasFor("value")
 	String name() default "";
@@ -61,6 +64,7 @@ public @interface LoadBalancerClient {
 	 * <code>@Bean</code> definition for the pieces that make up the client.
 	 *
 	 * @see LoadBalancerClientConfiguration for the defaults
+	 * @return configuration classes for the load balancer client.
 	 */
 	Class<?>[] configuration() default {};
 

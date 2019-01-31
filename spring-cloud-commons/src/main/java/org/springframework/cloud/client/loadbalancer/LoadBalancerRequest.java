@@ -21,10 +21,11 @@ import org.springframework.cloud.client.ServiceInstance;
 /**
  * Simple interface used by LoadBalancerClient to apply metrics or pre and post
  * actions around load balancer requests.
+ * @param <T> type of the response
  * @author Spencer Gibb
  */
 public interface LoadBalancerRequest<T> {
 
-	public T apply(ServiceInstance instance) throws Exception;
+	T apply(ServiceInstance instance) throws Exception;
 
 }

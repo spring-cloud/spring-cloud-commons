@@ -19,25 +19,28 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Spencer Gibb
  */
 @RunWith(ModifiedClassPathRunner.class)
-@ClassPathExclusions({"spring-boot-actuator-autoconfigure-*.jar", "spring-boot-starter-actuator-*.jar"})
+@ClassPathExclusions({ "spring-boot-actuator-autoconfigure-*.jar",
+		"spring-boot-starter-actuator-*.jar" })
 public class RefreshAutoConfigurationMoreClassPathTests {
 
 	@Rule
 	public OutputCapture outputCapture = new OutputCapture();
 
-	@Test
-	public void unknownClassProtected() {
-		try (ConfigurableApplicationContext context = getApplicationContext(
-				Config.class, "debug=true")) {
-			String output = this.outputCapture.toString();
-			assertThat(output).doesNotContain("Failed to introspect annotations on [class org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration")
-					.doesNotContain("TypeNotPresentExceptionProxy");
-		}
-	}
-
 	private static ConfigurableApplicationContext getApplicationContext(
 			Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE).properties(properties).run();
+		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE)
+				.properties(properties).run();
+	}
+
+	@Test
+	public void unknownClassProtected() {
+		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
+				"debug=true")) {
+			String output = this.outputCapture.toString();
+			assertThat(output).doesNotContain(
+					"Failed to introspect annotations on [class org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration")
+					.doesNotContain("TypeNotPresentExceptionProxy");
+		}
 	}
 
 	@Configuration
@@ -45,4 +48,5 @@ public class RefreshAutoConfigurationMoreClassPathTests {
 	static class Config {
 
 	}
+
 }

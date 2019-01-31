@@ -1,7 +1,7 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,24 +70,23 @@ public class EncryptionBootstrapConfigurationTests {
 		context.close();
 	}
 
-
 	@Test
 	public void rsaProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
-				EncryptionBootstrapConfiguration.class).web(WebApplicationType.NONE).properties(
-				"encrypt.key-store.location:classpath:/server.jks",
-				"encrypt.key-store.password:letmein",
-				"encrypt.key-store.alias:mytestkey", "encrypt.key-store.secret:changeme",
-				"encrypt.rsa.strong:true",
-				"encrypt.rsa.salt:foobar")
-				.run();
+				EncryptionBootstrapConfiguration.class)
+						.web(WebApplicationType.NONE)
+						.properties("encrypt.key-store.location:classpath:/server.jks",
+								"encrypt.key-store.password:letmein",
+								"encrypt.key-store.alias:mytestkey",
+								"encrypt.key-store.secret:changeme",
+								"encrypt.rsa.strong:true", "encrypt.rsa.salt:foobar")
+						.run();
 		RsaProperties properties = context.getBean(RsaProperties.class);
 		assertEquals("foobar", properties.getSalt());
 		assertTrue(properties.isStrong());
 		assertEquals(RsaAlgorithm.DEFAULT, properties.getAlgorithm());
 		context.close();
 	}
-
 
 	@Test
 	public void nonExistentKeystoreLocationShouldNotBeAllowed() {
@@ -107,4 +106,5 @@ public class EncryptionBootstrapConfigurationTests {
 			assertThat(e).hasRootCauseInstanceOf(IllegalStateException.class);
 		}
 	}
+
 }

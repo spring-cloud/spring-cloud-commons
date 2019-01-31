@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -26,7 +26,8 @@ import org.springframework.boot.test.rule.OutputCapture;
  */
 public class CompatibilityVerifierTests {
 
-	@Rule public OutputCapture outputCapture = new OutputCapture();
+	@Rule
+	public OutputCapture outputCapture = new OutputCapture();
 
 	@Test
 	public void should_not_print_the_report_when_no_errors_were_found() {
@@ -34,7 +35,8 @@ public class CompatibilityVerifierTests {
 
 		verifier.verifyDependencies();
 
-		BDDAssertions.then(outputCapture.toString()).doesNotContain("SPRING CLOUD VERIFICATION FAILED");
+		BDDAssertions.then(this.outputCapture.toString())
+			.doesNotContain("SPRING CLOUD VERIFICATION FAILED");
 	}
 
 	@Test
@@ -43,13 +45,15 @@ public class CompatibilityVerifierTests {
 		list.add(new CompatibilityVerifier() {
 			@Override
 			public VerificationResult verify() {
-				return VerificationResult.notCompatible("Wrong Boot version", "Use Boot version 1.2");
+				return VerificationResult
+					.notCompatible("Wrong Boot version", "Use Boot version 1.2");
 			}
 		});
 		list.add(new CompatibilityVerifier() {
 			@Override
 			public VerificationResult verify() {
-				return VerificationResult.notCompatible("Wrong JDK version", "Use JDK 25");
+				return VerificationResult
+					.notCompatible("Wrong JDK version", "Use JDK 25");
 			}
 		});
 		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(list);
@@ -57,7 +61,8 @@ public class CompatibilityVerifierTests {
 		try {
 			verifier.verifyDependencies();
 			BDDAssertions.fail("should fail");
-		} catch (CompatibilityNotMetException ex) {
+		}
+		catch (CompatibilityNotMetException ex) {
 			BDDAssertions.then(ex.results).hasSize(2);
 		}
 	}

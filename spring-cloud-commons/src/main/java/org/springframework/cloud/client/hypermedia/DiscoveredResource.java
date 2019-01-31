@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.hypermedia;
 
 import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
@@ -37,12 +39,9 @@ public class DiscoveredResource implements RemoteResource {
 
 	private final ServiceInstanceProvider provider;
 	private final TraversalDefinition traversal;
-	
-
+	private final Logger log = LoggerFactory.getLogger(DiscoveredResource.class);
 	private RestOperations restOperations = new RestTemplate();
 	private Link link = null;
-
-	private final Logger log = LoggerFactory.getLogger(DiscoveredResource.class);
 
 
 	public DiscoveredResource(ServiceInstanceProvider provider, TraversalDefinition traversal) {
@@ -50,30 +49,30 @@ public class DiscoveredResource implements RemoteResource {
 		this.traversal = traversal;
 	}
 
+	public ServiceInstanceProvider getProvider() {
+		return this.provider;
+	}
+
+	public TraversalDefinition getTraversal() {
+		return this.traversal;
+	}
+
+	public RestOperations getRestOperations() {
+		return this.restOperations;
+	}
+
 	/**
 	 * Configures the {@link RestOperations} to use to execute the traversal and verifying HEAD calls.
-	 * 
+	 *
 	 * @param restOperations Can be {@literal null}; resorts to a default {@link RestTemplate} in that case.
 	 */
 	public void setRestOperations(RestOperations restOperations) {
 		this.restOperations = restOperations == null ? new RestTemplate() : restOperations;
 	}
 
-	public ServiceInstanceProvider getProvider() {
-		return provider;
-	}
-
-	public TraversalDefinition getTraversal() {
-		return traversal;
-	}
-
-	public RestOperations getRestOperations() {
-		return restOperations;
-	}
-
 	@Override
 	public Link getLink() {
-		return link;
+		return this.link;
 	}
 
 	public void setLink(Link link) {
@@ -84,14 +83,14 @@ public class DiscoveredResource implements RemoteResource {
 	 * Verifies the link to the current.
 	 */
 	public void verifyOrDiscover() {
-		this.link = link == null ? discoverLink() : verify(link);
+		this.link = this.link == null ? discoverLink() : verify(this.link);
 	}
 
 	/**
 	 * Verifies the given {@link Link} by issuing an HTTP HEAD request to the resource.
-	 * 
+	 *
 	 * @param link Must not be {@literal null}.
-	 * @return
+	 * @return - link to the resource
 	 */
 	private Link verify(Link link) {
 
@@ -101,15 +100,16 @@ public class DiscoveredResource implements RemoteResource {
 
 			String uri = link.expand().getHref();
 
-			log.debug("Verifying link pointing to {}…", uri);
-			restOperations.headForHeaders(uri);
-			log.debug("Successfully verified link!");
+			this.log.debug("Verifying link pointing to {}…", uri);
+			this.restOperations.headForHeaders(uri);
+			this.log.debug("Successfully verified link!");
 
 			return link;
 
-		} catch (RestClientException o_O) {
+		}
+		catch (RestClientException o_O) {
 
-			log.debug("Verification failed, marking as outdated!");
+			this.log.debug("Verification failed, marking as outdated!");
 			return null;
 		}
 	}
@@ -118,7 +118,7 @@ public class DiscoveredResource implements RemoteResource {
 
 		try {
 
-			ServiceInstance service = provider.getServiceInstance();
+			ServiceInstance service = this.provider.getServiceInstance();
 
 			if (service == null) {
 				return null;
@@ -127,19 +127,20 @@ public class DiscoveredResource implements RemoteResource {
 			URI uri = service.getUri();
 			String serviceId = service.getServiceId();
 
-			log.debug("Discovered {} system at {}. Discovering resource…", serviceId, uri);
+			this.log.debug("Discovered {} system at {}. Discovering resource…", serviceId, uri);
 
 			Traverson traverson = new Traverson(uri, MediaTypes.HAL_JSON);
-			Link link = traversal.buildTraversal(traverson).asTemplatedLink();
+			Link link = this.traversal.buildTraversal(traverson).asTemplatedLink();
 
-			log.debug("Found link pointing to {}.", link.getHref());
+			this.log.debug("Found link pointing to {}.", link.getHref());
 
 			return link;
 
-		} catch (RuntimeException o_O) {
+		}
+		catch (RuntimeException o_O) {
 
 			this.link = null;
-			log.debug("Target system unavailable. Got: ", o_O.getMessage());
+			this.log.debug("Target system unavailable. Got: ", o_O.getMessage());
 
 			return null;
 		}

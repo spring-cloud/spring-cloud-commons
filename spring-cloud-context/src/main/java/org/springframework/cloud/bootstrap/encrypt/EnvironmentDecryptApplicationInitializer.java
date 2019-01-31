@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.bootstrap.encrypt;
 
 import java.util.ArrayList;
@@ -51,30 +52,38 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 public class EnvironmentDecryptApplicationInitializer implements
 		ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
+	/**
+	 * Name of the decrypted property source.
+	 */
 	public static final String DECRYPTED_PROPERTY_SOURCE_NAME = "decrypted";
 
+	/**
+	 * Name of the decrypted bootstrap property source.
+	 */
 	public static final String DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME = "decryptedBootstrap";
 
-	private int order = Ordered.HIGHEST_PRECEDENCE + 15;
+	private static final Pattern COLLECTION_PROPERTY = Pattern
+			.compile("(\\S+)?\\[(\\d+)\\](\\.\\S+)?");
 
 	private static Log logger = LogFactory
 			.getLog(EnvironmentDecryptApplicationInitializer.class);
+
+	private int order = Ordered.HIGHEST_PRECEDENCE + 15;
 
 	private TextEncryptor encryptor;
 
 	private boolean failOnError = true;
 
+	public EnvironmentDecryptApplicationInitializer(TextEncryptor encryptor) {
+		this.encryptor = encryptor;
+	}
+
 	/**
 	 * Strategy to determine how to handle exceptions during decryption.
-	 *
 	 * @param failOnError The flag value (default true).
 	 */
 	public void setFailOnError(boolean failOnError) {
 		this.failOnError = failOnError;
-	}
-
-	public EnvironmentDecryptApplicationInitializer(TextEncryptor encryptor) {
-		this.encryptor = encryptor;
 	}
 
 	@Override
@@ -177,9 +186,6 @@ public class EnvironmentDecryptApplicationInitializer implements
 		return overrides;
 	}
 
-	private static final Pattern COLLECTION_PROPERTY = Pattern
-			.compile("(\\S+)?\\[(\\d+)\\](\\.\\S+)?");
-
 	private void collectEncryptedProperties(PropertySource<?> source,
 			Map<String, Object> overrides) {
 
@@ -190,7 +196,8 @@ public class EnvironmentDecryptApplicationInitializer implements
 				collectEncryptedProperties(nested, overrides);
 			}
 
-		} else if (source instanceof EnumerablePropertySource) {
+		}
+		else if (source instanceof EnumerablePropertySource) {
 			Map<String, Object> otherCollectionProperties = new LinkedHashMap<>();
 			boolean sourceHasDecryptedCollection = false;
 
@@ -204,11 +211,13 @@ public class EnvironmentDecryptApplicationInitializer implements
 						if (COLLECTION_PROPERTY.matcher(key).matches()) {
 							sourceHasDecryptedCollection = true;
 						}
-					} else if (COLLECTION_PROPERTY.matcher(key).matches()) {
+					}
+					else if (COLLECTION_PROPERTY.matcher(key).matches()) {
 						// put non-encrypted properties so merging of index properties
 						// happens correctly
 						otherCollectionProperties.put(key, value);
-					} else {
+					}
+					else {
 						overrides.remove(key);
 					}
 				}

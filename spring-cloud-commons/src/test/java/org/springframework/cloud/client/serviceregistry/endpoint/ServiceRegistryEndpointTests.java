@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2018 the original author or authors.
+ * Copyright 2006-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
@@ -35,8 +37,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -54,7 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class ServiceRegistryEndpointTests {
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
-	
+
 	private static final String UPDATED_STATUS = "updatedstatus";
 	private static final String MYSTATUS = "mystatus";
 
@@ -77,7 +77,8 @@ public class ServiceRegistryEndpointTests {
 				.content(new ObjectMapper().writeValueAsString(status))
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
-		assertThat(this.serviceRegistry.getUpdatedStatus().get()).isEqualTo(UPDATED_STATUS);
+		assertThat(this.serviceRegistry.getUpdatedStatus().get())
+				.isEqualTo(UPDATED_STATUS);
 	}
 
 	@EnableAutoConfiguration
@@ -125,7 +126,7 @@ public class ServiceRegistryEndpointTests {
 
 		@Bean
 		ServiceRegistry serviceRegistry() {
-			return new TestServiceRegistry() ;
+			return new TestServiceRegistry();
 		}
 	}
 
@@ -150,7 +151,7 @@ public class ServiceRegistryEndpointTests {
 
 		@Override
 		public void setStatus(Registration registration, String status) {
-			updatedStatus.compareAndSet(null, status);
+			this.updatedStatus.compareAndSet(null, status);
 		}
 
 		@Override
@@ -159,7 +160,7 @@ public class ServiceRegistryEndpointTests {
 		}
 
 		public AtomicReference<String> getUpdatedStatus() {
-			return updatedStatus;
+			return this.updatedStatus;
 		}
 	}
 }

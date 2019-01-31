@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationEvent;
  * discovery service.
  *
  * @author Spencer Gibb
+ * @param <T> - type of configuration
  */
 @SuppressWarnings("serial")
 public class InstanceRegisteredEvent<T> extends ApplicationEvent {

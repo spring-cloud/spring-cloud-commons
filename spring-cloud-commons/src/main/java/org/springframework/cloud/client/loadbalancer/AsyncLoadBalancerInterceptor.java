@@ -16,15 +16,15 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.io.IOException;
+import java.net.URI;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.AsyncClientHttpRequestExecution;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.concurrent.ListenableFuture;
-
-import java.io.IOException;
-import java.net.URI;
 
 /**
  * @author Rob Worsnop
@@ -39,20 +39,20 @@ public class AsyncLoadBalancerInterceptor implements AsyncClientHttpRequestInter
 
 	@Override
 	public ListenableFuture<ClientHttpResponse> intercept(final HttpRequest request, final byte[] body,
-			final AsyncClientHttpRequestExecution execution) throws IOException {
+		final AsyncClientHttpRequestExecution execution) throws IOException {
 		final URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
 		return this.loadBalancer.execute(serviceName,
-				new LoadBalancerRequest<ListenableFuture<ClientHttpResponse>>() {
-					@Override
-					public ListenableFuture<ClientHttpResponse> apply(final ServiceInstance instance)
-							throws Exception {
-						HttpRequest serviceRequest = new ServiceRequestWrapper(request,
-								instance, loadBalancer);
-						return execution.executeAsync(serviceRequest, body);
-					}
+			new LoadBalancerRequest<ListenableFuture<ClientHttpResponse>>() {
+				@Override
+				public ListenableFuture<ClientHttpResponse> apply(final ServiceInstance instance)
+					throws Exception {
+					HttpRequest serviceRequest = new ServiceRequestWrapper(request,
+						instance, AsyncLoadBalancerInterceptor.this.loadBalancer);
+					return execution.executeAsync(serviceRequest, body);
+				}
 
-				});
+			});
 	}
 }
 
