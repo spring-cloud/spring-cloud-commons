@@ -17,16 +17,19 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Spencer Gibb
  */
 @RunWith(ModifiedClassPathRunner.class)
-@ClassPathExclusions({"spring-boot-actuator-*.jar", "spring-boot-starter-actuator-*.jar"})
+@ClassPathExclusions({ "spring-boot-actuator-*.jar",
+		"spring-boot-starter-actuator-*.jar" })
 public class ServiceRegistryAutoConfigurationTests {
 
 	@Test
 	public void runsWithoutActuator() {
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfig.class).web(WebApplicationType.NONE).run();
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(
+				TestConfig.class).web(WebApplicationType.NONE).run();
 		try {
 			context.getBean("serviceRegistryEndpoint");
 			fail("found a bean that shouldn't be there");
-		} catch (NoSuchBeanDefinitionException e) {
+		}
+		catch (NoSuchBeanDefinitionException e) {
 			// success
 		}
 	}
@@ -35,4 +38,5 @@ public class ServiceRegistryAutoConfigurationTests {
 	protected static class TestConfig {
 
 	}
+
 }

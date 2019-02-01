@@ -19,20 +19,27 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.reactivestreams.Publisher;
 
 /**
+ * Reactive load balancer.
+ *
+ * @param <T> type of the response
  * @author Spencer Gibb
  */
 public interface ReactiveLoadBalancer<T> {
 
+	/**
+	 * Default implementation of a request.
+	 */
 	Request REQUEST = new DefaultRequest();
 
 	/**
-	 * Choose the next server based on the load balancing algorithm
-	 * @param request
-	 * @return
+	 * Choose the next server based on the load balancing algorithm.
+	 * @param request - incoming request
+	 * @return publisher for the response
 	 */
 	Publisher<Response<T>> choose(Request request);
 
-	default Publisher<Response<T>> choose() { //conflicting name
+	default Publisher<Response<T>> choose() { // conflicting name
 		return choose(REQUEST);
 	}
+
 }

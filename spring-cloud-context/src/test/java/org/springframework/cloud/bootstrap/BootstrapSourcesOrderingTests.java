@@ -26,6 +26,7 @@ public class BootstrapSourcesOrderingTests {
 	@EnableAutoConfiguration
 	@Configuration
 	protected static class Application {
+
 	}
 
 }

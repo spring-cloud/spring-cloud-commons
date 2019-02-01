@@ -26,11 +26,12 @@ import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 
 /**
- * Gathers all instances of DiscoveryHealthIndicator from a DiscoveryClient
- * implementation and aggregates the statuses.
+ * Gathers all instances of DiscoveryHealthIndicator from a DiscoveryClient implementation
+ * and aggregates the statuses.
+ *
  * @author Spencer Gibb
  */
-//TODO: do we need this? Can they just be independent HealthIndicators?
+// TODO: do we need this? Can they just be independent HealthIndicators?
 public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator {
 
 	private final ArrayList<Holder> healthIndicators = new ArrayList<>();
@@ -42,15 +43,19 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 		for (DiscoveryHealthIndicator indicator : indicators) {
 			Holder holder = new Holder(indicator);
 			addHealthIndicator(indicator.getName(), holder);
-			healthIndicators.add(holder);
+			this.healthIndicators.add(holder);
 		}
 	}
 
 	public ArrayList<Holder> getHealthIndicators() {
-		return healthIndicators;
+		return this.healthIndicators;
 	}
 
+	/**
+	 * Holder for the Health Indicator.
+	 */
 	public static class Holder implements HealthIndicator {
+
 		private DiscoveryHealthIndicator delegate;
 
 		public Holder(DiscoveryHealthIndicator delegate) {
@@ -63,8 +68,9 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 		}
 
 		public DiscoveryHealthIndicator getDelegate() {
-			return delegate;
+			return this.delegate;
 		}
+
 	}
 
 }

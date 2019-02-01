@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,20 +32,23 @@ import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientF
 public class DiscoveryClientServiceInstanceSupplier implements ServiceInstanceSupplier {
 
 	private final DiscoveryClient delegate;
+
 	private final String serviceId;
 
-	public DiscoveryClientServiceInstanceSupplier(DiscoveryClient delegate, Environment environment) {
+	public DiscoveryClientServiceInstanceSupplier(DiscoveryClient delegate,
+			Environment environment) {
 		this.delegate = delegate;
-		serviceId = environment.getProperty(PROPERTY_NAME);
+		this.serviceId = environment.getProperty(PROPERTY_NAME);
 	}
 
 	@Override
 	public Flux<ServiceInstance> get() {
-		List<ServiceInstance> instances = delegate.getInstances(serviceId);
+		List<ServiceInstance> instances = this.delegate.getInstances(this.serviceId);
 		return Flux.fromIterable(instances);
 	}
 
 	public String getServiceId() {
 		return this.serviceId;
 	}
+
 }

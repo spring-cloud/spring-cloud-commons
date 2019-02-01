@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.cloud.client.hypermedia;
 
 import org.junit.Test;
+
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.DefaultServiceInstance;
@@ -37,6 +38,12 @@ import static org.junit.Assert.assertThat;
  * @author Tim Ysewyn
  */
 public class CloudHypermediaAutoConfigurationIntegrationTests {
+
+	private static ConfigurableApplicationContext getApplicationContext(
+			Class<?> configuration) {
+		return new SpringApplicationBuilder(configuration).properties("server.port=0")
+				.run();
+	}
 
 	@Test
 	public void picksUpHypermediaProperties() {
@@ -86,15 +93,10 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 		}
 	}
 
-	private static ConfigurableApplicationContext getApplicationContext(
-			Class<?> configuration) {
-		return new SpringApplicationBuilder(configuration).properties("server.port=0")
-				.run();
-	}
-
 	@Configuration
 	@EnableAutoConfiguration
 	static class Config {
+
 	}
 
 	@Configuration
@@ -105,8 +107,11 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 		public RemoteResource resource() {
 
 			ServiceInstanceProvider provider = new StaticServiceInstanceProvider(
-					new DefaultServiceInstance("instance", "service", "localhost", 80, false));
+					new DefaultServiceInstance("instance", "service", "localhost", 80,
+							false));
 			return new DiscoveredResource(provider, traverson -> traverson.follow("rel"));
 		}
+
 	}
+
 }

@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.mock.env.MockEnvironment;
@@ -39,7 +40,9 @@ public class EnableDiscoveryClientImportSelectorTests {
 	public void autoRegistrationIsEnabled() {
 		configureAnnotation(true);
 		String[] imports = this.importSelector.selectImports(this.annotationMetadata);
-		assertTrue(environment.getProperty("spring.cloud.service-registry.auto-registration.enabled", Boolean.class, true));
+		assertTrue(this.environment.getProperty(
+				"spring.cloud.service-registry.auto-registration.enabled", Boolean.class,
+				true));
 		assertThat(imports).hasSize(1);
 	}
 
@@ -47,7 +50,9 @@ public class EnableDiscoveryClientImportSelectorTests {
 	public void autoRegistrationIsDisabled() {
 		configureAnnotation(false);
 		String[] imports = this.importSelector.selectImports(this.annotationMetadata);
-		assertFalse(environment.getProperty("spring.cloud.service-registry.auto-registration.enabled", Boolean.class));
+		assertFalse(this.environment.getProperty(
+				"spring.cloud.service-registry.auto-registration.enabled",
+				Boolean.class));
 		assertThat(imports).isEmpty();
 	}
 
@@ -59,4 +64,5 @@ public class EnableDiscoveryClientImportSelectorTests {
 		given(this.annotationAttributes.getBoolean("autoRegister"))
 				.willReturn(autoRegistration);
 	}
+
 }

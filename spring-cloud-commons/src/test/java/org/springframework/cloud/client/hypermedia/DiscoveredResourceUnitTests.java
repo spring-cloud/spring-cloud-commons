@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2018 the original author or authors.
+ * Copyright 2015-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.client.Traverson;
@@ -45,24 +46,32 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class DiscoveredResourceUnitTests {
 
-	@Mock ServiceInstanceProvider provider;
-	@Mock TraversalDefinition traversal;
-	@Mock TraversalBuilder builder;
-	@Mock RestOperations operations;
+	@Mock
+	ServiceInstanceProvider provider;
+
+	@Mock
+	TraversalDefinition traversal;
+
+	@Mock
+	TraversalBuilder builder;
+
+	@Mock
+	RestOperations operations;
 
 	DiscoveredResource resource;
 
 	@Before
 	public void setUp() {
-		when(traversal.buildTraversal(Matchers.any(Traverson.class))).thenReturn(builder);
+		when(this.traversal.buildTraversal(Matchers.any(Traverson.class)))
+				.thenReturn(this.builder);
 
-		this.resource = new DiscoveredResource(provider, traversal);
-		this.resource.setRestOperations(operations);
+		this.resource = new DiscoveredResource(this.provider, this.traversal);
+		this.resource.setRestOperations(this.operations);
 	}
 
 	@Test
 	public void isUndiscoveredByDefault() {
-		assertThat(resource.getLink(), is(nullValue()));
+		assertThat(this.resource.getLink(), is(nullValue()));
 	}
 
 	@Test
@@ -70,14 +79,15 @@ public class DiscoveredResourceUnitTests {
 
 		Link link = new Link("target", "rel");
 
-		when(provider.getServiceInstance()).thenReturn(new DefaultServiceInstance("instance", "service", "localhost", 8080, false));
-		when(builder.asTemplatedLink()).thenReturn(link);
+		when(this.provider.getServiceInstance()).thenReturn(new DefaultServiceInstance(
+				"instance", "service", "localhost", 8080, false));
+		when(this.builder.asTemplatedLink()).thenReturn(link);
 
-		resource.verifyOrDiscover();
+		this.resource.verifyOrDiscover();
 
-		assertThat(resource.getLink(), is(link));
-		verify(provider, times(1)).getServiceInstance();
-		verify(traversal, times(1)).buildTraversal(Matchers.any(Traverson.class));
+		assertThat(this.resource.getLink(), is(link));
+		verify(this.provider, times(1)).getServiceInstance();
+		verify(this.traversal, times(1)).buildTraversal(Matchers.any(Traverson.class));
 	}
 
 	@Test
@@ -85,10 +95,10 @@ public class DiscoveredResourceUnitTests {
 
 		verificationTriggersDiscovery();
 
-		resource.verifyOrDiscover();
+		this.resource.verifyOrDiscover();
 
-		assertThat(resource.getLink(), is(notNullValue()));
-		verify(operations, times(1)).headForHeaders(anyString());
+		assertThat(this.resource.getLink(), is(notNullValue()));
+		verify(this.operations, times(1)).headForHeaders(anyString());
 	}
 
 	@Test
@@ -96,19 +106,21 @@ public class DiscoveredResourceUnitTests {
 
 		verificationTriggersDiscovery();
 
-		doThrow(RestClientException.class).when(operations).headForHeaders(anyString());
-		resource.verifyOrDiscover();
+		doThrow(RestClientException.class).when(this.operations)
+				.headForHeaders(anyString());
+		this.resource.verifyOrDiscover();
 
-		assertThat(resource.getLink(), is(nullValue()));
+		assertThat(this.resource.getLink(), is(nullValue()));
 	}
 
 	@Test
 	public void failedDiscoveryTraversalCausesLinkToStayNull() {
 
-		doThrow(RuntimeException.class).when(provider).getServiceInstance();
+		doThrow(RuntimeException.class).when(this.provider).getServiceInstance();
 
-		resource.verifyOrDiscover();
+		this.resource.verifyOrDiscover();
 
-		assertThat(resource.getLink(), is(nullValue()));
+		assertThat(this.resource.getLink(), is(nullValue()));
 	}
+
 }

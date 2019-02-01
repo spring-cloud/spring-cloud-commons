@@ -15,13 +15,14 @@
  */
 package org.springframework.cloud.bootstrap.encrypt;
 
+import java.nio.charset.Charset;
+
 import org.junit.Test;
+
 import org.springframework.cloud.context.encrypt.EncryptorFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.util.StreamUtils;
-
-import java.nio.charset.Charset;
 
 import static org.junit.Assert.assertEquals;
 
@@ -49,4 +50,5 @@ public class EncryptorFactoryTests {
 				+ "MIIEowIBAAKCAQEAwClFgrRa/PUHPIJr9gvIPL6g6Rjp/TVZmVNOf2fL96DYbkj5\n";
 		new EncryptorFactory().create(key);
 	}
+
 }

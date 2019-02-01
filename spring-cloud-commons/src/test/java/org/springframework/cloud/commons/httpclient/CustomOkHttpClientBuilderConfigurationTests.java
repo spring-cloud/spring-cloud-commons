@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  */
 package org.springframework.cloud.commons.httpclient;
 
-import okhttp3.OkHttpClient;
-
 import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -44,7 +45,7 @@ public class CustomOkHttpClientBuilderConfigurationTests {
 
 	@Test
 	public void testCustomBuilder() {
-		OkHttpClient.Builder builder = okHttpClientFactory.createBuilder(false);
+		OkHttpClient.Builder builder = this.okHttpClientFactory.createBuilder(false);
 		Integer timeout = getField(builder, "connectTimeout");
 		assertEquals(1, timeout.intValue());
 	}
@@ -73,5 +74,7 @@ class CustomOkHttpClientBuilderApplication {
 		public OkHttpClient.Builder builder() {
 			return new OkHttpClient.Builder().connectTimeout(1, TimeUnit.MILLISECONDS);
 		}
+
 	}
+
 }

@@ -4,6 +4,7 @@ import java.net.URI;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -85,5 +86,7 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 	@Configuration
 	@EnableAutoConfiguration
 	public static class SampleConfig {
+
 	}
+
 }

@@ -39,9 +39,9 @@ import org.springframework.web.client.AsyncRestTemplate;
 @ConditionalOnClass(AsyncRestTemplate.class)
 public class AsyncLoadBalancerAutoConfiguration {
 
-
 	@Configuration
 	static class AsyncRestTemplateCustomizerConfig {
+
 		@LoadBalanced
 		@Autowired(required = false)
 		private List<AsyncRestTemplate> restTemplates = Collections.emptyList();
@@ -60,12 +60,15 @@ public class AsyncLoadBalancerAutoConfiguration {
 				}
 			};
 		}
+
 	}
 
 	@Configuration
 	static class LoadBalancerInterceptorConfig {
+
 		@Bean
-		public AsyncLoadBalancerInterceptor asyncLoadBalancerInterceptor(LoadBalancerClient loadBalancerClient) {
+		public AsyncLoadBalancerInterceptor asyncLoadBalancerInterceptor(
+				LoadBalancerClient loadBalancerClient) {
 			return new AsyncLoadBalancerInterceptor(loadBalancerClient);
 		}
 
@@ -82,5 +85,7 @@ public class AsyncLoadBalancerAutoConfiguration {
 				}
 			};
 		}
+
 	}
+
 }

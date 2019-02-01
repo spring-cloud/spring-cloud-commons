@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.hypermedia;
 
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A component that will provide a {@link ServiceInstance}, or can express the absence of one by
- * returning {@literal null}.
- * 
+ * A component that will provide a {@link ServiceInstance}, or can express the absence of
+ * one by returning {@literal null}.
+ *
  * @author Oliver Gierke
  */
 public interface ServiceInstanceProvider {
 
 	/**
-	 * Returns the service instance or {@literal null} if the service is currently unavailable.
-	 * 
-	 * @return The service instance, or {@literal null} if the service is currently unavailable.
+	 * Returns the service instance or {@literal null} if the service is currently
+	 * unavailable.
+	 * @return The service instance, or {@literal null} if the service is currently
+	 * unavailable.
 	 */
 	ServiceInstance getServiceInstance();
+
 }

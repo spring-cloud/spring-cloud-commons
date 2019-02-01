@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.loadbalancer;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -20,14 +21,19 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpRequest;
 
 /**
- * Allows applications to transform the load-balanced {@link HttpRequest} given
- * the chosen {@link ServiceInstance}.
- * 
+ * Allows applications to transform the load-balanced {@link HttpRequest} given the chosen
+ * {@link ServiceInstance}.
+ *
  * @author Will Tran
  */
 @Order(LoadBalancerRequestTransformer.DEFAULT_ORDER)
 public interface LoadBalancerRequestTransformer {
-	public static final int DEFAULT_ORDER = 0;
+
+	/**
+	 * Order for the load balancer request tranformer.
+	 */
+	int DEFAULT_ORDER = 0;
 
 	HttpRequest transformRequest(HttpRequest request, ServiceInstance instance);
+
 }

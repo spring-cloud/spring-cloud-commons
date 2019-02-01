@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.loadbalancer;
 
 import java.io.IOException;
@@ -20,27 +21,30 @@ import java.net.URI;
 
 /**
  * Exception to be thrown when the status code is deemed to be retryable.
+ *
  * @author Ryan Baxter
  */
 public class RetryableStatusCodeException extends IOException {
 
 	private static final String MESSAGE = "Service %s returned a status code of %d";
 
-	private Object response;
+	private final Object response;
 
-	private URI uri;
+	private final URI uri;
 
-	public RetryableStatusCodeException(String serviceId, int statusCode, Object response, URI uri) {
+	public RetryableStatusCodeException(String serviceId, int statusCode, Object response,
+			URI uri) {
 		super(String.format(MESSAGE, serviceId, statusCode));
 		this.response = response;
 		this.uri = uri;
 	}
 
 	public Object getResponse() {
-		return response;
+		return this.response;
 	}
 
 	public URI getUri() {
-		return uri;
+		return this.uri;
 	}
+
 }

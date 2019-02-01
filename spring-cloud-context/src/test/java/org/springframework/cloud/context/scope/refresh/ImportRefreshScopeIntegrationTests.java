@@ -17,6 +17,7 @@ package org.springframework.cloud.context.scope.refresh;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,13 +35,13 @@ import static org.junit.Assert.assertEquals;
 public class ImportRefreshScopeIntegrationTests {
 
 	@Autowired
+	org.springframework.cloud.context.scope.refresh.RefreshScope scope;
+
+	@Autowired
 	private ConfigurableListableBeanFactory beanFactory;
 
 	@Autowired
 	private ExampleService service;
-
-	@Autowired
-	org.springframework.cloud.context.scope.refresh.RefreshScope scope;
 
 	@Test
 	public void testSimpleProperties() throws Exception {
@@ -63,6 +64,7 @@ public class ImportRefreshScopeIntegrationTests {
 	@Configuration
 	@Import({ RefreshAutoConfiguration.class, ExampleService.class })
 	protected static class TestConfiguration {
+
 	}
 
 }

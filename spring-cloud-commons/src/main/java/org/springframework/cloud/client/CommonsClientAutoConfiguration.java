@@ -57,10 +57,12 @@ public class CommonsClientAutoConfiguration {
 	@ConditionalOnBean(DiscoveryClient.class)
 	@ConditionalOnProperty(value = "spring.cloud.discovery.enabled", matchIfMissing = true)
 	protected static class DiscoveryLoadBalancerConfiguration {
+
 		@Bean
 		@ConditionalOnProperty(value = "spring.cloud.discovery.client.health-indicator.enabled", matchIfMissing = true)
 		public DiscoveryClientHealthIndicator discoveryClientHealthIndicator(
-				ObjectProvider<DiscoveryClient> discoveryClient, DiscoveryClientHealthIndicatorProperties properties) {
+				ObjectProvider<DiscoveryClient> discoveryClient,
+				DiscoveryClientHealthIndicatorProperties properties) {
 			return new DiscoveryClientHealthIndicator(discoveryClient, properties);
 		}
 
@@ -77,12 +79,14 @@ public class CommonsClientAutoConfiguration {
 			return HasFeatures.abstractFeatures(DiscoveryClient.class,
 					LoadBalancerClient.class);
 		}
+
 	}
 
 	@Configuration
 	@ConditionalOnClass(Endpoint.class)
 	@ConditionalOnProperty(value = "spring.cloud.features.enabled", matchIfMissing = true)
 	protected static class ActuatorConfiguration {
+
 		@Autowired(required = false)
 		private List<HasFeatures> hasFeatures = new ArrayList<>();
 
@@ -91,6 +95,7 @@ public class CommonsClientAutoConfiguration {
 		public FeaturesEndpoint featuresEndpoint() {
 			return new FeaturesEndpoint(this.hasFeatures);
 		}
+
 	}
 
 }

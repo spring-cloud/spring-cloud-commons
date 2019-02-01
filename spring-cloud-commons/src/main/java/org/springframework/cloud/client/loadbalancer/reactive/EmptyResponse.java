@@ -35,6 +35,7 @@ public class EmptyResponse implements Response<ServiceInstance> {
 
 	@Override
 	public void onComplete(CompletionContext completionContext) {
-		//TODO: implement
+		// TODO: implement
 	}
+
 }

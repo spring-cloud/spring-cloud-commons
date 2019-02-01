@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties.SimpleServiceInstance;
 
@@ -47,4 +48,5 @@ public class SimpleDiscoveryClientTests {
 		assertThat(instances.get(0).isSecure()).isEqualTo(false);
 		assertThat(instances.get(0).getMetadata()).isNotNull();
 	}
+
 }

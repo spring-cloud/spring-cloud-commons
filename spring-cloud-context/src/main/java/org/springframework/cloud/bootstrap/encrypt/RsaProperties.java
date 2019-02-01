@@ -1,6 +1,5 @@
-package org.springframework.cloud.bootstrap.encrypt;
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +13,8 @@ package org.springframework.cloud.bootstrap.encrypt;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.springframework.cloud.bootstrap.encrypt;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -33,10 +34,10 @@ public class RsaProperties {
 	private RsaAlgorithm algorithm = RsaAlgorithm.DEFAULT;
 
 	/**
-	 * Flag to indicate that "strong" AES encryption should be used internally. If
-	 * true, then the GCM algorithm is applied to the AES encrypted bytes. Default is
-	 * false (in which case "standard" CBC is used instead). Once it is set, do not
-	 * change it (or existing ciphers will not be decryptable).
+	 * Flag to indicate that "strong" AES encryption should be used internally. If true,
+	 * then the GCM algorithm is applied to the AES encrypted bytes. Default is false (in
+	 * which case "standard" CBC is used instead). Once it is set, do not change it (or
+	 * existing ciphers will not be decryptable).
 	 */
 	private boolean strong = false;
 

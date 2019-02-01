@@ -97,7 +97,7 @@ public class InetUtilsTests {
 			assertFalse(utils.isPreferredAddress(InetAddress.getByName("5.5.8.1")));
 		}
 	}
-	
+
 	@Test
 	public void testPreferredNetworksRegex() throws Exception {
 		InetUtilsProperties properties = new InetUtilsProperties();
@@ -110,7 +110,7 @@ public class InetUtilsTests {
 			assertFalse(utils.isPreferredAddress(InetAddress.getByName("10.255.10.1")));
 		}
 	}
-	
+
 	@Test
 	public void testPreferredNetworksSimple() throws Exception {
 		InetUtilsProperties properties = new InetUtilsProperties();
@@ -135,4 +135,5 @@ public class InetUtilsTests {
 			assertTrue(utils.isPreferredAddress(InetAddress.getByName("10.0.10.1")));
 		}
 	}
+
 }

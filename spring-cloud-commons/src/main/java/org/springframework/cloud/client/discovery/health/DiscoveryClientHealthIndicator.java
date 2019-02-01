@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
@@ -29,23 +30,24 @@ import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.Ordered;
 
-
 /**
  * @author Spencer Gibb
  */
 public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator, Ordered,
 		ApplicationListener<InstanceRegisteredEvent<?>> {
 
-	private AtomicBoolean discoveryInitialized = new AtomicBoolean(false);
-
-	private int order = Ordered.HIGHEST_PRECEDENCE;
-
 	private final ObjectProvider<DiscoveryClient> discoveryClient;
+
 	private final DiscoveryClientHealthIndicatorProperties properties;
 
 	private final Log log = LogFactory.getLog(DiscoveryClientHealthIndicator.class);
 
-	public DiscoveryClientHealthIndicator(ObjectProvider<DiscoveryClient> discoveryClient, DiscoveryClientHealthIndicatorProperties properties) {
+	private AtomicBoolean discoveryInitialized = new AtomicBoolean(false);
+
+	private int order = Ordered.HIGHEST_PRECEDENCE;
+
+	public DiscoveryClientHealthIndicator(ObjectProvider<DiscoveryClient> discoveryClient,
+			DiscoveryClientHealthIndicatorProperties properties) {
 		this.discoveryClient = discoveryClient;
 		this.properties = properties;
 	}
@@ -53,7 +55,7 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 	@Override
 	public void onApplicationEvent(InstanceRegisteredEvent<?> event) {
 		if (this.discoveryInitialized.compareAndSet(false, true)) {
-			log.debug("Discovery Client has been initialized");
+			this.log.debug("Discovery Client has been initialized");
 		}
 	}
 
@@ -65,12 +67,13 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 			try {
 				DiscoveryClient client = this.discoveryClient.getIfAvailable();
 				List<String> services = client.getServices();
-				String description = (this.properties.isIncludeDescription()) ? client.description() : "";
-				builder.status(new Status("UP", description))
-						.withDetail("services", services);
+				String description = (this.properties.isIncludeDescription())
+						? client.description() : "";
+				builder.status(new Status("UP", description)).withDetail("services",
+						services);
 			}
 			catch (Exception e) {
-				log.error("Error", e);
+				this.log.error("Error", e);
 				builder.down(e);
 			}
 		}

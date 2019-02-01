@@ -22,6 +22,7 @@ import org.springframework.web.client.AsyncRestTemplate;
  * @author Rob Worsnop
  */
 public interface AsyncRestTemplateCustomizer {
-	void customize(AsyncRestTemplate restTemplate);
-}
 
+	void customize(AsyncRestTemplate restTemplate);
+
+}

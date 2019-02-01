@@ -23,6 +23,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -39,10 +40,9 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 
 /**
- *
  * @deprecated Use
- * {@link org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration instead}.
- *
+ * {@link org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration
+ * instead}.
  * @author Dave Syer
  */
 @Configuration
@@ -51,6 +51,8 @@ import org.springframework.core.env.Environment;
 @Deprecated
 public class NoopDiscoveryClientAutoConfiguration
 		implements ApplicationListener<ContextRefreshedEvent> {
+
+	private final Log log = LogFactory.getLog(NoopDiscoveryClientAutoConfiguration.class);
 
 	@Autowired(required = false)
 	private ServerProperties server;
@@ -66,8 +68,6 @@ public class NoopDiscoveryClientAutoConfiguration
 
 	private DefaultServiceInstance serviceInstance;
 
-	private final Log log = LogFactory.getLog(NoopDiscoveryClientAutoConfiguration.class);
-
 	@PostConstruct
 	public void init() {
 		String host = "localhost";
@@ -75,7 +75,7 @@ public class NoopDiscoveryClientAutoConfiguration
 			host = InetAddress.getLocalHost().getHostName();
 		}
 		catch (UnknownHostException e) {
-			log.warn("Cannot get host info: (" + e.getMessage() + ")");
+			this.log.warn("Cannot get host info: (" + e.getMessage() + ")");
 		}
 		int port = findPort();
 		this.serviceInstance = new DefaultServiceInstance(
@@ -96,8 +96,8 @@ public class NoopDiscoveryClientAutoConfiguration
 		}
 		else {
 			// Apparently spring-web is not on the classpath
-			if (log.isDebugEnabled()) {
-				log.debug(
+			if (this.log.isDebugEnabled()) {
+				this.log.debug(
 						"Could not locate port in embedded container (spring-web not available)");
 			}
 		}
@@ -109,18 +109,21 @@ public class NoopDiscoveryClientAutoConfiguration
 		this.context.publishEvent(new InstanceRegisteredEvent<>(this, this.environment));
 	}
 
-	private interface PortFinder {
-		Integer findPort();
-	}
-
 	@Bean
 	public DiscoveryClient discoveryClient() {
 		return new NoopDiscoveryClient(this.serviceInstance);
 	}
 
+	private interface PortFinder {
+
+		Integer findPort();
+
+	}
+
 	@Configuration
-	@ConditionalOnClass(name = {"org.springframework.web.context.support.GenericWebApplicationContext",
-		"org.springframework.boot.context.embedded.EmbeddedWebApplicationContext"})
+	@ConditionalOnClass(name = {
+			"org.springframework.web.context.support.GenericWebApplicationContext",
+			"org.springframework.boot.context.embedded.EmbeddedWebApplicationContext" })
 	protected static class Boot15PortFinderConfiguration {
 
 		@Bean
@@ -129,16 +132,18 @@ public class NoopDiscoveryClientAutoConfiguration
 				@Override
 				public Integer findPort() {
 					// TODO: support reactive
-					/*if (context instanceof EmbeddedWebApplicationContext) {
-						EmbeddedServletContainer container = ((EmbeddedWebApplicationContext) context)
-								.getEmbeddedServletContainer();
-						if (container != null) {
-							return container.getPort();
-						}
-					}*/
+					/*
+					 * if (context instanceof EmbeddedWebApplicationContext) {
+					 * EmbeddedServletContainer container =
+					 * ((EmbeddedWebApplicationContext) context)
+					 * .getEmbeddedServletContainer(); if (container != null) { return
+					 * container.getPort(); } }
+					 */
 					return null;
 				}
 			};
 		}
+
 	}
+
 }

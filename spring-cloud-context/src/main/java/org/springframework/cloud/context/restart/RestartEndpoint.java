@@ -119,33 +119,6 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 		return new ResumeEndpoint();
 	}
 
-	@Endpoint(id = "pause")
-	public class PauseEndpoint {
-
-		@WriteOperation
-		public Boolean pause() {
-			if (isRunning()) {
-				doPause();
-				return true;
-			}
-			return false;
-		}
-	}
-
-	@Endpoint(id = "resume")
-	@ConfigurationProperties("management.endpoint.resume")
-	public class ResumeEndpoint {
-
-		@WriteOperation
-		public Boolean resume() {
-			if (!isRunning()) {
-				doResume();
-				return true;
-			}
-			return false;
-		}
-	}
-
 	// @ManagedOperation
 	public synchronized ConfigurableApplicationContext doRestart() {
 		if (this.context != null) {
@@ -202,17 +175,53 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 				this.application.getClass().getClassLoader());
 	}
 
+	/**
+	 * Pause endpoint configuration.
+	 */
+	@Endpoint(id = "pause")
+	public class PauseEndpoint {
+
+		@WriteOperation
+		public Boolean pause() {
+			if (isRunning()) {
+				doPause();
+				return true;
+			}
+			return false;
+		}
+
+	}
+
+	/**
+	 * Resume endpoint configuration.
+	 */
+	@Endpoint(id = "resume")
+	@ConfigurationProperties("management.endpoint.resume")
+	public class ResumeEndpoint {
+
+		@WriteOperation
+		public Boolean resume() {
+			if (!isRunning()) {
+				doResume();
+				return true;
+			}
+			return false;
+		}
+
+	}
+
 	private class IntegrationShutdown {
 
 		private IntegrationMBeanExporter exporter;
 
-		public IntegrationShutdown(Object exporter) {
+		IntegrationShutdown(Object exporter) {
 			this.exporter = (IntegrationMBeanExporter) exporter;
 		}
 
 		public void stop(long timeout) {
 			this.exporter.stopActiveComponents(timeout);
 		}
+
 	}
 
 }

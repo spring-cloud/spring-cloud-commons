@@ -28,8 +28,10 @@ public class AutoServiceRegistrationAutoConfigurationTests {
 
 	@Test
 	public void hasAutoServiceRegistration() {
-		try(AnnotationConfigApplicationContext context = setup(HasAutoServiceRegistrationConfiguration.class)) {
-			AutoServiceRegistration autoServiceRegistration = context.getBean(AutoServiceRegistration.class);
+		try (AnnotationConfigApplicationContext context = setup(
+				HasAutoServiceRegistrationConfiguration.class)) {
+			AutoServiceRegistration autoServiceRegistration = context
+					.getBean(AutoServiceRegistration.class);
 			assertThat(autoServiceRegistration).isNotNull();
 		}
 	}
@@ -37,30 +39,25 @@ public class AutoServiceRegistrationAutoConfigurationTests {
 	@Test
 	public void noAutoServiceRegistrationAndFailFast() {
 		this.exception.expect(BeanCreationException.class);
-		this.exception.expectMessage(Matchers.containsString("no AutoServiceRegistration"));
-		try(AnnotationConfigApplicationContext context = setup("spring.cloud.service-registry.auto-registration.failFast=true")) {
+		this.exception
+				.expectMessage(Matchers.containsString("no AutoServiceRegistration"));
+		try (AnnotationConfigApplicationContext context = setup(
+				"spring.cloud.service-registry.auto-registration.failFast=true")) {
 			assertNoBean(context);
 		}
 	}
 
 	@Test
 	public void noAutoServiceRegistrationAndFailFastFalse() {
-		try(AnnotationConfigApplicationContext context = setup()) {
+		try (AnnotationConfigApplicationContext context = setup()) {
 			assertNoBean(context);
 		}
 	}
 
 	private void assertNoBean(AnnotationConfigApplicationContext context) {
-		Map<String, AutoServiceRegistration> beans = context.getBeansOfType(AutoServiceRegistration.class);
+		Map<String, AutoServiceRegistration> beans = context
+				.getBeansOfType(AutoServiceRegistration.class);
 		assertThat(beans).isEmpty();
-	}
-
-	@Configuration
-	static class HasAutoServiceRegistrationConfiguration {
-		@Bean
-		public AutoServiceRegistration autoServiceRegistration() {
-			return new AutoServiceRegistration() {};
-		}
 	}
 
 	private AnnotationConfigApplicationContext setup(Class... classes) {
@@ -80,4 +77,16 @@ public class AutoServiceRegistrationAutoConfigurationTests {
 		context.refresh();
 		return context;
 	}
+
+	@Configuration
+	static class HasAutoServiceRegistrationConfiguration {
+
+		@Bean
+		public AutoServiceRegistration autoServiceRegistration() {
+			return new AutoServiceRegistration() {
+			};
+		}
+
+	}
+
 }

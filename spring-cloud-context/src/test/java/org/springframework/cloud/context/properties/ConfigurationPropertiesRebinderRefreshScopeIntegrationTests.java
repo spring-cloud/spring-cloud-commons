@@ -15,12 +15,11 @@
  */
 package org.springframework.cloud.context.properties;
 
-import static org.junit.Assert.assertEquals;
-
 import javax.annotation.PostConstruct;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -37,6 +36,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -57,31 +58,31 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testSimpleProperties() throws Exception {
-		assertEquals("Hello scope!", properties.getMessage());
+		assertEquals("Hello scope!", this.properties.getMessage());
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...but don't refresh, so the bean stays the same:
-		assertEquals("Hello scope!", properties.getMessage());
-		assertEquals(1, properties.getCount());
+		assertEquals("Hello scope!", this.properties.getMessage());
+		assertEquals(1, this.properties.getCount());
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefresh() throws Exception {
-		assertEquals(1, properties.getCount());
-		assertEquals("Hello scope!", properties.getMessage());
-		assertEquals(1, properties.getCount());
+		assertEquals(1, this.properties.getCount());
+		assertEquals("Hello scope!", this.properties.getMessage());
+		assertEquals(1, this.properties.getCount());
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...rebind, but the bean is not re-initialized:
-		rebinder.rebind();
-		assertEquals("Hello scope!", properties.getMessage());
-		assertEquals(1, properties.getCount());
+		this.rebinder.rebind();
+		assertEquals("Hello scope!", this.properties.getMessage());
+		assertEquals(1, this.properties.getCount());
 		// ...and then refresh, so the bean is re-initialized:
-		refreshScope.refreshAll();
-		assertEquals("Foo", properties.getMessage());
+		this.refreshScope.refreshAll();
+		assertEquals("Foo", this.properties.getMessage());
 		// It's a new instance so the initialization count is 1
-		assertEquals(1, properties.getCount());
+		assertEquals(1, this.properties.getCount());
 	}
 
 	@Configuration
@@ -101,16 +102,19 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 
 	@ConfigurationProperties
 	protected static class TestProperties {
+
 		private String message;
+
 		private int delay;
+
 		private int count = 0;
 
 		public int getCount() {
-			return count;
+			return this.count;
 		}
 
 		public String getMessage() {
-			return message;
+			return this.message;
 		}
 
 		public void setMessage(String message) {
@@ -118,7 +122,7 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 		}
 
 		public int getDelay() {
-			return delay;
+			return this.delay;
 		}
 
 		public void setDelay(int delay) {
@@ -129,6 +133,7 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 		public void init() {
 			this.count++;
 		}
+
 	}
 
 }

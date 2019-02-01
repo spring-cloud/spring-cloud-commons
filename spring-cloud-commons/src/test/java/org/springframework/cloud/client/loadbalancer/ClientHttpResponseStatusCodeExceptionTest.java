@@ -3,16 +3,17 @@ package org.springframework.cloud.client.loadbalancer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.AbstractClientHttpResponse;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
 /**
@@ -25,13 +26,14 @@ public class ClientHttpResponseStatusCodeExceptionTest {
 	public void testCreation() throws Exception {
 		MyClientHttpResponse response = new MyClientHttpResponse();
 		assertFalse(response.isClosed());
-		ClientHttpResponseStatusCodeException exp = new ClientHttpResponseStatusCodeException("service",
-				response, response.getStatusText().getBytes());
+		ClientHttpResponseStatusCodeException exp = new ClientHttpResponseStatusCodeException(
+				"service", response, response.getStatusText().getBytes());
 		ClientHttpResponse expResponse = exp.getResponse();
 		assertEquals(response.getRawStatusCode(), expResponse.getRawStatusCode());
 		assertEquals(response.getStatusText(), expResponse.getStatusText());
 		assertEquals(response.getHeaders(), expResponse.getHeaders());
-		assertEquals(response.getStatusText(), new String(StreamUtils.copyToByteArray(expResponse.getBody())));
+		assertEquals(response.getStatusText(),
+				new String(StreamUtils.copyToByteArray(expResponse.getBody())));
 	}
 
 	class MyClientHttpResponse extends AbstractClientHttpResponse {
@@ -54,7 +56,7 @@ public class ClientHttpResponseStatusCodeExceptionTest {
 		}
 
 		public boolean isClosed() {
-			return closed;
+			return this.closed;
 		}
 
 		@Override
@@ -68,5 +70,7 @@ public class ClientHttpResponseStatusCodeExceptionTest {
 			headers.add("foo", "bar");
 			return headers;
 		}
+
 	}
+
 }

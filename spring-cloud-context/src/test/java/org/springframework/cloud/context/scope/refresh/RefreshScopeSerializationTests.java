@@ -79,4 +79,5 @@ public class RefreshScopeSerializationTests {
 	protected static class TestBean {
 
 	}
+
 }

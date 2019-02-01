@@ -34,36 +34,40 @@ public class RestartIntegrationTests {
 
 	private ConfigurableApplicationContext context;
 
+	public static void main(String[] args) {
+		SpringApplication.run(TestConfiguration.class, args);
+	}
+
 	@After
 	public void close() {
-		if (context != null) {
-			context.close();
+		if (this.context != null) {
+			this.context.close();
 		}
 	}
 
 	@Test
 	public void testRestartTwice() throws Exception {
 
-		context = SpringApplication.run(TestConfiguration.class,
+		this.context = SpringApplication.run(TestConfiguration.class,
 				"--management.endpoint.restart.enabled=true", "--server.port=0",
 				"--spring.liveBeansView.mbeanDomain=livebeans");
 
-		RestartEndpoint endpoint = context.getBean(RestartEndpoint.class);
-		assertNotNull(context.getParent());
-		assertNull(context.getParent().getParent());
-		context = endpoint.doRestart();
+		RestartEndpoint endpoint = this.context.getBean(RestartEndpoint.class);
+		assertNotNull(this.context.getParent());
+		assertNull(this.context.getParent().getParent());
+		this.context = endpoint.doRestart();
 
-		assertNotNull(context);
-		assertNotNull(context.getParent());
-		assertNull(context.getParent().getParent());
+		assertNotNull(this.context);
+		assertNotNull(this.context.getParent());
+		assertNull(this.context.getParent().getParent());
 
-		RestartEndpoint next = context.getBean(RestartEndpoint.class);
+		RestartEndpoint next = this.context.getBean(RestartEndpoint.class);
 		assertNotSame(endpoint, next);
-		context = next.doRestart();
+		this.context = next.doRestart();
 
-		assertNotNull(context);
-		assertNotNull(context.getParent());
-		assertNull(context.getParent().getParent());
+		assertNotNull(this.context);
+		assertNotNull(this.context.getParent());
+		assertNull(this.context.getParent().getParent());
 
 		LiveBeansView beans = new LiveBeansView();
 		String json = beans.getSnapshotAsJson();
@@ -71,13 +75,10 @@ public class RestartIntegrationTests {
 		assertThat(json).containsOnlyOnce("parent\": null");
 	}
 
-	public static void main(String[] args) {
-		SpringApplication.run(TestConfiguration.class, args);
-	}
-
 	@Configuration
 	@EnableAutoConfiguration
 	protected static class TestConfiguration {
+
 	}
 
 }

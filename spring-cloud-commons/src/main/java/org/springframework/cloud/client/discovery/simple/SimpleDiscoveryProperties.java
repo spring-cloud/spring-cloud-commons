@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,9 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 /**
  * Properties to hold the details of a
  * {@link org.springframework.cloud.client.discovery.DiscoveryClient} service instances
- * for a given service.
- * It also holds the user-configurable order that will be used to establish the
- * precedence of this client in the list of clients
- * used by {@link org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClient}.
+ * for a given service. It also holds the user-configurable order that will be used to
+ * establish the precedence of this client in the list of clients used by
+ * {@link org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClient}.
  *
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma
@@ -43,6 +42,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
 public class SimpleDiscoveryProperties {
+
 	private Map<String, List<SimpleServiceInstance>> instances = new HashMap<>();
 
 	/**
@@ -83,25 +83,34 @@ public class SimpleDiscoveryProperties {
 		}
 	}
 
+	/**
+	 * Basic implementation of {@link ServiceInstance}.
+	 */
 	public static class SimpleServiceInstance implements ServiceInstance {
 
 		/**
 		 * The URI of the service instance. Will be parsed to extract the scheme, host,
-     * and port.
+		 * and port.
 		 */
 		private URI uri;
+
 		private String host;
+
 		private int port;
+
 		private boolean secure;
+
 		/**
 		 * Metadata for the service instance. Can be used by discovery clients to modify
 		 * their behaviour per instance, e.g. when load balancing.
 		 */
 		private Map<String, String> metadata = new LinkedHashMap<>();
+
 		/**
 		 * The unique identifier or name for the service instance.
 		 */
 		private String instanceId;
+
 		/**
 		 * The identifier or name for the service. Multiple instances might share the same
 		 * service ID.
@@ -113,16 +122,6 @@ public class SimpleDiscoveryProperties {
 
 		public SimpleServiceInstance(URI uri) {
 			setUri(uri);
-		}
-
-		public void setUri(URI uri) {
-			this.uri = uri;
-			this.host = this.uri.getHost();
-			this.port = this.uri.getPort();
-			String scheme = this.uri.getScheme();
-			if ("https".equals(scheme)) {
-				this.secure = true;
-			}
 		}
 
 		@Override
@@ -163,9 +162,21 @@ public class SimpleDiscoveryProperties {
 			return this.uri;
 		}
 
+		public void setUri(URI uri) {
+			this.uri = uri;
+			this.host = this.uri.getHost();
+			this.port = this.uri.getPort();
+			String scheme = this.uri.getScheme();
+			if ("https".equals(scheme)) {
+				this.secure = true;
+			}
+		}
+
 		@Override
 		public Map<String, String> getMetadata() {
 			return this.metadata;
 		}
+
 	}
+
 }

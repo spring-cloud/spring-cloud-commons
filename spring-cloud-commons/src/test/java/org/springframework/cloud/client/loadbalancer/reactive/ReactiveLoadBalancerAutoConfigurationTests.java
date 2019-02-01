@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
  * @author Spencer Gibb
  * @author Tim Ysewyn
@@ -73,7 +72,8 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 
 	@SuppressWarnings("unchecked")
 	private List<ExchangeFilterFunction> getFilters(WebClient.Builder builder) {
-		return (List<ExchangeFilterFunction>) ReflectionTestUtils.getField(builder, "filters");
+		return (List<ExchangeFilterFunction>) ReflectionTestUtils.getField(builder,
+				"filters");
 	}
 
 	@Test
@@ -111,7 +111,8 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				// .properties("spring.aop.proxyTargetClass=true")
 				.sources(config, WebClientAutoConfiguration.class,
-						ReactiveLoadBalancerAutoConfiguration.class).run();
+						ReactiveLoadBalancerAutoConfiguration.class)
+				.run();
 	}
 
 	@Configuration
@@ -123,7 +124,10 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		}
 
 		@Bean
-		LoadBalancedRetryFactory loadBalancedRetryFactory() {return new LoadBalancedRetryFactory(){};}
+		LoadBalancedRetryFactory loadBalancedRetryFactory() {
+			return new LoadBalancedRetryFactory() {
+			};
+		}
 
 	}
 
@@ -149,17 +153,20 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 
 		@Configuration
 		protected static class Two {
+
 			@Autowired
 			WebClient.Builder nonLoadBalanced;
 
 			@Autowired
 			@LoadBalanced
 			WebClient.Builder loadBalanced;
+
 		}
 
 	}
 
 	private static class NoopLoadBalancerClient implements LoadBalancerClient {
+
 		private final Random random = new Random();
 
 		@Override
@@ -172,16 +179,19 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
 
 		@Override
-		public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
+		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
+				LoadBalancerRequest<T> request) throws IOException {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -190,5 +200,7 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		public URI reconstructURI(ServiceInstance instance, URI original) {
 			return DefaultServiceInstance.getUri(instance);
 		}
+
 	}
+
 }

@@ -1,6 +1,6 @@
 package org.springframework.cloud.bootstrap.encrypt;
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,30 +35,32 @@ import static org.hamcrest.Matchers.hasSize;
  * @author Ryan Baxter
  */
 @RunWith(ModifiedClassPathRunner.class)
-@ClassPathExclusions({"spring-security-rsa*.jar"})
+@ClassPathExclusions({ "spring-security-rsa*.jar" })
 public class RsaDisabledTests {
 
 	private ConfigurableApplicationContext context;
 
 	@Before
 	public void setUp() {
-		context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.sources(EncryptionBootstrapConfiguration.class).web(WebApplicationType.NONE).properties(
-						"encrypt.key:mykey",
-						"encrypt.rsa.strong:true",
-						"encrypt.rsa.salt:foobar").run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+				.sources(EncryptionBootstrapConfiguration.class)
+				.web(WebApplicationType.NONE).properties("encrypt.key:mykey",
+						"encrypt.rsa.strong:true", "encrypt.rsa.salt:foobar")
+				.run();
 	}
 
 	@After
 	public void tearDown() {
-		if(context != null) {
-			context.close();
+		if (this.context != null) {
+			this.context.close();
 		}
 	}
 
 	@Test
 	public void testLoadBalancedRetryFactoryBean() throws Exception {
-		Map<String, RsaProperties> properties =  context.getBeansOfType(RsaProperties.class);
+		Map<String, RsaProperties> properties = this.context
+				.getBeansOfType(RsaProperties.class);
 		assertThat(properties.values(), hasSize(0));
 	}
+
 }

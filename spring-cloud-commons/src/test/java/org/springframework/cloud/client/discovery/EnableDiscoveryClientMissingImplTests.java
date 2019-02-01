@@ -1,6 +1,7 @@
 package org.springframework.cloud.client.discovery;
 
 import org.junit.Test;
+
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -13,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Tests that if <code>@EnableDiscoveryClient</code> is used, but there is no
  * implementation on the classpath, then fail
+ *
  * @author Spencer Gibb
  */
 public class EnableDiscoveryClientMissingImplTests {
@@ -35,5 +37,7 @@ public class EnableDiscoveryClientMissingImplTests {
 	// this will fail with @EnableDiscoveryClient and no implementation (nothing in
 	// spring.factories)
 	public static class App {
+
 	}
+
 }

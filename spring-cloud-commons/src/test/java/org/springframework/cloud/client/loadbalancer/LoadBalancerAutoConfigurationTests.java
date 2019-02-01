@@ -18,8 +18,9 @@ import static org.hamcrest.Matchers.is;
  * @author Spencer Gibb
  */
 @RunWith(ModifiedClassPathRunner.class)
-@ClassPathExclusions({"spring-retry-*.jar", "spring-boot-starter-aop-*.jar"})
-public class LoadBalancerAutoConfigurationTests extends AbstractLoadBalancerAutoConfigurationTests {
+@ClassPathExclusions({ "spring-retry-*.jar", "spring-boot-starter-aop-*.jar" })
+public class LoadBalancerAutoConfigurationTests
+		extends AbstractLoadBalancerAutoConfigurationTests {
 
 	@Override
 	protected void assertLoadBalanced(RestTemplate restTemplate) {
@@ -28,4 +29,5 @@ public class LoadBalancerAutoConfigurationTests extends AbstractLoadBalancerAuto
 		ClientHttpRequestInterceptor interceptor = interceptors.get(0);
 		assertThat(interceptor, is(instanceOf(LoadBalancerInterceptor.class)));
 	}
+
 }

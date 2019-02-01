@@ -1,14 +1,15 @@
 package org.springframework.cloud.commons.httpclient;
 
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
-
-import java.util.concurrent.TimeUnit;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -23,7 +24,8 @@ import static org.junit.Assert.assertTrue;
  * @author Ryan Baxter
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = CustomApplication.class, properties = {"spring.cloud.httpclient.ok.enabled: true"})
+@SpringBootTest(classes = CustomApplication.class, properties = {
+		"spring.cloud.httpclient.ok.enabled: true" })
 public class CustomHttpClientConfigurationTests {
 
 	@Autowired
@@ -41,28 +43,31 @@ public class CustomHttpClientConfigurationTests {
 	@Test
 	public void connManFactory() throws Exception {
 		assertTrue(ApacheHttpClientConnectionManagerFactory.class
-				.isInstance(connectionManagerFactory));
+				.isInstance(this.connectionManagerFactory));
 		assertTrue(CustomApplication.MyApacheHttpClientConnectionManagerFactory.class
-				.isInstance(connectionManagerFactory));
+				.isInstance(this.connectionManagerFactory));
 	}
 
 	@Test
 	public void apacheHttpClientFactory() throws Exception {
-		assertTrue(ApacheHttpClientFactory.class.isInstance(httpClientFactory));
+		assertTrue(ApacheHttpClientFactory.class.isInstance(this.httpClientFactory));
 		assertTrue(CustomApplication.MyApacheHttpClientFactory.class
-				.isInstance(httpClientFactory));
+				.isInstance(this.httpClientFactory));
 	}
 
 	@Test
 	public void connectionPoolFactory() throws Exception {
-		assertTrue(OkHttpClientConnectionPoolFactory.class.isInstance(okHttpClientConnectionPoolFactory));
-		assertTrue(CustomApplication.MyOkHttpConnectionPoolFactory.class.isInstance(okHttpClientConnectionPoolFactory));
+		assertTrue(OkHttpClientConnectionPoolFactory.class
+				.isInstance(this.okHttpClientConnectionPoolFactory));
+		assertTrue(CustomApplication.MyOkHttpConnectionPoolFactory.class
+				.isInstance(this.okHttpClientConnectionPoolFactory));
 	}
 
 	@Test
 	public void okHttpClientFactory() throws Exception {
-		assertTrue(OkHttpClientFactory.class.isInstance(okHttpClientFactory));
-		assertTrue(CustomApplication.MyOkHttpClientFactory.class.isInstance(okHttpClientFactory));
+		assertTrue(OkHttpClientFactory.class.isInstance(this.okHttpClientFactory));
+		assertTrue(CustomApplication.MyOkHttpClientFactory.class
+				.isInstance(this.okHttpClientFactory));
 	}
 
 }
@@ -106,6 +111,7 @@ class CustomApplication {
 		public HttpClientBuilder createBuilder() {
 			return HttpClientBuilder.create();
 		}
+
 	}
 
 	static class MyApacheHttpClientConnectionManagerFactory
@@ -118,20 +124,27 @@ class CustomApplication {
 				RegistryBuilder registryBuilder) {
 			return null;
 		}
+
 	}
 
 	static class MyOkHttpClientFactory implements OkHttpClientFactory {
+
 		@Override
 		public OkHttpClient.Builder createBuilder(boolean disableSslValidation) {
 			return new OkHttpClient.Builder();
 		}
+
 	}
 
-	static class MyOkHttpConnectionPoolFactory implements OkHttpClientConnectionPoolFactory {
+	static class MyOkHttpConnectionPoolFactory
+			implements OkHttpClientConnectionPoolFactory {
 
 		@Override
-		public ConnectionPool create(int maxIdleConnections, long keepAliveDuration, TimeUnit timeUnit) {
+		public ConnectionPool create(int maxIdleConnections, long keepAliveDuration,
+				TimeUnit timeUnit) {
 			return null;
 		}
+
 	}
+
 }

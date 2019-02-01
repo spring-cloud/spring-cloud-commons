@@ -2,6 +2,7 @@ package org.springframework.cloud.client.discovery.simple;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * DiscoveryClient implementation defaults to {@link CompositeDiscoveryClient}
- * 
+ *
  * @author Biju Kunjummen
  */
 @RunWith(SpringRunner.class)
@@ -26,11 +27,13 @@ public class DiscoveryClientAutoConfigurationDefaultTests {
 
 	@Test
 	public void simpleDiscoveryClientShouldBeTheDefault() {
-		assertThat(discoveryClient).isInstanceOf(CompositeDiscoveryClient.class);
+		assertThat(this.discoveryClient).isInstanceOf(CompositeDiscoveryClient.class);
 	}
 
 	@EnableAutoConfiguration
 	@Configuration
 	public static class Config {
+
 	}
+
 }

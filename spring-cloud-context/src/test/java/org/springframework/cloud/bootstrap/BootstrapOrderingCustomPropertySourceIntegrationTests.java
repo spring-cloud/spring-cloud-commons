@@ -7,6 +7,7 @@ import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,8 +26,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class,
-		properties = { "encrypt.key:deadbeef", "spring.cloud.bootstrap.name:custom" })
+@SpringBootTest(classes = Application.class, properties = { "encrypt.key:deadbeef",
+		"spring.cloud.bootstrap.name:custom" })
 @ActiveProfiles("encrypt")
 public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 
@@ -34,7 +35,7 @@ public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 	private ConfigurableEnvironment environment;
 
 	@Test
-	@Ignore //FIXME: spring boot 2.0.0
+	@Ignore // FIXME: spring boot 2.0.0
 	public void bootstrapPropertiesExist() {
 		assertTrue(this.environment.getPropertySources().contains(
 				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME));
@@ -56,7 +57,7 @@ public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 
 		public static Map<String, Object> MAP = new HashMap<String, Object>(
-				Collections.<String, Object> singletonMap("custom.foo",
+				Collections.<String, Object>singletonMap("custom.foo",
 						"{cipher}6154ca04d4bb6144d672c4e3d750b5147116dd381946d51fa44f8bc25dc256f4"));
 
 		@Override

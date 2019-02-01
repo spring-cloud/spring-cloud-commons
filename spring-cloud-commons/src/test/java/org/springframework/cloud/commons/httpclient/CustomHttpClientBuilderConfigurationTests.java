@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cloud.commons.httpclient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -41,9 +42,11 @@ public class CustomHttpClientBuilderConfigurationTests {
 
 	@Test
 	public void testCustomBuilder() {
-		HttpClientBuilder builder = apacheHttpClientFactory.createBuilder();
-		assertTrue(CustomHttpClientBuilderApplication.MyHttpClientBuilder.class.isInstance(builder));
+		HttpClientBuilder builder = this.apacheHttpClientFactory.createBuilder();
+		assertTrue(CustomHttpClientBuilderApplication.MyHttpClientBuilder.class
+				.isInstance(builder));
 	}
+
 }
 
 @Configuration
@@ -66,5 +69,7 @@ class CustomHttpClientBuilderApplication {
 	}
 
 	static class MyHttpClientBuilder extends HttpClientBuilder {
+
 	}
+
 }

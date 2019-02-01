@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -14,7 +15,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * @author Spencer Gibb
@@ -43,8 +43,8 @@ public class FeaturesEndpointTests {
 		FeaturesEndpoint.Features features = this.context.getBean(FeaturesEndpoint.class)
 				.features();
 		assertThat(features).isNotNull();
-		assertThat(features.getEnabled()).hasSize(2)
-				.contains(newFeature("foo", Foo.class), newFeature("Baz Feature", Baz.class));
+		assertThat(features.getEnabled()).hasSize(2).contains(
+				newFeature("foo", Foo.class), newFeature("Baz Feature", Baz.class));
 		assertThat(features.getDisabled()).hasSize(1).contains("Bar");
 	}
 
@@ -54,6 +54,7 @@ public class FeaturesEndpointTests {
 
 	@Configuration
 	public static class FeaturesConfig {
+
 		@Bean
 		Foo foo() {
 			return new Foo();
@@ -73,6 +74,7 @@ public class FeaturesEndpointTests {
 	@Configuration
 	@EnableConfigurationProperties
 	public static class Config {
+
 		@Autowired(required = false)
 		private List<HasFeatures> hasFeatures = new ArrayList<>();
 
@@ -80,14 +82,19 @@ public class FeaturesEndpointTests {
 		public FeaturesEndpoint cloudEndpoint() {
 			return new FeaturesEndpoint(this.hasFeatures);
 		}
+
 	}
 
 	public static class Foo {
+
 	}
 
 	public static class Bar {
+
 	}
 
 	public static class Baz {
+
 	}
+
 }

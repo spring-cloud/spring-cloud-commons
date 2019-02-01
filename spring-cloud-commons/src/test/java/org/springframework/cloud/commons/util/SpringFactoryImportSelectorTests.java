@@ -33,10 +33,11 @@ public class SpringFactoryImportSelectorTests {
 	}
 
 	public @interface MyAnnotation {
+
 	}
 
-	public static class MyAnnotationImportSelector extends
-			SpringFactoryImportSelector<MyAnnotation> {
+	public static class MyAnnotationImportSelector
+			extends SpringFactoryImportSelector<MyAnnotation> {
 
 		@Override
 		protected boolean isEnabled() {
@@ -44,4 +45,5 @@ public class SpringFactoryImportSelectorTests {
 		}
 
 	}
+
 }

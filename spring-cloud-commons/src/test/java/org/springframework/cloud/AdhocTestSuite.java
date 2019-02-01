@@ -20,6 +20,7 @@ import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+
 import org.springframework.cloud.client.discovery.EnableDiscoveryClientMissingImplTests;
 import org.springframework.cloud.client.hypermedia.CloudHypermediaAutoConfigurationIntegrationTests;
 

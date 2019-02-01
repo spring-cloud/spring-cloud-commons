@@ -4,6 +4,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,9 +17,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class,
-		properties = "spring.cloud.bootstrap.name:json")
+@SpringBootTest(classes = Application.class, properties = "spring.cloud.bootstrap.name:json")
 public class BootstrapOrderingSpringApplicationJsonIntegrationTests {
+
+	@Autowired
+	private ConfigurableEnvironment environment;
 
 	@BeforeClass
 	public static void spikeJson() {
@@ -30,9 +33,6 @@ public class BootstrapOrderingSpringApplicationJsonIntegrationTests {
 		System.clearProperty("SPRING_APPLICATION_JSON");
 	}
 
-	@Autowired
-	private ConfigurableEnvironment environment;
-
 	@Test
 	public void bootstrapPropertiesExist() {
 		assertTrue(this.environment.getPropertySources()
@@ -43,6 +43,7 @@ public class BootstrapOrderingSpringApplicationJsonIntegrationTests {
 	@EnableAutoConfiguration
 	@Configuration
 	protected static class Application {
+
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * Convenience annotation that allows user to combine multiple <code>@LoadBalancerClient</code>
- * annotations on a single class (including in Java 7).
+ * Convenience annotation that allows user to combine multiple
+ * <code>@LoadBalancerClient</code> annotations on a single class (including in Java 7).
  *
  * @author Dave Syer
  */
@@ -42,10 +42,12 @@ public @interface LoadBalancerClients {
 	LoadBalancerClient[] value() default {};
 
 	/**
-	 * {@link LoadBalancerClientConfigurationRegistrar} creates a {@link LoadBalancerClientSpecification}
-	 * with this as an argument. These in turn are added as default contexts in {@link LoadBalancerClientFactory}.
-	 * Configuration defined in these classes are used as defaults if values aren't defined via
+	 * {@link LoadBalancerClientConfigurationRegistrar} creates a
+	 * {@link LoadBalancerClientSpecification} with this as an argument. These in turn are
+	 * added as default contexts in {@link LoadBalancerClientFactory}. Configuration
+	 * defined in these classes are used as defaults if values aren't defined via
 	 * {@link LoadBalancerClient#configuration()}
+	 * @return classes for default configurations
 	 */
 	Class<?>[] defaultConfiguration() default {};
 

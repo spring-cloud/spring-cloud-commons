@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.context.properties;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +23,7 @@ import javax.annotation.PostConstruct;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -42,9 +41,10 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class,
-		properties = "messages=one,two")
+@SpringBootTest(classes = TestConfiguration.class, properties = "messages=one,two")
 public class ConfigurationPropertiesRebinderListIntegrationTests {
 
 	@Autowired
@@ -114,16 +114,20 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 
 	// Hack out a protected inner class for testing
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
+
 		@Configuration
 		protected static class RebinderConfiguration
 				extends ConfigurationPropertiesRebinderAutoConfiguration {
 
 		}
+
 	}
 
 	@ConfigurationProperties
 	protected static class TestProperties {
+
 		private List<String> messages;
+
 		private int count;
 
 		public List<String> getMessages() {
@@ -142,6 +146,7 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 		public void init() {
 			this.count++;
 		}
+
 	}
 
 }

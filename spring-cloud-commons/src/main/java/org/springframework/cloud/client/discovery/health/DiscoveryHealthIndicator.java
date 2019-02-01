@@ -20,6 +20,7 @@ import org.springframework.boot.actuate.health.Health;
 
 /**
  * A health indicator interface specific to a DiscoveryClient implementation.
+ *
  * @author Spencer Gibb
  */
 public interface DiscoveryHealthIndicator {

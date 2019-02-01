@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.springframework.cloud.autoconfigure;
@@ -68,14 +67,43 @@ import org.springframework.util.StringUtils;
 @AutoConfigureBefore(HibernateJpaAutoConfiguration.class)
 public class RefreshAutoConfiguration {
 
+	/**
+	 * Name of the refresh scope name.
+	 */
 	public static final String REFRESH_SCOPE_NAME = "refresh";
+
+	/**
+	 * Name of the prefix for refresh scope.
+	 */
 	public static final String REFRESH_SCOPE_PREFIX = "spring.cloud.refresh";
+
+	/**
+	 * Name of the enabled prefix for refresh scope.
+	 */
 	public static final String REFRESH_SCOPE_ENABLED = REFRESH_SCOPE_PREFIX + ".enabled";
 
 	@Bean
 	@ConditionalOnMissingBean(RefreshScope.class)
 	public static RefreshScope refreshScope() {
 		return new RefreshScope();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public static LoggingRebinder loggingRebinder() {
+		return new LoggingRebinder();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public ContextRefresher contextRefresher(ConfigurableApplicationContext context,
+			RefreshScope scope) {
+		return new ContextRefresher(context, scope);
+	}
+
+	@Bean
+	public RefreshEventListener refreshEventListener(ContextRefresher contextRefresher) {
+		return new RefreshEventListener(contextRefresher);
 	}
 
 	@Configuration
@@ -88,8 +116,8 @@ public class RefreshAutoConfiguration {
 		@PostConstruct
 		public void init() {
 			String cls = "org.springframework.boot.autoconfigure.jdbc.DataSourceInitializerInvoker";
-			if (beanFactory.containsBean(cls)) {
-				beanFactory.getBean(cls);
+			if (this.beanFactory.containsBean(cls)) {
+				this.beanFactory.getBean(cls);
 			}
 		}
 
@@ -176,13 +204,13 @@ public class RefreshAutoConfiguration {
 		}
 
 		private void bindEnvironmentIfNeeded(BeanDefinitionRegistry registry) {
-			if (!bound) { // only bind once
+			if (!this.bound) { // only bind once
 				if (this.environment == null) {
 					this.environment = new StandardEnvironment();
 				}
-				Binder.get(environment).bind("spring.cloud.refresh",
+				Binder.get(this.environment).bind("spring.cloud.refresh",
 						Bindable.ofInstance(this));
-				bound = true;
+				this.bound = true;
 			}
 		}
 
@@ -190,24 +218,7 @@ public class RefreshAutoConfiguration {
 		public void setEnvironment(Environment environment) {
 			this.environment = environment;
 		}
-	}
 
-	@Bean
-	@ConditionalOnMissingBean
-	public static LoggingRebinder loggingRebinder() {
-		return new LoggingRebinder();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public ContextRefresher contextRefresher(ConfigurableApplicationContext context,
-			RefreshScope scope) {
-		return new ContextRefresher(context, scope);
-	}
-
-	@Bean
-	public RefreshEventListener refreshEventListener(ContextRefresher contextRefresher) {
-		return new RefreshEventListener(contextRefresher);
 	}
 
 }

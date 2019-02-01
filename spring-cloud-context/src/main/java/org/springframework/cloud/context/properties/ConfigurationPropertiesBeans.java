@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2014 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.properties;
 
 import java.util.HashMap;
@@ -38,8 +39,8 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class ConfigurationPropertiesBeans implements BeanPostProcessor,
-ApplicationContextAware {
+public class ConfigurationPropertiesBeans
+		implements BeanPostProcessor, ApplicationContextAware {
 
 	private ConfigurationBeanFactoryMetadata metaData;
 
@@ -56,12 +57,13 @@ ApplicationContextAware {
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
-		if (applicationContext.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory) {
+		if (applicationContext
+				.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory) {
 			this.beanFactory = (ConfigurableListableBeanFactory) applicationContext
 					.getAutowireCapableBeanFactory();
 		}
-		if (applicationContext.getParent() != null
-				&& applicationContext.getParent().getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory) {
+		if (applicationContext.getParent() != null && applicationContext.getParent()
+				.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory) {
 			ConfigurableListableBeanFactory listable = (ConfigurableListableBeanFactory) applicationContext
 					.getParent().getAutowireCapableBeanFactory();
 			String[] names = listable
@@ -86,8 +88,8 @@ ApplicationContextAware {
 		if (isRefreshScoped(beanName)) {
 			return bean;
 		}
-		ConfigurationProperties annotation = AnnotationUtils.findAnnotation(
-				bean.getClass(), ConfigurationProperties.class);
+		ConfigurationProperties annotation = AnnotationUtils
+				.findAnnotation(bean.getClass(), ConfigurationProperties.class);
 		if (annotation != null) {
 			this.beans.put(beanName, bean);
 		}
@@ -105,7 +107,8 @@ ApplicationContextAware {
 		if (this.refreshScope == null && !this.refreshScopeInitialized) {
 			this.refreshScopeInitialized = true;
 			for (String scope : this.beanFactory.getRegisteredScopeNames()) {
-				if (this.beanFactory.getRegisteredScope(scope) instanceof org.springframework.cloud.context.scope.refresh.RefreshScope) {
+				if (this.beanFactory.getRegisteredScope(
+						scope) instanceof org.springframework.cloud.context.scope.refresh.RefreshScope) {
 					this.refreshScope = scope;
 					break;
 				}
@@ -114,9 +117,8 @@ ApplicationContextAware {
 		if (beanName == null || this.refreshScope == null) {
 			return false;
 		}
-		return this.beanFactory.containsBeanDefinition(beanName)
-				&& this.refreshScope.equals(this.beanFactory.getBeanDefinition(beanName)
-						.getScope());
+		return this.beanFactory.containsBeanDefinition(beanName) && this.refreshScope
+				.equals(this.beanFactory.getBeanDefinition(beanName).getScope());
 	}
 
 	@Override

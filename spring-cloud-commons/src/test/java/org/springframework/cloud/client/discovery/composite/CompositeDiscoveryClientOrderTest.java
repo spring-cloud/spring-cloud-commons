@@ -34,13 +34,14 @@ import static org.springframework.cloud.client.discovery.composite.CompositeDisc
 import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.FOURTH_DISCOVERY_CLIENT;
 
 /**
- * Tests for the support of ordered {@link DiscoveryClient} instances in {@link CompositeDiscoveryClient}
+ * Tests for the support of ordered {@link DiscoveryClient} instances in
+ * {@link CompositeDiscoveryClient}
  *
  * @author Olga Maciaszek-Sharma
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.cloud.discovery.client.simple.order:2", classes = {
-		CompositeDiscoveryClientTestsConfig.class})
+		CompositeDiscoveryClientTestsConfig.class })
 public class CompositeDiscoveryClientOrderTest {
 
 	@Autowired
@@ -73,4 +74,5 @@ public class CompositeDiscoveryClientOrderTest {
 		assertThat(serviceInstances).hasSize(1);
 		assertThat(serviceInstances.get(0).getPort()).isEqualTo(123);
 	}
+
 }

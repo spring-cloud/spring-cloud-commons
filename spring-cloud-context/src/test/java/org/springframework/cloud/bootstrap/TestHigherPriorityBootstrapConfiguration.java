@@ -12,13 +12,13 @@ import org.springframework.core.annotation.Order;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class TestHigherPriorityBootstrapConfiguration {
 
-	static final AtomicReference<Class<?>> firstToBeCreated = new AtomicReference<>();
-	
 	public static final AtomicInteger count = new AtomicInteger();
+	static final AtomicReference<Class<?>> firstToBeCreated = new AtomicReference<>();
 
 	public TestHigherPriorityBootstrapConfiguration() {
 		count.incrementAndGet();
-		firstToBeCreated.compareAndSet(null, TestHigherPriorityBootstrapConfiguration.class);
+		firstToBeCreated.compareAndSet(null,
+				TestHigherPriorityBootstrapConfiguration.class);
 	}
 
 }

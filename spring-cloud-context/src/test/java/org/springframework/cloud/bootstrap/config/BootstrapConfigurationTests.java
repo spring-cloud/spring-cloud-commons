@@ -53,12 +53,12 @@ import static org.junit.Assert.assertTrue;
  */
 public class BootstrapConfigurationTests {
 
+	@Rule
+	public ExpectedException expected = ExpectedException.none();
+
 	private ConfigurableApplicationContext context;
 
 	private ConfigurableApplicationContext sibling;
-
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
 
 	@After
 	public void close() {
@@ -111,7 +111,6 @@ public class BootstrapConfigurationTests {
 	/**
 	 * Running the test from maven will start from a different directory then starting it
 	 * from intellij
-	 *
 	 * @return
 	 */
 	private String getExternalProperties() {
@@ -275,10 +274,10 @@ public class BootstrapConfigurationTests {
 		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
 				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
 		assertEquals(1, TestHigherPriorityBootstrapConfiguration.count.get());
-		assertNotNull(context.getParent());
-		assertEquals("bootstrap", context.getParent().getParent().getId());
-		assertNull(context.getParent().getParent().getParent());
-		assertEquals("bar", context.getEnvironment().getProperty("custom.foo"));
+		assertNotNull(this.context.getParent());
+		assertEquals("bootstrap", this.context.getParent().getParent().getId());
+		assertNull(this.context.getParent().getParent().getParent());
+		assertEquals("bar", this.context.getEnvironment().getProperty("custom.foo"));
 	}
 
 	@Test
@@ -294,18 +293,18 @@ public class BootstrapConfigurationTests {
 				.properties("spring.application.name=context")
 				.web(WebApplicationType.NONE).run();
 		assertEquals(1, TestHigherPriorityBootstrapConfiguration.count.get());
-		assertNotNull(context.getParent());
-		assertEquals("bootstrap", context.getParent().getParent().getId());
-		assertNull(context.getParent().getParent().getParent());
-		assertEquals("context", context.getEnvironment().getProperty("custom.foo"));
+		assertNotNull(this.context.getParent());
+		assertEquals("bootstrap", this.context.getParent().getParent().getId());
+		assertNull(this.context.getParent().getParent().getParent());
+		assertEquals("context", this.context.getEnvironment().getProperty("custom.foo"));
 		assertEquals("context",
-				context.getEnvironment().getProperty("spring.application.name"));
-		assertNotNull(sibling.getParent());
-		assertEquals("bootstrap", sibling.getParent().getParent().getId());
-		assertNull(sibling.getParent().getParent().getParent());
-		assertEquals("sibling", sibling.getEnvironment().getProperty("custom.foo"));
+				this.context.getEnvironment().getProperty("spring.application.name"));
+		assertNotNull(this.sibling.getParent());
+		assertEquals("bootstrap", this.sibling.getParent().getParent().getId());
+		assertNull(this.sibling.getParent().getParent().getParent());
+		assertEquals("sibling", this.sibling.getEnvironment().getProperty("custom.foo"));
 		assertEquals("sibling",
-				sibling.getEnvironment().getProperty("spring.application.name"));
+				this.sibling.getEnvironment().getProperty("spring.application.name"));
 	}
 
 	@Test
@@ -375,6 +374,7 @@ public class BootstrapConfigurationTests {
 	@Configuration
 	@EnableConfigurationProperties
 	protected static class BareConfiguration {
+
 	}
 
 	@Configuration
@@ -416,6 +416,7 @@ public class BootstrapConfigurationTests {
 		public void setFail(boolean fail) {
 			this.fail = fail;
 		}
+
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ import org.springframework.util.Assert;
 /**
  * @author Dave Syer
  */
-public class LoadBalancerClientSpecification implements NamedContextFactory.Specification {
+public class LoadBalancerClientSpecification
+		implements NamedContextFactory.Specification {
 
 	private String name;
 
@@ -43,7 +44,7 @@ public class LoadBalancerClientSpecification implements NamedContextFactory.Spec
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
@@ -52,7 +53,7 @@ public class LoadBalancerClientSpecification implements NamedContextFactory.Spec
 	}
 
 	public Class<?>[] getConfiguration() {
-		return configuration;
+		return this.configuration;
 	}
 
 	public void setConfiguration(Class<?>[] configuration) {
@@ -63,22 +64,27 @@ public class LoadBalancerClientSpecification implements NamedContextFactory.Spec
 	@Override
 	public String toString() {
 		ToStringCreator to = new ToStringCreator(this);
-		to.append("name", name);
-		to.append("configuration", configuration);
+		to.append("name", this.name);
+		to.append("configuration", this.configuration);
 		return to.toString();
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 		LoadBalancerClientSpecification that = (LoadBalancerClientSpecification) o;
-		return Objects.equals(name, that.name) &&
-				Arrays.equals(configuration, that.configuration);
+		return Objects.equals(this.name, that.name)
+				&& Arrays.equals(this.configuration, that.configuration);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, configuration);
+		return Objects.hash(this.name, this.configuration);
 	}
+
 }

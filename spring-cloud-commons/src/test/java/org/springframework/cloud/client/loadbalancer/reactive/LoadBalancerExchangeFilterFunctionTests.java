@@ -9,6 +9,7 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -55,39 +56,28 @@ public class LoadBalancerExchangeFilterFunctionTests {
 		SimpleServiceInstance instance = new SimpleServiceInstance();
 		instance.setServiceId("testservice");
 		instance.setUri(URI.create("http://localhost:" + this.port));
-		properties.getInstances().put("testservice", Arrays.asList(instance));
+		this.properties.getInstances().put("testservice", Arrays.asList(instance));
 	}
 
 	@Test
 	public void testFilterFunctionWorks() {
-		String value = WebClient.builder()
-				.baseUrl("http://testservice")
-				.filter(lbFunction)
-				.build()
-				.get()
-				.uri("/hello")
-				.retrieve()
+		String value = WebClient.builder().baseUrl("http://testservice")
+				.filter(this.lbFunction).build().get().uri("/hello").retrieve()
 				.bodyToMono(String.class).block();
 		assertThat(value).isEqualTo("Hello World");
 	}
 
 	@Test
 	public void testNoInstance() {
-		ClientResponse clientResponse = WebClient.builder()
-				.baseUrl("http://foobar")
-				.filter(lbFunction)
-				.build()
-				.get().exchange().block();
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http://foobar")
+				.filter(this.lbFunction).build().get().exchange().block();
 		assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
 	@Test
 	public void testNoHostName() {
-		ClientResponse clientResponse = WebClient.builder()
-				.baseUrl("http:///foobar")
-				.filter(lbFunction)
-				.build()
-				.get().exchange().block();
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///foobar")
+				.filter(this.lbFunction).build().get().exchange().block();
 		assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
@@ -108,35 +98,36 @@ public class LoadBalancerExchangeFilterFunctionTests {
 				Random random = new Random();
 
 				@Override
-				public <T> T execute(String serviceId, LoadBalancerRequest<T> request) throws IOException {
+				public <T> T execute(String serviceId, LoadBalancerRequest<T> request)
+						throws IOException {
 					throw new UnsupportedOperationException();
 				}
 
 				@Override
-				public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
+				public <T> T execute(String serviceId, ServiceInstance serviceInstance,
+						LoadBalancerRequest<T> request) throws IOException {
 					throw new UnsupportedOperationException();
 				}
 
 				@Override
 				public URI reconstructURI(ServiceInstance instance, URI original) {
-					return UriComponentsBuilder.fromUri(original)
-							.host(instance.getHost())
-							.port(instance.getPort())
-							.build()
-							.toUri();
+					return UriComponentsBuilder.fromUri(original).host(instance.getHost())
+							.port(instance.getPort()).build().toUri();
 				}
 
 				@Override
 				public ServiceInstance choose(String serviceId) {
-					List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
-					if(instances.size() == 0) {
+					List<ServiceInstance> instances = discoveryClient
+							.getInstances(serviceId);
+					if (instances.size() == 0) {
 						return null;
 					}
-					int instanceIdx = random.nextInt(instances.size());
+					int instanceIdx = this.random.nextInt(instances.size());
 					return instances.get(instanceIdx);
 				}
 			};
 		}
 
 	}
+
 }

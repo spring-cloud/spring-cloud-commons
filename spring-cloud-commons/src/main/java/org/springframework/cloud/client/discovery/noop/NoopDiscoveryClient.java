@@ -25,8 +25,9 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 /**
  * DiscoveryClient used when no implementations are found on the classpath.
  *
- * @deprecated Use {@link org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient instead}.
- *
+ * @deprecated Use
+ * {@link org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient
+ * instead}.
  * @author Dave Syer
  */
 

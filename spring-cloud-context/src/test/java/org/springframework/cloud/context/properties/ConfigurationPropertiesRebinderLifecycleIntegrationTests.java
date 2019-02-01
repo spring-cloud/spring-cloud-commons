@@ -80,16 +80,20 @@ public class ConfigurationPropertiesRebinderLifecycleIntegrationTests {
 
 	// Hack out a protected inner class for testing
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
+
 		@Configuration
 		protected static class RebinderConfiguration
 				extends ConfigurationPropertiesRebinderAutoConfiguration {
 
 		}
+
 	}
 
 	@ConfigurationProperties
 	protected static class TestProperties implements DisposableBean, InitializingBean {
+
 		private String message;
+
 		private int count = 0;
 
 		public int getCount() {
@@ -114,6 +118,7 @@ public class ConfigurationPropertiesRebinderLifecycleIntegrationTests {
 			this.message = "";
 			this.count++;
 		}
+
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -41,10 +41,12 @@ public class CompatibilityVerifierAutoConfigurationTests {
 	@Configuration
 	@EnableAutoConfiguration
 	static class TestConfiguration {
+
 		@Bean
 		MyCompatibilityVerifier myMismatchVerifier() {
 			return new MyCompatibilityVerifier();
 		}
+
 	}
 
 	private static class MyCompatibilityVerifier implements CompatibilityVerifier {
@@ -56,6 +58,7 @@ public class CompatibilityVerifierAutoConfigurationTests {
 			this.called = true;
 			return VerificationResult.compatible();
 		}
-	}
-}
 
+	}
+
+}

@@ -17,6 +17,7 @@ package org.springframework.cloud.context.scope.refresh;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -44,42 +45,43 @@ public class RefreshScopeWebIntegrationTests {
 
 	@Autowired
 	private org.springframework.cloud.context.scope.refresh.RefreshScope scope;
-	
+
 	@Autowired
 	private EnvironmentManager environmentManager;
-	
+
 	@Autowired
 	private Client application;
-	
+
 	@Autowired
 	private ConfigurableListableBeanFactory beanFactory;
-	
+
 	@Test
 	public void scopeOnBeanDefinition() throws Exception {
-		assertEquals("refresh", beanFactory.getBeanDefinition("scopedTarget.application").getScope());
+		assertEquals("refresh", this.beanFactory
+				.getBeanDefinition("scopedTarget.application").getScope());
 	}
 
 	@Test
 	public void beanAccess() throws Exception {
-		application.hello();
-		environmentManager.setProperty("message", "Hello Dave!");
-		scope.refreshAll();
-		String message = application.hello();
+		this.application.hello();
+		this.environmentManager.setProperty("message", "Hello Dave!");
+		this.scope.refreshAll();
+		String message = this.application.hello();
 		assertEquals("Hello Dave!", message);
 	}
-	
+
 	@Configuration
 	@EnableAutoConfiguration
 	protected static class Application {
-		
+
+		public static void main(String[] args) {
+			SpringApplication.run(Application.class, args);
+		}
+
 		@Bean
 		@RefreshScope
 		public Client application() {
 			return new Client();
-		}
-		
-		public static void main(String[] args) {
-			SpringApplication.run(Application.class, args);
 		}
 
 	}
@@ -92,7 +94,7 @@ public class RefreshScopeWebIntegrationTests {
 
 		@RequestMapping("/")
 		public String hello() {
-			return message;
+			return this.message;
 		}
 
 	}

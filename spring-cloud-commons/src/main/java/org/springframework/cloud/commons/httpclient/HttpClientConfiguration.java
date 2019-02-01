@@ -1,9 +1,25 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.commons.httpclient;
 
 import okhttp3.OkHttpClient;
-
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -35,9 +51,11 @@ public class HttpClientConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public ApacheHttpClientFactory apacheHttpClientFactory(HttpClientBuilder builder) {
+		public ApacheHttpClientFactory apacheHttpClientFactory(
+				HttpClientBuilder builder) {
 			return new DefaultApacheHttpClientFactory(builder);
 		}
+
 	}
 
 	@Configuration
@@ -62,5 +80,7 @@ public class HttpClientConfiguration {
 		public OkHttpClientFactory okHttpClientFactory(OkHttpClient.Builder builder) {
 			return new DefaultOkHttpClientFactory(builder);
 		}
+
 	}
+
 }

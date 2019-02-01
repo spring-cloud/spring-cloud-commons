@@ -1,6 +1,7 @@
 package org.springframework.cloud.client;
 
 import org.junit.Test;
+
 import org.springframework.beans.BeansException;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -41,10 +42,16 @@ public class CommonsClientAutoConfigurationTests {
 
 	@Test
 	public void disableAll() {
-		try (ConfigurableApplicationContext ctxt = init("spring.cloud.discovery.enabled=false")) {
+		try (ConfigurableApplicationContext ctxt = init(
+				"spring.cloud.discovery.enabled=false")) {
 			assertBeanNonExistant(ctxt, DiscoveryClientHealthIndicator.class);
 			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthIndicator.class);
-			assertThat(ctxt.getBean(FeaturesEndpoint.class), is(notNullValue())); // features actuator is independent of discovery
+			assertThat(ctxt.getBean(FeaturesEndpoint.class), is(notNullValue())); // features
+			// actuator
+			// is
+			// independent
+			// of
+			// discovery
 			assertBeanNonExistant(ctxt, HasFeatures.class);
 		}
 	}
@@ -82,13 +89,15 @@ public class CommonsClientAutoConfigurationTests {
 	}
 
 	protected ConfigurableApplicationContext init(String... pairs) {
-		return new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(Config.class)
-				.properties(pairs).run();
+		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
+				.sources(Config.class).properties(pairs).run();
 	}
 
 	@Configuration
 	@EnableAutoConfiguration
 	@Import(NoopDiscoveryClientAutoConfiguration.class)
 	protected static class Config {
+
 	}
+
 }

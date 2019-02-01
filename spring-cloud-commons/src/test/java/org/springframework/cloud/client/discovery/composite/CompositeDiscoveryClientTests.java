@@ -37,13 +37,12 @@ import static org.springframework.cloud.client.discovery.composite.CompositeDisc
  */
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = {
-		"spring.application.name=service0",
+@SpringBootTest(properties = { "spring.application.name=service0",
 		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s1-1:8080",
 		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s1-2:8443",
 		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s2-1:8080",
-		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s2-2:443",}, classes = {
-		CompositeDiscoveryClientTestsConfig.class})
+		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s2-2:443", }, classes = {
+				CompositeDiscoveryClientTestsConfig.class })
 public class CompositeDiscoveryClientTests {
 
 	@Autowired
@@ -64,12 +63,14 @@ public class CompositeDiscoveryClientTests {
 
 	@Test
 	public void getServicesShouldAggregateAllServiceNames() {
-		assertThat(this.discoveryClient.getServices()).containsOnlyOnce("service1", "service2", "custom");
+		assertThat(this.discoveryClient.getServices()).containsOnlyOnce("service1",
+				"service2", "custom");
 	}
 
 	@Test
 	public void getDescriptionShouldBeComposite() {
-		assertThat(this.discoveryClient.description()).isEqualTo("Composite Discovery Client");
+		assertThat(this.discoveryClient.description())
+				.isEqualTo("Composite Discovery Client");
 	}
 
 	@Test
@@ -82,4 +83,5 @@ public class CompositeDiscoveryClientTests {
 	public void getInstancesByUnknownServiceIdShouldReturnAnEmptyList() {
 		assertThat(this.discoveryClient.getInstances("unknown")).hasSize(0);
 	}
+
 }

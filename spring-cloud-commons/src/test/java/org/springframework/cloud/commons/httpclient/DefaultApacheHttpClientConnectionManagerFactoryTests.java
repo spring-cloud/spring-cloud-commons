@@ -27,6 +27,7 @@ import static org.junit.Assert.assertThat;
  * @author Michael Wirth
  */
 public class DefaultApacheHttpClientConnectionManagerFactoryTests {
+
 	@Test
 	public void newConnectionManager() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
@@ -105,4 +106,5 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 		Object value = ReflectionUtils.getField(field, target);
 		return (T) value;
 	}
+
 }

@@ -212,4 +212,5 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		verify(encryptor).decrypt("bar2");
 		verifyNoMoreInteractions(encryptor);
 	}
+
 }

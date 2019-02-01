@@ -16,17 +16,13 @@
 
 package org.springframework.cloud.context.scope.refresh;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.DisposableBean;
@@ -45,6 +41,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -89,7 +90,8 @@ public class MoreRefreshScopeIntegrationTests {
 		assertEquals("Hello scope!", this.service.getMessage());
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
-		TestPropertyValues.of("message:Foo").applyTo(this.environment, Type.MAP, "morerefreshtests");
+		TestPropertyValues.of("message:Foo").applyTo(this.environment, Type.MAP,
+				"morerefreshtests");
 		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refreshAll();
 		String id2 = this.service.toString();
@@ -123,7 +125,6 @@ public class MoreRefreshScopeIntegrationTests {
 		assertEquals("Foo", this.service.getMessage());
 	}
 
-
 	public static class TestService implements InitializingBean, DisposableBean {
 
 		private static Log logger = LogFactory.getLog(TestService.class);
@@ -135,6 +136,19 @@ public class MoreRefreshScopeIntegrationTests {
 		private String message = null;
 
 		private volatile long delay = 0;
+
+		public static void reset() {
+			initCount = 0;
+			destroyCount = 0;
+		}
+
+		public static int getInitCount() {
+			return initCount;
+		}
+
+		public static int getDestroyCount() {
+			return destroyCount;
+		}
 
 		public void setDelay(long delay) {
 			this.delay = delay;
@@ -153,24 +167,6 @@ public class MoreRefreshScopeIntegrationTests {
 			this.message = null;
 		}
 
-		public static void reset() {
-			initCount = 0;
-			destroyCount = 0;
-		}
-
-		public static int getInitCount() {
-			return initCount;
-		}
-
-		public static int getDestroyCount() {
-			return destroyCount;
-		}
-
-		public void setMessage(String message) {
-			logger.debug("Setting message: " + message);
-			this.message = message;
-		}
-
 		public String getMessage() {
 			logger.debug("Getting message: " + this.message);
 			try {
@@ -181,6 +177,11 @@ public class MoreRefreshScopeIntegrationTests {
 			}
 			logger.info("Returning message: " + this.message);
 			return this.message;
+		}
+
+		public void setMessage(String message) {
+			logger.debug("Setting message: " + message);
+			this.message = message;
 		}
 
 	}
@@ -232,6 +233,7 @@ public class MoreRefreshScopeIntegrationTests {
 		public void setDelay(int delay) {
 			this.delay = delay;
 		}
+
 	}
 
 }

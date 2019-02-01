@@ -5,13 +5,11 @@ org.springframework.cloud.autoconfigure.LifecycleMvcEndpointAutoConfiguration,\
 org.springframework.cloud.autoconfigure.RefreshAutoConfiguration,\
 org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration,\
 org.springframework.cloud.autoconfigure.WritableEnvironmentEndpointAutoConfiguration
-
 # Application Listeners
 org.springframework.context.ApplicationListener=\
 org.springframework.cloud.bootstrap.BootstrapApplicationListener,\
 org.springframework.cloud.bootstrap.LoggingSystemShutdownListener,\
 org.springframework.cloud.context.restart.RestartListener
-
 # Bootstrap components
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration,\

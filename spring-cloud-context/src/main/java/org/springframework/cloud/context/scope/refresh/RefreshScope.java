@@ -1,14 +1,17 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
- * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.cloud.context.scope.refresh;
@@ -64,17 +67,19 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  * </p>
  *
  * @author Dave Syer
- *
  * @since 3.1
  *
  */
 @ManagedResource
-public class RefreshScope extends GenericScope
-		implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, Ordered {
+public class RefreshScope extends GenericScope implements ApplicationContextAware,
+		ApplicationListener<ContextRefreshedEvent>, Ordered {
 
 	private ApplicationContext context;
+
 	private BeanDefinitionRegistry registry;
+
 	private boolean eager = true;
+
 	private int order = Ordered.LOWEST_PRECEDENCE - 100;
 
 	/**
@@ -96,7 +101,6 @@ public class RefreshScope extends GenericScope
 	/**
 	 * Flag to determine whether all beans in refresh scope should be instantiated eagerly
 	 * on startup. Default true.
-	 *
 	 * @param eager The flag to set.
 	 */
 	public void setEager(boolean eager) {
@@ -135,7 +139,8 @@ public class RefreshScope extends GenericScope
 		}
 	}
 
-	@ManagedOperation(description = "Dispose of the current instance of bean name provided and force a refresh on next method execution.")
+	@ManagedOperation(description = "Dispose of the current instance of bean name "
+			+ "provided and force a refresh on next method execution.")
 	public boolean refresh(String name) {
 		if (!name.startsWith(SCOPED_TARGET_PREFIX)) {
 			// User wants to refresh the bean with this name but that isn't the one in the
@@ -150,7 +155,8 @@ public class RefreshScope extends GenericScope
 		return false;
 	}
 
-	@ManagedOperation(description = "Dispose of the current instance of all beans in this scope and force a refresh on next method execution.")
+	@ManagedOperation(description = "Dispose of the current instance of all beans "
+			+ "in this scope and force a refresh on next method execution.")
 	public void refreshAll() {
 		super.destroy();
 		this.context.publishEvent(new RefreshScopeRefreshedEvent());

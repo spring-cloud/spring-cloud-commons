@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,16 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -30,19 +38,11 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.web.client.AsyncRestTemplate;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.empty;
-
+import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * @author Rob Worsnop
@@ -65,10 +65,12 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 	}
 
 	private void assertLoadBalanced(AsyncRestTemplate restTemplate) {
-		List<AsyncClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+		List<AsyncClientHttpRequestInterceptor> interceptors = restTemplate
+				.getInterceptors();
 		MatcherAssert.assertThat(interceptors, hasSize(1));
 		AsyncClientHttpRequestInterceptor interceptor = interceptors.get(0);
-		MatcherAssert.assertThat(interceptor, is(instanceOf(AsyncLoadBalancerInterceptor.class)));
+		MatcherAssert.assertThat(interceptor,
+				is(instanceOf(AsyncLoadBalancerInterceptor.class)));
 	}
 
 	@Test
@@ -111,7 +113,10 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 		}
 
 		@Bean
-		LoadBalancedRetryFactory loadBalancedRetryFactory() {return new LoadBalancedRetryFactory(){};}
+		LoadBalancedRetryFactory loadBalancedRetryFactory() {
+			return new LoadBalancedRetryFactory() {
+			};
+		}
 
 	}
 
@@ -137,17 +142,20 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 
 		@Configuration
 		protected static class Two {
+
 			@Autowired
 			AsyncRestTemplate nonLoadBalanced;
 
 			@Autowired
 			@LoadBalanced
 			AsyncRestTemplate loadBalanced;
+
 		}
 
 	}
 
 	private static class NoopLoadBalancerClient implements LoadBalancerClient {
+
 		private final Random random = new Random();
 
 		@Override
@@ -160,16 +168,19 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 		public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
 
 		@Override
-		public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
+		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
+				LoadBalancerRequest<T> request) throws IOException {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -178,5 +189,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 		public URI reconstructURI(ServiceInstance instance, URI original) {
 			return DefaultServiceInstance.getUri(instance);
 		}
+
 	}
+
 }

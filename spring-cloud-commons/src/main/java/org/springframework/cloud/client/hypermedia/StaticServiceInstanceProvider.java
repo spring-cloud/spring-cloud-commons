@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.hypermedia;
 
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A {@link ServiceInstanceProvider} that will always return the configured {@link ServiceInstance}.
- * 
+ * A {@link ServiceInstanceProvider} that will always return the configured
+ * {@link ServiceInstance}.
+ *
  * @author Oliver Gierke
  */
 public class StaticServiceInstanceProvider implements ServiceInstanceProvider {
@@ -30,12 +32,14 @@ public class StaticServiceInstanceProvider implements ServiceInstanceProvider {
 		this.instance = instance;
 	}
 
-	/* 
-		 * (non-Javadoc)
-		 * @see example.customers.integration.ServiceInstanceProvider#getServiceInstance()
-		 */
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see example.customers.integration.ServiceInstanceProvider#getServiceInstance()
+	 */
 	@Override
 	public ServiceInstance getServiceInstance() {
-		return instance;
+		return this.instance;
 	}
+
 }

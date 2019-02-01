@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.DeferredImportSelector;
@@ -32,24 +33,24 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 
-
 /**
  * Selects configurations to load, defined by the generic type T. Loads implementations
  * using {@link SpringFactoriesLoader}.
  *
+ * @param <T> type of annotation class
  * @author Spencer Gibb
  * @author Dave Syer
  */
 public abstract class SpringFactoryImportSelector<T>
 		implements DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
 
+	private final Log log = LogFactory.getLog(SpringFactoryImportSelector.class);
+
 	private ClassLoader beanClassLoader;
 
 	private Class<T> annotationClass;
 
 	private Environment environment;
-
-	private final Log log = LogFactory.getLog(SpringFactoryImportSelector.class);
 
 	@SuppressWarnings("unchecked")
 	protected SpringFactoryImportSelector() {
@@ -80,7 +81,7 @@ public abstract class SpringFactoryImportSelector<T>
 		if (factories.size() > 1) {
 			// there should only ever be one DiscoveryClient, but there might be more than
 			// one factory
-			log.warn("More than one implementation " + "of @" + getSimpleName()
+			this.log.warn("More than one implementation " + "of @" + getSimpleName()
 					+ " (now relying on @Conditionals to pick one): " + factories);
 		}
 

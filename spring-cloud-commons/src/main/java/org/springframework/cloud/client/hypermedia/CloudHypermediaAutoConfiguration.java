@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.client.hypermedia;
 
+package org.springframework.cloud.client.hypermedia;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,9 +29,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Registers a default {@link RemoteResourceRefresher} if at least one {@link RemoteResource} is declared in the system.
- * Applies verification timings defined in the application properties.
- * 
+ * Registers a default {@link RemoteResourceRefresher} if at least one
+ * {@link RemoteResource} is declared in the system. Applies verification timings defined
+ * in the application properties.
+ *
  * @author Oliver Gierke
  */
 @Configuration
@@ -39,36 +40,47 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties(CloudHypermediaProperties.class)
 public class CloudHypermediaAutoConfiguration {
 
-	@Autowired(required = false) List<RemoteResource> discoveredResources = Collections.emptyList();
-	@Autowired CloudHypermediaProperties properties;
+	@Autowired(required = false)
+	List<RemoteResource> discoveredResources = Collections.emptyList();
+
+	@Autowired
+	CloudHypermediaProperties properties;
 
 	@Bean
 	@ConditionalOnMissingBean
 	public RemoteResourceRefresher discoveredResourceRefresher() {
-		return new RemoteResourceRefresher(discoveredResources, properties.getRefresh().getFixedDelay(),
-				properties.getRefresh().getInitialDelay());
+		return new RemoteResourceRefresher(this.discoveredResources,
+				this.properties.getRefresh().getFixedDelay(),
+				this.properties.getRefresh().getInitialDelay());
 	}
 
+	/**
+	 * Configuration for Cloud hypermedia.
+	 */
 	@ConfigurationProperties(prefix = "spring.cloud.hypermedia")
 	public static class CloudHypermediaProperties {
 
 		private Refresh refresh = new Refresh();
 
 		public Refresh getRefresh() {
-			return refresh;
+			return this.refresh;
 		}
 
 		public void setRefresh(Refresh refresh) {
 			this.refresh = refresh;
 		}
 
+		/**
+		 * Configuration for Cloud hypermedia refresh.
+		 */
 		public static class Refresh {
 
 			private int fixedDelay = 5000;
+
 			private int initialDelay = 10000;
 
 			public int getFixedDelay() {
-				return fixedDelay;
+				return this.fixedDelay;
 			}
 
 			public void setFixedDelay(int fixedDelay) {
@@ -76,12 +88,15 @@ public class CloudHypermediaAutoConfiguration {
 			}
 
 			public int getInitialDelay() {
-				return initialDelay;
+				return this.initialDelay;
 			}
 
 			public void setInitialDelay(int initialDelay) {
 				this.initialDelay = initialDelay;
 			}
+
 		}
+
 	}
+
 }

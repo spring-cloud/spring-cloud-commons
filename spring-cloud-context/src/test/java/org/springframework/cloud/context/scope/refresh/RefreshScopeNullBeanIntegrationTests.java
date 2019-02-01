@@ -17,6 +17,7 @@ package org.springframework.cloud.context.scope.refresh;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +32,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {RefreshScopeNullBeanIntegrationTests.TestConfiguration.class})
+@SpringBootTest(classes = {
+		RefreshScopeNullBeanIntegrationTests.TestConfiguration.class })
 public class RefreshScopeNullBeanIntegrationTests {
 
 	@Autowired
@@ -49,7 +51,9 @@ public class RefreshScopeNullBeanIntegrationTests {
 		// this.scope.refreshAll();
 	}
 
-	protected static class OptionalService { }
+	protected static class OptionalService {
+
+	}
 
 	public static class MyCustomComponent {
 
@@ -58,6 +62,7 @@ public class RefreshScopeNullBeanIntegrationTests {
 		public MyCustomComponent(OptionalService optionalService) {
 			this.optionalService = optionalService;
 		}
+
 	}
 
 	@Configuration
@@ -68,10 +73,12 @@ public class RefreshScopeNullBeanIntegrationTests {
 		public OptionalService service() {
 			return null;
 		}
+
 	}
 
 	@Configuration
-	@Import({ RefreshAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class, OptionalConfiguration.class })
+	@Import({ RefreshAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
+			OptionalConfiguration.class })
 	protected static class TestConfiguration {
 
 		@Autowired(required = false)
@@ -79,8 +86,9 @@ public class RefreshScopeNullBeanIntegrationTests {
 
 		@Bean
 		public MyCustomComponent myCustomComponent() {
-			return new MyCustomComponent(optionalService);
+			return new MyCustomComponent(this.optionalService);
 		}
+
 	}
 
 }

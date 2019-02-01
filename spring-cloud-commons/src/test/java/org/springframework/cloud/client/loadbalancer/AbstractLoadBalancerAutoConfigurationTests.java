@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,14 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Random;
 
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -40,6 +34,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 /**
  * @author Ryan Baxter
@@ -101,6 +101,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		LoadBalancerClient loadBalancerClient() {
 			return new NoopLoadBalancerClient();
 		}
+
 	}
 
 	@Configuration
@@ -125,17 +126,20 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 		@Configuration
 		protected static class Two {
+
 			@Autowired
 			RestTemplate nonLoadBalanced;
 
 			@Autowired
 			@LoadBalanced
 			RestTemplate loadBalanced;
+
 		}
 
 	}
 
 	private static class NoopLoadBalancerClient implements LoadBalancerClient {
+
 		private final Random random = new Random();
 
 		@Override
@@ -148,16 +152,19 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
 
 		@Override
-		public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
+		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
+				LoadBalancerRequest<T> request) throws IOException {
 			try {
 				return request.apply(choose(serviceId));
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -166,5 +173,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		public URI reconstructURI(ServiceInstance instance, URI original) {
 			return DefaultServiceInstance.getUri(instance);
 		}
+
 	}
+
 }

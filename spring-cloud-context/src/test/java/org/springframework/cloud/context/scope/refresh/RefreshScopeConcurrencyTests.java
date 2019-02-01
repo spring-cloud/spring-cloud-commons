@@ -113,6 +113,7 @@ public class RefreshScopeConcurrencyTests {
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 
 		private String message = null;
+
 		private volatile long delay = 0;
 
 		public void setDelay(long delay) {
@@ -130,11 +131,6 @@ public class RefreshScopeConcurrencyTests {
 			this.message = null;
 		}
 
-		public void setMessage(String message) {
-			logger.debug("Setting message: " + message);
-			this.message = message;
-		}
-
 		@Override
 		public String getMessage() {
 			logger.debug("Getting message: " + this.message);
@@ -146,6 +142,11 @@ public class RefreshScopeConcurrencyTests {
 			}
 			logger.info("Returning message: " + this.message);
 			return this.message;
+		}
+
+		public void setMessage(String message) {
+			logger.debug("Setting message: " + message);
+			this.message = message;
 		}
 
 	}
@@ -173,7 +174,9 @@ public class RefreshScopeConcurrencyTests {
 	@ConfigurationProperties
 	@ManagedResource
 	protected static class TestProperties {
+
 		private String message;
+
 		private int delay;
 
 		@ManagedAttribute
@@ -193,6 +196,7 @@ public class RefreshScopeConcurrencyTests {
 		public void setDelay(int delay) {
 			this.delay = delay;
 		}
+
 	}
 
 }

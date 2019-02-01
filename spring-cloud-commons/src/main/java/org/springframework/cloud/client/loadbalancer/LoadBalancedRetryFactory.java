@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.loadbalancer;
 
 import org.springframework.retry.RetryListener;
@@ -21,6 +22,7 @@ import org.springframework.retry.backoff.NoBackOffPolicy;
 
 /**
  * Factory class used to customize the retry functionality throughout Spring Cloud.
+ *
  * @author Ryan Baxter
  */
 public interface LoadBalancedRetryFactory {
@@ -31,7 +33,8 @@ public interface LoadBalancedRetryFactory {
 	 * @param serviceInstanceChooser Used to get the next server from a load balancer.
 	 * @return A retry policy for the service.
 	 */
-	default LoadBalancedRetryPolicy createRetryPolicy(String service, ServiceInstanceChooser serviceInstanceChooser) {
+	default LoadBalancedRetryPolicy createRetryPolicy(String service,
+			ServiceInstanceChooser serviceInstanceChooser) {
 		return null;
 	}
 
@@ -52,4 +55,5 @@ public interface LoadBalancedRetryFactory {
 	default BackOffPolicy createBackOffPolicy(String service) {
 		return new NoBackOffPolicy();
 	}
+
 }
