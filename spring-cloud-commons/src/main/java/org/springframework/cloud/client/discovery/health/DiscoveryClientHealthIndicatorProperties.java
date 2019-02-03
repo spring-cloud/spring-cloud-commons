@@ -47,7 +47,7 @@ public class DiscoveryClientHealthIndicatorProperties {
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer(
-				"DiscoveryClientHealthIndicatorProperties{");
+			"DiscoveryClientHealthIndicatorProperties{");
 		sb.append("enabled=").append(this.enabled);
 		sb.append(", includeDescription=").append(this.includeDescription);
 		sb.append('}');

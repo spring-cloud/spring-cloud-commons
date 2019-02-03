@@ -54,7 +54,7 @@ public interface LoadBalancerClient extends ServiceInstanceChooser {
 	 * ServiceInstance.
 	 */
 	<T> T execute(String serviceId, ServiceInstance serviceInstance,
-			LoadBalancerRequest<T> request) throws IOException;
+		LoadBalancerRequest<T> request) throws IOException;
 
 	/**
 	 * Creates a proper URI with a real host and port for systems to utilize. Some systems

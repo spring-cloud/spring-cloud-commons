@@ -36,7 +36,7 @@ public class DiscoveryClientServiceInstanceSupplier implements ServiceInstanceSu
 	private final String serviceId;
 
 	public DiscoveryClientServiceInstanceSupplier(DiscoveryClient delegate,
-			Environment environment) {
+		Environment environment) {
 		this.delegate = delegate;
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
 	}

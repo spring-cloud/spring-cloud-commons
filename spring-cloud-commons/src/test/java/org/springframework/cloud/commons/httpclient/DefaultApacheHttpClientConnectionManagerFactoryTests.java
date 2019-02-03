@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.commons.httpclient;
 
 import java.lang.reflect.Field;
@@ -16,11 +32,7 @@ import org.junit.Test;
 
 import org.springframework.util.ReflectionUtils;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Ryan Baxter
@@ -31,70 +43,70 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 	@Test
 	public void newConnectionManager() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
-				.newConnectionManager(false, 2, 6);
-		assertEquals(6, ((PoolingHttpClientConnectionManager) connectionManager)
-				.getDefaultMaxPerRoute());
-		assertEquals(2,
-				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
+			.newConnectionManager(false, 2, 6);
+		then(((PoolingHttpClientConnectionManager) connectionManager)
+			.getDefaultMaxPerRoute()).isEqualTo(6);
+		then(((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal())
+			.isEqualTo(2);
 		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
-				"pool");
-		assertEquals(new Long(-1), getField(pool, "timeToLive"));
+			"pool");
+		then((Long) getField(pool, "timeToLive")).isEqualTo(new Long(-1));
 		TimeUnit timeUnit = getField(pool, "tunit");
-		assertEquals(TimeUnit.MILLISECONDS, timeUnit);
+		then(timeUnit).isEqualTo(TimeUnit.MILLISECONDS);
 	}
 
 	@Test
 	public void newConnectionManagerWithTTL() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
-				.newConnectionManager(false, 2, 6, 56l, TimeUnit.DAYS, null);
-		assertEquals(6, ((PoolingHttpClientConnectionManager) connectionManager)
-				.getDefaultMaxPerRoute());
-		assertEquals(2,
-				((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal());
+			.newConnectionManager(false, 2, 6, 56L, TimeUnit.DAYS, null);
+		then(((PoolingHttpClientConnectionManager) connectionManager)
+			.getDefaultMaxPerRoute()).isEqualTo(6);
+		then(((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal())
+			.isEqualTo(2);
 		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
-				"pool");
-		assertEquals(new Long(56), getField(pool, "timeToLive"));
+			"pool");
+		then((Long) getField(pool, "timeToLive")).isEqualTo(new Long(56));
 		TimeUnit timeUnit = getField(pool, "tunit");
-		assertEquals(TimeUnit.DAYS, timeUnit);
+		then(timeUnit).isEqualTo(TimeUnit.DAYS);
 	}
 
 	@Test
 	public void newConnectionManagerWithSSL() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
-				.newConnectionManager(false, 2, 6);
+			.newConnectionManager(false, 2, 6);
 
 		Lookup<ConnectionSocketFactory> socketFactoryRegistry = getConnectionSocketFactoryLookup(
-				connectionManager);
-		assertThat(socketFactoryRegistry.lookup("https"), is(notNullValue()));
-		assertThat(getX509TrustManager(socketFactoryRegistry).getAcceptedIssuers(),
-				is(notNullValue()));
+			connectionManager);
+		then(socketFactoryRegistry.lookup("https")).isNotNull();
+		then(getX509TrustManager(socketFactoryRegistry).getAcceptedIssuers())
+			.isNotNull();
 	}
 
 	@Test
 	public void newConnectionManagerWithDisabledSSLValidation() throws Exception {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
-				.newConnectionManager(true, 2, 6);
+			.newConnectionManager(true, 2, 6);
 
 		Lookup<ConnectionSocketFactory> socketFactoryRegistry = getConnectionSocketFactoryLookup(
-				connectionManager);
-		assertThat(socketFactoryRegistry.lookup("https"), is(notNullValue()));
-		assertThat(getX509TrustManager(socketFactoryRegistry).getAcceptedIssuers(),
-				is(nullValue()));
+			connectionManager);
+		then(socketFactoryRegistry.lookup("https")).isNotNull();
+		then(getX509TrustManager(socketFactoryRegistry).getAcceptedIssuers())
+			.isNull();
 	}
 
 	private Lookup<ConnectionSocketFactory> getConnectionSocketFactoryLookup(
-			HttpClientConnectionManager connectionManager) {
+		HttpClientConnectionManager connectionManager) {
 		DefaultHttpClientConnectionOperator connectionOperator = getField(
-				connectionManager, "connectionOperator");
+			connectionManager, "connectionOperator");
 		return getField(connectionOperator, "socketFactoryRegistry");
 	}
 
 	private X509TrustManager getX509TrustManager(
-			Lookup<ConnectionSocketFactory> socketFactoryRegistry) {
+		Lookup<ConnectionSocketFactory> socketFactoryRegistry) {
 		ConnectionSocketFactory connectionSocketFactory = socketFactoryRegistry
-				.lookup("https");
+			.lookup("https");
 		SSLSocketFactory sslSocketFactory = getField(connectionSocketFactory,
-				"socketfactory");
+			"socketfactory");
 		SSLContextSpi sslContext = getField(sslSocketFactory, "context");
 		return getField(sslContext, "trustManager");
 	}

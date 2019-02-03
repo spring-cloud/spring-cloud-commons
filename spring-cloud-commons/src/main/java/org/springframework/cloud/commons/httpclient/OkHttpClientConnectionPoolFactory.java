@@ -35,6 +35,6 @@ public interface OkHttpClientConnectionPoolFactory {
 	 * @return A new {@link ConnectionPool}.
 	 */
 	ConnectionPool create(int maxIdleConnections, long keepAliveDuration,
-			TimeUnit timeUnit);
+		TimeUnit timeUnit);
 
 }

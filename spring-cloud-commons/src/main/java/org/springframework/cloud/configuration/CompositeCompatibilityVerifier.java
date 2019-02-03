@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 class CompositeCompatibilityVerifier {
 
 	private static final Log log = LogFactory
-			.getLog(CompositeCompatibilityVerifier.class);
+		.getLog(CompositeCompatibilityVerifier.class);
 
 	private final List<CompatibilityVerifier> verifiers;
 

@@ -40,16 +40,16 @@ public class CompatibilityVerifierAutoConfiguration {
 
 	@Bean
 	CompositeCompatibilityVerifier compositeCompatibilityVerifier(
-			List<CompatibilityVerifier> verifiers) {
+		List<CompatibilityVerifier> verifiers) {
 		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(
-				verifiers);
+			verifiers);
 		verifier.verifyDependencies();
 		return verifier;
 	}
 
 	@Bean
 	SpringBootVersionVerifier springBootVersionVerifier(
-			CompatibilityVerifierProperties properties) {
+		CompatibilityVerifierProperties properties) {
 		return new SpringBootVersionVerifier(properties.getCompatibleBootVersions());
 	}
 

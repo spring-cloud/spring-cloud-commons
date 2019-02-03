@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.hypermedia;
 
 import org.junit.Before;
@@ -23,16 +24,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.client.Traverson;
-import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -63,7 +57,7 @@ public class DiscoveredResourceUnitTests {
 	@Before
 	public void setUp() {
 		when(this.traversal.buildTraversal(Matchers.any(Traverson.class)))
-				.thenReturn(this.builder);
+			.thenReturn(this.builder);
 
 		this.resource = new DiscoveredResource(this.provider, this.traversal);
 		this.resource.setRestOperations(this.operations);
@@ -71,7 +65,7 @@ public class DiscoveredResourceUnitTests {
 
 	@Test
 	public void isUndiscoveredByDefault() {
-		assertThat(this.resource.getLink(), is(nullValue()));
+		then(this.resource.getLink()).isNull();
 	}
 
 	@Test
@@ -80,12 +74,12 @@ public class DiscoveredResourceUnitTests {
 		Link link = new Link("target", "rel");
 
 		when(this.provider.getServiceInstance()).thenReturn(new DefaultServiceInstance(
-				"instance", "service", "localhost", 8080, false));
+			"instance", "service", "localhost", 8080, false));
 		when(this.builder.asTemplatedLink()).thenReturn(link);
 
 		this.resource.verifyOrDiscover();
 
-		assertThat(this.resource.getLink(), is(link));
+		then(this.resource.getLink()).isEqualTo(link);
 		verify(this.provider, times(1)).getServiceInstance();
 		verify(this.traversal, times(1)).buildTraversal(Matchers.any(Traverson.class));
 	}
@@ -97,7 +91,7 @@ public class DiscoveredResourceUnitTests {
 
 		this.resource.verifyOrDiscover();
 
-		assertThat(this.resource.getLink(), is(notNullValue()));
+		then(this.resource.getLink()).isNotNull();
 		verify(this.operations, times(1)).headForHeaders(anyString());
 	}
 
@@ -107,10 +101,10 @@ public class DiscoveredResourceUnitTests {
 		verificationTriggersDiscovery();
 
 		doThrow(RestClientException.class).when(this.operations)
-				.headForHeaders(anyString());
+			.headForHeaders(anyString());
 		this.resource.verifyOrDiscover();
 
-		assertThat(this.resource.getLink(), is(nullValue()));
+		then(this.resource.getLink()).isNull();
 	}
 
 	@Test
@@ -120,7 +114,7 @@ public class DiscoveredResourceUnitTests {
 
 		this.resource.verifyOrDiscover();
 
-		assertThat(this.resource.getLink(), is(nullValue()));
+		then(this.resource.getLink()).isNull();
 	}
 
 }

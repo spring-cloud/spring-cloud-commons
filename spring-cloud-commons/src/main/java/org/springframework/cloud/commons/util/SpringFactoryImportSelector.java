@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * @author Dave Syer
  */
 public abstract class SpringFactoryImportSelector<T>
-		implements DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
+	implements DeferredImportSelector, BeanClassLoaderAware, EnvironmentAware {
 
 	private final Log log = LogFactory.getLog(SpringFactoryImportSelector.class);
 
@@ -55,7 +55,7 @@ public abstract class SpringFactoryImportSelector<T>
 	@SuppressWarnings("unchecked")
 	protected SpringFactoryImportSelector() {
 		this.annotationClass = (Class<T>) GenericTypeResolver
-				.resolveTypeArgument(this.getClass(), SpringFactoryImportSelector.class);
+			.resolveTypeArgument(this.getClass(), SpringFactoryImportSelector.class);
 	}
 
 	@Override
@@ -64,25 +64,25 @@ public abstract class SpringFactoryImportSelector<T>
 			return new String[0];
 		}
 		AnnotationAttributes attributes = AnnotationAttributes.fromMap(
-				metadata.getAnnotationAttributes(this.annotationClass.getName(), true));
+			metadata.getAnnotationAttributes(this.annotationClass.getName(), true));
 
 		Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is "
-				+ metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
+			+ metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
 
 		// Find all possible auto configuration classes, filtering duplicates
 		List<String> factories = new ArrayList<>(new LinkedHashSet<>(SpringFactoriesLoader
-				.loadFactoryNames(this.annotationClass, this.beanClassLoader)));
+			.loadFactoryNames(this.annotationClass, this.beanClassLoader)));
 
 		if (factories.isEmpty() && !hasDefaultFactory()) {
 			throw new IllegalStateException("Annotation @" + getSimpleName()
-					+ " found, but there are no implementations. Did you forget to include a starter?");
+				+ " found, but there are no implementations. Did you forget to include a starter?");
 		}
 
 		if (factories.size() > 1) {
 			// there should only ever be one DiscoveryClient, but there might be more than
 			// one factory
 			this.log.warn("More than one implementation " + "of @" + getSimpleName()
-					+ " (now relying on @Conditionals to pick one): " + factories);
+				+ " (now relying on @Conditionals to pick one): " + factories);
 		}
 
 		return factories.toArray(new String[factories.size()]);

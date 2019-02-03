@@ -38,14 +38,14 @@ public class LoadBalancerClientConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public ServiceInstanceSupplier discoveryClientServiceInstanceSupplier(
-			DiscoveryClient discoveryClient, Environment env,
-			ObjectProvider<CacheManager> cacheManager) {
+		DiscoveryClient discoveryClient, Environment env,
+		ObjectProvider<CacheManager> cacheManager) {
 		// TODO: bean post processor to enable caching?
 		DiscoveryClientServiceInstanceSupplier delegate = new DiscoveryClientServiceInstanceSupplier(
-				discoveryClient, env);
+			discoveryClient, env);
 		if (cacheManager.getIfAvailable() != null) {
 			return new CachingServiceInstanceSupplier(delegate,
-					cacheManager.getIfAvailable());
+				cacheManager.getIfAvailable());
 		}
 		return delegate;
 	}

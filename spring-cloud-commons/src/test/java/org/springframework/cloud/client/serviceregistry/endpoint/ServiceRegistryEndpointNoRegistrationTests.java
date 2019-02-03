@@ -52,19 +52,20 @@ public class ServiceRegistryEndpointNoRegistrationTests {
 	@Test
 	public void testGet() throws Exception {
 		this.mvc.perform(get("/service-registry/instance-status"))
-				.andExpect(status().isNotFound());
+			.andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void testPost() throws Exception {
 		this.mvc.perform(post("/service-registry/instance-status").content("newstatus"))
-				.andExpect(status().isNotFound());
+			.andExpect(status().isNotFound());
 	}
 
-	@Import({ JacksonAutoConfiguration.class,
-			HttpMessageConvertersAutoConfiguration.class, EndpointAutoConfiguration.class,
-			WebMvcAutoConfiguration.class,
-			// ManagementServerPropertiesAutoConfiguration.class
+	@Import({
+		JacksonAutoConfiguration.class,
+		HttpMessageConvertersAutoConfiguration.class, EndpointAutoConfiguration.class,
+		WebMvcAutoConfiguration.class
+		// ManagementServerPropertiesAutoConfiguration.class
 	})
 	@Configuration
 	public static class TestConfiguration {

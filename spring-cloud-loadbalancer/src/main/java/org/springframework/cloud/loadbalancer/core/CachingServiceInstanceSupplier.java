@@ -35,7 +35,7 @@ public class CachingServiceInstanceSupplier implements ServiceInstanceSupplier {
 	 * Name of the service cache instance.
 	 */
 	public static final String SERVICE_INSTANCE_CACHE_NAME = CachingServiceInstanceSupplier.class
-			.getSimpleName() + "Cache";
+		.getSimpleName() + "Cache";
 
 	private final ServiceInstanceSupplier delegate;
 
@@ -43,7 +43,7 @@ public class CachingServiceInstanceSupplier implements ServiceInstanceSupplier {
 
 	@SuppressWarnings("unchecked")
 	public CachingServiceInstanceSupplier(ServiceInstanceSupplier delegate,
-			CacheManager cacheManager) {
+		CacheManager cacheManager) {
 		this.delegate = delegate;
 		this.serviceInstances = CacheFlux.lookup(key -> {
 			Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME); // TODO:
@@ -56,12 +56,12 @@ public class CachingServiceInstanceSupplier implements ServiceInstanceSupplier {
 			}
 			return Flux.fromIterable(list).materialize().collectList();
 		}, delegate.getServiceId()).onCacheMissResume(this.delegate::get)
-				.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize()
-						.cast(ServiceInstance.class).collectList().doOnNext(instances -> {
-							Cache cache = cacheManager
-									.getCache(SERVICE_INSTANCE_CACHE_NAME);
-							cache.put(key, instances);
-						}).then());
+			.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize()
+				.cast(ServiceInstance.class).collectList().doOnNext(instances -> {
+					Cache cache = cacheManager
+						.getCache(SERVICE_INSTANCE_CACHE_NAME);
+					cache.put(key, instances);
+				}).then());
 	}
 
 	@Override

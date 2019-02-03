@@ -57,7 +57,7 @@ public class LoadBalancerAutoConfiguration {
 
 	@Bean
 	public SmartInitializingSingleton loadBalancedRestTemplateInitializerDeprecated(
-			final ObjectProvider<List<RestTemplateCustomizer>> restTemplateCustomizers) {
+		final ObjectProvider<List<RestTemplateCustomizer>> restTemplateCustomizers) {
 		return () -> restTemplateCustomizers.ifAvailable(customizers -> {
 			for (RestTemplate restTemplate : LoadBalancerAutoConfiguration.this.restTemplates) {
 				for (RestTemplateCustomizer customizer : customizers) {
@@ -70,7 +70,7 @@ public class LoadBalancerAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public LoadBalancerRequestFactory loadBalancerRequestFactory(
-			LoadBalancerClient loadBalancerClient) {
+		LoadBalancerClient loadBalancerClient) {
 		return new LoadBalancerRequestFactory(loadBalancerClient, this.transformers);
 	}
 
@@ -80,18 +80,18 @@ public class LoadBalancerAutoConfiguration {
 
 		@Bean
 		public LoadBalancerInterceptor ribbonInterceptor(
-				LoadBalancerClient loadBalancerClient,
-				LoadBalancerRequestFactory requestFactory) {
+			LoadBalancerClient loadBalancerClient,
+			LoadBalancerRequestFactory requestFactory) {
 			return new LoadBalancerInterceptor(loadBalancerClient, requestFactory);
 		}
 
 		@Bean
 		@ConditionalOnMissingBean
 		public RestTemplateCustomizer restTemplateCustomizer(
-				final LoadBalancerInterceptor loadBalancerInterceptor) {
+			final LoadBalancerInterceptor loadBalancerInterceptor) {
 			return restTemplate -> {
 				List<ClientHttpRequestInterceptor> list = new ArrayList<>(
-						restTemplate.getInterceptors());
+					restTemplate.getInterceptors());
 				list.add(loadBalancerInterceptor);
 				restTemplate.setInterceptors(list);
 			};
@@ -125,21 +125,21 @@ public class LoadBalancerAutoConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		public RetryLoadBalancerInterceptor ribbonInterceptor(
-				LoadBalancerClient loadBalancerClient,
-				LoadBalancerRetryProperties properties,
-				LoadBalancerRequestFactory requestFactory,
-				LoadBalancedRetryFactory loadBalancedRetryFactory) {
+			LoadBalancerClient loadBalancerClient,
+			LoadBalancerRetryProperties properties,
+			LoadBalancerRequestFactory requestFactory,
+			LoadBalancedRetryFactory loadBalancedRetryFactory) {
 			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties,
-					requestFactory, loadBalancedRetryFactory);
+				requestFactory, loadBalancedRetryFactory);
 		}
 
 		@Bean
 		@ConditionalOnMissingBean
 		public RestTemplateCustomizer restTemplateCustomizer(
-				final RetryLoadBalancerInterceptor loadBalancerInterceptor) {
+			final RetryLoadBalancerInterceptor loadBalancerInterceptor) {
 			return restTemplate -> {
 				List<ClientHttpRequestInterceptor> list = new ArrayList<>(
-						restTemplate.getInterceptors());
+					restTemplate.getInterceptors());
 				list.add(loadBalancerInterceptor);
 				restTemplate.setInterceptors(list);
 			};

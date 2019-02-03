@@ -50,7 +50,7 @@ import org.springframework.core.env.Environment;
 @ConditionalOnMissingBean(DiscoveryClient.class)
 @Deprecated
 public class NoopDiscoveryClientAutoConfiguration
-		implements ApplicationListener<ContextRefreshedEvent> {
+	implements ApplicationListener<ContextRefreshedEvent> {
 
 	private final Log log = LogFactory.getLog(NoopDiscoveryClientAutoConfiguration.class);
 
@@ -79,8 +79,8 @@ public class NoopDiscoveryClientAutoConfiguration
 		}
 		int port = findPort();
 		this.serviceInstance = new DefaultServiceInstance(
-				this.environment.getProperty("spring.application.name", "application"),
-				host, port, false);
+			this.environment.getProperty("spring.application.name", "application"),
+			host, port, false);
 	}
 
 	private int findPort() {
@@ -98,7 +98,7 @@ public class NoopDiscoveryClientAutoConfiguration
 			// Apparently spring-web is not on the classpath
 			if (this.log.isDebugEnabled()) {
 				this.log.debug(
-						"Could not locate port in embedded container (spring-web not available)");
+					"Could not locate port in embedded container (spring-web not available)");
 			}
 		}
 		return port;
@@ -122,8 +122,8 @@ public class NoopDiscoveryClientAutoConfiguration
 
 	@Configuration
 	@ConditionalOnClass(name = {
-			"org.springframework.web.context.support.GenericWebApplicationContext",
-			"org.springframework.boot.context.embedded.EmbeddedWebApplicationContext" })
+		"org.springframework.web.context.support.GenericWebApplicationContext",
+		"org.springframework.boot.context.embedded.EmbeddedWebApplicationContext"})
 	protected static class Boot15PortFinderConfiguration {
 
 		@Bean

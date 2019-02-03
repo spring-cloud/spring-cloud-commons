@@ -34,8 +34,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -43,8 +42,8 @@ import static org.mockito.Mockito.mock;
  * @author Spencer Gibb
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { DiscoveryCompositeHealthIndicatorTests.Config.class,
-		CommonsClientAutoConfiguration.class })
+@SpringBootTest(classes = {DiscoveryCompositeHealthIndicatorTests.Config.class,
+	CommonsClientAutoConfiguration.class})
 public class DiscoveryCompositeHealthIndicatorTests {
 
 	@Autowired
@@ -55,23 +54,27 @@ public class DiscoveryCompositeHealthIndicatorTests {
 
 	@Test
 	public void testHealthIndicator() {
-		assertNotNull("healthIndicator was null", this.healthIndicator);
+		then(this.healthIndicator).as("healthIndicator was null").isNotNull();
 		Health health = this.healthIndicator.health();
 		assertHealth(health, Status.UNKNOWN);
 
 		this.clientHealthIndicator
-				.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
+			.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
 
 		health = this.healthIndicator.health();
 		Status status = assertHealth(health, Status.UP);
-		assertEquals("status description was wrong", "", status.getDescription());
+		then("").isEqualTo(status.getDescription())
+			.as("status description was wrong");
+		;
 	}
 
 	protected Status assertHealth(Health health, Status expected) {
-		assertNotNull("health was null", health);
+		then(health).as("health was null").isNotNull();
 		Status status = health.getStatus();
-		assertNotNull("status was null", status);
-		assertEquals("status code was wrong", expected.getCode(), status.getCode());
+		then(status).as("status was null").isNotNull();
+		then(expected.getCode()).isEqualTo(status.getCode())
+			.as("status code was wrong");
+		;
 		return status;
 	}
 

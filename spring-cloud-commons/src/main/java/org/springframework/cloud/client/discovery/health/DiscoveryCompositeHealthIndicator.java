@@ -38,7 +38,7 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 
 	@Autowired
 	public DiscoveryCompositeHealthIndicator(HealthAggregator healthAggregator,
-			List<DiscoveryHealthIndicator> indicators) {
+		List<DiscoveryHealthIndicator> indicators) {
 		super(healthAggregator);
 		for (DiscoveryHealthIndicator indicator : indicators) {
 			Holder holder = new Holder(indicator);

@@ -30,7 +30,7 @@ import org.springframework.core.env.Environment;
  * @author Dave Syer
  */
 public class LoadBalancerClientFactory
-		extends NamedContextFactory<LoadBalancerClientSpecification> {
+	extends NamedContextFactory<LoadBalancerClientSpecification> {
 
 	/**
 	 * Property source name for load balancer.

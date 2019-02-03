@@ -50,8 +50,8 @@ public class CloudHypermediaAutoConfiguration {
 	@ConditionalOnMissingBean
 	public RemoteResourceRefresher discoveredResourceRefresher() {
 		return new RemoteResourceRefresher(this.discoveredResources,
-				this.properties.getRefresh().getFixedDelay(),
-				this.properties.getRefresh().getInitialDelay());
+			this.properties.getRefresh().getFixedDelay(),
+			this.properties.getRefresh().getInitialDelay());
 	}
 
 	/**

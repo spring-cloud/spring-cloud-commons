@@ -42,7 +42,7 @@ public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeEx
 	 * be retrieved.
 	 */
 	public ClientHttpResponseStatusCodeException(String serviceId,
-			ClientHttpResponse response, byte[] body) throws IOException {
+		ClientHttpResponse response, byte[] body) throws IOException {
 		super(serviceId, response.getRawStatusCode(), response, null);
 		this.response = new ClientHttpResponseWrapper(response, body);
 	}

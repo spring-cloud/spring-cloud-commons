@@ -22,7 +22,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.StandardEnvironment;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Dave Syer
@@ -36,14 +36,15 @@ public class HostInfoEnvironmentPostProcessorTests {
 	@Test
 	public void hostname() {
 		this.processor.postProcessEnvironment(this.environment, new SpringApplication());
-		assertNotNull(this.environment.getProperty("spring.cloud.client.hostname"));
+		then(this.environment.getProperty("spring.cloud.client.hostname"))
+			.isNotNull();
 	}
 
 	@Test
 	public void ipAddress() {
 		this.processor.postProcessEnvironment(this.environment, new SpringApplication());
 		String address = this.environment.getProperty("spring.cloud.client.ip-address");
-		assertNotNull(address);
+		then(address).isNotNull();
 	}
 
 }

@@ -38,7 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,7 +50,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Tim Ysewyn
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ServiceRegistryEndpointTests.TestConfiguration.class, properties = "management.endpoints.web.exposure.include=*")
+@SpringBootTest(classes = ServiceRegistryEndpointTests.TestConfiguration.class,
+	properties = "management.endpoints.web.exposure.include=*")
 @AutoConfigureMockMvc
 public class ServiceRegistryEndpointTests {
 
@@ -69,17 +70,17 @@ public class ServiceRegistryEndpointTests {
 	@Test
 	public void testGet() throws Exception {
 		this.mvc.perform(get(BASE_PATH + "/service-registry")).andExpect(status().isOk())
-				.andExpect(content().string(containsString(MYSTATUS)));
+			.andExpect(content().string(containsString(MYSTATUS)));
 	}
 
 	@Test
 	public void testPost() throws Exception {
 		Map<String, String> status = Collections.singletonMap("status", UPDATED_STATUS);
 		this.mvc.perform(post(BASE_PATH + "/service-registry")
-				.content(new ObjectMapper().writeValueAsString(status))
-				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
-		assertThat(this.serviceRegistry.getUpdatedStatus().get())
-				.isEqualTo(UPDATED_STATUS);
+			.content(new ObjectMapper().writeValueAsString(status))
+			.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		then(this.serviceRegistry.getUpdatedStatus().get())
+			.isEqualTo(UPDATED_STATUS);
 	}
 
 	@EnableAutoConfiguration

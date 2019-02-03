@@ -30,8 +30,8 @@ import org.springframework.cloud.client.hypermedia.CloudHypermediaAutoConfigurat
  * @author Dave Syer
  */
 @RunWith(Suite.class)
-@SuiteClasses({ EnableDiscoveryClientMissingImplTests.class,
-		CloudHypermediaAutoConfigurationIntegrationTests.class })
+@SuiteClasses({EnableDiscoveryClientMissingImplTests.class,
+	CloudHypermediaAutoConfigurationIntegrationTests.class})
 @Ignore
 public class AdhocTestSuite {
 

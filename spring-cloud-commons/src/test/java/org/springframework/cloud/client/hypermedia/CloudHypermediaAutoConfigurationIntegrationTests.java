@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.hypermedia;
 
 import org.junit.Test;
@@ -25,11 +26,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.hamcrest.Matchers.arrayWithSize;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * Integration tests for {@link CloudHypermediaAutoConfiguration}.
@@ -40,22 +37,22 @@ import static org.junit.Assert.assertThat;
 public class CloudHypermediaAutoConfigurationIntegrationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(
-			Class<?> configuration) {
+		Class<?> configuration) {
 		return new SpringApplicationBuilder(configuration).properties("server.port=0")
-				.run();
+			.run();
 	}
 
 	@Test
 	public void picksUpHypermediaProperties() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				ConfigWithRemoteResource.class)) {
+			ConfigWithRemoteResource.class)) {
 
 			CloudHypermediaProperties properties = context
-					.getBean(CloudHypermediaProperties.class);
+				.getBean(CloudHypermediaProperties.class);
 
-			assertThat(properties.getRefresh().getInitialDelay(), is(50000));
-			assertThat(properties.getRefresh().getFixedDelay(), is(10000));
+			then(properties.getRefresh().getInitialDelay()).isEqualTo(50000);
+			then(properties.getRefresh().getFixedDelay()).isEqualTo(10000);
 		}
 	}
 
@@ -63,9 +60,9 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	public void doesNotCreateCloudHypermediaPropertiesifNotActive() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				Config.class)) {
-			assertThat(context.getBeanNamesForType(CloudHypermediaProperties.class),
-					is(arrayWithSize(0)));
+			Config.class)) {
+			then(context.getBeanNamesForType(CloudHypermediaProperties.class))
+				.hasSize(0);
 		}
 	}
 
@@ -73,11 +70,11 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	public void doesNotRegisterResourceRefresherIfNoDiscoveredResourceIsDefined() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				Config.class)) {
+			Config.class)) {
 
-			assertThat(context.getBeansOfType(RemoteResource.class).values(), hasSize(0));
-			assertThat(context.getBeanNamesForType(RemoteResourceRefresher.class),
-					is(arrayWithSize(0)));
+			then(context.getBeansOfType(RemoteResource.class).values()).hasSize(0);
+			then(context.getBeanNamesForType(RemoteResourceRefresher.class))
+				.hasSize(0);
 		}
 	}
 
@@ -85,11 +82,10 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	public void registersResourceRefresherIfDiscoverredResourceIsDefined() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				ConfigWithRemoteResource.class)) {
+			ConfigWithRemoteResource.class)) {
 
-			assertThat(context.getBeansOfType(RemoteResource.class).values(), hasSize(1));
-			assertThat(context.getBean(RemoteResourceRefresher.class),
-					is(notNullValue()));
+			then(context.getBeansOfType(RemoteResource.class).values()).hasSize(1);
+			then(context.getBean(RemoteResourceRefresher.class)).isNotNull();
 		}
 	}
 
@@ -107,8 +103,8 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 		public RemoteResource resource() {
 
 			ServiceInstanceProvider provider = new StaticServiceInstanceProvider(
-					new DefaultServiceInstance("instance", "service", "localhost", 80,
-							false));
+				new DefaultServiceInstance("instance", "service", "localhost", 80,
+					false));
 			return new DiscoveredResource(provider, traverson -> traverson.follow("rel"));
 		}
 

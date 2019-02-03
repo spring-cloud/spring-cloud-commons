@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.scope.refresh;
 
 import java.util.concurrent.Callable;
@@ -46,9 +47,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -95,14 +94,14 @@ public class RefreshScopeScaleTests {
 				}
 			});
 		}
-		assertTrue(latch.await(15000, TimeUnit.MILLISECONDS));
-		assertEquals("Foo", this.service.getMessage());
-		assertNotNull(result.get());
-		assertEquals("Foo", result.get());
-		assertEquals(1, ExampleService.count);
+		then(latch.await(15000, TimeUnit.MILLISECONDS)).isTrue();
+		then(this.service.getMessage()).isEqualTo("Foo");
+		then(result.get()).isNotNull();
+		then(result.get()).isEqualTo("Foo");
+		then(ExampleService.count).isEqualTo(1);
 	}
 
-	public static interface Service {
+	public interface Service {
 
 		String getMessage();
 

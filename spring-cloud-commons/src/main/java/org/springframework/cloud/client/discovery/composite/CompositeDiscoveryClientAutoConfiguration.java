@@ -38,7 +38,7 @@ public class CompositeDiscoveryClientAutoConfiguration {
 	@Bean
 	@Primary
 	public CompositeDiscoveryClient compositeDiscoveryClient(
-			List<DiscoveryClient> discoveryClients) {
+		List<DiscoveryClient> discoveryClients) {
 		return new CompositeDiscoveryClient(discoveryClients);
 	}
 

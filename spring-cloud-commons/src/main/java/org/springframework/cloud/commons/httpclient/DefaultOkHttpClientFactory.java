@@ -54,7 +54,7 @@ public class DefaultOkHttpClientFactory implements OkHttpClientFactory {
 				sslContext.init(null, trustManagers, new java.security.SecureRandom());
 				SSLSocketFactory disabledSSLSocketFactory = sslContext.getSocketFactory();
 				this.builder.sslSocketFactory(disabledSSLSocketFactory,
-						disabledTrustManager);
+					disabledTrustManager);
 				this.builder.hostnameVerifier(new TrustAllHostnames());
 			}
 			catch (NoSuchAlgorithmException e) {

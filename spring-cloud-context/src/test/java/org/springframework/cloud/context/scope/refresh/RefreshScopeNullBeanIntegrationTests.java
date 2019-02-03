@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.scope.refresh;
 
 import org.junit.Test;
@@ -29,7 +30,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
@@ -45,8 +46,8 @@ public class RefreshScopeNullBeanIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testRefreshBean() {
-		assertThat(this.myCustomComponent.optionalService).isNotNull();
-		assertThat(this.scope).isNotNull();
+		then(this.myCustomComponent.optionalService).isNotNull();
+		then(this.scope).isNotNull();
 		// ...and then refresh, so the bean is re-initialized:
 		// this.scope.refreshAll();
 	}

@@ -34,7 +34,7 @@ import org.springframework.core.Ordered;
  * @author Spencer Gibb
  */
 public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator, Ordered,
-		ApplicationListener<InstanceRegisteredEvent<?>> {
+	ApplicationListener<InstanceRegisteredEvent<?>> {
 
 	private final ObjectProvider<DiscoveryClient> discoveryClient;
 
@@ -47,7 +47,7 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 	private int order = Ordered.HIGHEST_PRECEDENCE;
 
 	public DiscoveryClientHealthIndicator(ObjectProvider<DiscoveryClient> discoveryClient,
-			DiscoveryClientHealthIndicatorProperties properties) {
+		DiscoveryClientHealthIndicatorProperties properties) {
 		this.discoveryClient = discoveryClient;
 		this.properties = properties;
 	}
@@ -68,9 +68,9 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 				DiscoveryClient client = this.discoveryClient.getIfAvailable();
 				List<String> services = client.getServices();
 				String description = (this.properties.isIncludeDescription())
-						? client.description() : "";
+					? client.description() : "";
 				builder.status(new Status("UP", description)).withDetail("services",
-						services);
+					services);
 			}
 			catch (Exception e) {
 				this.log.error("Error", e);
@@ -79,7 +79,7 @@ public class DiscoveryClientHealthIndicator implements DiscoveryHealthIndicator,
 		}
 		else {
 			builder.status(new Status(Status.UNKNOWN.getCode(),
-					"Discovery Client not initialized"));
+				"Discovery Client not initialized"));
 		}
 		return builder.build();
 	}

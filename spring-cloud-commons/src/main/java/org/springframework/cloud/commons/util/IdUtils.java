@@ -35,7 +35,7 @@ public final class IdUtils {
 	}
 
 	public static String getDefaultInstanceId(PropertyResolver resolver,
-			boolean includeHostname) {
+		boolean includeHostname) {
 		String vcapInstanceId = resolver.getProperty("vcap.application.instance_id");
 		if (StringUtils.hasText(vcapInstanceId)) {
 			return vcapInstanceId;
@@ -50,13 +50,13 @@ public final class IdUtils {
 		String namePart = combineParts(hostname, SEPARATOR, appName);
 
 		String indexPart = resolver.getProperty("spring.application.instance_id",
-				resolver.getProperty("server.port"));
+			resolver.getProperty("server.port"));
 
 		return combineParts(namePart, SEPARATOR, indexPart);
 	}
 
 	public static String combineParts(String firstPart, String separator,
-			String secondPart) {
+		String secondPart) {
 		String combined = null;
 		if (firstPart != null && secondPart != null) {
 			combined = firstPart + separator + secondPart;

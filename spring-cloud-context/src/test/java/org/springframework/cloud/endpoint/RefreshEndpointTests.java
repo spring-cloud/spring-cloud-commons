@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,9 +47,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Dave Syer
@@ -77,7 +75,7 @@ public class RefreshEndpointTests {
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
-		assertTrue("Wrong keys: " + keys, keys.contains("added"));
+		then(keys.contains("added")).isTrue().as("Wrong keys: " + keys);
 	}
 
 	@Test
@@ -91,7 +89,7 @@ public class RefreshEndpointTests {
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
-		assertTrue("Wrong keys: " + keys, keys.contains("message"));
+		then(keys.contains("message")).isTrue().as("Wrong keys: " + keys);
 	}
 
 	@Test
@@ -108,7 +106,7 @@ public class RefreshEndpointTests {
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
-		assertTrue("Wrong keys: " + keys, keys.contains("external.message"));
+		then(keys.contains("external.message")).isTrue().as("Wrong keys: " + keys);
 	}
 
 	@Test
@@ -128,7 +126,7 @@ public class RefreshEndpointTests {
 		ContextRefresher contextRefresher = new ContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
-		assertFalse("Wrong keys: " + keys, keys.contains("external.message"));
+		then(keys.contains("external.message")).as("Wrong keys: " + keys).isFalse();
 	}
 
 	@Test
@@ -142,8 +140,8 @@ public class RefreshEndpointTests {
 		Empty empty = this.context.getBean(Empty.class);
 		endpoint.refresh();
 		int after = empty.events.size();
-		assertEquals("Shutdown hooks not cleaned on refresh", 2, after);
-		assertTrue(empty.events.get(0) instanceof EnvironmentChangeEvent);
+		then(2).isEqualTo(after).as("Shutdown hooks not cleaned on refresh");
+		then(empty.events.get(0) instanceof EnvironmentChangeEvent).isTrue();
 	}
 
 	@Test
@@ -157,7 +155,7 @@ public class RefreshEndpointTests {
 			int count = countShutdownHooks();
 			endpoint.refresh();
 			int after = countShutdownHooks();
-			assertEquals("Shutdown hooks not cleaned on refresh", count, after);
+			then(count).isEqualTo(after).as("Shutdown hooks not cleaned on refresh");
 		}
 	}
 

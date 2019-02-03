@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.commons.httpclient;
 
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -28,7 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Ryan Baxter
@@ -43,8 +44,8 @@ public class CustomHttpClientBuilderConfigurationTests {
 	@Test
 	public void testCustomBuilder() {
 		HttpClientBuilder builder = this.apacheHttpClientFactory.createBuilder();
-		assertTrue(CustomHttpClientBuilderApplication.MyHttpClientBuilder.class
-				.isInstance(builder));
+		then(CustomHttpClientBuilderApplication.MyHttpClientBuilder.class
+			.isInstance(builder)).isTrue();
 	}
 
 }
@@ -58,7 +59,7 @@ class CustomHttpClientBuilderApplication {
 	}
 
 	@Configuration
-	@AutoConfigureBefore(value = HttpClientConfiguration.class)
+	@AutoConfigureBefore(HttpClientConfiguration.class)
 	static class MyConfig {
 
 		@Bean

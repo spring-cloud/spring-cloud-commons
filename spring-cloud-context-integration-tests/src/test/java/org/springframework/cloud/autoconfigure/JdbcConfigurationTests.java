@@ -35,17 +35,17 @@ public class JdbcConfigurationTests {
 	@Test
 	public void schemaApplied() {
 		new SpringApplicationBuilder(BrokenApplication.class).web(WebApplicationType.NONE)
-				.run("--spring.datasource.initialization-mode=always").close();
+			.run("--spring.datasource.initialization-mode=always").close();
 	}
 
 	@SpringBootConfiguration
 	@EnableConfigurationProperties(DataSourceProperties.class)
-	@Import({ DataSourceAutoConfiguration.class, RefreshAutoConfiguration.class })
+	@Import({DataSourceAutoConfiguration.class, RefreshAutoConfiguration.class})
 	protected static class BrokenApplication {
 
 		public static void main(String[] args) {
 			new SpringApplicationBuilder(BrokenApplication.class)
-					.web(WebApplicationType.NONE).run(args);
+				.web(WebApplicationType.NONE).run(args);
 		}
 
 	}

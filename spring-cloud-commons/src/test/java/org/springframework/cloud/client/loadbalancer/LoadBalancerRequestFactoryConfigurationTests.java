@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.loadbalancer;
 
 import org.junit.Before;
@@ -32,7 +33,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -72,13 +73,13 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.web(WebApplicationType.NONE)
-				.properties("spring.aop.proxyTargetClass=true")
-				.sources(config, LoadBalancerAutoConfiguration.class).run();
+			.web(WebApplicationType.NONE)
+			.properties("spring.aop.proxyTargetClass=true")
+			.sources(config, LoadBalancerAutoConfiguration.class).run();
 
 		this.lbReqFactory = context.getBean(LoadBalancerRequestFactory.class);
 		this.lbRequest = this.lbReqFactory.createRequest(this.request, this.body,
-				this.execution);
+			this.execution);
 		return context;
 	}
 
@@ -87,16 +88,16 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 		ConfigurableApplicationContext context = init(Transformer.class);
 
 		LoadBalancerRequestTransformer transformer = context.getBean("transformer",
-				LoadBalancerRequestTransformer.class);
+			LoadBalancerRequestTransformer.class);
 		when(transformer.transformRequest(any(ServiceRequestWrapper.class),
-				eq(this.instance))).thenReturn(this.transformedRequest);
+			eq(this.instance))).thenReturn(this.transformedRequest);
 
 		this.lbRequest.apply(this.instance);
 
 		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
-		assertEquals(
-				"transformer should have transformed the ServiceRequestWrapper into transformedRequest",
-				this.transformedRequest, this.httpRequestCaptor.getValue());
+		then(this.httpRequestCaptor.getValue())
+			.as("transformer should have transformed the ServiceRequestWrapper into transformedRequest")
+			.isEqualTo(this.transformedRequest);
 	}
 
 	@Test
@@ -106,9 +107,9 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 		this.lbRequest.apply(this.instance);
 
 		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
-		assertEquals("ServiceRequestWrapper should be executed",
-				ServiceRequestWrapper.class,
-				this.httpRequestCaptor.getValue().getClass());
+		then(this.httpRequestCaptor.getValue().getClass())
+			.as("ServiceRequestWrapper should be executed")
+			.isEqualTo(ServiceRequestWrapper.class);
 	}
 
 	@Test
@@ -116,19 +117,20 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 		ConfigurableApplicationContext context = init(TransformersAreOrdered.class);
 
 		LoadBalancerRequestTransformer transformer = context.getBean("transformer",
-				LoadBalancerRequestTransformer.class);
+			LoadBalancerRequestTransformer.class);
 		when(transformer.transformRequest(any(ServiceRequestWrapper.class),
-				eq(this.instance))).thenReturn(this.transformedRequest);
+			eq(this.instance))).thenReturn(this.transformedRequest);
 		LoadBalancerRequestTransformer transformer2 = context.getBean("transformer2",
-				LoadBalancerRequestTransformer.class);
+			LoadBalancerRequestTransformer.class);
 		when(transformer2.transformRequest(this.transformedRequest, this.instance))
-				.thenReturn(this.transformedRequest2);
+			.thenReturn(this.transformedRequest2);
 
 		this.lbRequest.apply(this.instance);
 
 		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
-		assertEquals("transformer2 should run after transformer",
-				this.transformedRequest2, this.httpRequestCaptor.getValue());
+		then(this.httpRequestCaptor.getValue())
+			.as("transformer2 should run after transformer")
+			.isEqualTo(this.transformedRequest2);
 	}
 
 	@Configuration

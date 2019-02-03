@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.io.IOException;
@@ -31,7 +47,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
@@ -62,23 +78,23 @@ public class LoadBalancerExchangeFilterFunctionTests {
 	@Test
 	public void testFilterFunctionWorks() {
 		String value = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.lbFunction).build().get().uri("/hello").retrieve()
-				.bodyToMono(String.class).block();
-		assertThat(value).isEqualTo("Hello World");
+			.filter(this.lbFunction).build().get().uri("/hello").retrieve()
+			.bodyToMono(String.class).block();
+		then(value).isEqualTo("Hello World");
 	}
 
 	@Test
 	public void testNoInstance() {
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://foobar")
-				.filter(this.lbFunction).build().get().exchange().block();
-		assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+			.filter(this.lbFunction).build().get().exchange().block();
+		then(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
 	@Test
 	public void testNoHostName() {
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///foobar")
-				.filter(this.lbFunction).build().get().exchange().block();
-		assertThat(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+			.filter(this.lbFunction).build().get().exchange().block();
+		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@EnableDiscoveryClient
@@ -99,26 +115,26 @@ public class LoadBalancerExchangeFilterFunctionTests {
 
 				@Override
 				public <T> T execute(String serviceId, LoadBalancerRequest<T> request)
-						throws IOException {
+					throws IOException {
 					throw new UnsupportedOperationException();
 				}
 
 				@Override
 				public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-						LoadBalancerRequest<T> request) throws IOException {
+					LoadBalancerRequest<T> request) throws IOException {
 					throw new UnsupportedOperationException();
 				}
 
 				@Override
 				public URI reconstructURI(ServiceInstance instance, URI original) {
 					return UriComponentsBuilder.fromUri(original).host(instance.getHost())
-							.port(instance.getPort()).build().toUri();
+						.port(instance.getPort()).build().toUri();
 				}
 
 				@Override
 				public ServiceInstance choose(String serviceId) {
 					List<ServiceInstance> instances = discoveryClient
-							.getInstances(serviceId);
+						.getInstances(serviceId);
 					if (instances.size() == 0) {
 						return null;
 					}

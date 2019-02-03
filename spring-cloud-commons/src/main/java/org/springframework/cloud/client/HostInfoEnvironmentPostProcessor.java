@@ -35,7 +35,7 @@ import org.springframework.core.env.MapPropertySource;
  * @author Spencer Gibb
  */
 public class HostInfoEnvironmentPostProcessor
-		implements EnvironmentPostProcessor, Ordered {
+	implements EnvironmentPostProcessor, Ordered {
 
 	// Before ConfigFileApplicationListener
 	private int order = ConfigFileApplicationListener.DEFAULT_ORDER - 1;
@@ -47,13 +47,13 @@ public class HostInfoEnvironmentPostProcessor
 
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment,
-			SpringApplication application) {
+		SpringApplication application) {
 		InetUtils.HostInfo hostInfo = getFirstNonLoopbackHostInfo(environment);
 		LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 		map.put("spring.cloud.client.hostname", hostInfo.getHostname());
 		map.put("spring.cloud.client.ip-address", hostInfo.getIpAddress());
 		MapPropertySource propertySource = new MapPropertySource(
-				"springCloudClientHostInfo", map);
+			"springCloudClientHostInfo", map);
 		environment.getPropertySources().addLast(propertySource);
 	}
 
@@ -61,7 +61,7 @@ public class HostInfoEnvironmentPostProcessor
 		InetUtilsProperties target = new InetUtilsProperties();
 		ConfigurationPropertySources.attach(environment);
 		Binder.get(environment).bind(InetUtilsProperties.PREFIX,
-				Bindable.ofInstance(target));
+			Bindable.ofInstance(target));
 		try (InetUtils utils = new InetUtils(target)) {
 			return utils.findFirstNonLoopbackHostInfo();
 		}

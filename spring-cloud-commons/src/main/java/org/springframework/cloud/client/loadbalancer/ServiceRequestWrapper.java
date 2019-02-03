@@ -32,7 +32,7 @@ public class ServiceRequestWrapper extends HttpRequestWrapper {
 	private final LoadBalancerClient loadBalancer;
 
 	public ServiceRequestWrapper(HttpRequest request, ServiceInstance instance,
-			LoadBalancerClient loadBalancer) {
+		LoadBalancerClient loadBalancer) {
 		super(request);
 		this.instance = instance;
 		this.loadBalancer = loadBalancer;

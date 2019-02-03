@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.properties;
 
 import org.junit.Test;
@@ -36,8 +37,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -55,14 +55,14 @@ public class ConfigurationPropertiesRebinderLifecycleIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testRefresh() throws Exception {
-		assertEquals(0, this.properties.getCount());
-		assertEquals("Hello scope!", this.properties.getMessage());
+		then(this.properties.getCount()).isEqualTo(0);
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind();
-		assertEquals("Foo", this.properties.getMessage());
-		assertEquals(1, this.properties.getCount());
+		then(this.properties.getMessage()).isEqualTo("Foo");
+		then(this.properties.getCount()).isEqualTo(1);
 	}
 
 	@Configuration
@@ -110,7 +110,7 @@ public class ConfigurationPropertiesRebinderLifecycleIntegrationTests {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
-			assertThat(this.message).isNotEmpty();
+			then(this.message).isNotEmpty();
 		}
 
 		@Override

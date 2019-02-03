@@ -41,7 +41,7 @@ public class AutoServiceRegistrationAutoConfiguration {
 	protected void init() {
 		if (this.autoServiceRegistration == null && this.properties.isFailFast()) {
 			throw new IllegalStateException("Auto Service Registration has "
-					+ "been requested, but there is no AutoServiceRegistration bean");
+				+ "been requested, but there is no AutoServiceRegistration bean");
 		}
 	}
 

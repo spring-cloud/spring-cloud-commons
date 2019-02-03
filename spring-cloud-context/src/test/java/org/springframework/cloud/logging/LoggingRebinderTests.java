@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.logging;
 
 import java.util.Collections;
@@ -28,8 +29,7 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.core.env.StandardEnvironment;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Dave Syer
@@ -49,26 +49,26 @@ public class LoggingRebinderTests {
 
 	@Test
 	public void logLevelsChanged() {
-		assertFalse(this.logger.isTraceEnabled());
+		then(this.logger.isTraceEnabled()).isFalse();
 		StandardEnvironment environment = new StandardEnvironment();
 		TestPropertyValues.of("logging.level.org.springframework.web=TRACE")
 				.applyTo(environment);
 		this.rebinder.setEnvironment(environment);
 		this.rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment,
 				Collections.singleton("logging.level.org.springframework.web")));
-		assertTrue(this.logger.isTraceEnabled());
+		then(this.logger.isTraceEnabled()).isTrue();
 	}
 
 	@Test
 	public void logLevelsLowerCase() {
-		assertFalse(this.logger.isTraceEnabled());
+		then(this.logger.isTraceEnabled()).isFalse();
 		StandardEnvironment environment = new StandardEnvironment();
 		TestPropertyValues.of("logging.level.org.springframework.web=trace")
 				.applyTo(environment);
 		this.rebinder.setEnvironment(environment);
 		this.rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment,
 				Collections.singleton("logging.level.org.springframework.web")));
-		assertTrue(this.logger.isTraceEnabled());
+		then(this.logger.isTraceEnabled()).isTrue();
 	}
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.properties;
 
 import java.util.List;
@@ -41,7 +42,7 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class, properties = "messages=one,two")
@@ -59,22 +60,22 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testAppendProperties() throws Exception {
-		assertEquals("[one, two]", this.properties.getMessages().toString());
+		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		TestPropertyValues.of("messages[0]:foo").applyTo(this.environment);
 		this.rebinder.rebind();
-		assertEquals("[foo]", this.properties.getMessages().toString());
+		then(this.properties.getMessages().toString()).isEqualTo("[foo]");
 	}
 
 	@Test
 	@DirtiesContext
 	@Ignore("Can't rebind to list and re-initialize it (need refresh scope for this to work)")
 	public void testReplaceProperties() throws Exception {
-		assertEquals("[one, two]", this.properties.getMessages().toString());
+		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		Map<String, Object> map = findTestProperties();
 		map.clear();
 		TestPropertyValues.of("messages[0]:foo").applyTo(this.environment);
 		this.rebinder.rebind();
-		assertEquals("[foo]", this.properties.getMessages().toString());
+		then(this.properties.getMessages().toString()).isEqualTo("[foo]");
 	}
 
 	private Map<String, Object> findTestProperties() {
@@ -91,12 +92,12 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testReplacePropertiesWithCommaSeparated() throws Exception {
-		assertEquals("[one, two]", this.properties.getMessages().toString());
+		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		Map<String, Object> map = findTestProperties();
 		map.clear();
 		TestPropertyValues.of("messages:foo").applyTo(this.environment);
 		this.rebinder.rebind();
-		assertEquals("[foo]", this.properties.getMessages().toString());
+		then(this.properties.getMessages().toString()).isEqualTo("[foo]");
 	}
 
 	@Configuration

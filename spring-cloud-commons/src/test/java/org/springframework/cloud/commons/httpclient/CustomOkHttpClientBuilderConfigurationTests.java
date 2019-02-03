@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.commons.httpclient;
 
 import java.lang.reflect.Field;
@@ -31,7 +32,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Ryan Baxter
@@ -47,7 +48,7 @@ public class CustomOkHttpClientBuilderConfigurationTests {
 	public void testCustomBuilder() {
 		OkHttpClient.Builder builder = this.okHttpClientFactory.createBuilder(false);
 		Integer timeout = getField(builder, "connectTimeout");
-		assertEquals(1, timeout.intValue());
+		then(timeout.intValue()).isEqualTo(1);
 	}
 
 	protected <T> T getField(Object target, String name) {

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.context.named;
 
 import java.util.Arrays;
@@ -8,11 +24,7 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Spencer Gibb
@@ -30,24 +42,24 @@ public class NamedContextFactoryTests {
 				getSpec("bar", BarConfig.class)));
 
 		Foo foo = factory.getInstance("foo", Foo.class);
-		assertThat("foo was null", foo, is(notNullValue()));
+		then(foo).as("foo was null").isNotNull();
 
 		Bar bar = factory.getInstance("bar", Bar.class);
-		assertThat("bar was null", bar, is(notNullValue()));
+		then(bar).as("bar was null").isNotNull();
 
-		assertThat("context names not exposed", factory.getContextNames(),
-				hasItems("foo", "bar"));
+		then(factory.getContextNames()).as("context names not exposed").contains("foo",
+				"bar");
 
 		Bar foobar = factory.getInstance("foo", Bar.class);
-		assertThat("bar was not null", foobar, is(nullValue()));
+		then(foobar).as("bar was not null").isNull();
 
 		Map<String, Baz> fooBazes = factory.getInstances("foo", Baz.class);
-		assertThat("fooBazes was null", fooBazes, is(notNullValue()));
-		assertThat("fooBazes size was wrong", fooBazes.size(), is(1));
+		then(fooBazes).as("fooBazes was null").isNotNull();
+		then(fooBazes.size()).as("fooBazes size was wrong").isEqualTo(1);
 
 		Map<String, Baz> barBazes = factory.getInstances("bar", Baz.class);
-		assertThat("barBazes was null", barBazes, is(notNullValue()));
-		assertThat("barBazes size was wrong", barBazes.size(), is(2));
+		then(barBazes).as("barBazes was null").isNotNull();
+		then(barBazes.size()).as("barBazes size was wrong").isEqualTo(2);
 
 		// get the contexts before destroy() to verify these are the old ones
 		AnnotationConfigApplicationContext fooContext = factory.getContext("foo");
@@ -55,9 +67,9 @@ public class NamedContextFactoryTests {
 
 		factory.destroy();
 
-		assertThat("foo context wasn't closed", fooContext.isActive(), is(false));
+		then(fooContext.isActive()).as("foo context wasn't closed").isFalse();
 
-		assertThat("bar context wasn't closed", barContext.isActive(), is(false));
+		then(barContext.isActive()).as("bar context wasn't closed").isFalse();
 	}
 
 	private TestSpec getSpec(String name, Class<?> configClass) {
@@ -66,7 +78,7 @@ public class NamedContextFactoryTests {
 
 	static class TestClientFactory extends NamedContextFactory<TestSpec> {
 
-		public TestClientFactory() {
+		TestClientFactory() {
 			super(TestSpec.class, "testfactory", "test.client.name");
 		}
 
@@ -78,10 +90,10 @@ public class NamedContextFactoryTests {
 
 		private Class<?>[] configuration;
 
-		public TestSpec() {
+		TestSpec() {
 		}
 
-		public TestSpec(String name, Class<?>[] configuration) {
+		TestSpec(String name, Class<?>[] configuration) {
 			this.name = name;
 			this.configuration = configuration;
 		}

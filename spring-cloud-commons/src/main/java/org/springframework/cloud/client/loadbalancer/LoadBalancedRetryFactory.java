@@ -34,7 +34,7 @@ public interface LoadBalancedRetryFactory {
 	 * @return A retry policy for the service.
 	 */
 	default LoadBalancedRetryPolicy createRetryPolicy(String service,
-			ServiceInstanceChooser serviceInstanceChooser) {
+		ServiceInstanceChooser serviceInstanceChooser) {
 		return null;
 	}
 

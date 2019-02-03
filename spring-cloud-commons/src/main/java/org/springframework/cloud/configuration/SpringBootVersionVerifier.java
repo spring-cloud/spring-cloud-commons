@@ -70,7 +70,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 				try {
 					// deprecated 1.5
 					Class.forName(
-							"org.springframework.boot.context.config.ResourceNotFoundException");
+						"org.springframework.boot.context.config.ResourceNotFoundException");
 					return true;
 				}
 				catch (ClassNotFoundException e) {
@@ -141,21 +141,21 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		String versionFromManifest = getVersionFromManifest();
 		if (StringUtils.hasText(versionFromManifest)) {
 			return String.format(
-					"Spring Boot [%s] is not compatible with this Spring Cloud release train",
-					versionFromManifest);
+				"Spring Boot [%s] is not compatible with this Spring Cloud release train",
+				versionFromManifest);
 		}
 		return "Spring Boot is not compatible with this Spring Cloud release train";
 	}
 
 	private String action() {
 		return String.format(
-				"Change Spring Boot version to one of the following versions %s .\n"
-						+ "You can find the latest Spring Boot versions here [%s]. \n"
-						+ "If you want to learn more about the Spring Cloud Release train compatibility, you "
-						+ "can visit this page [%s] and check the [Release Trains] section.\n"
-						+ "If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]",
-				this.acceptedVersions, "https://spring.io/projects/spring-boot#learn",
-				"https://spring.io/projects/spring-cloud#overview");
+			"Change Spring Boot version to one of the following versions %s .\n"
+				+ "You can find the latest Spring Boot versions here [%s]. \n"
+				+ "If you want to learn more about the Spring Cloud Release train compatibility, you "
+				+ "can visit this page [%s] and check the [Release Trains] section.\n"
+				+ "If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]",
+			this.acceptedVersions, "https://spring.io/projects/spring-boot#learn",
+			"https://spring.io/projects/spring-cloud#overview");
 	}
 
 	private boolean springBootVersionMatches() {
@@ -166,7 +166,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			else {
 				// 2.0, 2.1
 				CompatibilityPredicate predicate = this.ACCEPTED_VERSIONS
-						.get(acceptedVersionWithoutX(acceptedVersion));
+					.get(acceptedVersionWithoutX(acceptedVersion));
 				if (predicate != null && predicate.isCompatible()) {
 					if (log.isDebugEnabled()) {
 						log.debug("Predicate [" + predicate + "] was matched");

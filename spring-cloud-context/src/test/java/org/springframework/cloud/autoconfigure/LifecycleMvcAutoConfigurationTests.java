@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.autoconfigure;
 
 import java.util.List;
@@ -13,11 +29,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Spencer Gibb
@@ -126,16 +138,16 @@ public class LifecycleMvcAutoConfigurationTests {
 	private void beanNotCreated(String beanName, String... contextProperties) {
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
 				contextProperties)) {
-			assertThat("bean was created", context.containsBeanDefinition(beanName),
-					equalTo(false));
+			then(context.containsBeanDefinition(beanName)).as("bean was created")
+					.isFalse();
 		}
 	}
 
 	private void beanCreated(String beanName, String... contextProperties) {
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
 				contextProperties)) {
-			assertThat("bean was not created", context.containsBeanDefinition(beanName),
-					equalTo(true));
+			then(context.containsBeanDefinition(beanName)).as("bean was not created")
+					.isTrue();
 		}
 	}
 
@@ -144,14 +156,13 @@ public class LifecycleMvcAutoConfigurationTests {
 			Function<T, Object> function, String... properties) {
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
 				properties)) {
-			assertThat("bean was not created", context.containsBeanDefinition(beanName),
-					equalTo(true));
+			then(context.containsBeanDefinition(beanName)).as("bean was not created")
+					.isTrue();
 
 			Object endpoint = context.getBean(beanName, type);
 			Object result = function.apply((T) endpoint);
 
-			assertThat("result is wrong type", result,
-					is(not(instanceOf(ResponseEntity.class))));
+			then(result).as("result is wrong type").isNotInstanceOf(ResponseEntity.class);
 		}
 	}
 

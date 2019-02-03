@@ -47,7 +47,7 @@ public class ReactiveLoadBalancerAutoConfiguration {
 
 	@Bean
 	public SmartInitializingSingleton loadBalancedWebClientInitializer(
-			final List<WebClientCustomizer> customizers) {
+		final List<WebClientCustomizer> customizers) {
 		return () -> {
 			for (WebClient.Builder webClientBuilder : getBuilders()) {
 				for (WebClientCustomizer customizer : customizers) {
@@ -59,13 +59,13 @@ public class ReactiveLoadBalancerAutoConfiguration {
 
 	@Bean
 	public WebClientCustomizer loadbalanceClientWebClientCustomizer(
-			LoadBalancerExchangeFilterFunction filterFunction) {
+		LoadBalancerExchangeFilterFunction filterFunction) {
 		return builder -> builder.filter(filterFunction);
 	}
 
 	@Bean
 	public LoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
-			LoadBalancerClient client) {
+		LoadBalancerClient client) {
 		return new LoadBalancerExchangeFilterFunction(client);
 	}
 

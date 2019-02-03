@@ -1,6 +1,21 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.loadbalancer;
 
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,8 +26,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
 import org.springframework.retry.RetryContext;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -52,13 +66,13 @@ public class InterceptorRetryPolicyTest {
 	@Test
 	public void canRetryBeforeExecution() throws Exception {
 		InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(
-				this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
+			this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
 		LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
 		when(context.getRetryCount()).thenReturn(0);
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		when(this.serviceInstanceChooser.choose(eq(this.serviceName)))
-				.thenReturn(serviceInstance);
-		assertThat(interceptorRetryPolicy.canRetry(context), is(true));
+			.thenReturn(serviceInstance);
+		then(interceptorRetryPolicy.canRetry(context)).isTrue();
 		verify(context, times(1)).setServiceInstance(eq(serviceInstance));
 
 	}
@@ -66,34 +80,34 @@ public class InterceptorRetryPolicyTest {
 	@Test
 	public void canRetryNextServer() throws Exception {
 		InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(
-				this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
+			this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
 		LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
 		when(context.getRetryCount()).thenReturn(1);
 		when(this.policy.canRetryNextServer(eq(context))).thenReturn(true);
-		assertThat(interceptorRetryPolicy.canRetry(context), is(true));
+		then(interceptorRetryPolicy.canRetry(context)).isTrue();
 	}
 
 	@Test
 	public void cannotRetry() throws Exception {
 		InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(
-				this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
+			this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
 		LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
 		when(context.getRetryCount()).thenReturn(1);
-		assertThat(interceptorRetryPolicy.canRetry(context), is(false));
+		then(interceptorRetryPolicy.canRetry(context)).isFalse();
 	}
 
 	@Test
 	public void open() throws Exception {
 		InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(
-				this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
+			this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
 		RetryContext context = interceptorRetryPolicy.open(null);
-		assertThat(context, IsInstanceOf.instanceOf(LoadBalancedRetryContext.class));
+		then(context).isInstanceOf(LoadBalancedRetryContext.class);
 	}
 
 	@Test
 	public void close() throws Exception {
 		InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(
-				this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
+			this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
 		LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
 		interceptorRetryPolicy.close(context);
 		verify(this.policy, times(1)).close(eq(context));
@@ -102,7 +116,7 @@ public class InterceptorRetryPolicyTest {
 	@Test
 	public void registerThrowable() throws Exception {
 		InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(
-				this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
+			this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
 		LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
 		Throwable thrown = new Exception();
 		interceptorRetryPolicy.registerThrowable(context, thrown);
@@ -113,14 +127,12 @@ public class InterceptorRetryPolicyTest {
 	@Test
 	public void equals() throws Exception {
 		InterceptorRetryPolicy interceptorRetryPolicy = new InterceptorRetryPolicy(
-				this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
-		assertThat(interceptorRetryPolicy.equals(null), is(false));
-		assertThat(interceptorRetryPolicy.equals(new Object()), is(false));
-		assertThat(interceptorRetryPolicy.equals(interceptorRetryPolicy), is(true));
-		assertThat(
-				interceptorRetryPolicy.equals(new InterceptorRetryPolicy(this.request,
-						this.policy, this.serviceInstanceChooser, this.serviceName)),
-				is(true));
+			this.request, this.policy, this.serviceInstanceChooser, this.serviceName);
+		then(interceptorRetryPolicy.equals(null)).isFalse();
+		then(interceptorRetryPolicy.equals(new Object())).isFalse();
+		then(interceptorRetryPolicy.equals(interceptorRetryPolicy)).isTrue();
+		then(interceptorRetryPolicy.equals(new InterceptorRetryPolicy(this.request,
+			this.policy, this.serviceInstanceChooser, this.serviceName))).isTrue();
 	}
 
 }

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,11 +37,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.web.client.AsyncRestTemplate;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Rob Worsnop
@@ -54,48 +49,47 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 	public void restTemplateGetsLoadBalancerInterceptor() {
 		ConfigurableApplicationContext context = init(OneRestTemplate.class);
 		final Map<String, AsyncRestTemplate> restTemplates = context
-				.getBeansOfType(AsyncRestTemplate.class);
+			.getBeansOfType(AsyncRestTemplate.class);
 
-		MatcherAssert.assertThat(restTemplates, is(notNullValue()));
-		MatcherAssert.assertThat(restTemplates.values(), hasSize(1));
+		then(restTemplates).isNotNull();
+		then(restTemplates.values()).hasSize(1);
 		AsyncRestTemplate restTemplate = restTemplates.values().iterator().next();
-		MatcherAssert.assertThat(restTemplate, is(notNullValue()));
+		then(restTemplate).isNotNull();
 
 		assertLoadBalanced(restTemplate);
 	}
 
 	private void assertLoadBalanced(AsyncRestTemplate restTemplate) {
 		List<AsyncClientHttpRequestInterceptor> interceptors = restTemplate
-				.getInterceptors();
-		MatcherAssert.assertThat(interceptors, hasSize(1));
+			.getInterceptors();
+		then(interceptors).hasSize(1);
 		AsyncClientHttpRequestInterceptor interceptor = interceptors.get(0);
-		MatcherAssert.assertThat(interceptor,
-				is(instanceOf(AsyncLoadBalancerInterceptor.class)));
+		then(interceptor).isInstanceOf(AsyncLoadBalancerInterceptor.class);
 	}
 
 	@Test
 	public void multipleRestTemplates() {
 		ConfigurableApplicationContext context = init(TwoRestTemplates.class);
 		final Map<String, AsyncRestTemplate> restTemplates = context
-				.getBeansOfType(AsyncRestTemplate.class);
+			.getBeansOfType(AsyncRestTemplate.class);
 
-		MatcherAssert.assertThat(restTemplates, is(notNullValue()));
+		then(restTemplates).isNotNull();
 		Collection<AsyncRestTemplate> templates = restTemplates.values();
-		MatcherAssert.assertThat(templates, hasSize(2));
+		then(templates).hasSize(2);
 
 		TwoRestTemplates.Two two = context.getBean(TwoRestTemplates.Two.class);
 
-		MatcherAssert.assertThat(two.loadBalanced, is(notNullValue()));
+		then(two.loadBalanced).isNotNull();
 		assertLoadBalanced(two.loadBalanced);
 
-		MatcherAssert.assertThat(two.nonLoadBalanced, is(notNullValue()));
-		MatcherAssert.assertThat(two.nonLoadBalanced.getInterceptors(), is(empty()));
+		then(two.nonLoadBalanced).isNotNull();
+		then(two.nonLoadBalanced.getInterceptors()).isEmpty();
 	}
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
 		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.aop.proxyTargetClass=true")
-				.sources(config, AsyncLoadBalancerAutoConfiguration.class).run();
+			.properties("spring.aop.proxyTargetClass=true")
+			.sources(config, AsyncLoadBalancerAutoConfiguration.class).run();
 	}
 
 	@Configuration
@@ -161,7 +155,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 		@Override
 		public ServiceInstance choose(String serviceId) {
 			return new DefaultServiceInstance(serviceId, serviceId, serviceId,
-					this.random.nextInt(40000), false);
+				this.random.nextInt(40000), false);
 		}
 
 		@Override
@@ -176,7 +170,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-				LoadBalancerRequest<T> request) throws IOException {
+			LoadBalancerRequest<T> request) throws IOException {
 			try {
 				return request.apply(choose(serviceId));
 			}

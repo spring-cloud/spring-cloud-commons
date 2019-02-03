@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.discovery;
 
 import org.junit.Test;
@@ -13,15 +29,14 @@ import org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationP
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Ryan Baxter
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {
-		"spring.cloud.service-registry.auto-registration.enabled: false" })
+	"spring.cloud.service-registry.auto-registration.enabled: false"})
 public class AutoRegisterPropertyFalseTests {
 
 	@Autowired(required = false)
@@ -38,10 +53,10 @@ public class AutoRegisterPropertyFalseTests {
 
 	@Test
 	public void veryifyBeans() {
-		assertNull(this.autoConfiguration);
-		assertNull(this.autoServiceRegistration);
-		assertNull(this.autoServiceRegistrationProperties);
-		assertFalse(this.autoRegisterProperty);
+		then(this.autoConfiguration).isNull();
+		then(this.autoServiceRegistration).isNull();
+		then(this.autoServiceRegistrationProperties).isNull();
+		then(this.autoRegisterProperty).isFalse();
 	}
 
 	@EnableAutoConfiguration

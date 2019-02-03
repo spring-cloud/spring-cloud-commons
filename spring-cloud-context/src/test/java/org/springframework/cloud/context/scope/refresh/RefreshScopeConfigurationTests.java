@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.scope.refresh;
 
 import org.junit.After;
@@ -34,7 +35,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Dave Syer
@@ -74,12 +75,12 @@ public class RefreshScopeConfigurationTests {
 				RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);
 		Application application = this.context.getBean(Application.class);
-		assertEquals("refresh",
-				this.context.getBeanDefinition("scopedTarget.application").getScope());
+		then(this.context.getBeanDefinition("scopedTarget.application").getScope())
+				.isEqualTo("refresh");
 		application.hello();
 		refresh();
 		String message = application.hello();
-		assertEquals("Hello Dave!", message);
+		then(message).isEqualTo("Hello Dave!");
 	}
 
 	@Test
@@ -92,7 +93,7 @@ public class RefreshScopeConfigurationTests {
 		application.hello();
 		refresh();
 		String message = application.hello();
-		assertEquals("Hello Dave!", message);
+		then(message).isEqualTo("Hello Dave!");
 	}
 
 	@Test
@@ -105,7 +106,7 @@ public class RefreshScopeConfigurationTests {
 		application.hello();
 		refresh();
 		String message = application.hello();
-		assertEquals("Hello Dave!", message);
+		then(message).isEqualTo("Hello Dave!");
 	}
 
 	// WTF? Maven can't compile without the FQN on this one (not the others).

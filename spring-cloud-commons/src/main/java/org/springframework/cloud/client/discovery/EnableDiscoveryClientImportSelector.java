@@ -35,21 +35,21 @@ import org.springframework.core.type.AnnotationMetadata;
  */
 @Order(Ordered.LOWEST_PRECEDENCE - 100)
 public class EnableDiscoveryClientImportSelector
-		extends SpringFactoryImportSelector<EnableDiscoveryClient> {
+	extends SpringFactoryImportSelector<EnableDiscoveryClient> {
 
 	@Override
 	public String[] selectImports(AnnotationMetadata metadata) {
 		String[] imports = super.selectImports(metadata);
 
 		AnnotationAttributes attributes = AnnotationAttributes.fromMap(
-				metadata.getAnnotationAttributes(getAnnotationClass().getName(), true));
+			metadata.getAnnotationAttributes(getAnnotationClass().getName(), true));
 
 		boolean autoRegister = attributes.getBoolean("autoRegister");
 
 		if (autoRegister) {
 			List<String> importsList = new ArrayList<>(Arrays.asList(imports));
 			importsList.add(
-					"org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
+				"org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationConfiguration");
 			imports = importsList.toArray(new String[0]);
 		}
 		else {
@@ -59,7 +59,7 @@ public class EnableDiscoveryClientImportSelector
 				LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 				map.put("spring.cloud.service-registry.auto-registration.enabled", false);
 				MapPropertySource propertySource = new MapPropertySource(
-						"springCloudDiscoveryClient", map);
+					"springCloudDiscoveryClient", map);
 				configEnv.getPropertySources().addLast(propertySource);
 			}
 
@@ -71,7 +71,7 @@ public class EnableDiscoveryClientImportSelector
 	@Override
 	protected boolean isEnabled() {
 		return getEnvironment().getProperty("spring.cloud.discovery.enabled",
-				Boolean.class, Boolean.TRUE);
+			Boolean.class, Boolean.TRUE);
 	}
 
 	@Override

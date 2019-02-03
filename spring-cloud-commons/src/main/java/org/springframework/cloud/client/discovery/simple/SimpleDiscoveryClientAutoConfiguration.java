@@ -61,9 +61,9 @@ public class SimpleDiscoveryClientAutoConfiguration {
 		SimpleDiscoveryProperties simple = new SimpleDiscoveryProperties();
 		simple.getLocal().setServiceId(this.serviceId);
 		simple.getLocal()
-				.setUri(URI.create(
-						"http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname()
-								+ ":" + findPort()));
+			.setUri(URI.create(
+				"http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname()
+					+ ":" + findPort()));
 		return simple;
 	}
 
@@ -84,7 +84,7 @@ public class SimpleDiscoveryClientAutoConfiguration {
 		 * container.getPort(); } } }
 		 */
 		if (this.server != null && this.server.getPort() != null
-				&& this.server.getPort() > 0) {
+			&& this.server.getPort() > 0) {
 			return this.server.getPort();
 		}
 		return 8080;

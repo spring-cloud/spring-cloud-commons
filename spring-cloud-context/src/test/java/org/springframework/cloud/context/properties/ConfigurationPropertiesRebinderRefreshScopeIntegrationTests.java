@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.properties;
 
 import javax.annotation.PostConstruct;
@@ -37,7 +38,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -58,31 +59,31 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testSimpleProperties() throws Exception {
-		assertEquals("Hello scope!", this.properties.getMessage());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...but don't refresh, so the bean stays the same:
-		assertEquals("Hello scope!", this.properties.getMessage());
-		assertEquals(1, this.properties.getCount());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
+		then(this.properties.getCount()).isEqualTo(1);
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefresh() throws Exception {
-		assertEquals(1, this.properties.getCount());
-		assertEquals("Hello scope!", this.properties.getMessage());
-		assertEquals(1, this.properties.getCount());
+		then(this.properties.getCount()).isEqualTo(1);
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
+		then(this.properties.getCount()).isEqualTo(1);
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...rebind, but the bean is not re-initialized:
 		this.rebinder.rebind();
-		assertEquals("Hello scope!", this.properties.getMessage());
-		assertEquals(1, this.properties.getCount());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
+		then(this.properties.getCount()).isEqualTo(1);
 		// ...and then refresh, so the bean is re-initialized:
 		this.refreshScope.refreshAll();
-		assertEquals("Foo", this.properties.getMessage());
+		then(this.properties.getMessage()).isEqualTo("Foo");
 		// It's a new instance so the initialization count is 1
-		assertEquals(1, this.properties.getCount());
+		then(this.properties.getCount()).isEqualTo(1);
 	}
 
 	@Configuration

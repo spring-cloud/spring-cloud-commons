@@ -1,4 +1,3 @@
-package org.springframework.cloud.bootstrap.encrypt;
 /*
  * Copyright 2012-2019 the original author or authors.
  *
@@ -15,6 +14,8 @@ package org.springframework.cloud.bootstrap.encrypt;
  * limitations under the License.
  */
 
+package org.springframework.cloud.bootstrap.encrypt;
+
 import java.util.Map;
 
 import org.junit.After;
@@ -28,8 +29,7 @@ import org.springframework.cloud.test.ClassPathExclusions;
 import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Ryan Baxter
@@ -60,7 +60,7 @@ public class RsaDisabledTests {
 	public void testLoadBalancedRetryFactoryBean() throws Exception {
 		Map<String, RsaProperties> properties = this.context
 				.getBeansOfType(RsaProperties.class);
-		assertThat(properties.values(), hasSize(0));
+		then(properties.values()).hasSize(0);
 	}
 
 }

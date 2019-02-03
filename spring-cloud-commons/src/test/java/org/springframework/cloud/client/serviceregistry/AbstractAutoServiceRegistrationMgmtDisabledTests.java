@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.assertj.core.api.Assertions;
+import org.assertj.core.api.BDDAssertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,8 +39,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AbstractAutoServiceRegistrationMgmtDisabledTests.Config.class, properties = {
-		"management.port=0",
-		"spring.cloud.service-registry.auto-registration.register-management=false" }, webEnvironment = RANDOM_PORT)
+	"management.port=0",
+	"spring.cloud.service-registry.auto-registration.register-management=false"}, webEnvironment = RANDOM_PORT)
 public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 
 	@Autowired
@@ -48,7 +48,7 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 
 	@Test
 	public void portsWork() {
-		Assertions.assertThat(this.autoRegistration.shouldRegisterManagement()).isFalse();
+		BDDAssertions.then(this.autoRegistration.shouldRegisterManagement()).isFalse();
 	}
 
 	@EnableAutoConfiguration
@@ -57,7 +57,7 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 
 		@Bean
 		public TestAutoServiceRegistration testAutoServiceRegistration(
-				AutoServiceRegistrationProperties properties) {
+			AutoServiceRegistrationProperties properties) {
 			return new TestAutoServiceRegistration(properties);
 		}
 
@@ -163,7 +163,7 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 	}
 
 	public static class TestAutoServiceRegistration
-			extends AbstractAutoServiceRegistration<TestRegistration> {
+		extends AbstractAutoServiceRegistration<TestRegistration> {
 
 		private int port = 0;
 

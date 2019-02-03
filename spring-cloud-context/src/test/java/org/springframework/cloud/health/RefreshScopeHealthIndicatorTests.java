@@ -27,7 +27,7 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -56,21 +56,21 @@ public class RefreshScopeHealthIndicatorTests {
 
 	@Test
 	public void sunnyDay() {
-		assertEquals(Status.UP, this.indicator.health().getStatus());
+		then(this.indicator.health().getStatus()).isEqualTo(Status.UP);
 	}
 
 	@Test
 	public void binderError() {
 		when(this.rebinder.getErrors())
 				.thenReturn(Collections.singletonMap("foo", new RuntimeException("FOO")));
-		assertEquals(Status.DOWN, this.indicator.health().getStatus());
+		then(this.indicator.health().getStatus()).isEqualTo(Status.DOWN);
 	}
 
 	@Test
 	public void scopeError() {
 		when(this.scope.getErrors())
 				.thenReturn(Collections.singletonMap("foo", new RuntimeException("FOO")));
-		assertEquals(Status.DOWN, this.indicator.health().getStatus());
+		then(this.indicator.health().getStatus()).isEqualTo(Status.DOWN);
 	}
 
 	@Test
@@ -79,14 +79,14 @@ public class RefreshScopeHealthIndicatorTests {
 				.thenReturn(Collections.singletonMap("foo", new RuntimeException("FOO")));
 		when(this.scope.getErrors())
 				.thenReturn(Collections.singletonMap("bar", new RuntimeException("BAR")));
-		assertEquals(Status.DOWN, this.indicator.health().getStatus());
+		then(this.indicator.health().getStatus()).isEqualTo(Status.DOWN);
 	}
 
 	@Test
 	public void nullRefreshScope() {
 		ObjectProvider<RefreshScope> scopeProvider = mock(ObjectProvider.class);
 		BDDMockito.willReturn(null).given(scopeProvider).getIfAvailable();
-		assertEquals(Status.UP, this.indicator.health().getStatus());
+		then(this.indicator.health().getStatus()).isEqualTo(Status.UP);
 	}
 
 }

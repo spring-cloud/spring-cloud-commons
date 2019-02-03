@@ -22,9 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.client.Traverson;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
@@ -49,7 +46,7 @@ public class DiscoveredResource implements RemoteResource {
 	private Link link = null;
 
 	public DiscoveredResource(ServiceInstanceProvider provider,
-			TraversalDefinition traversal) {
+		TraversalDefinition traversal) {
 		this.provider = provider;
 		this.traversal = traversal;
 	}
@@ -74,7 +71,7 @@ public class DiscoveredResource implements RemoteResource {
 	 */
 	public void setRestOperations(RestOperations restOperations) {
 		this.restOperations = restOperations == null ? new RestTemplate()
-				: restOperations;
+			: restOperations;
 	}
 
 	@Override
@@ -134,7 +131,7 @@ public class DiscoveredResource implements RemoteResource {
 			String serviceId = service.getServiceId();
 
 			this.log.debug("Discovered {} system at {}. Discovering resource…", serviceId,
-					uri);
+				uri);
 
 			Traverson traverson = new Traverson(uri, MediaTypes.HAL_JSON);
 			Link link = this.traversal.buildTraversal(traverson).asTemplatedLink();

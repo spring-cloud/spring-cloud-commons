@@ -46,12 +46,12 @@ public interface OkHttpClientFactory {
 
 		@Override
 		public void checkClientTrusted(X509Certificate[] x509Certificates, String s)
-				throws CertificateException {
+			throws CertificateException {
 		}
 
 		@Override
 		public void checkServerTrusted(X509Certificate[] x509Certificates, String s)
-				throws CertificateException {
+			throws CertificateException {
 		}
 
 		@Override

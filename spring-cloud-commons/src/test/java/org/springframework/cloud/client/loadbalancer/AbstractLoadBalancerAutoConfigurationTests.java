@@ -35,11 +35,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Ryan Baxter
@@ -51,12 +47,12 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	public void restTemplateGetsLoadBalancerInterceptor() {
 		ConfigurableApplicationContext context = init(OneRestTemplate.class);
 		final Map<String, RestTemplate> restTemplates = context
-				.getBeansOfType(RestTemplate.class);
+			.getBeansOfType(RestTemplate.class);
 
-		assertThat(restTemplates, is(notNullValue()));
-		assertThat(restTemplates.values(), hasSize(1));
+		then(restTemplates).isNotNull();
+		then(restTemplates.values()).hasSize(1);
 		RestTemplate restTemplate = restTemplates.values().iterator().next();
-		assertThat(restTemplate, is(notNullValue()));
+		then(restTemplate).isNotNull();
 
 		assertLoadBalanced(restTemplate);
 	}
@@ -67,25 +63,25 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	public void multipleRestTemplates() {
 		ConfigurableApplicationContext context = init(TwoRestTemplates.class);
 		final Map<String, RestTemplate> restTemplates = context
-				.getBeansOfType(RestTemplate.class);
+			.getBeansOfType(RestTemplate.class);
 
-		assertThat(restTemplates, is(notNullValue()));
+		then(restTemplates).isNotNull();
 		Collection<RestTemplate> templates = restTemplates.values();
-		assertThat(templates, hasSize(2));
+		then(templates).hasSize(2);
 
 		TwoRestTemplates.Two two = context.getBean(TwoRestTemplates.Two.class);
 
-		assertThat(two.loadBalanced, is(notNullValue()));
+		then(two.loadBalanced).isNotNull();
 		assertLoadBalanced(two.loadBalanced);
 
-		assertThat(two.nonLoadBalanced, is(notNullValue()));
-		assertThat(two.nonLoadBalanced.getInterceptors(), is(empty()));
+		then(two.nonLoadBalanced).isNotNull();
+		then(two.nonLoadBalanced.getInterceptors()).isEmpty();
 	}
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
 		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.aop.proxyTargetClass=true")
-				.sources(config, LoadBalancerAutoConfiguration.class).run();
+			.properties("spring.aop.proxyTargetClass=true")
+			.sources(config, LoadBalancerAutoConfiguration.class).run();
 	}
 
 	@Configuration
@@ -145,7 +141,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		@Override
 		public ServiceInstance choose(String serviceId) {
 			return new DefaultServiceInstance(serviceId, serviceId, serviceId,
-					this.random.nextInt(40000), false);
+				this.random.nextInt(40000), false);
 		}
 
 		@Override
@@ -160,7 +156,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-				LoadBalancerRequest<T> request) throws IOException {
+			LoadBalancerRequest<T> request) throws IOException {
 			try {
 				return request.apply(choose(serviceId));
 			}

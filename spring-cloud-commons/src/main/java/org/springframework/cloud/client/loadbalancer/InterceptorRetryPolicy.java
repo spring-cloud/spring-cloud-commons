@@ -44,7 +44,7 @@ public class InterceptorRetryPolicy implements RetryPolicy {
 	 * @param serviceName The name of the service.
 	 */
 	public InterceptorRetryPolicy(HttpRequest request, LoadBalancedRetryPolicy policy,
-			ServiceInstanceChooser serviceInstanceChooser, String serviceName) {
+		ServiceInstanceChooser serviceInstanceChooser, String serviceName) {
 		this.request = request;
 		this.policy = policy;
 		this.serviceInstanceChooser = serviceInstanceChooser;
@@ -57,7 +57,7 @@ public class InterceptorRetryPolicy implements RetryPolicy {
 		if (lbContext.getRetryCount() == 0 && lbContext.getServiceInstance() == null) {
 			// We haven't even tried to make the request yet so return true so we do
 			lbContext.setServiceInstance(
-					this.serviceInstanceChooser.choose(this.serviceName));
+				this.serviceInstanceChooser.choose(this.serviceName));
 			return true;
 		}
 		return this.policy.canRetryNextServer(lbContext);

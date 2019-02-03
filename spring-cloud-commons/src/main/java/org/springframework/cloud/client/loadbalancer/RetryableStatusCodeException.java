@@ -33,7 +33,7 @@ public class RetryableStatusCodeException extends IOException {
 	private final URI uri;
 
 	public RetryableStatusCodeException(String serviceId, int statusCode, Object response,
-			URI uri) {
+		URI uri) {
 		super(String.format(MESSAGE, serviceId, statusCode));
 		this.response = response;
 		this.uri = uri;

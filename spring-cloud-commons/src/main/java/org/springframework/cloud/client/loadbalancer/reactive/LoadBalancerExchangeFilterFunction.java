@@ -37,7 +37,7 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 public class LoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
 
 	private static Log logger = LogFactory
-			.getLog(LoadBalancerExchangeFilterFunction.class);
+		.getLog(LoadBalancerExchangeFilterFunction.class);
 
 	private final LoadBalancerClient loadBalancerClient;
 
@@ -51,28 +51,28 @@ public class LoadBalancerExchangeFilterFunction implements ExchangeFilterFunctio
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
 			String msg = String.format(
-					"Request URI does not contain a valid hostname: %s",
-					originalUrl.toString());
+				"Request URI does not contain a valid hostname: %s",
+				originalUrl.toString());
 			logger.warn(msg);
 			return Mono.just(
-					ClientResponse.create(HttpStatus.BAD_REQUEST).body(msg).build());
+				ClientResponse.create(HttpStatus.BAD_REQUEST).body(msg).build());
 		}
 		// TODO: reactive lb client
 		ServiceInstance instance = this.loadBalancerClient.choose(serviceId);
 		if (instance == null) {
 			String msg = String.format(
-					"Load balancer does not contain an instance for the service %s",
-					serviceId);
+				"Load balancer does not contain an instance for the service %s",
+				serviceId);
 			logger.warn(msg);
 			return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
-					.body(msg).build());
+				.body(msg).build());
 		}
 		URI uri = this.loadBalancerClient.reconstructURI(instance, originalUrl);
 		ClientRequest newRequest = ClientRequest.method(request.method(), uri)
-				.headers(headers -> headers.addAll(request.headers()))
-				.cookies(cookies -> cookies.addAll(request.cookies()))
-				.attributes(attributes -> attributes.putAll(request.attributes()))
-				.body(request.body()).build();
+			.headers(headers -> headers.addAll(request.headers()))
+			.cookies(cookies -> cookies.addAll(request.cookies()))
+			.attributes(attributes -> attributes.putAll(request.attributes()))
+			.body(request.body()).build();
 		return next.exchange(newRequest);
 	}
 

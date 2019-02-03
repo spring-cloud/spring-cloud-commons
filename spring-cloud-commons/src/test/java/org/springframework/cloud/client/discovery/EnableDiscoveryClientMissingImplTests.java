@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.discovery;
 
 import org.junit.Test;
@@ -9,7 +25,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.NestedRuntimeException;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * Tests that if <code>@EnableDiscoveryClient</code> is used, but there is no
@@ -22,12 +38,13 @@ public class EnableDiscoveryClientMissingImplTests {
 	@Test
 	public void testContextFails() {
 		try (ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.sources(App.class).web(WebApplicationType.NONE).run(new String[0]);) {
+			.sources(App.class).web(WebApplicationType.NONE).run()) {
+			// do sth
 		}
 		catch (NestedRuntimeException e) {
 			Throwable rootCause = e.getRootCause();
-			assertTrue(rootCause instanceof IllegalStateException);
-			assertTrue(rootCause.getMessage().contains("no implementations"));
+			then(rootCause instanceof IllegalStateException).isTrue();
+			then(rootCause.getMessage().contains("no implementations")).isTrue();
 		}
 	}
 

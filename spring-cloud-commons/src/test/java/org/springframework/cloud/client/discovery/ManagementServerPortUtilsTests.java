@@ -27,18 +27,18 @@ import org.springframework.cloud.test.ClassPathExclusions;
 import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(ModifiedClassPathRunner.class)
-@ClassPathExclusions({ "spring-boot-actuator-autoconfigure-*" })
+@ClassPathExclusions({"spring-boot-actuator-autoconfigure-*"})
 public class ManagementServerPortUtilsTests {
 
 	@Test
 	public void contextStarts() {
 		try (ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.web(WebApplicationType.NONE).sources(TestApp.class).run()) {
+			.web(WebApplicationType.NONE).sources(TestApp.class).run()) {
 
-			assertThat(ManagementServerPortUtils.hasActuator).isFalse();
+			then(ManagementServerPortUtils.hasActuator).isFalse();
 		}
 	}
 

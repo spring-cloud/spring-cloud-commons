@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.scope.refresh;
 
 import java.net.URI;
@@ -42,7 +43,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
@@ -69,7 +70,7 @@ public class RefreshEndpointIntegrationTests {
 				null, String.class);
 		String message = template.getForObject("http://localhost:" + this.port + "/",
 				String.class);
-		assertEquals("Hello Dave!", message);
+		then(message).isEqualTo("Hello Dave!");
 	}
 
 	private RequestEntity<?> getUrlEncodedEntity(String uri, String key, String value)

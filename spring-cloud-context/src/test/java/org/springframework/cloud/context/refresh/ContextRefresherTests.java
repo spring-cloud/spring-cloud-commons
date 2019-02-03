@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.context.refresh;
 
 import java.util.ArrayList;
@@ -24,7 +40,7 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 
 public class ContextRefresherTests {
 
@@ -43,14 +59,14 @@ public class ContextRefresherTests {
 				"--spring.main.bannerMode=OFF")) {
 			context.getEnvironment().setActiveProfiles("refresh");
 			List<String> names = names(context.getEnvironment().getPropertySources());
-			assertThat(names).doesNotContain(
+			then(names).doesNotContain(
 					"applicationConfig: [classpath:/bootstrap-refresh.properties]");
 			ContextRefresher refresher = new ContextRefresher(context, this.scope);
 			refresher.refresh();
 			names = names(context.getEnvironment().getPropertySources());
-			assertThat(names).contains(
+			then(names).contains(
 					"applicationConfig: [classpath:/bootstrap-refresh.properties]");
-			assertThat(names).containsSequence(
+			then(names).containsSequence(
 					"applicationConfig: [classpath:/application.properties]",
 					"applicationConfig: [classpath:/bootstrap-refresh.properties]",
 					"applicationConfig: [classpath:/bootstrap.properties]");
@@ -67,14 +83,14 @@ public class ContextRefresherTests {
 				"--spring.cloud.bootstrap.name=refresh")) {
 			List<String> names = names(context.getEnvironment().getPropertySources());
 			System.err.println("***** " + context.getEnvironment().getPropertySources());
-			assertThat(names).doesNotContain("bootstrapProperties");
+			then(names).doesNotContain("bootstrapProperties");
 			ContextRefresher refresher = new ContextRefresher(context, this.scope);
-			TestPropertyValues.of(
-					"spring.cloud.bootstrap.sources: org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
+			TestPropertyValues.of("spring.cloud.bootstrap.sources: "
+					+ "org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
 					.applyTo(context.getEnvironment(), Type.MAP, "defaultProperties");
 			refresher.refresh();
 			names = names(context.getEnvironment().getPropertySources());
-			assertThat(names).first().isEqualTo("bootstrapProperties");
+			then(names).first().isEqualTo("bootstrapProperties");
 		}
 	}
 
@@ -87,16 +103,16 @@ public class ContextRefresherTests {
 				"--debug=false", "--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh")) {
 			ContextRefresher refresher = new ContextRefresher(context, this.scope);
-			TestPropertyValues.of(
-					"spring.cloud.bootstrap.sources: org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
+			TestPropertyValues.of("spring.cloud.bootstrap.sources: "
+					+ "org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
 					.applyTo(context);
 			ConfigurableApplicationContext refresherContext = refresher
 					.addConfigFilesToEnvironment();
-			assertThat(refresherContext.getParent()).isNotNull()
+			then(refresherContext.getParent()).isNotNull()
 					.isInstanceOf(ConfigurableApplicationContext.class);
 			ConfigurableApplicationContext parent = (ConfigurableApplicationContext) refresherContext
 					.getParent();
-			assertThat(parent.isActive()).isFalse();
+			then(parent.isActive()).isFalse();
 		}
 	}
 
@@ -106,15 +122,15 @@ public class ContextRefresherTests {
 				TestLoggingSystem.class.getName());
 		TestLoggingSystem system = (TestLoggingSystem) LoggingSystem
 				.get(getClass().getClassLoader());
-		assertThat(system.getCount()).isEqualTo(0);
+		then(system.getCount()).isEqualTo(0);
 		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
 				"--spring.main.web-application-type=none", "--debug=false",
 				"--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh")) {
-			assertThat(system.getCount()).isEqualTo(4);
+			then(system.getCount()).isEqualTo(4);
 			ContextRefresher refresher = new ContextRefresher(context, this.scope);
 			refresher.refresh();
-			assertThat(system.getCount()).isEqualTo(4);
+			then(system.getCount()).isEqualTo(4);
 		}
 	}
 
@@ -130,8 +146,7 @@ public class ContextRefresherTests {
 			context.getEnvironment().setActiveProfiles("refresh");
 			ContextRefresher refresher = new ContextRefresher(context, this.scope);
 			refresher.refresh();
-			assertThat(TestBootstrapConfiguration.fooSightings).containsExactly("bar",
-					"bar");
+			then(TestBootstrapConfiguration.fooSightings).containsExactly("bar", "bar");
 		}
 
 		TestBootstrapConfiguration.fooSightings = null;

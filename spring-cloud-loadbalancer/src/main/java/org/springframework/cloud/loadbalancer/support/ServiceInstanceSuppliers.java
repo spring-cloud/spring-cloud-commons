@@ -34,7 +34,7 @@ public final class ServiceInstanceSuppliers {
 	}
 
 	public static ServiceInstanceSupplier from(String serviceId,
-			ServiceInstance... instances) {
+		ServiceInstance... instances) {
 		return new ServiceInstanceSupplier() {
 			@Override
 			public Flux<ServiceInstance> get() {
@@ -49,7 +49,7 @@ public final class ServiceInstanceSuppliers {
 	}
 
 	public static ObjectProvider<ServiceInstanceSupplier> toProvider(String serviceId,
-			ServiceInstance... instances) {
+		ServiceInstance... instances) {
 		return new SimpleObjectProvider<>(from(serviceId, instances));
 	}
 

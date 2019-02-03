@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.client.hypermedia;
 
-import org.springframework.hateoas.Link;
-
 /**
  * A REST resource that can be discovered and can be either gone or available.
  *

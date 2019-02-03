@@ -26,11 +26,11 @@ import okhttp3.ConnectionPool;
  * @author Ryan Baxter
  */
 public class DefaultOkHttpClientConnectionPoolFactory
-		implements OkHttpClientConnectionPoolFactory {
+	implements OkHttpClientConnectionPoolFactory {
 
 	@Override
 	public ConnectionPool create(int maxIdleConnections, long keepAliveDuration,
-			TimeUnit timeUnit) {
+		TimeUnit timeUnit) {
 		return new ConnectionPool(maxIdleConnections, keepAliveDuration, timeUnit);
 	}
 

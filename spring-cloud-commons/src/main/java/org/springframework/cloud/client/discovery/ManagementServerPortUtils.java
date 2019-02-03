@@ -34,9 +34,9 @@ public final class ManagementServerPortUtils {
 
 	static {
 		boolean hasEndpointClass = hasClass(
-				"org.springframework.boot.actuate.endpoint.annotation.Endpoint");
+			"org.springframework.boot.actuate.endpoint.annotation.Endpoint");
 		boolean hasManagementServerPropertiesClass = hasClass(
-				"org.springframework.boot.actuate.autoconfigure.web.server.ManagementServerProperties");
+			"org.springframework.boot.actuate.autoconfigure.web.server.ManagementServerProperties");
 		hasActuator = hasEndpointClass && hasManagementServerPropertiesClass;
 	}
 
@@ -78,7 +78,7 @@ public final class ManagementServerPortUtils {
 		}
 		try {
 			ManagementServerProperties properties = beanFactory
-					.getBean(ManagementServerProperties.class);
+				.getBean(ManagementServerProperties.class);
 			return properties.getPort();
 		}
 		catch (NoSuchBeanDefinitionException ex) {
@@ -124,7 +124,7 @@ public final class ManagementServerPortUtils {
 			ManagementServerProperties managementServerProperties;
 			try {
 				managementServerProperties = beanFactory
-						.getBean(ManagementServerProperties.class);
+					.getBean(ManagementServerProperties.class);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				managementServerProperties = new ManagementServerProperties();
@@ -139,9 +139,9 @@ public final class ManagementServerPortUtils {
 				return DIFFERENT;
 			}
 			return ((port == null)
-					|| (serverProperties.getPort() == null && port.equals(8080))
-					|| (port != 0 && port.equals(serverProperties.getPort())) ? SAME
-							: DIFFERENT);
+				|| (serverProperties.getPort() == null && port.equals(8080))
+				|| (port != 0 && port.equals(serverProperties.getPort())) ? SAME
+				: DIFFERENT);
 		}
 
 	}

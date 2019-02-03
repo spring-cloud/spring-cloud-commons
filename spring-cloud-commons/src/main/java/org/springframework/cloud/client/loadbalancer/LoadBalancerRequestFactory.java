@@ -37,7 +37,7 @@ public class LoadBalancerRequestFactory {
 	private List<LoadBalancerRequestTransformer> transformers;
 
 	public LoadBalancerRequestFactory(LoadBalancerClient loadBalancer,
-			List<LoadBalancerRequestTransformer> transformers) {
+		List<LoadBalancerRequestTransformer> transformers) {
 		this.loadBalancer = loadBalancer;
 		this.transformers = transformers;
 	}
@@ -47,15 +47,15 @@ public class LoadBalancerRequestFactory {
 	}
 
 	public LoadBalancerRequest<ClientHttpResponse> createRequest(
-			final HttpRequest request, final byte[] body,
-			final ClientHttpRequestExecution execution) {
+		final HttpRequest request, final byte[] body,
+		final ClientHttpRequestExecution execution) {
 		return instance -> {
 			HttpRequest serviceRequest = new ServiceRequestWrapper(request, instance,
-					this.loadBalancer);
+				this.loadBalancer);
 			if (this.transformers != null) {
 				for (LoadBalancerRequestTransformer transformer : this.transformers) {
 					serviceRequest = transformer.transformRequest(serviceRequest,
-							instance);
+						instance);
 				}
 			}
 			return execution.execute(serviceRequest, body);

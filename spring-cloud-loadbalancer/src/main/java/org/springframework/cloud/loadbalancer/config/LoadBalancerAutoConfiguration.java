@@ -38,7 +38,7 @@ public class LoadBalancerAutoConfiguration {
 	private final ObjectProvider<List<LoadBalancerClientSpecification>> configurations;
 
 	public LoadBalancerAutoConfiguration(
-			ObjectProvider<List<LoadBalancerClientSpecification>> configurations) {
+		ObjectProvider<List<LoadBalancerClientSpecification>> configurations) {
 		this.configurations = configurations;
 	}
 
@@ -46,7 +46,7 @@ public class LoadBalancerAutoConfiguration {
 	public LoadBalancerClientFactory loadBalancerClientFactory() {
 		LoadBalancerClientFactory clientFactory = new LoadBalancerClientFactory();
 		clientFactory.setConfigurations(
-				this.configurations.getIfAvailable(Collections::emptyList));
+			this.configurations.getIfAvailable(Collections::emptyList));
 		return clientFactory;
 	}
 

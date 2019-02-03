@@ -44,13 +44,13 @@ public class RoundRobinLoadBalancer implements ReactorLoadBalancer<ServiceInstan
 	private final String serviceId;
 
 	public RoundRobinLoadBalancer(String serviceId,
-			ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier) {
+		ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier) {
 		this(serviceId, serviceInstanceSupplier, new Random().nextInt(1000));
 	}
 
 	public RoundRobinLoadBalancer(String serviceId,
-			ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier,
-			int seedPosition) {
+		ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier,
+		int seedPosition) {
 		this.serviceId = serviceId;
 		this.serviceInstanceSupplier = serviceInstanceSupplier;
 		this.position = new AtomicInteger(seedPosition);

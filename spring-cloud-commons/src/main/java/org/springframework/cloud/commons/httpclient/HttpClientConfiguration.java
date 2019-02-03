@@ -52,7 +52,7 @@ public class HttpClientConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		public ApacheHttpClientFactory apacheHttpClientFactory(
-				HttpClientBuilder builder) {
+			HttpClientBuilder builder) {
 			return new DefaultApacheHttpClientFactory(builder);
 		}
 

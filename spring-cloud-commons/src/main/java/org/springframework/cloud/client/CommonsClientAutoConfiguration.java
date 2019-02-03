@@ -61,23 +61,23 @@ public class CommonsClientAutoConfiguration {
 		@Bean
 		@ConditionalOnProperty(value = "spring.cloud.discovery.client.health-indicator.enabled", matchIfMissing = true)
 		public DiscoveryClientHealthIndicator discoveryClientHealthIndicator(
-				ObjectProvider<DiscoveryClient> discoveryClient,
-				DiscoveryClientHealthIndicatorProperties properties) {
+			ObjectProvider<DiscoveryClient> discoveryClient,
+			DiscoveryClientHealthIndicatorProperties properties) {
 			return new DiscoveryClientHealthIndicator(discoveryClient, properties);
 		}
 
 		@Bean
 		@ConditionalOnProperty(value = "spring.cloud.discovery.client.composite-indicator.enabled", matchIfMissing = true)
-		@ConditionalOnBean({ DiscoveryHealthIndicator.class, HealthAggregator.class })
+		@ConditionalOnBean({DiscoveryHealthIndicator.class, HealthAggregator.class})
 		public DiscoveryCompositeHealthIndicator discoveryCompositeHealthIndicator(
-				HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
+			HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
 			return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
 		}
 
 		@Bean
 		public HasFeatures commonsFeatures() {
 			return HasFeatures.abstractFeatures(DiscoveryClient.class,
-					LoadBalancerClient.class);
+				LoadBalancerClient.class);
 		}
 
 	}
