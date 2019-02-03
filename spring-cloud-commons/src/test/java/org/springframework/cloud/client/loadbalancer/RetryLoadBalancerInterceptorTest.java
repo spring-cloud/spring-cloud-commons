@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.loadbalancer;
 
 import java.io.ByteArrayInputStream;
@@ -28,8 +44,7 @@ import org.springframework.retry.backoff.BackOffPolicy;
 import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.listener.RetryListenerSupport;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -145,7 +160,7 @@ public class RetryLoadBalancerInterceptorTest {
 		byte[] body = new byte[] {};
 		ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
 		ClientHttpResponse rsp = interceptor.intercept(request, body, execution);
-		assertThat(rsp, is(clientHttpResponse));
+		then(rsp).isEqualTo(clientHttpResponse);
 		verify(this.lbRequestFactory).createRequest(request, body, execution);
 	}
 
@@ -180,7 +195,7 @@ public class RetryLoadBalancerInterceptorTest {
 		verify(this.client, times(2)).execute(eq("foo"), eq(serviceInstance),
 				nullable(LoadBalancerRequest.class));
 		verify(notFoundStream, times(1)).close();
-		assertThat(rsp, is(clientHttpResponseOk));
+		then(rsp).isEqualTo(clientHttpResponseOk);
 		verify(this.lbRequestFactory, times(2)).createRequest(request, body, execution);
 	}
 
@@ -221,8 +236,8 @@ public class RetryLoadBalancerInterceptorTest {
 		// call twice in a retry attempt
 		byte[] content = new byte[1024];
 		int length = rsp.getBody().read(content);
-		assertThat(length, is("foo".getBytes().length));
-		assertThat(new String(content, 0, length), is("foo"));
+		then(length).isEqualTo("foo".getBytes().length);
+		then(new String(content, 0, length)).isEqualTo("foo");
 	}
 
 	@Test
@@ -251,9 +266,9 @@ public class RetryLoadBalancerInterceptorTest {
 		ClientHttpResponse rsp = interceptor.intercept(request, body, execution);
 		verify(this.client, times(2)).execute(eq("foo"), eq(serviceInstance),
 				any(LoadBalancerRequest.class));
-		assertThat(rsp, is(clientHttpResponse));
+		then(rsp).isEqualTo(clientHttpResponse);
 		verify(this.lbRequestFactory, times(2)).createRequest(request, body, execution);
-		assertThat(backOffPolicy.getBackoffAttempts(), is(1));
+		then(backOffPolicy.getBackoffAttempts()).isEqualTo(1);
 	}
 
 	@Test(expected = IOException.class)
@@ -310,10 +325,10 @@ public class RetryLoadBalancerInterceptorTest {
 		ClientHttpResponse rsp = interceptor.intercept(request, body, execution);
 		verify(this.client, times(2)).execute(eq("listener"), eq(serviceInstance),
 				any(LoadBalancerRequest.class));
-		assertThat(rsp, is(clientHttpResponse));
+		then(rsp).isEqualTo(clientHttpResponse);
 		verify(this.lbRequestFactory, times(2)).createRequest(request, body, execution);
-		assertThat(backOffPolicy.getBackoffAttempts(), is(1));
-		assertThat(retryListener.getOnError(), is(1));
+		then(backOffPolicy.getBackoffAttempts()).isEqualTo(1);
+		then(retryListener.getOnError()).isEqualTo(1);
 	}
 
 	@Test(expected = TerminatedRetryException.class)
@@ -364,9 +379,9 @@ public class RetryLoadBalancerInterceptorTest {
 		ClientHttpResponse rsp = interceptor.intercept(request, body, execution);
 		verify(this.client, times(2)).execute(eq("default"), eq(serviceInstance),
 				any(LoadBalancerRequest.class));
-		assertThat(rsp, is(clientHttpResponse));
+		then(rsp).isEqualTo(clientHttpResponse);
 		verify(this.lbRequestFactory, times(2)).createRequest(request, body, execution);
-		assertThat(backOffPolicy.getBackoffAttempts(), is(1));
+		then(backOffPolicy.getBackoffAttempts()).isEqualTo(1);
 	}
 
 	class MyLoadBalancedRetryFactory implements LoadBalancedRetryFactory {
@@ -377,18 +392,17 @@ public class RetryLoadBalancerInterceptorTest {
 
 		private RetryListener[] retryListeners;
 
-		public MyLoadBalancedRetryFactory(
-				LoadBalancedRetryPolicy loadBalancedRetryPolicy) {
+		MyLoadBalancedRetryFactory(LoadBalancedRetryPolicy loadBalancedRetryPolicy) {
 			this.loadBalancedRetryPolicy = loadBalancedRetryPolicy;
 		}
 
-		public MyLoadBalancedRetryFactory(LoadBalancedRetryPolicy loadBalancedRetryPolicy,
+		MyLoadBalancedRetryFactory(LoadBalancedRetryPolicy loadBalancedRetryPolicy,
 				BackOffPolicy backOffPolicy) {
 			this(loadBalancedRetryPolicy);
 			this.backOffPolicy = backOffPolicy;
 		}
 
-		public MyLoadBalancedRetryFactory(LoadBalancedRetryPolicy loadBalancedRetryPolicy,
+		MyLoadBalancedRetryFactory(LoadBalancedRetryPolicy loadBalancedRetryPolicy,
 				BackOffPolicy backOffPolicy, RetryListener[] retryListeners) {
 			this(loadBalancedRetryPolicy, backOffPolicy);
 			this.retryListeners = retryListeners;

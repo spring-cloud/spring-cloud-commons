@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.bootstrap.encrypt;
 
 import org.junit.Test;
@@ -9,7 +25,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 public class EncryptionIntegrationTests {
 
@@ -20,7 +36,7 @@ public class EncryptionIntegrationTests {
 						"encrypt.key:pie",
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
 						.run();
-		assertEquals("test", context.getEnvironment().getProperty("foo.password"));
+		then(context.getEnvironment().getProperty("foo.password")).isEqualTo("test");
 	}
 
 	@Test
@@ -30,7 +46,7 @@ public class EncryptionIntegrationTests {
 						"encrypt.key:pie",
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
 						.run();
-		assertEquals("test", context.getBean(PasswordProperties.class).getPassword());
+		then(context.getBean(PasswordProperties.class).getPassword()).isEqualTo("test");
 	}
 
 	@Configuration

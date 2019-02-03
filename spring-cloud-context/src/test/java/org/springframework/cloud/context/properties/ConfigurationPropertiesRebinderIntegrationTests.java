@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.properties;
 
 import javax.annotation.PostConstruct;
@@ -40,7 +41,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -62,50 +63,50 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testSimpleProperties() throws Exception {
-		assertEquals("Hello scope!", this.properties.getMessage());
-		assertEquals(1, this.properties.getCount());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
+		then(this.properties.getCount()).isEqualTo(1);
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...but don't refresh, so the bean stays the same:
-		assertEquals("Hello scope!", this.properties.getMessage());
-		assertEquals(1, this.properties.getCount());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
+		then(this.properties.getCount()).isEqualTo(1);
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefreshInParent() throws Exception {
-		assertEquals("main", this.config.getName());
+		then(this.config.getName()).isEqualTo("main");
 		// Change the dynamic property source...
 		TestPropertyValues.of("config.name=foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind();
-		assertEquals("foo", this.config.getName());
+		then(this.config.getName()).isEqualTo("foo");
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefresh() throws Exception {
-		assertEquals(1, this.properties.getCount());
-		assertEquals("Hello scope!", this.properties.getMessage());
+		then(this.properties.getCount()).isEqualTo(1);
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind();
-		assertEquals("Foo", this.properties.getMessage());
-		assertEquals(2, this.properties.getCount());
+		then(this.properties.getMessage()).isEqualTo("Foo");
+		then(this.properties.getCount()).isEqualTo(2);
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefreshByName() throws Exception {
-		assertEquals(1, this.properties.getCount());
-		assertEquals("Hello scope!", this.properties.getMessage());
+		then(this.properties.getCount()).isEqualTo(1);
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind("properties");
-		assertEquals("Foo", this.properties.getMessage());
-		assertEquals(2, this.properties.getCount());
+		then(this.properties.getMessage()).isEqualTo("Foo");
+		then(this.properties.getCount()).isEqualTo(2);
 	}
 
 	interface SomeService {

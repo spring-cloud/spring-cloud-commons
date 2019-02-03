@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.assertj.core.api.Assertions;
+import org.assertj.core.api.BDDAssertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -48,7 +48,7 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 
 	@Test
 	public void portsWork() {
-		Assertions.assertThat(this.autoRegistration.shouldRegisterManagement()).isFalse();
+		BDDAssertions.then(this.autoRegistration.shouldRegisterManagement()).isFalse();
 	}
 
 	@EnableAutoConfiguration

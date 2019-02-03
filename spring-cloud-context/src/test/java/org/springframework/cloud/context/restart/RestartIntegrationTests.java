@@ -25,10 +25,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.LiveBeansView;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.BDDAssertions.then;
 
 public class RestartIntegrationTests {
 
@@ -53,26 +50,26 @@ public class RestartIntegrationTests {
 				"--spring.liveBeansView.mbeanDomain=livebeans");
 
 		RestartEndpoint endpoint = this.context.getBean(RestartEndpoint.class);
-		assertNotNull(this.context.getParent());
-		assertNull(this.context.getParent().getParent());
+		then(this.context.getParent()).isNotNull();
+		then(this.context.getParent().getParent()).isNull();
 		this.context = endpoint.doRestart();
 
-		assertNotNull(this.context);
-		assertNotNull(this.context.getParent());
-		assertNull(this.context.getParent().getParent());
+		then(this.context).isNotNull();
+		then(this.context.getParent()).isNotNull();
+		then(this.context.getParent().getParent()).isNull();
 
 		RestartEndpoint next = this.context.getBean(RestartEndpoint.class);
-		assertNotSame(endpoint, next);
+		then(next).isNotSameAs(endpoint);
 		this.context = next.doRestart();
 
-		assertNotNull(this.context);
-		assertNotNull(this.context.getParent());
-		assertNull(this.context.getParent().getParent());
+		then(this.context).isNotNull();
+		then(this.context.getParent()).isNotNull();
+		then(this.context.getParent().getParent()).isNull();
 
 		LiveBeansView beans = new LiveBeansView();
 		String json = beans.getSnapshotAsJson();
-		assertThat(json).containsOnlyOnce("parent\": \"bootstrap");
-		assertThat(json).containsOnlyOnce("parent\": null");
+		then(json).containsOnlyOnce("parent\": \"bootstrap");
+		then(json).containsOnlyOnce("parent\": null");
 	}
 
 	@Configuration

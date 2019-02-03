@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.properties;
 
 import java.util.HashMap;
@@ -40,7 +41,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class, properties = {
@@ -61,10 +62,10 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 	public void testAppendProperties() throws Exception {
 		// This comes out as a String not Integer if the rebinder processes the proxy
 		// instead of the target
-		assertEquals(new Integer(168), this.properties.getExpiry().get("one"));
+		then(this.properties.getExpiry().get("one")).isEqualTo(new Integer(168));
 		TestPropertyValues.of("messages.expiry.one=56").applyTo(this.environment);
 		this.rebinder.rebind();
-		assertEquals(new Integer(56), this.properties.getExpiry().get("one"));
+		then(this.properties.getExpiry().get("one")).isEqualTo(new Integer(56));
 	}
 
 	@Configuration

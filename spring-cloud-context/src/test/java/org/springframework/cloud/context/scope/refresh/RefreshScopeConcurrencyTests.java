@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.scope.refresh;
 
 import java.util.concurrent.Callable;
@@ -46,9 +47,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -72,7 +71,7 @@ public class RefreshScopeConcurrencyTests {
 	@DirtiesContext
 	public void testConcurrentRefresh() throws Exception {
 
-		assertEquals("Hello scope!", this.service.getMessage());
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		this.properties.setMessage("Foo");
 		this.properties.setDelay(500);
 		final CountDownLatch latch = new CountDownLatch(1);
@@ -89,19 +88,19 @@ public class RefreshScopeConcurrencyTests {
 				}
 			}
 		});
-		assertTrue(latch.await(1500, TimeUnit.MILLISECONDS));
+		then(latch.await(15000, TimeUnit.MILLISECONDS)).isTrue();
 		logger.info("Refreshing");
 		this.scope.refreshAll();
-		assertEquals("Foo", this.service.getMessage());
+		then(this.service.getMessage()).isEqualTo("Foo");
 		/*
 		 * This is the most important assertion: we don't want a null value because that
 		 * means the bean was destroyed and not re-initialized before we accessed it.
 		 */
-		assertNotNull(result.get());
-		assertEquals("Hello scope!", result.get());
+		then(result.get()).isNotNull();
+		then(result.get()).isEqualTo("Hello scope!");
 	}
 
-	public static interface Service {
+	public interface Service {
 
 		String getMessage();
 

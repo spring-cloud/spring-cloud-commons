@@ -23,9 +23,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.boot.WebApplicationType.NONE;
 
 /**
@@ -41,7 +39,7 @@ public class BootstrapListenerHierarchyIntegrationTests {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
 				.sources(BasicConfiguration.class).web(NONE).run();
 
-		assertNotNull(context.getParent());
+		then(context.getParent()).isNotNull();
 	}
 
 	@Test
@@ -53,16 +51,16 @@ public class BootstrapListenerHierarchyIntegrationTests {
 		// Should be RootConfiguration based context
 		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) context
 				.getParent();
-		assertEquals("rootBean", parent.getBean("rootBean", String.class));
+		then(parent.getBean("rootBean", String.class)).isEqualTo("rootBean");
 
 		// Parent should have the bootstrap context as parent
-		assertNotNull(parent.getParent());
+		then(parent.getParent()).isNotNull();
 
 		ConfigurableApplicationContext bootstrapContext = (ConfigurableApplicationContext) parent
 				.getParent();
 
 		// Bootstrap should be the root, there should be no other parent
-		assertNull(bootstrapContext.getParent());
+		then(bootstrapContext.getParent()).isNull();
 	}
 
 	@Test
@@ -75,16 +73,16 @@ public class BootstrapListenerHierarchyIntegrationTests {
 		// Should be RootConfiguration based context
 		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) context
 				.getParent();
-		assertEquals("rootBean", parent.getBean("rootBean", String.class));
+		then(parent.getBean("rootBean", String.class)).isEqualTo("rootBean");
 
 		// Parent should have the bootstrap context as parent
-		assertNotNull(parent.getParent());
+		then(parent.getParent()).isNotNull();
 
 		ConfigurableApplicationContext bootstrapContext = (ConfigurableApplicationContext) parent
 				.getParent();
 
 		// Bootstrap should be the root, there should be no other parent
-		assertNull(bootstrapContext.getParent());
+		then(bootstrapContext.getParent()).isNull();
 	}
 
 	@Configuration

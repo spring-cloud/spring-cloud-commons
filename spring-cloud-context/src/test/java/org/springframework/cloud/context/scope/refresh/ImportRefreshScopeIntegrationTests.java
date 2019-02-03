@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.scope.refresh;
 
 import org.junit.Test;
@@ -28,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -45,10 +46,10 @@ public class ImportRefreshScopeIntegrationTests {
 
 	@Test
 	public void testSimpleProperties() throws Exception {
-		assertEquals("Hello scope!", this.service.getMessage());
-		assertEquals("refresh",
-				this.beanFactory.getBeanDefinition("scopedTarget.service").getScope());
-		assertEquals("Hello scope!", this.service.getMessage());
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
+		then(this.beanFactory.getBeanDefinition("scopedTarget.service").getScope())
+				.isEqualTo("refresh");
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
 	}
 
 	@Configuration("service")

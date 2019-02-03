@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.context.environment;
 
 import org.junit.Test;
@@ -7,7 +23,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mock.env.MockEnvironment;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -24,22 +40,22 @@ public class EnvironmentManagerTest {
 
 		environmentManager.setProperty("foo", "bar");
 
-		assertThat(environment.getProperty("foo")).isEqualTo("bar");
+		then(environment.getProperty("foo")).isEqualTo("bar");
 		ArgumentCaptor<ApplicationEvent> eventCaptor = ArgumentCaptor
 				.forClass(ApplicationEvent.class);
 		verify(publisher, times(1)).publishEvent(eventCaptor.capture());
-		assertThat(eventCaptor.getValue()).isInstanceOf(EnvironmentChangeEvent.class);
+		then(eventCaptor.getValue()).isInstanceOf(EnvironmentChangeEvent.class);
 		EnvironmentChangeEvent event = (EnvironmentChangeEvent) eventCaptor.getValue();
-		assertThat(event.getKeys()).containsExactly("foo");
+		then(event.getKeys()).containsExactly("foo");
 
 		reset(publisher);
 
 		environmentManager.reset();
-		assertThat(environment.getProperty("foo")).isNull();
+		then(environment.getProperty("foo")).isNull();
 		verify(publisher, times(1)).publishEvent(eventCaptor.capture());
-		assertThat(eventCaptor.getValue()).isInstanceOf(EnvironmentChangeEvent.class);
+		then(eventCaptor.getValue()).isInstanceOf(EnvironmentChangeEvent.class);
 		event = (EnvironmentChangeEvent) eventCaptor.getValue();
-		assertThat(event.getKeys()).containsExactly("foo");
+		then(event.getKeys()).containsExactly("foo");
 	}
 
 }

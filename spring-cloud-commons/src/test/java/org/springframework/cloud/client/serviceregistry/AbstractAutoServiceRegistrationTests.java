@@ -35,12 +35,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
@@ -48,7 +43,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * @author Tim Ysewyn
  */
 @RunWith(SpringRunner.class)
+// @checkstyle:off
 @SpringBootTest(classes = AbstractAutoServiceRegistrationTests.Config.class, properties = "management.port=0", webEnvironment = RANDOM_PORT)
+// @checkstyle:on
 public class AbstractAutoServiceRegistrationTests {
 
 	@Autowired
@@ -68,30 +65,30 @@ public class AbstractAutoServiceRegistrationTests {
 
 	@Test
 	public void portsWork() {
-		assertNotEquals("Lifecycle port is zero", 0,
-				this.autoRegistration.getPort().get());
-		assertNotEquals("Lifecycle port is management port", this.managementPort,
-				this.autoRegistration.getPort().get());
-		assertEquals("Lifecycle port is wrong", this.port,
-				this.autoRegistration.getPort().get());
-		assertTrue("Lifecycle not running", this.autoRegistration.isRunning());
-		assertThat("ServiceRegistry is wrong type",
-				this.autoRegistration.getServiceRegistry(),
-				is(instanceOf(TestServiceRegistry.class)));
+		then(this.autoRegistration.getPort().get()).isNotEqualTo(0)
+				.as("Lifecycle port is zero");
+		then(this.managementPort).isNotEqualTo(this.autoRegistration.getPort().get())
+				.as("Lifecycle port is management port");
+		then(this.port).isEqualTo(this.autoRegistration.getPort().get())
+				.as("Lifecycle port is wrong");
+		then(this.autoRegistration.isRunning()).isTrue().as("Lifecycle not running");
+		then(this.autoRegistration.getServiceRegistry())
+				.isInstanceOf(TestServiceRegistry.class)
+				.as("ServiceRegistry is wrong type");
 		TestServiceRegistry serviceRegistry = (TestServiceRegistry) this.autoRegistration
 				.getServiceRegistry();
-		assertTrue("Lifecycle not registered", serviceRegistry.isRegistered());
-		assertEquals("Lifecycle appName is wrong", "application",
-				this.autoRegistration.getAppName());
+		then(serviceRegistry.isRegistered()).isTrue().as("Lifecycle not registered");
+		then(this.autoRegistration.getAppName()).as("Lifecycle appName is wrong")
+				.isEqualTo("application");
 	}
 
 	@Test
 	public void eventsFireTest() {
-		assertTrue(this.preEventListener.wasFired);
-		assertEquals("testRegistration2",
-				this.preEventListener.registration.getServiceId());
-		assertTrue(this.postEventListener.wasFired);
-		assertEquals("testRegistration2", this.postEventListener.config.getServiceId());
+		then(this.preEventListener.wasFired).isTrue();
+		then(this.preEventListener.registration.getServiceId())
+				.isEqualTo("testRegistration2");
+		then(this.postEventListener.wasFired).isTrue();
+		then(this.postEventListener.config.getServiceId()).isEqualTo("testRegistration2");
 	}
 
 	@EnableAutoConfiguration

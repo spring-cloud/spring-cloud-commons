@@ -25,11 +25,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Dave Syer
@@ -40,16 +36,16 @@ public class RefreshScopeSerializationTests {
 	public void defaultApplicationContextId() throws Exception {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
 				TestConfiguration.class).web(WebApplicationType.NONE).run();
-		assertThat(context.getId(), is(equalTo("application-1")));
+		then(context.getId()).isEqualTo("application-1");
 	}
 
 	@Test
 	public void serializationIdReproducible() throws Exception {
 		String first = getBeanFactory().getSerializationId();
 		String second = getBeanFactory().getSerializationId();
-		assertThat(first, is(notNullValue()));
-		assertThat(first, is(not(equalTo("application"))));
-		assertThat(first, is(equalTo(second)));
+		then(first).isNotNull();
+		then(first).isNotEqualTo("application");
+		then(first).isEqualTo(second);
 	}
 
 	private DefaultListableBeanFactory getBeanFactory() {

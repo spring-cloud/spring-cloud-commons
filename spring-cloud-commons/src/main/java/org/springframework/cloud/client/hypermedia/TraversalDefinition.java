@@ -17,7 +17,6 @@
 package org.springframework.cloud.client.hypermedia;
 
 import org.springframework.hateoas.client.Traverson;
-import org.springframework.hateoas.client.Traverson.TraversalBuilder;
 
 /**
  * Callback to define the traversal to a resource.
@@ -30,6 +29,6 @@ public interface TraversalDefinition {
 	 * @param traverson The Traverson instance to run the traversal on.
 	 * @return the builder for traversing
 	 */
-	TraversalBuilder buildTraversal(Traverson traverson);
+	Traverson.TraversalBuilder buildTraversal(Traverson traverson);
 
 }

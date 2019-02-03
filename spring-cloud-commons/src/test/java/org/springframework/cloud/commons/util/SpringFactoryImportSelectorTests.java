@@ -18,7 +18,7 @@ package org.springframework.cloud.commons.util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Spencer Gibb
@@ -28,8 +28,8 @@ public class SpringFactoryImportSelectorTests {
 	@Test
 	public void testFindAnnotation() {
 		MyAnnotationImportSelector selector = new MyAnnotationImportSelector();
-		assertEquals("annotationClass was wrong", MyAnnotation.class,
-				selector.getAnnotationClass());
+		then(selector.getAnnotationClass()).as("annotationClass was wrong")
+				.isEqualTo(MyAnnotation.class);
 	}
 
 	public @interface MyAnnotation {

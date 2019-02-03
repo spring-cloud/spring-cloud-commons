@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.client.hypermedia;
 
 import java.util.Arrays;
@@ -25,9 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -43,8 +42,8 @@ public class DynamicServiceInstanceProviderUnitTests {
 
 	@Test
 	public void returnsNoServiceInCaseNoneIsAvailable() {
-		assertThat(new DynamicServiceInstanceProvider(this.client, "service")
-				.getServiceInstance(), is(nullValue()));
+		then(new DynamicServiceInstanceProvider(this.client, "service")
+				.getServiceInstance()).isNull();
 	}
 
 	@Test
@@ -56,8 +55,8 @@ public class DynamicServiceInstanceProviderUnitTests {
 		when(this.client.getInstances(anyString()))
 				.thenReturn(Arrays.asList(first, second));
 
-		assertThat(new DynamicServiceInstanceProvider(this.client, "service")
-				.getServiceInstance(), is(first));
+		then(new DynamicServiceInstanceProvider(this.client, "service")
+				.getServiceInstance()).isEqualTo(first);
 	}
 
 }

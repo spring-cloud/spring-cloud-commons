@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.autoconfigure;
 
 import org.apache.commons.logging.Log;
@@ -42,10 +43,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -63,7 +61,7 @@ public class RefreshScopeIntegrationTests {
 
 	@Before
 	public void init() {
-		assertEquals(1, ExampleService.getInitCount());
+		then(ExampleService.getInitCount()).isEqualTo(1);
 		ExampleService.reset();
 	}
 
@@ -75,53 +73,53 @@ public class RefreshScopeIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testSimpleProperties() throws Exception {
-		assertEquals("Hello scope!", this.service.getMessage());
-		assertTrue(this.service instanceof Advised);
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
+		then(this.service instanceof Advised).isTrue();
 		// Change the dynamic property source...
 		this.properties.setMessage("Foo");
 		// ...but don't refresh, so the bean stays the same:
-		assertEquals("Hello scope!", this.service.getMessage());
-		assertEquals(0, ExampleService.getInitCount());
-		assertEquals(0, ExampleService.getDestroyCount());
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
+		then(ExampleService.getInitCount()).isEqualTo(0);
+		then(ExampleService.getDestroyCount()).isEqualTo(0);
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefresh() throws Exception {
-		assertEquals("Hello scope!", this.service.getMessage());
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
 		this.properties.setMessage("Foo");
 		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refreshAll();
 		String id2 = this.service.toString();
-		assertEquals("Foo", this.service.getMessage());
-		assertEquals(1, ExampleService.getInitCount());
-		assertEquals(1, ExampleService.getDestroyCount());
-		assertNotSame(id1, id2);
-		assertNotNull(ExampleService.event);
-		assertEquals(RefreshScopeRefreshedEvent.DEFAULT_NAME,
-				ExampleService.event.getName());
+		then(this.service.getMessage()).isEqualTo("Foo");
+		then(ExampleService.getInitCount()).isEqualTo(1);
+		then(ExampleService.getDestroyCount()).isEqualTo(1);
+		then(id2).isNotSameAs(id1);
+		then(ExampleService.event).isNotNull();
+		then(ExampleService.event.getName())
+				.isEqualTo(RefreshScopeRefreshedEvent.DEFAULT_NAME);
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefreshBean() throws Exception {
-		assertEquals("Hello scope!", this.service.getMessage());
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
 		this.properties.setMessage("Foo");
 		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refresh("service");
 		String id2 = this.service.toString();
-		assertEquals("Foo", this.service.getMessage());
-		assertEquals("Foo", this.service.getMessage());
-		assertEquals(1, ExampleService.getInitCount());
-		assertEquals(1, ExampleService.getDestroyCount());
-		assertNotSame(id1, id2);
-		assertNotNull(ExampleService.event);
-		assertEquals(GenericScope.SCOPED_TARGET_PREFIX + "service",
-				ExampleService.event.getName());
+		then(this.service.getMessage()).isEqualTo("Foo");
+		then(this.service.getMessage()).isEqualTo("Foo");
+		then(ExampleService.getInitCount()).isEqualTo(1);
+		then(ExampleService.getDestroyCount()).isEqualTo(1);
+		then(id2).isNotSameAs(id1);
+		then(ExampleService.event).isNotNull();
+		then(ExampleService.event.getName())
+				.isEqualTo(GenericScope.SCOPED_TARGET_PREFIX + "service");
 	}
 
 	// see gh-349

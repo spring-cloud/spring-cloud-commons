@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.refresh;
 
 import org.junit.Test;
@@ -32,7 +33,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class, properties = {
@@ -51,33 +52,33 @@ public class ContextRefresherIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testSimpleProperties() throws Exception {
-		assertEquals("Hello scope!", this.properties.getMessage());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		this.properties.setMessage("Foo");
 		// ...but don't refresh, so the bean stays the same:
-		assertEquals("Foo", this.properties.getMessage());
+		then(this.properties.getMessage()).isEqualTo("Foo");
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefreshBean() throws Exception {
-		assertEquals("Hello scope!", this.properties.getMessage());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		this.properties.setMessage("Foo");
 		// ...and then refresh, so the bean is re-initialized:
 		this.refresher.refresh();
-		assertEquals("Hello scope!", this.properties.getMessage());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 	}
 
 	@Test
 	@DirtiesContext
 	public void testUpdateHikari() throws Exception {
-		assertEquals("Hello scope!", this.properties.getMessage());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		TestPropertyValues.of("spring.datasource.hikari.read-only=true")
 				.applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.refresher.refresh();
-		assertEquals("Hello scope!", this.properties.getMessage());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 	}
 
 	@Configuration

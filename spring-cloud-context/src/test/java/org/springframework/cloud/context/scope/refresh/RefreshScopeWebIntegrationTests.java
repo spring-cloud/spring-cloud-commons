@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.scope.refresh;
 
 import org.junit.Test;
@@ -33,7 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Dave Syer
@@ -57,8 +58,8 @@ public class RefreshScopeWebIntegrationTests {
 
 	@Test
 	public void scopeOnBeanDefinition() throws Exception {
-		assertEquals("refresh", this.beanFactory
-				.getBeanDefinition("scopedTarget.application").getScope());
+		then(this.beanFactory.getBeanDefinition("scopedTarget.application").getScope())
+				.isEqualTo("refresh");
 	}
 
 	@Test
@@ -67,7 +68,7 @@ public class RefreshScopeWebIntegrationTests {
 		this.environmentManager.setProperty("message", "Hello Dave!");
 		this.scope.refreshAll();
 		String message = this.application.hello();
-		assertEquals("Hello Dave!", message);
+		then(message).isEqualTo("Hello Dave!");
 	}
 
 	@Configuration

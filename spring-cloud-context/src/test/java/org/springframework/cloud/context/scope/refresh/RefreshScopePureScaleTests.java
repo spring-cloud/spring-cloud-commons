@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.cloud.context.scope.refresh;
 
 import java.util.ArrayList;
@@ -45,8 +46,7 @@ import org.springframework.test.annotation.Repeat;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.ObjectUtils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -96,14 +96,14 @@ public class RefreshScopePureScaleTests {
 				}
 			});
 		}
-		assertTrue(latch.await(15000, TimeUnit.MILLISECONDS));
-		assertEquals("Foo", this.service.getMessage());
+		then(latch.await(15000, TimeUnit.MILLISECONDS)).isTrue();
+		then(this.service.getMessage()).isEqualTo("Foo");
 		for (Future<String> result : results) {
-			assertEquals("Foo", result.get());
+			then(result.get()).isEqualTo("Foo");
 		}
 	}
 
-	public static interface Service {
+	public interface Service {
 
 		String getMessage();
 

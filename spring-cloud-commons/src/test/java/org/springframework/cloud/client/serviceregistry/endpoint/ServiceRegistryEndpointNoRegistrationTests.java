@@ -63,7 +63,7 @@ public class ServiceRegistryEndpointNoRegistrationTests {
 
 	@Import({ JacksonAutoConfiguration.class,
 			HttpMessageConvertersAutoConfiguration.class, EndpointAutoConfiguration.class,
-			WebMvcAutoConfiguration.class,
+			WebMvcAutoConfiguration.class
 			// ManagementServerPropertiesAutoConfiguration.class
 	})
 	@Configuration

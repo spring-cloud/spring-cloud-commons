@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client;
 
 import org.junit.Test;
@@ -15,12 +31,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-import static org.hamcrest.Matchers.emptyCollectionOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Spencer Gibb
@@ -30,13 +42,10 @@ public class CommonsClientAutoConfigurationTests {
 	@Test
 	public void beansCreatedNormally() {
 		try (ConfigurableApplicationContext ctxt = init()) {
-			assertThat(ctxt.getBean(DiscoveryClientHealthIndicator.class),
-					is(notNullValue()));
-			assertThat(ctxt.getBean(DiscoveryCompositeHealthIndicator.class),
-					is(notNullValue()));
-			assertThat(ctxt.getBean(FeaturesEndpoint.class), is(notNullValue()));
-			assertThat(ctxt.getBeansOfType(HasFeatures.class).values(),
-					not(emptyCollectionOf(HasFeatures.class)));
+			then(ctxt.getBean(DiscoveryClientHealthIndicator.class)).isNotNull();
+			then(ctxt.getBean(DiscoveryCompositeHealthIndicator.class)).isNotNull();
+			then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull();
+			then(ctxt.getBeansOfType(HasFeatures.class).values()).isNotEmpty();
 		}
 	}
 
@@ -46,7 +55,7 @@ public class CommonsClientAutoConfigurationTests {
 				"spring.cloud.discovery.enabled=false")) {
 			assertBeanNonExistant(ctxt, DiscoveryClientHealthIndicator.class);
 			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthIndicator.class);
-			assertThat(ctxt.getBean(FeaturesEndpoint.class), is(notNullValue())); // features
+			then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull(); // features
 			// actuator
 			// is
 			// independent

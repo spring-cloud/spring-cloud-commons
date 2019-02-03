@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ package org.springframework.cloud.bootstrap;
 
 import java.util.Locale;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -35,6 +34,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.BDDAssertions.then;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestApplication.class, properties = "debug=true")
 public class MessageSourceConfigurationTests {
@@ -44,8 +45,8 @@ public class MessageSourceConfigurationTests {
 
 	@Test
 	public void loadsMessage() {
-		Assert.assertEquals("Hello World!", this.messageSource.getMessage("hello.message",
-				null, Locale.getDefault()));
+		then(this.messageSource.getMessage("hello.message", null, Locale.getDefault()))
+				.isEqualTo("Hello World!");
 	}
 
 	@Configuration

@@ -42,10 +42,8 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
@@ -62,7 +60,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 	@Before
 	public void init() {
-		assertEquals(1, TestService.getInitCount());
+		then(TestService.getInitCount()).isEqualTo(1);
 		TestService.reset();
 	}
 
@@ -74,20 +72,20 @@ public class MoreRefreshScopeIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testSimpleProperties() throws Exception {
-		assertEquals("Hello scope!", this.service.getMessage());
-		assertTrue(this.service instanceof Advised);
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
+		then(this.service instanceof Advised).isTrue();
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
 		// ...but don't refresh, so the bean stays the same:
-		assertEquals("Hello scope!", this.service.getMessage());
-		assertEquals(0, TestService.getInitCount());
-		assertEquals(0, TestService.getDestroyCount());
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
+		then(TestService.getInitCount()).isEqualTo(0);
+		then(TestService.getDestroyCount()).isEqualTo(0);
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefresh() throws Exception {
-		assertEquals("Hello scope!", this.service.getMessage());
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment, Type.MAP,
@@ -96,16 +94,16 @@ public class MoreRefreshScopeIntegrationTests {
 		this.scope.refreshAll();
 		String id2 = this.service.toString();
 		String message = this.service.getMessage();
-		assertEquals("Foo", message);
-		assertEquals(1, TestService.getInitCount());
-		assertEquals(1, TestService.getDestroyCount());
-		assertNotSame(id1, id2);
+		then(message).isEqualTo("Foo");
+		then(TestService.getInitCount()).isEqualTo(1);
+		then(TestService.getDestroyCount()).isEqualTo(1);
+		then(id2).isNotSameAs(id1);
 	}
 
 	@Test
 	@DirtiesContext
 	public void testRefreshFails() throws Exception {
-		assertEquals("Hello scope!", this.service.getMessage());
+		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo", "delay:foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
@@ -113,7 +111,7 @@ public class MoreRefreshScopeIntegrationTests {
 		try {
 			// If a refresh fails (e.g. a binding error in this case) the application is
 			// basically hosed.
-			assertEquals("Hello scope!", this.service.getMessage());
+			then(this.service.getMessage()).isEqualTo("Hello scope!");
 			fail("expected BeanCreationException");
 		}
 		catch (BeanCreationException e) {
@@ -122,7 +120,7 @@ public class MoreRefreshScopeIntegrationTests {
 		TestPropertyValues.of("delay:0").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refreshAll();
-		assertEquals("Foo", this.service.getMessage());
+		then(this.service.getMessage()).isEqualTo("Foo");
 	}
 
 	public static class TestService implements InitializingBean, DisposableBean {

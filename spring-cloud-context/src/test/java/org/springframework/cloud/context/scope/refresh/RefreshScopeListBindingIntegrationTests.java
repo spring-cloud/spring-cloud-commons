@@ -42,8 +42,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class, properties = { "test.messages[0]=one",
@@ -62,23 +61,23 @@ public class RefreshScopeListBindingIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testAppendProperties() throws Exception {
-		assertEquals("[one, two]", this.properties.getMessages().toString());
-		assertTrue(this.properties instanceof Advised);
+		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
+		then(this.properties instanceof Advised).isTrue();
 		TestPropertyValues.of("test.messages[0]:foo").applyTo(this.environment);
 		this.scope.refreshAll();
-		assertEquals("[foo]", this.properties.getMessages().toString());
+		then(this.properties.getMessages().toString()).isEqualTo("[foo]");
 	}
 
 	@Test
 	@DirtiesContext
 	public void testReplaceProperties() throws Exception {
-		assertEquals("[one, two]", this.properties.getMessages().toString());
-		assertTrue(this.properties instanceof Advised);
+		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
+		then(this.properties instanceof Advised).isTrue();
 		Map<String, Object> map = findTestProperties();
 		map.clear();
 		TestPropertyValues.of("test.messages[0]:foo").applyTo(this.environment);
 		this.scope.refreshAll();
-		assertEquals("[foo]", this.properties.getMessages().toString());
+		then(this.properties.getMessages().toString()).isEqualTo("[foo]");
 	}
 
 	private Map<String, Object> findTestProperties() {

@@ -43,9 +43,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -72,13 +71,13 @@ public class EnvironmentManagerIntegrationTests {
 
 	@Test
 	public void testRefresh() throws Exception {
-		assertEquals("Hello scope!", this.properties.getMessage());
+		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		String content = property("message", "Foo");
 
 		this.mvc.perform(post(BASE_PATH + "/env").content(content)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(content().string("{\"message\":\"Foo\"}"));
-		assertEquals("Foo", this.properties.getMessage());
+		then(this.properties.getMessage()).isEqualTo("Foo");
 	}
 
 	private String property(String name, String value) throws JsonProcessingException {
@@ -101,7 +100,7 @@ public class EnvironmentManagerIntegrationTests {
 		catch (ServletException e) {
 			// The underlying BindException is not handled by the dispatcher servlet
 		}
-		assertEquals(0, this.properties.getDelay());
+		then(this.properties.getDelay()).isEqualTo(0);
 	}
 
 	@Test
@@ -114,14 +113,14 @@ public class EnvironmentManagerIntegrationTests {
 	public void environmentBeansConfiguredCorrectly() {
 		Map<String, EnvironmentEndpoint> envbeans = this.context
 				.getBeansOfType(EnvironmentEndpoint.class);
-		assertThat(envbeans).hasSize(1).containsKey("environmentEndpoint");
-		assertThat(envbeans.get("environmentEndpoint"))
+		then(envbeans).hasSize(1).containsKey("environmentEndpoint");
+		then(envbeans.get("environmentEndpoint"))
 				.isInstanceOf(WritableEnvironmentEndpoint.class);
 
 		Map<String, EnvironmentEndpointWebExtension> extbeans = this.context
 				.getBeansOfType(EnvironmentEndpointWebExtension.class);
-		assertThat(extbeans).hasSize(1).containsKey("environmentEndpointWebExtension");
-		assertThat(extbeans.get("environmentEndpointWebExtension"))
+		then(extbeans).hasSize(1).containsKey("environmentEndpointWebExtension");
+		then(extbeans.get("environmentEndpointWebExtension"))
 				.isInstanceOf(WritableEnvironmentEndpointWebExtension.class);
 	}
 

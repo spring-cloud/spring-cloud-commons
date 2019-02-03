@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2012-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.CUSTOM_DISCOVERY_CLIENT;
 import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.CUSTOM_SERVICE_ID;
 import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.DEFAULT_ORDER_DISCOVERY_CLIENT;
@@ -54,14 +54,11 @@ public class CompositeDiscoveryClientOrderTest {
 				.getDiscoveryClients();
 
 		// then:
-		assertThat(discoveryClients.get(0).description())
-				.isEqualTo(CUSTOM_DISCOVERY_CLIENT);
-		assertThat(discoveryClients.get(1).description())
+		then(discoveryClients.get(0).description()).isEqualTo(CUSTOM_DISCOVERY_CLIENT);
+		then(discoveryClients.get(1).description())
 				.isEqualTo(DEFAULT_ORDER_DISCOVERY_CLIENT);
-		assertThat(discoveryClients.get(2).description())
-				.isEqualTo("Simple Discovery Client");
-		assertThat(discoveryClients.get(3).description())
-				.isEqualTo(FOURTH_DISCOVERY_CLIENT);
+		then(discoveryClients.get(2).description()).isEqualTo("Simple Discovery Client");
+		then(discoveryClients.get(3).description()).isEqualTo(FOURTH_DISCOVERY_CLIENT);
 	}
 
 	@Test
@@ -71,8 +68,8 @@ public class CompositeDiscoveryClientOrderTest {
 				.getInstances(CUSTOM_SERVICE_ID);
 
 		// then:
-		assertThat(serviceInstances).hasSize(1);
-		assertThat(serviceInstances.get(0).getPort()).isEqualTo(123);
+		then(serviceInstances).hasSize(1);
+		then(serviceInstances.get(0).getPort()).isEqualTo(123);
 	}
 
 }

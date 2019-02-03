@@ -44,7 +44,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Spencer Gibb
@@ -62,8 +62,8 @@ public class LoadBalancerTest {
 				.getInstance("myservice", ReactiveLoadBalancer.class,
 						ServiceInstance.class);
 
-		assertThat(reactiveLoadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
-		assertThat(reactiveLoadBalancer).isInstanceOf(ReactorLoadBalancer.class);
+		then(reactiveLoadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
+		then(reactiveLoadBalancer).isInstanceOf(ReactorLoadBalancer.class);
 		ReactorLoadBalancer<ServiceInstance> loadBalancer = (ReactorLoadBalancer<ServiceInstance>) reactiveLoadBalancer;
 
 		// order dependent on seedPosition -1 of RoundRobinLoadBalancer
@@ -77,19 +77,19 @@ public class LoadBalancerTest {
 		for (String host : hosts) {
 			Mono<Response<ServiceInstance>> source = loadBalancer.choose();
 			StepVerifier.create(source).consumeNextWith(response -> {
-				assertThat(response).isNotNull();
-				assertThat(response.hasServer()).isTrue();
+				then(response).isNotNull();
+				then(response.hasServer()).isTrue();
 
 				ServiceInstance instance = response.getServer();
-				assertThat(instance).isNotNull();
-				assertThat(instance.getHost()).as("instance host is incorrent %s", host)
+				then(instance).isNotNull();
+				then(instance.getHost()).as("instance host is incorrent %s", host)
 						.isEqualTo(host);
 
 				if (host.contains("secure")) {
-					assertThat(instance.isSecure()).isTrue();
+					then(instance.isSecure()).isTrue();
 				}
 				else {
-					assertThat(instance.isSecure()).isFalse();
+					then(instance.isSecure()).isFalse();
 				}
 
 				response.onComplete(new CompletionContext(Status.SUCCESSS));
@@ -104,12 +104,12 @@ public class LoadBalancerTest {
 		ReactorLoadBalancer<ServiceInstance> loadBalancer = this.clientFactory
 				.getInstance("unknownservice", type);
 
-		assertThat(loadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
+		then(loadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
 
 		Mono<Response<ServiceInstance>> source = loadBalancer.choose();
 		StepVerifier.create(source).consumeNextWith(response -> {
-			assertThat(response).isNotNull();
-			assertThat(response.hasServer()).isFalse();
+			then(response).isNotNull();
+			then(response.hasServer()).isFalse();
 		}).verifyComplete();
 	}
 
@@ -133,7 +133,7 @@ public class LoadBalancerTest {
 	@SpringBootConfiguration
 	@LoadBalancerClients({
 			@LoadBalancerClient(name = "myservice", configuration = MyServiceConfig.class),
-			@LoadBalancerClient(name = "unknownservice", configuration = MyServiceConfig.class), })
+			@LoadBalancerClient(name = "unknownservice", configuration = MyServiceConfig.class) })
 	@EnableCaching
 	protected static class Config {
 

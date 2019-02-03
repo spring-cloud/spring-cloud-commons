@@ -42,7 +42,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Spencer Gibb
@@ -56,18 +56,18 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);
 
-		assertThat(webClientBuilders).isNotNull().hasSize(1);
+		then(webClientBuilders).isNotNull().hasSize(1);
 		WebClient.Builder webClientBuilder = webClientBuilders.values().iterator().next();
-		assertThat(webClientBuilder).isNotNull();
+		then(webClientBuilder).isNotNull();
 
 		assertLoadBalanced(webClientBuilder);
 	}
 
 	private void assertLoadBalanced(WebClient.Builder webClientBuilder) {
 		List<ExchangeFilterFunction> filters = getFilters(webClientBuilder);
-		assertThat(filters).hasSize(1);
+		then(filters).hasSize(1);
 		ExchangeFilterFunction interceptor = filters.get(0);
-		assertThat(interceptor).isInstanceOf(LoadBalancerExchangeFilterFunction.class);
+		then(interceptor).isInstanceOf(LoadBalancerExchangeFilterFunction.class);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -82,15 +82,15 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);
 
-		assertThat(webClientBuilders).hasSize(2);
+		then(webClientBuilders).hasSize(2);
 
 		TwoWebClientBuilders.Two two = context.getBean(TwoWebClientBuilders.Two.class);
 
-		assertThat(two.loadBalanced).isNotNull();
+		then(two.loadBalanced).isNotNull();
 		assertLoadBalanced(two.loadBalanced);
 
-		assertThat(two.nonLoadBalanced).isNotNull();
-		assertThat(getFilters(two.nonLoadBalanced)).isNullOrEmpty();
+		then(two.nonLoadBalanced).isNotNull();
+		then(getFilters(two.nonLoadBalanced)).isNullOrEmpty();
 	}
 
 	@Test
@@ -99,12 +99,12 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);
 
-		assertThat(webClientBuilders).hasSize(1);
+		then(webClientBuilders).hasSize(1);
 
 		WebClient.Builder builder = context.getBean(WebClient.Builder.class);
 
-		assertThat(builder).isNotNull();
-		assertThat(getFilters(builder)).isNullOrEmpty();
+		then(builder).isNotNull();
+		then(getFilters(builder)).isNullOrEmpty();
 	}
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
