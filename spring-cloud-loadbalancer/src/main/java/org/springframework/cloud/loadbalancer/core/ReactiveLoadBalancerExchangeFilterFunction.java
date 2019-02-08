@@ -20,6 +20,8 @@ import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Mono;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -29,8 +31,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import reactor.core.publisher.Mono;
 
 /**
  * @author Nikola Kološnjaji
@@ -92,4 +92,5 @@ public class ReactiveLoadBalancerExchangeFilterFunction
 				.scheme(instance.getUri().getScheme()).host(instance.getHost())
 				.port(instance.getPort()).build().toUri();
 	}
+
 }

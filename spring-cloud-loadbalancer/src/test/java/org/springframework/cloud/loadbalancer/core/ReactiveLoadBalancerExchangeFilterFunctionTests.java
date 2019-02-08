@@ -16,15 +16,13 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
 import java.net.URI;
 import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -43,6 +41,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * @author Nikola Kološnjaji
@@ -98,9 +99,11 @@ public class ReactiveLoadBalancerExchangeFilterFunctionTests {
 	@RestController
 	static class Config {
 
-		@RequestMapping()
+		@RequestMapping
 		public String hello(@RequestParam("param") String param) {
 			return "Hello " + param;
 		}
+
 	}
+
 }

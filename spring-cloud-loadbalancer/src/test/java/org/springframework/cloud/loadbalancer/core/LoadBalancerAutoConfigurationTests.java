@@ -16,12 +16,11 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
@@ -36,6 +35,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static org.assertj.core.api.BDDAssertions.then;
+
 /**
  * @author Nikola Kološnjaji
  */
@@ -47,12 +48,12 @@ public class LoadBalancerAutoConfigurationTests {
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);
 
-		assertThat(webClientBuilders).hasSize(1);
+		then(webClientBuilders).hasSize(1);
 
 		WebClient.Builder builder = context.getBean(WebClient.Builder.class);
 
-		assertThat(builder).isNotNull();
-		assertThat(getFilters(builder)).isNullOrEmpty();
+		then(builder).isNotNull();
+		then(getFilters(builder)).isNullOrEmpty();
 	}
 
 	@Test
@@ -61,9 +62,9 @@ public class LoadBalancerAutoConfigurationTests {
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);
 
-		assertThat(webClientBuilders).isNotNull().hasSize(1);
+		then(webClientBuilders).isNotNull().hasSize(1);
 		WebClient.Builder webClientBuilder = webClientBuilders.values().iterator().next();
-		assertThat(webClientBuilder).isNotNull();
+		then(webClientBuilder).isNotNull();
 
 		assertLoadBalanced(webClientBuilder);
 	}
@@ -74,37 +75,39 @@ public class LoadBalancerAutoConfigurationTests {
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);
 
-		assertThat(webClientBuilders).hasSize(2);
+		then(webClientBuilders).hasSize(2);
 
 		TwoWebClientBuilders.Two two = context.getBean(TwoWebClientBuilders.Two.class);
 
-		assertThat(two.loadBalanced).isNotNull();
+		then(two.loadBalanced).isNotNull();
 		assertLoadBalanced(two.loadBalanced);
 
-		assertThat(two.nonLoadBalanced).isNotNull();
-		assertThat(getFilters(two.nonLoadBalanced)).isNullOrEmpty();
+		then(two.nonLoadBalanced).isNotNull();
+		then(getFilters(two.nonLoadBalanced)).isNullOrEmpty();
 	}
 
 	private void assertLoadBalanced(WebClient.Builder webClientBuilder) {
 		List<ExchangeFilterFunction> filters = getFilters(webClientBuilder);
-		assertThat(filters).hasSize(1);
+		then(filters).hasSize(1);
 		ExchangeFilterFunction interceptor = filters.get(0);
-		assertThat(interceptor).isInstanceOf(ReactiveLoadBalancerExchangeFilterFunction.class);
+		then(interceptor).isInstanceOf(ReactiveLoadBalancerExchangeFilterFunction.class);
 	}
 
 	@SuppressWarnings("unchecked")
 	private List<ExchangeFilterFunction> getFilters(WebClient.Builder builder) {
-		return (List<ExchangeFilterFunction>) ReflectionTestUtils.getField(builder, "filters");
+		return (List<ExchangeFilterFunction>) ReflectionTestUtils.getField(builder,
+				"filters");
 	}
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
-		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.sources(config, WebClientAutoConfiguration.class,
-						LoadBalancerAutoConfiguration.class).run();
+		return new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(config,
+				WebClientAutoConfiguration.class, LoadBalancerAutoConfiguration.class)
+				.run();
 	}
 
 	@Configuration
 	protected static class NoWebClientBuilder {
+
 	}
 
 	@Configuration
@@ -129,12 +132,14 @@ public class LoadBalancerAutoConfigurationTests {
 
 		@Configuration
 		protected static class Two {
+
 			@Autowired
 			WebClient.Builder nonLoadBalanced;
 
 			@Autowired
 			@LoadBalanced
 			WebClient.Builder loadBalanced;
+
 		}
 
 	}
