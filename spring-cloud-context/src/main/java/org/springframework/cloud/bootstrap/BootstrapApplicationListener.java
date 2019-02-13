@@ -36,6 +36,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.ApplicationFailedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
+import org.springframework.boot.env.OriginTrackedMapPropertySource;
 import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEvent;
@@ -47,7 +48,6 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -444,7 +444,8 @@ public class BootstrapApplicationListener
 		}
 
 		public void add(PropertySource<?> source) {
-			if (source instanceof EnumerablePropertySource
+			// Only add map property sources added by boot, see gh-476
+			if (source instanceof OriginTrackedMapPropertySource
 					&& !this.names.contains(source.getName())) {
 				this.sources.addPropertySource(source);
 				this.names.add(source.getName());

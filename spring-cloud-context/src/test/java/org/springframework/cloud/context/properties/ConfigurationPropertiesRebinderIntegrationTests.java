@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -35,7 +36,6 @@ import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderIntegrationTests.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -117,7 +117,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	@Configuration
 	@EnableConfigurationProperties
-	@Import({ RefreshConfiguration.RebinderConfiguration.class,
+	@ImportAutoConfiguration({ RefreshConfiguration.RebinderConfiguration.class,
 			PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 
