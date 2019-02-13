@@ -447,6 +447,7 @@ public class BootstrapApplicationListener
 		}
 
 		public void add(PropertySource<?> source) {
+			// Only add map property sources added by boot, see gh-476
 			if (source instanceof OriginTrackedMapPropertySource
 					&& !this.names.contains(source.getName())) {
 				this.sources.addPropertySource(source);
