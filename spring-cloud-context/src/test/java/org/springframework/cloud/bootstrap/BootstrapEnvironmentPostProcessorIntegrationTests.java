@@ -44,14 +44,12 @@ public class BootstrapEnvironmentPostProcessorIntegrationTests {
 	@Test
 	public void conditionalValuesFromMapProperySourceCreatedByEPPExist() {
 		assertThat(this.env.containsProperty("unconditional.property"))
-				.as("Environment does not contain unconditional.property")
-				.isTrue();
+				.as("Environment does not contain unconditional.property").isTrue();
 		assertThat(this.env.getProperty("unconditional.property"))
 				.as("Environment has wrong value for unconditional.property")
 				.isEqualTo("unconditional.value");
 		assertThat(this.env.containsProperty("conditional.property"))
-				.as("Environment does not contain conditional.property")
-				.isTrue();
+				.as("Environment does not contain conditional.property").isTrue();
 		assertThat(this.env.getProperty("conditional.property"))
 				.as("Environment has wrong value for conditional.property")
 				.isEqualTo("conditional.value");
@@ -60,11 +58,15 @@ public class BootstrapEnvironmentPostProcessorIntegrationTests {
 	@EnableAutoConfiguration
 	@SpringBootConfiguration
 	protected static class TestConfig {
+
 	}
 
-	public static class TestConditionalEnvironmentPostProcessor implements EnvironmentPostProcessor {
+	public static class TestConditionalEnvironmentPostProcessor
+			implements EnvironmentPostProcessor {
+
 		@Override
-		public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+		public void postProcessEnvironment(ConfigurableEnvironment environment,
+				SpringApplication application) {
 			HashMap<String, Object> map = new HashMap<>();
 
 			if (!environment.containsProperty("conditional.property")) {
@@ -75,6 +77,7 @@ public class BootstrapEnvironmentPostProcessorIntegrationTests {
 			MapPropertySource propertySource = new MapPropertySource("test-epp-map", map);
 			environment.getPropertySources().addFirst(propertySource);
 		}
+
 	}
 
 }
