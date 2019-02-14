@@ -128,6 +128,9 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		if (this.parent != null) {
 			// Uses Environment from parent as well as beans
 			context.setParent(this.parent);
+			// jdk11 issue
+			// https://github.com/spring-cloud/spring-cloud-netflix/issues/3101
+			context.setClassLoader(this.parent.getClassLoader());
 		}
 		context.setDisplayName(generateDisplayName(name));
 		context.refresh();

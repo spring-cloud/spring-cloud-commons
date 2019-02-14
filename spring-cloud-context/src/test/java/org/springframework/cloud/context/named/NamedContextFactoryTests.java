@@ -19,6 +19,7 @@ package org.springframework.cloud.context.named;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -64,6 +65,13 @@ public class NamedContextFactoryTests {
 		// get the contexts before destroy() to verify these are the old ones
 		AnnotationConfigApplicationContext fooContext = factory.getContext("foo");
 		AnnotationConfigApplicationContext barContext = factory.getContext("bar");
+
+		then(fooContext.getClassLoader())
+				.as("foo context classloader does not match parent")
+				.isSameAs(parent.getClassLoader());
+
+		Assertions.assertThat(fooContext).hasFieldOrPropertyWithValue("customClassLoader",
+				true);
 
 		factory.destroy();
 
