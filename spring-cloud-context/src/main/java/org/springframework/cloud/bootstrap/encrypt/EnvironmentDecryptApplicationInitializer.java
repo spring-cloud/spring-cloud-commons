@@ -163,25 +163,21 @@ public class EnvironmentDecryptApplicationInitializer implements
 			sources.add(0, source);
 		}
 		for (PropertySource<?> source : sources) {
-			collectEncryptedProperties(source, overrides);
+			decrypt(source, overrides);
 		}
-
-		doDecrypt(overrides);
 		return overrides;
 	}
 
 	private Map<String, Object> decrypt(PropertySource<?> source) {
 		Map<String, Object> overrides = new LinkedHashMap<>();
-		collectEncryptedProperties(source, overrides);
-		doDecrypt(overrides);
+		decrypt(source, overrides);
 		return overrides;
 	}
 
 	private static final Pattern COLLECTION_PROPERTY = Pattern
 			.compile("(\\S+)?\\[(\\d+)\\](\\.\\S+)?");
 
-	private void collectEncryptedProperties(PropertySource<?> source,
-			Map<String, Object> overrides) {
+	private void decrypt(PropertySource<?> source, Map<String, Object> overrides) {
 
 		if (source instanceof EnumerablePropertySource) {
 			Map<String, Object> otherCollectionProperties = new LinkedHashMap<>();
@@ -193,6 +189,28 @@ public class EnvironmentDecryptApplicationInitializer implements
 				if (property != null) {
 					String value = property.toString();
 					if (value.startsWith("{cipher}")) {
+						value = value.substring("{cipher}".length());
+						try {
+							value = this.encryptor.decrypt(value);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Decrypted: key=" + key);
+							}
+						}
+						catch (Exception e) {
+							String message = "Cannot decrypt: key=" + key;
+							if (this.failOnError) {
+								throw new IllegalStateException(message, e);
+							}
+							if (logger.isDebugEnabled()) {
+								logger.warn(message, e);
+							}
+							else {
+								logger.warn(message);
+							}
+							// Set value to empty to avoid making a password out of the
+							// cipher text
+							value = "";
+						}
 						overrides.put(key, value);
 						if (COLLECTION_PROPERTY.matcher(key).matches()) {
 							sourceHasDecryptedCollection = true;
@@ -215,42 +233,11 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 			for (PropertySource<?> nested : ((CompositePropertySource) source)
 					.getPropertySources()) {
-				collectEncryptedProperties(nested, overrides);
+				decrypt(nested, overrides);
 			}
 
 		}
 
-	}
-
-	private void doDecrypt(Map<String, Object> overrides) {
-		for (String key : overrides.keySet()) {
-			String value = overrides.get(key).toString();
-			if (value.startsWith("{cipher}")) {
-				value = value.substring("{cipher}".length());
-				try {
-					value = this.encryptor.decrypt(value);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Decrypted: key=" + key);
-					}
-				}
-				catch (Exception e) {
-					String message = "Cannot decrypt: key=" + key;
-					if (this.failOnError) {
-						throw new IllegalStateException(message, e);
-					}
-					if (logger.isDebugEnabled()) {
-						logger.warn(message, e);
-					}
-					else {
-						logger.warn(message);
-					}
-					// Set value to empty to avoid making a password out of the
-					// cipher text
-					value = "";
-				}
-				overrides.put(key, value);
-			}
-		}
 	}
 
 }
