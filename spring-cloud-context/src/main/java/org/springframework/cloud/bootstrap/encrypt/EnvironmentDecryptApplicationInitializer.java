@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2013-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 /**
- * Decrypts properties from the environment and inserts them with high priority so they
+ * Decrypt properties from the environment and insert them with high priority so they
  * override the encrypted values.
  *
  * @author Dave Syer
@@ -74,16 +74,16 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 	private boolean failOnError = true;
 
-	public EnvironmentDecryptApplicationInitializer(TextEncryptor encryptor) {
-		this.encryptor = encryptor;
-	}
-
 	/**
 	 * Strategy to determine how to handle exceptions during decryption.
-	 * @param failOnError The flag value (default true).
+	 * @param failOnError the flag value (default true)
 	 */
 	public void setFailOnError(boolean failOnError) {
 		this.failOnError = failOnError;
+	}
+
+	public EnvironmentDecryptApplicationInitializer(TextEncryptor encryptor) {
+		this.encryptor = encryptor;
 	}
 
 	@Override
@@ -185,7 +185,15 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 	private void decrypt(PropertySource<?> source, Map<String, Object> overrides) {
 
-		if (source instanceof EnumerablePropertySource) {
+		if (source instanceof CompositePropertySource) {
+
+			for (PropertySource<?> nested : ((CompositePropertySource) source)
+					.getPropertySources()) {
+				decrypt(nested, overrides);
+			}
+
+		}
+		else if (source instanceof EnumerablePropertySource) {
 			Map<String, Object> otherCollectionProperties = new LinkedHashMap<>();
 			boolean sourceHasDecryptedCollection = false;
 
@@ -235,15 +243,6 @@ public class EnvironmentDecryptApplicationInitializer implements
 			}
 
 		}
-		else if (source instanceof CompositePropertySource) {
-
-			for (PropertySource<?> nested : ((CompositePropertySource) source)
-					.getPropertySources()) {
-				decrypt(nested, overrides);
-			}
-
-		}
-
 	}
 
 }

@@ -17,7 +17,6 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
@@ -36,9 +35,8 @@ import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME;
 
@@ -75,17 +73,6 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		context.getEnvironment().getPropertySources()
 				.addFirst(new MapPropertySource("test_override",
 						Collections.<String, Object>singletonMap("foo", "{cipher}spam")));
-		this.listener.initialize(context);
-		then(context.getEnvironment().getProperty("foo")).isEqualTo("spam");
-	}
-
-	@Test
-	public void propertySourcesOrderedCorrectlyWithUnencryptedOverrides() {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
-		TestPropertyValues.of("foo: {cipher}bar").applyTo(context);
-		context.getEnvironment().getPropertySources()
-				.addFirst(new MapPropertySource("test_override",
-						Collections.<String, Object>singletonMap("foo", "spam")));
 		this.listener.initialize(context);
 		then(context.getEnvironment().getProperty("foo")).isEqualTo("spam");
 	}
@@ -167,49 +154,23 @@ public class EnvironmentDecryptApplicationInitializerTests {
 
 	@Test
 	public void testDecryptCompositePropertySource() {
+		String expected = "always";
+		TextEncryptor textEncryptor = mock(TextEncryptor.class);
+		when(textEncryptor.decrypt(anyString())).thenReturn(expected);
+
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
 		EnvironmentDecryptApplicationInitializer initializer = new EnvironmentDecryptApplicationInitializer(
-				Encryptors.noOpText());
+				textEncryptor);
 
-		CompositePropertySource cps = new CompositePropertySource("testCPS");
-		Map<String, Object> map1 = new HashMap<>();
-		map1.put("key1", "{cipher}value1b");
-		map1.put("key2", "value2b");
-		cps.addPropertySource(new MapPropertySource("profile1", map1));
-		Map<String, Object> map2 = new HashMap<>();
-		map2.put("key1", "{cipher}value1");
-		map2.put("key2", "value2");
-		map1.put("key3", "value3");
-		cps.addPropertySource(new MapPropertySource("profile2", map2));
-		// add non-enumerable property source that will fail cps.getPropertyNames()
-		cps.addPropertySource(mock(PropertySource.class));
+		MapPropertySource source = new MapPropertySource("nobody",
+				Collections.singletonMap("key", "{cipher}value"));
+		CompositePropertySource cps = mock(CompositePropertySource.class);
+		when(cps.getPropertyNames()).thenReturn(source.getPropertyNames());
+		when(cps.getPropertySources()).thenReturn(Collections.singleton(source));
 		ctx.getEnvironment().getPropertySources().addLast(cps);
 
 		initializer.initialize(ctx);
-		// validate behaviour with encryption
-		then(ctx.getEnvironment().getProperty("key1")).isEqualTo("value1b");
-		// validate behaviour without encryption
-		then(ctx.getEnvironment().getProperty("key2")).isEqualTo("value2b");
-		// validate behaviour without override
-		then(ctx.getEnvironment().getProperty("key3")).isEqualTo("value3");
-	}
-
-	@Test
-	public void testOnlyDecryptIfNotOverridden() {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
-		TextEncryptor encryptor = mock(TextEncryptor.class);
-		when(encryptor.decrypt("bar2")).thenReturn("bar2");
-		EnvironmentDecryptApplicationInitializer initializer = new EnvironmentDecryptApplicationInitializer(
-				encryptor);
-		TestPropertyValues.of("foo: {cipher}bar", "foo2: {cipher}bar2").applyTo(context);
-		context.getEnvironment().getPropertySources()
-				.addFirst(new MapPropertySource("test_override",
-						Collections.<String, Object>singletonMap("foo", "spam")));
-		initializer.initialize(context);
-		then(context.getEnvironment().getProperty("foo")).isEqualTo("spam");
-		then(context.getEnvironment().getProperty("foo2")).isEqualTo("bar2");
-		verify(encryptor).decrypt("bar2");
-		verifyNoMoreInteractions(encryptor);
+		then(ctx.getEnvironment().getProperty("key")).isEqualTo(expected);
 	}
 
 }
