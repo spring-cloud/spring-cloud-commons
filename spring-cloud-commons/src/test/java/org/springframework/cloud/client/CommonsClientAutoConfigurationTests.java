@@ -32,6 +32,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.BDDAssertions.then;
 
@@ -96,7 +97,7 @@ public class CommonsClientAutoConfigurationTests {
 		}
 		try (ConfigurableApplicationContext context = init(
 				"spring.cloud.discovery.enabled=true")) {
-			assertThat(context.getBean(TestBean.class), is(notNullValue()));
+			assertThat(context.getBean(TestBean.class)).isNotNull();
 		}
 	}
 
@@ -118,19 +119,20 @@ public class CommonsClientAutoConfigurationTests {
 
 	@Configuration
 	@EnableAutoConfiguration
-	@Import({NoopDiscoveryClientAutoConfiguration.class, DiscoveryEnabledConfig.class})
+	@Import({ NoopDiscoveryClientAutoConfiguration.class, DiscoveryEnabledConfig.class })
 	protected static class Config {
 
 	}
 
-
 	@Configuration
 	@ConditionalOnDiscoveryEnabled
 	protected static class DiscoveryEnabledConfig {
+
 		@Bean
 		TestBean testBean() {
 			return new TestBean();
 		}
+
 	}
 
 	private static class TestBean {
