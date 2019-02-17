@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 /**
  * Provides a more succinct conditional <code>spring.cloud.discovery.enabled</code>.
  *
+ * @since 2.0
  * @author Olga Maciaszek-Sharma
  */
 @Target(ElementType.TYPE)
