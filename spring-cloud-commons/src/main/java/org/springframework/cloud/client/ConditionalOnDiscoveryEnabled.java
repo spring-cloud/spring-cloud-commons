@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 /**
- * Provides a more succint conditional <code>spring.cloud.discovery.enbaled</code>.
+ * Provides a more succint conditional <code>spring.cloud.discovery.enabled</code>.
  *
  * @author Olga Maciaszek-Sharma
  */
