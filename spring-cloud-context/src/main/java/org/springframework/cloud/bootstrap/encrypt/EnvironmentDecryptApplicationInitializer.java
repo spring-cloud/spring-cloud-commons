@@ -167,13 +167,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 	public Map<String, Object> decrypt(PropertySources propertySources) {
 		Map<String, Object> overrides = new LinkedHashMap<>();
-		List<PropertySource<?>> sources = new ArrayList<>();
-		for (PropertySource<?> source : propertySources) {
-			sources.add(0, source);
-		}
-		for (PropertySource<?> source : sources) {
-			decrypt(source, overrides);
-		}
+		decryptMultiple(propertySources, overrides);
 		return overrides;
 	}
 
@@ -183,14 +177,22 @@ public class EnvironmentDecryptApplicationInitializer implements
 		return overrides;
 	}
 
+	private void decryptMultiple(Iterable<PropertySource<?>> propertySources,
+								 Map<String, Object> overrides) {
+		List<PropertySource<?>> sources = new ArrayList<>();
+		for (PropertySource<?> source : propertySources) {
+			sources.add(0, source);
+		}
+		for (PropertySource<?> source : sources) {
+			decrypt(source, overrides);
+		}
+	}
+
 	private void decrypt(PropertySource<?> source, Map<String, Object> overrides) {
 
 		if (source instanceof CompositePropertySource) {
-
-			for (PropertySource<?> nested : ((CompositePropertySource) source)
-					.getPropertySources()) {
-				decrypt(nested, overrides);
-			}
+			decryptMultiple(((CompositePropertySource) source).getPropertySources(),
+					overrides);
 
 		}
 		else if (source instanceof EnumerablePropertySource) {

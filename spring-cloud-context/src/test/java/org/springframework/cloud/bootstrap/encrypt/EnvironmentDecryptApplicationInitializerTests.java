@@ -17,6 +17,7 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
@@ -35,6 +36,7 @@ import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -154,23 +156,31 @@ public class EnvironmentDecryptApplicationInitializerTests {
 
 	@Test
 	public void testDecryptCompositePropertySource() {
-		String expected = "always";
-		TextEncryptor textEncryptor = mock(TextEncryptor.class);
-		when(textEncryptor.decrypt(anyString())).thenReturn(expected);
-
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
 		EnvironmentDecryptApplicationInitializer initializer = new EnvironmentDecryptApplicationInitializer(
-				textEncryptor);
+				Encryptors.noOpText());
 
-		MapPropertySource source = new MapPropertySource("nobody",
-				Collections.singletonMap("key", "{cipher}value"));
-		CompositePropertySource cps = mock(CompositePropertySource.class);
-		when(cps.getPropertyNames()).thenReturn(source.getPropertyNames());
-		when(cps.getPropertySources()).thenReturn(Collections.singleton(source));
+		CompositePropertySource cps = new CompositePropertySource("testCPS");
+		Map<String, Object> map1 = new HashMap<>();
+		map1.put("key1", "{cipher}value1b");
+		map1.put("key2", "value2b");
+		cps.addPropertySource(new MapPropertySource("profile1", map1));
+		Map<String, Object> map2 = new HashMap<>();
+		map2.put("key1", "{cipher}value1");
+		map2.put("key2", "value2");
+		map1.put("key3", "value3");
+		cps.addPropertySource(new MapPropertySource("profile2", map2));
+		// add non-enumerable property source that will fail cps.getPropertyNames()
+		cps.addPropertySource(mock(PropertySource.class));
 		ctx.getEnvironment().getPropertySources().addLast(cps);
 
 		initializer.initialize(ctx);
-		then(ctx.getEnvironment().getProperty("key")).isEqualTo(expected);
+		// validate behaviour with encryption
+		assertEquals("value1b", ctx.getEnvironment().getProperty("key1"));
+		// validate behaviour without encryption
+		assertEquals("value2b", ctx.getEnvironment().getProperty("key2"));
+		// validate behaviour without override
+		assertEquals("value3", ctx.getEnvironment().getProperty("key3"));
 	}
 
 }
