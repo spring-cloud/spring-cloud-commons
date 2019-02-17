@@ -46,6 +46,7 @@ import org.springframework.context.annotation.Configuration;
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Cloud Commons Client.
  *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 @Configuration
 @AutoConfigureOrder(0)
@@ -55,7 +56,7 @@ public class CommonsClientAutoConfiguration {
 	@EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
 	@ConditionalOnClass(HealthIndicator.class)
 	@ConditionalOnBean(DiscoveryClient.class)
-	@ConditionalOnProperty(value = "spring.cloud.discovery.enabled", matchIfMissing = true)
+	@ConditionalOnDiscoveryEnabled
 	protected static class DiscoveryLoadBalancerConfiguration {
 
 		@Bean
