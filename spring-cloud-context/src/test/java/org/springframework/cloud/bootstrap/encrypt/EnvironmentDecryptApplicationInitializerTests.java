@@ -36,11 +36,10 @@ import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME;
 
 /**
@@ -88,7 +87,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 				.addFirst(new MapPropertySource("test_override",
 						Collections.<String, Object>singletonMap("foo", "spam")));
 		this.listener.initialize(context);
-		assertEquals("spam", context.getEnvironment().getProperty("foo"));
+		then(context.getEnvironment().getProperty("foo")).isEqualTo("spam");
 	}
 
 	@Test
@@ -98,8 +97,8 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		this.listener.initialize(context);
 		TestPropertyValues.of("foo2: {cipher}bar2").applyTo(context);
 		this.listener.initialize(context);
-		assertEquals("bar", context.getEnvironment().getProperty("foo"));
-		assertEquals("bar2", context.getEnvironment().getProperty("foo2"));
+		then(context.getEnvironment().getProperty("foo")).isEqualTo("bar");
+		then(context.getEnvironment().getProperty("foo2")).isEqualTo("bar2");
 	}
 
 	@Test(expected = IllegalStateException.class)
@@ -199,11 +198,11 @@ public class EnvironmentDecryptApplicationInitializerTests {
 
 		initializer.initialize(ctx);
 		// validate behaviour with encryption
-		assertEquals("value1b", ctx.getEnvironment().getProperty("key1"));
+		then(ctx.getEnvironment().getProperty("key1")).isEqualTo("value1b");
 		// validate behaviour without encryption
-		assertEquals("value2b", ctx.getEnvironment().getProperty("key2"));
+		then(ctx.getEnvironment().getProperty("key2")).isEqualTo("value2b");
 		// validate behaviour without override
-		assertEquals("value3", ctx.getEnvironment().getProperty("key3"));
+		then(ctx.getEnvironment().getProperty("key3")).isEqualTo("value3");
 	}
 
 	@Test
@@ -218,8 +217,8 @@ public class EnvironmentDecryptApplicationInitializerTests {
 				.addFirst(new MapPropertySource("test_override",
 						Collections.<String, Object>singletonMap("foo", "spam")));
 		initializer.initialize(context);
-		assertEquals("spam", context.getEnvironment().getProperty("foo"));
-		assertEquals("bar2", context.getEnvironment().getProperty("foo2"));
+		then(context.getEnvironment().getProperty("foo")).isEqualTo("spam");
+		then(context.getEnvironment().getProperty("foo2")).isEqualTo("bar2");
 		verify(encryptor).decrypt("bar2");
 		verifyNoMoreInteractions(encryptor);
 	}
