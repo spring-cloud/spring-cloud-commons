@@ -37,9 +37,10 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME;
 
 /**
@@ -203,6 +204,24 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		assertEquals("value2b", ctx.getEnvironment().getProperty("key2"));
 		// validate behaviour without override
 		assertEquals("value3", ctx.getEnvironment().getProperty("key3"));
+	}
+
+	@Test
+	public void testOnlyDecryptIfNotOverridden() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
+		TextEncryptor encryptor = mock(TextEncryptor.class);
+		when(encryptor.decrypt("bar2")).thenReturn("bar2");
+		EnvironmentDecryptApplicationInitializer initializer = new EnvironmentDecryptApplicationInitializer(
+				encryptor);
+		TestPropertyValues.of("foo: {cipher}bar", "foo2: {cipher}bar2").applyTo(context);
+		context.getEnvironment().getPropertySources()
+				.addFirst(new MapPropertySource("test_override",
+						Collections.<String, Object>singletonMap("foo", "spam")));
+		initializer.initialize(context);
+		assertEquals("spam", context.getEnvironment().getProperty("foo"));
+		assertEquals("bar2", context.getEnvironment().getProperty("foo2"));
+		verify(encryptor).decrypt("bar2");
+		verifyNoMoreInteractions(encryptor);
 	}
 
 }

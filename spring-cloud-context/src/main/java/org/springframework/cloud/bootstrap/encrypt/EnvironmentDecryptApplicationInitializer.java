@@ -62,6 +62,8 @@ public class EnvironmentDecryptApplicationInitializer implements
 	 */
 	public static final String DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME = "decryptedBootstrap";
 
+	private static final String ENCRYPTED_PROPERTY_PREFIX = "{cipher}";
+
 	private static final Pattern COLLECTION_PROPERTY = Pattern
 			.compile("(\\S+)?\\[(\\d+)\\](\\.\\S+)?");
 
@@ -186,32 +188,35 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 	public Map<String, Object> decrypt(PropertySources propertySources) {
 		Map<String, Object> overrides = new LinkedHashMap<>();
-		decryptMultiple(propertySources, overrides);
+		collectEncryptedPropertiesFromMultiple(propertySources, overrides);
+		doDecrypt(overrides);
 		return overrides;
 	}
 
 	private Map<String, Object> decrypt(PropertySource<?> source) {
 		Map<String, Object> overrides = new LinkedHashMap<>();
-		decrypt(source, overrides);
+		collectEncryptedProperties(source, overrides);
+		doDecrypt(overrides);
 		return overrides;
 	}
 
-	private void decryptMultiple(Iterable<PropertySource<?>> propertySources,
-								 Map<String, Object> overrides) {
+	private void collectEncryptedPropertiesFromMultiple(
+			Iterable<PropertySource<?>> propertySources, Map<String, Object> overrides) {
 		List<PropertySource<?>> sources = new ArrayList<>();
 		for (PropertySource<?> source : propertySources) {
 			sources.add(0, source);
 		}
 		for (PropertySource<?> source : sources) {
-			decrypt(source, overrides);
+			collectEncryptedProperties(source, overrides);
 		}
 	}
 
-	private void decrypt(PropertySource<?> source, Map<String, Object> overrides) {
+	private void collectEncryptedProperties(PropertySource<?> source,
+			Map<String, Object> overrides) {
 
 		if (source instanceof CompositePropertySource) {
-			decryptMultiple(((CompositePropertySource) source).getPropertySources(),
-					overrides);
+			collectEncryptedPropertiesFromMultiple(
+					((CompositePropertySource) source).getPropertySources(), overrides);
 
 		}
 		else if (source instanceof EnumerablePropertySource) {
@@ -223,36 +228,14 @@ public class EnvironmentDecryptApplicationInitializer implements
 				Object property = source.getProperty(key);
 				if (property != null) {
 					String value = property.toString();
-					if (value.startsWith("{cipher}")) {
-						value = value.substring("{cipher}".length());
-						try {
-							value = this.encryptor.decrypt(value);
-							if (logger.isDebugEnabled()) {
-								logger.debug("Decrypted: key=" + key);
-							}
-						}
-						catch (Exception e) {
-							String message = "Cannot decrypt: key=" + key;
-							if (this.failOnError) {
-								throw new IllegalStateException(message, e);
-							}
-							if (logger.isDebugEnabled()) {
-								logger.warn(message, e);
-							}
-							else {
-								logger.warn(message);
-							}
-							// Set value to empty to avoid making a password out of the
-							// cipher text
-							value = "";
-						}
+					if (value.startsWith(ENCRYPTED_PROPERTY_PREFIX)) {
 						overrides.put(key, value);
 						if (COLLECTION_PROPERTY.matcher(key).matches()) {
 							sourceHasDecryptedCollection = true;
 						}
 					}
 					else if (COLLECTION_PROPERTY.matcher(key).matches()) {
-						// put non-ecrypted properties so merging of index properties
+						// put non-encrypted properties so merging of index properties
 						// happens correctly
 						otherCollectionProperties.put(key, value);
 					}
@@ -266,6 +249,37 @@ public class EnvironmentDecryptApplicationInitializer implements
 				overrides.putAll(otherCollectionProperties);
 			}
 
+		}
+	}
+
+	private void doDecrypt(Map<String, Object> overrides) {
+		for (String key : overrides.keySet()) {
+			String value = overrides.get(key).toString();
+			if (value.startsWith(ENCRYPTED_PROPERTY_PREFIX)) {
+				value = value.substring(ENCRYPTED_PROPERTY_PREFIX.length());
+				try {
+					value = this.encryptor.decrypt(value);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Decrypted: key=" + key);
+					}
+				}
+				catch (Exception e) {
+					String message = "Cannot decrypt: key=" + key;
+					if (this.failOnError) {
+						throw new IllegalStateException(message, e);
+					}
+					if (logger.isDebugEnabled()) {
+						logger.warn(message, e);
+					}
+					else {
+						logger.warn(message);
+					}
+					// Set value to empty to avoid making a password out of the
+					// cipher text
+					value = "";
+				}
+				overrides.put(key, value);
+			}
 		}
 	}
 
