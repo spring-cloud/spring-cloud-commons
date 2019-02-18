@@ -79,6 +79,28 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		then(context.getEnvironment().getProperty("foo")).isEqualTo("spam");
 	}
 
+	@Test
+	public void propertySourcesOrderedCorrectlyWithUnencryptedOverrides() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of("foo: {cipher}bar").applyTo(context);
+		context.getEnvironment().getPropertySources()
+				.addFirst(new MapPropertySource("test_override",
+						Collections.<String, Object>singletonMap("foo", "spam")));
+		this.listener.initialize(context);
+		assertEquals("spam", context.getEnvironment().getProperty("foo"));
+	}
+
+	@Test
+	public void decryptCipherKeyTwice() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of("foo: {cipher}bar").applyTo(context);
+		this.listener.initialize(context);
+		TestPropertyValues.of("foo2: {cipher}bar2").applyTo(context);
+		this.listener.initialize(context);
+		assertEquals("bar", context.getEnvironment().getProperty("foo"));
+		assertEquals("bar2", context.getEnvironment().getProperty("foo2"));
+	}
+
 	@Test(expected = IllegalStateException.class)
 	public void errorOnDecrypt() {
 		this.listener = new EnvironmentDecryptApplicationInitializer(

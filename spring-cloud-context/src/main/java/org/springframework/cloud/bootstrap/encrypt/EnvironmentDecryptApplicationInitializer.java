@@ -99,6 +99,8 @@ public class EnvironmentDecryptApplicationInitializer implements
 	public void initialize(ConfigurableApplicationContext applicationContext) {
 
 		ConfigurableEnvironment environment = applicationContext.getEnvironment();
+		removePrevious(applicationContext);
+
 		MutablePropertySources propertySources = environment.getPropertySources();
 
 		Set<String> found = new LinkedHashSet<>();
@@ -128,6 +130,23 @@ public class EnvironmentDecryptApplicationInitializer implements
 				parent.publishEvent(new EnvironmentChangeEvent(parent, found));
 			}
 
+		}
+	}
+
+	private void removePrevious(ApplicationContext applicationContext) {
+		// When we initialize twice, e.g. because the environment is updated with
+		// properties from a ConfigServer, then we must make sure that the previous
+		// overrides are removed, because they may no longer be valid.
+		ApplicationContext parent = applicationContext;
+		while (parent != null) {
+			if (parent.getEnvironment() instanceof ConfigurableEnvironment) {
+				ConfigurableEnvironment mutable = (ConfigurableEnvironment) parent
+						.getEnvironment();
+				mutable.getPropertySources().remove(DECRYPTED_PROPERTY_SOURCE_NAME);
+				mutable.getPropertySources()
+						.remove(DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME);
+			}
+			parent = parent.getParent();
 		}
 	}
 
@@ -236,6 +255,9 @@ public class EnvironmentDecryptApplicationInitializer implements
 						// put non-ecrypted properties so merging of index properties
 						// happens correctly
 						otherCollectionProperties.put(key, value);
+					}
+					else {
+						overrides.remove(key);
 					}
 				}
 			}
