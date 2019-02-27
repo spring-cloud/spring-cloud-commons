@@ -107,6 +107,11 @@ public class KeyProperties {
 		 */
 		private String secret;
 
+		/**
+		 * The KeyStore type.  Defaults to jks.
+		 */
+		private String type = "jks";
+
 		public String getAlias() {
 			return this.alias;
 		}
@@ -127,6 +132,10 @@ public class KeyProperties {
 			return this.password;
 		}
 
+		public String getType() {
+			return type;
+		}
+
 		public void setPassword(String password) {
 			this.password = password;
 		}
@@ -137,6 +146,10 @@ public class KeyProperties {
 
 		public void setSecret(String secret) {
 			this.secret = secret;
+		}
+
+		public void setType(String type) {
+			this.type = type;
 		}
 
 	}
