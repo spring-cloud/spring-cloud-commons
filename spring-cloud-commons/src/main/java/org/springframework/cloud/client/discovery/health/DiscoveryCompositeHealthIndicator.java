@@ -17,7 +17,9 @@
 package org.springframework.cloud.client.discovery.health;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.CompositeHealthIndicator;
@@ -39,16 +41,25 @@ public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator 
 	@Autowired
 	public DiscoveryCompositeHealthIndicator(HealthAggregator healthAggregator,
 			List<DiscoveryHealthIndicator> indicators) {
-		super(healthAggregator);
-		for (DiscoveryHealthIndicator indicator : indicators) {
-			Holder holder = new Holder(indicator);
-			addHealthIndicator(indicator.getName(), holder);
-			this.healthIndicators.add(holder);
-		}
+		super(healthAggregator, createMap(indicators));
+		getRegistry().getAll().values().stream()
+				.filter(healthIndicator -> healthIndicator instanceof Holder)
+				.forEach(healthIndicator -> this.healthIndicators
+						.add((Holder) healthIndicator));
 	}
 
 	public ArrayList<Holder> getHealthIndicators() {
 		return this.healthIndicators;
+	}
+
+	public static Map<String, HealthIndicator> createMap(
+			List<DiscoveryHealthIndicator> indicators) {
+		Map<String, HealthIndicator> map = new HashMap<>();
+		for (DiscoveryHealthIndicator indicator : indicators) {
+			Holder holder = new Holder(indicator);
+			map.put(indicator.getName(), holder);
+		}
+		return map;
 	}
 
 	/**

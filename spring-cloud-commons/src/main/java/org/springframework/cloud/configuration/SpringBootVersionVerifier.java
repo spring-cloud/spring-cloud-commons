@@ -39,6 +39,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			this.put("1.5", is1_5());
 			this.put("2.0", is2_0());
 			this.put("2.1", is2_1());
+			this.put("2.2", is2_2());
 		}
 	};
 
@@ -127,6 +128,30 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 				try {
 					// since 2.1
 					Class.forName("org.springframework.boot.task.TaskExecutorCustomizer");
+					return true;
+				}
+				catch (ClassNotFoundException e) {
+					return false;
+				}
+
+			}
+		};
+	}
+
+	CompatibilityPredicate is2_2() {
+		return new CompatibilityPredicate() {
+
+			@Override
+			public String toString() {
+				return "Predicate for Boot 2.2";
+			}
+
+			@Override
+			public boolean isCompatible() {
+				try {
+					// since 2.1
+					Class.forName(
+							"org.springframework.boot.autoconfigure.flyway.FlywayMigrationScriptMissingException");
 					return true;
 				}
 				catch (ClassNotFoundException e) {

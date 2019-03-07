@@ -28,7 +28,7 @@ import static org.springframework.boot.WebApplicationType.NONE;
 
 /**
  * Integration tests for Bootstrap Listener's functionality of adding a bootstrap context
- * as the root Application Context
+ * as the root Application Context.
  *
  * @author Biju Kunjummen
  */
