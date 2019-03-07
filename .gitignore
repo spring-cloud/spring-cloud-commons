@@ -19,3 +19,4 @@ _site/
 .factorypath
 /spring-cloud-release-tools*.jar
 antrun
+.vscode/
