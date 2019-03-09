@@ -27,8 +27,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author Dave Syer
  */
 @RunWith(Suite.class)
-@SuiteClasses({
-		org.springframework.cloud.health.RefreshScopeHealthIndicatorTests.class,
+@SuiteClasses({ org.springframework.cloud.health.RefreshScopeHealthIndicatorTests.class,
 		org.springframework.cloud.logging.LoggingRebinderTests.class,
 		org.springframework.cloud.bootstrap.BootstrapSourcesOrderingTests.class,
 		org.springframework.cloud.bootstrap.BootstrapDisabledAutoConfigurationIntegrationTests.class,
@@ -73,8 +72,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		org.springframework.cloud.autoconfigure.RefreshAutoConfigurationTests.class,
 		org.springframework.cloud.autoconfigure.LifecycleMvcAutoConfigurationTests.class,
 		org.springframework.cloud.autoconfigure.RefreshAutoConfigurationClassPathTests.class,
-		org.springframework.cloud.autoconfigure.RefreshAutoConfigurationMoreClassPathTests.class,
-})
+		org.springframework.cloud.autoconfigure.RefreshAutoConfigurationMoreClassPathTests.class })
 @Ignore
 public class AdhocTestSuite {
 
