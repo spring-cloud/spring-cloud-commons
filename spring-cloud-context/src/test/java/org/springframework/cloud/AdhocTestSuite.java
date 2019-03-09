@@ -21,91 +21,60 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import org.springframework.cloud.autoconfigure.LifecycleMvcAutoConfigurationTests;
-import org.springframework.cloud.autoconfigure.RefreshAutoConfigurationClassPathTests;
-import org.springframework.cloud.autoconfigure.RefreshAutoConfigurationMoreClassPathTests;
-import org.springframework.cloud.autoconfigure.RefreshAutoConfigurationTests;
-import org.springframework.cloud.bootstrap.BootstrapDisabledAutoConfigurationIntegrationTests;
-import org.springframework.cloud.bootstrap.BootstrapOrderingAutoConfigurationIntegrationTests;
-import org.springframework.cloud.bootstrap.BootstrapOrderingCustomPropertySourceIntegrationTests;
-import org.springframework.cloud.bootstrap.BootstrapOrderingSpringApplicationJsonIntegrationTests;
-import org.springframework.cloud.bootstrap.BootstrapSourcesOrderingTests;
-import org.springframework.cloud.bootstrap.MessageSourceConfigurationTests;
-import org.springframework.cloud.bootstrap.config.BootstrapConfigurationTests;
-import org.springframework.cloud.bootstrap.config.BootstrapListenerHierarchyIntegrationTests;
-import org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfigurationTests;
-import org.springframework.cloud.bootstrap.encrypt.EncryptionIntegrationTests;
-import org.springframework.cloud.bootstrap.encrypt.EncryptorFactoryTests;
-import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializerTests;
-import org.springframework.cloud.bootstrap.encrypt.RsaDisabledTests;
-import org.springframework.cloud.context.environment.EnvironmentManagerIntegrationTests;
-import org.springframework.cloud.context.environment.EnvironmentManagerTest;
-import org.springframework.cloud.context.named.NamedContextFactoryTests;
-import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderIntegrationTests;
-import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderLifecycleIntegrationTests;
-import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderListIntegrationTests;
-import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderProxyIntegrationTests;
-import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderRefreshScopeIntegrationTests;
-import org.springframework.cloud.context.refresh.ContextRefresherIntegrationTests;
-import org.springframework.cloud.context.refresh.ContextRefresherTests;
-import org.springframework.cloud.context.restart.RestartIntegrationTests;
-import org.springframework.cloud.context.scope.refresh.ImportRefreshScopeIntegrationTests;
-import org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests;
-import org.springframework.cloud.context.scope.refresh.RefreshEndpointIntegrationTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeConcurrencyTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeConfigurationScaleTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeConfigurationTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeIntegrationTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeLazyIntegrationTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeListBindingIntegrationTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeNullBeanIntegrationTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopePureScaleTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeScaleTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeSerializationTests;
-import org.springframework.cloud.context.scope.refresh.RefreshScopeWebIntegrationTests;
-import org.springframework.cloud.endpoint.RefreshEndpointTests;
-import org.springframework.cloud.health.RefreshScopeHealthIndicatorTests;
-import org.springframework.cloud.logging.LoggingRebinderTests;
-
 /**
  * A test suite for probing weird ordering problems in the tests.
  *
  * @author Dave Syer
  */
 @RunWith(Suite.class)
-@SuiteClasses({ BootstrapSourcesOrderingTests.class,
-		BootstrapDisabledAutoConfigurationIntegrationTests.class,
-		EncryptionBootstrapConfigurationTests.class, RsaDisabledTests.class,
-		EncryptorFactoryTests.class, EnvironmentDecryptApplicationInitializerTests.class,
-		EncryptionIntegrationTests.class,
-		BootstrapOrderingAutoConfigurationIntegrationTests.class,
-		MessageSourceConfigurationTests.class,
-		BootstrapOrderingSpringApplicationJsonIntegrationTests.class,
-		BootstrapConfigurationTests.class,
-		BootstrapListenerHierarchyIntegrationTests.class,
-		BootstrapOrderingCustomPropertySourceIntegrationTests.class,
-		RefreshEndpointTests.class, RefreshAutoConfigurationClassPathTests.class,
-		RefreshAutoConfigurationMoreClassPathTests.class,
-		LifecycleMvcAutoConfigurationTests.class, RefreshAutoConfigurationTests.class,
-		RestartIntegrationTests.class, ContextRefresherIntegrationTests.class,
-		ContextRefresherTests.class,
-		ConfigurationPropertiesRebinderListIntegrationTests.class,
-		ConfigurationPropertiesRebinderLifecycleIntegrationTests.class,
-		ConfigurationPropertiesRebinderIntegrationTests.class,
-		ConfigurationPropertiesRebinderRefreshScopeIntegrationTests.class,
-		ConfigurationPropertiesRebinderProxyIntegrationTests.class,
-		RefreshScopeIntegrationTests.class, RefreshScopeConfigurationTests.class,
-		RefreshScopeLazyIntegrationTests.class, ImportRefreshScopeIntegrationTests.class,
-		RefreshScopeConcurrencyTests.class, RefreshEndpointIntegrationTests.class,
-		RefreshScopeConfigurationScaleTests.class,
-		RefreshScopeNullBeanIntegrationTests.class,
-		MoreRefreshScopeIntegrationTests.class,
-		RefreshScopeListBindingIntegrationTests.class,
-		RefreshScopeWebIntegrationTests.class, RefreshScopePureScaleTests.class,
-		RefreshScopeScaleTests.class, RefreshScopeSerializationTests.class,
-		NamedContextFactoryTests.class, EnvironmentManagerIntegrationTests.class,
-		EnvironmentManagerTest.class, LoggingRebinderTests.class,
-		RefreshScopeHealthIndicatorTests.class })
+@SuiteClasses({
+		org.springframework.cloud.health.RefreshScopeHealthIndicatorTests.class,
+		org.springframework.cloud.logging.LoggingRebinderTests.class,
+		org.springframework.cloud.bootstrap.BootstrapSourcesOrderingTests.class,
+		org.springframework.cloud.bootstrap.BootstrapDisabledAutoConfigurationIntegrationTests.class,
+		org.springframework.cloud.bootstrap.BootstrapEnvironmentPostProcessorIntegrationTests.class,
+		org.springframework.cloud.bootstrap.encrypt.RsaDisabledTests.class,
+		org.springframework.cloud.bootstrap.encrypt.EncryptorFactoryTests.class,
+		org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializerTests.class,
+		org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfigurationTests.class,
+		org.springframework.cloud.bootstrap.encrypt.EncryptionIntegrationTests.class,
+		org.springframework.cloud.bootstrap.BootstrapOrderingSpringApplicationJsonIntegrationTests.class,
+		org.springframework.cloud.bootstrap.config.BootstrapConfigurationTests.class,
+		org.springframework.cloud.bootstrap.config.BootstrapListenerHierarchyIntegrationTests.class,
+		org.springframework.cloud.bootstrap.BootstrapOrderingAutoConfigurationIntegrationTests.class,
+		org.springframework.cloud.bootstrap.MessageSourceConfigurationTests.class,
+		org.springframework.cloud.bootstrap.BootstrapOrderingCustomPropertySourceIntegrationTests.class,
+		org.springframework.cloud.endpoint.RefreshEndpointTests.class,
+		org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderIntegrationTests.class,
+		org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderProxyIntegrationTests.class,
+		org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderRefreshScopeIntegrationTests.class,
+		org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderListIntegrationTests.class,
+		org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderLifecycleIntegrationTests.class,
+		org.springframework.cloud.context.named.NamedContextFactoryTests.class,
+		org.springframework.cloud.context.refresh.ContextRefresherIntegrationTests.class,
+		org.springframework.cloud.context.refresh.ContextRefresherTests.class,
+		org.springframework.cloud.context.environment.EnvironmentManagerTest.class,
+		org.springframework.cloud.context.environment.EnvironmentManagerIntegrationTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopeConfigurationTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopeNullBeanIntegrationTests.class,
+		org.springframework.cloud.context.scope.refresh.MoreRefreshScopeIntegrationTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopeIntegrationTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopeConcurrencyTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopeScaleTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopeLazyIntegrationTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopePureScaleTests.class,
+		org.springframework.cloud.context.scope.refresh.ImportRefreshScopeIntegrationTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopeSerializationTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopeListBindingIntegrationTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopeWebIntegrationTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshScopeConfigurationScaleTests.class,
+		org.springframework.cloud.context.scope.refresh.RefreshEndpointIntegrationTests.class,
+		org.springframework.cloud.context.restart.RestartIntegrationTests.class,
+		org.springframework.cloud.autoconfigure.RefreshAutoConfigurationTests.class,
+		org.springframework.cloud.autoconfigure.LifecycleMvcAutoConfigurationTests.class,
+		org.springframework.cloud.autoconfigure.RefreshAutoConfigurationClassPathTests.class,
+		org.springframework.cloud.autoconfigure.RefreshAutoConfigurationMoreClassPathTests.class,
+})
 @Ignore
 public class AdhocTestSuite {
 
