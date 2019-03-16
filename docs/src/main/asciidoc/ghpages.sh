@@ -47,7 +47,7 @@ WHITELISTED_BRANCHES_VALUE=$(mvn -q \
 echo "Extracted '${WHITELIST_PROPERTY}' from Maven build [${WHITELISTED_BRANCHES_VALUE}]"
 
 # Code getting the name of the current branch. For master we want to publish as we did until now
-# http://stackoverflow.com/questions/1593051/how-to-programmatically-determine-the-current-checked-out-git-branch
+# https://stackoverflow.com/questions/1593051/how-to-programmatically-determine-the-current-checked-out-git-branch
 CURRENT_BRANCH=$(git symbolic-ref -q HEAD)
 CURRENT_BRANCH=${CURRENT_BRANCH##refs/heads/}
 CURRENT_BRANCH=${CURRENT_BRANCH:-HEAD}
@@ -80,7 +80,7 @@ if [[ "${CURRENT_BRANCH}" == "master" ]] ; then
     COMMIT_CHANGES="yes"
 else
     echo -e "Current branch is [${CURRENT_BRANCH}]"
-    # http://stackoverflow.com/questions/29300806/a-bash-script-to-check-if-a-string-is-present-in-a-comma-separated-list-of-strin
+    # https://stackoverflow.com/questions/29300806/a-bash-script-to-check-if-a-string-is-present-in-a-comma-separated-list-of-strin
     if [[ ",${WHITELISTED_BRANCHES_VALUE}," = *",${CURRENT_BRANCH},"* ]] ; then
         echo -e "Branch [${CURRENT_BRANCH}] is whitelisted! Will copy the current docs to the [${CURRENT_BRANCH}] folder"
         for f in docs/target/generated-docs/*; do
