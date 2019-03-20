@@ -38,7 +38,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = { "spring.application.name=service0",
-		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s1-1:8080",
+		"spring.cloud.discovery.client.simple.instances.service1[0].uri=https://s1-1:8080",
 		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s1-2:8443",
 		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s2-1:8080",
 		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s2-2:443" })
@@ -58,7 +58,7 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 				.isEqualTo("s1-1");
 		then(this.props.getInstances().get("service1").get(0).getPort()).isEqualTo(8080);
 		then(this.props.getInstances().get("service1").get(0).getUri())
-				.isEqualTo(URI.create("http://s1-1:8080"));
+				.isEqualTo(URI.create("https://s1-1:8080"));
 		then(this.props.getInstances().get("service1").get(0).isSecure())
 				.isEqualTo(false);
 
@@ -79,7 +79,7 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 		ServiceInstance s1 = this.discoveryClient.getInstances("service1").get(0);
 		then(s1.getHost()).isEqualTo("s1-1");
 		then(s1.getPort()).isEqualTo(8080);
-		then(s1.getUri()).isEqualTo(URI.create("http://s1-1:8080"));
+		then(s1.getUri()).isEqualTo(URI.create("https://s1-1:8080"));
 		then(s1.isSecure()).isEqualTo(false);
 	}
 

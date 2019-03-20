@@ -59,7 +59,7 @@ public interface LoadBalancerClient extends ServiceInstanceChooser {
 	/**
 	 * Creates a proper URI with a real host and port for systems to utilize. Some systems
 	 * use a URI with the logical service name as the host, such as
-	 * http://myservice/path/to/service. This will replace the service name with the
+	 * https://myservice/path/to/service. This will replace the service name with the
 	 * host:port from the ServiceInstance.
 	 * @param instance service instance to reconstruct the URI
 	 * @param original A URI with the host as a logical service name.

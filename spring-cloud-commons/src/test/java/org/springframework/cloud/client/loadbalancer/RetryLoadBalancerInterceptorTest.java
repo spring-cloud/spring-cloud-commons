@@ -86,7 +86,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test(expected = IOException.class)
 	public void interceptDisableRetry() throws Throwable {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://foo"));
+		when(request.getURI()).thenReturn(new URI("https://foo"));
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		when(this.client.choose(eq("foo"))).thenReturn(serviceInstance);
 		when(this.client.execute(eq("foo"), eq(serviceInstance),
@@ -108,7 +108,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test(expected = IllegalStateException.class)
 	public void interceptInvalidHost() throws Throwable {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://foo_underscore"));
+		when(request.getURI()).thenReturn(new URI("https://foo_underscore"));
 		this.lbProperties.setEnabled(true);
 		RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(
 				this.client, this.lbProperties, this.lbRequestFactory,
@@ -121,7 +121,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test
 	public void interceptNeverRetry() throws Throwable {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://foo"));
+		when(request.getURI()).thenReturn(new URI("https://foo"));
 		ClientHttpResponse clientHttpResponse = new MockClientHttpResponse(new byte[] {},
 				HttpStatus.OK);
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
@@ -143,7 +143,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test
 	public void interceptSuccess() throws Throwable {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://foo"));
+		when(request.getURI()).thenReturn(new URI("https://foo"));
 		ClientHttpResponse clientHttpResponse = new MockClientHttpResponse(new byte[] {},
 				HttpStatus.OK);
 		LoadBalancedRetryPolicy policy = mock(LoadBalancedRetryPolicy.class);
@@ -167,7 +167,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test
 	public void interceptRetryOnStatusCode() throws Throwable {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://foo"));
+		when(request.getURI()).thenReturn(new URI("https://foo"));
 		InputStream notFoundStream = mock(InputStream.class);
 		when(notFoundStream.read(any(byte[].class))).thenReturn(-1);
 		ClientHttpResponse clientHttpResponseNotFound = new MockClientHttpResponse(
@@ -202,7 +202,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test
 	public void interceptRetryFailOnStatusCode() throws Throwable {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://foo"));
+		when(request.getURI()).thenReturn(new URI("https://foo"));
 
 		InputStream notFoundStream = new ByteArrayInputStream("foo".getBytes());
 		ClientHttpResponse clientHttpResponseNotFound = new MockClientHttpResponse(
@@ -243,7 +243,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test
 	public void interceptRetry() throws Throwable {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://foo"));
+		when(request.getURI()).thenReturn(new URI("https://foo"));
 		ClientHttpResponse clientHttpResponse = new MockClientHttpResponse(new byte[] {},
 				HttpStatus.OK);
 		LoadBalancedRetryPolicy policy = mock(LoadBalancedRetryPolicy.class);
@@ -274,7 +274,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test(expected = IOException.class)
 	public void interceptFailedRetry() throws Exception {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://foo"));
+		when(request.getURI()).thenReturn(new URI("https://foo"));
 		ClientHttpResponse clientHttpResponse = new MockClientHttpResponse(new byte[] {},
 				HttpStatus.OK);
 		LoadBalancedRetryPolicy policy = mock(LoadBalancedRetryPolicy.class);
@@ -300,7 +300,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test
 	public void retryListenerTest() throws Throwable {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://listener"));
+		when(request.getURI()).thenReturn(new URI("https://listener"));
 		ClientHttpResponse clientHttpResponse = new MockClientHttpResponse(new byte[] {},
 				HttpStatus.OK);
 		LoadBalancedRetryPolicy policy = mock(LoadBalancedRetryPolicy.class);
@@ -334,7 +334,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test(expected = TerminatedRetryException.class)
 	public void retryListenerTestNoRetry() throws Throwable {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://noRetry"));
+		when(request.getURI()).thenReturn(new URI("https://noRetry"));
 		LoadBalancedRetryPolicy policy = mock(LoadBalancedRetryPolicy.class);
 		MyBackOffPolicy backOffPolicy = new MyBackOffPolicy();
 		this.lbProperties.setEnabled(true);
@@ -356,7 +356,7 @@ public class RetryLoadBalancerInterceptorTest {
 	@Test
 	public void retryWithDefaultConstructorTest() throws Throwable {
 		HttpRequest request = mock(HttpRequest.class);
-		when(request.getURI()).thenReturn(new URI("http://default"));
+		when(request.getURI()).thenReturn(new URI("https://default"));
 		ClientHttpResponse clientHttpResponse = new MockClientHttpResponse(new byte[] {},
 				HttpStatus.OK);
 		LoadBalancedRetryPolicy policy = mock(LoadBalancedRetryPolicy.class);

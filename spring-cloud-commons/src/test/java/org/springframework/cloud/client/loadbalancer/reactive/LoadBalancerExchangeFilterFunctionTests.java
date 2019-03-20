@@ -85,14 +85,14 @@ public class LoadBalancerExchangeFilterFunctionTests {
 
 	@Test
 	public void testNoInstance() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://foobar")
+		ClientResponse clientResponse = WebClient.builder().baseUrl("https://foobar")
 				.filter(this.lbFunction).build().get().exchange().block();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
 	@Test
 	public void testNoHostName() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///foobar")
+		ClientResponse clientResponse = WebClient.builder().baseUrl("https:///foobar")
 				.filter(this.lbFunction).build().get().exchange().block();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}

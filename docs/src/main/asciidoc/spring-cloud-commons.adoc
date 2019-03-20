@@ -241,7 +241,7 @@ Patterns such as service discovery, load balancing, and circuit breakers lend th
 Spring Cloud Commons provides the `@EnableDiscoveryClient` annotation.
 This looks for implementations of the `DiscoveryClient` interface with `META-INF/spring.factories`.
 Implementations of the Discovery Client add a configuration class to `spring.factories` under the `org.springframework.cloud.client.discovery.EnableDiscoveryClient` key.
-Examples of `DiscoveryClient` implementations include http://cloud.spring.io/spring-cloud-netflix/[Spring Cloud Netflix Eureka], http://cloud.spring.io/spring-cloud-consul/[Spring Cloud Consul Discovery], and http://cloud.spring.io/spring-cloud-zookeeper/[Spring Cloud Zookeeper Discovery].
+Examples of `DiscoveryClient` implementations include https://cloud.spring.io/spring-cloud-netflix/[Spring Cloud Netflix Eureka], https://cloud.spring.io/spring-cloud-consul/[Spring Cloud Consul Discovery], and https://cloud.spring.io/spring-cloud-zookeeper/[Spring Cloud Zookeeper Discovery].
 
 By default, implementations of `DiscoveryClient` auto-register the local Spring Boot server with the remote discovery server.
 This behavior can be disabled by setting `autoRegister=false` in `@EnableDiscoveryClient`.
@@ -354,7 +354,7 @@ public class MyClass {
     private RestTemplate restTemplate;
 
     public String doOtherStuff() {
-        String results = restTemplate.getForObject("http://stores/stores", String.class);
+        String results = restTemplate.getForObject("https://stores/stores", String.class);
         return results;
     }
 }
@@ -389,7 +389,7 @@ public class MyClass {
     private WebClient.Builder webClientBuilder;
 
     public Mono<String> doOtherStuff() {
-        return webClientBuilder.build().get().uri("http://stores/stores")
+        return webClientBuilder.build().get().uri("https://stores/stores")
         				.retrieve().bodyToMono(String.class);
     }
 }
@@ -496,11 +496,11 @@ public class MyClass {
     private RestTemplate loadBalanced;
 
     public String doOtherStuff() {
-        return loadBalanced.getForObject("http://stores/stores", String.class);
+        return loadBalanced.getForObject("https://stores/stores", String.class);
     }
 
     public String doStuff() {
-        return restTemplate.getForObject("http://example.com", String.class);
+        return restTemplate.getForObject("https://example.com", String.class);
     }
 }
 ----
@@ -521,7 +521,7 @@ public class MyClass {
     private LoadBalancerExchangeFilterFunction lbFunction;
 
     public Mono<String> doOtherStuff() {
-        return WebClient.builder().baseUrl("http://stores")
+        return WebClient.builder().baseUrl("https://stores")
             .filter(lbFunction)
             .build()
             .get()
