@@ -500,7 +500,7 @@ public class MyClass {
     }
 
     public String doStuff() {
-        return restTemplate.getForObject("https://example.com", String.class);
+        return restTemplate.getForObject("http://example.com", String.class);
     }
 }
 ----

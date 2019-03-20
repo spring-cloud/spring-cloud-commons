@@ -38,10 +38,10 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = { "spring.application.name=service0",
-		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s1-1:8080",
-		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s1-2:8443",
-		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s2-1:8080",
-		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s2-2:443" })
+		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s11:8080",
+		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s12:8443",
+		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s21:8080",
+		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s22:443" })
 public class SimpleDiscoveryClientPropertiesMappingTests {
 
 	@Autowired
@@ -54,20 +54,18 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 	public void propsShouldGetCleanlyMapped() {
 		then(this.props.getInstances().size()).isEqualTo(2);
 		then(this.props.getInstances().get("service1").size()).isEqualTo(2);
-		then(this.props.getInstances().get("service1").get(0).getHost())
-				.isEqualTo("s1-1");
+		then(this.props.getInstances().get("service1").get(0).getHost()).isEqualTo("s11");
 		then(this.props.getInstances().get("service1").get(0).getPort()).isEqualTo(8080);
 		then(this.props.getInstances().get("service1").get(0).getUri())
-				.isEqualTo(URI.create("http://s1-1:8080"));
+				.isEqualTo(URI.create("http://s11:8080"));
 		then(this.props.getInstances().get("service1").get(0).isSecure())
 				.isEqualTo(false);
 
 		then(this.props.getInstances().get("service2").size()).isEqualTo(2);
-		then(this.props.getInstances().get("service2").get(0).getHost())
-				.isEqualTo("s2-1");
+		then(this.props.getInstances().get("service2").get(0).getHost()).isEqualTo("s21");
 		then(this.props.getInstances().get("service2").get(0).getPort()).isEqualTo(8080);
 		then(this.props.getInstances().get("service2").get(0).getUri())
-				.isEqualTo(URI.create("https://s2-1:8080"));
+				.isEqualTo(URI.create("https://s21:8080"));
 		then(this.props.getInstances().get("service2").get(0).isSecure()).isEqualTo(true);
 	}
 
@@ -77,9 +75,9 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 		then(this.discoveryClient.getInstances("service1")).hasSize(2);
 
 		ServiceInstance s1 = this.discoveryClient.getInstances("service1").get(0);
-		then(s1.getHost()).isEqualTo("s1-1");
+		then(s1.getHost()).isEqualTo("s11");
 		then(s1.getPort()).isEqualTo(8080);
-		then(s1.getUri()).isEqualTo(URI.create("http://s1-1:8080"));
+		then(s1.getUri()).isEqualTo(URI.create("http://s11:8080"));
 		then(s1.isSecure()).isEqualTo(false);
 	}
 
