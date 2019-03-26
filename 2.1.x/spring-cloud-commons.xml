@@ -8,23 +8,23 @@
 </info>
 <preface>
 <title></title>
-<simpara><link xl:href="http://pivotal.io/platform-as-a-service/migrating-to-cloud-native-application-architectures-ebook">Cloud Native</link> is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development.
-A related discipline is that of building <link xl:href="http://12factor.net/">12-factor Applications</link>, in which development practices are aligned with delivery and operations goals&#8201;&#8212;&#8201;for instance, by using declarative programming and management and monitoring.
+<simpara><link xl:href="https://pivotal.io/platform-as-a-service/migrating-to-cloud-native-application-architectures-ebook">Cloud Native</link> is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development.
+A related discipline is that of building <link xl:href="https://12factor.net/">12-factor Applications</link>, in which development practices are aligned with delivery and operations goals&#8201;&#8212;&#8201;for instance, by using declarative programming and management and monitoring.
 Spring Cloud facilitates these styles of development in a number of specific ways.
  The starting point is a set of features to which all components in a distributed system need easy access.</simpara>
-<simpara>Many of those features are covered by <link xl:href="http://projects.spring.io/spring-boot">Spring Boot</link>, on which Spring Cloud builds. Some more features are delivered by Spring Cloud as two libraries: Spring Cloud Context and Spring Cloud Commons.
+<simpara>Many of those features are covered by <link xl:href="https://projects.spring.io/spring-boot">Spring Boot</link>, on which Spring Cloud builds. Some more features are delivered by Spring Cloud as two libraries: Spring Cloud Context and Spring Cloud Commons.
 Spring Cloud Context provides utilities and special services for the <literal>ApplicationContext</literal> of a Spring Cloud application (bootstrap context, encryption, refresh scope, and environment endpoints). Spring Cloud Commons is a set of abstractions and common classes used in different Spring Cloud implementations (such as Spring Cloud Netflix and Spring Cloud Consul).</simpara>
 <simpara>If you get an exception due to "Illegal key size" and you use Sun&#8217;s JDK, you need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files.
 See the following links for more information:</simpara>
 <itemizedlist>
 <listitem>
-<simpara><link xl:href="http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</link></simpara>
+<simpara><link xl:href="https://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</link></simpara>
 </listitem>
 <listitem>
-<simpara><link xl:href="http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</link></simpara>
+<simpara><link xl:href="https://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</link></simpara>
 </listitem>
 <listitem>
-<simpara><link xl:href="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</link></simpara>
+<simpara><link xl:href="https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</link></simpara>
 </listitem>
 </itemizedlist>
 <simpara>Extract the files into the JDK/jre/lib/security folder for whichever version of JRE/JDK x64/x86 you use.</simpara>
@@ -227,13 +227,13 @@ To use the encryption features in an application, you need to include Spring Sec
 See the following links for more information:</simpara>
 <itemizedlist>
 <listitem>
-<simpara><link xl:href="http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</link></simpara>
+<simpara><link xl:href="https://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</link></simpara>
 </listitem>
 <listitem>
-<simpara><link xl:href="http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</link></simpara>
+<simpara><link xl:href="https://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</link></simpara>
 </listitem>
 <listitem>
-<simpara><link xl:href="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</link></simpara>
+<simpara><link xl:href="https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</link></simpara>
 </listitem>
 </itemizedlist>
 <simpara>Extract the files into the JDK/jre/lib/security folder for whichever version of JRE/JDK x64/x86 you use.</simpara>
@@ -269,7 +269,7 @@ will also be disabled since they are just a special case of <literal>/actuator/r
 <simpara>Spring Cloud Commons provides the <literal>@EnableDiscoveryClient</literal> annotation.
 This looks for implementations of the <literal>DiscoveryClient</literal> interface with <literal>META-INF/spring.factories</literal>.
 Implementations of the Discovery Client add a configuration class to <literal>spring.factories</literal> under the <literal>org.springframework.cloud.client.discovery.EnableDiscoveryClient</literal> key.
-Examples of <literal>DiscoveryClient</literal> implementations include <link xl:href="http://cloud.spring.io/spring-cloud-netflix/">Spring Cloud Netflix Eureka</link>, <link xl:href="http://cloud.spring.io/spring-cloud-consul/">Spring Cloud Consul Discovery</link>, and <link xl:href="http://cloud.spring.io/spring-cloud-zookeeper/">Spring Cloud Zookeeper Discovery</link>.</simpara>
+Examples of <literal>DiscoveryClient</literal> implementations include <link xl:href="https://cloud.spring.io/spring-cloud-netflix/">Spring Cloud Netflix Eureka</link>, <link xl:href="https://cloud.spring.io/spring-cloud-consul/">Spring Cloud Consul Discovery</link>, and <link xl:href="https://cloud.spring.io/spring-cloud-zookeeper/">Spring Cloud Zookeeper Discovery</link>.</simpara>
 <simpara>By default, implementations of <literal>DiscoveryClient</literal> auto-register the local Spring Boot server with the remote discovery server.
 This behavior can be disabled by setting <literal>autoRegister=false</literal> in <literal>@EnableDiscoveryClient</literal>.</simpara>
 <note>
@@ -508,7 +508,7 @@ public class MyClass {
     }
 
     public String doStuff() {
-        return restTemplate.getForObject("http://example.com", String.class);
+        return restTemplate.getForObject("https://example.com", String.class);
     }
 }</programlisting>
 <important>
