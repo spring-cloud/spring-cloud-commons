@@ -6,22 +6,22 @@ spring:
           instances:
             myservice:
               - service-id: myservice
-                uri: http://a.host
+                uri: https://a.host
               - service-id: myservice
-                uri: http://c.host
+                uri: https://c.host
               - service-id: myservice
                 uri: https://b.host-secure
             anotherservice:
               - service-id: myservice
-                uri: http://d.host
+                uri: https://d.host
               - service-id: myservice
-                uri: http://f.host
+                uri: https://f.host
               - service-id: myservice
                 uri: https://e.host
             thirdservice:
               - service-id: myservice
-                uri: http://g.host
+                uri: https://g.host
               - service-id: myservice
-                uri: http://h.host
+                uri: https://h.host
               - service-id: myservice
                 uri: https://i.host
