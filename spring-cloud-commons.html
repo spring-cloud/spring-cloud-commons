@@ -33,7 +33,7 @@
 	color: #ffffff;
 }
 </style>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
 <script type="text/javascript">
 function addBlockSwitches() {
 	$('.primary').each(function() {
@@ -125,13 +125,13 @@ $(addBlockSwitches);
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="http://pivotal.io/platform-as-a-service/migrating-to-cloud-native-application-architectures-ebook">Cloud Native</a> is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development.
-A related discipline is that of building <a href="http://12factor.net/">12-factor Applications</a>, in which development practices are aligned with delivery and operations goals&#8201;&#8212;&#8201;for instance, by using declarative programming and management and monitoring.
+<p><a href="https://pivotal.io/platform-as-a-service/migrating-to-cloud-native-application-architectures-ebook">Cloud Native</a> is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development.
+A related discipline is that of building <a href="https://12factor.net/">12-factor Applications</a>, in which development practices are aligned with delivery and operations goals&#8201;&#8212;&#8201;for instance, by using declarative programming and management and monitoring.
 Spring Cloud facilitates these styles of development in a number of specific ways.
  The starting point is a set of features to which all components in a distributed system need easy access.</p>
 </div>
 <div class="paragraph">
-<p>Many of those features are covered by <a href="http://projects.spring.io/spring-boot">Spring Boot</a>, on which Spring Cloud builds. Some more features are delivered by Spring Cloud as two libraries: Spring Cloud Context and Spring Cloud Commons.
+<p>Many of those features are covered by <a href="https://projects.spring.io/spring-boot">Spring Boot</a>, on which Spring Cloud builds. Some more features are delivered by Spring Cloud as two libraries: Spring Cloud Context and Spring Cloud Commons.
 Spring Cloud Context provides utilities and special services for the <code>ApplicationContext</code> of a Spring Cloud application (bootstrap context, encryption, refresh scope, and environment endpoints). Spring Cloud Commons is a set of abstractions and common classes used in different Spring Cloud implementations (such as Spring Cloud Netflix and Spring Cloud Consul).</p>
 </div>
 <div class="paragraph">
@@ -141,13 +141,13 @@ See the following links for more information:</p>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</a></p>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</a></p>
 </li>
 <li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</a></p>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</a></p>
 </li>
 <li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</a></p>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</a></p>
 </li>
 </ul>
 </div>
@@ -475,13 +475,13 @@ See the following links for more information:</p>
 <div class="ulist">
 <ul>
 <li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</a></p>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</a></p>
 </li>
 <li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</a></p>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</a></p>
 </li>
 <li>
-<p><a href="http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</a></p>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</a></p>
 </li>
 </ul>
 </div>
@@ -538,7 +538,7 @@ will also be disabled since they are just a special case of <code>/actuator/rest
 <p>Spring Cloud Commons provides the <code>@EnableDiscoveryClient</code> annotation.
 This looks for implementations of the <code>DiscoveryClient</code> interface with <code>META-INF/spring.factories</code>.
 Implementations of the Discovery Client add a configuration class to <code>spring.factories</code> under the <code>org.springframework.cloud.client.discovery.EnableDiscoveryClient</code> key.
-Examples of <code>DiscoveryClient</code> implementations include <a href="http://cloud.spring.io/spring-cloud-netflix/">Spring Cloud Netflix Eureka</a>, <a href="http://cloud.spring.io/spring-cloud-consul/">Spring Cloud Consul Discovery</a>, and <a href="http://cloud.spring.io/spring-cloud-zookeeper/">Spring Cloud Zookeeper Discovery</a>.</p>
+Examples of <code>DiscoveryClient</code> implementations include <a href="https://cloud.spring.io/spring-cloud-netflix/">Spring Cloud Netflix Eureka</a>, <a href="https://cloud.spring.io/spring-cloud-consul/">Spring Cloud Consul Discovery</a>, and <a href="https://cloud.spring.io/spring-cloud-zookeeper/">Spring Cloud Zookeeper Discovery</a>.</p>
 </div>
 <div class="paragraph">
 <p>By default, implementations of <code>DiscoveryClient</code> auto-register the local Spring Boot server with the remote discovery server.
@@ -874,7 +874,7 @@ public class MyClass {
     }
 
     public String doStuff() {
-        return restTemplate.getForObject("http://example.com", String.class);
+        return restTemplate.getForObject("https://example.com", String.class);
     }
 }</code></pre>
 </div>
