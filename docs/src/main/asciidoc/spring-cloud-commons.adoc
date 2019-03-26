@@ -234,7 +234,7 @@ Patterns such as service discovery, load balancing, and circuit breakers lend th
 Spring Cloud Commons provides the `@EnableDiscoveryClient` annotation.
 This looks for implementations of the `DiscoveryClient` interface with `META-INF/spring.factories`.
 Implementations of the Discovery Client add a configuration class to `spring.factories` under the `org.springframework.cloud.client.discovery.EnableDiscoveryClient` key.
-Examples of `DiscoveryClient` implementations include http://cloud.spring.io/spring-cloud-netflix/[Spring Cloud Netflix Eureka], http://cloud.spring.io/spring-cloud-consul/[Spring Cloud Consul Discovery], and http://cloud.spring.io/spring-cloud-zookeeper/[Spring Cloud Zookeeper Discovery].
+Examples of `DiscoveryClient` implementations include https://cloud.spring.io/spring-cloud-netflix/[Spring Cloud Netflix Eureka], https://cloud.spring.io/spring-cloud-consul/[Spring Cloud Consul Discovery], and https://cloud.spring.io/spring-cloud-zookeeper/[Spring Cloud Zookeeper Discovery].
 
 By default, implementations of `DiscoveryClient` auto-register the local Spring Boot server with the remote discovery server.
 This behavior can be disabled by setting `autoRegister=false` in `@EnableDiscoveryClient`.
@@ -473,7 +473,7 @@ public class MyClass {
     }
 
     public String doStuff() {
-        return restTemplate.getForObject("http://example.com", String.class);
+        return restTemplate.getForObject("https://example.com", String.class);
     }
 }
 ----
