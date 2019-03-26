@@ -3,15 +3,15 @@
 image::https://circleci.com/gh/spring-cloud/spring-cloud-commons.svg?style=svg[Build Status, link=https://circleci.com/gh/spring-cloud/spring-cloud-commons]
 
 
-http://pivotal.io/platform-as-a-service/migrating-to-cloud-native-application-architectures-ebook[Cloud Native] is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development. A related discipline is that of building http://12factor.net/[12-factor Apps] in which development practices are aligned with delivery and operations goals, for instance by using declarative programming and management and monitoring. Spring Cloud facilitates these styles of development in a number of specific ways and the starting point is a set of features that all components in a distributed system either need or need easy access to when required.
+https://pivotal.io/platform-as-a-service/migrating-to-cloud-native-application-architectures-ebook[Cloud Native] is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development. A related discipline is that of building https://12factor.net/[12-factor Apps] in which development practices are aligned with delivery and operations goals, for instance by using declarative programming and management and monitoring. Spring Cloud facilitates these styles of development in a number of specific ways and the starting point is a set of features that all components in a distributed system either need or need easy access to when required.
 
-Many of those features are covered by http://projects.spring.io/spring-boot[Spring Boot], which we build on in Spring Cloud. Some more are delivered by Spring Cloud as two libraries: Spring Cloud Context and Spring Cloud Commons. Spring Cloud Context provides utilities and special services for the `ApplicationContext` of a Spring Cloud application (bootstrap context, encryption, refresh scope and environment endpoints). Spring Cloud Commons is a set of abstractions and common classes used in different Spring Cloud implementations (eg. Spring Cloud Netflix vs. Spring Cloud Consul).
+Many of those features are covered by https://projects.spring.io/spring-boot[Spring Boot], which we build on in Spring Cloud. Some more are delivered by Spring Cloud as two libraries: Spring Cloud Context and Spring Cloud Commons. Spring Cloud Context provides utilities and special services for the `ApplicationContext` of a Spring Cloud application (bootstrap context, encryption, refresh scope and environment endpoints). Spring Cloud Commons is a set of abstractions and common classes used in different Spring Cloud implementations (eg. Spring Cloud Netflix vs. Spring Cloud Consul).
 
 If you are getting an exception due to "Illegal key size" and you are using Sun's JDK, you need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files. See the following links for more information:
 
-* http://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html[Java 6 JCE]
-* http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html[Java 7 JCE]
-* http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html[Java 8 JCE]
+* https://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html[Java 6 JCE]
+* https://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html[Java 7 JCE]
+* https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html[Java 8 JCE]
 
 Extract files into JDK/jre/lib/security folder (whichever version of JRE/JDK x64/x86 you are using).
 
@@ -52,7 +52,7 @@ credentials and you already have those.
 
 The projects that require middleware generally include a
 `docker-compose.yml`, so consider using
-http://compose.docker.io/[Docker Compose] to run the middeware servers
+https://compose.docker.io/[Docker Compose] to run the middeware servers
 in Docker containers. See the README in the
 https://github.com/spring-cloud-samples/scripts[scripts demo
 repository] for specific instructions about the common cases of mongo,
@@ -74,13 +74,13 @@ a modified file in the correct place. Just commit it and push the change.
 
 === Working with the code
 If you don't have an IDE preference we would recommend that you use
-http://www.springsource.com/developer/sts[Spring Tools Suite] or
-http://eclipse.org[Eclipse] when working with the code. We use the
-http://eclipse.org/m2e/[m2eclipse] eclipse plugin for maven support. Other IDEs and tools
+https://www.springsource.com/developer/sts[Spring Tools Suite] or
+https://eclipse.org[Eclipse] when working with the code. We use the
+https://eclipse.org/m2e/[m2eclipse] eclipse plugin for maven support. Other IDEs and tools
 should also work without issue as long as they use Maven 3.3.3 or better.
 
 ==== Importing into eclipse with m2eclipse
-We recommend the http://eclipse.org/m2e/[m2eclipse] eclipse plugin when working with
+We recommend the https://eclipse.org/m2e/[m2eclipse] eclipse plugin when working with
 eclipse. If you don't already have m2eclipse installed it is available from the "eclipse
 marketplace".
 
@@ -136,7 +136,7 @@ added after the original pull request but before a merge.
   `eclipse-code-formatter.xml` file from the
   https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/spring-cloud-dependencies-parent/eclipse-code-formatter.xml[Spring
   Cloud Build] project. If using IntelliJ, you can use the
-  http://plugins.jetbrains.com/plugin/6546[Eclipse Code Formatter
+  https://plugins.jetbrains.com/plugin/6546[Eclipse Code Formatter
   Plugin] to import the same file.
 * Make sure all new `.java` files to have a simple Javadoc class comment with at least an
   `@author` tag identifying you, and preferably at least a paragraph on what the class is
@@ -149,6 +149,6 @@ added after the original pull request but before a merge.
 * A few unit tests would help a lot as well -- someone has to do it.
 * If no-one else is using your branch, please rebase it against the current master (or
   other target branch in the main project).
-* When writing a commit message please follow http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions],
+* When writing a commit message please follow https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions],
   if you are fixing an existing issue please add `Fixes gh-XXXX` at the end of the commit
   message (where XXXX is the issue number).
