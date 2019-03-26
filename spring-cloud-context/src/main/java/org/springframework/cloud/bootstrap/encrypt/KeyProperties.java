@@ -108,7 +108,7 @@ public class KeyProperties {
 		private String secret;
 
 		/**
-		 * The KeyStore type.  Defaults to jks.
+		 * The KeyStore type. Defaults to jks.
 		 */
 		private String type = "jks";
 
