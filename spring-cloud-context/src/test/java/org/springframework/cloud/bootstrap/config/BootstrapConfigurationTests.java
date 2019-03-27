@@ -371,7 +371,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	@Ignore //FIXME 2.2.0.M1
+	@Ignore // FIXME 2.2.0.M1
 	public void includeProfileFromBootstrapProperties() {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class)
