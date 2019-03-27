@@ -67,7 +67,7 @@ public class LoadBalancerTest {
 		ReactorLoadBalancer<ServiceInstance> loadBalancer = (ReactorLoadBalancer<ServiceInstance>) reactiveLoadBalancer;
 
 		// order dependent on seedPosition -1 of RoundRobinLoadBalancer
-		List<String> hosts = Arrays.asList("a.host", "c.host", "b.host-secure", "a.host");
+		List<String> hosts = Arrays.asList("ahost", "chost", "bhostsecure", "ahost");
 
 		assertLoadBalancer(loadBalancer, hosts);
 	}
@@ -118,10 +118,10 @@ public class LoadBalancerTest {
 		String serviceId = "test1";
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(serviceId,
 				ServiceInstanceSuppliers.toProvider(serviceId,
-						instance(serviceId, "1.host", false),
-						instance(serviceId, "2.host-secure", true)),
+						instance(serviceId, "1host", false),
+						instance(serviceId, "2host-secure", true)),
 				-1);
-		assertLoadBalancer(loadBalancer, Arrays.asList("1.host", "2.host-secure"));
+		assertLoadBalancer(loadBalancer, Arrays.asList("1host", "2host-secure"));
 	}
 
 	private DefaultServiceInstance instance(String serviceId, String host,
