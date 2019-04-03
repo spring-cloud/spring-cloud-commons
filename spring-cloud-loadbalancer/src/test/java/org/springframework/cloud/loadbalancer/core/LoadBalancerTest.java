@@ -118,15 +118,15 @@ public class LoadBalancerTest {
 		String serviceId = "test1";
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(serviceId,
 				ServiceInstanceSuppliers.toProvider(serviceId,
-						instance("instance1", serviceId, "1.host", false),
-						instance("instance2", serviceId, "2.host-secure", true)),
+						instance(serviceId, "1.host", false),
+						instance(serviceId, "2.host-secure", true)),
 				-1);
 		assertLoadBalancer(loadBalancer, Arrays.asList("1.host", "2.host-secure"));
 	}
 
-	private DefaultServiceInstance instance(String instanceId, String serviceId,
-			String host, boolean secure) {
-		return new DefaultServiceInstance(instanceId, serviceId, host, 80, secure);
+	private DefaultServiceInstance instance(String serviceId, String host,
+			boolean secure) {
+		return new DefaultServiceInstance(serviceId, host, 80, secure);
 	}
 
 	@EnableAutoConfiguration
