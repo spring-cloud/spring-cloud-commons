@@ -25,15 +25,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
-import org.springframework.boot.web.context.ConfigurableWebServerApplicationContext;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.client.discovery.ManagementServerPortUtils;
 import org.springframework.cloud.client.discovery.event.InstancePreRegisteredEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
 
 /**
  * Lifecycle methods that may be useful and common to {@link ServiceRegistry}
@@ -43,9 +45,10 @@ import org.springframework.core.env.Environment;
  *
  * @param <R> Registration type passed to the {@link ServiceRegistry}.
  * @author Spencer Gibb
+ * @author Chris White
  */
 public abstract class AbstractAutoServiceRegistration<R extends Registration>
-		implements AutoServiceRegistration, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
+		implements AutoServiceRegistration, ApplicationContextAware, ApplicationListener<ApplicationEvent> {
 
 	private static final Log logger = LogFactory.getLog(AbstractAutoServiceRegistration.class);
 
@@ -62,6 +65,8 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	private Environment environment;
 
 	private AtomicInteger port = new AtomicInteger(0);
+
+	private AtomicInteger mgmtPort = new AtomicInteger(0);
 
 	private AutoServiceRegistrationProperties properties;
 
@@ -81,21 +86,25 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public void onApplicationEvent(WebServerInitializedEvent event) {
-		bind(event);
+	public void onApplicationEvent(ApplicationEvent event) {
+		if (event instanceof ApplicationReadyEvent) {
+			this.start();
+		}
+		else if (event instanceof WebServerInitializedEvent) {
+			this.bind((WebServerInitializedEvent) event);
+		}
 	}
 
 	@Deprecated
 	public void bind(WebServerInitializedEvent event) {
-		ApplicationContext context = event.getApplicationContext();
-		if (context instanceof ConfigurableWebServerApplicationContext) {
-			if ("management".equals(((ConfigurableWebServerApplicationContext) context).getServerNamespace())) {
-				return;
-			}
+		String serverNamespace = event.getApplicationContext().getServerNamespace();
+
+		if (StringUtils.isEmpty(serverNamespace)) {
+			this.port.compareAndSet(0, event.getWebServer().getPort());
 		}
-		this.port.compareAndSet(0, event.getWebServer().getPort());
-		this.start();
+		else if ("management".equals(serverNamespace)) {
+			this.mgmtPort.compareAndSet(0, event.getWebServer().getPort());
+		}
 	}
 
 	@Override
@@ -185,7 +194,12 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	 */
 	@Deprecated
 	protected Integer getManagementPort() {
-		return ManagementServerPortUtils.getPort(this.context);
+		if (this.mgmtPort.get() != 0) {
+			return this.mgmtPort.get();
+		}
+		else {
+			return ManagementServerPortUtils.getPort(this.context);
+		}
 	}
 
 	/**
