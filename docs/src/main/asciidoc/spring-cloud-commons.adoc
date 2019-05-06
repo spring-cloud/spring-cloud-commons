@@ -535,6 +535,44 @@ public class MyClass {
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The `LoadBalancerClient` is used to create a full physical address.
 
+[[reactive-loadbalanced-webclient]]
+=== Spring WebFlux WebClient as a Reactive Load Balancer Client
+
+`WebClient` can be configured to use the `ReactiveLoadBalancer`. `ReactiveLoadBalancerExchangeFilterFunction` and `WebClient.Builder` with `@LoadBalanced` qualifier are auto-configured if `spring-cloud-loadbalancer` is on the classpath. If you do not provide bean of type `ServiceInstanceSupplier`, DiscoveryClientServiceInstanceSupplier bean will be autoconfigured which uses Spring  Discovery Client abstraction to find available instances. The following example shows how to configure a Round-robin Reactive Load Balancer client for two services, `service-one` and `service-two`:
+
+[source,java,indent=0]
+----
+@LoadBalancerClients(value = { @LoadBalancerClient("service-one"),
+		@LoadBalancerClient("service-two") }, defaultConfiguration = DefaultLoadBalancerConfig.class)
+class LoadBalancerClientConfiguration {
+}
+
+class DefaultLoadBalancerConfiguration {
+	@Bean
+	public RoundRobinLoadBalancer roundRobinContextLoadBalancer(LoadBalancerClientFactory clientFactory,
+			Environment env) {
+		String serviceId = clientFactory.getName(env);
+		return new RoundRobinLoadBalancer(serviceId,
+				clientFactory.getLazyProvider(serviceId, ServiceInstanceSupplier.class));
+	}
+}
+
+class MyClass {
+    @Autowired
+    private ReactiveLoadBalancerExchangeFilterFunction lbFunction;
+
+    public Mono<String> doOtherStuff() {
+        return WebClient.builder().baseUrl("http://service-one")
+            .filter(lbFunction)
+            .build()
+            .get()
+            .uri("/get")
+            .retrieve()
+            .bodyToMono(String.class);
+    }
+}
+----
+
 [[ignore-network-interfaces]]
 === Ignore Network Interfaces
 
