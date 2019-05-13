@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.web.context.ConfigurableWebServerApplicationContext;
 import org.springframework.cloud.client.discovery.ManagementServerPortUtils;
@@ -34,6 +35,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.util.Assert;
 
 /**
  * Lifecycle methods that may be useful and common to {@link ServiceRegistry}
@@ -47,6 +50,7 @@ import org.springframework.core.env.Environment;
 public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		implements AutoServiceRegistration, ApplicationContextAware,
 		ApplicationListener<ApplicationReadyEvent> {
+
 
 	private static final Log logger = LogFactory
 			.getLog(AbstractAutoServiceRegistration.class);
@@ -98,6 +102,9 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 			}
 		}
 		String port = context.getEnvironment().getProperty("server.port");
+		if (environment instanceof StandardEnvironment) {
+			Assert.isNull(port, "If spring main web application type none is set, the server port must be declared");
+		}
 		this.port.compareAndSet(0, Integer.valueOf(port));
 		this.start();
 	}
