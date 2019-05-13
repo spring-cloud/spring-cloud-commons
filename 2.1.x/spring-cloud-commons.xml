@@ -390,7 +390,7 @@ Individual applications must create it.</simpara>
 </caution>
 <simpara>The URI needs to use a virtual host name (that is, a service name, not a host name).
 The Ribbon client is used to create a full physical address.
-See <link xl:href="https://github.com/spring-cloud/spring-cloud-netflix/blob/master/spring-cloud-netflix-core/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java">RibbonAutoConfiguration</link> for details of how the <literal>RestTemplate</literal> is set up.</simpara>
+See <link xl:href="https://github.com/spring-cloud/spring-cloud-netflix/blob/master/spring-cloud-netflix-ribbon/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java">RibbonAutoConfiguration</link> for details of how the <literal>RestTemplate</literal> is set up.</simpara>
 </section>
 <section xml:id="_spring_webclient_as_a_load_balancer_client">
 <title>Spring WebClient as a Load Balancer Client</title>
