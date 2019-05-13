@@ -25,8 +25,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.web.context.ConfigurableWebServerApplicationContext;
-import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.client.discovery.ManagementServerPortUtils;
 import org.springframework.cloud.client.discovery.event.InstancePreRegisteredEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
@@ -46,7 +46,7 @@ import org.springframework.core.env.Environment;
  */
 public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		implements AutoServiceRegistration, ApplicationContextAware,
-		ApplicationListener<WebServerInitializedEvent> {
+		ApplicationListener<ApplicationReadyEvent> {
 
 	private static final Log logger = LogFactory
 			.getLog(AbstractAutoServiceRegistration.class);
@@ -84,12 +84,12 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	@Override
 	@SuppressWarnings("deprecation")
-	public void onApplicationEvent(WebServerInitializedEvent event) {
+	public void onApplicationEvent(ApplicationReadyEvent event) {
 		bind(event);
 	}
 
 	@Deprecated
-	public void bind(WebServerInitializedEvent event) {
+	public void bind(ApplicationReadyEvent event) {
 		ApplicationContext context = event.getApplicationContext();
 		if (context instanceof ConfigurableWebServerApplicationContext) {
 			if ("management".equals(((ConfigurableWebServerApplicationContext) context)
@@ -97,7 +97,8 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 				return;
 			}
 		}
-		this.port.compareAndSet(0, event.getWebServer().getPort());
+		String port = context.getEnvironment().getProperty("server.port");
+		this.port.compareAndSet(0, Integer.valueOf(port));
 		this.start();
 	}
 
