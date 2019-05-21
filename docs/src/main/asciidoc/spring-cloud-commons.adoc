@@ -42,6 +42,8 @@ spring:
 ----
 
 If your application needs any application-specific configuration from the server, it is a good idea to set the `spring.application.name` (in `bootstrap.yml` or `application.yml`).
+In order for the property `spring.application.name` to be used as the application's context ID you
+must set it in `bootstrap.[properties | yml]`.
 
 You can disable the bootstrap process completely by setting `spring.cloud.bootstrap.enabled=false` (for example, in system properties).
 
