@@ -203,7 +203,9 @@ The following listing shows an example:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>If your application needs any application-specific configuration from the server, it is a good idea to set the <code>spring.application.name</code> (in <code>bootstrap.yml</code> or <code>application.yml</code>).</p>
+<p>If your application needs any application-specific configuration from the server, it is a good idea to set the <code>spring.application.name</code> (in <code>bootstrap.yml</code> or <code>application.yml</code>).
+In order for the property <code>spring.application.name</code> to be used as the application&#8217;s context ID you
+must set it in <code>bootstrap.[properties | yml]</code>.</p>
 </div>
 <div class="paragraph">
 <p>You can disable the bootstrap process completely by setting <code>spring.cloud.bootstrap.enabled=false</code> (for example, in system properties).</p>
