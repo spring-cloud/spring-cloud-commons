@@ -30,7 +30,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class, properties = "spring.cloud.bootstrap.enabled:false")
+@SpringBootTest(classes = Application.class,
+		properties = "spring.cloud.bootstrap.enabled:false")
 public class BootstrapDisabledAutoConfigurationIntegrationTests {
 
 	@Autowired

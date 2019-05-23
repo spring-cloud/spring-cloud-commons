@@ -33,7 +33,8 @@ import org.springframework.context.annotation.Configuration;
  * @since 1.3.6
  */
 @Configuration
-@ConditionalOnProperty(value = "spring.cloud.compatibility-verifier.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.cloud.compatibility-verifier.enabled",
+		matchIfMissing = true)
 @AutoConfigureOrder(0)
 @EnableConfigurationProperties(CompatibilityVerifierProperties.class)
 public class CompatibilityVerifierAutoConfiguration {

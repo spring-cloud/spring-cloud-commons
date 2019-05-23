@@ -32,7 +32,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class, properties = "spring.cloud.bootstrap.name:json")
+@SpringBootTest(classes = Application.class,
+		properties = "spring.cloud.bootstrap.name:json")
 public class BootstrapOrderingSpringApplicationJsonIntegrationTests {
 
 	@Autowired

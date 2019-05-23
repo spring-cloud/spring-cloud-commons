@@ -44,8 +44,10 @@ import static org.mockito.Mockito.mock;
  */
 @RunWith(SpringRunner.class)
 // @checkstyle:off
-@SpringBootTest(classes = { DiscoveryClientHealthIndicatorTests.Config.class,
-		CommonsClientAutoConfiguration.class }, properties = "spring.cloud.discovery.client.health-indicator.include-description:true")
+@SpringBootTest(
+		classes = { DiscoveryClientHealthIndicatorTests.Config.class,
+				CommonsClientAutoConfiguration.class },
+		properties = "spring.cloud.discovery.client.health-indicator.include-description:true")
 // @checkstyle:on
 public class DiscoveryClientHealthIndicatorTests {
 

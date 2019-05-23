@@ -41,8 +41,8 @@ import static org.springframework.cloud.client.discovery.composite.CompositeDisc
 		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s11:8080",
 		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s12:8443",
 		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s21:8080",
-		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s22:443" }, classes = {
-				CompositeDiscoveryClientTestsConfig.class })
+		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s22:443" },
+		classes = { CompositeDiscoveryClientTestsConfig.class })
 public class CompositeDiscoveryClientTests {
 
 	@Autowired

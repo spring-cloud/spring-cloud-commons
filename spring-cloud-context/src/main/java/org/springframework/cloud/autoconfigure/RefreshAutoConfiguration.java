@@ -63,7 +63,8 @@ import org.springframework.util.StringUtils;
  */
 @Configuration
 @ConditionalOnClass(RefreshScope.class)
-@ConditionalOnProperty(name = RefreshAutoConfiguration.REFRESH_SCOPE_ENABLED, matchIfMissing = true)
+@ConditionalOnProperty(name = RefreshAutoConfiguration.REFRESH_SCOPE_ENABLED,
+		matchIfMissing = true)
 @AutoConfigureBefore(HibernateJpaAutoConfiguration.class)
 public class RefreshAutoConfiguration {
 

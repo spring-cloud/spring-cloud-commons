@@ -48,7 +48,8 @@ import org.springframework.core.env.Environment;
 @AutoConfigureBefore(EnvironmentEndpointAutoConfiguration.class)
 @AutoConfigureAfter(LifecycleMvcEndpointAutoConfiguration.class)
 @EnableConfigurationProperties({ EnvironmentEndpointProperties.class })
-@ConditionalOnProperty(value = "management.endpoint.env.post.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "management.endpoint.env.post.enabled",
+		matchIfMissing = true)
 public class WritableEnvironmentEndpointAutoConfiguration {
 
 	private final EnvironmentEndpointProperties properties;

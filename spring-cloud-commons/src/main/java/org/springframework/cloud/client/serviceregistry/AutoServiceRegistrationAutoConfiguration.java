@@ -28,7 +28,8 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @Import(AutoServiceRegistrationConfiguration.class)
-@ConditionalOnProperty(value = "spring.cloud.service-registry.auto-registration.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.cloud.service-registry.auto-registration.enabled",
+		matchIfMissing = true)
 public class AutoServiceRegistrationAutoConfiguration {
 
 	@Autowired(required = false)

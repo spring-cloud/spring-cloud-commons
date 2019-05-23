@@ -51,7 +51,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class, properties = "management.endpoints.web.exposure.include=*")
+@SpringBootTest(classes = TestConfiguration.class,
+		properties = "management.endpoints.web.exposure.include=*")
 @AutoConfigureMockMvc
 public class EnvironmentManagerIntegrationTests {
 

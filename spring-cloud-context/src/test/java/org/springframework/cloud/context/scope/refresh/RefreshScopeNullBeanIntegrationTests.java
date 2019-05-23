@@ -33,8 +33,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {
-		RefreshScopeNullBeanIntegrationTests.TestConfiguration.class })
+@SpringBootTest(
+		classes = { RefreshScopeNullBeanIntegrationTests.TestConfiguration.class })
 public class RefreshScopeNullBeanIntegrationTests {
 
 	@Autowired

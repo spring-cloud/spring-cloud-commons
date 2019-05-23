@@ -60,7 +60,9 @@ public class CommonsClientAutoConfiguration {
 	protected static class DiscoveryLoadBalancerConfiguration {
 
 		@Bean
-		@ConditionalOnProperty(value = "spring.cloud.discovery.client.health-indicator.enabled", matchIfMissing = true)
+		@ConditionalOnProperty(
+				value = "spring.cloud.discovery.client.health-indicator.enabled",
+				matchIfMissing = true)
 		public DiscoveryClientHealthIndicator discoveryClientHealthIndicator(
 				ObjectProvider<DiscoveryClient> discoveryClient,
 				DiscoveryClientHealthIndicatorProperties properties) {
@@ -68,7 +70,9 @@ public class CommonsClientAutoConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnProperty(value = "spring.cloud.discovery.client.composite-indicator.enabled", matchIfMissing = true)
+		@ConditionalOnProperty(
+				value = "spring.cloud.discovery.client.composite-indicator.enabled",
+				matchIfMissing = true)
 		@ConditionalOnBean({ DiscoveryHealthIndicator.class, HealthAggregator.class })
 		public DiscoveryCompositeHealthIndicator discoveryCompositeHealthIndicator(
 				HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {

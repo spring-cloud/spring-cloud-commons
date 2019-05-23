@@ -44,8 +44,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class, properties = {
-		"messages.expiry.one=168", "messages.expiry.two=76" })
+@SpringBootTest(classes = TestConfiguration.class,
+		properties = { "messages.expiry.one=168", "messages.expiry.two=76" })
 public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 
 	@Autowired

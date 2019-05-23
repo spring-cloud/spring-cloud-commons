@@ -25,7 +25,8 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(AutoServiceRegistrationProperties.class)
-@ConditionalOnProperty(value = "spring.cloud.service-registry.auto-registration.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.cloud.service-registry.auto-registration.enabled",
+		matchIfMissing = true)
 public class AutoServiceRegistrationConfiguration {
 
 }

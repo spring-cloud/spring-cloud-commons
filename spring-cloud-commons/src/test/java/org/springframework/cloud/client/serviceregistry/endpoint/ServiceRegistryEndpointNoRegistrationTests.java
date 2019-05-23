@@ -42,7 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Spencer Gibb
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ServiceRegistryEndpointNoRegistrationTests.TestConfiguration.class)
+@SpringBootTest(
+		classes = ServiceRegistryEndpointNoRegistrationTests.TestConfiguration.class)
 @AutoConfigureMockMvc
 public class ServiceRegistryEndpointNoRegistrationTests {
 

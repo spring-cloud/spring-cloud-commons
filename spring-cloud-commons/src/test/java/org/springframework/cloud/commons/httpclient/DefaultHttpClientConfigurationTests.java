@@ -32,8 +32,8 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Ryan Baxter
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = MyApplication.class, properties = {
-		"spring.cloud.httpclient.ok.enabled: true" })
+@SpringBootTest(classes = MyApplication.class,
+		properties = { "spring.cloud.httpclient.ok.enabled: true" })
 public class DefaultHttpClientConfigurationTests {
 
 	@Autowired

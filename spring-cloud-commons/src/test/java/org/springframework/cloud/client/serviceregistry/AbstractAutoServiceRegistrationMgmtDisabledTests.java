@@ -38,9 +38,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * @author Tim Ysewyn
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = AbstractAutoServiceRegistrationMgmtDisabledTests.Config.class, properties = {
-		"management.port=0",
-		"spring.cloud.service-registry.auto-registration.register-management=false" }, webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = AbstractAutoServiceRegistrationMgmtDisabledTests.Config.class,
+		properties = { "management.port=0",
+				"spring.cloud.service-registry.auto-registration.register-management=false" },
+		webEnvironment = RANDOM_PORT)
 public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 
 	@Autowired

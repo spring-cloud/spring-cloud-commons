@@ -51,7 +51,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 // @checkstyle:off
-@SpringBootTest(classes = ServiceRegistryEndpointTests.TestConfiguration.class, properties = "management.endpoints.web.exposure.include=*")
+@SpringBootTest(classes = ServiceRegistryEndpointTests.TestConfiguration.class,
+		properties = "management.endpoints.web.exposure.include=*")
 // @checkstyle:on
 @AutoConfigureMockMvc
 public class ServiceRegistryEndpointTests {

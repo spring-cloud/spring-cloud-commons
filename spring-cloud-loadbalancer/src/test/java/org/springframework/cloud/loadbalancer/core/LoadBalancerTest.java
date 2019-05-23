@@ -132,8 +132,10 @@ public class LoadBalancerTest {
 	@EnableAutoConfiguration
 	@SpringBootConfiguration
 	@LoadBalancerClients({
-			@LoadBalancerClient(name = "myservice", configuration = MyServiceConfig.class),
-			@LoadBalancerClient(name = "unknownservice", configuration = MyServiceConfig.class) })
+			@LoadBalancerClient(name = "myservice",
+					configuration = MyServiceConfig.class),
+			@LoadBalancerClient(name = "unknownservice",
+					configuration = MyServiceConfig.class) })
 	@EnableCaching
 	protected static class Config {
 

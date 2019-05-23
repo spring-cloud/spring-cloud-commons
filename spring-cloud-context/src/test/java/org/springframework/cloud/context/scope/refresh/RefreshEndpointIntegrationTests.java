@@ -51,8 +51,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  *
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = ClientApp.class, properties = {
-		"management.endpoints.web.exposure.include=*" }, webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = ClientApp.class,
+		properties = { "management.endpoints.web.exposure.include=*" },
+		webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
 
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
