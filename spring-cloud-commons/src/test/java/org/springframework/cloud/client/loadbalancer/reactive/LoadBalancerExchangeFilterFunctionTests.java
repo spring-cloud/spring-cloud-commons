@@ -141,6 +141,7 @@ public class LoadBalancerExchangeFilterFunctionTests {
 					int instanceIdx = this.random.nextInt(instances.size());
 					return instances.get(instanceIdx);
 				}
+
 			};
 		}
 
