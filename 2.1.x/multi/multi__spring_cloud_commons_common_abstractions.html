@@ -19,8 +19,8 @@ properties to set the order of the <code class="literal">DiscoveryClient</code>
 implementations provided by Spring Cloud, among others  <code class="literal">ConsulDiscoveryClient</code>, <code class="literal">EurekaDiscoveryClient</code> and
 <code class="literal">ZookeeperDiscoveryClient</code>. In order to do it, you just need to set the
 <code class="literal">spring.cloud.{clientIdentifier}.discovery.order</code> (or <code class="literal">eureka.client.order</code> for Eureka) property to the desired value.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="_serviceregistry" href="#_serviceregistry"></a>2.2&nbsp;ServiceRegistry</h2></div></div></div><p>Commons now provides a <code class="literal">ServiceRegistry</code> interface that provides methods such as <code class="literal">register(Registration)</code> and <code class="literal">deregister(Registration)</code>, which let you provide custom registered services.
-<code class="literal">Registration</code> is a marker interface.</p><p>The following example shows the <code class="literal">ServiceRegistry</code> in use:</p><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
-<em><span class="hl-annotation" style="color: gray">@EnableDiscoveryClient(autoRegister=false)</span></em>
+<code class="literal">Registration</code> is a marker interface.</p><p>The following example shows the <code class="literal">ServiceRegistry</code> in use:</p><pre class="programlisting"><xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Configuration</xslthl:annotation>
+<xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@EnableDiscoveryClient(autoRegister=false)</xslthl:annotation>
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">private</span> ServiceRegistry registry;
 
@@ -48,18 +48,18 @@ Using POST to the same endpoint with a JSON body changes the status of the curre
 The JSON body has to include the <code class="literal">status</code> field with the preferred value.
 Please see the documentation of the <code class="literal">ServiceRegistry</code> implementation you use for the allowed values when updating the status and the values returned for the status.
 For instance, Eureka&#8217;s supported statuses are <code class="literal">UP</code>, <code class="literal">DOWN</code>, <code class="literal">OUT_OF_SERVICE</code>, and <code class="literal">UNKNOWN</code>.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="_spring_resttemplate_as_a_load_balancer_client" href="#_spring_resttemplate_as_a_load_balancer_client"></a>2.3&nbsp;Spring RestTemplate as a Load Balancer Client</h2></div></div></div><p><code class="literal">RestTemplate</code> can be automatically configured to use ribbon.
-To create a load-balanced <code class="literal">RestTemplate</code>, create a <code class="literal">RestTemplate</code> <code class="literal">@Bean</code> and use the <code class="literal">@LoadBalanced</code> qualifier, as shown in the following example:</p><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
+To create a load-balanced <code class="literal">RestTemplate</code>, create a <code class="literal">RestTemplate</code> <code class="literal">@Bean</code> and use the <code class="literal">@LoadBalanced</code> qualifier, as shown in the following example:</p><pre class="programlisting"><xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Configuration</xslthl:annotation>
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
 
-    <em><span class="hl-annotation" style="color: gray">@LoadBalanced</span></em>
-    <em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@LoadBalanced</xslthl:annotation>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Bean</xslthl:annotation>
     RestTemplate restTemplate() {
         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> RestTemplate();
     }
 }
 
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyClass {
-    <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Autowired</xslthl:annotation>
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">private</span> RestTemplate restTemplate;
 
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> String doOtherStuff() {
@@ -70,18 +70,18 @@ To create a load-balanced <code class="literal">RestTemplate</code>, create a <c
 Individual applications must create it.</p></td></tr></table></div><p>The URI needs to use a virtual host name (that is, a service name, not a host name).
 The Ribbon client is used to create a full physical address.
 See <a class="link" href="https://github.com/spring-cloud/spring-cloud-netflix/blob/master/spring-cloud-netflix-ribbon/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java" target="_top">RibbonAutoConfiguration</a> for details of how the <code class="literal">RestTemplate</code> is set up.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="_spring_webclient_as_a_load_balancer_client" href="#_spring_webclient_as_a_load_balancer_client"></a>2.4&nbsp;Spring WebClient as a Load Balancer Client</h2></div></div></div><p><code class="literal">WebClient</code> can be automatically configured to use the <code class="literal">LoadBalancerClient</code>.
-To create a load-balanced <code class="literal">WebClient</code>, create a <code class="literal">WebClient.Builder</code> <code class="literal">@Bean</code> and use the <code class="literal">@LoadBalanced</code> qualifier, as shown in the following example:</p><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
+To create a load-balanced <code class="literal">WebClient</code>, create a <code class="literal">WebClient.Builder</code> <code class="literal">@Bean</code> and use the <code class="literal">@LoadBalanced</code> qualifier, as shown in the following example:</p><pre class="programlisting"><xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Configuration</xslthl:annotation>
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
 
-	<em><span class="hl-annotation" style="color: gray">@Bean</span></em>
-	<em><span class="hl-annotation" style="color: gray">@LoadBalanced</span></em>
+	<xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Bean</xslthl:annotation>
+	<xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@LoadBalanced</xslthl:annotation>
 	<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> WebClient.Builder loadBalancedWebClientBuilder() {
 		<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> WebClient.builder();
 	}
 }
 
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyClass {
-    <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Autowired</xslthl:annotation>
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">private</span> WebClient.Builder webClientBuilder;
 
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> Mono&lt;String&gt; doOtherStuff() {
@@ -95,12 +95,12 @@ You can enable it by adding <a class="link" href="https://github.com/spring-proj
 The load-balanced <code class="literal">RestTemplate</code> honors some of the Ribbon configuration values related to retrying failed requests.
 You can use <code class="literal">client.ribbon.MaxAutoRetries</code>, <code class="literal">client.ribbon.MaxAutoRetriesNextServer</code>, and <code class="literal">client.ribbon.OkToRetryOnAllOperations</code> properties.
 If you would like to disable the retry logic with Spring Retry on the classpath, you can set <code class="literal">spring.cloud.loadbalancer.retry.enabled=false</code>.
-See the <a class="link" href="https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties" target="_top">Ribbon documentation</a> for a description of what these properties do.</p><p>If you would like to implement a <code class="literal">BackOffPolicy</code> in your retries, you need to create a bean of type <code class="literal">LoadBalancedRetryFactory</code> and override the <code class="literal">createBackOffPolicy</code> method:</p><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
+See the <a class="link" href="https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties" target="_top">Ribbon documentation</a> for a description of what these properties do.</p><p>If you would like to implement a <code class="literal">BackOffPolicy</code> in your retries, you need to create a bean of type <code class="literal">LoadBalancedRetryFactory</code> and override the <code class="literal">createBackOffPolicy</code> method:</p><pre class="programlisting"><xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Configuration</xslthl:annotation>
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
-    <em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Bean</xslthl:annotation>
     LoadBalancedRetryFactory retryFactory() {
         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> LoadBalancedRetryFactory() {
-            <em><span class="hl-annotation" style="color: gray">@Override</span></em>
+            <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Override</xslthl:annotation>
             <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> BackOffPolicy createBackOffPolicy(String service) {
         		<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> ExponentialBackOffPolicy();
         	}
@@ -108,26 +108,26 @@ See the <a class="link" href="https://github.com/Netflix/ribbon/wiki/Getting-Sta
     }
 }</pre><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Note"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="images/note.png"></td><th align="left">Note</th></tr><tr><td align="left" valign="top"><p><code class="literal">client</code> in the preceding examples should be replaced with your Ribbon client&#8217;s name.</p></td></tr></table></div><p>If you want to add one or more <code class="literal">RetryListener</code> implementations to your retry functionality, you need to
 create a bean of type <code class="literal">LoadBalancedRetryListenerFactory</code> and return the <code class="literal">RetryListener</code> array
-you would like to use for a given service, as shown in the following example:</p><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
+you would like to use for a given service, as shown in the following example:</p><pre class="programlisting"><xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Configuration</xslthl:annotation>
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
-    <em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Bean</xslthl:annotation>
     LoadBalancedRetryListenerFactory retryListenerFactory() {
         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> LoadBalancedRetryListenerFactory() {
-            <em><span class="hl-annotation" style="color: gray">@Override</span></em>
+            <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Override</xslthl:annotation>
             <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> RetryListener[] createRetryListeners(String service) {
                 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> RetryListener[]{<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> RetryListener() {
-                    <em><span class="hl-annotation" style="color: gray">@Override</span></em>
+                    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Override</xslthl:annotation>
                     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> &lt;T, E <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">extends</span> Throwable&gt; <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">boolean</span> open(RetryContext context, RetryCallback&lt;T, E&gt; callback) {
                         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-comment">//TODO Do you business...</span>
                         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> true;
                     }
 
-                    <em><span class="hl-annotation" style="color: gray">@Override</span></em>
+                    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Override</xslthl:annotation>
                      <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> &lt;T, E <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">extends</span> Throwable&gt; <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">void</span> close(RetryContext context, RetryCallback&lt;T, E&gt; callback, Throwable throwable) {
                         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-comment">//TODO Do you business...</span>
                     }
 
-                    <em><span class="hl-annotation" style="color: gray">@Override</span></em>
+                    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Override</xslthl:annotation>
                     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> &lt;T, E <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">extends</span> Throwable&gt; <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">void</span> onError(RetryContext context, RetryCallback&lt;T, E&gt; callback, Throwable throwable) {
                         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-comment">//TODO Do you business...</span>
                     }
@@ -136,28 +136,28 @@ you would like to use for a given service, as shown in the following example:</p
         };
     }
 }</pre></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="_multiple_resttemplate_objects" href="#_multiple_resttemplate_objects"></a>2.5&nbsp;Multiple RestTemplate objects</h2></div></div></div><p>If you want a <code class="literal">RestTemplate</code> that is not load-balanced, create a <code class="literal">RestTemplate</code> bean and inject it.
-To access the load-balanced <code class="literal">RestTemplate</code>, use the <code class="literal">@LoadBalanced</code> qualifier when you create your <code class="literal">@Bean</code>, as shown in the following example:\</p><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Configuration</span></em>
+To access the load-balanced <code class="literal">RestTemplate</code>, use the <code class="literal">@LoadBalanced</code> qualifier when you create your <code class="literal">@Bean</code>, as shown in the following example:\</p><pre class="programlisting"><xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Configuration</xslthl:annotation>
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyConfiguration {
 
-    <em><span class="hl-annotation" style="color: gray">@LoadBalanced</span></em>
-    <em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@LoadBalanced</xslthl:annotation>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Bean</xslthl:annotation>
     RestTemplate loadBalanced() {
         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> RestTemplate();
     }
 
-    <em><span class="hl-annotation" style="color: gray">@Primary</span></em>
-    <em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Primary</xslthl:annotation>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Bean</xslthl:annotation>
     RestTemplate restTemplate() {
         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> RestTemplate();
     }
 }
 
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyClass {
-    <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Autowired</xslthl:annotation>
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">private</span> RestTemplate restTemplate;
 
-    <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
-    <em><span class="hl-annotation" style="color: gray">@LoadBalanced</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Autowired</xslthl:annotation>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@LoadBalanced</xslthl:annotation>
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">private</span> RestTemplate loadBalanced;
 
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> String doOtherStuff() {
@@ -168,7 +168,7 @@ To access the load-balanced <code class="literal">RestTemplate</code>, use the <
         <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> restTemplate.getForObject(<span xmlns:d="http://docbook.org/ns/docbook" class="hl-string">"https://example.com"</span>, String.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>);
     }
 }</pre><div class="important" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Important"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Important]" src="images/important.png"></td><th align="left">Important</th></tr><tr><td align="left" valign="top"><p>Notice the use of the <code class="literal">@Primary</code> annotation on the plain <code class="literal">RestTemplate</code> declaration in the preceding example to disambiguate the unqualified <code class="literal">@Autowired</code> injection.</p></td></tr></table></div><div class="tip" style="margin-left: 0.5in; margin-right: 0.5in;"><table border="0" summary="Tip"><tr><td rowspan="2" align="center" valign="top" width="25"><img alt="[Tip]" src="images/tip.png"></td><th align="left">Tip</th></tr><tr><td align="left" valign="top"><p>If you see errors such as <code class="literal">java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89</code>, try injecting <code class="literal">RestOperations</code> or setting <code class="literal">spring.aop.proxyTargetClass=true</code>.</p></td></tr></table></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="loadbalanced-webclient" href="#loadbalanced-webclient"></a>2.6&nbsp;Spring WebFlux WebClient as a Load Balancer Client</h2></div></div></div><p><code class="literal">WebClient</code> can be configured to use the <code class="literal">LoadBalancerClient</code>. <code class="literal">LoadBalancerExchangeFilterFunction</code> is auto-configured if <code class="literal">spring-webflux</code> is on the classpath. The following example shows how to configure a <code class="literal">WebClient</code> to use load balancer:</p><pre class="programlisting"><span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span> MyClass {
-    <em><span class="hl-annotation" style="color: gray">@Autowired</span></em>
+    <xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Autowired</xslthl:annotation>
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">private</span> LoadBalancerExchangeFilterFunction lbFunction;
 
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> Mono&lt;String&gt; doOtherStuff() {
@@ -210,19 +210,19 @@ You can also disable the creation of these beans by setting <code class="literal
 This endpoint returns features available on the classpath and whether they are enabled.
 The information returned includes the feature type, name, version, and vendor.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_feature_types" href="#_feature_types"></a>2.9.1&nbsp;Feature types</h3></div></div></div><p>There are two types of 'features': abstract and named.</p><p>Abstract features are features where an interface or abstract class is defined and that an implementation the creates, such as <code class="literal">DiscoveryClient</code>, <code class="literal">LoadBalancerClient</code>, or <code class="literal">LockService</code>.
 The abstract class or interface is used to find a bean of that type in the context.
-The version displayed is <code class="literal">bean.getClass().getPackage().getImplementationVersion()</code>.</p><p>Named features are features that do not have a particular class they implement, such as "Circuit Breaker", "API Gateway", "Spring Cloud Bus", and others. These features require a name and a bean type.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_declaring_features" href="#_declaring_features"></a>2.9.2&nbsp;Declaring features</h3></div></div></div><p>Any module can declare any number of <code class="literal">HasFeature</code> beans, as shown in the following examples:</p><pre class="programlisting"><em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+The version displayed is <code class="literal">bean.getClass().getPackage().getImplementationVersion()</code>.</p><p>Named features are features that do not have a particular class they implement, such as "Circuit Breaker", "API Gateway", "Spring Cloud Bus", and others. These features require a name and a bean type.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="_declaring_features" href="#_declaring_features"></a>2.9.2&nbsp;Declaring features</h3></div></div></div><p>Any module can declare any number of <code class="literal">HasFeature</code> beans, as shown in the following examples:</p><pre class="programlisting"><xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Bean</xslthl:annotation>
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> HasFeatures commonsFeatures() {
   <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> HasFeatures.abstractFeatures(DiscoveryClient.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>, LoadBalancerClient.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>);
 }
 
-<em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+<xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Bean</xslthl:annotation>
 <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">public</span> HasFeatures consulFeatures() {
   <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> HasFeatures.namedFeatures(
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> NamedFeature(<span xmlns:d="http://docbook.org/ns/docbook" class="hl-string">"Spring Cloud Bus"</span>, ConsulBusAutoConfiguration.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>),
     <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">new</span> NamedFeature(<span xmlns:d="http://docbook.org/ns/docbook" class="hl-string">"Circuit Breaker"</span>, HystrixCommandAspect.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>));
 }
 
-<em><span class="hl-annotation" style="color: gray">@Bean</span></em>
+<xslthl:annotation xmlns:xslthl="http://xslthl.sourceforge.net/">@Bean</xslthl:annotation>
 HasFeatures localFeatures() {
   <span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">return</span> HasFeatures.builder()
       .abstractFeature(Foo.<span xmlns:d="http://docbook.org/ns/docbook" class="hl-keyword">class</span>)
