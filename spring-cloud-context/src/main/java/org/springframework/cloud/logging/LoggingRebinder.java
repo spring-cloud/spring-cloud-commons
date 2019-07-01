@@ -17,6 +17,7 @@
 package org.springframework.cloud.logging;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -37,6 +38,7 @@ import org.springframework.core.env.Environment;
  * changed.
  *
  * @author Dave Syer
+ * @author Olga Maciaszek-Sharma
  *
  */
 public class LoggingRebinder
@@ -79,11 +81,19 @@ public class LoggingRebinder
 				name = null;
 			}
 			level = environment.resolvePlaceholders(level);
-			system.setLogLevel(name, LogLevel.valueOf(level.toUpperCase()));
+			system.setLogLevel(name, resolveLogLevel(level));
 		}
 		catch (RuntimeException ex) {
 			this.logger.error("Cannot set level: " + level + " for '" + name + "'");
 		}
+	}
+
+	private LogLevel resolveLogLevel(String level) {
+		String trimmedLevel = level.trim();
+		if ("false".equalsIgnoreCase(trimmedLevel)) {
+			return LogLevel.OFF;
+		}
+		return LogLevel.valueOf(trimmedLevel.toUpperCase(Locale.ENGLISH));
 	}
 
 }
