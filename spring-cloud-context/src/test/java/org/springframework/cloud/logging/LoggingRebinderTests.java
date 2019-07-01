@@ -18,6 +18,7 @@ package org.springframework.cloud.logging;
 
 import java.util.Collections;
 
+import ch.qos.logback.classic.Level;
 import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Dave Syer
+ * @author Olga Maciaszek-Sharma
  *
  */
 public class LoggingRebinderTests {
@@ -69,6 +71,19 @@ public class LoggingRebinderTests {
 		this.rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment,
 				Collections.singleton("logging.level.org.springframework.web")));
 		then(this.logger.isTraceEnabled()).isTrue();
+	}
+
+	@Test
+	public void logLevelFalseResolvedToOff() {
+		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+				.getLogger("org.springframework.cloud");
+		StandardEnvironment environment = new StandardEnvironment();
+		TestPropertyValues.of("logging.level.org.springframework.cloud=false")
+				.applyTo(environment);
+		rebinder.setEnvironment(environment);
+		rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment,
+				Collections.singleton("logging.level.org.springframework.cloud")));
+		then(Level.OFF).isEqualTo((logger.getLevel()));
 	}
 
 }
