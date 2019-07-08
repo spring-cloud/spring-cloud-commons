@@ -84,7 +84,7 @@ public class BootstrapApplicationListener
 	/**
 	 * The name of the default properties.
 	 */
-	public static final String DEFAULT_PROPERTIES = "defaultProperties";
+	public static final String DEFAULT_PROPERTIES = "springCloudDefaultProperties";
 
 	private int order = DEFAULT_ORDER;
 

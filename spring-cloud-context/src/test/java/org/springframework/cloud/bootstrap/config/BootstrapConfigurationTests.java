@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -371,7 +370,6 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	@Ignore // FIXME 2.2.0.M1
 	public void includeProfileFromBootstrapProperties() {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class)
