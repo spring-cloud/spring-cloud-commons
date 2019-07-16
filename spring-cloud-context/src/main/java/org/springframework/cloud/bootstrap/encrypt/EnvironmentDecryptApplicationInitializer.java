@@ -17,6 +17,7 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -187,8 +188,11 @@ public class EnvironmentDecryptApplicationInitializer implements
 
 		if (source instanceof CompositePropertySource) {
 
-			for (PropertySource<?> nested : ((CompositePropertySource) source)
-					.getPropertySources()) {
+			List<PropertySource<?>> sources = new ArrayList<>(
+					((CompositePropertySource) source).getPropertySources());
+			Collections.reverse(sources);
+
+			for (PropertySource<?> nested : sources) {
 				decrypt(nested, overrides);
 			}
 

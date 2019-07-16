@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.bootstrap.encrypt;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer.DECRYPTED_PROPERTY_SOURCE_NAME;
@@ -154,23 +155,28 @@ public class EnvironmentDecryptApplicationInitializerTests {
 
 	@Test
 	public void testDecryptCompositePropertySource() {
-		String expected = "always";
 		TextEncryptor textEncryptor = mock(TextEncryptor.class);
-		when(textEncryptor.decrypt(anyString())).thenReturn(expected);
+		when(textEncryptor.decrypt(eq("value1"))).thenReturn("always1");
+		when(textEncryptor.decrypt(eq("value2"))).thenReturn("always2");
 
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
 		EnvironmentDecryptApplicationInitializer initializer = new EnvironmentDecryptApplicationInitializer(
 				textEncryptor);
 
-		MapPropertySource source = new MapPropertySource("nobody",
-				Collections.singletonMap("key", "{cipher}value"));
+		MapPropertySource devProfile = new MapPropertySource("dev-profile",
+				Collections.singletonMap("key", "{cipher}value1"));
+
+		MapPropertySource defaultProfile = new MapPropertySource("default-profile",
+				Collections.singletonMap("key", "{cipher}value2"));
+
 		CompositePropertySource cps = mock(CompositePropertySource.class);
-		when(cps.getPropertyNames()).thenReturn(source.getPropertyNames());
-		when(cps.getPropertySources()).thenReturn(Collections.singleton(source));
+		when(cps.getPropertyNames()).thenReturn(devProfile.getPropertyNames());
+		when(cps.getPropertySources())
+				.thenReturn(Arrays.asList(devProfile, defaultProfile));
 		ctx.getEnvironment().getPropertySources().addLast(cps);
 
 		initializer.initialize(ctx);
-		then(ctx.getEnvironment().getProperty("key")).isEqualTo(expected);
+		then(ctx.getEnvironment().getProperty("key")).isEqualTo("always1");
 	}
 
 }
