@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.support;
 import org.springframework.cloud.context.named.NamedContextFactory;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
+import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.core.env.Environment;
 
 /**
@@ -28,6 +29,7 @@ import org.springframework.core.env.Environment;
  *
  * @author Spencer Gibb
  * @author Dave Syer
+ * @author Olga Maciaszek-Sharma
  */
 public class LoadBalancerClientFactory
 		extends NamedContextFactory<LoadBalancerClientSpecification> {
@@ -48,6 +50,12 @@ public class LoadBalancerClientFactory
 
 	public String getName(Environment environment) {
 		return environment.getProperty(PROPERTY_NAME);
+	}
+
+	// TODO: get correct LB instance based on provided config
+	public ReactorServiceInstanceLoadBalancer getLoadBalancer(String name) {
+		// TODO: initialize the context and load configs
+		return getInstance(name, ReactorServiceInstanceLoadBalancer.class);
 	}
 
 }
