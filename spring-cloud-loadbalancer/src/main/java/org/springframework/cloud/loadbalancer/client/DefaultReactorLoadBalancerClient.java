@@ -65,12 +65,12 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 	// https://github.com/spring-cloud/spring-cloud-gateway/blob/master/spring-cloud-gateway-core/
 	// src/main/java/org/springframework/cloud/gateway/support/ServerWebExchangeUtils.java
 	private static boolean containsEncodedParts(URI uri) {
-		boolean encoded = (uri.getRawQuery() != null
-				&& uri.getRawQuery().contains(PERCENTAGE_SIGN))
-				|| (uri.getRawPath() != null
-						&& uri.getRawPath().contains(PERCENTAGE_SIGN))
-				|| (uri.getRawFragment() != null
-						&& uri.getRawFragment().contains(PERCENTAGE_SIGN));
+		boolean encoded = (uri.getRawQuery() != null && uri.getRawQuery()
+				.contains(PERCENTAGE_SIGN))
+				|| (uri.getRawPath() != null && uri.getRawPath()
+				.contains(PERCENTAGE_SIGN))
+				|| (uri.getRawFragment() != null && uri.getRawFragment()
+				.contains(PERCENTAGE_SIGN));
 		// Verify if it is really fully encoded. Treat partial encoded as unencoded.
 		if (encoded) {
 			try {
@@ -113,15 +113,15 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 	}
 
 	@Override
-	public Mono<URI> reconstructURI(Mono<Response<ServiceInstance>> instanceResponse,
-			URI original) {
-		return instanceResponse.map(Response::getServer)
-				.switchIfEmpty(Mono.defer(() -> Mono.error(new IllegalArgumentException(
-						"Service Instance must be present."))))
-				.map(serviceInstance -> reconstructURI(serviceInstance, original));
+	public Mono<URI> reconstructURI(ServiceInstance serviceInstance, URI original) {
+		if (serviceInstance == null) {
+			return Mono.defer(() -> Mono
+					.error(new IllegalArgumentException("Service Instance cannot be null.")));
+		}
+		return Mono.just(doReconstructURI(serviceInstance, original));
 	}
 
-	private URI reconstructURI(ServiceInstance serviceInstance, URI original) {
+	private URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
 		String host = serviceInstance.getHost();
 		String scheme = Optional.ofNullable(serviceInstance.getScheme())
 				.orElse(computeScheme(original, serviceInstance));
@@ -140,8 +140,8 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 	private String computeScheme(URI original, ServiceInstance serviceInstance) {
 		String originalOrDefault = Optional.ofNullable(original.getScheme())
 				.orElse(DEFAULT_SCHEME);
-		if (serviceInstance.isSecure()
-				&& INSECURE_SCHEME_MAPPINGS.containsKey(originalOrDefault)) {
+		if (serviceInstance.isSecure() && INSECURE_SCHEME_MAPPINGS
+				.containsKey(originalOrDefault)) {
 			return INSECURE_SCHEME_MAPPINGS.get(originalOrDefault);
 		}
 		return originalOrDefault;

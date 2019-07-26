@@ -35,6 +35,6 @@ public interface ReactorLoadBalancerClient {
 
 	Mono<Response<ServiceInstance>> choose(String serviceId);
 
-	Mono<URI> reconstructURI(Mono<Response<ServiceInstance>> instance, URI original);
+	Mono<URI> reconstructURI(ServiceInstance serviceInstance, URI original);
 
 }
