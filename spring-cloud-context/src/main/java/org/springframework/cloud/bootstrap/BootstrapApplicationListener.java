@@ -37,7 +37,10 @@ import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEven
 import org.springframework.boot.context.event.ApplicationFailedEvent;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.boot.env.OriginTrackedMapPropertySource;
+import org.springframework.boot.origin.Origin;
+import org.springframework.boot.origin.OriginLookup;
 import org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializer;
+import org.springframework.cloud.bootstrap.support.OriginTrackedCompositePropertySource;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -416,15 +419,15 @@ public class BootstrapApplicationListener
 	}
 
 	private static class ExtendedDefaultPropertySource
-			extends SystemEnvironmentPropertySource {
+			extends SystemEnvironmentPropertySource implements OriginLookup<String> {
 
-		private final CompositePropertySource sources;
+		private final OriginTrackedCompositePropertySource sources;
 
 		private final List<String> names = new ArrayList<>();
 
 		ExtendedDefaultPropertySource(String name, PropertySource<?> propertySource) {
 			super(name, findMap(propertySource));
-			this.sources = new CompositePropertySource(name);
+			this.sources = new OriginTrackedCompositePropertySource(name);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -474,6 +477,11 @@ public class BootstrapApplicationListener
 			names.addAll(Arrays.asList(this.sources.getPropertyNames()));
 			names.addAll(Arrays.asList(super.getPropertyNames()));
 			return names.toArray(new String[0]);
+		}
+
+		@Override
+		public Origin getOrigin(String name) {
+			return this.sources.getOrigin(name);
 		}
 
 	}

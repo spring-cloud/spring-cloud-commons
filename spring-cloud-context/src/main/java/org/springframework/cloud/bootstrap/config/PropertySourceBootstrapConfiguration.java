@@ -36,6 +36,7 @@ import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
+import org.springframework.cloud.bootstrap.support.OriginTrackedCompositePropertySource;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.context.ApplicationContextInitializer;
@@ -87,7 +88,7 @@ public class PropertySourceBootstrapConfiguration implements
 
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
-		CompositePropertySource composite = new CompositePropertySource(
+		CompositePropertySource composite = new OriginTrackedCompositePropertySource(
 				BOOTSTRAP_PROPERTY_SOURCE_NAME);
 		AnnotationAwareOrderComparator.sort(this.propertySourceLocators);
 		boolean empty = true;
