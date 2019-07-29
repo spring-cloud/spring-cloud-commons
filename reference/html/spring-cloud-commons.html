@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.7.1">
+<title>Cloud Native Applications</title>
+<link rel="stylesheet" href="css/spring.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+.hidden {
+	display: none;
+}
+
+.switch {
+	border-width: 1px 1px 0 1px;
+	border-style: solid;
+	border-color: #7a2518;
+	display: inline-block;
+}
+
+.switch--item {
+	padding: 10px;
+	background-color: #ffffff;
+	color: #7a2518;
+	display: inline-block;
+	cursor: pointer;
+}
+
+.switch--item:not(:first-child) {
+	border-width: 0 0 0 1px;
+	border-style: solid;
+	border-color: #7a2518;
+}
+
+.switch--item.selected {
+	background-color: #7a2519;
+	color: #ffffff;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+<script type="text/javascript">
+function addBlockSwitches() {
+	$('.primary').each(function() {
+		primary = $(this);
+		createSwitchItem(primary, createBlockSwitch(primary)).item.addClass("selected");
+		primary.children('.title').remove();
+	});
+	$('.secondary').each(function(idx, node) {
+		secondary = $(node);
+		primary = findPrimary(secondary);
+		switchItem = createSwitchItem(secondary, primary.children('.switch'));
+		switchItem.content.addClass('hidden');
+		findPrimary(secondary).append(switchItem.content);
+		secondary.remove();
+	});
+}
+
+function createBlockSwitch(primary) {
+	blockSwitch = $('<div class="switch"></div>');
+	primary.prepend(blockSwitch);
+	return blockSwitch;
+}
+
+function findPrimary(secondary) {
+	candidate = secondary.prev();
+	while (!candidate.is('.primary')) {
+		candidate = candidate.prev();
+	}
+	return candidate;
+}
+
+function createSwitchItem(block, blockSwitch) {
+	blockName = block.children('.title').text();
+	content = block.children('.content').first().append(block.next('.colist'));
+	item = $('<div class="switch--item">' + blockName + '</div>');
+	item.on('click', '', content, function(e) {
+		$(this).addClass('selected');
+		$(this).siblings().removeClass('selected');
+		e.data.siblings('.content').addClass('hidden');
+		e.data.removeClass('hidden');
+	});
+	blockSwitch.append(item);
+	return {'item': item, 'content': content};
+}
+
+$(addBlockSwitches);
+</script>
+
+</head>
+<body class="book toc2 toc-left">
+<div id="header">
+<h1>Cloud Native Applications</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_spring_cloud_context_application_context_services">Spring Cloud Context: Application Context Services</a>
+<ul class="sectlevel2">
+<li><a href="#_the_bootstrap_application_context">The Bootstrap Application Context</a></li>
+<li><a href="#_application_context_hierarchies">Application Context Hierarchies</a></li>
+<li><a href="#customizing-bootstrap-properties">Changing the Location of Bootstrap Properties</a></li>
+<li><a href="#overriding-bootstrap-properties">Overriding the Values of Remote Properties</a></li>
+<li><a href="#_customizing_the_bootstrap_configuration">Customizing the Bootstrap Configuration</a></li>
+<li><a href="#customizing-bootstrap-property-sources">Customizing the Bootstrap Property Sources</a></li>
+<li><a href="#_logging_configuration">Logging Configuration</a></li>
+<li><a href="#_environment_changes">Environment Changes</a></li>
+<li><a href="#refresh-scope">Refresh Scope</a></li>
+<li><a href="#_encryption_and_decryption">Encryption and Decryption</a></li>
+<li><a href="#_endpoints">Endpoints</a></li>
+</ul>
+</li>
+<li><a href="#_spring_cloud_commons_common_abstractions">Spring Cloud Commons: Common Abstractions</a>
+<ul class="sectlevel2">
+<li><a href="#_enablediscoveryclient">@EnableDiscoveryClient</a></li>
+<li><a href="#_serviceregistry">ServiceRegistry</a></li>
+<li><a href="#_spring_resttemplate_as_a_load_balancer_client">Spring RestTemplate as a Load Balancer Client</a></li>
+<li><a href="#_spring_webclient_as_a_load_balancer_client">Spring WebClient as a Load Balancer Client</a></li>
+<li><a href="#_multiple_resttemplate_objects">Multiple RestTemplate objects</a></li>
+<li><a href="#loadbalanced-webclient">Spring WebFlux WebClient as a Load Balancer Client</a></li>
+<li><a href="#ignore-network-interfaces">Ignore Network Interfaces</a></li>
+<li><a href="#http-clients">HTTP Client Factories</a></li>
+<li><a href="#enabled-features">Enabled Features</a></li>
+<li><a href="#_spring_cloud_compatibility_verification">Spring Cloud Compatibility Verification</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://pivotal.io/platform-as-a-service/migrating-to-cloud-native-application-architectures-ebook">Cloud Native</a> is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development.
+A related discipline is that of building <a href="https://12factor.net/">12-factor Applications</a>, in which development practices are aligned with delivery and operations goals&#8201;&#8212;&#8201;for instance, by using declarative programming and management and monitoring.
+Spring Cloud facilitates these styles of development in a number of specific ways.
+ The starting point is a set of features to which all components in a distributed system need easy access.</p>
+</div>
+<div class="paragraph">
+<p>Many of those features are covered by <a href="https://projects.spring.io/spring-boot">Spring Boot</a>, on which Spring Cloud builds. Some more features are delivered by Spring Cloud as two libraries: Spring Cloud Context and Spring Cloud Commons.
+Spring Cloud Context provides utilities and special services for the <code>ApplicationContext</code> of a Spring Cloud application (bootstrap context, encryption, refresh scope, and environment endpoints). Spring Cloud Commons is a set of abstractions and common classes used in different Spring Cloud implementations (such as Spring Cloud Netflix and Spring Cloud Consul).</p>
+</div>
+<div class="paragraph">
+<p>If you get an exception due to "Illegal key size" and you use Sun&#8217;s JDK, you need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files.
+See the following links for more information:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</a></p>
+</li>
+<li>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</a></p>
+</li>
+<li>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Extract the files into the JDK/jre/lib/security folder for whichever version of JRE/JDK x64/x86 you use.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Spring Cloud is released under the non-restrictive Apache 2.0 license.
+If you would like to contribute to this section of the documentation or if you find an error, you can find the source code and issue trackers for the project at <a href="https://github.com/spring-cloud/spring-cloud-commons/tree/master/docs/src/main/asciidoc">github</a>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_spring_cloud_context_application_context_services"><a class="link" href="#_spring_cloud_context_application_context_services">Spring Cloud Context: Application Context Services</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Boot has an opinionated view of how to build an application with Spring.
+For instance, it has conventional locations for common configuration files and has endpoints for common management and monitoring tasks.
+Spring Cloud builds on top of that and adds a few features that probably all components in a system would use or occasionally need.</p>
+</div>
+<div class="sect2">
+<h3 id="_the_bootstrap_application_context"><a class="link" href="#_the_bootstrap_application_context">The Bootstrap Application Context</a></h3>
+<div class="paragraph">
+<p>A Spring Cloud application operates by creating a &#8220;bootstrap&#8221; context, which is a parent context for the main application.
+It is responsible for loading configuration properties from the external sources and for decrypting properties in the local external configuration files.
+The two contexts share an <code>Environment</code>, which is the source of external properties for any Spring application.
+By default, bootstrap properties (not <code>bootstrap.properties</code> but properties that are loaded during the bootstrap phase) are added with high precedence, so they cannot be overridden by local configuration.</p>
+</div>
+<div class="paragraph">
+<p>The bootstrap context uses a different convention for locating external configuration than the main application context.
+Instead of <code>application.yml</code> (or <code>.properties</code>), you can use <code>bootstrap.yml</code>, keeping the external configuration for bootstrap and main context
+nicely separate.
+The following listing shows an example:</p>
+</div>
+<div class="listingblock">
+<div class="title">bootstrap.yml</div>
+<div class="content">
+<pre>spring:
+  application:
+    name: foo
+  cloud:
+    config:
+      uri: ${SPRING_CONFIG_URI:http://localhost:8888}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If your application needs any application-specific configuration from the server, it is a good idea to set the <code>spring.application.name</code> (in <code>bootstrap.yml</code> or <code>application.yml</code>).
+In order for the property <code>spring.application.name</code> to be used as the application&#8217;s context ID you
+must set it in <code>bootstrap.[properties | yml]</code>.</p>
+</div>
+<div class="paragraph">
+<p>You can disable the bootstrap process completely by setting <code>spring.cloud.bootstrap.enabled=false</code> (for example, in system properties).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_application_context_hierarchies"><a class="link" href="#_application_context_hierarchies">Application Context Hierarchies</a></h3>
+<div class="paragraph">
+<p>If you build an application context from <code>SpringApplication</code> or <code>SpringApplicationBuilder</code>, then the Bootstrap context is added as a parent to that context.
+It is a feature of Spring that child contexts inherit property sources and profiles from their parent, so the &#8220;main&#8221; application context contains additional property sources, compared to building the same context without Spring Cloud Config.
+The additional property sources are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>&#8220;bootstrap&#8221;: If any <code>PropertySourceLocators</code> are found in the Bootstrap context and if they have non-empty properties, an optional <code>CompositePropertySource</code> appears with high priority.
+An example would be properties from the Spring Cloud Config Server.
+See &#8220;<a href="#customizing-bootstrap-property-sources">Customizing the Bootstrap Property Sources</a>&#8221; for instructions on how to customize the contents of this property source.</p>
+</li>
+<li>
+<p>&#8220;applicationConfig: [classpath:bootstrap.yml]&#8221; (and related files if Spring profiles are active): If you have a <code>bootstrap.yml</code> (or <code>.properties</code>), those properties are used to configure the Bootstrap context.
+Then they get added to the child context when its parent is set.
+They have lower precedence than the <code>application.yml</code> (or <code>.properties</code>) and any other property sources that are added to the child as a normal part of the process of creating a Spring Boot application.
+See &#8220;<a href="#customizing-bootstrap-properties">Changing the Location of Bootstrap Properties</a>&#8221; for instructions on how to customize the contents of these property sources.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Because of the ordering rules of property sources, the &#8220;bootstrap&#8221; entries take precedence.
+However, note that these do not contain any data from <code>bootstrap.yml</code>, which has very low precedence but can be used to set defaults.</p>
+</div>
+<div class="paragraph">
+<p>You can extend the context hierarchy by setting the parent context of any <code>ApplicationContext</code> you create&#8201;&#8212;&#8201;for example, by using its own interface or with the <code>SpringApplicationBuilder</code> convenience methods (<code>parent()</code>, <code>child()</code> and <code>sibling()</code>).
+The bootstrap context is the parent of the most senior ancestor that you create yourself.
+Every context in the hierarchy has its own &#8220;bootstrap&#8221; (possibly empty) property source to avoid promoting values inadvertently from parents down to their descendants.
+If there is a Config Server, every context in the hierarchy can also (in principle) have a different <code>spring.application.name</code> and, hence, a different remote property source.
+Normal Spring application context behavior rules apply to property resolution: properties from a child context override those in
+the parent, by name and also by property source name.
+(If the child has a property source with the same name as the parent, the value from the parent is not included in the child).</p>
+</div>
+<div class="paragraph">
+<p>Note that the <code>SpringApplicationBuilder</code> lets you share an <code>Environment</code> amongst the whole hierarchy, but that is not the default.
+Thus, sibling contexts, in particular, do not need to have the same profiles or property sources, even though they may share common values with their parent.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="customizing-bootstrap-properties"><a class="link" href="#customizing-bootstrap-properties">Changing the Location of Bootstrap Properties</a></h3>
+<div class="paragraph">
+<p>The <code>bootstrap.yml</code> (or <code>.properties</code>) location can be specified by setting <code>spring.cloud.bootstrap.name</code> (default: <code>bootstrap</code>) or <code>spring.cloud.bootstrap.location</code> (default: empty)&#8201;&#8212;&#8201;for example, in System properties.
+Those properties behave like the <code>spring.config.*</code> variants with the same name.
+In fact, they are used to set up the bootstrap <code>ApplicationContext</code> by setting those properties in its <code>Environment</code>.
+If there is an active profile (from <code>spring.profiles.active</code> or through the <code>Environment</code> API in the
+context you are building), properties in that profile get loaded as well, the same as in a regular Spring Boot app&#8201;&#8212;&#8201;for example, from <code>bootstrap-development.properties</code> for a <code>development</code> profile.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="overriding-bootstrap-properties"><a class="link" href="#overriding-bootstrap-properties">Overriding the Values of Remote Properties</a></h3>
+<div class="paragraph">
+<p>The property sources that are added to your application by the bootstrap context are often &#8220;remote&#8221; (from example, from Spring Cloud Config Server).
+By default, they cannot be overridden locally.
+If you want to let your applications override the remote properties with their own System properties or config files, the remote property source has to grant it permission by setting <code>spring.cloud.config.allowOverride=true</code> (it does not work to set this locally).
+Once that flag is set, two finer-grained settings control the location of the remote properties in relation to system properties and the application&#8217;s local configuration:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>spring.cloud.config.overrideNone=true</code>: Override from any local property source.</p>
+</li>
+<li>
+<p><code>spring.cloud.config.overrideSystemProperties=false</code>: Only system properties, command line arguments, and environment variables (but not the local config files) should override the remote settings.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_customizing_the_bootstrap_configuration"><a class="link" href="#_customizing_the_bootstrap_configuration">Customizing the Bootstrap Configuration</a></h3>
+<div class="paragraph">
+<p>The bootstrap context can be set to do anything you like by adding entries to <code>/META-INF/spring.factories</code> under a key named <code>org.springframework.cloud.bootstrap.BootstrapConfiguration</code>.
+This holds a comma-separated list of Spring <code>@Configuration</code> classes that are used to create the context.
+Any beans that you want to be available to the main application context for autowiring can be created here.
+There is a special contract for <code>@Beans</code> of type <code>ApplicationContextInitializer</code>.
+If you want to control the startup sequence, classes can be marked with an <code>@Order</code> annotation (the default order is <code>last</code>).</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+When adding custom <code>BootstrapConfiguration</code>, be careful that the classes you add are not <code>@ComponentScanned</code> by mistake into your &#8220;main&#8221; application context, where they might not be needed.
+Use a separate package name for boot configuration classes and make sure that name is not already covered by your <code>@ComponentScan</code> or <code>@SpringBootApplication</code> annotated configuration classes.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The bootstrap process ends by injecting initializers into the main <code>SpringApplication</code> instance (which is the normal Spring Boot startup sequence, whether it is running as a standalone application or deployed in an application server).
+First, a bootstrap context is created from the classes found in <code>spring.factories</code>.
+Then, all <code>@Beans</code> of type <code>ApplicationContextInitializer</code> are added to the main <code>SpringApplication</code> before it is started.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="customizing-bootstrap-property-sources"><a class="link" href="#customizing-bootstrap-property-sources">Customizing the Bootstrap Property Sources</a></h3>
+<div class="paragraph">
+<p>The default property source for external configuration added by the bootstrap process is the Spring Cloud Config Server, but you can add additional sources by adding beans of type <code>PropertySourceLocator</code> to the bootstrap context (through <code>spring.factories</code>).
+For instance, you can insert additional properties from a different server or from a database.</p>
+</div>
+<div class="paragraph">
+<p>As an example, consider the following custom locator:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class CustomPropertySourceLocator implements PropertySourceLocator {
+
+    @Override
+    public PropertySource&lt;?&gt; locate(Environment environment) {
+        return new MapPropertySource("customProperty",
+                Collections.&lt;String, Object&gt;singletonMap("property.from.sample.custom.source", "worked as intended"));
+    }
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>Environment</code> that is passed in is the one for the <code>ApplicationContext</code> about to be created&#8201;&#8212;&#8201;in other words, the one for which we supply additional property sources for.
+It already has its normal Spring Boot-provided property sources, so you can use those to locate a property source specific to this <code>Environment</code> (for example, by keying it on <code>spring.application.name</code>, as is done in the default Spring Cloud Config Server property source locator).</p>
+</div>
+<div class="paragraph">
+<p>If you create a jar with this class in it and then add a <code>META-INF/spring.factories</code> containing the following, the <code>customProperty</code> <code>PropertySource</code> appears in any application that includes that jar on its classpath:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>org.springframework.cloud.bootstrap.BootstrapConfiguration=sample.custom.CustomPropertySourceLocator</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_logging_configuration"><a class="link" href="#_logging_configuration">Logging Configuration</a></h3>
+<div class="paragraph">
+<p>If you are going to use Spring Boot to configure log settings than
+you should place this configuration in `bootstrap.[yml | properties]
+if you would like it to apply to all events.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+For Spring Cloud to initialize logging configuration properly you cannot use a custom prefix.  For example,
+using <code>custom.loggin.logpath</code> will not be recognized by Spring Cloud when initializing the logging system.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_environment_changes"><a class="link" href="#_environment_changes">Environment Changes</a></h3>
+<div class="paragraph">
+<p>The application listens for an <code>EnvironmentChangeEvent</code> and reacts to the change in a couple of standard ways (additional <code>ApplicationListeners</code> can be added as <code>@Beans</code> by the user in the normal way).
+When an <code>EnvironmentChangeEvent</code> is observed, it has a list of key values that have changed, and the application uses those to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Re-bind any <code>@ConfigurationProperties</code> beans in the context</p>
+</li>
+<li>
+<p>Set the logger levels for any properties in <code>logging.level.*</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Note that the Config Client does not, by default, poll for changes in the <code>Environment</code>.
+Generally, we would not recommend that approach for detecting changes (although you could set it up with a
+<code>@Scheduled</code> annotation).
+If you have a scaled-out client application, it is better to broadcast the <code>EnvironmentChangeEvent</code> to all the instances instead of having them polling for changes (for example, by using the <a href="https://github.com/spring-cloud/spring-cloud-bus">Spring Cloud Bus</a>).</p>
+</div>
+<div class="paragraph">
+<p>The <code>EnvironmentChangeEvent</code> covers a large class of refresh use cases, as long as you can actually make a change to the <code>Environment</code> and publish the event.
+Note that those APIs are public and part of core Spring).
+You can verify that the changes are bound to <code>@ConfigurationProperties</code> beans by visiting the <code>/configprops</code> endpoint (a normal Spring Boot Actuator feature).
+For instance, a <code>DataSource</code> can have its <code>maxPoolSize</code> changed at runtime (the default <code>DataSource</code> created by Spring Boot is an <code>@ConfigurationProperties</code> bean) and grow capacity dynamically.
+Re-binding <code>@ConfigurationProperties</code> does not cover another large class of use cases, where you need more control over the refresh and where you need a change to be atomic over the whole <code>ApplicationContext</code>.
+To address those concerns, we have <code>@RefreshScope</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="refresh-scope"><a class="link" href="#refresh-scope">Refresh Scope</a></h3>
+<div class="paragraph">
+<p>When there is a configuration change, a Spring <code>@Bean</code> that is marked as <code>@RefreshScope</code> gets special treatment.
+This feature addresses the problem of stateful beans that only get their configuration injected when they are initialized.
+For instance, if a <code>DataSource</code> has open connections when the database URL is changed via the <code>Environment</code>, you probably want the holders of those connections to be able to complete what they are doing.
+Then, the next time something borrows a connection from the pool, it gets one with the new URL.</p>
+</div>
+<div class="paragraph">
+<p>Sometimes, it might even be mandatory to apply the <code>@RefreshScope</code>
+annotation on some beans which can be only initialized once. If a bean
+is "immutable", you will have to either annotate the bean with <code>@RefreshScope</code>
+or specify the classname under the property key
+<code>spring.cloud.refresh.extra-refreshable</code>.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If you create a <code>DataSource</code> bean yourself and the implementation is a <code>HikariDataSource</code>, return the
+most specific type, in this case <code>HikariDataSource</code>. Otherwise, you will need to set
+<code>spring.cloud.refresh.extra-refreshable=javax.sql.DataSource</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Refresh scope beans are lazy proxies that initialize when they are used (that is, when a method is called), and the scope acts as a cache of initialized values.
+To force a bean to re-initialize on the next method call, you must invalidate its cache entry.</p>
+</div>
+<div class="paragraph">
+<p>The <code>RefreshScope</code> is a bean in the context and has a public  <code>refreshAll()</code> method to refresh all beans in the scope by clearing the target cache.
+The <code>/refresh</code> endpoint exposes this functionality (over HTTP or JMX).
+To refresh an individual bean by name, there is also a <code>refresh(String)</code> method.</p>
+</div>
+<div class="paragraph">
+<p>To expose the <code>/refresh</code> endpoint, you need to add following configuration to your application:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>@RefreshScope</code> works (technically) on an <code>@Configuration</code> class, but it might lead to surprising behavior.
+For example, it does not mean that all the <code>@Beans</code> defined in that class are themselves in <code>@RefreshScope</code>.
+Specifically, anything that depends on those beans cannot rely on them being updated when a refresh is initiated, unless it is itself in <code>@RefreshScope</code>.
+In that case, it is rebuilt on a refresh and its dependencies are re-injected. At that point, they are re-initialized from the refreshed <code>@Configuration</code>).
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_encryption_and_decryption"><a class="link" href="#_encryption_and_decryption">Encryption and Decryption</a></h3>
+<div class="paragraph">
+<p>Spring Cloud has an <code>Environment</code> pre-processor for decrypting property values locally.
+It follows the same rules as the Config Server and has the same external configuration through <code>encrypt.*</code>.
+Thus, you can use encrypted values in the form of <code>{cipher}*</code> and, as long as there is a valid key, they are decrypted before the main application context gets the <code>Environment</code> settings.
+To use the encryption features in an application, you need to include Spring Security RSA in your classpath (Maven co-ordinates: "org.springframework.security:spring-security-rsa"), and you also need the full strength JCE extensions in your JVM.</p>
+</div>
+<div class="paragraph">
+<p>If you get an exception due to "Illegal key size" and you use Sun&#8217;s JDK, you need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files.
+See the following links for more information:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html">Java 6 JCE</a></p>
+</li>
+<li>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html">Java 7 JCE</a></p>
+</li>
+<li>
+<p><a href="https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html">Java 8 JCE</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Extract the files into the JDK/jre/lib/security folder for whichever version of JRE/JDK x64/x86 you use.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_endpoints"><a class="link" href="#_endpoints">Endpoints</a></h3>
+<div class="paragraph">
+<p>For a Spring Boot Actuator application, some additional management endpoints are available. You can use:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>POST</code> to <code>/actuator/env</code> to update the <code>Environment</code> and rebind <code>@ConfigurationProperties</code> and log levels.</p>
+</li>
+<li>
+<p><code>/actuator/refresh</code> to re-load the boot strap context and refresh the <code>@RefreshScope</code> beans.</p>
+</li>
+<li>
+<p><code>/actuator/restart</code> to close the <code>ApplicationContext</code> and restart it (disabled by default).</p>
+</li>
+<li>
+<p><code>/actuator/pause</code> and <code>/actuator/resume</code> for calling the <code>Lifecycle</code> methods (<code>stop()</code> and <code>start()</code> on the <code>ApplicationContext</code>).</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you disable the <code>/actuator/restart</code> endpoint then the <code>/actuator/pause</code> and <code>/actuator/resume</code> endpoints
+will also be disabled since they are just a special case of <code>/actuator/restart</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_spring_cloud_commons_common_abstractions"><a class="link" href="#_spring_cloud_commons_common_abstractions">Spring Cloud Commons: Common Abstractions</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Patterns such as service discovery, load balancing, and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (for example, discovery with Eureka or Consul).</p>
+</div>
+<div class="sect2">
+<h3 id="_enablediscoveryclient"><a class="link" href="#_enablediscoveryclient">@EnableDiscoveryClient</a></h3>
+<div class="paragraph">
+<p>Spring Cloud Commons provides the <code>@EnableDiscoveryClient</code> annotation.
+This looks for implementations of the <code>DiscoveryClient</code> interface with <code>META-INF/spring.factories</code>.
+Implementations of the Discovery Client add a configuration class to <code>spring.factories</code> under the <code>org.springframework.cloud.client.discovery.EnableDiscoveryClient</code> key.
+Examples of <code>DiscoveryClient</code> implementations include <a href="https://cloud.spring.io/spring-cloud-netflix/">Spring Cloud Netflix Eureka</a>, <a href="https://cloud.spring.io/spring-cloud-consul/">Spring Cloud Consul Discovery</a>, and <a href="https://cloud.spring.io/spring-cloud-zookeeper/">Spring Cloud Zookeeper Discovery</a>.</p>
+</div>
+<div class="paragraph">
+<p>By default, implementations of <code>DiscoveryClient</code> auto-register the local Spring Boot server with the remote discovery server.
+This behavior can be disabled by setting <code>autoRegister=false</code> in <code>@EnableDiscoveryClient</code>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>@EnableDiscoveryClient</code> is no longer required.
+You can put a <code>DiscoveryClient</code> implementation on the classpath to cause the Spring Boot application to register with the service discovery server.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_health_indicator"><a class="link" href="#_health_indicator">Health Indicator</a></h4>
+<div class="paragraph">
+<p>Commons creates a Spring Boot <code>HealthIndicator</code> that <code>DiscoveryClient</code> implementations can participate in by implementing <code>DiscoveryHealthIndicator</code>.
+To disable the composite <code>HealthIndicator</code>, set <code>spring.cloud.discovery.client.composite-indicator.enabled=false</code>.
+A generic <code>HealthIndicator</code> based on <code>DiscoveryClient</code> is auto-configured (<code>DiscoveryClientHealthIndicator</code>).
+To disable it, set <code>spring.cloud.discovery.client.health-indicator.enabled=false</code>.
+To disable the description field of the <code>DiscoveryClientHealthIndicator</code>, set <code>spring.cloud.discovery.client.health-indicator.include-description=false</code>.
+Otherwise, it can bubble up as the <code>description</code> of the rolled up <code>HealthIndicator</code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_ordering_discoveryclient_instances"><a class="link" href="#_ordering_discoveryclient_instances">Ordering <code>DiscoveryClient</code> instances</a></h4>
+<div class="paragraph">
+<p><code>DiscoveryClient</code> interface extends <code>Ordered</code>. This is useful when using multiple discovery
+ clients, as it allows you to define the order of the returned discovery clients, similar to
+how you can order the beans loaded by a Spring application. By default, the order of any <code>DiscoveryClient</code> is set to
+<code>0</code>. If you want to set a different order for your custom <code>DiscoveryClient</code> implementations, you just need to override
+the <code>getOrder()</code> method so that it returns the value that is suitable for your setup. Apart from this, you can use
+properties to set the order of the <code>DiscoveryClient</code>
+implementations provided by Spring Cloud, among others  <code>ConsulDiscoveryClient</code>, <code>EurekaDiscoveryClient</code> and
+<code>ZookeeperDiscoveryClient</code>. In order to do it, you just need to set the
+<code>spring.cloud.{clientIdentifier}.discovery.order</code> (or <code>eureka.client.order</code> for Eureka) property to the desired value.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_serviceregistry"><a class="link" href="#_serviceregistry">ServiceRegistry</a></h3>
+<div class="paragraph">
+<p>Commons now provides a <code>ServiceRegistry</code> interface that provides methods such as <code>register(Registration)</code> and <code>deregister(Registration)</code>, which let you provide custom registered services.
+<code>Registration</code> is a marker interface.</p>
+</div>
+<div class="paragraph">
+<p>The following example shows the <code>ServiceRegistry</code> in use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+@EnableDiscoveryClient(autoRegister=false)
+public class MyConfiguration {
+    private ServiceRegistry registry;
+
+    public MyConfiguration(ServiceRegistry registry) {
+        this.registry = registry;
+    }
+
+    // called through some external process, such as an event or a custom actuator endpoint
+    public void register() {
+        Registration registration = constructRegistration();
+        this.registry.register(registration);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each <code>ServiceRegistry</code> implementation has its own <code>Registry</code> implementation.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>ZookeeperRegistration</code> used with <code>ZookeeperServiceRegistry</code></p>
+</li>
+<li>
+<p><code>EurekaRegistration</code> used with <code>EurekaServiceRegistry</code></p>
+</li>
+<li>
+<p><code>ConsulRegistration</code> used with <code>ConsulServiceRegistry</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you are using the <code>ServiceRegistry</code> interface, you are going to need to pass the
+correct <code>Registry</code> implementation for the <code>ServiceRegistry</code> implementation you
+are using.</p>
+</div>
+<div class="sect3">
+<h4 id="_serviceregistry_auto_registration"><a class="link" href="#_serviceregistry_auto_registration">ServiceRegistry Auto-Registration</a></h4>
+<div class="paragraph">
+<p>By default, the <code>ServiceRegistry</code> implementation auto-registers the running service.
+To disable that behavior, you can set:
+* <code>@EnableDiscoveryClient(autoRegister=false)</code> to permanently disable auto-registration.
+* <code>spring.cloud.service-registry.auto-registration.enabled=false</code> to disable the behavior through configuration.</p>
+</div>
+<div class="sect4">
+<h5 id="_serviceregistry_auto_registration_events"><a class="link" href="#_serviceregistry_auto_registration_events">ServiceRegistry Auto-Registration Events</a></h5>
+<div class="paragraph">
+<p>There are two events that will be fired when a service auto-registers.  The first event, called
+<code>InstancePreRegisteredEvent</code>, is fired before the service is registered.  The second
+event, called <code>InstanceRegisteredEvent</code>, is fired after the service is registered.  You can register an
+<code>ApplicationListener</code>(s) to listen to and react to these events.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+These events will not be fired if <code>spring.cloud.service-registry.auto-registration.enabled</code> is set to <code>false</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_service_registry_actuator_endpoint"><a class="link" href="#_service_registry_actuator_endpoint">Service Registry Actuator Endpoint</a></h4>
+<div class="paragraph">
+<p>Spring Cloud Commons provides a <code>/service-registry</code> actuator endpoint.
+This endpoint relies on a <code>Registration</code> bean in the Spring Application Context.
+Calling <code>/service-registry</code> with GET returns the status of the <code>Registration</code>.
+Using POST to the same endpoint with a JSON body changes the status of the current <code>Registration</code> to the new value.
+The JSON body has to include the <code>status</code> field with the preferred value.
+Please see the documentation of the <code>ServiceRegistry</code> implementation you use for the allowed values when updating the status and the values returned for the status.
+For instance, Eureka&#8217;s supported statuses are <code>UP</code>, <code>DOWN</code>, <code>OUT_OF_SERVICE</code>, and <code>UNKNOWN</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_spring_resttemplate_as_a_load_balancer_client"><a class="link" href="#_spring_resttemplate_as_a_load_balancer_client">Spring RestTemplate as a Load Balancer Client</a></h3>
+<div class="paragraph">
+<p><code>RestTemplate</code> can be automatically configured to use ribbon.
+To create a load-balanced <code>RestTemplate</code>, create a <code>RestTemplate</code> <code>@Bean</code> and use the <code>@LoadBalanced</code> qualifier, as shown in the following example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private RestTemplate restTemplate;
+
+    public String doOtherStuff() {
+        String results = restTemplate.getForObject("http://stores/stores", String.class);
+        return results;
+    }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+A <code>RestTemplate</code> bean is no longer created through auto-configuration.
+Individual applications must create it.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The URI needs to use a virtual host name (that is, a service name, not a host name).
+The Ribbon client is used to create a full physical address.
+See <a href="https://github.com/spring-cloud/spring-cloud-netflix/blob/master/spring-cloud-netflix-ribbon/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java">RibbonAutoConfiguration</a> for details of how the <code>RestTemplate</code> is set up.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_spring_webclient_as_a_load_balancer_client"><a class="link" href="#_spring_webclient_as_a_load_balancer_client">Spring WebClient as a Load Balancer Client</a></h3>
+<div class="paragraph">
+<p><code>WebClient</code> can be automatically configured to use the <code>LoadBalancerClient</code>.
+To create a load-balanced <code>WebClient</code>, create a <code>WebClient.Builder</code> <code>@Bean</code> and use the <code>@LoadBalanced</code> qualifier, as shown in the following example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class MyConfiguration {
+
+	@Bean
+	@LoadBalanced
+	public WebClient.Builder loadBalancedWebClientBuilder() {
+		return WebClient.builder();
+	}
+}
+
+public class MyClass {
+    @Autowired
+    private WebClient.Builder webClientBuilder;
+
+    public Mono&lt;String&gt; doOtherStuff() {
+        return webClientBuilder.build().get().uri("http://stores/stores")
+        				.retrieve().bodyToMono(String.class);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The URI needs to use a virtual host name (that is, a service name, not a host name).
+The Ribbon client is used to create a full physical address.</p>
+</div>
+<div class="sect3">
+<h4 id="_retrying_failed_requests"><a class="link" href="#_retrying_failed_requests">Retrying Failed Requests</a></h4>
+<div class="paragraph">
+<p>A load-balanced <code>RestTemplate</code> can be configured to retry failed requests.
+By default, this logic is disabled.
+You can enable it by adding <a href="https://github.com/spring-projects/spring-retry">Spring Retry</a> to your application&#8217;s classpath.
+The load-balanced <code>RestTemplate</code> honors some of the Ribbon configuration values related to retrying failed requests.
+You can use <code>client.ribbon.MaxAutoRetries</code>, <code>client.ribbon.MaxAutoRetriesNextServer</code>, and <code>client.ribbon.OkToRetryOnAllOperations</code> properties.
+If you would like to disable the retry logic with Spring Retry on the classpath, you can set <code>spring.cloud.loadbalancer.retry.enabled=false</code>.
+See the <a href="https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties">Ribbon documentation</a> for a description of what these properties do.</p>
+</div>
+<div class="paragraph">
+<p>If you would like to implement a <code>BackOffPolicy</code> in your retries, you need to create a bean of type <code>LoadBalancedRetryFactory</code> and override the <code>createBackOffPolicy</code> method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class MyConfiguration {
+    @Bean
+    LoadBalancedRetryFactory retryFactory() {
+        return new LoadBalancedRetryFactory() {
+            @Override
+            public BackOffPolicy createBackOffPolicy(String service) {
+        		return new ExponentialBackOffPolicy();
+        	}
+        };
+    }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>client</code> in the preceding examples should be replaced with your Ribbon client&#8217;s name.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If you want to add one or more <code>RetryListener</code> implementations to your retry functionality, you need to
+create a bean of type <code>LoadBalancedRetryListenerFactory</code> and return the <code>RetryListener</code> array
+you would like to use for a given service, as shown in the following example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class MyConfiguration {
+    @Bean
+    LoadBalancedRetryListenerFactory retryListenerFactory() {
+        return new LoadBalancedRetryListenerFactory() {
+            @Override
+            public RetryListener[] createRetryListeners(String service) {
+                return new RetryListener[]{new RetryListener() {
+                    @Override
+                    public &lt;T, E extends Throwable&gt; boolean open(RetryContext context, RetryCallback&lt;T, E&gt; callback) {
+                        //TODO Do you business...
+                        return true;
+                    }
+
+                    @Override
+                     public &lt;T, E extends Throwable&gt; void close(RetryContext context, RetryCallback&lt;T, E&gt; callback, Throwable throwable) {
+                        //TODO Do you business...
+                    }
+
+                    @Override
+                    public &lt;T, E extends Throwable&gt; void onError(RetryContext context, RetryCallback&lt;T, E&gt; callback, Throwable throwable) {
+                        //TODO Do you business...
+                    }
+                }};
+            }
+        };
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_multiple_resttemplate_objects"><a class="link" href="#_multiple_resttemplate_objects">Multiple RestTemplate objects</a></h3>
+<div class="paragraph">
+<p>If you want a <code>RestTemplate</code> that is not load-balanced, create a <code>RestTemplate</code> bean and inject it.
+To access the load-balanced <code>RestTemplate</code>, use the <code>@LoadBalanced</code> qualifier when you create your <code>@Bean</code>, as shown in the following example:\</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    RestTemplate loadBalanced() {
+        return new RestTemplate();
+    }
+
+    @Primary
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    @LoadBalanced
+    private RestTemplate loadBalanced;
+
+    public String doOtherStuff() {
+        return loadBalanced.getForObject("http://stores/stores", String.class);
+    }
+
+    public String doStuff() {
+        return restTemplate.getForObject("http://example.com", String.class);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Notice the use of the <code>@Primary</code> annotation on the plain <code>RestTemplate</code> declaration in the preceding example to disambiguate the unqualified <code>@Autowired</code> injection.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+If you see errors such as <code>java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89</code>, try injecting <code>RestOperations</code> or setting <code>spring.aop.proxyTargetClass=true</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="loadbalanced-webclient"><a class="link" href="#loadbalanced-webclient">Spring WebFlux WebClient as a Load Balancer Client</a></h3>
+<div class="paragraph">
+<p><code>WebClient</code> can be configured to use the <code>LoadBalancerClient</code>. <code>LoadBalancerExchangeFilterFunction</code> is auto-configured if <code>spring-webflux</code> is on the classpath. The following example shows how to configure a <code>WebClient</code> to use load balancer:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class MyClass {
+    @Autowired
+    private LoadBalancerExchangeFilterFunction lbFunction;
+
+    public Mono&lt;String&gt; doOtherStuff() {
+        return WebClient.builder().baseUrl("http://stores")
+            .filter(lbFunction)
+            .build()
+            .get()
+            .uri("/stores")
+            .retrieve()
+            .bodyToMono(String.class);
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The URI needs to use a virtual host name (that is, a service name, not a host name).
+The <code>LoadBalancerClient</code> is used to create a full physical address.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ignore-network-interfaces"><a class="link" href="#ignore-network-interfaces">Ignore Network Interfaces</a></h3>
+<div class="paragraph">
+<p>Sometimes, it is useful to ignore certain named network interfaces so that they can be excluded from Service Discovery registration (for example, when running in a Docker container).
+A list of regular expressions can be set to cause the desired network interfaces to be ignored.
+The following configuration ignores the <code>docker0</code> interface and all interfaces that start with <code>veth</code>:</p>
+</div>
+<div class="listingblock">
+<div class="title">application.yml</div>
+<div class="content">
+<pre>spring:
+  cloud:
+    inetutils:
+      ignoredInterfaces:
+        - docker0
+        - veth.*</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also force the use of only specified network addresses by using a list of regular expressions, as shown in the following example:</p>
+</div>
+<div class="listingblock">
+<div class="title">bootstrap.yml</div>
+<div class="content">
+<pre>spring:
+  cloud:
+    inetutils:
+      preferredNetworks:
+        - 192.168
+        - 10.0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also force the use of only site-local addresses, as shown in the following example:
+.application.yml</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>spring:
+  cloud:
+    inetutils:
+      useOnlySiteLocalInterfaces: true</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See <a href="https://docs.oracle.com/javase/8/docs/api/java/net/Inet4Address.html#isSiteLocalAddress--">Inet4Address.html.isSiteLocalAddress()</a> for more details about what constitutes a site-local address.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="http-clients"><a class="link" href="#http-clients">HTTP Client Factories</a></h3>
+<div class="paragraph">
+<p>Spring Cloud Commons provides beans for creating both Apache HTTP clients (<code>ApacheHttpClientFactory</code>) and OK HTTP clients (<code>OkHttpClientFactory</code>).
+The <code>OkHttpClientFactory</code> bean is created only if the OK HTTP jar is on the classpath.
+In addition, Spring Cloud Commons provides beans for creating the connection managers used by both clients: <code>ApacheHttpClientConnectionManagerFactory</code> for the Apache HTTP client and <code>OkHttpClientConnectionPoolFactory</code> for the OK HTTP client.
+If you would like to customize how the HTTP clients are created in downstream projects, you can provide your own implementation of these beans.
+In addition, if you provide a bean of type <code>HttpClientBuilder</code> or <code>OkHttpClient.Builder</code>, the default factories use these builders as the basis for the builders returned to downstream projects.
+You can also disable the creation of these beans by setting <code>spring.cloud.httpclientfactories.apache.enabled</code> or <code>spring.cloud.httpclientfactories.ok.enabled</code> to <code>false</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="enabled-features"><a class="link" href="#enabled-features">Enabled Features</a></h3>
+<div class="paragraph">
+<p>Spring Cloud Commons provides a <code>/features</code> actuator endpoint.
+This endpoint returns features available on the classpath and whether they are enabled.
+The information returned includes the feature type, name, version, and vendor.</p>
+</div>
+<div class="sect3">
+<h4 id="_feature_types"><a class="link" href="#_feature_types">Feature types</a></h4>
+<div class="paragraph">
+<p>There are two types of 'features': abstract and named.</p>
+</div>
+<div class="paragraph">
+<p>Abstract features are features where an interface or abstract class is defined and that an implementation the creates, such as <code>DiscoveryClient</code>, <code>LoadBalancerClient</code>, or <code>LockService</code>.
+The abstract class or interface is used to find a bean of that type in the context.
+The version displayed is <code>bean.getClass().getPackage().getImplementationVersion()</code>.</p>
+</div>
+<div class="paragraph">
+<p>Named features are features that do not have a particular class they implement, such as "Circuit Breaker", "API Gateway", "Spring Cloud Bus", and others. These features require a name and a bean type.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_declaring_features"><a class="link" href="#_declaring_features">Declaring features</a></h4>
+<div class="paragraph">
+<p>Any module can declare any number of <code>HasFeature</code> beans, as shown in the following examples:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Bean
+public HasFeatures commonsFeatures() {
+  return HasFeatures.abstractFeatures(DiscoveryClient.class, LoadBalancerClient.class);
+}
+
+@Bean
+public HasFeatures consulFeatures() {
+  return HasFeatures.namedFeatures(
+    new NamedFeature("Spring Cloud Bus", ConsulBusAutoConfiguration.class),
+    new NamedFeature("Circuit Breaker", HystrixCommandAspect.class));
+}
+
+@Bean
+HasFeatures localFeatures() {
+  return HasFeatures.builder()
+      .abstractFeature(Foo.class)
+      .namedFeature(new NamedFeature("Bar Feature", Bar.class))
+      .abstractFeature(Baz.class)
+      .build();
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each of these beans should go in an appropriately guarded <code>@Configuration</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_spring_cloud_compatibility_verification"><a class="link" href="#_spring_cloud_compatibility_verification">Spring Cloud Compatibility Verification</a></h3>
+<div class="paragraph">
+<p>Due to the fact that some users have problem with setting up Spring Cloud application, we&#8217;ve decided
+to add a compatibility verification mechanism. It will break if your current setup is not compatible
+with Spring Cloud requirements, together with a report, showing what exactly went wrong.</p>
+</div>
+<div class="paragraph">
+<p>At the moment we verify which version of Spring Boot is added to your classpath.</p>
+</div>
+<div class="paragraph">
+<p>Example of a report</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Your project setup is incompatible with our requirements due to following reasons:
+
+- Spring Boot [2.1.0.RELEASE] is not compatible with this Spring Cloud release train
+
+
+Action:
+
+Consider applying the following actions:
+
+- Change Spring Boot version to one of the following versions [1.2.x, 1.3.x] .
+You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
+If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In order to disable this feature, set <code>spring.cloud.compatibility-verifier.enabled</code> to <code>false</code>.
+If you want to override the compatible Spring Boot versions, just set the
+<code>spring.cloud.compatibility-verifier.compatible-boot-versions</code> property with a comma separated list
+of compatible Spring Boot versions.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script type="text/javascript" src="js/tocbot/tocbot.min.js"></script>
+<script type="text/javascript" src="js/toc.js"></script>
+<link rel="stylesheet" href="js/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="js/highlight/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>
