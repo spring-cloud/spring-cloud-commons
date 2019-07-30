@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Olga Maciaszek-Sharma
  */
+
 class DefaultReactorLoadBalancerClientTests {
 
 	private final LoadBalancerClientFactory loadBalancerClientFactory = new LoadBalancerClientFactory();

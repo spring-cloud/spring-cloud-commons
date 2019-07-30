@@ -30,16 +30,20 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 
 /**
+ * An {@link ExchangeFilterFunction} that uses {@link ReactorLoadBalancerClient} to
+ * execute requests on a correct {@link ServiceInstance}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
 public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
 
-	private static Log logger = LogFactory
-			.getLog(LoadBalancerExchangeFilterFunction.class);
+	private static Log LOG = LogFactory.getLog(LoadBalancerExchangeFilterFunction.class);
 
 	private final ReactorLoadBalancerClient loadBalancerClient;
 
-	public ReactorLoadBalancerExchangeFilterFunction(ReactorLoadBalancerClient loadBalancerClient) {
+	public ReactorLoadBalancerExchangeFilterFunction(
+			ReactorLoadBalancerClient loadBalancerClient) {
 		this.loadBalancerClient = loadBalancerClient;
 	}
 
@@ -48,34 +52,34 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 		URI originalUrl = request.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
-			String msg = String
-					.format("Request URI does not contain a valid hostname: %s", originalUrl
-							.toString());
-			logger.warn(msg);
-			return Mono.just(ClientResponse.create(HttpStatus.BAD_REQUEST).body(msg)
-					.build());
+			String msg = String.format(
+					"Request URI does not contain a valid hostname: %s",
+					originalUrl.toString());
+			LOG.warn(msg);
+			return Mono.just(
+					ClientResponse.create(HttpStatus.BAD_REQUEST).body(msg).build());
 		}
-		return loadBalancerClient.choose(serviceId).log().handle((response, sink) -> {
+		return loadBalancerClient.choose(serviceId).handle((response, sink) -> {
 			ServiceInstance instance = response.getServer();
 			if (instance == null) {
-				String message = getServiceInstanceUnavailableMessage(serviceId);
-				logger.warn(message);
+				String message = serviceInstanceUnavailableMessage(serviceId);
+				LOG.warn(message);
 				sink.error(new IllegalStateException(message));
 			}
 			else {
-				logger.debug(String
-						.format("Load balancer has retrieved the instance for service %s: %s", serviceId,
-								instance.getUri()));
+				LOG.debug(String.format(
+						"Load balancer has retrieved the instance for service %s: %s",
+						serviceId, instance.getUri()));
 				sink.next(instance);
 			}
 		}).flatMap(serviceInstance -> loadBalancerClient
 				.reconstructURI((ServiceInstance) serviceInstance, originalUrl))
 				.map(uri -> buildClientRequest(request, uri)).flatMap(next::exchange)
 				.onErrorReturn(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
-						.body(getServiceInstanceUnavailableMessage(serviceId)).build());
+						.body(serviceInstanceUnavailableMessage(serviceId)).build());
 	}
 
-	private String getServiceInstanceUnavailableMessage(String serviceId) {
+	private String serviceInstanceUnavailableMessage(String serviceId) {
 		return "Load balancer does not contain an instance for the service " + serviceId;
 	}
 

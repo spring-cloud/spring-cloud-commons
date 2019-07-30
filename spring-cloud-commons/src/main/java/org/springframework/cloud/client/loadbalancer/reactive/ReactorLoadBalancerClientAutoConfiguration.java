@@ -23,15 +23,20 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
+ * An auto-configuration that allows the use of a {@link LoadBalanced}
+ * {@link WebClient.Builder} with reactive load balancer under the hood.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
 @Configuration
-@ConditionalOnClass
+@ConditionalOnClass(WebClient.class)
 @ConditionalOnBean(ReactorLoadBalancerClient.class)
 public class ReactorLoadBalancerClientAutoConfiguration {
 
@@ -42,7 +47,8 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 	}
 
 	@Bean
-	public SmartInitializingSingleton loadBalancedWebClientInitializer(final List<WebClientCustomizer> customizers) {
+	public SmartInitializingSingleton loadBalancedWebClientInitializer(
+			final List<WebClientCustomizer> customizers) {
 		return () -> {
 			for (WebClient.Builder webClientBuilder : getBuilders()) {
 				for (WebClientCustomizer customizer : customizers) {
@@ -53,7 +59,7 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 	}
 
 	@Bean
-	public WebClientCustomizer loadBalancedClientWebClientCustomizer(
+	public WebClientCustomizer loadBalancerClientWebClientCustomizer(
 			ReactorLoadBalancerExchangeFilterFunction filterFunction) {
 		return builder -> builder.filter(filterFunction);
 	}
@@ -64,6 +70,7 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 		return new ReactorLoadBalancerExchangeFilterFunction(client);
 	}
 
+	@LoadBalanced
 	@Autowired(required = false)
 	void setWebClientBuilders(List<WebClient.Builder> webClientBuilders) {
 		this.webClientBuilders = webClientBuilders;

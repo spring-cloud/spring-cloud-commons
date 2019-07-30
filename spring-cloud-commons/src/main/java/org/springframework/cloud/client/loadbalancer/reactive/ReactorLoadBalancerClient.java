@@ -27,14 +27,35 @@ import org.springframework.cloud.client.ServiceInstance;
  * load balancer.
  *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
 
 public interface ReactorLoadBalancerClient {
 
+	/**
+	 * Chooses a {@link ServiceInstance} instance based on serviceId and request.
+	 * @param serviceId id of the service to select the instance for
+	 * @param request request providing
+	 * @return a {@link Mono} of load balancer {@link Response} containing selected
+	 * {@link ServiceInstance}
+	 */
 	Mono<Response<ServiceInstance>> choose(String serviceId, Request request);
 
+	/**
+	 * Chooses a {@link ServiceInstance} instance based on serviceId.
+	 * @param serviceId id of the service to select the instance for
+	 * @return a {@link Mono} of load balancer {@link Response} containing selected
+	 * {@link ServiceInstance}
+	 */
 	Mono<Response<ServiceInstance>> choose(String serviceId);
 
+	/**
+	 * Reconstructs the {@link URI} in a way that will result in passing the request to
+	 * the provided {@link ServiceInstance}.
+	 * @param serviceInstance to direct the request to
+	 * @param original the original {@link URI}
+	 * @return a {@link Mono} of the reconstructed {@link URI}
+	 */
 	Mono<URI> reconstructURI(ServiceInstance serviceInstance, URI original);
 
 }

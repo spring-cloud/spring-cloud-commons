@@ -30,7 +30,6 @@ import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalance
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
-import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -38,6 +37,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * Default implementation of {@link ReactorLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
 public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClient {
 
@@ -65,12 +65,12 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 	// https://github.com/spring-cloud/spring-cloud-gateway/blob/master/spring-cloud-gateway-core/
 	// src/main/java/org/springframework/cloud/gateway/support/ServerWebExchangeUtils.java
 	private static boolean containsEncodedParts(URI uri) {
-		boolean encoded = (uri.getRawQuery() != null && uri.getRawQuery()
-				.contains(PERCENTAGE_SIGN))
-				|| (uri.getRawPath() != null && uri.getRawPath()
-				.contains(PERCENTAGE_SIGN))
-				|| (uri.getRawFragment() != null && uri.getRawFragment()
-				.contains(PERCENTAGE_SIGN));
+		boolean encoded = (uri.getRawQuery() != null
+				&& uri.getRawQuery().contains(PERCENTAGE_SIGN))
+				|| (uri.getRawPath() != null
+						&& uri.getRawPath().contains(PERCENTAGE_SIGN))
+				|| (uri.getRawFragment() != null
+						&& uri.getRawFragment().contains(PERCENTAGE_SIGN));
 		// Verify if it is really fully encoded. Treat partial encoded as unencoded.
 		if (encoded) {
 			try {
@@ -115,8 +115,8 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 	@Override
 	public Mono<URI> reconstructURI(ServiceInstance serviceInstance, URI original) {
 		if (serviceInstance == null) {
-			return Mono.defer(() -> Mono
-					.error(new IllegalArgumentException("Service Instance cannot be null.")));
+			return Mono.defer(() -> Mono.error(
+					new IllegalArgumentException("Service Instance cannot be null.")));
 		}
 		return Mono.just(doReconstructURI(serviceInstance, original));
 	}
@@ -140,14 +140,14 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 	private String computeScheme(URI original, ServiceInstance serviceInstance) {
 		String originalOrDefault = Optional.ofNullable(original.getScheme())
 				.orElse(DEFAULT_SCHEME);
-		if (serviceInstance.isSecure() && INSECURE_SCHEME_MAPPINGS
-				.containsKey(originalOrDefault)) {
+		if (serviceInstance.isSecure()
+				&& INSECURE_SCHEME_MAPPINGS.containsKey(originalOrDefault)) {
 			return INSECURE_SCHEME_MAPPINGS.get(originalOrDefault);
 		}
 		return originalOrDefault;
 	}
 
-	private ReactorServiceInstanceLoadBalancer getLoadBalancer(String serviceId) {
+	private ReactorLoadBalancer<ServiceInstance> getLoadBalancer(String serviceId) {
 		return clientFactory.getLoadBalancer(serviceId);
 	}
 

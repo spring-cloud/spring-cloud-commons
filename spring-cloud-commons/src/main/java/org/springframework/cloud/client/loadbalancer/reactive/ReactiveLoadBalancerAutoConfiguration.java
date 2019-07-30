@@ -33,11 +33,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 /**
  * @deprecated in favour of {@link ReactorLoadBalancerClientAutoConfiguration}
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 @Configuration
 @ConditionalOnClass(WebClient.class)
 @ConditionalOnBean(LoadBalancerClient.class)
-@ConditionalOnMissingBean(ReactorLoadBalancerClientAutoConfiguration.class)
+@ConditionalOnMissingBean(ReactorLoadBalancerClient.class)
 public class ReactiveLoadBalancerAutoConfiguration {
 
 	@LoadBalanced

@@ -62,7 +62,7 @@ public @interface LoadBalancerClient {
 	 * A custom <code>@Configuration</code> for the load balancer client. Can contain
 	 * override <code>@Bean</code> definition for the pieces that make up the client.
 	 *
-	 * @see LoadBalancerClientConfiguration for the defaults
+	 * @see LoadBalancerDiscoveryClientConfiguration for the defaults
 	 * @return configuration classes for the load balancer client.
 	 */
 	Class<?>[] configuration() default {};
