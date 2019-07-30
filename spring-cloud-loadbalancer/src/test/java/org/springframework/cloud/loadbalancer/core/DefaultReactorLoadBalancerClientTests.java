@@ -23,21 +23,28 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
+import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.loadbalancer.client.DefaultReactorLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link DefaultReactorLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
  */
-
 class DefaultReactorLoadBalancerClientTests {
 
-	private final LoadBalancerClientFactory loadBalancerClientFactory = new LoadBalancerClientFactory();
+	private static final String TEST = "test";
+
+	private final LoadBalancerClientFactory loadBalancerClientFactory = mock(
+			LoadBalancerClientFactory.class);
 
 	private final DefaultReactorLoadBalancerClient loadBalancerClient = new DefaultReactorLoadBalancerClient(
 			loadBalancerClientFactory);
@@ -213,6 +220,19 @@ class DefaultReactorLoadBalancerClientTests {
 		assertThat(reconstructed.getRawFragment()).isEqualTo(original.getRawFragment());
 		assertThat(reconstructed.getHost()).isEqualTo(serviceInstance.getHost());
 		assertThat(reconstructed.getPort()).isEqualTo(serviceInstance.getPort());
+	}
+
+	@Test
+	void returnEmptyResponseIfLoadBalancerNotAvailable() {
+		Request request = mock(Request.class);
+		when(loadBalancerClientFactory.getLoadBalancer(TEST)).thenReturn(null);
+		assertThatCode(() -> loadBalancerClient.choose(TEST)).doesNotThrowAnyException();
+		assertThat(loadBalancerClient.choose(TEST).block())
+				.isInstanceOf(EmptyResponse.class);
+		assertThatCode(() -> loadBalancerClient.choose(TEST, request))
+				.doesNotThrowAnyException();
+		assertThat(loadBalancerClient.choose(TEST, request).block())
+				.isInstanceOf(EmptyResponse.class);
 	}
 
 }

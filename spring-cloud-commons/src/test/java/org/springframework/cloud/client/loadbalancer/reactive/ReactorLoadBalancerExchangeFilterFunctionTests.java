@@ -17,123 +17,128 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Hooks;
+import org.junit.jupiter.api.extension.ExtendWith;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import static org.assertj.core.api.BDDAssertions.then;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * Tests for {@link ReactorLoadBalancerExchangeFilterFunction}.
  *
  * @author Olga Maciaszek-Sharma
  */
-// TODO: implement!
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 class ReactorLoadBalancerExchangeFilterFunctionTests {
 
+	@Autowired
+	private ReactorLoadBalancerExchangeFilterFunction loadBalancerFunction;
+
+	@Autowired
+	private SimpleDiscoveryProperties properties;
+
+	@LocalServerPort
+	private int port;
+
+	@BeforeEach
+	void setUp() {
+		SimpleDiscoveryProperties.SimpleServiceInstance instance = new SimpleDiscoveryProperties.SimpleServiceInstance();
+		instance.setServiceId("testservice");
+		instance.setUri(URI.create("http://localhost:" + this.port));
+		this.properties.getInstances().put("testservice",
+				Collections.singletonList(instance));
+	}
+
 	@Test
-	void exchangeFunctionReturnsDefaultResponseWhenServiceInstanceMissing() {
-		Hooks.onOperatorDebug();
-		WebClient webClient = WebClient.builder().baseUrl(null)
-				.filter(new ReactorLoadBalancerExchangeFilterFunction(
-						new TestReactorLoadBalancerClient()))
-				.build();
-		webClient.get().uri("/xxx").retrieve().bodyToMono(String.class).block();
-		assert true;
-
+	void correctResponseReturnedForExistingHostAndInstancePresent() {
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
+				.block();
+		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
+		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
 	}
 
-}
-
-class TestReactorLoadBalancerClient implements ReactorLoadBalancerClient {
-
-	@Override
-	public Mono<Response<ServiceInstance>> choose(String serviceId, Request request) {
-		throw new UnsupportedOperationException("Please, implement me.");
+	@Test
+	void serviceUnavailableReturnedWhenNoInstancePresent() {
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http://xxx")
+				.filter(this.loadBalancerFunction).build().get().exchange().block();
+		then(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
-	@Override
-	public Mono<Response<ServiceInstance>> choose(String serviceId) {
-		return Mono.just(new DefaultResponse(null));
+	@Test
+	void badRequestReturnedForIncorrectHost() {
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///xxx")
+				.filter(this.loadBalancerFunction).build().get().exchange().block();
+		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
-	@Override
-	public Mono<URI> reconstructURI(ServiceInstance serviceInstance, URI original) {
-		if (serviceInstance == null) {
-			return Mono.defer(() -> Mono.error(
-					new IllegalArgumentException("Service Instance cannot be null.")));
+	@EnableDiscoveryClient
+	@EnableAutoConfiguration
+	@SpringBootConfiguration
+	@RestController
+	static class Config {
+
+		@RequestMapping("/hello")
+		public String hello() {
+			return "Hello World";
 		}
-		return Mono.just(URI.create("http://test.example"));
-	}
 
-}
+		@Bean
+		ReactorLoadBalancerClient loadBalancerClient(DiscoveryClient discoveryClient) {
+			return new ReactorLoadBalancerClient() {
+				Random random = new Random();
 
-class TestServiceInstance implements ServiceInstance {
+				@Override
+				public Mono<URI> reconstructURI(ServiceInstance instance, URI original) {
+					return Mono.just(UriComponentsBuilder.fromUri(original)
+							.host(instance.getHost()).port(instance.getPort()).build()
+							.toUri());
+				}
 
-	private URI uri;
+				@Override
+				public Mono<Response<ServiceInstance>> choose(String serviceId,
+						Request request) {
+					throw new UnsupportedOperationException("Please, implement me.");
+				}
 
-	private String scheme = "http";
+				@Override
+				public Mono<Response<ServiceInstance>> choose(String serviceId) {
+					List<ServiceInstance> instances = discoveryClient
+							.getInstances(serviceId);
+					if (instances.size() == 0) {
+						return Mono.just(new EmptyResponse());
+					}
+					int instanceIdx = this.random.nextInt(instances.size());
+					return Mono.just(new DefaultResponse(instances.get(instanceIdx)));
+				}
+			};
+		}
 
-	private String host = "test.example";
-
-	private int port = 8080;
-
-	private boolean secure;
-
-	private Map<String, String> metadata = new LinkedHashMap<>();
-
-	TestServiceInstance withScheme(String scheme) {
-		this.scheme = scheme;
-		return this;
-	}
-
-	TestServiceInstance withPort(int port) {
-		this.port = port;
-		return this;
-	}
-
-	TestServiceInstance withSecure(boolean secure) {
-		this.secure = secure;
-		return this;
-	}
-
-	@Override
-	public String getServiceId() {
-		return "test-service";
-	}
-
-	@Override
-	public String getHost() {
-		return host;
-	}
-
-	@Override
-	public int getPort() {
-		return port;
-	}
-
-	@Override
-	public boolean isSecure() {
-		return secure;
-	}
-
-	@Override
-	public URI getUri() {
-		return uri;
-	}
-
-	@Override
-	public Map<String, String> getMetadata() {
-		return metadata;
-	}
-
-	@Override
-	public String getScheme() {
-		return scheme;
 	}
 
 }
