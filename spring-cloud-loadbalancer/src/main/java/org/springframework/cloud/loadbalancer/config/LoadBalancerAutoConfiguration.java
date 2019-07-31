@@ -22,22 +22,15 @@ import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
-import org.springframework.cloud.loadbalancer.annotation.LoadBalancerDiscoveryClientConfiguration;
 import org.springframework.cloud.loadbalancer.client.DefaultReactorLoadBalancerClient;
-import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
-import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
-import org.springframework.cloud.loadbalancer.core.ServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 
 /**
  * @author Spencer Gibb
@@ -48,7 +41,6 @@ import org.springframework.core.env.Environment;
 		ReactiveLoadBalancerAutoConfiguration.class })
 // @EnableCaching //TODO: how to enforce, or check conditions?
 // @AutoConfigureBefore(CacheAutoConfiguration.class)
-@Import(LoadBalancerDiscoveryClientConfiguration.class)
 public class LoadBalancerAutoConfiguration {
 
 	private final ObjectProvider<List<LoadBalancerClientSpecification>> configurations;
@@ -71,16 +63,6 @@ public class LoadBalancerAutoConfiguration {
 	public ReactorLoadBalancerClient reactorLoadBalancerClient(
 			LoadBalancerClientFactory loadBalancerClientFactory) {
 		return new DefaultReactorLoadBalancerClient(loadBalancerClientFactory);
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public ReactorLoadBalancer<ServiceInstance> reactorServiceInstanceLoadBalancer(
-			Environment environment,
-			LoadBalancerClientFactory loadBalancerClientFactory) {
-		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
-		return new RoundRobinLoadBalancer(name, loadBalancerClientFactory
-				.getLazyProvider(name, ServiceInstanceSupplier.class));
 	}
 
 }
