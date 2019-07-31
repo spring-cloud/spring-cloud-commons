@@ -404,6 +404,11 @@ IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder` it is recommen
 Then, a reactive `ReactorLoadBalancerClient` will be used underneath.
 Otherwise, the request will be handled by a non-reactive `@LoadBalancerClient`.
 
+TIP: The `ReactorLoadBalancer` used underneath supports caching. If `cacheManager` is detected,
+cached version of `ServiceInstanceSupplier` will be used. If not, we will retrieve instances
+from discovery service without caching them. We recommend enabling caching in your project
+if you use `ReactorLoadBalancerClient`.
+
 ==== Retrying Failed Requests
 
 A load-balanced `RestTemplate` can be configured to retry failed requests.
