@@ -19,8 +19,11 @@ package org.springframework.cloud.loadbalancer.core;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * A marker interface for {@link ReactorLoadBalancer} that allows selecting
+ * {@link ServiceInstance} objects.
+ *
  * @author Olga Maciaszek-Sharma
- * @since 2.2
+ * @since 2.2.0
  */
 public interface ReactorServiceInstanceLoadBalancer
 		extends ReactorLoadBalancer<ServiceInstance> {

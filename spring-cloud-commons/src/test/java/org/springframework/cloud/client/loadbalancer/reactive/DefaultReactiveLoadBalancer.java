@@ -16,35 +16,34 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import java.net.URI;
 import java.util.Random;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * A sample implementation of {@link ReactiveLoadBalancer} used for tests.
+ *
  * @author Olga Maciaszek-Sharma
  */
-class TestReactorLoadBalancerClient implements ReactorLoadBalancerClient {
+class DefaultReactiveLoadBalancer implements ReactiveLoadBalancer<ServiceInstance> {
+
+	private static final String TEST_SERVICE_ID = "testServiceId";
 
 	private final Random random = new Random();
 
 	@Override
-	public Mono<Response<ServiceInstance>> choose(String serviceId, Request request) {
-		return choose(serviceId);
+	public Publisher<Response<ServiceInstance>> choose() {
+		return Mono.just(new DefaultResponse(new DefaultServiceInstance(TEST_SERVICE_ID,
+				TEST_SERVICE_ID, TEST_SERVICE_ID, random.nextInt(40000), false)));
 	}
 
 	@Override
-	public Mono<Response<ServiceInstance>> choose(String serviceId) {
-		return Mono.just(new DefaultResponse(new DefaultServiceInstance(serviceId,
-				serviceId, serviceId, random.nextInt(40000), false)));
-	}
-
-	@Override
-	public Mono<URI> reconstructURI(ServiceInstance instance, URI original) {
-		return Mono.just(DefaultServiceInstance.getUri(instance));
+	public Publisher<Response<ServiceInstance>> choose(Request request) {
+		return choose();
 	}
 
 }

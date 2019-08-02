@@ -30,14 +30,15 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * An auto-configuration that allows the use of a {@link LoadBalanced}
- * {@link WebClient.Builder} with reactive load balancer under the hood.
+ * {@link WebClient.Builder} with {@link ReactorLoadBalancerExchangeFilterFunction} and
+ * {@link ReactiveLoadBalancer} used under the hood.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
 @Configuration
 @ConditionalOnClass(WebClient.class)
-@ConditionalOnBean(ReactorLoadBalancerClient.class)
+@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 public class ReactorLoadBalancerClientAutoConfiguration {
 
 	private List<WebClient.Builder> webClientBuilders = Collections.emptyList();
@@ -66,8 +67,8 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 
 	@Bean
 	public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
-			ReactorLoadBalancerClient client) {
-		return new ReactorLoadBalancerExchangeFilterFunction(client);
+			ReactiveLoadBalancer.Factory loadBalancerFactory) {
+		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory);
 	}
 
 	@LoadBalanced

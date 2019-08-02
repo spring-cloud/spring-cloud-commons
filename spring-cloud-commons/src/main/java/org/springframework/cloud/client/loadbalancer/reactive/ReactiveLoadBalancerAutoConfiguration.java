@@ -38,7 +38,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 @ConditionalOnClass(WebClient.class)
 @ConditionalOnBean(LoadBalancerClient.class)
-@ConditionalOnMissingBean(ReactorLoadBalancerClient.class)
+@ConditionalOnMissingBean(ReactiveLoadBalancer.Factory.class)
 public class ReactiveLoadBalancerAutoConfiguration {
 
 	@LoadBalanced
@@ -62,7 +62,7 @@ public class ReactiveLoadBalancerAutoConfiguration {
 	}
 
 	@Bean
-	public WebClientCustomizer loadbalanceClientWebClientCustomizer(
+	public WebClientCustomizer loadBalancerClientWebClientCustomizer(
 			LoadBalancerExchangeFilterFunction filterFunction) {
 		return builder -> builder.filter(filterFunction);
 	}

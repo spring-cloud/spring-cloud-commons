@@ -42,6 +42,7 @@ import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalance
 /**
  * @author Spencer Gibb
  * @author Tim Ysewyn
+ * @author Olga Maciaszek-Sharma
  */
 public class ReactiveLoadBalancerAutoConfigurationTests {
 
@@ -134,8 +135,8 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 	protected static class ReactorLoadBalancerClientPresent extends OneWebClientBuilder {
 
 		@Bean
-		ReactorLoadBalancerClient reactorLoadBalancerClient() {
-			return new TestReactorLoadBalancerClient();
+		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory() {
+			return serviceId -> new DefaultReactiveLoadBalancer();
 		}
 
 	}

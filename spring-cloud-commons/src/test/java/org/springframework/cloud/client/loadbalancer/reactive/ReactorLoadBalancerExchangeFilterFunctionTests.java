@@ -24,6 +24,7 @@ import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -109,36 +109,44 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		}
 
 		@Bean
-		ReactorLoadBalancerClient loadBalancerClient(DiscoveryClient discoveryClient) {
-			return new ReactorLoadBalancerClient() {
-				Random random = new Random();
-
-				@Override
-				public Mono<URI> reconstructURI(ServiceInstance instance, URI original) {
-					return Mono.just(UriComponentsBuilder.fromUri(original)
-							.host(instance.getHost()).port(instance.getPort()).build()
-							.toUri());
-				}
-
-				@Override
-				public Mono<Response<ServiceInstance>> choose(String serviceId,
-						Request request) {
-					throw new UnsupportedOperationException("Please, implement me.");
-				}
-
-				@Override
-				public Mono<Response<ServiceInstance>> choose(String serviceId) {
-					List<ServiceInstance> instances = discoveryClient
-							.getInstances(serviceId);
-					if (instances.size() == 0) {
-						return Mono.just(new EmptyResponse());
-					}
-					int instanceIdx = this.random.nextInt(instances.size());
-					return Mono.just(new DefaultResponse(instances.get(instanceIdx)));
-				}
-			};
+		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory(
+				DiscoveryClient discoveryClient) {
+			return serviceId -> new DiscoveryClientBasedReactiveLoadBalancer(serviceId,
+					discoveryClient);
 		}
 
+	}
+
+}
+
+class DiscoveryClientBasedReactiveLoadBalancer
+		implements ReactiveLoadBalancer<ServiceInstance> {
+
+	private final Random random = new Random();
+
+	private final String serviceId;
+
+	private final DiscoveryClient discoveryClient;
+
+	DiscoveryClientBasedReactiveLoadBalancer(String serviceId,
+			DiscoveryClient discoveryClient) {
+		this.serviceId = serviceId;
+		this.discoveryClient = discoveryClient;
+	}
+
+	@Override
+	public Publisher<Response<ServiceInstance>> choose() {
+		List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
+		if (instances.size() == 0) {
+			return Mono.just(new EmptyResponse());
+		}
+		int instanceIdx = this.random.nextInt(instances.size());
+		return Mono.just(new DefaultResponse(instances.get(instanceIdx)));
+	}
+
+	@Override
+	public Publisher<Response<ServiceInstance>> choose(Request request) {
+		return choose();
 	}
 
 }

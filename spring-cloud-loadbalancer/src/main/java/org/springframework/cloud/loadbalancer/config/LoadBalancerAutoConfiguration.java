@@ -21,19 +21,17 @@ import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoConfiguration;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
-import org.springframework.cloud.loadbalancer.client.DefaultReactorLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 @Configuration
 @LoadBalancerClients
@@ -56,13 +54,6 @@ public class LoadBalancerAutoConfiguration {
 		clientFactory.setConfigurations(
 				this.configurations.getIfAvailable(Collections::emptyList));
 		return clientFactory;
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
-	public ReactorLoadBalancerClient reactorLoadBalancerClient(
-			LoadBalancerClientFactory loadBalancerClientFactory) {
-		return new DefaultReactorLoadBalancerClient(loadBalancerClientFactory);
 	}
 
 }

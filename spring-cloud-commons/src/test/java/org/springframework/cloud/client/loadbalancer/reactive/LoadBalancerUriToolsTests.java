@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.loadbalancer.core;
+package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
@@ -23,31 +23,16 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
-import org.springframework.cloud.client.loadbalancer.reactive.Request;
-import org.springframework.cloud.loadbalancer.client.DefaultReactorLoadBalancerClient;
-import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
- * Tests for {@link DefaultReactorLoadBalancerClient}.
+ * Tests for {@link LoadBalancerUriTools}.
  *
  * @author Olga Maciaszek-Sharma
  */
-class DefaultReactorLoadBalancerClientTests {
-
-	private static final String TEST = "test";
-
-	private final LoadBalancerClientFactory loadBalancerClientFactory = mock(
-			LoadBalancerClientFactory.class);
-
-	private final DefaultReactorLoadBalancerClient loadBalancerClient = new DefaultReactorLoadBalancerClient(
-			loadBalancerClientFactory);
+class LoadBalancerUriToolsTests {
 
 	@Test
 	void originalURIReturnedIfDataMatches() {
@@ -55,7 +40,7 @@ class DefaultReactorLoadBalancerClientTests {
 		URI original = UriComponentsBuilder.fromUriString("http://test.example:8080/xxx")
 				.build().toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isEqualTo(original);
@@ -67,7 +52,7 @@ class DefaultReactorLoadBalancerClientTests {
 		URI original = UriComponentsBuilder
 				.fromUriString("http://testHost.example:8080/xxx").build().toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -81,7 +66,7 @@ class DefaultReactorLoadBalancerClientTests {
 		URI original = UriComponentsBuilder.fromUriString("http://test.example/xxx")
 				.build().toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -94,7 +79,7 @@ class DefaultReactorLoadBalancerClientTests {
 		URI original = UriComponentsBuilder.fromUriString("https://test.example/xxx")
 				.build().toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -108,7 +93,7 @@ class DefaultReactorLoadBalancerClientTests {
 		URI original = UriComponentsBuilder.fromUriString("http://test.example/xxx")
 				.build().toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -122,7 +107,7 @@ class DefaultReactorLoadBalancerClientTests {
 		URI original = UriComponentsBuilder.fromUriString("ws://test.example/xxx").build()
 				.toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -135,7 +120,7 @@ class DefaultReactorLoadBalancerClientTests {
 		URI original = UriComponentsBuilder.fromUriString("//test.example/xxx").build()
 				.toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -148,7 +133,7 @@ class DefaultReactorLoadBalancerClientTests {
 		URI original = UriComponentsBuilder.fromUriString("http://test.example:8080/xxx")
 				.build().toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -161,7 +146,7 @@ class DefaultReactorLoadBalancerClientTests {
 		URI original = UriComponentsBuilder.fromUriString("http://test.example:8888/xxx")
 				.build().toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -175,7 +160,7 @@ class DefaultReactorLoadBalancerClientTests {
 		URI original = UriComponentsBuilder.fromUriString("http://test.example:8888/xxx")
 				.build().toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -189,7 +174,7 @@ class DefaultReactorLoadBalancerClientTests {
 				"http://testUser@testHost.example/path?query1=test1&query2=test2#fragment")
 				.build().toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -209,7 +194,7 @@ class DefaultReactorLoadBalancerClientTests {
 				"http://test.example/path%40%21%242?query=val%40%21%242#frag%40%21%242")
 				.build().toUri();
 
-		URI reconstructed = loadBalancerClient.reconstructURI(serviceInstance, original)
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original)
 				.block();
 
 		assertThat(reconstructed).isNotNull();
@@ -220,19 +205,6 @@ class DefaultReactorLoadBalancerClientTests {
 		assertThat(reconstructed.getRawFragment()).isEqualTo(original.getRawFragment());
 		assertThat(reconstructed.getHost()).isEqualTo(serviceInstance.getHost());
 		assertThat(reconstructed.getPort()).isEqualTo(serviceInstance.getPort());
-	}
-
-	@Test
-	void returnEmptyResponseIfLoadBalancerNotAvailable() {
-		Request request = mock(Request.class);
-		when(loadBalancerClientFactory.getLoadBalancer(TEST)).thenReturn(null);
-		assertThatCode(() -> loadBalancerClient.choose(TEST)).doesNotThrowAnyException();
-		assertThat(loadBalancerClient.choose(TEST).block())
-				.isInstanceOf(EmptyResponse.class);
-		assertThatCode(() -> loadBalancerClient.choose(TEST, request))
-				.doesNotThrowAnyException();
-		assertThat(loadBalancerClient.choose(TEST, request).block())
-				.isInstanceOf(EmptyResponse.class);
 	}
 
 }

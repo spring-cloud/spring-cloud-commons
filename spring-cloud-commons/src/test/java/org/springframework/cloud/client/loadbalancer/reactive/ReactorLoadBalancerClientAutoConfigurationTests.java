@@ -21,6 +21,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -33,7 +34,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerTestUtils.getFilters;
 
 /**
- * Tests for {@link ReactorLoadBalancerClientAutoConfiguration}
+ * Tests for {@link ReactorLoadBalancerClientAutoConfiguration}.
  *
  * @author Olga Maciaszek-Sharma
  */
@@ -97,8 +98,8 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	protected static class NoWebClientBuilder {
 
 		@Bean
-		ReactorLoadBalancerClient loadBalancerClient() {
-			return new TestReactorLoadBalancerClient();
+		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory() {
+			return serviceId -> new DefaultReactiveLoadBalancer();
 		}
 
 		@Bean

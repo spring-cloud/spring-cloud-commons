@@ -401,13 +401,13 @@ The URI needs to use a virtual host name (that is, a service name, not a host na
 The Ribbon client is used to create a full physical address.
 
 IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder` it is recommended that you add the `org.springframework.cloud:spring-cloud-loadbalancer` dependency to your project.
-Then, a reactive `ReactorLoadBalancerClient` will be used underneath.
-Otherwise, the request will be handled by a non-reactive `@LoadBalancerClient`.
+Then, `ReactiveLoadBalancer` will be used underneath.
+Otherwise, the request will be handled by a non-reactive `LoadBalancerClient`.
 
 TIP: The `ReactorLoadBalancer` used underneath supports caching. If `cacheManager` is detected,
 cached version of `ServiceInstanceSupplier` will be used. If not, we will retrieve instances
 from discovery service without caching them. We recommend enabling caching in your project
-if you use `ReactorLoadBalancerClient`.
+if you use `ReactiveLoadBalancer`.
 
 ==== Retrying Failed Requests
 
@@ -524,9 +524,9 @@ TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set 
 === Spring WebFlux WebClient as a Load Balancer Client
 
 [[webflux-with-reactive-loadbalancer]]
-==== Spring WebFlux WebClient with Reactive Load Balancer Client
+==== Spring WebFlux WebClient with Reactive Load Balancer
 
-`WebClient` can be configured to use the `ReactorLoadBalancerClient`.
+`WebClient` can be configured to use the `ReactiveLoadBalancer`.
 If you add `org.springframework.cloud:spring-cloud-loadbalancer` to your project,
  `ReactorLoadBalancerExchangeFilterFunction` is auto-configured if `spring-webflux` is on the classpath.
 The following example shows how to configure a `WebClient` to use reactive load balancer under the hood:
@@ -554,8 +554,10 @@ The `ReactorLoadBalancerClient` is used to create a full physical address.
 
 ==== Spring WebFlux WebClient with non-reactive Load Balancer Client
 
-If you you don't have `org.springframework.cloud:spring-cloud-loadbalancer` in your project, you can still use `WebClient` with the `LoadBalancerClient`. `LoadBalancerExchangeFilterFunction`
-will be auto-configured if `spring-webflux` is on the classpath.
+If you you don't have `org.springframework.cloud:spring-cloud-loadbalancer` in your project,
+you can still use `WebClient` with the `LoadBalancerClient`. `LoadBalancerExchangeFilterFunction`
+will be auto-configured if `spring-webflux` is on the classpath. Please note, however, that this is
+a non-reactive client.
 The following example shows how to configure a `WebClient` to use load balancer:
 
 [source,java,indent=0]
@@ -584,7 +586,7 @@ This approach is now deprecated.
 We suggest you use <<webflux-with-reactive-loadbalancer,WebFlux with reactive Load-Balancer>>
 instead.
 
-==== Passing your own Load-Balancer client configuration
+==== Passing your own Load-Balancer Client configuration
 
 You can also use the `@LoadBalancerClient` annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, like so:
 

@@ -30,8 +30,8 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 
 /**
- * An {@link ExchangeFilterFunction} that uses {@link ReactorLoadBalancerClient} to
- * execute requests on a correct {@link ServiceInstance}.
+ * An {@link ExchangeFilterFunction} that uses {@link ReactiveLoadBalancer} to execute
+ * requests against a correct {@link ServiceInstance}.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
@@ -40,11 +40,11 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 
 	private static Log LOG = LogFactory.getLog(LoadBalancerExchangeFilterFunction.class);
 
-	private final ReactorLoadBalancerClient loadBalancerClient;
+	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
 	public ReactorLoadBalancerExchangeFilterFunction(
-			ReactorLoadBalancerClient loadBalancerClient) {
-		this.loadBalancerClient = loadBalancerClient;
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+		this.loadBalancerFactory = loadBalancerFactory;
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			return Mono.just(
 					ClientResponse.create(HttpStatus.BAD_REQUEST).body(msg).build());
 		}
-		return loadBalancerClient.choose(serviceId).handle((response, sink) -> {
+		return choose(serviceId).handle((response, sink) -> {
 			ServiceInstance instance = response.getServer();
 			if (instance == null) {
 				String message = serviceInstanceUnavailableMessage(serviceId);
@@ -72,11 +72,20 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 						serviceId, instance.getUri()));
 				sink.next(instance);
 			}
-		}).flatMap(serviceInstance -> loadBalancerClient
+		}).flatMap(serviceInstance -> LoadBalancerUriTools
 				.reconstructURI((ServiceInstance) serviceInstance, originalUrl))
 				.map(uri -> buildClientRequest(request, uri)).flatMap(next::exchange)
 				.onErrorReturn(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
+	}
+
+	private Mono<Response<ServiceInstance>> choose(String serviceId) {
+		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory
+				.getInstance(serviceId);
+		if (loadBalancer == null) {
+			return Mono.just(new EmptyResponse());
+		}
+		return Mono.from(loadBalancer.choose());
 	}
 
 	private String serviceInstanceUnavailableMessage(String serviceId) {

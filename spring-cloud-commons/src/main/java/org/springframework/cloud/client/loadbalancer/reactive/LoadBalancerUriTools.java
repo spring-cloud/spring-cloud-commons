@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.loadbalancer.client;
+package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -25,21 +25,17 @@ import java.util.Optional;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClient;
-import org.springframework.cloud.client.loadbalancer.reactive.Request;
-import org.springframework.cloud.client.loadbalancer.reactive.Response;
-import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
-import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Default implementation of {@link ReactorLoadBalancerClient}.
- *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClient {
+final class LoadBalancerUriTools {
+
+	private LoadBalancerUriTools() {
+		throw new IllegalStateException("Can't instantiate a utility class");
+	}
 
 	private static final String PERCENTAGE_SIGN = "%";
 
@@ -53,12 +49,6 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 		INSECURE_SCHEME_MAPPINGS = new HashMap<>();
 		INSECURE_SCHEME_MAPPINGS.put(DEFAULT_SCHEME, DEFAULT_SECURE_SCHEME);
 		INSECURE_SCHEME_MAPPINGS.put("ws", "wss");
-	}
-
-	private final LoadBalancerClientFactory clientFactory;
-
-	public DefaultReactorLoadBalancerClient(LoadBalancerClientFactory clientFactory) {
-		this.clientFactory = clientFactory;
 	}
 
 	// see original
@@ -94,26 +84,7 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 		return 80;
 	}
 
-	@Override
-	public Mono<Response<ServiceInstance>> choose(String serviceId, Request request) {
-		ReactorLoadBalancer<ServiceInstance> loadBalancer = getLoadBalancer(serviceId);
-		if (loadBalancer == null) {
-			return Mono.just(new EmptyResponse());
-		}
-		return loadBalancer.choose(request);
-	}
-
-	@Override
-	public Mono<Response<ServiceInstance>> choose(String serviceId) {
-		ReactorLoadBalancer<ServiceInstance> loadBalancer = getLoadBalancer(serviceId);
-		if (loadBalancer == null) {
-			return Mono.just(new EmptyResponse());
-		}
-		return loadBalancer.choose();
-	}
-
-	@Override
-	public Mono<URI> reconstructURI(ServiceInstance serviceInstance, URI original) {
+	static Mono<URI> reconstructURI(ServiceInstance serviceInstance, URI original) {
 		if (serviceInstance == null) {
 			return Mono.defer(() -> Mono.error(
 					new IllegalArgumentException("Service Instance cannot be null.")));
@@ -121,7 +92,7 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 		return Mono.just(doReconstructURI(serviceInstance, original));
 	}
 
-	private URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
+	private static URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
 		String host = serviceInstance.getHost();
 		String scheme = Optional.ofNullable(serviceInstance.getScheme())
 				.orElse(computeScheme(original, serviceInstance));
@@ -137,7 +108,7 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 				.build(encoded).toUri();
 	}
 
-	private String computeScheme(URI original, ServiceInstance serviceInstance) {
+	private static String computeScheme(URI original, ServiceInstance serviceInstance) {
 		String originalOrDefault = Optional.ofNullable(original.getScheme())
 				.orElse(DEFAULT_SCHEME);
 		if (serviceInstance.isSecure()
@@ -145,10 +116,6 @@ public class DefaultReactorLoadBalancerClient implements ReactorLoadBalancerClie
 			return INSECURE_SCHEME_MAPPINGS.get(originalOrDefault);
 		}
 		return originalOrDefault;
-	}
-
-	private ReactorLoadBalancer<ServiceInstance> getLoadBalancer(String serviceId) {
-		return clientFactory.getLoadBalancer(serviceId);
 	}
 
 }
