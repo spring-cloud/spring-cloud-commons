@@ -79,9 +79,9 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 				}
 				return instance;
 			}
-		}).flatMap(serviceInstance -> LoadBalancerUriTools
-				.reconstructURI((ServiceInstance) serviceInstance, originalUrl))
-				.map(uri -> buildClientRequest(request, uri)).flatMap(next::exchange)
+		}).flatMap(serviceInstance -> LoadBalancerUriTools.reconstructURI(serviceInstance,
+				originalUrl)).map(uri -> buildClientRequest(request, uri))
+				.flatMap(next::exchange)
 				.onErrorReturn(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
 	}
