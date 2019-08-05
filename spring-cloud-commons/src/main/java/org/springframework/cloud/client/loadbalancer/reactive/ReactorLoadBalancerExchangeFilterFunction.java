@@ -63,14 +63,14 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			return Mono.just(
 					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
-		return choose(serviceId).handle((response, sink) -> {
+		return choose(serviceId).map(response -> {
 			ServiceInstance instance = response.getServer();
 			if (instance == null) {
 				String message = serviceInstanceUnavailableMessage(serviceId);
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(message);
 				}
-				sink.error(new IllegalStateException(message));
+				throw new IllegalStateException(message);
 			}
 			else {
 				if (LOG.isDebugEnabled()) {
@@ -78,10 +78,10 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 							"Load balancer has retrieved the instance for service %s: %s",
 							serviceId, instance.getUri()));
 				}
-				sink.next(instance);
+				return instance;
 			}
 		}).flatMap(serviceInstance -> LoadBalancerUriTools
-				.reconstructURIAsMono((ServiceInstance) serviceInstance, originalUrl))
+				.reconstructURIAsMono(serviceInstance, originalUrl))
 				.map(uri -> buildClientRequest(request, uri)).flatMap(next::exchange)
 				.onErrorReturn(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
