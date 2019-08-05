@@ -1,4 +1,4 @@
 # AutoConfiguration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration
-
+org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration,\
+org.springframework.cloud.loadbalancer.config.SpringLoadBalancerClientAutoConfiguration

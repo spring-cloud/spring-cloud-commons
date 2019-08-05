@@ -1,4 +1,20 @@
-package org.springframework.cloud.loadbalancer.client;
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.cloud.loadbalancer.nonreactive.client;
 
 import java.io.IOException;
 import java.net.URI;
@@ -26,14 +42,17 @@ public class SpringLoadBalancerClient implements LoadBalancerClient {
 	}
 
 	@Override
-	public <T> T execute(String serviceId, LoadBalancerRequest<T> request) throws IOException {
+	public <T> T execute(String serviceId, LoadBalancerRequest<T> request)
+			throws IOException {
 		ServiceInstance serviceInstance = Optional.ofNullable(choose(serviceId))
-				.orElseThrow(() -> new IllegalStateException("No instances available for " + serviceId));
+				.orElseThrow(() -> new IllegalStateException(
+						"No instances available for " + serviceId));
 		return execute(serviceId, serviceInstance, request);
 	}
 
 	@Override
-	public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) throws IOException {
+	public <T> T execute(String serviceId, ServiceInstance serviceInstance,
+			LoadBalancerRequest<T> request) throws IOException {
 		try {
 			return request.apply(serviceInstance);
 		}
@@ -55,7 +74,8 @@ public class SpringLoadBalancerClient implements LoadBalancerClient {
 	public ServiceInstance choose(String serviceId) {
 		return Optional.ofNullable(loadBalancerClientFactory.getInstance(serviceId))
 				.map(loadBalancer -> Mono.from(loadBalancer.choose())
-						.map(Response::getServer)
-						.block()).orElse(null);
+						.map(Response::getServer).block())
+				.orElse(null);
 	}
+
 }

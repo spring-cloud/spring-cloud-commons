@@ -84,7 +84,8 @@ public final class LoadBalancerUriTools {
 		return 80;
 	}
 
-	public static Mono<URI> reconstructURIAsMono(ServiceInstance serviceInstance, URI original) {
+	public static Mono<URI> reconstructURIAsMono(ServiceInstance serviceInstance,
+			URI original) {
 		if (serviceInstance == null) {
 			return Mono.defer(() -> Mono.error(
 					new IllegalArgumentException("Service Instance cannot be null.")));
@@ -95,7 +96,8 @@ public final class LoadBalancerUriTools {
 	public static URI reconstructURI(ServiceInstance serviceInstance, URI original) {
 		return Optional.ofNullable(serviceInstance)
 				.map(instance -> doReconstructURI(serviceInstance, original))
-				.orElseThrow(() -> new IllegalArgumentException("Service Instance cannot be null."));
+				.orElseThrow(() -> new IllegalArgumentException(
+						"Service Instance cannot be null."));
 	}
 
 	public static URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
