@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-final class LoadBalancerUriTools {
+public final class LoadBalancerUriTools {
 
 	private LoadBalancerUriTools() {
 		throw new IllegalStateException("Can't instantiate a utility class");
@@ -84,7 +84,7 @@ final class LoadBalancerUriTools {
 		return 80;
 	}
 
-	static Mono<URI> reconstructURI(ServiceInstance serviceInstance, URI original) {
+	public static Mono<URI> reconstructURIAsMono(ServiceInstance serviceInstance, URI original) {
 		if (serviceInstance == null) {
 			return Mono.defer(() -> Mono.error(
 					new IllegalArgumentException("Service Instance cannot be null.")));
@@ -92,7 +92,13 @@ final class LoadBalancerUriTools {
 		return Mono.just(doReconstructURI(serviceInstance, original));
 	}
 
-	private static URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
+	public static URI reconstructURI(ServiceInstance serviceInstance, URI original) {
+		return Optional.ofNullable(serviceInstance)
+				.map(instance -> doReconstructURI(serviceInstance, original))
+				.orElseThrow(() -> new IllegalArgumentException("Service Instance cannot be null."));
+	}
+
+	public static URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
 		String host = serviceInstance.getHost();
 		String scheme = Optional.ofNullable(serviceInstance.getScheme())
 				.orElse(computeScheme(original, serviceInstance));
