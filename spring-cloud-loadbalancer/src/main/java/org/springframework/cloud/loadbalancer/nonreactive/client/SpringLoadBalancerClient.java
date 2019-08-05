@@ -46,7 +46,6 @@ public class SpringLoadBalancerClient implements LoadBalancerClient {
 		return null;
 	}
 
-
 	@Override
 	public URI reconstructURI(ServiceInstance serviceInstance, URI original) {
 		return LoadBalancerUriTools.reconstructURI(serviceInstance, original);
