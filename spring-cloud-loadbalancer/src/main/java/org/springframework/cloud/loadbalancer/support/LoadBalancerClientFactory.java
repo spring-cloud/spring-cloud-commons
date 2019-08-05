@@ -19,8 +19,8 @@ package org.springframework.cloud.loadbalancer.support;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.context.named.NamedContextFactory;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
-import org.springframework.cloud.loadbalancer.annotation.LoadBalancerDiscoveryClientConfiguration;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.core.env.Environment;
 
@@ -48,7 +48,7 @@ public class LoadBalancerClientFactory
 	public static final String PROPERTY_NAME = NAMESPACE + ".client.name";
 
 	public LoadBalancerClientFactory() {
-		super(LoadBalancerDiscoveryClientConfiguration.class, NAMESPACE, PROPERTY_NAME);
+		super(LoadBalancerClientConfiguration.class, NAMESPACE, PROPERTY_NAME);
 	}
 
 	public String getName(Environment environment) {

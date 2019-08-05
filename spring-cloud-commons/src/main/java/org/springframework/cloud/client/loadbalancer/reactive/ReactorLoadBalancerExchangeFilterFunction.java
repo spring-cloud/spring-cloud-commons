@@ -38,7 +38,8 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
  */
 public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
 
-	private static Log LOG = LogFactory.getLog(LoadBalancerExchangeFilterFunction.class);
+	private static final Log LOG = LogFactory
+			.getLog(LoadBalancerExchangeFilterFunction.class);
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
@@ -52,24 +53,30 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 		URI originalUrl = request.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
-			String msg = String.format(
+			String message = String.format(
 					"Request URI does not contain a valid hostname: %s",
 					originalUrl.toString());
-			LOG.warn(msg);
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(message);
+			}
 			return Mono.just(
-					ClientResponse.create(HttpStatus.BAD_REQUEST).body(msg).build());
+					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
 		return choose(serviceId).handle((response, sink) -> {
 			ServiceInstance instance = response.getServer();
 			if (instance == null) {
 				String message = serviceInstanceUnavailableMessage(serviceId);
-				LOG.warn(message);
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(message);
+				}
 				sink.error(new IllegalStateException(message));
 			}
 			else {
-				LOG.debug(String.format(
-						"Load balancer has retrieved the instance for service %s: %s",
-						serviceId, instance.getUri()));
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(String.format(
+							"Load balancer has retrieved the instance for service %s: %s",
+							serviceId, instance.getUri()));
+				}
 				sink.next(instance);
 			}
 		}).flatMap(serviceInstance -> LoadBalancerUriTools

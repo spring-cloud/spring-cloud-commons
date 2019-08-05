@@ -40,11 +40,11 @@ import org.springframework.core.env.Environment;
  */
 @Configuration
 @EnableConfigurationProperties
-@ConditionalOnBean(DiscoveryClient.class)
 @ConditionalOnDiscoveryEnabled
-public class LoadBalancerDiscoveryClientConfiguration {
+public class LoadBalancerClientConfiguration {
 
 	@Bean
+	@ConditionalOnBean(DiscoveryClient.class)
 	@ConditionalOnMissingBean
 	public ServiceInstanceSupplier discoveryClientServiceInstanceSupplier(
 			DiscoveryClient discoveryClient, Environment env,

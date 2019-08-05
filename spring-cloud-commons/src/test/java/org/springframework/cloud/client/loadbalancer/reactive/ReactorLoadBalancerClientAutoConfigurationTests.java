@@ -99,7 +99,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 		@Bean
 		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory() {
-			return serviceId -> new DefaultReactiveLoadBalancer();
+			return serviceId -> new TestReactiveLoadBalancer();
 		}
 
 		@Bean
