@@ -29,7 +29,7 @@ import org.springframework.cloud.client.ServiceInstance;
  *
  * @author Olga Maciaszek-Sharma
  */
-class DefaultReactiveLoadBalancer implements ReactiveLoadBalancer<ServiceInstance> {
+class TestReactiveLoadBalancer implements ReactiveLoadBalancer<ServiceInstance> {
 
 	private static final String TEST_SERVICE_ID = "testServiceId";
 
