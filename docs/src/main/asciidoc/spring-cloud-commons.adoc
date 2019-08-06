@@ -406,7 +406,7 @@ Otherwise, the request will be handled by a non-reactive `LoadBalancerClient`.
 
 TIP: The `ReactorLoadBalancer` used underneath supports caching. If `cacheManager` is detected,
 cached version of `ServiceInstanceSupplier` will be used. If not, we will retrieve instances
-from discovery service without caching them. We recommend enabling caching in your project
+from discovery service without caching them. We recommend https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[enabling caching] in your project
 if you use `ReactiveLoadBalancer`.
 
 ==== Retrying Failed Requests
