@@ -30,14 +30,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
-import org.springframework.cloud.loadbalancer.nonreactive.client.SpringLoadBalancerClient;
+import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * An autoconfiguration for {@link SpringLoadBalancerClient}.
+ * An autoconfiguration for {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
@@ -48,7 +48,7 @@ import org.springframework.web.client.RestTemplate;
 @AutoConfigureBefore({
 		org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration.class,
 		AsyncLoadBalancerAutoConfiguration.class })
-public class SpringLoadBalancerClientAutoConfiguration {
+public class BlockingLoadBalancerClientAutoConfiguration {
 
 	@Bean
 	@ConditionalOnClass(
@@ -64,7 +64,7 @@ public class SpringLoadBalancerClientAutoConfiguration {
 	@ConditionalOnMissingClass("org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
 	public LoadBalancerClient loadBalancerClient(
 			LoadBalancerClientFactory loadBalancerClientFactory) {
-		return new SpringLoadBalancerClient(loadBalancerClientFactory);
+		return new BlockingLoadBalancerClient(loadBalancerClientFactory);
 	}
 
 }
@@ -77,8 +77,9 @@ class RibbonWarnLogger {
 	void logWarning() {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn(
-					"You already have RibbonLoadBalancerClient on your classpath. It will be used by default."
-							+ " To use SpringLoadBalancerClient remove spring-cloud-starter-netflix-ribbon from your project.");
+					"You already have RibbonLoadBalancerClient on your classpath. It will be used by default. To use "
+							+ BlockingLoadBalancerClient.class.getSimpleName()
+							+ " remove spring-cloud-starter-netflix-ribbon from your project.");
 		}
 	}
 

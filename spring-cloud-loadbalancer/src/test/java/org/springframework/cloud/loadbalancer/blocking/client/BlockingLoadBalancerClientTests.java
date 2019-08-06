@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.loadbalancer.nonreactive.client;
+package org.springframework.cloud.loadbalancer.blocking.client;
 
 import java.io.IOException;
 import java.net.URI;
@@ -50,16 +50,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 /**
- * Tests for {@link SpringLoadBalancerClient}.
+ * Tests for {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
  */
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
-class SpringLoadBalancerClientTests {
+class BlockingLoadBalancerClientTests {
 
 	@Autowired
-	private SpringLoadBalancerClient loadBalancerClient;
+	private BlockingLoadBalancerClient loadBalancerClient;
 
 	@Autowired
 	private SimpleDiscoveryProperties properties;
