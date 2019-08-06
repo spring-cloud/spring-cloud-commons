@@ -73,8 +73,9 @@ public class SpringLoadBalancerClient implements LoadBalancerClient {
 	@Override
 	public ServiceInstance choose(String serviceId) {
 		return Optional.ofNullable(loadBalancerClientFactory.getInstance(serviceId))
-				.map(loadBalancer -> Mono.from(loadBalancer.choose())
-						.map(Response::getServer).block())
+				.map(loadBalancer -> Optional
+						.ofNullable(Mono.from(loadBalancer.choose()).block())
+						.map(Response::getServer).orElse(null))
 				.orElse(null);
 	}
 

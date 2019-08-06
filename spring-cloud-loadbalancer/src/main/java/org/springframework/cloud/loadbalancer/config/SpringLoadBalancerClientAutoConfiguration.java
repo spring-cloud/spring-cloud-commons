@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.loadbalancer.config;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -41,15 +46,37 @@ import org.springframework.web.client.RestTemplate;
 @AutoConfigureBefore({
 		org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration.class })
 @ConditionalOnBean(LoadBalancerClientFactory.class)
-@ConditionalOnMissingClass("org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
 public class SpringLoadBalancerClientAutoConfiguration {
+
+	@Bean
+	@ConditionalOnClass(
+			name = "org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
+	public RibbonWarnLogger ribbonWarnLogger() {
+		return new RibbonWarnLogger();
+	}
 
 	@Bean
 	@ConditionalOnClass(RestTemplate.class)
 	@ConditionalOnMissingBean
+	@ConditionalOnMissingClass("org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
 	public LoadBalancerClient loadBalancerClient(
 			LoadBalancerClientFactory loadBalancerClientFactory) {
 		return new SpringLoadBalancerClient(loadBalancerClientFactory);
+	}
+
+}
+
+class RibbonWarnLogger {
+
+	private static final Log LOG = LogFactory.getLog(RibbonWarnLogger.class);
+
+	@PostConstruct
+	void logWarning() {
+		if (LOG.isWarnEnabled()) {
+			LOG.warn(
+					"You already have RibbonLoadBalancerClient on your classpath. It will be used by default."
+							+ " To use SpringLoadBalancerClient remove spring-cloud-starter-netflix-ribbon from your project.");
+		}
 	}
 
 }
