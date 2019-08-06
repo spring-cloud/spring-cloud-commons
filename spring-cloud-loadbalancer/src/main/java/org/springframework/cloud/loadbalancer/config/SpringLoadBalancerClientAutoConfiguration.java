@@ -37,15 +37,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 /**
+ * An autoconfiguration for {@link SpringLoadBalancerClient}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
 @Configuration
 @LoadBalancerClients
-@AutoConfigureAfter({ AsyncLoadBalancerAutoConfiguration.class,
-		LoadBalancerAutoConfiguration.class })
+@AutoConfigureAfter(LoadBalancerAutoConfiguration.class)
 @AutoConfigureBefore({
-		org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration.class })
-@ConditionalOnBean(LoadBalancerClientFactory.class)
+		org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration.class,
+		AsyncLoadBalancerAutoConfiguration.class })
 public class SpringLoadBalancerClientAutoConfiguration {
 
 	@Bean
@@ -56,6 +58,7 @@ public class SpringLoadBalancerClientAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	@ConditionalOnClass(RestTemplate.class)
 	@ConditionalOnMissingBean
 	@ConditionalOnMissingClass("org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")

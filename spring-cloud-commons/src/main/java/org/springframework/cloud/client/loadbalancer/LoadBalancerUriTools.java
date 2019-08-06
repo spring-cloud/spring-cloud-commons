@@ -28,6 +28,9 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
+ * Utility class containing methods allowing for reconstructing URIs in order to redirect
+ * the requests to a service instance of choice.
+ *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
@@ -84,6 +87,12 @@ public final class LoadBalancerUriTools {
 		return 80;
 	}
 
+	/**
+	 * Modifies the URI in order to redirect the request to a service instance of choice.
+	 * @param serviceInstance the {@link ServiceInstance} to redirect the request to.
+	 * @param original the {@link URI} from the original request
+	 * @return a {@link Mono} of the modified {@link URI}
+	 */
 	public static Mono<URI> reconstructURIAsMono(ServiceInstance serviceInstance,
 			URI original) {
 		if (serviceInstance == null) {
@@ -93,6 +102,12 @@ public final class LoadBalancerUriTools {
 		return Mono.just(doReconstructURI(serviceInstance, original));
 	}
 
+	/**
+	 * Modifies the URI in order to redirect the request to a service instance of choice.
+	 * @param serviceInstance the {@link ServiceInstance} to redirect the request to.
+	 * @param original the {@link URI} from the original request
+	 * @return the modified {@link URI}
+	 */
 	public static URI reconstructURI(ServiceInstance serviceInstance, URI original) {
 		return Optional.ofNullable(serviceInstance)
 				.map(instance -> doReconstructURI(serviceInstance, original))
@@ -100,7 +115,7 @@ public final class LoadBalancerUriTools {
 						"Service Instance cannot be null."));
 	}
 
-	public static URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
+	private static URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
 		String host = serviceInstance.getHost();
 		String scheme = Optional.ofNullable(serviceInstance.getScheme())
 				.orElse(computeScheme(original, serviceInstance));

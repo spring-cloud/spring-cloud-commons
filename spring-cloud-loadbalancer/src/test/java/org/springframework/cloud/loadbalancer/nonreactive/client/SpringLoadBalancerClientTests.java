@@ -96,6 +96,22 @@ class SpringLoadBalancerClientTests {
 	}
 
 	@Test
+	void exceptionThrownIfInstanceNotAvailableForRequestExecution() throws IOException {
+		try {
+			final String result = "result";
+			Object actualResult = loadBalancerClient.execute("unknownservice",
+					(LoadBalancerRequest<Object>) instance -> result);
+			assertThat(actualResult).isEqualTo(result);
+			fail("Should have thrown exception.");
+		}
+		catch (Exception exception) {
+			assertThat(exception).isNotNull();
+			assertThat(exception).isInstanceOf(IllegalStateException.class);
+			assertThat(exception).hasMessage("No instances available for unknownservice");
+		}
+	}
+
+	@Test
 	void exceptionRethrownAsRuntime() {
 		try {
 			loadBalancerClient.execute("myservice", instance -> {
@@ -133,7 +149,7 @@ class SpringLoadBalancerClientTests {
 					name = "myservice", configuration = MyServiceConfig.class),
 			@org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient(
 					name = "unknownservice",
-					configuration = UnknownServiceConfig.class)})
+					configuration = UnknownServiceConfig.class) })
 	protected static class Config {
 
 	}

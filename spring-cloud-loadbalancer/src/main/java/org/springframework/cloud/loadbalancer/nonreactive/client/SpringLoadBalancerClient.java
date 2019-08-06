@@ -31,7 +31,10 @@ import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.util.ReflectionUtils;
 
 /**
+ * The default {@link LoadBalancerClient} implementation.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
 public class SpringLoadBalancerClient implements LoadBalancerClient {
 
