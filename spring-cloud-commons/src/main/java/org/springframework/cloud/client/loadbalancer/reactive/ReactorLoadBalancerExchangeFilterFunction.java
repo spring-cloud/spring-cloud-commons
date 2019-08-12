@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.Objects;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,28 +63,26 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			return Mono.just(
 					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
-		return choose(serviceId).map(response -> {
+		return choose(serviceId).flatMap(response -> {
 			ServiceInstance instance = response.getServer();
 			if (instance == null) {
 				String message = serviceInstanceUnavailableMessage(serviceId);
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(message);
 				}
-				throw new IllegalStateException(message);
-			}
-			else {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(String.format(
-							"Load balancer has retrieved the instance for service %s: %s",
-							serviceId, instance.getUri()));
-				}
-				return instance;
-			}
-		}).flatMap(serviceInstance -> LoadBalancerUriTools.reconstructURI(serviceInstance,
-				originalUrl)).map(uri -> buildClientRequest(request, uri))
-				.flatMap(next::exchange)
-				.onErrorReturn(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
+				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
+			}
+
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(String.format(
+						"Load balancer has retrieved the instance for service %s: %s",
+						serviceId, Objects.requireNonNull(instance).getUri()));
+			}
+			ClientRequest newRequest = buildClientRequest(request,
+					LoadBalancerUriTools.reconstructURI(instance, originalUrl));
+			return next.exchange(newRequest);
+		});
 	}
 
 	private Mono<Response<ServiceInstance>> choose(String serviceId) {

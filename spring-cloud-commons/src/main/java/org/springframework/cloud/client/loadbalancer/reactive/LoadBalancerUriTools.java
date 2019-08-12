@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -84,12 +82,11 @@ final class LoadBalancerUriTools {
 		return 80;
 	}
 
-	static Mono<URI> reconstructURI(ServiceInstance serviceInstance, URI original) {
+	static URI reconstructURI(ServiceInstance serviceInstance, URI original) {
 		if (serviceInstance == null) {
-			return Mono.defer(() -> Mono.error(
-					new IllegalArgumentException("Service Instance cannot be null.")));
+			throw new IllegalArgumentException("Service Instance cannot be null.");
 		}
-		return Mono.just(doReconstructURI(serviceInstance, original));
+		return doReconstructURI(serviceInstance, original);
 	}
 
 	private static URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
