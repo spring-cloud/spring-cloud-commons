@@ -33,7 +33,7 @@ import org.springframework.cloud.client.loadbalancer.reactive.Response;
 /**
  * @author Spencer Gibb
  */
-public class RoundRobinLoadBalancer implements ReactorLoadBalancer<ServiceInstance> {
+public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
 	private static final Log log = LogFactory.getLog(RoundRobinLoadBalancer.class);
 

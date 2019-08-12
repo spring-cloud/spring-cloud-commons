@@ -16,38 +16,34 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.util.Random;
+
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
+
+import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * Reactive load balancer.
+ * A sample implementation of {@link ReactiveLoadBalancer} used for tests.
  *
- * @param <T> type of the response
- * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-public interface ReactiveLoadBalancer<T> {
+class TestReactiveLoadBalancer implements ReactiveLoadBalancer<ServiceInstance> {
 
-	/**
-	 * Default implementation of a request.
-	 */
-	Request REQUEST = new DefaultRequest();
+	private static final String TEST_SERVICE_ID = "testServiceId";
 
-	/**
-	 * Choose the next server based on the load balancing algorithm.
-	 * @param request - incoming request
-	 * @return publisher for the response
-	 */
-	Publisher<Response<T>> choose(Request request);
+	private final Random random = new Random();
 
-	default Publisher<Response<T>> choose() { // conflicting name
-		return choose(REQUEST);
+	@Override
+	public Publisher<Response<ServiceInstance>> choose() {
+		return Mono.just(new DefaultResponse(new DefaultServiceInstance(TEST_SERVICE_ID,
+				TEST_SERVICE_ID, TEST_SERVICE_ID, random.nextInt(40000), false)));
 	}
 
-	@FunctionalInterface
-	interface Factory<T> {
-
-		ReactiveLoadBalancer<T> getInstance(String serviceId);
-
+	@Override
+	public Publisher<Response<ServiceInstance>> choose(Request request) {
+		return choose();
 	}
 
 }
