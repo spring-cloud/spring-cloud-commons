@@ -82,6 +82,12 @@ public final class LoadBalancerUriTools {
 		return 80;
 	}
 
+	/**
+	 * Modifies the URI in order to redirect the request to a service instance of choice.
+	 * @param serviceInstance the {@link ServiceInstance} to redirect the request to.
+	 * @param original the {@link URI} from the original request
+	 * @return the modified {@link URI}
+	 */
 	public static URI reconstructURI(ServiceInstance serviceInstance, URI original) {
 		if (serviceInstance == null) {
 			throw new IllegalArgumentException("Service Instance cannot be null.");
