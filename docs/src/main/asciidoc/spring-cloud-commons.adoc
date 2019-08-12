@@ -371,7 +371,7 @@ See {githubroot}/spring-cloud-netflix/blob/master/spring-cloud-netflix-ribbon/sr
 
 === Spring WebClient as a Load Balancer Client
 
-`WebClient` can be automatically configured to use the `LoadBalancerClient`.
+`WebClient` can be automatically configured to use a load-balancer client.
 To create a load-balanced `WebClient`, create a `WebClient.Builder` `@Bean` and use the `@LoadBalanced` qualifier, as shown in the following example:
 
 [source,java,indent=0]
@@ -399,6 +399,20 @@ public class MyClass {
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The Ribbon client is used to create a full physical address.
+
+IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder`, you need to have a loadbalancer
+implementation in the classpath. It is recommended that you add the
+`org.springframework.cloud:spring-cloud-loadbalancer` dependency to your project.
+Then, `ReactiveLoadBalancer` will be used underneath.
+Alternatively, this functionality will also work with spring-cloud-starter-netflix-ribbon, but the request
+will be handled by a non-reactive `LoadBalancerClient` under the hood. Additionally,
+spring-cloud-starter-netflix-ribbon is already in maintenance mode, so we do not recommned
+adding it to new projects.
+
+TIP: The `ReactorLoadBalancer` used underneath supports caching. If `cacheManager` is detected,
+cached version of `ServiceInstanceSupplier` will be used. If not, we will retrieve instances
+from discovery service without caching them. We recommend https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[enabling caching] in your project
+if you use `ReactiveLoadBalancer`.
 
 ==== Retrying Failed Requests
 
@@ -514,7 +528,42 @@ TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set 
 [[loadbalanced-webclient]]
 === Spring WebFlux WebClient as a Load Balancer Client
 
-`WebClient` can be configured to use the `LoadBalancerClient`. `LoadBalancerExchangeFilterFunction` is auto-configured if `spring-webflux` is on the classpath. The following example shows how to configure a `WebClient` to use load balancer:
+[[webflux-with-reactive-loadbalancer]]
+==== Spring WebFlux WebClient with Reactive Load Balancer
+
+`WebClient` can be configured to use the `ReactiveLoadBalancer`.
+If you add `org.springframework.cloud:spring-cloud-loadbalancer` to your project,
+ `ReactorLoadBalancerExchangeFilterFunction` is auto-configured if `spring-webflux` is on the classpath.
+The following example shows how to configure a `WebClient` to use reactive load balancer under the hood:
+
+[source,java,indent=0]
+----
+public class MyClass {
+    @Autowired
+    private ReactorLoadBalancerExchangeFilterFunction lbFunction;
+
+    public Mono<String> doOtherStuff() {
+        return WebClient.builder().baseUrl("http://stores")
+            .filter(lbFunction)
+            .build()
+            .get()
+            .uri("/stores")
+            .retrieve()
+            .bodyToMono(String.class);
+    }
+}
+----
+
+The URI needs to use a virtual host name (that is, a service name, not a host name).
+The `ReactorLoadBalancerClient` is used to create a full physical address.
+
+==== Spring WebFlux WebClient with non-reactive Load Balancer Client
+
+If you you don't have `org.springframework.cloud:spring-cloud-loadbalancer` in your project,
+but you do have spring-cloud-starter-netflix-ribbon, you can still use `WebClient` with `LoadBalancerClient`. `LoadBalancerExchangeFilterFunction`
+will be auto-configured if `spring-webflux` is on the classpath. Please note, however, that this is
+uses a non-reactive client under the hood.
+The following example shows how to configure a `WebClient` to use load balancer:
 
 [source,java,indent=0]
 ----
@@ -536,6 +585,45 @@ public class MyClass {
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The `LoadBalancerClient` is used to create a full physical address.
+
+WARN:
+This approach is now deprecated.
+We suggest you use <<webflux-with-reactive-loadbalancer,WebFlux with reactive Load-Balancer>>
+instead.
+
+==== Passing your own Load-Balancer Client configuration
+
+You can also use the `@LoadBalancerClient` annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, like so:
+
+[source,java,indent=0]
+----
+@Configuration
+@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class)
+public class MyConfiguration {
+
+	@Bean
+	@LoadBalanced
+	public WebClient.Builder loadBalancedWebClientBuilder() {
+		return WebClient.builder();
+	}
+}
+----
+
+It is also possible to pass together multiple configurations (for more than one load-balancer client) via the `@LoadBalancerClients` annotation, as shown below:
+
+[source,java,indent=0]
+----
+@Configuration
+@LoadBalancerClients({@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class), @LoadBalancerClient(value = "customers", configuration = CustomersLoadBalancerClientConfiguration.class)})
+public class MyConfiguration {
+
+	@Bean
+	@LoadBalanced
+	public WebClient.Builder loadBalancedWebClientBuilder() {
+		return WebClient.builder();
+	}
+}
+----
 
 [[ignore-network-interfaces]]
 === Ignore Network Interfaces

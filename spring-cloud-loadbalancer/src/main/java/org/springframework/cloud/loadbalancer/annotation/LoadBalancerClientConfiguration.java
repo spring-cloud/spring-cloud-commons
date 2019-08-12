@@ -17,25 +17,34 @@
 package org.springframework.cloud.loadbalancer.annotation;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
+import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceSupplier;
+import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
+import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceSupplier;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 /**
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 @Configuration
 @EnableConfigurationProperties
+@ConditionalOnDiscoveryEnabled
 public class LoadBalancerClientConfiguration {
 
 	@Bean
+	@ConditionalOnBean(DiscoveryClient.class)
 	@ConditionalOnMissingBean
 	public ServiceInstanceSupplier discoveryClientServiceInstanceSupplier(
 			DiscoveryClient discoveryClient, Environment env,
@@ -48,6 +57,16 @@ public class LoadBalancerClientConfiguration {
 					cacheManager.getIfAvailable());
 		}
 		return delegate;
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public ReactorLoadBalancer<ServiceInstance> reactorServiceInstanceLoadBalancer(
+			Environment environment,
+			LoadBalancerClientFactory loadBalancerClientFactory) {
+		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
+		return new RoundRobinLoadBalancer(name, loadBalancerClientFactory
+				.getLazyProvider(name, ServiceInstanceSupplier.class));
 	}
 
 }
