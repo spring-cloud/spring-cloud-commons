@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-final class LoadBalancerUriTools {
+public final class LoadBalancerUriTools {
 
 	private LoadBalancerUriTools() {
 		throw new IllegalStateException("Can't instantiate a utility class");
@@ -82,7 +82,7 @@ final class LoadBalancerUriTools {
 		return 80;
 	}
 
-	static URI reconstructURI(ServiceInstance serviceInstance, URI original) {
+	public static URI reconstructURI(ServiceInstance serviceInstance, URI original) {
 		if (serviceInstance == null) {
 			throw new IllegalArgumentException("Service Instance cannot be null.");
 		}
