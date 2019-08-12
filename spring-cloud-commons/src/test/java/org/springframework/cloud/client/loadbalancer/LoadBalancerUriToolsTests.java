@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
