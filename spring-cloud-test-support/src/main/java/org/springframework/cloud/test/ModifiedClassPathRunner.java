@@ -182,7 +182,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 
 	private URL[] processUrls(URL[] urls, Class<?> testClass) throws Exception {
 		MergedAnnotations annotations = MergedAnnotations.from(testClass,
-				SearchStrategy.EXHAUSTIVE);
+				SearchStrategy.TYPE_HIERARCHY);
 		ClassPathEntryFilter filter = new ClassPathEntryFilter(
 				annotations.get(ClassPathExclusions.class));
 		List<URL> processedUrls = new ArrayList<>();
