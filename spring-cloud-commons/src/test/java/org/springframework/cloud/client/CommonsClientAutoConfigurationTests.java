@@ -25,7 +25,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.actuator.FeaturesEndpoint;
 import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicator;
-import org.springframework.cloud.client.discovery.health.DiscoveryCompositeHealthIndicator;
+import org.springframework.cloud.client.discovery.health.DiscoveryCompositeHealthContributor;
 import org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -46,7 +46,7 @@ public class CommonsClientAutoConfigurationTests {
 	public void beansCreatedNormally() {
 		try (ConfigurableApplicationContext ctxt = init()) {
 			then(ctxt.getBean(DiscoveryClientHealthIndicator.class)).isNotNull();
-			then(ctxt.getBean(DiscoveryCompositeHealthIndicator.class)).isNotNull();
+			then(ctxt.getBean(DiscoveryCompositeHealthContributor.class)).isNotNull();
 			then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull();
 			then(ctxt.getBeansOfType(HasFeatures.class).values()).isNotEmpty();
 		}
@@ -57,13 +57,9 @@ public class CommonsClientAutoConfigurationTests {
 		try (ConfigurableApplicationContext ctxt = init(
 				"spring.cloud.discovery.enabled=false")) {
 			assertBeanNonExistant(ctxt, DiscoveryClientHealthIndicator.class);
-			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthIndicator.class);
-			then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull(); // features
-			// actuator
-			// is
-			// independent
-			// of
-			// discovery
+			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthContributor.class);
+			then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull();
+			// features actuator is independent of discovery
 			assertBeanNonExistant(ctxt, HasFeatures.class);
 		}
 	}
@@ -75,7 +71,7 @@ public class CommonsClientAutoConfigurationTests {
 				"spring.cloud.discovery.client.composite-indicator.enabled=false",
 				"spring.cloud.features.enabled=false")) {
 			assertBeanNonExistant(ctxt, DiscoveryClientHealthIndicator.class);
-			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthIndicator.class);
+			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthContributor.class);
 			assertBeanNonExistant(ctxt, FeaturesEndpoint.class);
 		}
 	}
@@ -85,7 +81,7 @@ public class CommonsClientAutoConfigurationTests {
 		try (ConfigurableApplicationContext ctxt = init(
 				"spring.cloud.discovery.client.health-indicator.enabled=false")) {
 			assertBeanNonExistant(ctxt, DiscoveryClientHealthIndicator.class);
-			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthIndicator.class);
+			assertBeanNonExistant(ctxt, DiscoveryCompositeHealthContributor.class);
 		}
 	}
 

@@ -22,9 +22,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.CompositeHealthContributor;
 import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthAggregator;
-import org.springframework.boot.actuate.health.OrderedHealthAggregator;
+import org.springframework.boot.actuate.health.HealthContributor;
+import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,42 +53,43 @@ import static org.mockito.Mockito.mock;
 public class DiscoveryClientHealthIndicatorTests {
 
 	@Autowired
-	private DiscoveryCompositeHealthIndicator healthIndicator;
+	private DiscoveryCompositeHealthContributor healthContributor;
 
 	@Autowired
 	private DiscoveryClientHealthIndicator clientHealthIndicator;
 
 	@Test
 	public void testHealthIndicatorDescriptionDisabled() {
-		then(this.healthIndicator).as("healthIndicator was null").isNotNull();
-		Health health = this.healthIndicator.health();
-		assertHealth(health, Status.UNKNOWN);
+		then(this.healthContributor).as("healthIndicator was null").isNotNull();
+		assertHealth(getHealth("testDiscoveryHealthIndicator"), Status.UNKNOWN);
+		assertHealth(getHealth("discoveryClient"), Status.UNKNOWN);
 
 		this.clientHealthIndicator
 				.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
 
-		health = this.healthIndicator.health();
-		Status status = assertHealth(health, Status.UP);
+		assertHealth(getHealth("testDiscoveryHealthIndicator"), Status.UNKNOWN);
+		Status status = assertHealth(getHealth("discoveryClient"), Status.UP);
 		then(status.getDescription()).as("status description was wrong")
 				.isEqualTo("TestDiscoveryClient");
+	}
+
+	private Health getHealth(String name) {
+		HealthContributor delegate = ((CompositeHealthContributor) this.healthContributor)
+				.getContributor(name);
+		return ((HealthIndicator) delegate).health();
 	}
 
 	private Status assertHealth(Health health, Status expected) {
 		then(health).as("health was null").isNotNull();
 		Status status = health.getStatus();
 		then(status).as("status was null").isNotNull();
-		then(expected.getCode()).isEqualTo(status.getCode()).as("status code was wrong");
+		then(status.getCode()).isEqualTo(expected.getCode()).as("status code was wrong");
 		return status;
 	}
 
 	@Configuration
 	@EnableConfigurationProperties
 	public static class Config {
-
-		@Bean
-		public HealthAggregator healthAggregator() {
-			return new OrderedHealthAggregator();
-		}
 
 		@Bean
 		public DiscoveryClient discoveryClient() {
@@ -100,6 +102,7 @@ public class DiscoveryClientHealthIndicatorTests {
 		@Bean
 		public DiscoveryHealthIndicator discoveryHealthIndicator() {
 			return new DiscoveryHealthIndicator() {
+
 				@Override
 				public String getName() {
 					return "testDiscoveryHealthIndicator";
@@ -109,6 +112,7 @@ public class DiscoveryClientHealthIndicatorTests {
 				public Health health() {
 					return new Health.Builder().unknown().build();
 				}
+
 			};
 		}
 

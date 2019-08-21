@@ -23,7 +23,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnEnabledEndpoint;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
-import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -36,7 +35,7 @@ import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicator;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicatorProperties;
-import org.springframework.cloud.client.discovery.health.DiscoveryCompositeHealthIndicator;
+import org.springframework.cloud.client.discovery.health.DiscoveryCompositeHealthContributor;
 import org.springframework.cloud.client.discovery.health.DiscoveryHealthIndicator;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
@@ -73,10 +72,10 @@ public class CommonsClientAutoConfiguration {
 		@ConditionalOnProperty(
 				value = "spring.cloud.discovery.client.composite-indicator.enabled",
 				matchIfMissing = true)
-		@ConditionalOnBean({ DiscoveryHealthIndicator.class, HealthAggregator.class })
-		public DiscoveryCompositeHealthIndicator discoveryCompositeHealthIndicator(
-				HealthAggregator aggregator, List<DiscoveryHealthIndicator> indicators) {
-			return new DiscoveryCompositeHealthIndicator(aggregator, indicators);
+		@ConditionalOnBean({ DiscoveryHealthIndicator.class })
+		public DiscoveryCompositeHealthContributor discoveryCompositeHealthContributor(
+				List<DiscoveryHealthIndicator> indicators) {
+			return new DiscoveryCompositeHealthContributor(indicators);
 		}
 
 		@Bean
