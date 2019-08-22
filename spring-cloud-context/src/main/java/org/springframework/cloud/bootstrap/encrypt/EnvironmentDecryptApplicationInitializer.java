@@ -282,14 +282,14 @@ public class EnvironmentDecryptApplicationInitializer implements
 		}
 		catch (Exception e) {
 			String message = "Cannot decrypt: key=" + key;
-			if (this.failOnError) {
-				throw new IllegalStateException(message, e);
-			}
 			if (logger.isDebugEnabled()) {
 				logger.warn(message, e);
 			}
 			else {
 				logger.warn(message);
+			}
+			if (this.failOnError) {
+				throw new IllegalStateException(message, e);
 			}
 			return "";
 		}
