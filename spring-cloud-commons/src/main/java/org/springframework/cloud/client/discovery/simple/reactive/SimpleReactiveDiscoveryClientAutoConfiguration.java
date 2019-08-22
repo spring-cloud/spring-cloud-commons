@@ -20,7 +20,9 @@ import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.cloud.commons.util.InetUtils;
@@ -34,6 +36,7 @@ import org.springframework.core.annotation.Order;
  * @author Tim Ysewyn
  */
 @Configuration
+@ConditionalOnDiscoveryEnabled
 public class SimpleReactiveDiscoveryClientAutoConfiguration {
 
 	@Autowired(required = false)
@@ -46,7 +49,8 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration {
 	private InetUtils inet;
 
 	@Bean
-	public SimpleDiscoveryProperties simpleDiscoveryProperties() {
+	@ConditionalOnMissingBean
+	public SimpleDiscoveryProperties simpleReactiveDiscoveryProperties() {
 		SimpleDiscoveryProperties simple = new SimpleDiscoveryProperties();
 		simple.getLocal().setServiceId(this.serviceId);
 		simple.getLocal()
@@ -58,8 +62,8 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration {
 
 	@Bean
 	@Order
-	public ReactiveDiscoveryClient simpleDiscoveryClient() {
-		return new SimpleReactiveDiscoveryClient(simpleDiscoveryProperties());
+	public ReactiveDiscoveryClient simpleReactiveDiscoveryClient(SimpleDiscoveryProperties simpleDiscoveryProperties) {
+		return new SimpleReactiveDiscoveryClient(simpleDiscoveryProperties);
 	}
 
 	private int findPort() {
