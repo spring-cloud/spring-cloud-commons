@@ -39,14 +39,17 @@ public class SimpleReactiveDiscoveryClientTests {
 
 	private final SimpleServiceInstance service1Inst1 = new SimpleServiceInstance(
 			URI.create("http://host1:8080"));
+
 	private final SimpleServiceInstance service1Inst2 = new SimpleServiceInstance(
 			URI.create("https://host2:8443"));
+
 	private SimpleReactiveDiscoveryClient client;
 
 	@BeforeEach
 	public void setUp() {
 		SimpleDiscoveryProperties simpleDiscoveryProperties = new SimpleDiscoveryProperties();
-		simpleDiscoveryProperties.setInstances(singletonMap("service", Arrays.asList(service1Inst1, service1Inst2)));
+		simpleDiscoveryProperties.setInstances(
+				singletonMap("service", Arrays.asList(service1Inst1, service1Inst2)));
 		simpleDiscoveryProperties.init();
 		this.client = new SimpleReactiveDiscoveryClient(simpleDiscoveryProperties);
 	}
@@ -60,27 +63,20 @@ public class SimpleReactiveDiscoveryClientTests {
 	@Test
 	public void shouldReturnFluxOfServices() {
 		Flux<String> services = this.client.getServices();
-		StepVerifier.create(services)
-				.expectNext("service")
-				.expectComplete()
-				.verify();
+		StepVerifier.create(services).expectNext("service").expectComplete().verify();
 	}
 
 	@Test
 	public void shouldReturnEmptyFluxForNonExistingService() {
 		Flux<ServiceInstance> instances = this.client.getInstances("undefined");
-		StepVerifier.create(instances)
-				.expectComplete();
+		StepVerifier.create(instances).expectComplete();
 	}
 
 	@Test
 	public void shouldReturnFluxOfServiceInstances() {
 		Flux<ServiceInstance> services = this.client.getInstances("service");
-		StepVerifier.create(services)
-				.expectNext(service1Inst1)
-				.expectNext(service1Inst2)
-				.expectComplete()
-				.verify();
+		StepVerifier.create(services).expectNext(service1Inst1).expectNext(service1Inst2)
+				.expectComplete().verify();
 	}
 
 }

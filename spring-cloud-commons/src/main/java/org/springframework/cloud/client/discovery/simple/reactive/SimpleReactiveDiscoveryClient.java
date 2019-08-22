@@ -26,8 +26,8 @@ import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperti
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties.SimpleServiceInstance;
 
 /**
- * A {@link ReactiveDiscoveryClient} that will use the
- * properties file as a source of service instances.
+ * A {@link ReactiveDiscoveryClient} that will use the properties file as a source of
+ * service instances.
  *
  * @author Tim Ysewyn
  */
@@ -35,7 +35,8 @@ public class SimpleReactiveDiscoveryClient implements ReactiveDiscoveryClient {
 
 	private SimpleDiscoveryProperties simpleDiscoveryProperties;
 
-	public SimpleReactiveDiscoveryClient(SimpleDiscoveryProperties simpleDiscoveryProperties) {
+	public SimpleReactiveDiscoveryClient(
+			SimpleDiscoveryProperties simpleDiscoveryProperties) {
 		this.simpleDiscoveryProperties = simpleDiscoveryProperties;
 	}
 

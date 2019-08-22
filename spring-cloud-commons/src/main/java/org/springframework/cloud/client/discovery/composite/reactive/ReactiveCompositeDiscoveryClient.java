@@ -26,8 +26,8 @@ import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
- * A {@link ReactiveDiscoveryClient} that is composed of other discovery clients and delegates
- * calls to each of them in order.
+ * A {@link ReactiveDiscoveryClient} that is composed of other discovery clients and
+ * delegates calls to each of them in order.
  *
  * @author Tim Ysewyn
  */
@@ -35,7 +35,8 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 
 	private final List<ReactiveDiscoveryClient> discoveryClients;
 
-	public ReactiveCompositeDiscoveryClient(List<ReactiveDiscoveryClient> discoveryClients) {
+	public ReactiveCompositeDiscoveryClient(
+			List<ReactiveDiscoveryClient> discoveryClients) {
 		AnnotationAwareOrderComparator.sort(discoveryClients);
 		this.discoveryClients = discoveryClients;
 	}
@@ -69,4 +70,5 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 	List<ReactiveDiscoveryClient> getDiscoveryClients() {
 		return discoveryClients;
 	}
+
 }
