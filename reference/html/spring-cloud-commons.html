@@ -125,6 +125,18 @@ $(addBlockSwitches);
 <li><a href="#_spring_cloud_compatibility_verification">Spring Cloud Compatibility Verification</a></li>
 </ul>
 </li>
+<li><a href="#_spring_cloud_circuit_breaker">Spring Cloud Circuit Breaker</a></li>
+<li><a href="#_introduction">Introduction</a>
+<ul class="sectlevel2">
+<li><a href="#_supported_implementations">Supported Implementations</a></li>
+</ul>
+</li>
+<li><a href="#_core_concepts">Core Concepts</a>
+<ul class="sectlevel2">
+<li><a href="#_circuit_breakers_in_reactive_code">Circuit Breakers In Reactive Code</a></li>
+</ul>
+</li>
+<li><a href="#_configuration">Configuration</a></li>
 </ul>
 </div>
 </div>
@@ -1240,6 +1252,125 @@ If you want to override the compatible Spring Boot versions, just set the
 <code>spring.cloud.compatibility-verifier.compatible-boot-versions</code> property with a comma separated list
 of compatible Spring Boot versions.</p>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_spring_cloud_circuit_breaker"><a class="link" href="#_spring_cloud_circuit_breaker">Spring Cloud Circuit Breaker</a></h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction"><a class="link" href="#_introduction">Introduction</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations.
+It provides a consistent API to use in your applications allowing you the developer to choose the circuit breaker implementation that best fits your needs for your app.</p>
+</div>
+<div class="sect2">
+<h3 id="_supported_implementations"><a class="link" href="#_supported_implementations">Supported Implementations</a></h3>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/Netflix/Hystrix">Netfix Hystrix</a></p>
+</li>
+<li>
+<p><a href="https://github.com/resilience4j/resilience4j">Resilience4J</a></p>
+</li>
+<li>
+<p><a href="https://github.com/alibaba/Sentinel">Sentinel</a></p>
+</li>
+<li>
+<p><a href="https://github.com/spring-projects/spring-retry">Spring Retry</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_core_concepts"><a class="link" href="#_core_concepts">Core Concepts</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To create a circuit breaker in your code you can use the <code>CircuitBreakerFactory</code> API. When you include a Spring Cloud Circuit Breaker starter on your classpath a bean implementing this API will automatically be created for you.
+A very simple example of using this API is given below</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Service
+public static class DemoControllerService {
+	private RestTemplate rest;
+	private CircuitBreakerFactory cbFactory;
+
+	public DemoControllerService(RestTemplate rest, CircuitBreakerFactory cbFactory) {
+		this.rest = rest;
+		this.cbFactory = cbFactory;
+	}
+
+	public String slow() {
+		return cbFactory.create("slow").run(() -&gt; rest.getForObject("/slow", String.class), throwable -&gt; "fallback");
+	}
+
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>CircuitBreakerFactory.create</code> API will create an instance of a class called <code>CircuitBreaker</code>.
+The <code>run</code> method takes a <code>Supplier</code> and a <code>Function</code>.
+The <code>Supplier</code> is the code that you are going to wrap in a circuit breaker.
+The <code>Function</code> is the fallback that will be executed if the circuit breaker is tripped.
+The function will be passed the <code>Throwable</code> that caused the fallback to be triggered.
+You can optionally exclude the fallback if you do not want to provide one.</p>
+</div>
+<div class="sect2">
+<h3 id="_circuit_breakers_in_reactive_code"><a class="link" href="#_circuit_breakers_in_reactive_code">Circuit Breakers In Reactive Code</a></h3>
+<div class="paragraph">
+<p>If Project Reactor is on the class path then you can also use <code>ReactiveCircuitBreakerFactory</code> for your reactive code.</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Service
+public static class DemoControllerService {
+	private ReactiveCircuitBreakerFactory cbFactory;
+	private WebClient webClient;
+
+
+	public DemoControllerService(WebClient webClient, ReactiveCircuitBreakerFactory cbFactory) {
+		this.webClient = webClient;
+		this.cbFactory = cbFactory;
+	}
+
+	public Mono&lt;String&gt; slow() {
+		return webClient.get().uri("/slow").retrieve().bodyToMono(String.class).transform(
+		it -&gt; cbFactory.create("slow").run(it, throwable -&gt; return Mono.just("fallback")));
+	}
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>ReactiveCircuitBreakerFactory.create</code> API will create an instance of a class called <code>ReactiveCircuitBreaker</code>.
+The <code>run</code> method takes with a <code>Mono</code> or <code>Flux</code> and wraps it in a circuit breaker.
+You can optionally profile a fallback <code>Function</code> which will be called if the circuit breaker is tripped and will be passed the <code>Throwable</code>
+that caused the failure.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration"><a class="link" href="#_configuration">Configuration</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can configure your circuit breakers using by creating beans of type <code>Customizer</code>.
+The <code>Customizer</code> interface has a single method called <code>customize</code> that takes in the <code>Object</code> to customize.</p>
 </div>
 </div>
 </div>
