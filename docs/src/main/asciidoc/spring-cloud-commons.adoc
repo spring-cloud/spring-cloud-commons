@@ -768,3 +768,7 @@ In order to disable this feature, set `spring.cloud.compatibility-verifier.enabl
 If you want to override the compatible Spring Boot versions, just set the
 `spring.cloud.compatibility-verifier.compatible-boot-versions` property with a comma separated list
 of compatible Spring Boot versions.
+
+== Spring Cloud Circuit Breaker
+
+include::spring-cloud-circuitbreaker.adoc[]
