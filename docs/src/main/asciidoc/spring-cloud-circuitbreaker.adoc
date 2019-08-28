@@ -79,4 +79,7 @@ that caused the failure.
 You can configure your circuit breakers using by creating beans of type `Customizer`.
 The `Customizer` interface has a single method called `customize` that takes in the `Object` to customize.
 
-// TODO link to implementation docs
+For detailed information on how to customize a given implementation see
+the links below
+
+* [Hystrix](../spring-cloud-netflix/reference/html/#_circuit_breaker_spring_cloud_circuit_breaker_with_hystrix)
