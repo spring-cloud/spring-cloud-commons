@@ -85,4 +85,4 @@ the links below
 * link:../../../spring-cloud-netflix/reference/html/#_circuit_breaker_spring_cloud_circuit_breaker_with_hystrix[Hystrix]
 * link:../../../spring-cloud-circuitbreaker/reference/html/spring-cloud-circuitbreaker.html#_configuring_resilience4j_circuit_breakers[Resilience4J]
 * link:../../../spring-cloud-circuitbreaker/reference/html/spring-cloud-circuitbreaker.html#_configuring_sentinel_circuit_breakers[Sentinal]
-* link:../../../https://cloud.spring.io/spring-cloud-circuitbreaker/reference/html/spring-cloud-circuitbreaker.html#_configuring_spring_retry_circuit_breakers[Spring Retry]
+* link:../../../spring-cloud-circuitbreaker/reference/html/spring-cloud-circuitbreaker.html#_configuring_spring_retry_circuit_breakers[Spring Retry]
