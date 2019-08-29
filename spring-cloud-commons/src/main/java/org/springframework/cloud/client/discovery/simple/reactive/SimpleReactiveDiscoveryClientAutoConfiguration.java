@@ -21,9 +21,13 @@ import java.net.URI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
-import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicatorProperties;
+import org.springframework.cloud.client.discovery.health.reactive.ReactiveDiscoveryClientHealthIndicator;
+import org.springframework.cloud.client.discovery.health.reactive.ReactiveDiscoveryHealthIndicator;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.context.annotation.Bean;
@@ -37,6 +41,7 @@ import org.springframework.core.annotation.Order;
  */
 @Configuration
 @ConditionalOnDiscoveryEnabled
+@EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
 public class SimpleReactiveDiscoveryClientAutoConfiguration {
 
 	@Autowired(required = false)
@@ -62,7 +67,8 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration {
 
 	@Bean
 	@Order
-	public ReactiveDiscoveryClient simpleReactiveDiscoveryClient(SimpleDiscoveryProperties simpleDiscoveryProperties) {
+	public SimpleReactiveDiscoveryClient simpleReactiveDiscoveryClient(
+			SimpleDiscoveryProperties simpleDiscoveryProperties) {
 		return new SimpleReactiveDiscoveryClient(simpleDiscoveryProperties);
 	}
 
@@ -72,6 +78,16 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration {
 			return this.server.getPort();
 		}
 		return 8080;
+	}
+
+	@Bean
+	@ConditionalOnProperty(
+			value = "spring.cloud.discovery.client.health-indicator.enabled",
+			matchIfMissing = true)
+	public ReactiveDiscoveryHealthIndicator simpleReactiveDiscoveryClientHealthIndicator(
+			SimpleReactiveDiscoveryClient discoveryClient,
+			DiscoveryClientHealthIndicatorProperties properties) {
+		return new ReactiveDiscoveryClientHealthIndicator(discoveryClient, properties);
 	}
 
 }

@@ -30,6 +30,7 @@ import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
@@ -70,6 +71,8 @@ class ReactiveCompositeDiscoveryClientTests {
 
 		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
 				asList(discoveryClient1, discoveryClient2));
+
+		assertThat(client.description()).isEqualTo("Composite Reactive Discovery Client");
 
 		Flux<String> services = client.getServices();
 
