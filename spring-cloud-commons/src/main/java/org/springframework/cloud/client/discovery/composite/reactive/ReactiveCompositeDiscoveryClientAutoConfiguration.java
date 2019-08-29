@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.boot.actuate.health.StatusAggregator;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
@@ -31,14 +32,17 @@ import org.springframework.cloud.client.discovery.simple.reactive.SimpleReactive
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Auto-configuration for reactive composite discovery client.
  *
  * @author Tim Ysewyn
+ * @since 2.2.0
  */
 @Configuration
 @ConditionalOnDiscoveryEnabled
+@ConditionalOnClass(WebClient.class)
 @AutoConfigureBefore(SimpleReactiveDiscoveryClientAutoConfiguration.class)
 public class ReactiveCompositeDiscoveryClientAutoConfiguration {
 

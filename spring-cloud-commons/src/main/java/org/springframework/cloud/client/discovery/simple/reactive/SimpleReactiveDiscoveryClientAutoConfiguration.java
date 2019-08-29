@@ -20,6 +20,7 @@ import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
@@ -33,14 +34,17 @@ import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Spring Boot auto-configuration for simple properties-based reactive discovery client.
  *
  * @author Tim Ysewyn
+ * @since 2.2.0
  */
 @Configuration
 @ConditionalOnDiscoveryEnabled
+@ConditionalOnClass(WebClient.class)
 @EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
 public class SimpleReactiveDiscoveryClientAutoConfiguration {
 
