@@ -251,7 +251,7 @@ This behavior can be disabled by setting `autoRegister=false` in `@EnableDiscove
 NOTE: `@EnableDiscoveryClient` is no longer required.
 You can put a `DiscoveryClient` implementation on the classpath to cause the Spring Boot application to register with the service discovery server.
 
-NOTE: Since 2.2.0 we also provide a `ReactiveDiscoveryClient` interface.
+NOTE: A `ReactiveDiscoveryClient` interface is provided now as well.
 All existing functionality of a `DiscoveryClient` has been made available to be used in a non-blocking application.
 
 ==== Health Indicator
