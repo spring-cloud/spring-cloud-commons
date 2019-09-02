@@ -18,7 +18,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
@@ -41,7 +41,7 @@ import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalance
 public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 	@Test
-	void loadBalancerFilterAddedToWebClientBuilder() {
+	public void loadBalancerFilterAddedToWebClientBuilder() {
 		ConfigurableApplicationContext context = init(OneWebClientBuilder.class);
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);
@@ -54,7 +54,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	}
 
 	@Test
-	void loadBalancerFilterAddedOnlyToLoadBalancedWebClientBuilder() {
+	public void loadBalancerFilterAddedOnlyToLoadBalancedWebClientBuilder() {
 		ConfigurableApplicationContext context = init(TwoWebClientBuilders.class);
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);
@@ -71,7 +71,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	}
 
 	@Test
-	void noCustomWebClientBuilders() {
+	public void noCustomWebClientBuilders() {
 		ConfigurableApplicationContext context = init(NoWebClientBuilder.class);
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);

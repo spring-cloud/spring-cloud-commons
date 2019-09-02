@@ -51,8 +51,7 @@ import org.springframework.web.client.RestTemplate;
 public class BlockingLoadBalancerClientAutoConfiguration {
 
 	@Bean
-	@ConditionalOnClass(
-			name = "org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
+	@ConditionalOnClass(name = "org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
 	public RibbonWarnLogger ribbonWarnLogger() {
 		return new RibbonWarnLogger();
 	}

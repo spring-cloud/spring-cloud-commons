@@ -21,9 +21,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -38,7 +38,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -52,9 +52,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  *
  * @author Olga Maciaszek-Sharma
  */
-@ExtendWith(SpringExtension.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-class ReactorLoadBalancerExchangeFilterFunctionTests {
+public class ReactorLoadBalancerExchangeFilterFunctionTests {
 
 	@Autowired
 	private ReactorLoadBalancerExchangeFilterFunction loadBalancerFunction;
@@ -65,8 +65,8 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 	@LocalServerPort
 	private int port;
 
-	@BeforeEach
-	void setUp() {
+	@Before
+	public void setUp() {
 		SimpleDiscoveryProperties.SimpleServiceInstance instance = new SimpleDiscoveryProperties.SimpleServiceInstance();
 		instance.setServiceId("testservice");
 		instance.setUri(URI.create("http://localhost:" + this.port));
@@ -75,7 +75,7 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 	}
 
 	@Test
-	void correctResponseReturnedForExistingHostAndInstancePresent() {
+	public void correctResponseReturnedForExistingHostAndInstancePresent() {
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
 				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
 				.block();
@@ -84,14 +84,14 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 	}
 
 	@Test
-	void serviceUnavailableReturnedWhenNoInstancePresent() {
+	public void serviceUnavailableReturnedWhenNoInstancePresent() {
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://xxx")
 				.filter(this.loadBalancerFunction).build().get().exchange().block();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
 	@Test
-	void badRequestReturnedForIncorrectHost() {
+	public void badRequestReturnedForIncorrectHost() {
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///xxx")
 				.filter(this.loadBalancerFunction).build().get().exchange().block();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);

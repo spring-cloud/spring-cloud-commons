@@ -22,9 +22,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -55,8 +55,8 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Olga Maciaszek-Sharma
  */
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
-class BlockingLoadBalancerClientTests {
+@RunWith(SpringRunner.class)
+public class BlockingLoadBalancerClientTests {
 
 	@Autowired
 	private BlockingLoadBalancerClient loadBalancerClient;
@@ -64,8 +64,8 @@ class BlockingLoadBalancerClientTests {
 	@Autowired
 	private SimpleDiscoveryProperties properties;
 
-	@BeforeEach
-	void setUp() {
+	@Before
+	public void setUp() {
 		properties.getInstances().put("myservice",
 				Collections.singletonList(
 						new SimpleDiscoveryProperties.SimpleServiceInstance(
@@ -73,19 +73,19 @@ class BlockingLoadBalancerClientTests {
 	}
 
 	@Test
-	void correctServiceInstanceChosen() {
+	public void correctServiceInstanceChosen() {
 		ServiceInstance serviceInstance = loadBalancerClient.choose("myservice");
 		assertThat(serviceInstance.getHost()).isEqualTo("test.example");
 	}
 
 	@Test
-	void nullReturnedIfInstanceMissing() {
+	public void nullReturnedIfInstanceMissing() {
 		ServiceInstance serviceInstance = loadBalancerClient.choose("unknownservice");
 		assertThat(serviceInstance).isNull();
 	}
 
 	@Test
-	void requestExecutedAgainstCorrectInstance() throws IOException {
+	public void requestExecutedAgainstCorrectInstance() throws IOException {
 		final String result = "result";
 		Object actualResult = loadBalancerClient.execute("myservice",
 				(LoadBalancerRequest<Object>) instance -> {
@@ -96,7 +96,8 @@ class BlockingLoadBalancerClientTests {
 	}
 
 	@Test
-	void exceptionThrownIfInstanceNotAvailableForRequestExecution() throws IOException {
+	public void exceptionThrownIfInstanceNotAvailableForRequestExecution()
+			throws IOException {
 		try {
 			final String result = "result";
 			Object actualResult = loadBalancerClient.execute("unknownservice",
@@ -112,7 +113,7 @@ class BlockingLoadBalancerClientTests {
 	}
 
 	@Test
-	void exceptionRethrownAsRuntime() {
+	public void exceptionRethrownAsRuntime() {
 		try {
 			loadBalancerClient.execute("myservice", instance -> {
 				assertThat(instance.getHost()).isEqualTo("test.example");
@@ -127,7 +128,7 @@ class BlockingLoadBalancerClientTests {
 	}
 
 	@Test
-	void IOExceptionRethrown() {
+	public void IOExceptionRethrown() {
 		try {
 			loadBalancerClient.execute("myservice", instance -> {
 				assertThat(instance.getHost()).isEqualTo("test.example");
@@ -145,11 +146,8 @@ class BlockingLoadBalancerClientTests {
 	@EnableAutoConfiguration
 	@SpringBootConfiguration
 	@LoadBalancerClients({
-			@org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient(
-					name = "myservice", configuration = MyServiceConfig.class),
-			@org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient(
-					name = "unknownservice",
-					configuration = UnknownServiceConfig.class) })
+			@org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient(name = "myservice", configuration = MyServiceConfig.class),
+			@org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient(name = "unknownservice", configuration = UnknownServiceConfig.class) })
 	protected static class Config {
 
 	}

@@ -20,7 +20,7 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Olga Maciaszek-Sharma
  */
-class LoadBalancerUriToolsTests {
+public class LoadBalancerUriToolsTests {
 
 	@Test
-	void originalURIReturnedIfDataMatches() {
+	public void originalURIReturnedIfDataMatches() {
 		TestServiceInstance serviceInstance = new TestServiceInstance();
 		URI original = UriComponentsBuilder.fromUriString("http://test.example:8080/xxx")
 				.build().toUri();
@@ -47,7 +47,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void serviceInstanceHostSet() {
+	public void serviceInstanceHostSet() {
 		TestServiceInstance serviceInstance = new TestServiceInstance();
 		URI original = UriComponentsBuilder
 				.fromUriString("http://testHost.example:8080/xxx").build().toUri();
@@ -60,7 +60,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void serviceInstanceSchemeSet() {
+	public void serviceInstanceSchemeSet() {
 		TestServiceInstance serviceInstance = new TestServiceInstance()
 				.withScheme("https");
 		URI original = UriComponentsBuilder.fromUriString("http://test.example/xxx")
@@ -74,7 +74,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void originalSchemeSetIfServiceInstanceSchemeMissing() {
+	public void originalSchemeSetIfServiceInstanceSchemeMissing() {
 		TestServiceInstance serviceInstance = new TestServiceInstance().withScheme(null);
 		URI original = UriComponentsBuilder.fromUriString("https://test.example/xxx")
 				.build().toUri();
@@ -87,7 +87,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void secureSchemeSetIfServiceInstanceSchemeMissingAndServiceInstanceSecure() {
+	public void secureSchemeSetIfServiceInstanceSchemeMissingAndServiceInstanceSecure() {
 		TestServiceInstance serviceInstance = new TestServiceInstance().withScheme(null)
 				.withSecure(true);
 		URI original = UriComponentsBuilder.fromUriString("http://test.example/xxx")
@@ -101,7 +101,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void secureWsSchemeSetIfServiceInstanceSchemeMissingAndServiceInstanceSecure() {
+	public void secureWsSchemeSetIfServiceInstanceSchemeMissingAndServiceInstanceSecure() {
 		TestServiceInstance serviceInstance = new TestServiceInstance().withScheme(null)
 				.withSecure(true);
 		URI original = UriComponentsBuilder.fromUriString("ws://test.example/xxx").build()
@@ -115,7 +115,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void defaultSchemeSetIfMissing() {
+	public void defaultSchemeSetIfMissing() {
 		TestServiceInstance serviceInstance = new TestServiceInstance().withScheme(null);
 		URI original = UriComponentsBuilder.fromUriString("//test.example/xxx").build()
 				.toUri();
@@ -128,7 +128,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void serviceInstancePortSet() {
+	public void serviceInstancePortSet() {
 		TestServiceInstance serviceInstance = new TestServiceInstance().withPort(0);
 		URI original = UriComponentsBuilder.fromUriString("http://test.example:8080/xxx")
 				.build().toUri();
@@ -141,7 +141,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void defaultHttpPortSetIfServiceInstancePortIncorrect() {
+	public void defaultHttpPortSetIfServiceInstancePortIncorrect() {
 		TestServiceInstance serviceInstance = new TestServiceInstance().withPort(-1);
 		URI original = UriComponentsBuilder.fromUriString("http://test.example:8888/xxx")
 				.build().toUri();
@@ -154,7 +154,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void defaultHttpsPortSetIfServiceInstancePortIncorrect() {
+	public void defaultHttpsPortSetIfServiceInstancePortIncorrect() {
 		TestServiceInstance serviceInstance = new TestServiceInstance()
 				.withScheme("https").withPort(-1);
 		URI original = UriComponentsBuilder.fromUriString("http://test.example:8888/xxx")
@@ -168,7 +168,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void originalUserInfoSet() {
+	public void originalUserInfoSet() {
 		TestServiceInstance serviceInstance = new TestServiceInstance();
 		URI original = UriComponentsBuilder.fromUriString(
 				"http://testUser@testHost.example/path?query1=test1&query2=test2#fragment")
@@ -188,7 +188,7 @@ class LoadBalancerUriToolsTests {
 	}
 
 	@Test
-	void reconstructedURIEncodedCorrectly() {
+	public void reconstructedURIEncodedCorrectly() {
 		TestServiceInstance serviceInstance = new TestServiceInstance();
 		URI original = UriComponentsBuilder.fromUriString(
 				"http://test.example/path%40%21%242?query=val%40%21%242#frag%40%21%242")
