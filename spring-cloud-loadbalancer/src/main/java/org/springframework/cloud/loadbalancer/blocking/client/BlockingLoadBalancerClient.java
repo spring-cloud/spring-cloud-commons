@@ -34,7 +34,7 @@ import org.springframework.util.ReflectionUtils;
  * The default {@link LoadBalancerClient} implementation.
  *
  * @author Olga Maciaszek-Sharma
- * @since 2.2.0
+ * @since 2.1.3
  */
 public class BlockingLoadBalancerClient implements LoadBalancerClient {
 

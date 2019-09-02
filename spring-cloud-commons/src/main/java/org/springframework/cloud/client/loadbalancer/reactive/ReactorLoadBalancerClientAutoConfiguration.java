@@ -34,7 +34,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * {@link ReactiveLoadBalancer} used under the hood.
  *
  * @author Olga Maciaszek-Sharma
- * @since 2.2.0
+ * @since 2.1.3
  */
 @Configuration
 @ConditionalOnClass(WebClient.class)

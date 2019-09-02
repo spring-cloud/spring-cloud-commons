@@ -40,7 +40,7 @@ import org.springframework.web.client.RestTemplate;
  * An autoconfiguration for {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
- * @since 2.2.0
+ * @since 2.1.3
  */
 @Configuration
 @LoadBalancerClients

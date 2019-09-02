@@ -23,7 +23,7 @@ import org.springframework.cloud.client.ServiceInstance;
  * {@link ServiceInstance} objects.
  *
  * @author Olga Maciaszek-Sharma
- * @since 2.2.0
+ * @since 2.1.3
  */
 public interface ReactorServiceInstanceLoadBalancer
 		extends ReactorLoadBalancer<ServiceInstance> {

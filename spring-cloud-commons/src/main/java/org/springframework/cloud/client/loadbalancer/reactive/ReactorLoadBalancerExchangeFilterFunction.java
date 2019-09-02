@@ -36,7 +36,7 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
  * requests against a correct {@link ServiceInstance}.
  *
  * @author Olga Maciaszek-Sharma
- * @since 2.2.0
+ * @since 2.1.3
  */
 public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
 

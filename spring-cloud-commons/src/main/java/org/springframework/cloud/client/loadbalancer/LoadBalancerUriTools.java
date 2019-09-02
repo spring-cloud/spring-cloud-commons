@@ -27,7 +27,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * @author Olga Maciaszek-Sharma
- * @since 2.2.0
+ * @since 2.1.3
  */
 public final class LoadBalancerUriTools {
 
