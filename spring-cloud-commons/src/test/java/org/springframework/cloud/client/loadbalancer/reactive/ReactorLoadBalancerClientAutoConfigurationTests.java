@@ -16,20 +16,14 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import java.io.IOException;
-import java.net.URI;
 import java.util.Map;
-import java.util.Random;
 
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,14 +34,14 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerTestUtils.getFilters;
 
 /**
- * @author Spencer Gibb
- * @author Tim Ysewyn
+ * Tests for {@link ReactorLoadBalancerClientAutoConfiguration}.
+ *
  * @author Olga Maciaszek-Sharma
  */
-public class ReactiveLoadBalancerAutoConfigurationTests {
+public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 	@Test
-	public void webClientBuilderGetsLoadBalancerInterceptor() {
+	public void loadBalancerFilterAddedToWebClientBuilder() {
 		ConfigurableApplicationContext context = init(OneWebClientBuilder.class);
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);
@@ -60,7 +54,7 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 	}
 
 	@Test
-	public void multipleWebClientBuilders() {
+	public void loadBalancerFilterAddedOnlyToLoadBalancedWebClientBuilder() {
 		ConfigurableApplicationContext context = init(TwoWebClientBuilders.class);
 		final Map<String, WebClient.Builder> webClientBuilders = context
 				.getBeansOfType(WebClient.Builder.class);
@@ -90,53 +84,28 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		then(getFilters(builder)).isNullOrEmpty();
 	}
 
-	@Test
-	public void autoConfigurationNotLoadedWhenReactorLoadBalancerClientPresent() {
-		ConfigurableApplicationContext context = init(
-				ReactorLoadBalancerClientPresent.class);
-		final Map<String, WebClient.Builder> webClientBuilders = context
-				.getBeansOfType(WebClient.Builder.class);
-
-		then(webClientBuilders).hasSize(1);
-
-		WebClient.Builder builder = context.getBean(WebClient.Builder.class);
-
-		then(builder).isNotNull();
-		then(getFilters(builder)).isNullOrEmpty();
-	}
-
 	private ConfigurableApplicationContext init(Class<?> config) {
 		return LoadBalancerTestUtils.init(config,
-				ReactiveLoadBalancerAutoConfiguration.class);
+				ReactorLoadBalancerClientAutoConfiguration.class);
 	}
 
-	private void assertLoadBalanced(WebClient.Builder builder) {
-		LoadBalancerTestUtils.assertLoadBalanced(builder,
-				LoadBalancerExchangeFilterFunction.class);
+	private void assertLoadBalanced(WebClient.Builder webClientBuilder) {
+		LoadBalancerTestUtils.assertLoadBalanced(webClientBuilder,
+				ReactorLoadBalancerExchangeFilterFunction.class);
 	}
 
 	@Configuration
 	protected static class NoWebClientBuilder {
 
 		@Bean
-		LoadBalancerClient loadBalancerClient() {
-			return new NoopLoadBalancerClient();
+		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory() {
+			return serviceId -> new TestReactiveLoadBalancer();
 		}
 
 		@Bean
 		LoadBalancedRetryFactory loadBalancedRetryFactory() {
 			return new LoadBalancedRetryFactory() {
 			};
-		}
-
-	}
-
-	@Configuration
-	protected static class ReactorLoadBalancerClientPresent extends OneWebClientBuilder {
-
-		@Bean
-		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory() {
-			return serviceId -> new TestReactiveLoadBalancer();
 		}
 
 	}
@@ -171,44 +140,6 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 			@LoadBalanced
 			WebClient.Builder loadBalanced;
 
-		}
-
-	}
-
-	private static class NoopLoadBalancerClient implements LoadBalancerClient {
-
-		private final Random random = new Random();
-
-		@Override
-		public ServiceInstance choose(String serviceId) {
-			return new DefaultServiceInstance(serviceId, serviceId, serviceId,
-					this.random.nextInt(40000), false);
-		}
-
-		@Override
-		public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
-			try {
-				return request.apply(choose(serviceId));
-			}
-			catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		@Override
-		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-				LoadBalancerRequest<T> request) throws IOException {
-			try {
-				return request.apply(choose(serviceId));
-			}
-			catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		@Override
-		public URI reconstructURI(ServiceInstance instance, URI original) {
-			return DefaultServiceInstance.getUri(instance);
 		}
 
 	}

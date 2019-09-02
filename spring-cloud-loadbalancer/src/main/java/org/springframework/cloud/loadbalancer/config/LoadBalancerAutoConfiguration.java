@@ -20,6 +20,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoConfiguration;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -28,9 +31,12 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 @Configuration
 @LoadBalancerClients
+@AutoConfigureBefore({ ReactorLoadBalancerClientAutoConfiguration.class,
+		ReactiveLoadBalancerAutoConfiguration.class })
 // @EnableCaching //TODO: how to enforce, or check conditions?
 // @AutoConfigureBefore(CacheAutoConfiguration.class)
 public class LoadBalancerAutoConfiguration {
