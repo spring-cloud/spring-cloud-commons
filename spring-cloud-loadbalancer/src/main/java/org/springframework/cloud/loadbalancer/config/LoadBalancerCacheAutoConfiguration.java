@@ -16,18 +16,29 @@
 
 package org.springframework.cloud.loadbalancer.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.CacheAspectSupport;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * An AutoConfiguration that automatically enables caching when when Spring Boot and
+ * Spring Framework Cache support classes are present.
+ *
  * @author Olga Maciaszek-Sharma
+ * @see CacheManager
+ * @see CacheAutoConfiguration
+ * @see CacheAspectSupport
  */
-// FIXME
 @Configuration
+@ConditionalOnClass({ CacheManager.class, CacheAutoConfiguration.class })
+@ConditionalOnMissingBean(CacheAspectSupport.class)
 @EnableCaching
-@ConditionalOnBean(CacheManager.class)
+@AutoConfigureBefore(CacheAutoConfiguration.class)
 public class LoadBalancerCacheAutoConfiguration {
 
 }
