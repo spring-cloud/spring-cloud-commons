@@ -35,7 +35,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Biju Kunjummen
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = DiscoveryClientAutoConfigurationDefaultTests.Config.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.main.web-application-type=reactive")
+@SpringBootTest(classes = DiscoveryClientAutoConfigurationDefaultTests.Config.class)
 public class DiscoveryClientAutoConfigurationDefaultTests {
 
 	@Autowired
