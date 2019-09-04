@@ -22,28 +22,28 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClient;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
- * DiscoveryClient implementation defaults to {@link CompositeDiscoveryClient}.
- *
- * @author Biju Kunjummen
+ * @author Ryan Baxter
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = DiscoveryClientAutoConfigurationDefaultTests.Config.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "spring.main.web-application-type=reactive")
-public class DiscoveryClientAutoConfigurationDefaultTests {
+@SpringBootTest(classes = ServletSimpleDiscoveryPropertiesAutoConfigurationTests.Config.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class ServletSimpleDiscoveryPropertiesAutoConfigurationTests {
 
 	@Autowired
-	private DiscoveryClient discoveryClient;
+	private SimpleDiscoveryProperties discoveryProperties;
+
+	@LocalServerPort
+	private int port;
 
 	@Test
-	public void simpleDiscoveryClientShouldBeTheDefault() {
-		then(this.discoveryClient).isInstanceOf(CompositeDiscoveryClient.class);
+	public void testPort() {
+		then(discoveryProperties.getLocal().getPort()).isEqualTo(port);
 	}
 
 	@EnableAutoConfiguration
