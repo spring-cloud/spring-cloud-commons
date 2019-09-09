@@ -76,8 +76,9 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 			super(ConfigurationPhase.REGISTER_BEAN);
 		}
 
-		@ConditionalOnProperty("spring.cloud.loadbalancer.default")
-		static class LoadBalancerDefaultProperty {
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.ribbon.enabled",
+				havingValue = "false")
+		static class RibbonNotEnabled {
 
 		}
 
@@ -100,7 +101,7 @@ class RibbonWarnLogger {
 			LOG.warn(
 					"You already have RibbonLoadBalancerClient on your classpath. It will be used by default. To use "
 							+ BlockingLoadBalancerClient.class.getSimpleName()
-							+ " set the value of `spring.cloud.loadbalancer.default` to `true` or "
+							+ " set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or "
 							+ "remove spring-cloud-starter-netflix-ribbon from your project.");
 		}
 	}

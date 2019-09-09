@@ -377,7 +377,7 @@ The
 
 WARNING: If you have both `RibbonLoadBalancerClient` and `BlockingLoadBalancerClient`, in order to
 preserve backward compatibility, `RibbonLoadBalancerClient` will be used by default. In order
-to override it, you can set the property `spring.cloud.loadbalancer.default` to `true`.
+to override it, you can set the property `spring.cloud.loadbalancer.ribbon.enabled` to `false`.
 
 === Spring WebClient as a Load Balancer Client
 

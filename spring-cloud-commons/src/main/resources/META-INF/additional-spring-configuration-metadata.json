@@ -49,9 +49,9 @@
 			"type": "java.lang.Boolean"
 		},
 		{
-			"defaultValue": false,
-			"name": "spring.cloud.loadbalancer.default",
-			"description": "Causes Spring Cloud LoadBalancer to be used by default.",
+			"defaultValue": true,
+			"name": "spring.cloud.loadbalancer.ribbon.enabled",
+			"description": "Causes `RibbonLoadBalancerClient` to be used by default.",
 			"type": "java.lang.Boolean"
 		}
 	]
