@@ -752,7 +752,7 @@ See <a href="https://github.com/spring-cloud/spring-cloud-netflix/blob/master/sp
 <td class="content">
 In order to use a load-balanced <code>RestTemplate</code>, you need to have a load-balancer implementation in your classpath.
 The recommended implementation is <code>BlockingLoadBalancerClient</code>
-- add <code>org.springframework.cloud:spring-cloud-loadbalancer</code> in order to use it.
+- add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> in order to use it.
 The
 <code>RibbonLoadBalancerClient</code> also can be used, but it&#8217;s now under maintenance and we do not recommend adding it to new projects.
 </td>
@@ -766,8 +766,9 @@ The
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-If you want to use <code>BlockingLoadBalancerClient</code>, make sure you do not have
-<code>RibbonLoadBalancerClient</code> in the project classpath, as for backward compatibility reasons, it will be used by default.
+If you have both <code>RibbonLoadBalancerClient</code> and <code>BlockingLoadBalancerClient</code>, in order to
+preserve backward compatibility, <code>RibbonLoadBalancerClient</code> will be used by default. In order
+to override it, you can set the property <code>spring.cloud.loadbalancer.ribbon.enabled</code> to <code>false</code>.
 </td>
 </tr>
 </table>
@@ -815,27 +816,28 @@ The Ribbon client is used to create a full physical address.</p>
 <td class="content">
 If you want to use a <code>@LoadBalanced WebClient.Builder</code>, you need to have a loadbalancer
 implementation in the classpath. It is recommended that you add the
-<code>org.springframework.cloud:spring-cloud-loadbalancer</code> dependency to your project.
+<code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> dependency to your project.
 Then, <code>ReactiveLoadBalancer</code> will be used underneath.
 Alternatively, this functionality will also work with spring-cloud-starter-netflix-ribbon, but the request
 will be handled by a non-reactive <code>LoadBalancerClient</code> under the hood. Additionally,
-spring-cloud-starter-netflix-ribbon is already in maintenance mode, so we do not recommned
+spring-cloud-starter-netflix-ribbon is already in maintenance mode, so we do not recommend
 adding it to new projects.
 </td>
 </tr>
 </table>
 </div>
-<div class="admonitionblock tip">
+<div class="admonitionblock important">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-tip" title="Tip"></i>
+<i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-The <code>ReactorLoadBalancer</code> used underneath supports caching. If <code>cacheManager</code> is detected,
-cached version of <code>ServiceInstanceSupplier</code> will be used. If not, we will retrieve instances
-from discovery service without caching them. We recommend <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html">enabling caching</a> in your project
-if you use <code>ReactiveLoadBalancer</code>.
+In order to make use of the more efficient cached version of <code>ServiceInstanceSupplier</code>,
+ <code>spring-cloud-starter-loadbalancer</code> will <strong>enable caching</strong> by default.
+<a href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html">Spring Boot Caching</a>
+mechanism will be used under the hood. If you don&#8217;t want caching to be used, you can set
+the value of <code>spring.cache.type</code> to <code>none</code>.
 </td>
 </tr>
 </table>
@@ -994,7 +996,7 @@ If you see errors such as <code>java.lang.IllegalArgumentException: Can not set 
 <h4 id="webflux-with-reactive-loadbalancer"><a class="link" href="#webflux-with-reactive-loadbalancer">Spring WebFlux WebClient with Reactive Load Balancer</a></h4>
 <div class="paragraph">
 <p><code>WebClient</code> can be configured to use the <code>ReactiveLoadBalancer</code>.
-If you add <code>org.springframework.cloud:spring-cloud-loadbalancer</code> to your project,
+If you add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> to your project,
  <code>ReactorLoadBalancerExchangeFilterFunction</code> is auto-configured if <code>spring-webflux</code> is on the classpath.
 The following example shows how to configure a <code>WebClient</code> to use reactive load balancer under the hood:</p>
 </div>
@@ -1024,7 +1026,7 @@ The <code>ReactorLoadBalancerClient</code> is used to create a full physical add
 <div class="sect3">
 <h4 id="_spring_webflux_webclient_with_non_reactive_load_balancer_client"><a class="link" href="#_spring_webflux_webclient_with_non_reactive_load_balancer_client">Spring WebFlux WebClient with non-reactive Load Balancer Client</a></h4>
 <div class="paragraph">
-<p>If you you don&#8217;t have <code>org.springframework.cloud:spring-cloud-loadbalancer</code> in your project,
+<p>If you you don&#8217;t have <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> in your project,
 but you do have spring-cloud-starter-netflix-ribbon, you can still use <code>WebClient</code> with <code>LoadBalancerClient</code>. <code>LoadBalancerExchangeFilterFunction</code>
 will be auto-configured if <code>spring-webflux</code> is on the classpath. Please note, however, that this is
 uses a non-reactive client under the hood.
