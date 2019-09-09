@@ -34,13 +34,13 @@ import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import static java.util.Collections.emptyList;
 
 /**
- * Properties to hold the details of a
- * {@link ReactiveDiscoveryClient} service instances
+ * Properties to hold the details of a {@link ReactiveDiscoveryClient} service instance
  * for a given service. It also holds the user-configurable order that will be used to
  * establish the precedence of this client in the list of clients used by
  * {@link org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClient}.
  *
  * @author Tim Ysewyn
+ * @since 2.2.0
  */
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
 public class SimpleReactiveDiscoveryProperties {
