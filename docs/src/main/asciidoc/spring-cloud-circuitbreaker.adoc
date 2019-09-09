@@ -1,0 +1,88 @@
+== Introduction
+
+Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations.
+It provides a consistent API to use in your applications allowing you the developer to choose the circuit breaker implementation that best fits your needs for your app.
+
+=== Supported Implementations
+
+* https://github.com/Netflix/Hystrix[Netfix Hystrix]
+* https://github.com/resilience4j/resilience4j[Resilience4J]
+* https://github.com/alibaba/Sentinel[Sentinel]
+* https://github.com/spring-projects/spring-retry[Spring Retry]
+
+== Core Concepts
+
+To create a circuit breaker in your code you can use the `CircuitBreakerFactory` API. When you include a Spring Cloud Circuit Breaker starter on your classpath a bean implementing this API will automatically be created for you.
+A very simple example of using this API is given below
+
+====
+[source,java]
+----
+@Service
+public static class DemoControllerService {
+	private RestTemplate rest;
+	private CircuitBreakerFactory cbFactory;
+
+	public DemoControllerService(RestTemplate rest, CircuitBreakerFactory cbFactory) {
+		this.rest = rest;
+		this.cbFactory = cbFactory;
+	}
+
+	public String slow() {
+		return cbFactory.create("slow").run(() -> rest.getForObject("/slow", String.class), throwable -> "fallback");
+	}
+
+}
+----
+====
+
+The `CircuitBreakerFactory.create` API will create an instance of a class called `CircuitBreaker`.
+The `run` method takes a `Supplier` and a `Function`.
+The `Supplier` is the code that you are going to wrap in a circuit breaker.
+The `Function` is the fallback that will be executed if the circuit breaker is tripped.
+The function will be passed the `Throwable` that caused the fallback to be triggered.
+You can optionally exclude the fallback if you do not want to provide one.
+
+=== Circuit Breakers In Reactive Code
+
+If Project Reactor is on the class path then you can also use `ReactiveCircuitBreakerFactory` for your reactive code.
+
+====
+[source,java]
+----
+@Service
+public static class DemoControllerService {
+	private ReactiveCircuitBreakerFactory cbFactory;
+	private WebClient webClient;
+
+
+	public DemoControllerService(WebClient webClient, ReactiveCircuitBreakerFactory cbFactory) {
+		this.webClient = webClient;
+		this.cbFactory = cbFactory;
+	}
+
+	public Mono<String> slow() {
+		return webClient.get().uri("/slow").retrieve().bodyToMono(String.class).transform(
+		it -> cbFactory.create("slow").run(it, throwable -> return Mono.just("fallback")));
+	}
+}
+----
+====
+
+The `ReactiveCircuitBreakerFactory.create` API will create an instance of a class called `ReactiveCircuitBreaker`.
+The `run` method takes with a `Mono` or `Flux` and wraps it in a circuit breaker.
+You can optionally profile a fallback `Function` which will be called if the circuit breaker is tripped and will be passed the `Throwable`
+that caused the failure.
+
+== Configuration
+
+You can configure your circuit breakers using by creating beans of type `Customizer`.
+The `Customizer` interface has a single method called `customize` that takes in the `Object` to customize.
+
+For detailed information on how to customize a given implementation see
+the links below
+
+* link:../../../spring-cloud-netflix/reference/html/#_circuit_breaker_spring_cloud_circuit_breaker_with_hystrix[Hystrix]
+* link:../../../spring-cloud-circuitbreaker/reference/html/spring-cloud-circuitbreaker.html#_configuring_resilience4j_circuit_breakers[Resilience4J]
+* link:../../../spring-cloud-circuitbreaker/reference/html/spring-cloud-circuitbreaker.html#_configuring_sentinel_circuit_breakers[Sentinal]
+* link:../../../spring-cloud-circuitbreaker/reference/html/spring-cloud-circuitbreaker.html#_configuring_spring_retry_circuit_breakers[Spring Retry]

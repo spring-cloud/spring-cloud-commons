@@ -21,8 +21,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Rule;
 import org.junit.Test;
 
+import org.springframework.boot.test.rule.OutputCapture;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.context.ApplicationContext;
@@ -56,6 +58,9 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	private EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
 			Encryptors.noOpText());
 
+	@Rule
+	public OutputCapture outputCapture = new OutputCapture();
+
 	@Test
 	public void decryptCipherKey() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
@@ -83,14 +88,22 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		then(context.getEnvironment().getProperty("foo")).isEqualTo("spam");
 	}
 
-	@Test(expected = IllegalStateException.class)
+	@Test
 	public void errorOnDecrypt() {
 		this.listener = new EnvironmentDecryptApplicationInitializer(
 				Encryptors.text("deadbeef", "AFFE37"));
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("foo: {cipher}bar").applyTo(context);
-		this.listener.initialize(context);
-		then(context.getEnvironment().getProperty("foo")).isEqualTo("bar");
+		// catch IllegalStateException and verify
+		try {
+			this.listener.initialize(context);
+		}
+		catch (Exception e) {
+			then(e).isInstanceOf(IllegalStateException.class);
+		}
+		// Assert logs contain warning even when exception thrown
+		String sysOutput = this.outputCapture.toString();
+		then(sysOutput).contains("Cannot decrypt: key=foo");
 	}
 
 	@Test
@@ -101,6 +114,9 @@ public class EnvironmentDecryptApplicationInitializerTests {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("foo: {cipher}bar").applyTo(context);
 		this.listener.initialize(context);
+		// Assert logs contain warning
+		String sysOutput = this.outputCapture.toString();
+		then(sysOutput).contains("Cannot decrypt: key=foo");
 		// Empty is safest fallback for undecryptable cipher
 		then(context.getEnvironment().getProperty("foo")).isEqualTo("");
 	}
