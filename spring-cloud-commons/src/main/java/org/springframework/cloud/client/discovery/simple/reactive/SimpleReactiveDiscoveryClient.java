@@ -16,14 +16,10 @@
 
 package org.springframework.cloud.client.discovery.simple.reactive;
 
-import java.util.List;
-
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties.SimpleServiceInstance;
 
 /**
  * A {@link ReactiveDiscoveryClient} that will use the properties file as a source of
@@ -33,10 +29,10 @@ import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperti
  */
 public class SimpleReactiveDiscoveryClient implements ReactiveDiscoveryClient {
 
-	private SimpleDiscoveryProperties simpleDiscoveryProperties;
+	private SimpleReactiveDiscoveryProperties simpleDiscoveryProperties;
 
 	public SimpleReactiveDiscoveryClient(
-			SimpleDiscoveryProperties simpleDiscoveryProperties) {
+			SimpleReactiveDiscoveryProperties simpleDiscoveryProperties) {
 		this.simpleDiscoveryProperties = simpleDiscoveryProperties;
 	}
 
@@ -47,12 +43,7 @@ public class SimpleReactiveDiscoveryClient implements ReactiveDiscoveryClient {
 
 	@Override
 	public Flux<ServiceInstance> getInstances(String serviceId) {
-		List<SimpleServiceInstance> serviceInstances = this.simpleDiscoveryProperties
-				.getInstances().get(serviceId);
-		if (serviceInstances == null || serviceInstances.isEmpty()) {
-			return Flux.empty();
-		}
-		return Flux.fromIterable(serviceInstances);
+		return this.simpleDiscoveryProperties.getInstances(serviceId);
 	}
 
 	@Override

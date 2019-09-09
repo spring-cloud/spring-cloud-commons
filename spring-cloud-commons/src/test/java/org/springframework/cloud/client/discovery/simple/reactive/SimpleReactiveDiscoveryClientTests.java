@@ -26,8 +26,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties.SimpleServiceInstance;
+import org.springframework.cloud.client.discovery.simple.reactive.SimpleReactiveDiscoveryProperties.SimpleServiceInstance;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,11 +46,11 @@ public class SimpleReactiveDiscoveryClientTests {
 
 	@BeforeEach
 	public void setUp() {
-		SimpleDiscoveryProperties simpleDiscoveryProperties = new SimpleDiscoveryProperties();
-		simpleDiscoveryProperties.setInstances(
+		SimpleReactiveDiscoveryProperties simpleReactiveDiscoveryProperties = new SimpleReactiveDiscoveryProperties();
+		simpleReactiveDiscoveryProperties.setInstances(
 				singletonMap("service", Arrays.asList(service1Inst1, service1Inst2)));
-		simpleDiscoveryProperties.init();
-		this.client = new SimpleReactiveDiscoveryClient(simpleDiscoveryProperties);
+		simpleReactiveDiscoveryProperties.init();
+		this.client = new SimpleReactiveDiscoveryClient(simpleReactiveDiscoveryProperties);
 	}
 
 	@Test

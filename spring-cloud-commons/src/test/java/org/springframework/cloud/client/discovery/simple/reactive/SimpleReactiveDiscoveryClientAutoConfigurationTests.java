@@ -24,7 +24,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
+import org.springframework.cloud.client.discovery.simple.reactive.SimpleReactiveDiscoveryProperties;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.cloud.commons.util.UtilAutoConfiguration;
 
@@ -50,8 +50,8 @@ class SimpleReactiveDiscoveryClientAutoConfigurationTests {
 					.isEqualTo(ReactiveDiscoveryClient.DEFAULT_ORDER);
 			InetUtils inet = context.getBean(InetUtils.class);
 			assertThat(inet).isNotNull();
-			SimpleDiscoveryProperties properties = context
-					.getBean(SimpleDiscoveryProperties.class);
+			SimpleReactiveDiscoveryProperties properties = context
+					.getBean(SimpleReactiveDiscoveryProperties.class);
 			assertThat(properties).isNotNull();
 			assertThat(properties.getLocal().getServiceId()).isEqualTo("application");
 			assertThat(properties.getLocal().getHost())
@@ -73,8 +73,8 @@ class SimpleReactiveDiscoveryClientAutoConfigurationTests {
 					assertThat(client.getOrder()).isEqualTo(1);
 					InetUtils inet = context.getBean(InetUtils.class);
 					assertThat(inet).isNotNull();
-					SimpleDiscoveryProperties properties = context
-							.getBean(SimpleDiscoveryProperties.class);
+					SimpleReactiveDiscoveryProperties properties = context
+							.getBean(SimpleReactiveDiscoveryProperties.class);
 					assertThat(properties).isNotNull();
 					assertThat(properties.getLocal().getServiceId())
 							.isEqualTo("my-service");
