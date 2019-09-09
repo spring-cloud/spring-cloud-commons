@@ -20,21 +20,21 @@ import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
+import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
+import org.springframework.cloud.client.ReactiveCommonsClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicatorProperties;
 import org.springframework.cloud.client.discovery.health.reactive.ReactiveDiscoveryClientHealthIndicator;
-import org.springframework.cloud.client.discovery.health.reactive.ReactiveDiscoveryHealthIndicator;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Spring Boot auto-configuration for simple properties-based reactive discovery client.
@@ -44,8 +44,9 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @Configuration
 @ConditionalOnDiscoveryEnabled
-@ConditionalOnClass(WebClient.class)
+@ConditionalOnReactiveDiscoveryEnabled
 @EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
+@AutoConfigureBefore(ReactiveCommonsClientAutoConfiguration.class)
 public class SimpleReactiveDiscoveryClientAutoConfiguration {
 
 	@Autowired(required = false)
@@ -61,11 +62,9 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration {
 	@ConditionalOnMissingBean
 	public SimpleDiscoveryProperties simpleReactiveDiscoveryProperties() {
 		SimpleDiscoveryProperties simple = new SimpleDiscoveryProperties();
-		simple.getLocal().setServiceId(this.serviceId);
-		simple.getLocal()
-				.setUri(URI.create(
-						"http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname()
-								+ ":" + findPort()));
+		simple.getLocal().setServiceId(serviceId);
+		simple.getLocal().setUri(URI.create("http://"
+				+ inet.findFirstNonLoopbackHostInfo().getHostname() + ":" + findPort()));
 		return simple;
 	}
 
@@ -76,22 +75,21 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration {
 		return new SimpleReactiveDiscoveryClient(simpleDiscoveryProperties);
 	}
 
-	private int findPort() {
-		if (this.server != null && this.server.getPort() != null
-				&& this.server.getPort() > 0) {
-			return this.server.getPort();
-		}
-		return 8080;
-	}
-
 	@Bean
 	@ConditionalOnProperty(
 			value = "spring.cloud.discovery.client.health-indicator.enabled",
 			matchIfMissing = true)
-	public ReactiveDiscoveryHealthIndicator simpleReactiveDiscoveryClientHealthIndicator(
+	public ReactiveDiscoveryClientHealthIndicator simpleReactiveDiscoveryClientHealthIndicator(
 			SimpleReactiveDiscoveryClient discoveryClient,
 			DiscoveryClientHealthIndicatorProperties properties) {
 		return new ReactiveDiscoveryClientHealthIndicator(discoveryClient, properties);
+	}
+
+	private int findPort() {
+		if (server != null && server.getPort() != null && server.getPort() > 0) {
+			return server.getPort();
+		}
+		return 8080;
 	}
 
 }

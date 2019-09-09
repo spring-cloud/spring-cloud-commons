@@ -33,6 +33,9 @@ import org.springframework.core.Ordered;
 import static java.util.Collections.emptyList;
 
 /**
+ * A health indicator which indicates whether or not the discovery client has been
+ * initialized.
+ *
  * @author Tim Ysewyn
  */
 public class ReactiveDiscoveryClientHealthIndicator

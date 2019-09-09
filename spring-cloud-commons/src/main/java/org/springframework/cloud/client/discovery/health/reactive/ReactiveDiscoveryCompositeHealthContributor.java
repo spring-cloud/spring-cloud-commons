@@ -52,7 +52,7 @@ public class ReactiveDiscoveryCompositeHealthContributor
 
 	@Override
 	public Iterator<NamedContributor<ReactiveHealthContributor>> iterator() {
-		return this.indicators.values().stream().map(this::asNamedContributor).iterator();
+		return indicators.values().stream().map(this::asNamedContributor).iterator();
 	}
 
 	private NamedContributor<ReactiveHealthContributor> asNamedContributor(

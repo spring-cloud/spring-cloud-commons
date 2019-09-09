@@ -16,23 +16,16 @@
 
 package org.springframework.cloud.client.discovery.composite.reactive;
 
-import java.util.Collection;
 import java.util.List;
 
-import org.springframework.boot.actuate.health.StatusAggregator;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
+import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.discovery.health.reactive.ReactiveDiscoveryCompositeHealthContributor;
-import org.springframework.cloud.client.discovery.health.reactive.ReactiveDiscoveryHealthIndicator;
 import org.springframework.cloud.client.discovery.simple.reactive.SimpleReactiveDiscoveryClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Auto-configuration for reactive composite discovery client.
@@ -42,7 +35,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @Configuration
 @ConditionalOnDiscoveryEnabled
-@ConditionalOnClass(WebClient.class)
+@ConditionalOnReactiveDiscoveryEnabled
 @AutoConfigureBefore(SimpleReactiveDiscoveryClientAutoConfiguration.class)
 public class ReactiveCompositeDiscoveryClientAutoConfiguration {
 
@@ -51,16 +44,6 @@ public class ReactiveCompositeDiscoveryClientAutoConfiguration {
 	public ReactiveCompositeDiscoveryClient reactiveCompositeDiscoveryClient(
 			List<ReactiveDiscoveryClient> discoveryClients) {
 		return new ReactiveCompositeDiscoveryClient(discoveryClients);
-	}
-
-	@Bean
-	@ConditionalOnProperty(
-			value = "spring.cloud.discovery.client.composite-indicator.enabled",
-			matchIfMissing = true)
-	@ConditionalOnBean({ ReactiveDiscoveryHealthIndicator.class, StatusAggregator.class })
-	public ReactiveDiscoveryCompositeHealthContributor reactiveDiscoveryClients(
-			Collection<ReactiveDiscoveryHealthIndicator> indicators) {
-		return new ReactiveDiscoveryCompositeHealthContributor(indicators);
 	}
 
 }

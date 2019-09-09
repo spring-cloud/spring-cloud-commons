@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.cloud.client.CommonsClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.commons.util.InetUtils;
@@ -41,7 +42,8 @@ import org.springframework.core.annotation.Order;
  */
 
 @Configuration
-@AutoConfigureBefore(NoopDiscoveryClientAutoConfiguration.class)
+@AutoConfigureBefore({ NoopDiscoveryClientAutoConfiguration.class,
+		CommonsClientAutoConfiguration.class })
 public class SimpleDiscoveryClientAutoConfiguration {
 
 	@Autowired(required = false)

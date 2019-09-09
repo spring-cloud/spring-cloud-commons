@@ -38,7 +38,7 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 					.of(ReactiveCompositeDiscoveryClientAutoConfiguration.class));
 
 	@Test
-	public void shouldCreateSimpleReactiveDiscoveryClient() {
+	public void shouldCreateCompositeReactiveDiscoveryClientWithoutDelegates() {
 		this.contextRunner.run((context) -> {
 			ReactiveDiscoveryClient client = context
 					.getBean(ReactiveDiscoveryClient.class);
@@ -47,7 +47,10 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 			assertThat(((ReactiveCompositeDiscoveryClient) client).getDiscoveryClients())
 					.isEmpty();
 		});
+	}
 
+	@Test
+	public void shouldCreateCompositeReactiveDiscoveryClientWithDelegate() {
 		this.contextRunner.withUserConfiguration(Configuration.class).run((context) -> {
 			ReactiveDiscoveryClient client = context
 					.getBean(ReactiveDiscoveryClient.class);

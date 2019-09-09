@@ -41,7 +41,7 @@ class SimpleReactiveDiscoveryClientAutoConfigurationTests {
 					UtilAutoConfiguration.class));
 
 	@Test
-	public void shouldCreateSimpleReactiveDiscoveryClient() {
+	public void shouldUseDefaults() {
 		this.contextRunner.run((context) -> {
 			ReactiveDiscoveryClient client = context
 					.getBean(ReactiveDiscoveryClient.class);
@@ -58,24 +58,10 @@ class SimpleReactiveDiscoveryClientAutoConfigurationTests {
 					.isEqualTo(inet.findFirstNonLoopbackHostInfo().getHostname());
 			assertThat(properties.getLocal().getPort()).isEqualTo(8080);
 		});
+	}
 
-		this.contextRunner.withUserConfiguration(Configuration.class).run((context) -> {
-			ReactiveDiscoveryClient client = context
-					.getBean(ReactiveDiscoveryClient.class);
-			assertThat(client).isNotNull();
-			assertThat(client.getOrder())
-					.isEqualTo(ReactiveDiscoveryClient.DEFAULT_ORDER);
-			InetUtils inet = context.getBean(InetUtils.class);
-			assertThat(inet).isNotNull();
-			SimpleDiscoveryProperties properties = context
-					.getBean(SimpleDiscoveryProperties.class);
-			assertThat(properties).isNotNull();
-			assertThat(properties.getLocal().getServiceId()).isEqualTo("application");
-			assertThat(properties.getLocal().getHost())
-					.isEqualTo(inet.findFirstNonLoopbackHostInfo().getHostname());
-			assertThat(properties.getLocal().getPort()).isEqualTo(8080);
-		});
-
+	@Test
+	public void shouldUseCustomConfiguration() {
 		this.contextRunner.withUserConfiguration(Configuration.class)
 				.withPropertyValues("spring.application.name=my-service",
 						"spring.cloud.discovery.client.simple.order=1",

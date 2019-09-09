@@ -1,6 +1,7 @@
 # AutoConfiguration
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.springframework.cloud.client.CommonsClientAutoConfiguration,\
+org.springframework.cloud.client.ReactiveCommonsClientAutoConfiguration,\
 org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientAutoConfiguration,\
 org.springframework.cloud.client.discovery.composite.reactive.ReactiveCompositeDiscoveryClientAutoConfiguration,\
 org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration,\
