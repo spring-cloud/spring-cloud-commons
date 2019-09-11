@@ -557,9 +557,14 @@ will also be disabled since they are just a special case of <code>/actuator/rest
 <h3 id="_enablediscoveryclient"><a class="link" href="#_enablediscoveryclient">@EnableDiscoveryClient</a></h3>
 <div class="paragraph">
 <p>Spring Cloud Commons provides the <code>@EnableDiscoveryClient</code> annotation.
-This looks for implementations of the <code>DiscoveryClient</code> interface with <code>META-INF/spring.factories</code>.
-Implementations of the Discovery Client add a configuration class to <code>spring.factories</code> under the <code>org.springframework.cloud.client.discovery.EnableDiscoveryClient</code> key.
+This looks for implementations of the <code>DiscoveryClient</code> and <code>ReactiveDiscoveryClient</code> interfaces with <code>META-INF/spring.factories</code>.
+Implementations of the discovery client add a configuration class to <code>spring.factories</code> under the <code>org.springframework.cloud.client.discovery.EnableDiscoveryClient</code> key.
 Examples of <code>DiscoveryClient</code> implementations include <a href="https://cloud.spring.io/spring-cloud-netflix/">Spring Cloud Netflix Eureka</a>, <a href="https://cloud.spring.io/spring-cloud-consul/">Spring Cloud Consul Discovery</a>, and <a href="https://cloud.spring.io/spring-cloud-zookeeper/">Spring Cloud Zookeeper Discovery</a>.</p>
+</div>
+<div class="paragraph">
+<p>Spring Cloud will provide both the blocking and reactive service discovery clients by default.
+You can disable the blocking and/or reactive clients easily by setting <code>spring.cloud.discovery.blocking.enabled=false</code> or <code>spring.cloud.discovery.reactive.enabled=false</code>.
+To completely disable service discovery you just need to set <code>spring.cloud.discovery.enabled=false</code>.</p>
 </div>
 <div class="paragraph">
 <p>By default, implementations of <code>DiscoveryClient</code> auto-register the local Spring Boot server with the remote discovery server.
