@@ -23,10 +23,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
+import org.springframework.cloud.client.CommonsClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.commons.util.InetUtils;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,17 +38,14 @@ import org.springframework.core.annotation.Order;
  *
  * @author Biju Kunjummen
  */
-
 @Configuration
-@AutoConfigureBefore(NoopDiscoveryClientAutoConfiguration.class)
+@AutoConfigureBefore({ NoopDiscoveryClientAutoConfiguration.class,
+		CommonsClientAutoConfiguration.class })
 public class SimpleDiscoveryClientAutoConfiguration
 		implements ApplicationListener<WebServerInitializedEvent> {
 
 	@Autowired(required = false)
 	private ServerProperties server;
-
-	@Autowired
-	private ApplicationContext context;
 
 	@Value("${spring.application.name:application}")
 	private String serviceId;

@@ -47,6 +47,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
+ * @author Tim Ysewyn
  */
 @Configuration
 @AutoConfigureOrder(0)
@@ -57,6 +58,7 @@ public class CommonsClientAutoConfiguration {
 	@ConditionalOnClass(HealthIndicator.class)
 	@ConditionalOnBean(DiscoveryClient.class)
 	@ConditionalOnDiscoveryEnabled
+	@ConditionalOnBlockingDiscoveryEnabled
 	protected static class DiscoveryLoadBalancerConfiguration {
 
 		@Bean
