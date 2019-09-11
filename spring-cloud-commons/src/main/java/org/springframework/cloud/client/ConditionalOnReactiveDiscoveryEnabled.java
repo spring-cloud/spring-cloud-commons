@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Provides a more succinct conditional
@@ -39,7 +38,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@ConditionalOnClass(WebClient.class)
+@ConditionalOnClass(name = "org.springframework.web.reactive.function.client.WebClint")
 @ConditionalOnProperty(value = "spring.cloud.discovery.reactive.enabled",
 		matchIfMissing = true)
 public @interface ConditionalOnReactiveDiscoveryEnabled {
