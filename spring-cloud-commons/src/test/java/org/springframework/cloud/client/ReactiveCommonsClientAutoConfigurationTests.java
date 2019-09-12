@@ -123,7 +123,7 @@ public class ReactiveCommonsClientAutoConfigurationTests {
 							ReactiveDiscoveryClientHealthIndicator.class);
 					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryCompositeHealthContributor.class);
-					then(context.getBeansOfType(HasFeatures.class).values()).isNotEmpty();
+					then(context.getBeansOfType(HasFeatures.class).values()).isEmpty();
 				});
 	}
 

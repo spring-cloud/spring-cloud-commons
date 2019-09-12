@@ -126,7 +126,7 @@ public class CommonsClientAutoConfigurationTests {
 							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
 					assertThat(context)
 							.doesNotHaveBean(DiscoveryCompositeHealthIndicator.class);
-					then(context.getBeansOfType(HasFeatures.class).values()).isNotEmpty();
+					then(context.getBeansOfType(HasFeatures.class).values()).isEmpty();
 				});
 	}
 

@@ -82,15 +82,6 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 		return new SimpleReactiveDiscoveryClient(simpleReactiveDiscoveryProperties());
 	}
 
-	@Bean
-	@ConditionalOnClass(ReactiveHealthIndicator.class)
-	@ConditionalOnDiscoveryHealthIndicatorEnabled
-	public ReactiveDiscoveryClientHealthIndicator simpleReactiveDiscoveryClientHealthIndicator(
-			DiscoveryClientHealthIndicatorProperties properties) {
-		return new ReactiveDiscoveryClientHealthIndicator(simpleReactiveDiscoveryClient(),
-				properties);
-	}
-
 	private int findPort() {
 		if (port > 0) {
 			return port;
@@ -108,6 +99,21 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 			simple.getLocal().setUri(URI.create("http://"
 					+ inet.findFirstNonLoopbackHostInfo().getHostname() + ":" + port));
 		}
+	}
+
+	@Configuration
+	@ConditionalOnClass(ReactiveHealthIndicator.class)
+	protected static class HealthConfiguration {
+
+		@Bean
+		@ConditionalOnDiscoveryHealthIndicatorEnabled
+		public ReactiveDiscoveryClientHealthIndicator simpleReactiveDiscoveryClientHealthIndicator(
+				DiscoveryClientHealthIndicatorProperties properties,
+				SimpleReactiveDiscoveryClient simpleReactiveDiscoveryClient) {
+			return new ReactiveDiscoveryClientHealthIndicator(
+					simpleReactiveDiscoveryClient, properties);
+		}
+
 	}
 
 }
