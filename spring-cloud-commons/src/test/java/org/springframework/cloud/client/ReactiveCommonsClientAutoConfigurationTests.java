@@ -128,6 +128,20 @@ public class ReactiveCommonsClientAutoConfigurationTests {
 	}
 
 	@Test
+	public void worksWithoutWebflux() {
+		applicationContextRunner
+				.withClassLoader(
+						new FilteredClassLoader("org.springframework.web.reactive"))
+				.run(context -> {
+					assertThat(context).doesNotHaveBean(
+							ReactiveDiscoveryClientHealthIndicator.class);
+					assertThat(context).doesNotHaveBean(
+							ReactiveDiscoveryCompositeHealthContributor.class);
+					assertThat(context).doesNotHaveBean(HasFeatures.class);
+				});
+	}
+
+	@Test
 	public void conditionalOnReactiveDiscoveryEnabledWorks() {
 		ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 				.withUserConfiguration(ReactiveDiscoveryEnabledConfig.class);
