@@ -25,7 +25,6 @@ import org.springframework.boot.actuate.autoconfigure.endpoint.condition.Conditi
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.health.HealthAggregator;
 import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -50,21 +49,18 @@ import org.springframework.context.annotation.Configuration;
  * @author Tim Ysewyn
  */
 @Configuration
-@AutoConfigureOrder(0)
 public class CommonsClientAutoConfiguration {
 
 	@Configuration
 	@EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
-	@ConditionalOnClass(HealthIndicator.class)
 	@ConditionalOnBean(DiscoveryClient.class)
 	@ConditionalOnDiscoveryEnabled
 	@ConditionalOnBlockingDiscoveryEnabled
 	protected static class DiscoveryLoadBalancerConfiguration {
 
 		@Bean
-		@ConditionalOnProperty(
-				value = "spring.cloud.discovery.client.health-indicator.enabled",
-				matchIfMissing = true)
+		@ConditionalOnClass(HealthIndicator.class)
+		@ConditionalOnDiscoveryHealthIndicatorEnabled
 		public DiscoveryClientHealthIndicator discoveryClientHealthIndicator(
 				ObjectProvider<DiscoveryClient> discoveryClient,
 				DiscoveryClientHealthIndicatorProperties properties) {
@@ -72,6 +68,7 @@ public class CommonsClientAutoConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnClass(HealthIndicator.class)
 		@ConditionalOnProperty(
 				value = "spring.cloud.discovery.client.composite-indicator.enabled",
 				matchIfMissing = true)
