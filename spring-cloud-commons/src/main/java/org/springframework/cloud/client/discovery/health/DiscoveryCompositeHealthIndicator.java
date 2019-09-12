@@ -32,8 +32,10 @@ import org.springframework.boot.actuate.health.HealthIndicator;
  * and aggregates the statuses.
  *
  * @author Spencer Gibb
+ * @deprecated since 2.2.0 in favor of {@link DiscoveryCompositeHealthContributor}
  */
 // TODO: do we need this? Can they just be independent HealthIndicators?
+@Deprecated
 public class DiscoveryCompositeHealthIndicator extends CompositeHealthIndicator {
 
 	private final ArrayList<Holder> healthIndicators = new ArrayList<>();

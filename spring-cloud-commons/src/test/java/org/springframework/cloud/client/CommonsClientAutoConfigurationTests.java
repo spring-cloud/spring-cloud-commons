@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.actuator.FeaturesEndpoint;
 import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicator;
-import org.springframework.cloud.client.discovery.health.DiscoveryCompositeHealthIndicator;
+import org.springframework.cloud.client.discovery.health.DiscoveryCompositeHealthContributor;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.commons.util.UtilAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -53,7 +53,7 @@ public class CommonsClientAutoConfigurationTests {
 						AutoConfigurations.of(HealthEndpointAutoConfiguration.class))
 				.run(ctxt -> {
 					then(ctxt.getBean(DiscoveryClientHealthIndicator.class)).isNotNull();
-					then(ctxt.getBean(DiscoveryCompositeHealthIndicator.class))
+					then(ctxt.getBean(DiscoveryCompositeHealthContributor.class))
 							.isNotNull();
 					then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull();
 					then(ctxt.getBeansOfType(HasFeatures.class).values()).isNotEmpty();
@@ -67,7 +67,7 @@ public class CommonsClientAutoConfigurationTests {
 					assertThat(ctxt)
 							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
 					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryCompositeHealthIndicator.class);
+							.doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
 					then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull();
 					// features actuator is independent of discovery
 					assertThat(ctxt).doesNotHaveBean(HasFeatures.class);
@@ -82,7 +82,7 @@ public class CommonsClientAutoConfigurationTests {
 					assertThat(ctxt)
 							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
 					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryCompositeHealthIndicator.class);
+							.doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
 					then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull();
 					// features actuator is independent of discovery
 					assertThat(ctxt).doesNotHaveBean(HasFeatures.class);
@@ -98,7 +98,7 @@ public class CommonsClientAutoConfigurationTests {
 					assertThat(ctxt)
 							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
 					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryCompositeHealthIndicator.class);
+							.doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
 					assertThat(ctxt).doesNotHaveBean(FeaturesEndpoint.class);
 				});
 	}
@@ -112,7 +112,7 @@ public class CommonsClientAutoConfigurationTests {
 					assertThat(ctxt)
 							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
 					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryCompositeHealthIndicator.class);
+							.doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
 				});
 	}
 
@@ -125,7 +125,7 @@ public class CommonsClientAutoConfigurationTests {
 					assertThat(context)
 							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
 					assertThat(context)
-							.doesNotHaveBean(DiscoveryCompositeHealthIndicator.class);
+							.doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
 					then(context.getBeansOfType(HasFeatures.class).values()).isEmpty();
 				});
 	}
