@@ -37,8 +37,6 @@ import org.springframework.context.annotation.Configuration;
 @LoadBalancerClients
 @AutoConfigureBefore({ ReactorLoadBalancerClientAutoConfiguration.class,
 		ReactiveLoadBalancerAutoConfiguration.class })
-// @EnableCaching //TODO: how to enforce, or check conditions?
-// @AutoConfigureBefore(CacheAutoConfiguration.class)
 public class LoadBalancerAutoConfiguration {
 
 	private final ObjectProvider<List<LoadBalancerClientSpecification>> configurations;

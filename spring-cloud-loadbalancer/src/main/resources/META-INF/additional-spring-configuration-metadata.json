@@ -1,0 +1,10 @@
+{
+	"properties": [
+		{
+			"defaultValue": true,
+			"name": "spring.cloud.loadbalancer.ribbon.enabled",
+			"description": "Causes `RibbonLoadBalancerClient` to be used by default.",
+			"type": "java.lang.Boolean"
+		}
+	]
+}
