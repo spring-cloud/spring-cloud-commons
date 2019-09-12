@@ -18,8 +18,8 @@ package org.springframework.cloud.client;
 
 import org.junit.Test;
 
-import org.springframework.beans.BeansException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.actuator.FeaturesEndpoint;
@@ -28,12 +28,9 @@ import org.springframework.cloud.client.discovery.health.reactive.ReactiveDiscov
 import org.springframework.cloud.client.discovery.health.reactive.ReactiveDiscoveryCompositeHealthContributor;
 import org.springframework.cloud.client.discovery.simple.reactive.SimpleReactiveDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.commons.util.UtilAutoConfiguration;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
@@ -64,13 +61,13 @@ public class ReactiveCommonsClientAutoConfigurationTests {
 		applicationContextRunner
 				.withPropertyValues("spring.cloud.discovery.enabled=false")
 				.run(context -> {
-					assertBeanNonExistant(context,
+					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryClientHealthIndicator.class);
-					assertBeanNonExistant(context,
+					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryCompositeHealthContributor.class);
 					// features actuator is independent of discovery
 					then(context.getBean(FeaturesEndpoint.class)).isNotNull();
-					assertBeanNonExistant(context, HasFeatures.class);
+					assertThat(context).doesNotHaveBean(HasFeatures.class);
 				});
 	}
 
@@ -79,13 +76,13 @@ public class ReactiveCommonsClientAutoConfigurationTests {
 		applicationContextRunner
 				.withPropertyValues("spring.cloud.discovery.reactive.enabled=false")
 				.run(context -> {
-					assertBeanNonExistant(context,
+					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryClientHealthIndicator.class);
-					assertBeanNonExistant(context,
+					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryCompositeHealthContributor.class);
 					// features actuator is independent of discovery
 					then(context.getBean(FeaturesEndpoint.class)).isNotNull();
-					assertBeanNonExistant(context, HasFeatures.class);
+					assertThat(context).doesNotHaveBean(HasFeatures.class);
 				});
 	}
 
@@ -95,11 +92,11 @@ public class ReactiveCommonsClientAutoConfigurationTests {
 				"spring.cloud.discovery.client.health-indicator.enabled=false",
 				"spring.cloud.discovery.client.composite-indicator.enabled=false",
 				"spring.cloud.features.enabled=false").run(context -> {
-					assertBeanNonExistant(context,
+					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryClientHealthIndicator.class);
-					assertBeanNonExistant(context,
+					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryCompositeHealthContributor.class);
-					assertBeanNonExistant(context, FeaturesEndpoint.class);
+					assertThat(context).doesNotHaveBean(FeaturesEndpoint.class);
 				});
 	}
 
@@ -109,10 +106,24 @@ public class ReactiveCommonsClientAutoConfigurationTests {
 				.withPropertyValues(
 						"spring.cloud.discovery.client.health-indicator.enabled=false")
 				.run(context -> {
-					assertBeanNonExistant(context,
+					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryClientHealthIndicator.class);
-					assertBeanNonExistant(context,
+					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryCompositeHealthContributor.class);
+				});
+	}
+
+	@Test
+	public void worksWithoutActuator() {
+		applicationContextRunner
+				.withClassLoader(
+						new FilteredClassLoader("org.springframework.boot.actuate"))
+				.run(context -> {
+					assertThat(context).doesNotHaveBean(
+							ReactiveDiscoveryClientHealthIndicator.class);
+					assertThat(context).doesNotHaveBean(
+							ReactiveDiscoveryCompositeHealthContributor.class);
+					then(context.getBeansOfType(HasFeatures.class).values()).isNotEmpty();
 				});
 	}
 
@@ -121,23 +132,12 @@ public class ReactiveCommonsClientAutoConfigurationTests {
 		ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 				.withUserConfiguration(ReactiveDiscoveryEnabledConfig.class);
 		contextRunner.withPropertyValues("spring.cloud.discovery.reactive.enabled=false")
-				.run(context -> assertBeanNonExistant(context, TestBean.class));
+				.run(context -> assertThat(context).doesNotHaveBean(TestBean.class));
 		contextRunner.withPropertyValues("spring.cloud.discovery.reactive.enabled=true")
 				.run(context -> assertThat(context.getBean(TestBean.class)).isNotNull());
 	}
 
-	private void assertBeanNonExistant(ConfigurableApplicationContext ctxt,
-			Class<?> beanClass) {
-		try {
-			ctxt.getBean(beanClass);
-			fail("Bean of type " + beanClass + " should not have been created");
-		}
-		catch (BeansException e) {
-			// should fail with exception
-		}
-	}
-
-	@Configuration
+	@TestConfiguration
 	@ConditionalOnDiscoveryEnabled
 	protected static class DiscoveryEnabledConfig {
 
