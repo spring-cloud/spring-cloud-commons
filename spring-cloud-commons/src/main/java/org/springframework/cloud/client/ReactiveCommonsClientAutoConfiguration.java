@@ -18,8 +18,7 @@ package org.springframework.cloud.client;
 
 import java.util.Collection;
 
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
+import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -42,18 +41,17 @@ import org.springframework.context.annotation.Configuration;
  * @since 2.2.0
  */
 @Configuration
-@AutoConfigureOrder(0)
 public class ReactiveCommonsClientAutoConfiguration {
 
 	@Configuration
 	@EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
-	@ConditionalOnClass(HealthIndicator.class)
 	@ConditionalOnBean(ReactiveDiscoveryClient.class)
 	@ConditionalOnDiscoveryEnabled
 	@ConditionalOnReactiveDiscoveryEnabled
 	protected static class ReactiveDiscoveryLoadBalancerConfiguration {
 
 		@Bean
+		@ConditionalOnClass(ReactiveHealthIndicator.class)
 		@ConditionalOnProperty(
 				value = "spring.cloud.discovery.client.composite-indicator.enabled",
 				matchIfMissing = true)

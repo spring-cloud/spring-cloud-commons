@@ -18,11 +18,9 @@ package org.springframework.cloud.client.discovery.composite.reactive;
 
 import java.util.List;
 
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
 import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.discovery.simple.reactive.SimpleReactiveDiscoveryClientAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -36,7 +34,6 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 @ConditionalOnDiscoveryEnabled
 @ConditionalOnReactiveDiscoveryEnabled
-@AutoConfigureBefore(SimpleReactiveDiscoveryClientAutoConfiguration.class)
 public class ReactiveCompositeDiscoveryClientAutoConfiguration {
 
 	@Bean

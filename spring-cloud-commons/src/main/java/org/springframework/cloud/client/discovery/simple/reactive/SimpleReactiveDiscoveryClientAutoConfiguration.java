@@ -20,14 +20,18 @@ import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
+import org.springframework.cloud.client.ConditionalOnDiscoveryHealthIndicatorEnabled;
 import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
 import org.springframework.cloud.client.ReactiveCommonsClientAutoConfiguration;
+import org.springframework.cloud.client.discovery.composite.reactive.ReactiveCompositeDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicatorProperties;
 import org.springframework.cloud.client.discovery.health.reactive.ReactiveDiscoveryClientHealthIndicator;
 import org.springframework.cloud.commons.util.InetUtils;
@@ -47,6 +51,7 @@ import org.springframework.core.annotation.Order;
 @ConditionalOnReactiveDiscoveryEnabled
 @EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
 @AutoConfigureBefore(ReactiveCommonsClientAutoConfiguration.class)
+@AutoConfigureAfter(ReactiveCompositeDiscoveryClientAutoConfiguration.class)
 public class SimpleReactiveDiscoveryClientAutoConfiguration
 		implements ApplicationListener<WebServerInitializedEvent> {
 
@@ -78,9 +83,8 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 	}
 
 	@Bean
-	@ConditionalOnProperty(
-			value = "spring.cloud.discovery.client.health-indicator.enabled",
-			matchIfMissing = true)
+	@ConditionalOnClass(ReactiveHealthIndicator.class)
+	@ConditionalOnDiscoveryHealthIndicatorEnabled
 	public ReactiveDiscoveryClientHealthIndicator simpleReactiveDiscoveryClientHealthIndicator(
 			DiscoveryClientHealthIndicatorProperties properties) {
 		return new ReactiveDiscoveryClientHealthIndicator(simpleReactiveDiscoveryClient(),
