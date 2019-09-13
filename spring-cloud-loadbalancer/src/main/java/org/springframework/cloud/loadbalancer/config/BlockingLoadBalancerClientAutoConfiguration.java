@@ -29,7 +29,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -60,14 +59,19 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 		return new RibbonWarnLogger();
 	}
 
-	@Bean
-	@ConditionalOnBean(LoadBalancerClientFactory.class)
+	@Configuration
 	@ConditionalOnClass(RestTemplate.class)
 	@Conditional(OnNoRibbonDefaultCondition.class)
-	@Primary
-	public LoadBalancerClient blockingLoadBalancerClient(
-			LoadBalancerClientFactory loadBalancerClientFactory) {
-		return new BlockingLoadBalancerClient(loadBalancerClientFactory);
+	protected static class BlockingLoadbalancerClientConfig {
+
+		@Bean
+		@ConditionalOnBean(LoadBalancerClientFactory.class)
+		@Primary
+		public BlockingLoadBalancerClient blockingLoadBalancerClient(
+				LoadBalancerClientFactory loadBalancerClientFactory) {
+			return new BlockingLoadBalancerClient(loadBalancerClientFactory);
+		}
+
 	}
 
 	private static final class OnNoRibbonDefaultCondition extends AnyNestedCondition {
@@ -89,21 +93,21 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 
 	}
 
-}
+	static class RibbonWarnLogger {
 
-class RibbonWarnLogger {
+		private static final Log LOG = LogFactory.getLog(RibbonWarnLogger.class);
 
-	private static final Log LOG = LogFactory.getLog(RibbonWarnLogger.class);
-
-	@PostConstruct
-	void logWarning() {
-		if (LOG.isWarnEnabled()) {
-			LOG.warn(
-					"You already have RibbonLoadBalancerClient on your classpath. It will be used by default. To use "
-							+ BlockingLoadBalancerClient.class.getSimpleName()
-							+ " set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or "
-							+ "remove spring-cloud-starter-netflix-ribbon from your project.");
+		@PostConstruct
+		void logWarning() {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(
+						"You already have RibbonLoadBalancerClient on your classpath. It will be used by default. To use "
+								+ BlockingLoadBalancerClient.class.getSimpleName()
+								+ " set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or "
+								+ "remove spring-cloud-starter-netflix-ribbon from your project.");
+			}
 		}
+
 	}
 
 }
