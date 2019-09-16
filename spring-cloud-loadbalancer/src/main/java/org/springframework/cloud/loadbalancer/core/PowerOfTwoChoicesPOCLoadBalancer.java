@@ -37,12 +37,18 @@ public class PowerOfTwoChoicesPOCLoadBalancer implements ReactorServiceInstanceL
 		resetInstances();
 	}
 
+//	private void resetInstances() {
+//		Schedulers.fromExecutorService(Executors.newSingleThreadScheduledExecutor())
+//				.schedulePeriodically(() -> instances = serviceInstanceListSupplier
+//						// maybe we don't have to block at all?
+//						// TODO:  sensible interval defaults + config
+//						.getIfAvailable().get().next().block(), 0, 10, TimeUnit.MINUTES);
+//	}
+
 	private void resetInstances() {
-		Schedulers.fromExecutorService(Executors.newSingleThreadScheduledExecutor())
-				.schedulePeriodically(() -> instances = serviceInstanceListSupplier
-						// maybe we don't have to block at all?
-						// TODO:  sensible interval defaults + config
-						.getIfAvailable().get().block(), 0, 10, TimeUnit.MINUTES);
+		serviceInstanceListSupplier.getIfAvailable()
+				.get()
+				.subscribe(connectionTrackingServiceInstances -> instances = connectionTrackingServiceInstances);
 	}
 
 	// TODO: optimise

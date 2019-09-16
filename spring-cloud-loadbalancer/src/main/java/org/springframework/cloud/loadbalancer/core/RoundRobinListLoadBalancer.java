@@ -48,6 +48,7 @@ public class RoundRobinListLoadBalancer implements ReactorServiceInstanceLoadBal
 		// TODO: move supplier to Request?
 		ServiceInstanceListSupplier<ServiceInstance> supplier = this.serviceInstanceListSupplier.getIfAvailable();
 		return supplier.get()
+				.next()
 				.map(instances -> {
 			if (instances.isEmpty()) {
 				log.warn("No servers available for service: " + this.serviceId);

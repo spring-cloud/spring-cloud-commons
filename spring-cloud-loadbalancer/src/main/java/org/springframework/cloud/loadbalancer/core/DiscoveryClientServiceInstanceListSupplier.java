@@ -1,9 +1,10 @@
 package org.springframework.cloud.loadbalancer.core;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.env.Environment;
@@ -26,14 +27,19 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 	}
 
 	@Override
-	public Mono<List<ConnectionTrackingServiceInstance>> get() {
-		List<ConnectionTrackingServiceInstance> instances = this.delegate
+	public Flux<List<ConnectionTrackingServiceInstance>> get() {
+		//FIXME: sensible defaults + config
+		return Flux.just(getInstances())
+				.delayElements(Duration.ofMinutes(5));
+	}
+
+	private List<ConnectionTrackingServiceInstance> getInstances() {
+		return this.delegate
 				.getInstances(this.serviceId)
 				.stream()
 				// switch to a more sensible conversion
 				.map(serviceInstance -> (ConnectionTrackingServiceInstance) serviceInstance)
 				.collect(Collectors.toList());
-		return Mono.just(instances);
 	}
 
 	public String getServiceId() {
