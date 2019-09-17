@@ -17,6 +17,7 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.List;
+import java.util.Objects;
 
 import reactor.cache.CacheFlux;
 import reactor.core.publisher.Flux;
@@ -27,24 +28,30 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * @deprecated Use {@link CachingServiceInstanceListSupplier} instead.
+ * A {@link ServiceInstanceListSupplier} implementation that tries retrieving
+ * {@link ServiceInstance} objects from cache; if none found, retrieves instances using
+ * {@link DiscoveryClientServiceInstanceListSupplier}.
+ *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
-@Deprecated
-public class CachingServiceInstanceSupplier implements ServiceInstanceSupplier {
+public class CachingServiceInstanceListSupplier
+		implements ServiceInstanceListSupplier<ServiceInstance> {
 
 	/**
 	 * Name of the service cache instance.
 	 */
-	public static final String SERVICE_INSTANCE_CACHE_NAME = CachingServiceInstanceSupplier.class
+	public static final String SERVICE_INSTANCE_CACHE_NAME = CachingServiceInstanceListSupplier.class
 			.getSimpleName() + "Cache";
 
-	private final ServiceInstanceSupplier delegate;
+	private final ServiceInstanceListSupplier<ServiceInstance> delegate;
 
-	private final Flux<ServiceInstance> serviceInstances;
+	private final Flux<List<ServiceInstance>> serviceInstances;
 
 	@SuppressWarnings("unchecked")
-	public CachingServiceInstanceSupplier(ServiceInstanceSupplier delegate,
+	public CachingServiceInstanceListSupplier(
+			ServiceInstanceListSupplier<ServiceInstance> delegate,
 			CacheManager cacheManager) {
 		this.delegate = delegate;
 		this.serviceInstances = CacheFlux.lookup(key -> {
@@ -52,28 +59,29 @@ public class CachingServiceInstanceSupplier implements ServiceInstanceSupplier {
 			// configurable
 			// cache
 			// name
-			List<ServiceInstance> list = cache.get(key, List.class);
+			List<ServiceInstance> list = Objects.requireNonNull(cache).get(key,
+					List.class);
 			if (list == null || list.isEmpty()) {
 				return Mono.empty();
 			}
-			return Flux.fromIterable(list).materialize().collectList();
-		}, delegate.getServiceId()).onCacheMissResume(this.delegate::get)
+			return Flux.just(list).materialize().collectList();
+		}, delegate.getServiceId()).onCacheMissResume(this.delegate)
 				.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize()
 						.cast(ServiceInstance.class).collectList().doOnNext(instances -> {
 							Cache cache = cacheManager
 									.getCache(SERVICE_INSTANCE_CACHE_NAME);
-							cache.put(key, instances);
+							Objects.requireNonNull(cache).put(key, instances);
 						}).then());
 	}
 
 	@Override
-	public Flux<ServiceInstance> get() {
-		return this.serviceInstances;
+	public String getServiceId() {
+		return delegate.getServiceId();
 	}
 
 	@Override
-	public String getServiceId() {
-		return this.delegate.getServiceId();
+	public Flux<List<ServiceInstance>> get() {
+		return serviceInstances;
 	}
 
 }
