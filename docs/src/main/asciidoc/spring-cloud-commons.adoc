@@ -1,10 +1,5 @@
 = Cloud Native Applications
-:githubroot: https://github.com/spring-cloud
-:github: {githubroot}/spring-cloud-commons
-:githubmaster: {github}/tree/master
-:docslink: {githubmaster}/docs/src/main/asciidoc
-:toc:
-:nofooter:
+include::_attributes.adoc[]
 
 include::intro.adoc[]
 
@@ -778,3 +773,7 @@ of compatible Spring Boot versions.
 == Spring Cloud Circuit Breaker
 
 include::spring-cloud-circuitbreaker.adoc[]
+
+== Configuration Properties
+
+To see the list of all Sleuth related configuration properties please check link:appendix.html[the Appendix page].
