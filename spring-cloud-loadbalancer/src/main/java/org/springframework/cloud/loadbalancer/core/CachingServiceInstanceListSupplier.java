@@ -65,7 +65,7 @@ public class CachingServiceInstanceListSupplier implements ServiceInstanceListSu
 			return Flux.just(list).materialize().collectList();
 		}, delegate.getServiceId()).onCacheMissResume(this.delegate)
 				.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize()
-						.cast(ServiceInstance.class).collectList().doOnNext(instances -> {
+						.doOnNext(instances -> {
 							Cache cache = cacheManager
 									.getCache(SERVICE_INSTANCE_CACHE_NAME);
 							Objects.requireNonNull(cache).put(key, instances);

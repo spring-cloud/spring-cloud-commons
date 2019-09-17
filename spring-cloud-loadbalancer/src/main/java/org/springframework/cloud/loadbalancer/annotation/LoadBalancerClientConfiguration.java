@@ -24,10 +24,13 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceSupplier;
+import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
+import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +45,22 @@ import org.springframework.core.env.Environment;
 @EnableConfigurationProperties
 @ConditionalOnDiscoveryEnabled
 public class LoadBalancerClientConfiguration {
+
+	@Bean
+	@ConditionalOnBean(DiscoveryClient.class)
+	@ConditionalOnMissingBean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			DiscoveryClient discoveryClient, Environment env,
+			ObjectProvider<CacheManager> cacheManager) {
+		// TODO: bean post processor to enable caching?
+		DiscoveryClientServiceInstanceListSupplier delegate = new DiscoveryClientServiceInstanceListSupplier(
+				discoveryClient, env);
+		if (cacheManager.getIfAvailable() != null) {
+			return new CachingServiceInstanceListSupplier(delegate,
+					cacheManager.getIfAvailable());
+		}
+		return delegate;
+	}
 
 	@Bean
 	@ConditionalOnBean(DiscoveryClient.class)
@@ -65,8 +84,8 @@ public class LoadBalancerClientConfiguration {
 			Environment environment,
 			LoadBalancerClientFactory loadBalancerClientFactory) {
 		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
-		return new RoundRobinLoadBalancer(name, loadBalancerClientFactory
-				.getLazyProvider(name, ServiceInstanceSupplier.class));
+		return new RoundRobinLoadBalancer(loadBalancerClientFactory.getLazyProvider(name,
+				ServiceInstanceListSupplier.class), name);
 	}
 
 }
