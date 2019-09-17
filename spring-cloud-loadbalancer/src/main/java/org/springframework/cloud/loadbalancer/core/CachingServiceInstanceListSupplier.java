@@ -36,8 +36,7 @@ import org.springframework.cloud.client.ServiceInstance;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-public class CachingServiceInstanceListSupplier
-		implements ServiceInstanceListSupplier<ServiceInstance> {
+public class CachingServiceInstanceListSupplier implements ServiceInstanceListSupplier {
 
 	/**
 	 * Name of the service cache instance.
@@ -45,13 +44,12 @@ public class CachingServiceInstanceListSupplier
 	public static final String SERVICE_INSTANCE_CACHE_NAME = CachingServiceInstanceListSupplier.class
 			.getSimpleName() + "Cache";
 
-	private final ServiceInstanceListSupplier<ServiceInstance> delegate;
+	private final ServiceInstanceListSupplier delegate;
 
 	private final Flux<List<ServiceInstance>> serviceInstances;
 
 	@SuppressWarnings("unchecked")
-	public CachingServiceInstanceListSupplier(
-			ServiceInstanceListSupplier<ServiceInstance> delegate,
+	public CachingServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			CacheManager cacheManager) {
 		this.delegate = delegate;
 		this.serviceInstances = CacheFlux.lookup(key -> {

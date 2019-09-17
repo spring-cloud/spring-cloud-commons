@@ -34,7 +34,7 @@ import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientF
  * @since 2.2.0
  */
 public class DiscoveryClientServiceInstanceListSupplier
-		implements ServiceInstanceListSupplier<ServiceInstance> {
+		implements ServiceInstanceListSupplier {
 
 	private final DiscoveryClient delegate;
 

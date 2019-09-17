@@ -44,7 +44,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	@Deprecated
 	private ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier;
 
-	private ObjectProvider<ServiceInstanceListSupplier<ServiceInstance>> serviceInstanceListSupplierProvider;
+	private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
 
 	private final String serviceId;
 
@@ -66,7 +66,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	 * @param serviceId id of the service for which to choose an instance
 	 */
 	public RoundRobinLoadBalancer(
-			ObjectProvider<ServiceInstanceListSupplier<ServiceInstance>> serviceInstanceListSupplierProvider,
+			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId) {
 		this(serviceInstanceListSupplierProvider, serviceId, new Random().nextInt(1000));
 	}
@@ -78,7 +78,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	 * @param seedPosition Round Robin element position marker
 	 */
 	public RoundRobinLoadBalancer(
-			ObjectProvider<ServiceInstanceListSupplier<ServiceInstance>> serviceInstanceListSupplierProvider,
+			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId, int seedPosition) {
 		this.serviceId = serviceId;
 		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
@@ -110,7 +110,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 		// TODO: move supplier to Request?
 		// Temporary conditional logic till deprecated members are removed.
 		if (serviceInstanceListSupplierProvider != null) {
-			ServiceInstanceListSupplier<ServiceInstance> supplier = serviceInstanceListSupplierProvider
+			ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
 					.getIfAvailable();
 			return Objects.requireNonNull(supplier).get().next()
 					.map(this::getInstanceResponse);
