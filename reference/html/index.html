@@ -96,47 +96,77 @@ $(addBlockSwitches);
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_spring_cloud_context_application_context_services">Spring Cloud Context: Application Context Services</a>
+<li><a href="#spring-cloud-context-application-context-services">1. Spring Cloud Context: Application Context Services</a>
 <ul class="sectlevel2">
-<li><a href="#_the_bootstrap_application_context">The Bootstrap Application Context</a></li>
-<li><a href="#_application_context_hierarchies">Application Context Hierarchies</a></li>
-<li><a href="#customizing-bootstrap-properties">Changing the Location of Bootstrap Properties</a></li>
-<li><a href="#overriding-bootstrap-properties">Overriding the Values of Remote Properties</a></li>
-<li><a href="#_customizing_the_bootstrap_configuration">Customizing the Bootstrap Configuration</a></li>
-<li><a href="#customizing-bootstrap-property-sources">Customizing the Bootstrap Property Sources</a></li>
-<li><a href="#_logging_configuration">Logging Configuration</a></li>
-<li><a href="#_environment_changes">Environment Changes</a></li>
-<li><a href="#refresh-scope">Refresh Scope</a></li>
-<li><a href="#_encryption_and_decryption">Encryption and Decryption</a></li>
-<li><a href="#_endpoints">Endpoints</a></li>
+<li><a href="#the-bootstrap-application-context">1.1. The Bootstrap Application Context</a></li>
+<li><a href="#application-context-hierarchies">1.2. Application Context Hierarchies</a></li>
+<li><a href="#customizing-bootstrap-properties">1.3. Changing the Location of Bootstrap Properties</a></li>
+<li><a href="#overriding-bootstrap-properties">1.4. Overriding the Values of Remote Properties</a></li>
+<li><a href="#customizing-the-bootstrap-configuration">1.5. Customizing the Bootstrap Configuration</a></li>
+<li><a href="#customizing-bootstrap-property-sources">1.6. Customizing the Bootstrap Property Sources</a></li>
+<li><a href="#logging-configuration">1.7. Logging Configuration</a></li>
+<li><a href="#environment-changes">1.8. Environment Changes</a></li>
+<li><a href="#refresh-scope">1.9. Refresh Scope</a></li>
+<li><a href="#encryption-and-decryption">1.10. Encryption and Decryption</a></li>
+<li><a href="#endpoints">1.11. Endpoints</a></li>
 </ul>
 </li>
-<li><a href="#_spring_cloud_commons_common_abstractions">Spring Cloud Commons: Common Abstractions</a>
+<li><a href="#spring-cloud-commons-common-abstractions">2. Spring Cloud Commons: Common Abstractions</a>
 <ul class="sectlevel2">
-<li><a href="#_enablediscoveryclient">@EnableDiscoveryClient</a></li>
-<li><a href="#_serviceregistry">ServiceRegistry</a></li>
-<li><a href="#_spring_resttemplate_as_a_load_balancer_client">Spring RestTemplate as a Load Balancer Client</a></li>
-<li><a href="#_spring_webclient_as_a_load_balancer_client">Spring WebClient as a Load Balancer Client</a></li>
-<li><a href="#_multiple_resttemplate_objects">Multiple RestTemplate objects</a></li>
-<li><a href="#loadbalanced-webclient">Spring WebFlux WebClient as a Load Balancer Client</a></li>
-<li><a href="#ignore-network-interfaces">Ignore Network Interfaces</a></li>
-<li><a href="#http-clients">HTTP Client Factories</a></li>
-<li><a href="#enabled-features">Enabled Features</a></li>
-<li><a href="#_spring_cloud_compatibility_verification">Spring Cloud Compatibility Verification</a></li>
+<li><a href="#enablediscoveryclient">2.1. @EnableDiscoveryClient</a>
+<ul class="sectlevel3">
+<li><a href="#health-indicator">2.1.1. Health Indicator</a></li>
+<li><a href="#ordering-discoveryclient-instances">2.1.2. Ordering <code>DiscoveryClient</code> instances</a></li>
 </ul>
 </li>
-<li><a href="#_spring_cloud_circuit_breaker">Spring Cloud Circuit Breaker</a></li>
-<li><a href="#_introduction">Introduction</a>
-<ul class="sectlevel2">
-<li><a href="#_supported_implementations">Supported Implementations</a></li>
+<li><a href="#serviceregistry">2.2. ServiceRegistry</a>
+<ul class="sectlevel3">
+<li><a href="#serviceregistry-auto-registration">2.2.1. ServiceRegistry Auto-Registration</a>
+<ul class="sectlevel4">
+<li><a href="#serviceregistry-auto-registration-events">ServiceRegistry Auto-Registration Events</a></li>
 </ul>
 </li>
-<li><a href="#_core_concepts">Core Concepts</a>
-<ul class="sectlevel2">
-<li><a href="#_circuit_breakers_in_reactive_code">Circuit Breakers In Reactive Code</a></li>
+<li><a href="#service-registry-actuator-endpoint">2.2.2. Service Registry Actuator Endpoint</a></li>
 </ul>
 </li>
-<li><a href="#_configuration">Configuration</a></li>
+<li><a href="#spring-resttemplate-as-a-load-balancer-client">2.3. Spring RestTemplate as a Load Balancer Client</a></li>
+<li><a href="#spring-webclient-as-a-load-balancer-client">2.4. Spring WebClient as a Load Balancer Client</a>
+<ul class="sectlevel3">
+<li><a href="#retrying-failed-requests">2.4.1. Retrying Failed Requests</a></li>
+</ul>
+</li>
+<li><a href="#multiple-resttemplate-objects">2.5. Multiple RestTemplate objects</a></li>
+<li><a href="#loadbalanced-webclient">2.6. Spring WebFlux WebClient as a Load Balancer Client</a>
+<ul class="sectlevel3">
+<li><a href="#webflux-with-reactive-loadbalancer">2.6.1. Spring WebFlux WebClient with Reactive Load Balancer</a></li>
+<li><a href="#spring-webflux-webclient-with-non-reactive-load-balancer-client">2.6.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></li>
+<li><a href="#passing-your-own-load-balancer-client-configuration">2.6.3. Passing your own Load-Balancer Client configuration</a></li>
+</ul>
+</li>
+<li><a href="#ignore-network-interfaces">2.7. Ignore Network Interfaces</a></li>
+<li><a href="#http-clients">2.8. HTTP Client Factories</a></li>
+<li><a href="#enabled-features">2.9. Enabled Features</a>
+<ul class="sectlevel3">
+<li><a href="#feature-types">2.9.1. Feature types</a></li>
+<li><a href="#declaring-features">2.9.2. Declaring features</a></li>
+</ul>
+</li>
+<li><a href="#spring-cloud-compatibility-verification">2.10. Spring Cloud Compatibility Verification</a></li>
+</ul>
+</li>
+<li><a href="#spring-cloud-circuit-breaker">3. Spring Cloud Circuit Breaker</a></li>
+<li><a href="#introduction">4. Introduction</a>
+<ul class="sectlevel2">
+<li><a href="#supported-implementations">4.1. Supported Implementations</a></li>
+</ul>
+</li>
+<li><a href="#core-concepts">5. Core Concepts</a>
+<ul class="sectlevel2">
+<li><a href="#circuit-breakers-in-reactive-code">5.1. Circuit Breakers In Reactive Code</a></li>
+</ul>
+</li>
+<li><a href="#configuration">6. Configuration</a></li>
+<li><a href="#configuration-properties">7. Configuration Properties</a></li>
 </ul>
 </div>
 </div>
@@ -181,7 +211,7 @@ See the following links for more information:</p>
 </td>
 <td class="content">
 Spring Cloud is released under the non-restrictive Apache 2.0 license.
-If you would like to contribute to this section of the documentation or if you find an error, you can find the source code and issue trackers for the project at <a href="https://github.com/spring-cloud/spring-cloud-commons/tree/master/docs/src/main/asciidoc">github</a>.
+If you would like to contribute to this section of the documentation or if you find an error, you can find the source code and issue trackers for the project at {docslink}[github].
 </td>
 </tr>
 </table>
@@ -189,7 +219,7 @@ If you would like to contribute to this section of the documentation or if you f
 </div>
 </div>
 <div class="sect1">
-<h2 id="_spring_cloud_context_application_context_services"><a class="link" href="#_spring_cloud_context_application_context_services">Spring Cloud Context: Application Context Services</a></h2>
+<h2 id="spring-cloud-context-application-context-services"><a class="anchor" href="#spring-cloud-context-application-context-services"></a><a class="link" href="#spring-cloud-context-application-context-services">1. Spring Cloud Context: Application Context Services</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Spring Boot has an opinionated view of how to build an application with Spring.
@@ -197,7 +227,7 @@ For instance, it has conventional locations for common configuration files and h
 Spring Cloud builds on top of that and adds a few features that probably all components in a system would use or occasionally need.</p>
 </div>
 <div class="sect2">
-<h3 id="_the_bootstrap_application_context"><a class="link" href="#_the_bootstrap_application_context">The Bootstrap Application Context</a></h3>
+<h3 id="the-bootstrap-application-context"><a class="anchor" href="#the-bootstrap-application-context"></a><a class="link" href="#the-bootstrap-application-context">1.1. The Bootstrap Application Context</a></h3>
 <div class="paragraph">
 <p>A Spring Cloud application operates by creating a &#8220;bootstrap&#8221; context, which is a parent context for the main application.
 It is responsible for loading configuration properties from the external sources and for decrypting properties in the local external configuration files.
@@ -231,7 +261,7 @@ must set it in <code>bootstrap.[properties | yml]</code>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_application_context_hierarchies"><a class="link" href="#_application_context_hierarchies">Application Context Hierarchies</a></h3>
+<h3 id="application-context-hierarchies"><a class="anchor" href="#application-context-hierarchies"></a><a class="link" href="#application-context-hierarchies">1.2. Application Context Hierarchies</a></h3>
 <div class="paragraph">
 <p>If you build an application context from <code>SpringApplication</code> or <code>SpringApplicationBuilder</code>, then the Bootstrap context is added as a parent to that context.
 It is a feature of Spring that child contexts inherit property sources and profiles from their parent, so the &#8220;main&#8221; application context contains additional property sources, compared to building the same context without Spring Cloud Config.
@@ -271,7 +301,7 @@ Thus, sibling contexts, in particular, do not need to have the same profiles or 
 </div>
 </div>
 <div class="sect2">
-<h3 id="customizing-bootstrap-properties"><a class="link" href="#customizing-bootstrap-properties">Changing the Location of Bootstrap Properties</a></h3>
+<h3 id="customizing-bootstrap-properties"><a class="anchor" href="#customizing-bootstrap-properties"></a><a class="link" href="#customizing-bootstrap-properties">1.3. Changing the Location of Bootstrap Properties</a></h3>
 <div class="paragraph">
 <p>The <code>bootstrap.yml</code> (or <code>.properties</code>) location can be specified by setting <code>spring.cloud.bootstrap.name</code> (default: <code>bootstrap</code>) or <code>spring.cloud.bootstrap.location</code> (default: empty)&#8201;&#8212;&#8201;for example, in System properties.
 Those properties behave like the <code>spring.config.*</code> variants with the same name.
@@ -281,7 +311,7 @@ context you are building), properties in that profile get loaded as well, the sa
 </div>
 </div>
 <div class="sect2">
-<h3 id="overriding-bootstrap-properties"><a class="link" href="#overriding-bootstrap-properties">Overriding the Values of Remote Properties</a></h3>
+<h3 id="overriding-bootstrap-properties"><a class="anchor" href="#overriding-bootstrap-properties"></a><a class="link" href="#overriding-bootstrap-properties">1.4. Overriding the Values of Remote Properties</a></h3>
 <div class="paragraph">
 <p>The property sources that are added to your application by the bootstrap context are often &#8220;remote&#8221; (from example, from Spring Cloud Config Server).
 By default, they cannot be overridden locally.
@@ -300,7 +330,7 @@ Once that flag is set, two finer-grained settings control the location of the re
 </div>
 </div>
 <div class="sect2">
-<h3 id="_customizing_the_bootstrap_configuration"><a class="link" href="#_customizing_the_bootstrap_configuration">Customizing the Bootstrap Configuration</a></h3>
+<h3 id="customizing-the-bootstrap-configuration"><a class="anchor" href="#customizing-the-bootstrap-configuration"></a><a class="link" href="#customizing-the-bootstrap-configuration">1.5. Customizing the Bootstrap Configuration</a></h3>
 <div class="paragraph">
 <p>The bootstrap context can be set to do anything you like by adding entries to <code>/META-INF/spring.factories</code> under a key named <code>org.springframework.cloud.bootstrap.BootstrapConfiguration</code>.
 This holds a comma-separated list of Spring <code>@Configuration</code> classes that are used to create the context.
@@ -328,7 +358,7 @@ Then, all <code>@Beans</code> of type <code>ApplicationContextInitializer</code>
 </div>
 </div>
 <div class="sect2">
-<h3 id="customizing-bootstrap-property-sources"><a class="link" href="#customizing-bootstrap-property-sources">Customizing the Bootstrap Property Sources</a></h3>
+<h3 id="customizing-bootstrap-property-sources"><a class="anchor" href="#customizing-bootstrap-property-sources"></a><a class="link" href="#customizing-bootstrap-property-sources">1.6. Customizing the Bootstrap Property Sources</a></h3>
 <div class="paragraph">
 <p>The default property source for external configuration added by the bootstrap process is the Spring Cloud Config Server, but you can add additional sources by adding beans of type <code>PropertySourceLocator</code> to the bootstrap context (through <code>spring.factories</code>).
 For instance, you can insert additional properties from a different server or from a database.</p>
@@ -364,7 +394,7 @@ It already has its normal Spring Boot-provided property sources, so you can use 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_logging_configuration"><a class="link" href="#_logging_configuration">Logging Configuration</a></h3>
+<h3 id="logging-configuration"><a class="anchor" href="#logging-configuration"></a><a class="link" href="#logging-configuration">1.7. Logging Configuration</a></h3>
 <div class="paragraph">
 <p>If you are going to use Spring Boot to configure log settings than
 you should place this configuration in `bootstrap.[yml | properties]
@@ -385,7 +415,7 @@ using <code>custom.loggin.logpath</code> will not be recognized by Spring Cloud 
 </div>
 </div>
 <div class="sect2">
-<h3 id="_environment_changes"><a class="link" href="#_environment_changes">Environment Changes</a></h3>
+<h3 id="environment-changes"><a class="anchor" href="#environment-changes"></a><a class="link" href="#environment-changes">1.8. Environment Changes</a></h3>
 <div class="paragraph">
 <p>The application listens for an <code>EnvironmentChangeEvent</code> and reacts to the change in a couple of standard ways (additional <code>ApplicationListeners</code> can be added as <code>@Beans</code> by the user in the normal way).
 When an <code>EnvironmentChangeEvent</code> is observed, it has a list of key values that have changed, and the application uses those to:</p>
@@ -416,7 +446,7 @@ To address those concerns, we have <code>@RefreshScope</code>.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="refresh-scope"><a class="link" href="#refresh-scope">Refresh Scope</a></h3>
+<h3 id="refresh-scope"><a class="anchor" href="#refresh-scope"></a><a class="link" href="#refresh-scope">1.9. Refresh Scope</a></h3>
 <div class="paragraph">
 <p>When there is a configuration change, a Spring <code>@Bean</code> that is marked as <code>@RefreshScope</code> gets special treatment.
 This feature addresses the problem of stateful beans that only get their configuration injected when they are initialized.
@@ -482,7 +512,7 @@ In that case, it is rebuilt on a refresh and its dependencies are re-injected. A
 </div>
 </div>
 <div class="sect2">
-<h3 id="_encryption_and_decryption"><a class="link" href="#_encryption_and_decryption">Encryption and Decryption</a></h3>
+<h3 id="encryption-and-decryption"><a class="anchor" href="#encryption-and-decryption"></a><a class="link" href="#encryption-and-decryption">1.10. Encryption and Decryption</a></h3>
 <div class="paragraph">
 <p>Spring Cloud has an <code>Environment</code> pre-processor for decrypting property values locally.
 It follows the same rules as the Config Server and has the same external configuration through <code>encrypt.*</code>.
@@ -511,7 +541,7 @@ See the following links for more information:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_endpoints"><a class="link" href="#_endpoints">Endpoints</a></h3>
+<h3 id="endpoints"><a class="anchor" href="#endpoints"></a><a class="link" href="#endpoints">1.11. Endpoints</a></h3>
 <div class="paragraph">
 <p>For a Spring Boot Actuator application, some additional management endpoints are available. You can use:</p>
 </div>
@@ -548,13 +578,13 @@ will also be disabled since they are just a special case of <code>/actuator/rest
 </div>
 </div>
 <div class="sect1">
-<h2 id="_spring_cloud_commons_common_abstractions"><a class="link" href="#_spring_cloud_commons_common_abstractions">Spring Cloud Commons: Common Abstractions</a></h2>
+<h2 id="spring-cloud-commons-common-abstractions"><a class="anchor" href="#spring-cloud-commons-common-abstractions"></a><a class="link" href="#spring-cloud-commons-common-abstractions">2. Spring Cloud Commons: Common Abstractions</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Patterns such as service discovery, load balancing, and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (for example, discovery with Eureka or Consul).</p>
 </div>
 <div class="sect2">
-<h3 id="_enablediscoveryclient"><a class="link" href="#_enablediscoveryclient">@EnableDiscoveryClient</a></h3>
+<h3 id="enablediscoveryclient"><a class="anchor" href="#enablediscoveryclient"></a><a class="link" href="#enablediscoveryclient">2.1. @EnableDiscoveryClient</a></h3>
 <div class="paragraph">
 <p>Spring Cloud Commons provides the <code>@EnableDiscoveryClient</code> annotation.
 This looks for implementations of the <code>DiscoveryClient</code> and <code>ReactiveDiscoveryClient</code> interfaces with <code>META-INF/spring.factories</code>.
@@ -584,7 +614,7 @@ You can put a <code>DiscoveryClient</code> implementation on the classpath to ca
 </table>
 </div>
 <div class="sect3">
-<h4 id="_health_indicator"><a class="link" href="#_health_indicator">Health Indicator</a></h4>
+<h4 id="health-indicator"><a class="anchor" href="#health-indicator"></a><a class="link" href="#health-indicator">2.1.1. Health Indicator</a></h4>
 <div class="paragraph">
 <p>Commons creates a Spring Boot <code>HealthIndicator</code> that <code>DiscoveryClient</code> implementations can participate in by implementing <code>DiscoveryHealthIndicator</code>.
 To disable the composite <code>HealthIndicator</code>, set <code>spring.cloud.discovery.client.composite-indicator.enabled=false</code>.
@@ -595,7 +625,7 @@ Otherwise, it can bubble up as the <code>description</code> of the rolled up <co
 </div>
 </div>
 <div class="sect3">
-<h4 id="_ordering_discoveryclient_instances"><a class="link" href="#_ordering_discoveryclient_instances">Ordering <code>DiscoveryClient</code> instances</a></h4>
+<h4 id="ordering-discoveryclient-instances"><a class="anchor" href="#ordering-discoveryclient-instances"></a><a class="link" href="#ordering-discoveryclient-instances">2.1.2. Ordering <code>DiscoveryClient</code> instances</a></h4>
 <div class="paragraph">
 <p><code>DiscoveryClient</code> interface extends <code>Ordered</code>. This is useful when using multiple discovery
  clients, as it allows you to define the order of the returned discovery clients, similar to
@@ -610,7 +640,7 @@ implementations provided by Spring Cloud, among others  <code>ConsulDiscoveryCli
 </div>
 </div>
 <div class="sect2">
-<h3 id="_serviceregistry"><a class="link" href="#_serviceregistry">ServiceRegistry</a></h3>
+<h3 id="serviceregistry"><a class="anchor" href="#serviceregistry"></a><a class="link" href="#serviceregistry">2.2. ServiceRegistry</a></h3>
 <div class="paragraph">
 <p>Commons now provides a <code>ServiceRegistry</code> interface that provides methods such as <code>register(Registration)</code> and <code>deregister(Registration)</code>, which let you provide custom registered services.
 <code>Registration</code> is a marker interface.</p>
@@ -659,7 +689,7 @@ correct <code>Registry</code> implementation for the <code>ServiceRegistry</code
 are using.</p>
 </div>
 <div class="sect3">
-<h4 id="_serviceregistry_auto_registration"><a class="link" href="#_serviceregistry_auto_registration">ServiceRegistry Auto-Registration</a></h4>
+<h4 id="serviceregistry-auto-registration"><a class="anchor" href="#serviceregistry-auto-registration"></a><a class="link" href="#serviceregistry-auto-registration">2.2.1. ServiceRegistry Auto-Registration</a></h4>
 <div class="paragraph">
 <p>By default, the <code>ServiceRegistry</code> implementation auto-registers the running service.
 To disable that behavior, you can set:
@@ -667,7 +697,7 @@ To disable that behavior, you can set:
 * <code>spring.cloud.service-registry.auto-registration.enabled=false</code> to disable the behavior through configuration.</p>
 </div>
 <div class="sect4">
-<h5 id="_serviceregistry_auto_registration_events"><a class="link" href="#_serviceregistry_auto_registration_events">ServiceRegistry Auto-Registration Events</a></h5>
+<h5 id="serviceregistry-auto-registration-events"><a class="anchor" href="#serviceregistry-auto-registration-events"></a><a class="link" href="#serviceregistry-auto-registration-events">ServiceRegistry Auto-Registration Events</a></h5>
 <div class="paragraph">
 <p>There are two events that will be fired when a service auto-registers.  The first event, called
 <code>InstancePreRegisteredEvent</code>, is fired before the service is registered.  The second
@@ -689,7 +719,7 @@ These events will not be fired if <code>spring.cloud.service-registry.auto-regis
 </div>
 </div>
 <div class="sect3">
-<h4 id="_service_registry_actuator_endpoint"><a class="link" href="#_service_registry_actuator_endpoint">Service Registry Actuator Endpoint</a></h4>
+<h4 id="service-registry-actuator-endpoint"><a class="anchor" href="#service-registry-actuator-endpoint"></a><a class="link" href="#service-registry-actuator-endpoint">2.2.2. Service Registry Actuator Endpoint</a></h4>
 <div class="paragraph">
 <p>Spring Cloud Commons provides a <code>/service-registry</code> actuator endpoint.
 This endpoint relies on a <code>Registration</code> bean in the Spring Application Context.
@@ -702,7 +732,7 @@ For instance, Eureka&#8217;s supported statuses are <code>UP</code>, <code>DOWN<
 </div>
 </div>
 <div class="sect2">
-<h3 id="_spring_resttemplate_as_a_load_balancer_client"><a class="link" href="#_spring_resttemplate_as_a_load_balancer_client">Spring RestTemplate as a Load Balancer Client</a></h3>
+<h3 id="spring-resttemplate-as-a-load-balancer-client"><a class="anchor" href="#spring-resttemplate-as-a-load-balancer-client"></a><a class="link" href="#spring-resttemplate-as-a-load-balancer-client">2.3. Spring RestTemplate as a Load Balancer Client</a></h3>
 <div class="paragraph">
 <p><code>RestTemplate</code> can be automatically configured to use a Load-balancer client under the hood.
 To create a load-balanced <code>RestTemplate</code>, create a <code>RestTemplate</code> <code>@Bean</code> and use the <code>@LoadBalanced</code> qualifier, as shown in the following example:</p>
@@ -746,7 +776,7 @@ Individual applications must create it.
 <div class="paragraph">
 <p>The URI needs to use a virtual host name (that is, a service name, not a host name).
 The Ribbon client is used to create a full physical address.
-See <a href="https://github.com/spring-cloud/spring-cloud-netflix/blob/master/spring-cloud-netflix-ribbon/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java">RibbonAutoConfiguration</a> for details of how the <code>RestTemplate</code> is set up.</p>
+See {githubroot}/spring-cloud-netflix/blob/master/spring-cloud-netflix-ribbon/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java[RibbonAutoConfiguration] for details of how the <code>RestTemplate</code> is set up.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -780,7 +810,7 @@ to override it, you can set the property <code>spring.cloud.loadbalancer.ribbon.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_spring_webclient_as_a_load_balancer_client"><a class="link" href="#_spring_webclient_as_a_load_balancer_client">Spring WebClient as a Load Balancer Client</a></h3>
+<h3 id="spring-webclient-as-a-load-balancer-client"><a class="anchor" href="#spring-webclient-as-a-load-balancer-client"></a><a class="link" href="#spring-webclient-as-a-load-balancer-client">2.4. Spring WebClient as a Load Balancer Client</a></h3>
 <div class="paragraph">
 <p><code>WebClient</code> can be automatically configured to use a load-balancer client.
 To create a load-balanced <code>WebClient</code>, create a <code>WebClient.Builder</code> <code>@Bean</code> and use the <code>@LoadBalanced</code> qualifier, as shown in the following example:</p>
@@ -790,11 +820,11 @@ To create a load-balanced <code>WebClient</code>, create a <code>WebClient.Build
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
 public class MyConfiguration {
 
-	@Bean
-	@LoadBalanced
-	public WebClient.Builder loadBalancedWebClientBuilder() {
-		return WebClient.builder();
-	}
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder loadBalancedWebClientBuilder() {
+        return WebClient.builder();
+    }
 }
 
 public class MyClass {
@@ -803,7 +833,7 @@ public class MyClass {
 
     public Mono&lt;String&gt; doOtherStuff() {
         return webClientBuilder.build().get().uri("http://stores/stores")
-        				.retrieve().bodyToMono(String.class);
+                        .retrieve().bodyToMono(String.class);
     }
 }</code></pre>
 </div>
@@ -848,7 +878,7 @@ the value of <code>spring.cache.type</code> to <code>none</code>.
 </table>
 </div>
 <div class="sect3">
-<h4 id="_retrying_failed_requests"><a class="link" href="#_retrying_failed_requests">Retrying Failed Requests</a></h4>
+<h4 id="retrying-failed-requests"><a class="anchor" href="#retrying-failed-requests"></a><a class="link" href="#retrying-failed-requests">2.4.1. Retrying Failed Requests</a></h4>
 <div class="paragraph">
 <p>A load-balanced <code>RestTemplate</code> can be configured to retry failed requests.
 By default, this logic is disabled.
@@ -870,8 +900,8 @@ public class MyConfiguration {
         return new LoadBalancedRetryFactory() {
             @Override
             public BackOffPolicy createBackOffPolicy(String service) {
-        		return new ExponentialBackOffPolicy();
-        	}
+                return new ExponentialBackOffPolicy();
+            }
         };
     }
 }</code></pre>
@@ -929,7 +959,7 @@ public class MyConfiguration {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_multiple_resttemplate_objects"><a class="link" href="#_multiple_resttemplate_objects">Multiple RestTemplate objects</a></h3>
+<h3 id="multiple-resttemplate-objects"><a class="anchor" href="#multiple-resttemplate-objects"></a><a class="link" href="#multiple-resttemplate-objects">2.5. Multiple RestTemplate objects</a></h3>
 <div class="paragraph">
 <p>If you want a <code>RestTemplate</code> that is not load-balanced, create a <code>RestTemplate</code> bean and inject it.
 To access the load-balanced <code>RestTemplate</code>, use the <code>@LoadBalanced</code> qualifier when you create your <code>@Bean</code>, as shown in the following example:\</p>
@@ -996,9 +1026,9 @@ If you see errors such as <code>java.lang.IllegalArgumentException: Can not set 
 </div>
 </div>
 <div class="sect2">
-<h3 id="loadbalanced-webclient"><a class="link" href="#loadbalanced-webclient">Spring WebFlux WebClient as a Load Balancer Client</a></h3>
+<h3 id="loadbalanced-webclient"><a class="anchor" href="#loadbalanced-webclient"></a><a class="link" href="#loadbalanced-webclient">2.6. Spring WebFlux WebClient as a Load Balancer Client</a></h3>
 <div class="sect3">
-<h4 id="webflux-with-reactive-loadbalancer"><a class="link" href="#webflux-with-reactive-loadbalancer">Spring WebFlux WebClient with Reactive Load Balancer</a></h4>
+<h4 id="webflux-with-reactive-loadbalancer"><a class="anchor" href="#webflux-with-reactive-loadbalancer"></a><a class="link" href="#webflux-with-reactive-loadbalancer">2.6.1. Spring WebFlux WebClient with Reactive Load Balancer</a></h4>
 <div class="paragraph">
 <p><code>WebClient</code> can be configured to use the <code>ReactiveLoadBalancer</code>.
 If you add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> to your project,
@@ -1029,7 +1059,7 @@ The <code>ReactorLoadBalancerClient</code> is used to create a full physical add
 </div>
 </div>
 <div class="sect3">
-<h4 id="_spring_webflux_webclient_with_non_reactive_load_balancer_client"><a class="link" href="#_spring_webflux_webclient_with_non_reactive_load_balancer_client">Spring WebFlux WebClient with non-reactive Load Balancer Client</a></h4>
+<h4 id="spring-webflux-webclient-with-non-reactive-load-balancer-client"><a class="anchor" href="#spring-webflux-webclient-with-non-reactive-load-balancer-client"></a><a class="link" href="#spring-webflux-webclient-with-non-reactive-load-balancer-client">2.6.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></h4>
 <div class="paragraph">
 <p>If you you don&#8217;t have <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> in your project,
 but you do have spring-cloud-starter-netflix-ribbon, you can still use <code>WebClient</code> with <code>LoadBalancerClient</code>. <code>LoadBalancerExchangeFilterFunction</code>
@@ -1067,7 +1097,7 @@ instead.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_passing_your_own_load_balancer_client_configuration"><a class="link" href="#_passing_your_own_load_balancer_client_configuration">Passing your own Load-Balancer Client configuration</a></h4>
+<h4 id="passing-your-own-load-balancer-client-configuration"><a class="anchor" href="#passing-your-own-load-balancer-client-configuration"></a><a class="link" href="#passing-your-own-load-balancer-client-configuration">2.6.3. Passing your own Load-Balancer Client configuration</a></h4>
 <div class="paragraph">
 <p>You can also use the <code>@LoadBalancerClient</code> annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, like so:</p>
 </div>
@@ -1077,11 +1107,11 @@ instead.</p>
 @LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class)
 public class MyConfiguration {
 
-	@Bean
-	@LoadBalanced
-	public WebClient.Builder loadBalancedWebClientBuilder() {
-		return WebClient.builder();
-	}
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder loadBalancedWebClientBuilder() {
+        return WebClient.builder();
+    }
 }</code></pre>
 </div>
 </div>
@@ -1094,18 +1124,18 @@ public class MyConfiguration {
 @LoadBalancerClients({@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class), @LoadBalancerClient(value = "customers", configuration = CustomersLoadBalancerClientConfiguration.class)})
 public class MyConfiguration {
 
-	@Bean
-	@LoadBalanced
-	public WebClient.Builder loadBalancedWebClientBuilder() {
-		return WebClient.builder();
-	}
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder loadBalancedWebClientBuilder() {
+        return WebClient.builder();
+    }
 }</code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="ignore-network-interfaces"><a class="link" href="#ignore-network-interfaces">Ignore Network Interfaces</a></h3>
+<h3 id="ignore-network-interfaces"><a class="anchor" href="#ignore-network-interfaces"></a><a class="link" href="#ignore-network-interfaces">2.7. Ignore Network Interfaces</a></h3>
 <div class="paragraph">
 <p>Sometimes, it is useful to ignore certain named network interfaces so that they can be excluded from Service Discovery registration (for example, when running in a Docker container).
 A list of regular expressions can be set to cause the desired network interfaces to be ignored.
@@ -1153,7 +1183,7 @@ The following configuration ignores the <code>docker0</code> interface and all i
 </div>
 </div>
 <div class="sect2">
-<h3 id="http-clients"><a class="link" href="#http-clients">HTTP Client Factories</a></h3>
+<h3 id="http-clients"><a class="anchor" href="#http-clients"></a><a class="link" href="#http-clients">2.8. HTTP Client Factories</a></h3>
 <div class="paragraph">
 <p>Spring Cloud Commons provides beans for creating both Apache HTTP clients (<code>ApacheHttpClientFactory</code>) and OK HTTP clients (<code>OkHttpClientFactory</code>).
 The <code>OkHttpClientFactory</code> bean is created only if the OK HTTP jar is on the classpath.
@@ -1164,14 +1194,14 @@ You can also disable the creation of these beans by setting <code>spring.cloud.h
 </div>
 </div>
 <div class="sect2">
-<h3 id="enabled-features"><a class="link" href="#enabled-features">Enabled Features</a></h3>
+<h3 id="enabled-features"><a class="anchor" href="#enabled-features"></a><a class="link" href="#enabled-features">2.9. Enabled Features</a></h3>
 <div class="paragraph">
 <p>Spring Cloud Commons provides a <code>/features</code> actuator endpoint.
 This endpoint returns features available on the classpath and whether they are enabled.
 The information returned includes the feature type, name, version, and vendor.</p>
 </div>
 <div class="sect3">
-<h4 id="_feature_types"><a class="link" href="#_feature_types">Feature types</a></h4>
+<h4 id="feature-types"><a class="anchor" href="#feature-types"></a><a class="link" href="#feature-types">2.9.1. Feature types</a></h4>
 <div class="paragraph">
 <p>There are two types of 'features': abstract and named.</p>
 </div>
@@ -1185,7 +1215,7 @@ The version displayed is <code>bean.getClass().getPackage().getImplementationVer
 </div>
 </div>
 <div class="sect3">
-<h4 id="_declaring_features"><a class="link" href="#_declaring_features">Declaring features</a></h4>
+<h4 id="declaring-features"><a class="anchor" href="#declaring-features"></a><a class="link" href="#declaring-features">2.9.2. Declaring features</a></h4>
 <div class="paragraph">
 <p>Any module can declare any number of <code>HasFeature</code> beans, as shown in the following examples:</p>
 </div>
@@ -1219,7 +1249,7 @@ HasFeatures localFeatures() {
 </div>
 </div>
 <div class="sect2">
-<h3 id="_spring_cloud_compatibility_verification"><a class="link" href="#_spring_cloud_compatibility_verification">Spring Cloud Compatibility Verification</a></h3>
+<h3 id="spring-cloud-compatibility-verification"><a class="anchor" href="#spring-cloud-compatibility-verification"></a><a class="link" href="#spring-cloud-compatibility-verification">2.10. Spring Cloud Compatibility Verification</a></h3>
 <div class="paragraph">
 <p>Due to the fact that some users have problem with setting up Spring Cloud application, we&#8217;ve decided
 to add a compatibility verification mechanism. It will break if your current setup is not compatible
@@ -1263,20 +1293,20 @@ of compatible Spring Boot versions.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_spring_cloud_circuit_breaker"><a class="link" href="#_spring_cloud_circuit_breaker">Spring Cloud Circuit Breaker</a></h2>
+<h2 id="spring-cloud-circuit-breaker"><a class="anchor" href="#spring-cloud-circuit-breaker"></a><a class="link" href="#spring-cloud-circuit-breaker">3. Spring Cloud Circuit Breaker</a></h2>
 <div class="sectionbody">
 
 </div>
 </div>
 <div class="sect1">
-<h2 id="_introduction"><a class="link" href="#_introduction">Introduction</a></h2>
+<h2 id="introduction"><a class="anchor" href="#introduction"></a><a class="link" href="#introduction">4. Introduction</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations.
 It provides a consistent API to use in your applications allowing you the developer to choose the circuit breaker implementation that best fits your needs for your app.</p>
 </div>
 <div class="sect2">
-<h3 id="_supported_implementations"><a class="link" href="#_supported_implementations">Supported Implementations</a></h3>
+<h3 id="supported-implementations"><a class="anchor" href="#supported-implementations"></a><a class="link" href="#supported-implementations">4.1. Supported Implementations</a></h3>
 <div class="ulist">
 <ul>
 <li>
@@ -1297,7 +1327,7 @@ It provides a consistent API to use in your applications allowing you the develo
 </div>
 </div>
 <div class="sect1">
-<h2 id="_core_concepts"><a class="link" href="#_core_concepts">Core Concepts</a></h2>
+<h2 id="core-concepts"><a class="anchor" href="#core-concepts"></a><a class="link" href="#core-concepts">5. Core Concepts</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To create a circuit breaker in your code you can use the <code>CircuitBreakerFactory</code> API. When you include a Spring Cloud Circuit Breaker starter on your classpath a bean implementing this API will automatically be created for you.
@@ -1309,17 +1339,17 @@ A very simple example of using this API is given below</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Service
 public static class DemoControllerService {
-	private RestTemplate rest;
-	private CircuitBreakerFactory cbFactory;
+    private RestTemplate rest;
+    private CircuitBreakerFactory cbFactory;
 
-	public DemoControllerService(RestTemplate rest, CircuitBreakerFactory cbFactory) {
-		this.rest = rest;
-		this.cbFactory = cbFactory;
-	}
+    public DemoControllerService(RestTemplate rest, CircuitBreakerFactory cbFactory) {
+        this.rest = rest;
+        this.cbFactory = cbFactory;
+    }
 
-	public String slow() {
-		return cbFactory.create("slow").run(() -&gt; rest.getForObject("/slow", String.class), throwable -&gt; "fallback");
-	}
+    public String slow() {
+        return cbFactory.create("slow").run(() -&gt; rest.getForObject("/slow", String.class), throwable -&gt; "fallback");
+    }
 
 }</code></pre>
 </div>
@@ -1335,7 +1365,7 @@ The function will be passed the <code>Throwable</code> that caused the fallback 
 You can optionally exclude the fallback if you do not want to provide one.</p>
 </div>
 <div class="sect2">
-<h3 id="_circuit_breakers_in_reactive_code"><a class="link" href="#_circuit_breakers_in_reactive_code">Circuit Breakers In Reactive Code</a></h3>
+<h3 id="circuit-breakers-in-reactive-code"><a class="anchor" href="#circuit-breakers-in-reactive-code"></a><a class="link" href="#circuit-breakers-in-reactive-code">5.1. Circuit Breakers In Reactive Code</a></h3>
 <div class="paragraph">
 <p>If Project Reactor is on the class path then you can also use <code>ReactiveCircuitBreakerFactory</code> for your reactive code.</p>
 </div>
@@ -1345,19 +1375,19 @@ You can optionally exclude the fallback if you do not want to provide one.</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Service
 public static class DemoControllerService {
-	private ReactiveCircuitBreakerFactory cbFactory;
-	private WebClient webClient;
+    private ReactiveCircuitBreakerFactory cbFactory;
+    private WebClient webClient;
 
 
-	public DemoControllerService(WebClient webClient, ReactiveCircuitBreakerFactory cbFactory) {
-		this.webClient = webClient;
-		this.cbFactory = cbFactory;
-	}
+    public DemoControllerService(WebClient webClient, ReactiveCircuitBreakerFactory cbFactory) {
+        this.webClient = webClient;
+        this.cbFactory = cbFactory;
+    }
 
-	public Mono&lt;String&gt; slow() {
-		return webClient.get().uri("/slow").retrieve().bodyToMono(String.class).transform(
-		it -&gt; cbFactory.create("slow").run(it, throwable -&gt; return Mono.just("fallback")));
-	}
+    public Mono&lt;String&gt; slow() {
+        return webClient.get().uri("/slow").retrieve().bodyToMono(String.class).transform(
+        it -&gt; cbFactory.create("slow").run(it, throwable -&gt; return Mono.just("fallback")));
+    }
 }</code></pre>
 </div>
 </div>
@@ -1373,7 +1403,7 @@ that caused the failure.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_configuration"><a class="link" href="#_configuration">Configuration</a></h2>
+<h2 id="configuration"><a class="anchor" href="#configuration"></a><a class="link" href="#configuration">6. Configuration</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>You can configure your circuit breakers using by creating beans of type <code>Customizer</code>.
@@ -1398,6 +1428,14 @@ the links below</p>
 <p><a href="../../../spring-cloud-circuitbreaker/reference/html/spring-cloud-circuitbreaker.html#_configuring_spring_retry_circuit_breakers">Spring Retry</a></p>
 </li>
 </ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="configuration-properties"><a class="anchor" href="#configuration-properties"></a><a class="link" href="#configuration-properties">7. Configuration Properties</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To see the list of all Sleuth related configuration properties please check <a href="appendix.html">the Appendix page</a>.</p>
 </div>
 </div>
 </div>
