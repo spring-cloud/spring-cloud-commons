@@ -39,7 +39,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @ConditionalOnClass(WebClient.class)
 @ConditionalOnBean(LoadBalancerClient.class)
 @ConditionalOnMissingBean(ReactiveLoadBalancer.Factory.class)
-@Deprecated
 public class ReactiveLoadBalancerAutoConfiguration {
 
 	@LoadBalanced

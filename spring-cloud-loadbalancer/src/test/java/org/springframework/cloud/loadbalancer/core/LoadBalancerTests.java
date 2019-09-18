@@ -39,6 +39,7 @@ import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.cloud.loadbalancer.support.ServiceInstanceListSuppliers;
+import org.springframework.cloud.loadbalancer.support.ServiceInstanceSuppliers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
@@ -115,6 +116,17 @@ public class LoadBalancerTests {
 
 	@Test
 	public void staticConfigurationWorks() {
+		String serviceId = "test1";
+		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(serviceId,
+				ServiceInstanceSuppliers.toProvider(serviceId,
+						instance(serviceId, "1host", false),
+						instance(serviceId, "2host-secure", true)),
+				-1);
+		assertLoadBalancer(loadBalancer, Arrays.asList("1host", "2host-secure"));
+	}
+
+	@Test
+	public void staticConfigurationWorksWithServiceInstanceListSupplier() {
 		String serviceId = "test1";
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(
 				ServiceInstanceListSuppliers.toProvider(serviceId,

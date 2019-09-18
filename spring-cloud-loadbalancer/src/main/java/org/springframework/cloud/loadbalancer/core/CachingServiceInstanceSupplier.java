@@ -48,10 +48,8 @@ public class CachingServiceInstanceSupplier implements ServiceInstanceSupplier {
 			CacheManager cacheManager) {
 		this.delegate = delegate;
 		this.serviceInstances = CacheFlux.lookup(key -> {
-			Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME); // TODO:
-			// configurable
-			// cache
-			// name
+			// TODO: configurable cache name
+			Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
 			List<ServiceInstance> list = cache.get(key, List.class);
 			if (list == null || list.isEmpty()) {
 				return Mono.empty();

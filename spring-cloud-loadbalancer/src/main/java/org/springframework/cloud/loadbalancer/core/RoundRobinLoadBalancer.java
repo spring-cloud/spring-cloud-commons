@@ -17,7 +17,6 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -114,13 +113,12 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 		// Temporary conditional logic till deprecated members are removed.
 		if (serviceInstanceListSupplierProvider != null) {
 			ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
-					.getIfAvailable();
-			return Objects.requireNonNull(supplier).get().next()
-					.map(this::getInstanceResponse);
+					.getIfAvailable(NoopServiceInstanceListSupplier::new);
+			return supplier.get().next().map(this::getInstanceResponse);
 		}
-		ServiceInstanceSupplier supplier = this.serviceInstanceSupplier.getIfAvailable();
-		return Objects.requireNonNull(supplier).get().collectList()
-				.map(this::getInstanceResponse);
+		ServiceInstanceSupplier supplier = this.serviceInstanceSupplier
+				.getIfAvailable(NoopServiceInstanceSupplier::new);
+		return supplier.get().collectList().map(this::getInstanceResponse);
 	}
 
 	private Response<ServiceInstance> getInstanceResponse(
