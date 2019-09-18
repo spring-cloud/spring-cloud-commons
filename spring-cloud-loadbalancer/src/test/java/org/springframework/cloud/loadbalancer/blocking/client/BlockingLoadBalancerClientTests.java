@@ -96,7 +96,7 @@ class BlockingLoadBalancerClientTests {
 	}
 
 	@Test
-	void exceptionThrownIfInstanceNotAvailableForRequestExecution() throws IOException {
+	void exceptionThrownIfInstanceNotAvailableForRequestExecution() {
 		try {
 			final String result = "result";
 			Object actualResult = loadBalancerClient.execute("unknownservice",

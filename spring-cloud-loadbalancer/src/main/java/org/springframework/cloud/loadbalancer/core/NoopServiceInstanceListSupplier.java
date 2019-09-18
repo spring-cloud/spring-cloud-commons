@@ -16,19 +16,27 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import java.util.function.Supplier;
+import java.util.List;
 
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * @author Spencer Gibb
- * @deprecated Use {@link ServiceInstanceListSupplier} instead.
+ * A no-op implementation of {@link ServiceInstanceListSupplier}.
+ *
+ * @author Olga Maciaszek-Sharma
  */
-@Deprecated
-public interface ServiceInstanceSupplier extends Supplier<Flux<ServiceInstance>> {
+public class NoopServiceInstanceListSupplier implements ServiceInstanceListSupplier {
 
-	String getServiceId();
+	@Override
+	public String getServiceId() {
+		return "";
+	}
+
+	@Override
+	public Flux<List<ServiceInstance>> get() {
+		return Flux.empty();
+	}
 
 }

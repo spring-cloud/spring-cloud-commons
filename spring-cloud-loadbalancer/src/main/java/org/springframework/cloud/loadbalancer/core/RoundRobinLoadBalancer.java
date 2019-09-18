@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,7 +32,10 @@ import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 
 /**
+ * A Round-Robin-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
+ *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
@@ -39,15 +43,59 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	private final AtomicInteger position;
 
-	private final ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier;
+	@Deprecated
+	private ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier;
+
+	private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
 
 	private final String serviceId;
 
+	/**
+	 * @param serviceId id of the service for which to choose an instance
+	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
+	 * will be used to get available instances
+	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, String)}} instead.
+	 */
+	@Deprecated
 	public RoundRobinLoadBalancer(String serviceId,
 			ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier) {
 		this(serviceId, serviceInstanceSupplier, new Random().nextInt(1000));
 	}
 
+	/**
+	 * @param serviceInstanceListSupplierProvider a provider of
+	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 * @param serviceId id of the service for which to choose an instance
+	 */
+	public RoundRobinLoadBalancer(
+			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+			String serviceId) {
+		this(serviceInstanceListSupplierProvider, serviceId, new Random().nextInt(1000));
+	}
+
+	/**
+	 * @param serviceInstanceListSupplierProvider a provider of
+	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 * @param serviceId id of the service for which to choose an instance
+	 * @param seedPosition Round Robin element position marker
+	 */
+	public RoundRobinLoadBalancer(
+			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+			String serviceId, int seedPosition) {
+		this.serviceId = serviceId;
+		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
+		this.position = new AtomicInteger(seedPosition);
+	}
+
+	/**
+	 * @param serviceId id of the service for which to choose an instance
+	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
+	 * will be used to get available instances
+	 * @param seedPosition Round Robin element position marker
+	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, String, int)}}
+	 * instead.
+	 */
+	@Deprecated
 	public RoundRobinLoadBalancer(String serviceId,
 			ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier,
 			int seedPosition) {
@@ -62,19 +110,29 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	// src/main/java/netflix/ocelli/loadbalancer/RoundRobinLoadBalancer.java
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		// TODO: move supplier to Request?
-		ServiceInstanceSupplier supplier = this.serviceInstanceSupplier.getIfAvailable();
-		return supplier.get().collectList().map(instances -> {
-			if (instances.isEmpty()) {
-				log.warn("No servers available for service: " + this.serviceId);
-				return new EmptyResponse();
-			}
-			// TODO: enforce order?
-			int pos = Math.abs(this.position.incrementAndGet());
+		// Temporary conditional logic till deprecated members are removed.
+		if (serviceInstanceListSupplierProvider != null) {
+			ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
+					.getIfAvailable(NoopServiceInstanceListSupplier::new);
+			return supplier.get().next().map(this::getInstanceResponse);
+		}
+		ServiceInstanceSupplier supplier = this.serviceInstanceSupplier
+				.getIfAvailable(NoopServiceInstanceSupplier::new);
+		return supplier.get().collectList().map(this::getInstanceResponse);
+	}
 
-			ServiceInstance instance = instances.get(pos % instances.size());
+	private Response<ServiceInstance> getInstanceResponse(
+			List<ServiceInstance> instances) {
+		if (instances.isEmpty()) {
+			log.warn("No servers available for service: " + this.serviceId);
+			return new EmptyResponse();
+		}
+		// TODO: enforce order?
+		int pos = Math.abs(this.position.incrementAndGet());
 
-			return new DefaultResponse(instance);
-		});
+		ServiceInstance instance = instances.get(pos % instances.size());
+
+		return new DefaultResponse(instance);
 	}
 
 }

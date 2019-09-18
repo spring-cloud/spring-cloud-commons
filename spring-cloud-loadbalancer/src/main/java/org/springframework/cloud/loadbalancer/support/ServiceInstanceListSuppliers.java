@@ -16,31 +16,33 @@
 
 package org.springframework.cloud.loadbalancer.support;
 
+import java.util.Arrays;
+import java.util.List;
+
 import reactor.core.publisher.Flux;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.loadbalancer.core.ServiceInstanceSupplier;
+import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 
 /**
  * Utility class for service instances.
  *
  * @author Spencer Gibb
- * @deprecated Use {@link ServiceInstanceListSuppliers} instead.
+ * @author Olga Maciaszek-Sharma
  */
-@Deprecated
-public final class ServiceInstanceSuppliers {
+public final class ServiceInstanceListSuppliers {
 
-	private ServiceInstanceSuppliers() {
+	private ServiceInstanceListSuppliers() {
 		throw new IllegalStateException("Can't instantiate a utility class");
 	}
 
-	public static ServiceInstanceSupplier from(String serviceId,
+	public static ServiceInstanceListSupplier from(String serviceId,
 			ServiceInstance... instances) {
-		return new ServiceInstanceSupplier() {
+		return new ServiceInstanceListSupplier() {
 			@Override
-			public Flux<ServiceInstance> get() {
-				return Flux.just(instances);
+			public Flux<List<ServiceInstance>> get() {
+				return Flux.just(Arrays.asList(instances));
 			}
 
 			@Override
@@ -50,7 +52,7 @@ public final class ServiceInstanceSuppliers {
 		};
 	}
 
-	public static ObjectProvider<ServiceInstanceSupplier> toProvider(String serviceId,
+	public static ObjectProvider<ServiceInstanceListSupplier> toProvider(String serviceId,
 			ServiceInstance... instances) {
 		return new SimpleObjectProvider<>(from(serviceId, instances));
 	}

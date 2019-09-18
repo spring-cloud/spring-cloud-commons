@@ -418,7 +418,7 @@ will be handled by a non-reactive `LoadBalancerClient` under the hood. Additiona
 spring-cloud-starter-netflix-ribbon is already in maintenance mode, so we do not recommend
 adding it to new projects.
 
-IMPORTANT: In order to make use of the more efficient cached version of `ServiceInstanceSupplier`,
+IMPORTANT: In order to make use of the more efficient cached version of `ServiceInstanceListSupplier`,
  `spring-cloud-starter-loadbalancer` will *enable caching* by default.
 https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching]
 mechanism will be used under the hood. If you don't want caching to be used, you can set

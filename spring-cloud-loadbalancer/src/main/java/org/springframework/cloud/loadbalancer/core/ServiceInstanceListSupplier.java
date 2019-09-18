@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import reactor.core.publisher.Flux;
@@ -23,11 +24,13 @@ import reactor.core.publisher.Flux;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * @author Spencer Gibb
- * @deprecated Use {@link ServiceInstanceListSupplier} instead.
+ * A {@link Supplier} of lists of {@link ServiceInstance} objects.
+ *
+ * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
-@Deprecated
-public interface ServiceInstanceSupplier extends Supplier<Flux<ServiceInstance>> {
+public interface ServiceInstanceListSupplier
+		extends Supplier<Flux<List<ServiceInstance>>> {
 
 	String getServiceId();
 

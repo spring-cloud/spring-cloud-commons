@@ -27,30 +27,33 @@ import org.springframework.core.env.Environment;
 import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory.PROPERTY_NAME;
 
 /**
- * @deprecated Use {@link DiscoveryClientServiceInstanceListSupplier} instead.
+ * A discovery-client-based {@link ServiceInstanceListSupplier} implementation.
+ *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
-@Deprecated
-public class DiscoveryClientServiceInstanceSupplier implements ServiceInstanceSupplier {
+public class DiscoveryClientServiceInstanceListSupplier
+		implements ServiceInstanceListSupplier {
 
 	private final DiscoveryClient delegate;
 
 	private final String serviceId;
 
-	public DiscoveryClientServiceInstanceSupplier(DiscoveryClient delegate,
+	public DiscoveryClientServiceInstanceListSupplier(DiscoveryClient delegate,
 			Environment environment) {
 		this.delegate = delegate;
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
 	}
 
 	@Override
-	public Flux<ServiceInstance> get() {
-		List<ServiceInstance> instances = this.delegate.getInstances(this.serviceId);
-		return Flux.fromIterable(instances);
+	public String getServiceId() {
+		return serviceId;
 	}
 
-	public String getServiceId() {
-		return this.serviceId;
+	@Override
+	public Flux<List<ServiceInstance>> get() {
+		return Flux.defer(() -> Flux.just(delegate.getInstances(serviceId)));
 	}
 
 }

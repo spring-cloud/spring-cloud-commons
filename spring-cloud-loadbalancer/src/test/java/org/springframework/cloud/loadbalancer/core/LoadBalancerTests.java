@@ -38,6 +38,7 @@ import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.cloud.loadbalancer.support.ServiceInstanceListSuppliers;
 import org.springframework.cloud.loadbalancer.support.ServiceInstanceSuppliers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ResolvableType;
@@ -51,7 +52,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class LoadBalancerTest {
+public class LoadBalancerTests {
 
 	@Autowired
 	private LoadBalancerClientFactory clientFactory;
@@ -124,9 +125,20 @@ public class LoadBalancerTest {
 		assertLoadBalancer(loadBalancer, Arrays.asList("1host", "2host-secure"));
 	}
 
+	@Test
+	public void staticConfigurationWorksWithServiceInstanceListSupplier() {
+		String serviceId = "test1";
+		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(
+				ServiceInstanceListSuppliers.toProvider(serviceId,
+						instance(serviceId, "1host", false),
+						instance(serviceId, "2host-secure", true)),
+				serviceId, -1);
+		assertLoadBalancer(loadBalancer, Arrays.asList("1host", "2host-secure"));
+	}
+
 	private DefaultServiceInstance instance(String serviceId, String host,
 			boolean secure) {
-		return new DefaultServiceInstance(serviceId, host, 80, secure);
+		return new DefaultServiceInstance(serviceId, serviceId, host, 80, secure);
 	}
 
 	@EnableAutoConfiguration
@@ -147,8 +159,8 @@ public class LoadBalancerTest {
 		public RoundRobinLoadBalancer roundRobinContextLoadBalancer(
 				LoadBalancerClientFactory clientFactory, Environment env) {
 			String serviceId = clientFactory.getName(env);
-			return new RoundRobinLoadBalancer(serviceId, clientFactory
-					.getLazyProvider(serviceId, ServiceInstanceSupplier.class), -1);
+			return new RoundRobinLoadBalancer(clientFactory.getLazyProvider(serviceId,
+					ServiceInstanceListSupplier.class), serviceId, -1);
 		}
 
 	}
