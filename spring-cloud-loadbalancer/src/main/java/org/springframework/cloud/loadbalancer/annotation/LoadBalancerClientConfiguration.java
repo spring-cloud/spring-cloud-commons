@@ -52,7 +52,6 @@ public class LoadBalancerClientConfiguration {
 	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 			DiscoveryClient discoveryClient, Environment env,
 			ObjectProvider<CacheManager> cacheManager) {
-		// TODO: bean post processor to enable caching?
 		DiscoveryClientServiceInstanceListSupplier delegate = new DiscoveryClientServiceInstanceListSupplier(
 				discoveryClient, env);
 		if (cacheManager.getIfAvailable() != null) {
@@ -68,7 +67,6 @@ public class LoadBalancerClientConfiguration {
 	public ServiceInstanceSupplier discoveryClientServiceInstanceSupplier(
 			DiscoveryClient discoveryClient, Environment env,
 			ObjectProvider<CacheManager> cacheManager) {
-		// TODO: bean post processor to enable caching?
 		DiscoveryClientServiceInstanceSupplier delegate = new DiscoveryClientServiceInstanceSupplier(
 				discoveryClient, env);
 		if (cacheManager.getIfAvailable() != null) {

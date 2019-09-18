@@ -29,8 +29,7 @@ import org.springframework.cloud.client.ServiceInstance;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-public interface ServiceInstanceListSupplier
-		extends Supplier<Flux<List<ServiceInstance>>> {
+public interface ServiceInstanceListSupplier extends Supplier<Flux<List<ServiceInstance>>> {
 
 	String getServiceId();
 
