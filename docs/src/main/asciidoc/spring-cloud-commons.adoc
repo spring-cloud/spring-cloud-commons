@@ -407,16 +407,19 @@ public class MyClass {
 ----
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
-The Ribbon client is used to create a full physical address.
+The Ribbon client or Spring Cloud LoadBalancer is used to create a full physical address.
 
 IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder`, you need to have a loadbalancer
 implementation in the classpath. It is recommended that you add the
 `org.springframework.cloud:spring-cloud-starter-loadbalancer` dependency to your project.
 Then, `ReactiveLoadBalancer` will be used underneath.
-Alternatively, this functionality will also work with spring-cloud-starter-netflix-ribbon, but the request
+Alternatively, this functionality will also work with `spring-cloud-starter-netflix-ribbon`, but the request
 will be handled by a non-reactive `LoadBalancerClient` under the hood. Additionally,
 spring-cloud-starter-netflix-ribbon is already in maintenance mode, so we do not recommend
 adding it to new projects.
+If you have both `spring-cloud-starter-loadbalancer` and `spring-cloud-starter-netflix-ribbon`
+in your classpath, Ribbon will be used by default. In order to switch to Spring Cloud LoadBalancer,
+set the value of `spring.cloud.loadbalancer.ribbon.enabled` to false.
 
 IMPORTANT: In order to make use of the more efficient cached version of `ServiceInstanceSupplier`,
  `spring-cloud-starter-loadbalancer` will *enable caching* by default.
@@ -565,8 +568,14 @@ public class MyClass {
 ----
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
-The `ReactorLoadBalancerClient` is used to create a full physical address.
+The `ReactorLoadBalancer` is used to create a full physical address.
 
+NOTE: If you have `spring-cloud-netflix-ribbon` in your classpath, <<load-balancer-exchange-filter-function,`LoadBalancerExchangeFilterFunction`>>
+will be used by default to maintain backward compatibility. In order to be able to use
+`ReactorLoadBalancerExchangeFilterFunction`, set the value of `spring.cloud.loadbalancer.ribbon.enabled` property
+to `false`.
+
+[[load-balancer-exchange-filter-function]]
 ==== Spring WebFlux WebClient with non-reactive Load Balancer Client
 
 If you you don't have `org.springframework.cloud:spring-cloud-starter-loadbalancer` in your project,

@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -38,7 +39,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 @ConditionalOnClass(WebClient.class)
 @ConditionalOnBean(LoadBalancerClient.class)
-@ConditionalOnMissingBean(ReactiveLoadBalancer.Factory.class)
+@AutoConfigureAfter(ReactorLoadBalancerClientAutoConfiguration.class)
+@ConditionalOnMissingBean(ReactorLoadBalancerExchangeFilterFunction.class)
 @Deprecated
 public class ReactiveLoadBalancerAutoConfiguration {
 

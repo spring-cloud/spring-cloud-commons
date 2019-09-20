@@ -91,7 +91,7 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 	}
 
 	@Test
-	public void autoConfigurationNotLoadedWhenReactorLoadBalancerClientPresent() {
+	public void autoConfigurationNotLoadedWhenReactorLoadBalancerExchangeFilterFunctionPresent() {
 		ConfigurableApplicationContext context = init(
 				ReactorLoadBalancerClientPresent.class);
 		final Map<String, WebClient.Builder> webClientBuilders = context
@@ -137,6 +137,12 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		@Bean
 		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory() {
 			return serviceId -> new TestReactiveLoadBalancer();
+		}
+
+		@Bean
+		ReactorLoadBalancerExchangeFilterFunction reactorLoadBalancerExchangeFilterFunction() {
+			return new ReactorLoadBalancerExchangeFilterFunction(
+					reactiveLoadBalancerFactory());
 		}
 
 	}

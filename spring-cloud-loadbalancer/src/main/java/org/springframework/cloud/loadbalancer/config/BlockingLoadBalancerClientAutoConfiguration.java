@@ -55,8 +55,8 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@Bean
 	@ConditionalOnClass(
 			name = "org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
-	public RibbonWarnLogger ribbonWarnLogger() {
-		return new RibbonWarnLogger();
+	public BlockingLoadBalancerClientRibbonWarnLogger blockingLoadBalancerClientRibbonWarnLogger() {
+		return new BlockingLoadBalancerClientRibbonWarnLogger();
 	}
 
 	@Configuration
@@ -93,9 +93,10 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 
 	}
 
-	static class RibbonWarnLogger {
+	static class BlockingLoadBalancerClientRibbonWarnLogger {
 
-		private static final Log LOG = LogFactory.getLog(RibbonWarnLogger.class);
+		private static final Log LOG = LogFactory
+				.getLog(BlockingLoadBalancerClientRibbonWarnLogger.class);
 
 		@PostConstruct
 		void logWarning() {
