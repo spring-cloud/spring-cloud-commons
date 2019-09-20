@@ -128,9 +128,10 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("You have RibbonLoadBalancerClient on your classpath. "
 						+ "LoadBalancerExchangeFilterFunction that uses it under the "
-						+ "hood will be used by default. To use reactive "
-						+ ReactorLoadBalancerExchangeFilterFunction.class.getSimpleName()
-						+ " set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or "
+						+ "hood will be used by default. Spring Cloud Ribbon is now in maintenance mode, "
+						+ "so we suggest switching to " + ReactorLoadBalancerExchangeFilterFunction.class
+						.getSimpleName()
+						+ " instead. In order to use it, set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or "
 						+ "remove spring-cloud-starter-netflix-ribbon from your project.");
 			}
 		}

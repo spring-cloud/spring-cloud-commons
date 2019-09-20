@@ -102,9 +102,10 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 		void logWarning() {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(
-						"You already have RibbonLoadBalancerClient on your classpath. It will be used by default. To use "
+						"You already have RibbonLoadBalancerClient on your classpath. It will be used by default. "
+								+ "As Spring Cloud Ribbon is in maintenance mode. We recommend switching to "
 								+ BlockingLoadBalancerClient.class.getSimpleName()
-								+ " set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or "
+								+ " instead. In order to use it, set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or "
 								+ "remove spring-cloud-starter-netflix-ribbon from your project.");
 			}
 		}
