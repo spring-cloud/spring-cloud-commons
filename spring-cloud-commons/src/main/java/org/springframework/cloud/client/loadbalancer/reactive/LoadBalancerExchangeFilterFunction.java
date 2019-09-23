@@ -33,7 +33,10 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 /**
  * @author Spencer Gibb
  * @author Ryan Baxter
+ *
+ * @deprecated Use {@link ReactorLoadBalancerExchangeFilterFunction} instead.
  */
+@Deprecated
 public class LoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
 
 	private static Log logger = LogFactory
