@@ -55,8 +55,8 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@Bean
 	@ConditionalOnClass(
 			name = "org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
-	public RibbonWarnLogger ribbonWarnLogger() {
-		return new RibbonWarnLogger();
+	public BlockingLoadBalancerClientRibbonWarnLogger blockingLoadBalancerClientRibbonWarnLogger() {
+		return new BlockingLoadBalancerClientRibbonWarnLogger();
 	}
 
 	@Configuration
@@ -93,17 +93,19 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 
 	}
 
-	static class RibbonWarnLogger {
+	static class BlockingLoadBalancerClientRibbonWarnLogger {
 
-		private static final Log LOG = LogFactory.getLog(RibbonWarnLogger.class);
+		private static final Log LOG = LogFactory
+				.getLog(BlockingLoadBalancerClientRibbonWarnLogger.class);
 
 		@PostConstruct
 		void logWarning() {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(
-						"You already have RibbonLoadBalancerClient on your classpath. It will be used by default. To use "
+						"You already have RibbonLoadBalancerClient on your classpath. It will be used by default. "
+								+ "As Spring Cloud Ribbon is in maintenance mode. We recommend switching to "
 								+ BlockingLoadBalancerClient.class.getSimpleName()
-								+ " set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or "
+								+ " instead. In order to use it, set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or "
 								+ "remove spring-cloud-starter-netflix-ribbon from your project.");
 			}
 		}
