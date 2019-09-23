@@ -139,7 +139,7 @@ $(addBlockSwitches);
 <li><a href="#loadbalanced-webclient">2.6. Spring WebFlux WebClient as a Load Balancer Client</a>
 <ul class="sectlevel3">
 <li><a href="#webflux-with-reactive-loadbalancer">2.6.1. Spring WebFlux WebClient with Reactive Load Balancer</a></li>
-<li><a href="#spring-webflux-webclient-with-non-reactive-load-balancer-client">2.6.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></li>
+<li><a href="#load-balancer-exchange-filter-function">2.6.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></li>
 <li><a href="#passing-your-own-load-balancer-client-configuration">2.6.3. Passing your own Load-Balancer Client configuration</a></li>
 </ul>
 </li>
@@ -840,7 +840,7 @@ public class MyClass {
 </div>
 <div class="paragraph">
 <p>The URI needs to use a virtual host name (that is, a service name, not a host name).
-The Ribbon client is used to create a full physical address.</p>
+The Ribbon client or Spring Cloud LoadBalancer is used to create a full physical address.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -853,10 +853,13 @@ If you want to use a <code>@LoadBalanced WebClient.Builder</code>, you need to h
 implementation in the classpath. It is recommended that you add the
 <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> dependency to your project.
 Then, <code>ReactiveLoadBalancer</code> will be used underneath.
-Alternatively, this functionality will also work with spring-cloud-starter-netflix-ribbon, but the request
+Alternatively, this functionality will also work with <code>spring-cloud-starter-netflix-ribbon</code>, but the request
 will be handled by a non-reactive <code>LoadBalancerClient</code> under the hood. Additionally,
 spring-cloud-starter-netflix-ribbon is already in maintenance mode, so we do not recommend
 adding it to new projects.
+If you have both <code>spring-cloud-starter-loadbalancer</code> and <code>spring-cloud-starter-netflix-ribbon</code>
+in your classpath, Ribbon will be used by default. In order to switch to Spring Cloud LoadBalancer,
+set the value of <code>spring.cloud.loadbalancer.ribbon.enabled</code> to false.
 </td>
 </tr>
 </table>
@@ -1055,11 +1058,26 @@ The following example shows how to configure a <code>WebClient</code> to use rea
 </div>
 <div class="paragraph">
 <p>The URI needs to use a virtual host name (that is, a service name, not a host name).
-The <code>ReactorLoadBalancerClient</code> is used to create a full physical address.</p>
+The <code>ReactorLoadBalancer</code> is used to create a full physical address.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you have <code>spring-cloud-netflix-ribbon</code> in your classpath, <a href="#load-balancer-exchange-filter-function"><code>LoadBalancerExchangeFilterFunction</code></a>
+will be used by default to maintain backward compatibility. In order to be able to use
+<code>ReactorLoadBalancerExchangeFilterFunction</code>, set the value of <code>spring.cloud.loadbalancer.ribbon.enabled</code> property
+to <code>false</code>.
+</td>
+</tr>
+</table>
 </div>
 </div>
 <div class="sect3">
-<h4 id="spring-webflux-webclient-with-non-reactive-load-balancer-client"><a class="anchor" href="#spring-webflux-webclient-with-non-reactive-load-balancer-client"></a><a class="link" href="#spring-webflux-webclient-with-non-reactive-load-balancer-client">2.6.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></h4>
+<h4 id="load-balancer-exchange-filter-function"><a class="anchor" href="#load-balancer-exchange-filter-function"></a><a class="link" href="#load-balancer-exchange-filter-function">2.6.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></h4>
 <div class="paragraph">
 <p>If you you don&#8217;t have <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> in your project,
 but you do have spring-cloud-starter-netflix-ribbon, you can still use <code>WebClient</code> with <code>LoadBalancerClient</code>. <code>LoadBalancerExchangeFilterFunction</code>
