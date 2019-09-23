@@ -33,7 +33,6 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 /**
  * @author Spencer Gibb
  * @author Ryan Baxter
- *
  * @deprecated Use {@link ReactorLoadBalancerExchangeFilterFunction} instead.
  */
 @Deprecated
