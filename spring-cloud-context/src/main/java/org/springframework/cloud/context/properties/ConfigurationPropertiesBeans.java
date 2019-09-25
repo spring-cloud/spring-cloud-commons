@@ -24,11 +24,9 @@ import java.util.Set;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,15 +34,14 @@ import org.springframework.stereotype.Component;
  * its parent.
  *
  * @author Dave Syer
- *
  */
 @Component
 public class ConfigurationPropertiesBeans
 		implements BeanPostProcessor, ApplicationContextAware {
 
-	private ConfigurationBeanFactoryMetadata metaData;
+	private Map<String, ConfigurationPropertiesBean> beans = new HashMap<>();
 
-	private Map<String, Object> beans = new HashMap<String, Object>();
+	private ApplicationContext applicationContext;
 
 	private ConfigurableListableBeanFactory beanFactory;
 
@@ -57,6 +54,7 @@ public class ConfigurationPropertiesBeans
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
+		this.applicationContext = applicationContext;
 		if (applicationContext
 				.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory) {
 			this.beanFactory = (ConfigurableListableBeanFactory) applicationContext
@@ -77,9 +75,13 @@ public class ConfigurationPropertiesBeans
 
 	/**
 	 * @param beans The bean meta data to set.
+	 * @deprecated since 2.2.0 because
+	 * {@link org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata}
+	 * has been deprecated
 	 */
-	public void setBeanMetaDataStore(ConfigurationBeanFactoryMetadata beans) {
-		this.metaData = beans;
+	@Deprecated
+	public void setBeanMetaDataStore(
+			org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata beans) {
 	}
 
 	@Override
@@ -88,17 +90,10 @@ public class ConfigurationPropertiesBeans
 		if (isRefreshScoped(beanName)) {
 			return bean;
 		}
-		ConfigurationProperties annotation = AnnotationUtils
-				.findAnnotation(bean.getClass(), ConfigurationProperties.class);
-		if (annotation != null) {
-			this.beans.put(beanName, bean);
-		}
-		else if (this.metaData != null) {
-			annotation = this.metaData.findFactoryAnnotation(beanName,
-					ConfigurationProperties.class);
-			if (annotation != null) {
-				this.beans.put(beanName, bean);
-			}
+		ConfigurationPropertiesBean propertiesBean = ConfigurationPropertiesBean
+				.get(this.applicationContext, bean, beanName);
+		if (propertiesBean != null) {
+			this.beans.put(beanName, propertiesBean);
 		}
 		return bean;
 	}

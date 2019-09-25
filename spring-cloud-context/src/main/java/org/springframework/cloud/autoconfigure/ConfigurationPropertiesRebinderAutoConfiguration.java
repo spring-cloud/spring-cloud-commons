@@ -20,7 +20,6 @@ import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
-import org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesBeans;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
@@ -49,16 +48,7 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
 	public ConfigurationPropertiesBeans configurationPropertiesBeans() {
-		// Since this is a BeanPostProcessor we have to be super careful not to
-		// cause a cascade of bean instantiation. Knowing the *name* of the beans we
-		// need is super optimal, but a little brittle (unfortunately we have no
-		// choice).
-		ConfigurationBeanFactoryMetadata metaData = this.context.getBean(
-				ConfigurationBeanFactoryMetadata.BEAN_NAME,
-				ConfigurationBeanFactoryMetadata.class);
-		ConfigurationPropertiesBeans beans = new ConfigurationPropertiesBeans();
-		beans.setBeanMetaDataStore(metaData);
-		return beans;
+		return new ConfigurationPropertiesBeans();
 	}
 
 	@Bean
