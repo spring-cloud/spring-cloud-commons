@@ -64,7 +64,7 @@ public class DiscoveryClientServiceInstanceListSupplier
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		return serviceInstances.collectList().flatMapMany(Flux::just);
+		return serviceInstances.collectList().flux();
 	}
 
 }
