@@ -66,7 +66,7 @@ public class LoadBalancerClientConfiguration {
 	@Configuration
 	@ConditionalOnReactiveDiscoveryEnabled
 	@Order(REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER)
-	public static class ReactiveSupport {
+	public static class ReactiveSupportConfiguration {
 
 		@Bean
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
@@ -103,7 +103,7 @@ public class LoadBalancerClientConfiguration {
 	@Configuration
 	@ConditionalOnBlockingDiscoveryEnabled
 	@Order(REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER + 1)
-	public static class BlockingSupport {
+	public static class BlockingSupportConfiguration {
 
 		@Bean
 		@ConditionalOnBean(DiscoveryClient.class)
