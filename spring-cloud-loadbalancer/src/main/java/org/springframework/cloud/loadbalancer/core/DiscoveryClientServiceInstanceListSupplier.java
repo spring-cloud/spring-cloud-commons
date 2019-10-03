@@ -19,9 +19,11 @@ package org.springframework.cloud.loadbalancer.core;
 import java.util.List;
 
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.core.env.Environment;
 
 import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory.PROPERTY_NAME;
@@ -31,19 +33,28 @@ import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientF
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
+ * @author Tim Ysewyn
  * @since 2.2.0
  */
 public class DiscoveryClientServiceInstanceListSupplier
 		implements ServiceInstanceListSupplier {
 
-	private final DiscoveryClient delegate;
-
 	private final String serviceId;
+
+	private final Flux<ServiceInstance> serviceInstances;
 
 	public DiscoveryClientServiceInstanceListSupplier(DiscoveryClient delegate,
 			Environment environment) {
-		this.delegate = delegate;
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
+		this.serviceInstances = Flux
+				.defer(() -> Flux.fromIterable(delegate.getInstances(serviceId)))
+				.subscribeOn(Schedulers.boundedElastic());
+	}
+
+	public DiscoveryClientServiceInstanceListSupplier(ReactiveDiscoveryClient delegate,
+			Environment environment) {
+		this.serviceId = environment.getProperty(PROPERTY_NAME);
+		this.serviceInstances = delegate.getInstances(serviceId);
 	}
 
 	@Override
@@ -53,7 +64,7 @@ public class DiscoveryClientServiceInstanceListSupplier
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		return Flux.defer(() -> Flux.just(delegate.getInstances(serviceId)));
+		return serviceInstances.collectList().flux();
 	}
 
 }
