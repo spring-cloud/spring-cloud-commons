@@ -63,12 +63,12 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 						"The iterator returned is null");
 			}
 			catch (Throwable e) {
-				Operators.error(actual, Operators.onOperatorError(e,
-						actual.currentContext()));
+				Operators.error(actual,
+						Operators.onOperatorError(e, actual.currentContext()));
 				return;
 			}
 
-			for (; ; ) {
+			for (;;) {
 
 				boolean b;
 
@@ -76,8 +76,8 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 					b = it.hasNext();
 				}
 				catch (Throwable e) {
-					Operators.error(actual, Operators.onOperatorError(e,
-							actual.currentContext()));
+					Operators.error(actual,
+							Operators.onOperatorError(e, actual.currentContext()));
 					return;
 				}
 
@@ -92,8 +92,8 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 							"The Publisher returned by the iterator is null");
 				}
 				catch (Throwable e) {
-					Operators.error(actual, Operators.onOperatorError(e,
-							actual.currentContext()));
+					Operators.error(actual,
+							Operators.onOperatorError(e, actual.currentContext()));
 					return;
 				}
 
@@ -137,17 +137,15 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 	 * the current array of sources.
 	 * <p>
 	 * This operation doesn't change the current FluxFirstEmitting instance.
-	 *
 	 * @param source the new source to merge with the others
-	 *
 	 * @return the new FluxFirstEmitting instance or null if the Amb runs with an Iterable
 	 */
 	@Nullable
 	FluxFirstEmitting<T> ambAdditionalSource(Publisher<? extends T> source) {
 		if (array != null) {
 			int n = array.length;
-			@SuppressWarnings("unchecked") Publisher<? extends T>[] newArray =
-					new Publisher[n + 1];
+			@SuppressWarnings("unchecked")
+			Publisher<? extends T>[] newArray = new Publisher[n + 1];
 			System.arraycopy(array, 0, newArray, 0, n);
 			newArray[n] = source;
 
@@ -158,20 +156,20 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 
 	@Override
 	public Object scanUnsafe(Attr key) {
-		return null; //no particular key to be represented, still useful in hooks
+		return null; // no particular key to be represented, still useful in hooks
 	}
 
-	static final class RaceCoordinator<T>
-			implements Subscription, Scannable {
+	static final class RaceCoordinator<T> implements Subscription, Scannable {
 
 		final FirstNonEmptyEmittingSubscriber<T>[] subscribers;
 
 		volatile boolean cancelled;
 
 		volatile int wip;
+
 		@SuppressWarnings("rawtypes")
-		static final AtomicIntegerFieldUpdater<RaceCoordinator> WIP =
-				AtomicIntegerFieldUpdater.newUpdater(RaceCoordinator.class, "wip");
+		static final AtomicIntegerFieldUpdater<RaceCoordinator> WIP = AtomicIntegerFieldUpdater
+				.newUpdater(RaceCoordinator.class, "wip");
 
 		@SuppressWarnings("unchecked")
 		RaceCoordinator(int n) {
@@ -187,13 +185,14 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 		@Override
 		@Nullable
 		public Object scanUnsafe(Attr key) {
-			if (key == Attr.CANCELLED) return cancelled;
+			if (key == Attr.CANCELLED) {
+				return cancelled;
+			}
 
 			return null;
 		}
 
-		void subscribe(Publisher<? extends T>[] sources,
-				int n,
+		void subscribe(Publisher<? extends T>[] sources, int n,
 				CoreSubscriber<? super T> actual) {
 			FirstNonEmptyEmittingSubscriber<T>[] a = subscribers;
 
@@ -212,7 +211,8 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 
 				if (p == null) {
 					if (WIP.compareAndSet(this, Integer.MIN_VALUE, -1)) {
-						actual.onError(new NullPointerException("The " + i + " th Publisher source is null"));
+						actual.onError(new NullPointerException(
+								"The " + i + " th Publisher source is null"));
 					}
 					return;
 				}
@@ -273,10 +273,11 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 			}
 			return false;
 		}
+
 	}
 
-	static final class FirstNonEmptyEmittingSubscriber<T> extends Operators.DeferredSubscription
-			implements InnerOperator<T, T> {
+	static final class FirstNonEmptyEmittingSubscriber<T>
+			extends Operators.DeferredSubscription implements InnerOperator<T, T> {
 
 		final RaceCoordinator<T> parent;
 
@@ -287,8 +288,7 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 		boolean won;
 
 		FirstNonEmptyEmittingSubscriber(CoreSubscriber<? super T> actual,
-				RaceCoordinator<T> parent,
-				int index) {
+				RaceCoordinator<T> parent, int index) {
 			this.actual = actual;
 			this.parent = parent;
 			this.index = index;
@@ -297,8 +297,12 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 		@Override
 		@Nullable
 		public Object scanUnsafe(Attr key) {
-			if (key == Attr.PARENT) return s;
-			if (key == Attr.CANCELLED) return parent.cancelled;
+			if (key == Attr.PARENT) {
+				return s;
+			}
+			if (key == Attr.CANCELLED) {
+				return parent.cancelled;
+			}
 
 			return InnerOperator.super.scanUnsafe(key);
 		}
@@ -337,6 +341,7 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 				actual.onComplete();
 			}
 		}
+
 	}
-	
+
 }

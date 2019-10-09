@@ -1,6 +1,21 @@
+/*
+ * Copyright 2019-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package reactor.core.publisher;
 
-import java.time.Duration;
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -30,39 +45,34 @@ public class FluxFirstNonEmptyEmittingTests {
 
 	@Test
 	public void firstWinner() {
-		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.range(1, 10), Flux.range(11, 10)))
-		.expectNext(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).verifyComplete();
+		StepVerifier
+				.create(CloudFlux.firstNonEmpty(Flux.range(1, 10), Flux.range(11, 10)))
+				.expectNext(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).verifyComplete();
 	}
 
 	@Test
 	public void firstWinnerBackpressured() {
-		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.range(1, 10), Flux.range(11, 10)))
-				.thenRequest(5)
-				.expectNext(1, 2, 3, 4, 5)
-				.thenCancel()
-				.verifyThenAssertThat()
-				.hasNotDiscardedElements()
-				.hasNotDroppedElements()
+		StepVerifier
+				.create(CloudFlux.firstNonEmpty(Flux.range(1, 10), Flux.range(11, 10)))
+				.thenRequest(5).expectNext(1, 2, 3, 4, 5).thenCancel()
+				.verifyThenAssertThat().hasNotDiscardedElements().hasNotDroppedElements()
 				.hasNotDroppedErrors();
 	}
 
 	@Test
 	public void secondWinner() {
-		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.never(),
-				Flux.range(11, 10)
-						.log()))
-		.expectNext(11, 12, 13, 14, 15, 16, 17, 18, 19, 20).verifyComplete();
+		StepVerifier
+				.create(CloudFlux.firstNonEmpty(Flux.never(), Flux.range(11, 10).log()))
+				.expectNext(11, 12, 13, 14, 15, 16, 17, 18, 19, 20).verifyComplete();
 	}
 
 	@Test
 	public void secondEmitsError() {
 		RuntimeException ex = new RuntimeException("forced failure");
-		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.never(), Flux.<Integer>error(ex)))
-				.thenCancel()
-				.verifyThenAssertThat()
-				.hasNotDiscardedElements()
-				.hasNotDroppedElements()
-				.hasNotDroppedErrors();
+		StepVerifier
+				.create(CloudFlux.firstNonEmpty(Flux.never(), Flux.<Integer>error(ex)))
+				.thenCancel().verifyThenAssertThat().hasNotDiscardedElements()
+				.hasNotDroppedElements().hasNotDroppedErrors();
 	}
 
 	@Test
@@ -79,23 +89,27 @@ public class FluxFirstNonEmptyEmittingTests {
 
 	@Test
 	public void singleIterableNullSource() {
-		StepVerifier.create(CloudFlux.firstNonEmpty(singletonList((Publisher<Object>) null)))
+		StepVerifier
+				.create(CloudFlux.firstNonEmpty(singletonList((Publisher<Object>) null)))
 				.expectError(NullPointerException.class).verify();
 	}
 
 	@Test
 	public void iterableOneIsNullSource() {
-		StepVerifier.create(CloudFlux.firstNonEmpty(Arrays.asList(Flux.never(),
-				(Publisher<Object>) null,
-				Flux.never())))
+		StepVerifier
+				.create(CloudFlux.firstNonEmpty(Arrays.asList(Flux.never(),
+						(Publisher<Object>) null, Flux.never())))
 				.expectError(NullPointerException.class).verify();
 	}
 
 	@Test
 	public void scanSubscriber() {
-		CoreSubscriber<String> actual = new LambdaSubscriber<>(null, e -> {}, null, null);
-		FluxFirstEmitting.RaceCoordinator<String> parent = new FluxFirstEmitting.RaceCoordinator<>(1);
-		FluxFirstEmitting.FirstEmittingSubscriber<String> test = new FluxFirstEmitting.FirstEmittingSubscriber<>(actual, parent, 1);
+		CoreSubscriber<String> actual = new LambdaSubscriber<>(null, e -> {
+		}, null, null);
+		FluxFirstNonEmptyEmitting.RaceCoordinator<String> parent = new FluxFirstNonEmptyEmitting.RaceCoordinator<>(
+				1);
+		FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<String> test = new FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<>(
+				actual, parent, 1);
 		Subscription sub = Operators.emptySubscription();
 		test.onSubscribe(sub);
 
@@ -108,9 +122,12 @@ public class FluxFirstNonEmptyEmittingTests {
 
 	@Test
 	public void scanRaceCoordinator() {
-		CoreSubscriber<String> actual = new LambdaSubscriber<>(null, e -> {}, null, null);
-		FluxFirstEmitting.RaceCoordinator<String> parent = new FluxFirstEmitting.RaceCoordinator<>(1);
-		FluxFirstEmitting.FirstEmittingSubscriber<String> test = new FluxFirstEmitting.FirstEmittingSubscriber<>(actual, parent, 1);
+		CoreSubscriber<String> actual = new LambdaSubscriber<>(null, e -> {
+		}, null, null);
+		FluxFirstNonEmptyEmitting.RaceCoordinator<String> parent = new FluxFirstNonEmptyEmitting.RaceCoordinator<>(
+				1);
+		FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<String> test = new FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<>(
+				actual, parent, 1);
 		Subscription sub = Operators.emptySubscription();
 		test.onSubscribe(sub);
 

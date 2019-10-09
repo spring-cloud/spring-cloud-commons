@@ -24,13 +24,11 @@ import org.reactivestreams.Publisher;
 public abstract class CloudFlux<T> extends Flux<T> {
 
 	/**
-	 * Pick the first {@link Publisher} to emit an onNext signal and
-	 * replay all signals from that {@link Publisher}, effectively behaving like the
-	 * fastest of these competing sources.
-	 *
+	 * Pick the first {@link Publisher} to emit an onNext signal and replay all signals
+	 * from that {@link Publisher}, effectively behaving like the fastest of these
+	 * competing sources.
 	 * @param sources The competing source publishers
 	 * @param <I> The type of values in both source and output sequences
-	 *
 	 * @return a new {@link Flux} behaving like the fastest of its sources
 	 */
 	@SafeVarargs
@@ -39,16 +37,16 @@ public abstract class CloudFlux<T> extends Flux<T> {
 	}
 
 	/**
-	 * Pick the first {@link Publisher} to emit an onNext signal and
-	 * replay all signals from that {@link Publisher}, effectively behaving like the
-	 * fastest of these competing sources.
-	 *
+	 * Pick the first {@link Publisher} to emit an onNext signal and replay all signals
+	 * from that {@link Publisher}, effectively behaving like the fastest of these
+	 * competing sources.
 	 * @param sources The competing source publishers
 	 * @param <I> The type of values in both source and output sequences
-	 *
-	 * @return a new {@link reactor.core.publisher.Flux} behaving like the fastest of its sources
+	 * @return a new {@link reactor.core.publisher.Flux} behaving like the fastest of its
+	 * sources
 	 */
-	public static <I> Flux<I> firstNonEmpty(Iterable<? extends Publisher<? extends I>> sources) {
+	public static <I> Flux<I> firstNonEmpty(
+			Iterable<? extends Publisher<? extends I>> sources) {
 		return onAssembly(new FluxFirstNonEmptyEmitting<>(sources));
 	}
 
