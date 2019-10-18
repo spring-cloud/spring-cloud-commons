@@ -40,13 +40,19 @@ public class FluxFirstNonEmptyEmittingTests {
 
 	@Test(expected = NullPointerException.class)
 	public void iterableNull() {
-		new FluxFirstEmitting<>((Iterable<Publisher<Integer>>) null);
+		CloudFlux.firstNonEmpty((Iterable<Publisher<Integer>>) null);
 	}
 
 	@Test
 	public void firstWinner() {
 		StepVerifier
 				.create(CloudFlux.firstNonEmpty(Flux.range(1, 10), Flux.range(11, 10)))
+				.expectNext(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).verifyComplete();
+	}
+
+	@Test
+	public void firstWinnerSecondEmpty() {
+		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.range(1, 10), Flux.empty()))
 				.expectNext(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).verifyComplete();
 	}
 
@@ -67,12 +73,26 @@ public class FluxFirstNonEmptyEmittingTests {
 	}
 
 	@Test
+	public void secondWinnerFirstEmpty() {
+		StepVerifier
+				.create(CloudFlux.firstNonEmpty(Flux.empty(), Flux.range(11, 10).log()))
+				.expectNext(11, 12, 13, 14, 15, 16, 17, 18, 19, 20).verifyComplete();
+	}
+
+	@Test
+	public void bothEmpty() {
+		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.empty(), Flux.empty()))
+				.expectComplete().verifyThenAssertThat().hasNotDiscardedElements()
+				.hasNotDroppedElements().hasNotDroppedErrors();
+	}
+
+	@Test
 	public void secondEmitsError() {
 		RuntimeException ex = new RuntimeException("forced failure");
 		StepVerifier
 				.create(CloudFlux.firstNonEmpty(Flux.never(), Flux.<Integer>error(ex)))
-				.thenCancel().verifyThenAssertThat().hasNotDiscardedElements()
-				.hasNotDroppedElements().hasNotDroppedErrors();
+				.expectError(RuntimeException.class).verifyThenAssertThat()
+				.hasNotDiscardedElements().hasNotDroppedElements().hasNotDroppedErrors();
 	}
 
 	@Test

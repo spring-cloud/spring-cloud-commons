@@ -132,28 +132,6 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 		coordinator.subscribe(a, n, actual);
 	}
 
-	/**
-	 * Returns a new instance which has the additional source to be amb'd together with
-	 * the current array of sources.
-	 * <p>
-	 * This operation doesn't change the current FluxFirstEmitting instance.
-	 * @param source the new source to merge with the others
-	 * @return the new FluxFirstEmitting instance or null if the Amb runs with an Iterable
-	 */
-	@Nullable
-	FluxFirstEmitting<T> ambAdditionalSource(Publisher<? extends T> source) {
-		if (array != null) {
-			int n = array.length;
-			@SuppressWarnings("unchecked")
-			Publisher<? extends T>[] newArray = new Publisher[n + 1];
-			System.arraycopy(array, 0, newArray, 0, n);
-			newArray[n] = source;
-
-			return new FluxFirstEmitting<>(newArray);
-		}
-		return null;
-	}
-
 	@Override
 	public Object scanUnsafe(Attr key) {
 		return null; // no particular key to be represented, still useful in hooks
@@ -167,14 +145,20 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 
 		volatile int wip;
 
+		volatile int competingSubscribers;
+
 		@SuppressWarnings("rawtypes")
 		static final AtomicIntegerFieldUpdater<RaceCoordinator> WIP = AtomicIntegerFieldUpdater
 				.newUpdater(RaceCoordinator.class, "wip");
+
+		static final AtomicIntegerFieldUpdater<RaceCoordinator> COMPETING_SUBSCRIBERS = AtomicIntegerFieldUpdater
+				.newUpdater(RaceCoordinator.class, "competingSubscribers");
 
 		@SuppressWarnings("unchecked")
 		RaceCoordinator(int n) {
 			subscribers = new FirstNonEmptyEmittingSubscriber[n];
 			wip = Integer.MIN_VALUE;
+			competingSubscribers = n;
 		}
 
 		@Override
@@ -274,6 +258,14 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 			return false;
 		}
 
+		boolean resignFromRace() {
+			return COMPETING_SUBSCRIBERS.decrementAndGet(this) == 0;
+		}
+
+		boolean isLastRemainingFlux() {
+			return COMPETING_SUBSCRIBERS.get(this) == 0;
+		}
+
 	}
 
 	static final class FirstNonEmptyEmittingSubscriber<T>
@@ -330,14 +322,15 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 
 		@Override
 		public void onError(Throwable t) {
-			if (won) {
+			if (won || parent.isLastRemainingFlux()) {
 				actual.onError(t);
 			}
 		}
 
 		@Override
 		public void onComplete() {
-			if (won) {
+			parent.resignFromRace();
+			if (won || parent.isLastRemainingFlux()) {
 				actual.onComplete();
 			}
 		}

@@ -19,14 +19,18 @@ package reactor.core.publisher;
 import org.reactivestreams.Publisher;
 
 /**
+ * INTERNAL USAGE ONLY. This functionality is ported to reactor-core and will be removed
+ * in a next release.
+ *
  * @author Tim Ysewyn
  */
 public abstract class CloudFlux<T> extends Flux<T> {
 
 	/**
-	 * Pick the first {@link Publisher} to emit an onNext signal and replay all signals
-	 * from that {@link Publisher}, effectively behaving like the fastest of these
-	 * competing sources.
+	 * Pick the first {@link Publisher} to emit an onNext/onError signal and replay all
+	 * signals from that {@link Publisher}, effectively behaving like the fastest of these
+	 * competing sources. If none of the sources is emitting a signal, a completion signal
+	 * will be send.
 	 * @param sources The competing source publishers
 	 * @param <I> The type of values in both source and output sequences
 	 * @return a new {@link Flux} behaving like the fastest of its sources
@@ -37,9 +41,10 @@ public abstract class CloudFlux<T> extends Flux<T> {
 	}
 
 	/**
-	 * Pick the first {@link Publisher} to emit an onNext signal and replay all signals
-	 * from that {@link Publisher}, effectively behaving like the fastest of these
-	 * competing sources.
+	 * Pick the first {@link Publisher} to emit an onNext/onError signal and replay all
+	 * signals from that {@link Publisher}, effectively behaving like the fastest of these
+	 * competing sources. If none of the sources is emitting a signal, a completion signal
+	 * will be send.
 	 * @param sources The competing source publishers
 	 * @param <I> The type of values in both source and output sequences
 	 * @return a new {@link reactor.core.publisher.Flux} behaving like the fastest of its
