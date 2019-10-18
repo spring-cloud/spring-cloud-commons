@@ -16,6 +16,7 @@
 
 package reactor.core.publisher;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -87,7 +88,32 @@ public class FluxFirstNonEmptyEmittingTests {
 	}
 
 	@Test
+	public void neverAndEmpty() {
+		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.never(), Flux.empty()))
+				.thenAwait(Duration.ofSeconds(2)).thenCancel().verifyThenAssertThat()
+				.hasNotDiscardedElements().hasNotDroppedElements().hasNotDroppedErrors();
+	}
+
+	@Test
+	public void firstEmitsError() {
+		RuntimeException ex = new RuntimeException("forced failure");
+		StepVerifier
+				.create(CloudFlux.firstNonEmpty(Flux.<Integer>error(ex), Flux.empty()))
+				.expectError(RuntimeException.class).verifyThenAssertThat()
+				.hasNotDiscardedElements().hasNotDroppedElements().hasNotDroppedErrors();
+	}
+
+	@Test
 	public void secondEmitsError() {
+		RuntimeException ex = new RuntimeException("forced failure");
+		StepVerifier
+				.create(CloudFlux.firstNonEmpty(Flux.empty(), Flux.<Integer>error(ex)))
+				.expectError(RuntimeException.class).verifyThenAssertThat()
+				.hasNotDiscardedElements().hasNotDroppedElements().hasNotDroppedErrors();
+	}
+
+	@Test
+	public void neverAndSecondEmitsError() {
 		RuntimeException ex = new RuntimeException("forced failure");
 		StepVerifier
 				.create(CloudFlux.firstNonEmpty(Flux.never(), Flux.<Integer>error(ex)))

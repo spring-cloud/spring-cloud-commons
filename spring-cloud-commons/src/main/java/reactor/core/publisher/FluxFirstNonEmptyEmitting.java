@@ -258,8 +258,8 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 			return false;
 		}
 
-		boolean resignFromRace() {
-			return COMPETING_SUBSCRIBERS.decrementAndGet(this) == 0;
+		void resignFromRace() {
+			COMPETING_SUBSCRIBERS.decrementAndGet(this);
 		}
 
 		boolean isLastRemainingFlux() {
@@ -322,7 +322,11 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 
 		@Override
 		public void onError(Throwable t) {
-			if (won || parent.isLastRemainingFlux()) {
+			if (won) {
+				actual.onError(t);
+			}
+			else if (parent.tryWin(index)) {
+				won = true;
 				actual.onError(t);
 			}
 		}
