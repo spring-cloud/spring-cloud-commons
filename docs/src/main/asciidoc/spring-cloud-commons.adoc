@@ -781,7 +781,7 @@ of compatible Spring Boot versions.
 
 == Spring Cloud Circuit Breaker
 
-include::spring-cloud-circuitbreaker.adoc[]
+include::spring-cloud-circuitbreaker.adoc[leveloffset=+1]
 
 == Configuration Properties
 
