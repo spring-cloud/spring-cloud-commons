@@ -232,7 +232,7 @@ will also be disabled since they are just a special case of `/actuator/restart`.
 
 Patterns such as service discovery, load balancing, and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (for example, discovery with Eureka or Consul).
 
-
+[[discovery-client]]
 === @EnableDiscoveryClient
 
 Spring Cloud Commons provides the `@EnableDiscoveryClient` annotation.
@@ -333,6 +333,7 @@ The JSON body has to include the `status` field with the preferred value.
 Please see the documentation of the `ServiceRegistry` implementation you use for the allowed values when updating the status and the values returned for the status.
 For instance, Eureka's supported statuses are `UP`, `DOWN`, `OUT_OF_SERVICE`, and `UNKNOWN`.
 
+[[rest-template-loadbalancer-client]]
 === Spring RestTemplate as a Load Balancer Client
 
 `RestTemplate` can be automatically configured to use a Load-balancer client under the hood.
@@ -370,7 +371,7 @@ See {githubroot}/spring-cloud-netflix/blob/master/spring-cloud-netflix-ribbon/sr
 
 IMPORTANT: In order to use a load-balanced `RestTemplate`, you need to have a load-balancer implementation in your classpath.
 The recommended implementation is `BlockingLoadBalancerClient`
-- add `org.springframework.cloud:spring-cloud-starter-loadbalancer` in order to use it.
+- add <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> to your project in order to use it.
 The
 `RibbonLoadBalancerClient` also can be used, but it's now under maintenance and we do not recommend adding it to new projects.
 
@@ -378,6 +379,7 @@ WARNING: If you have both `RibbonLoadBalancerClient` and `BlockingLoadBalancerCl
 preserve backward compatibility, `RibbonLoadBalancerClient` will be used by default. In order
 to override it, you can set the property `spring.cloud.loadbalancer.ribbon.enabled` to `false`.
 
+[[webclinet-loadbalancer-client]]
 === Spring WebClient as a Load Balancer Client
 
 `WebClient` can be automatically configured to use a load-balancer client.
@@ -411,7 +413,7 @@ The Ribbon client or Spring Cloud LoadBalancer is used to create a full physical
 
 IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder`, you need to have a loadbalancer
 implementation in the classpath. It is recommended that you add the
-`org.springframework.cloud:spring-cloud-starter-loadbalancer` dependency to your project.
+<<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> to your project.
 Then, `ReactiveLoadBalancer` will be used underneath.
 Alternatively, this functionality will also work with `spring-cloud-starter-netflix-ribbon`, but the request
 will be handled by a non-reactive `LoadBalancerClient` under the hood. Additionally,
@@ -420,12 +422,6 @@ adding it to new projects.
 If you have both `spring-cloud-starter-loadbalancer` and `spring-cloud-starter-netflix-ribbon`
 in your classpath, Ribbon will be used by default. In order to switch to Spring Cloud LoadBalancer,
 set the value of `spring.cloud.loadbalancer.ribbon.enabled` to false.
-
-IMPORTANT: In order to make use of the more efficient cached version of `ServiceInstanceListSupplier`,
- `spring-cloud-starter-loadbalancer` will *enable caching* by default.
-https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching]
-mechanism will be used under the hood. If you don't want caching to be used, you can set
-the value of `spring.cache.type` to `none`.
 
 ==== Retrying Failed Requests
 
@@ -542,10 +538,10 @@ TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set 
 === Spring WebFlux WebClient as a Load Balancer Client
 
 [[webflux-with-reactive-loadbalancer]]
-==== Spring WebFlux WebClient with Reactive Load Balancer
+==== Spring WebFlux WebClient with ReactorLoadBalancerExchangeFilterFunction
 
 `WebClient` can be configured to use the `ReactiveLoadBalancer`.
-If you add `org.springframework.cloud:spring-cloud-starter-loadbalancer` to your project,
+If you add <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> to your project,
  `ReactorLoadBalancerExchangeFilterFunction` is auto-configured if `spring-webflux` is on the classpath.
 The following example shows how to configure a `WebClient` to use reactive load balancer under the hood:
 
@@ -578,7 +574,7 @@ to `false`.
 [[load-balancer-exchange-filter-function]]
 ==== Spring WebFlux WebClient with non-reactive Load Balancer Client
 
-If you you don't have `org.springframework.cloud:spring-cloud-starter-loadbalancer` in your project,
+If you you don't have <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> in your project,
 but you do have spring-cloud-starter-netflix-ribbon, you can still use `WebClient` with `LoadBalancerClient`. `LoadBalancerExchangeFilterFunction`
 will be auto-configured if `spring-webflux` is on the classpath. Please note, however, that this is
 uses a non-reactive client under the hood.
@@ -609,40 +605,6 @@ WARN:
 This approach is now deprecated.
 We suggest you use <<webflux-with-reactive-loadbalancer,WebFlux with reactive Load-Balancer>>
 instead.
-
-==== Passing your own Load-Balancer Client configuration
-
-You can also use the `@LoadBalancerClient` annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, like so:
-
-[source,java,indent=0]
-----
-@Configuration
-@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class)
-public class MyConfiguration {
-
-	@Bean
-	@LoadBalanced
-	public WebClient.Builder loadBalancedWebClientBuilder() {
-		return WebClient.builder();
-	}
-}
-----
-
-It is also possible to pass together multiple configurations (for more than one load-balancer client) via the `@LoadBalancerClients` annotation, as shown below:
-
-[source,java,indent=0]
-----
-@Configuration
-@LoadBalancerClients({@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class), @LoadBalancerClient(value = "customers", configuration = CustomersLoadBalancerClientConfiguration.class)})
-public class MyConfiguration {
-
-	@Bean
-	@LoadBalanced
-	public WebClient.Builder loadBalancedWebClientBuilder() {
-		return WebClient.builder();
-	}
-}
-----
 
 [[ignore-network-interfaces]]
 === Ignore Network Interfaces
@@ -778,6 +740,76 @@ In order to disable this feature, set `spring.cloud.compatibility-verifier.enabl
 If you want to override the compatible Spring Boot versions, just set the
 `spring.cloud.compatibility-verifier.compatible-boot-versions` property with a comma separated list
 of compatible Spring Boot versions.
+
+== Spring Cloud LoadBalancer
+
+Spring Cloud provides its own client-side load-balancer abstraction and implementation. For the load-balancing
+mechanism, `ReactiveLoadBalancer` interface has been added and a Round-Robin-based implementation
+has been provided for it. In order to get instances to select from reactive `ServiceInstanceListSupplier`
+is used. Currently we support a service-discovery-based implementation of `ServiceInstanceListSupplier`
+that retrieves available instances from Service Discovery using a <<discovery-client, Discovery Client>> available in the classpath.
+
+=== Spring Cloud LoadBalancer integrations
+
+In order to make it easy to use Spring Cloud LoadBalancer, we provide `ReactorLoadBalancerExchangeFilterFunction` that can be used
+with `WebClient` and `BlockingLoadBalancerClient` that works with `RestTemplate`. You can see more information and examples of usage
+in the following sections:
+
+* <<rest-template-loadbalancer-client,Spring RestTemplate as a Load Balancer Client>>
+* <<webclinet-loadbalancer-client, Spring WebClient as a Load Balancer Client>>
+* <<webflux-with-reactive-loadbalancer,Spring WebFlux WebClient with `ReactorLoadBalancerExchangeFilterFunction`>>
+
+[[spring-cloud-loadbalancer-starter]]
+=== Spring Cloud LoadBalancer starter
+
+We also provide a starter that allows you to easily add Spring Cloud LoadBalancer in a Spring Boot app.
+In order to use it, just add `org.springframework.cloud:spring-cloud-starter-loadbalancer` to your Spring
+Cloud dependencies in your build file.
+
+WARNING: In order to make use of the more efficient cached version of `ServiceInstanceListSupplier`,
+ `spring-cloud-starter-loadbalancer` will *enable caching* by default.
+https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching]
+mechanism will be used under the hood. If you don't want caching to be used, you can set
+the value of `spring.cache.type` to `none`.
+
+WARNING: If you have both Ribbon and Spring Cloud LoadBalancer int the classpath, in order to maintain
+backward compatibility, Ribbon-based implementations will be used by default. In order
+to switch to using Spring Cloud LoadBalancer under the hood,
+make sure you set the property `spring.cloud.loadbalancer.ribbon.enabled` to `false`.
+
+=== Passing your own Spring Cloud LoadBalancer configuration
+
+You can also use the `@LoadBalancerClient` annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, like so:
+
+[source,java,indent=0]
+----
+@Configuration
+@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class)
+public class MyConfiguration {
+
+	@Bean
+	@LoadBalanced
+	public WebClient.Builder loadBalancedWebClientBuilder() {
+		return WebClient.builder();
+	}
+}
+----
+
+It is also possible to pass together multiple configurations (for more than one load-balancer client) via the `@LoadBalancerClients` annotation, as shown below:
+
+[source,java,indent=0]
+----
+@Configuration
+@LoadBalancerClients({@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class), @LoadBalancerClient(value = "customers", configuration = CustomersLoadBalancerClientConfiguration.class)})
+public class MyConfiguration {
+
+	@Bean
+	@LoadBalanced
+	public WebClient.Builder loadBalancedWebClientBuilder() {
+		return WebClient.builder();
+	}
+}
+----
 
 == Spring Cloud Circuit Breaker
 
