@@ -113,7 +113,7 @@ $(addBlockSwitches);
 </li>
 <li><a href="#spring-cloud-commons-common-abstractions">2. Spring Cloud Commons: Common Abstractions</a>
 <ul class="sectlevel2">
-<li><a href="#enablediscoveryclient">2.1. @EnableDiscoveryClient</a>
+<li><a href="#discovery-client">2.1. @EnableDiscoveryClient</a>
 <ul class="sectlevel3">
 <li><a href="#health-indicator">2.1.1. Health Indicator</a></li>
 <li><a href="#ordering-discoveryclient-instances">2.1.2. Ordering <code>DiscoveryClient</code> instances</a></li>
@@ -129,8 +129,8 @@ $(addBlockSwitches);
 <li><a href="#service-registry-actuator-endpoint">2.2.2. Service Registry Actuator Endpoint</a></li>
 </ul>
 </li>
-<li><a href="#spring-resttemplate-as-a-load-balancer-client">2.3. Spring RestTemplate as a Load Balancer Client</a></li>
-<li><a href="#spring-webclient-as-a-load-balancer-client">2.4. Spring WebClient as a Load Balancer Client</a>
+<li><a href="#rest-template-loadbalancer-client">2.3. Spring RestTemplate as a Load Balancer Client</a></li>
+<li><a href="#webclinet-loadbalancer-client">2.4. Spring WebClient as a Load Balancer Client</a>
 <ul class="sectlevel3">
 <li><a href="#retrying-failed-requests">2.4.1. Retrying Failed Requests</a></li>
 </ul>
@@ -138,9 +138,8 @@ $(addBlockSwitches);
 <li><a href="#multiple-resttemplate-objects">2.5. Multiple RestTemplate objects</a></li>
 <li><a href="#loadbalanced-webclient">2.6. Spring WebFlux WebClient as a Load Balancer Client</a>
 <ul class="sectlevel3">
-<li><a href="#webflux-with-reactive-loadbalancer">2.6.1. Spring WebFlux WebClient with Reactive Load Balancer</a></li>
+<li><a href="#webflux-with-reactive-loadbalancer">2.6.1. Spring WebFlux WebClient with ReactorLoadBalancerExchangeFilterFunction</a></li>
 <li><a href="#load-balancer-exchange-filter-function">2.6.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></li>
-<li><a href="#passing-your-own-load-balancer-client-configuration">2.6.3. Passing your own Load-Balancer Client configuration</a></li>
 </ul>
 </li>
 <li><a href="#ignore-network-interfaces">2.7. Ignore Network Interfaces</a></li>
@@ -154,22 +153,29 @@ $(addBlockSwitches);
 <li><a href="#spring-cloud-compatibility-verification">2.10. Spring Cloud Compatibility Verification</a></li>
 </ul>
 </li>
-<li><a href="#spring-cloud-circuit-breaker">3. Spring Cloud Circuit Breaker</a>
+<li><a href="#spring-cloud-loadbalancer">3. Spring Cloud LoadBalancer</a>
 <ul class="sectlevel2">
-<li><a href="#introduction">3.1. Introduction</a>
+<li><a href="#spring-cloud-loadbalancer-integrations">3.1. Spring Cloud LoadBalancer integrations</a></li>
+<li><a href="#spring-cloud-loadbalancer-starter">3.2. Spring Cloud LoadBalancer starter</a></li>
+<li><a href="#passing-your-own-spring-cloud-loadbalancer-configuration">3.3. Passing your own Spring Cloud LoadBalancer configuration</a></li>
+</ul>
+</li>
+<li><a href="#spring-cloud-circuit-breaker">4. Spring Cloud Circuit Breaker</a>
+<ul class="sectlevel2">
+<li><a href="#introduction">4.1. Introduction</a>
 <ul class="sectlevel3">
-<li><a href="#supported-implementations">3.1.1. Supported Implementations</a></li>
+<li><a href="#supported-implementations">4.1.1. Supported Implementations</a></li>
 </ul>
 </li>
-<li><a href="#core-concepts">3.2. Core Concepts</a>
+<li><a href="#core-concepts">4.2. Core Concepts</a>
 <ul class="sectlevel3">
-<li><a href="#circuit-breakers-in-reactive-code">3.2.1. Circuit Breakers In Reactive Code</a></li>
+<li><a href="#circuit-breakers-in-reactive-code">4.2.1. Circuit Breakers In Reactive Code</a></li>
 </ul>
 </li>
-<li><a href="#configuration">3.3. Configuration</a></li>
+<li><a href="#configuration">4.3. Configuration</a></li>
 </ul>
 </li>
-<li><a href="#configuration-properties">4. Configuration Properties</a></li>
+<li><a href="#configuration-properties">5. Configuration Properties</a></li>
 </ul>
 </div>
 </div>
@@ -587,7 +593,7 @@ will also be disabled since they are just a special case of <code>/actuator/rest
 <p>Patterns such as service discovery, load balancing, and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (for example, discovery with Eureka or Consul).</p>
 </div>
 <div class="sect2">
-<h3 id="enablediscoveryclient"><a class="anchor" href="#enablediscoveryclient"></a><a class="link" href="#enablediscoveryclient">2.1. @EnableDiscoveryClient</a></h3>
+<h3 id="discovery-client"><a class="anchor" href="#discovery-client"></a><a class="link" href="#discovery-client">2.1. @EnableDiscoveryClient</a></h3>
 <div class="paragraph">
 <p>Spring Cloud Commons provides the <code>@EnableDiscoveryClient</code> annotation.
 This looks for implementations of the <code>DiscoveryClient</code> and <code>ReactiveDiscoveryClient</code> interfaces with <code>META-INF/spring.factories</code>.
@@ -735,7 +741,7 @@ For instance, Eureka&#8217;s supported statuses are <code>UP</code>, <code>DOWN<
 </div>
 </div>
 <div class="sect2">
-<h3 id="spring-resttemplate-as-a-load-balancer-client"><a class="anchor" href="#spring-resttemplate-as-a-load-balancer-client"></a><a class="link" href="#spring-resttemplate-as-a-load-balancer-client">2.3. Spring RestTemplate as a Load Balancer Client</a></h3>
+<h3 id="rest-template-loadbalancer-client"><a class="anchor" href="#rest-template-loadbalancer-client"></a><a class="link" href="#rest-template-loadbalancer-client">2.3. Spring RestTemplate as a Load Balancer Client</a></h3>
 <div class="paragraph">
 <p><code>RestTemplate</code> can be automatically configured to use a Load-balancer client under the hood.
 To create a load-balanced <code>RestTemplate</code>, create a <code>RestTemplate</code> <code>@Bean</code> and use the <code>@LoadBalanced</code> qualifier, as shown in the following example:</p>
@@ -790,7 +796,7 @@ See {githubroot}/spring-cloud-netflix/blob/master/spring-cloud-netflix-ribbon/sr
 <td class="content">
 In order to use a load-balanced <code>RestTemplate</code>, you need to have a load-balancer implementation in your classpath.
 The recommended implementation is <code>BlockingLoadBalancerClient</code>
-- add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> in order to use it.
+- add <a href="#spring-cloud-loadbalancer-starter">Spring Cloud LoadBalancer starter</a> to your project in order to use it.
 The
 <code>RibbonLoadBalancerClient</code> also can be used, but it&#8217;s now under maintenance and we do not recommend adding it to new projects.
 </td>
@@ -813,7 +819,7 @@ to override it, you can set the property <code>spring.cloud.loadbalancer.ribbon.
 </div>
 </div>
 <div class="sect2">
-<h3 id="spring-webclient-as-a-load-balancer-client"><a class="anchor" href="#spring-webclient-as-a-load-balancer-client"></a><a class="link" href="#spring-webclient-as-a-load-balancer-client">2.4. Spring WebClient as a Load Balancer Client</a></h3>
+<h3 id="webclinet-loadbalancer-client"><a class="anchor" href="#webclinet-loadbalancer-client"></a><a class="link" href="#webclinet-loadbalancer-client">2.4. Spring WebClient as a Load Balancer Client</a></h3>
 <div class="paragraph">
 <p><code>WebClient</code> can be automatically configured to use a load-balancer client.
 To create a load-balanced <code>WebClient</code>, create a <code>WebClient.Builder</code> <code>@Bean</code> and use the <code>@LoadBalanced</code> qualifier, as shown in the following example:</p>
@@ -854,7 +860,7 @@ The Ribbon client or Spring Cloud LoadBalancer is used to create a full physical
 <td class="content">
 If you want to use a <code>@LoadBalanced WebClient.Builder</code>, you need to have a loadbalancer
 implementation in the classpath. It is recommended that you add the
-<code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> dependency to your project.
+<a href="#spring-cloud-loadbalancer-starter">Spring Cloud LoadBalancer starter</a> to your project.
 Then, <code>ReactiveLoadBalancer</code> will be used underneath.
 Alternatively, this functionality will also work with <code>spring-cloud-starter-netflix-ribbon</code>, but the request
 will be handled by a non-reactive <code>LoadBalancerClient</code> under the hood. Additionally,
@@ -863,22 +869,6 @@ adding it to new projects.
 If you have both <code>spring-cloud-starter-loadbalancer</code> and <code>spring-cloud-starter-netflix-ribbon</code>
 in your classpath, Ribbon will be used by default. In order to switch to Spring Cloud LoadBalancer,
 set the value of <code>spring.cloud.loadbalancer.ribbon.enabled</code> to false.
-</td>
-</tr>
-</table>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-In order to make use of the more efficient cached version of <code>ServiceInstanceListSupplier</code>,
- <code>spring-cloud-starter-loadbalancer</code> will <strong>enable caching</strong> by default.
-<a href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html">Spring Boot Caching</a>
-mechanism will be used under the hood. If you don&#8217;t want caching to be used, you can set
-the value of <code>spring.cache.type</code> to <code>none</code>.
 </td>
 </tr>
 </table>
@@ -1034,10 +1024,10 @@ If you see errors such as <code>java.lang.IllegalArgumentException: Can not set 
 <div class="sect2">
 <h3 id="loadbalanced-webclient"><a class="anchor" href="#loadbalanced-webclient"></a><a class="link" href="#loadbalanced-webclient">2.6. Spring WebFlux WebClient as a Load Balancer Client</a></h3>
 <div class="sect3">
-<h4 id="webflux-with-reactive-loadbalancer"><a class="anchor" href="#webflux-with-reactive-loadbalancer"></a><a class="link" href="#webflux-with-reactive-loadbalancer">2.6.1. Spring WebFlux WebClient with Reactive Load Balancer</a></h4>
+<h4 id="webflux-with-reactive-loadbalancer"><a class="anchor" href="#webflux-with-reactive-loadbalancer"></a><a class="link" href="#webflux-with-reactive-loadbalancer">2.6.1. Spring WebFlux WebClient with ReactorLoadBalancerExchangeFilterFunction</a></h4>
 <div class="paragraph">
 <p><code>WebClient</code> can be configured to use the <code>ReactiveLoadBalancer</code>.
-If you add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> to your project,
+If you add <a href="#spring-cloud-loadbalancer-starter">Spring Cloud LoadBalancer starter</a> to your project,
  <code>ReactorLoadBalancerExchangeFilterFunction</code> is auto-configured if <code>spring-webflux</code> is on the classpath.
 The following example shows how to configure a <code>WebClient</code> to use reactive load balancer under the hood:</p>
 </div>
@@ -1082,7 +1072,7 @@ to <code>false</code>.
 <div class="sect3">
 <h4 id="load-balancer-exchange-filter-function"><a class="anchor" href="#load-balancer-exchange-filter-function"></a><a class="link" href="#load-balancer-exchange-filter-function">2.6.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></h4>
 <div class="paragraph">
-<p>If you you don&#8217;t have <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> in your project,
+<p>If you you don&#8217;t have <a href="#spring-cloud-loadbalancer-starter">Spring Cloud LoadBalancer starter</a> in your project,
 but you do have spring-cloud-starter-netflix-ribbon, you can still use <code>WebClient</code> with <code>LoadBalancerClient</code>. <code>LoadBalancerExchangeFilterFunction</code>
 will be auto-configured if <code>spring-webflux</code> is on the classpath. Please note, however, that this is
 uses a non-reactive client under the hood.
@@ -1115,43 +1105,6 @@ The <code>LoadBalancerClient</code> is used to create a full physical address.</
 This approach is now deprecated.
 We suggest you use <a href="#webflux-with-reactive-loadbalancer">WebFlux with reactive Load-Balancer</a>
 instead.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="passing-your-own-load-balancer-client-configuration"><a class="anchor" href="#passing-your-own-load-balancer-client-configuration"></a><a class="link" href="#passing-your-own-load-balancer-client-configuration">2.6.3. Passing your own Load-Balancer Client configuration</a></h4>
-<div class="paragraph">
-<p>You can also use the <code>@LoadBalancerClient</code> annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, like so:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
-@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class)
-public class MyConfiguration {
-
-    @Bean
-    @LoadBalanced
-    public WebClient.Builder loadBalancedWebClientBuilder() {
-        return WebClient.builder();
-    }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>It is also possible to pass together multiple configurations (for more than one load-balancer client) via the <code>@LoadBalancerClients</code> annotation, as shown below:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
-@LoadBalancerClients({@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class), @LoadBalancerClient(value = "customers", configuration = CustomersLoadBalancerClientConfiguration.class)})
-public class MyConfiguration {
-
-    @Bean
-    @LoadBalanced
-    public WebClient.Builder loadBalancedWebClientBuilder() {
-        return WebClient.builder();
-    }
-}</code></pre>
-</div>
 </div>
 </div>
 </div>
@@ -1314,16 +1267,125 @@ of compatible Spring Boot versions.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="spring-cloud-circuit-breaker"><a class="anchor" href="#spring-cloud-circuit-breaker"></a><a class="link" href="#spring-cloud-circuit-breaker">3. Spring Cloud Circuit Breaker</a></h2>
+<h2 id="spring-cloud-loadbalancer"><a class="anchor" href="#spring-cloud-loadbalancer"></a><a class="link" href="#spring-cloud-loadbalancer">3. Spring Cloud LoadBalancer</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Cloud provides its own client-side load-balancer abstraction and implementation. For the load-balancing
+mechanism, <code>ReactiveLoadBalancer</code> interface has been added and a Round-Robin-based implementation
+has been provided for it. In order to get instances to select from reactive <code>ServiceInstanceListSupplier</code>
+is used. Currently we support a service-discovery-based implementation of <code>ServiceInstanceListSupplier</code>
+that retrieves available instances from Service Discovery using a <a href="#discovery-client">Discovery Client</a> available in the classpath.</p>
+</div>
+<div class="sect2">
+<h3 id="spring-cloud-loadbalancer-integrations"><a class="anchor" href="#spring-cloud-loadbalancer-integrations"></a><a class="link" href="#spring-cloud-loadbalancer-integrations">3.1. Spring Cloud LoadBalancer integrations</a></h3>
+<div class="paragraph">
+<p>In order to make it easy to use Spring Cloud LoadBalancer, we provide <code>ReactorLoadBalancerExchangeFilterFunction</code> that can be used
+with <code>WebClient</code> and <code>BlockingLoadBalancerClient</code> that works with <code>RestTemplate</code>. You can see more information and examples of usage
+in the following sections:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#rest-template-loadbalancer-client">Spring RestTemplate as a Load Balancer Client</a></p>
+</li>
+<li>
+<p><a href="#webclinet-loadbalancer-client">Spring WebClient as a Load Balancer Client</a></p>
+</li>
+<li>
+<p><a href="#webflux-with-reactive-loadbalancer">Spring WebFlux WebClient with <code>ReactorLoadBalancerExchangeFilterFunction</code></a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="spring-cloud-loadbalancer-starter"><a class="anchor" href="#spring-cloud-loadbalancer-starter"></a><a class="link" href="#spring-cloud-loadbalancer-starter">3.2. Spring Cloud LoadBalancer starter</a></h3>
+<div class="paragraph">
+<p>We also provide a starter that allows you to easily add Spring Cloud LoadBalancer in a Spring Boot app.
+In order to use it, just add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> to your Spring
+Cloud dependencies in your build file.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+In order to make use of the more efficient cached version of <code>ServiceInstanceListSupplier</code>,
+ <code>spring-cloud-starter-loadbalancer</code> will <strong>enable caching</strong> by default.
+<a href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html">Spring Boot Caching</a>
+mechanism will be used under the hood. If you don&#8217;t want caching to be used, you can set
+the value of <code>spring.cache.type</code> to <code>none</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+If you have both Ribbon and Spring Cloud LoadBalancer int the classpath, in order to maintain
+backward compatibility, Ribbon-based implementations will be used by default. In order
+to switch to using Spring Cloud LoadBalancer under the hood,
+make sure you set the property <code>spring.cloud.loadbalancer.ribbon.enabled</code> to <code>false</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="passing-your-own-spring-cloud-loadbalancer-configuration"><a class="anchor" href="#passing-your-own-spring-cloud-loadbalancer-configuration"></a><a class="link" href="#passing-your-own-spring-cloud-loadbalancer-configuration">3.3. Passing your own Spring Cloud LoadBalancer configuration</a></h3>
+<div class="paragraph">
+<p>You can also use the <code>@LoadBalancerClient</code> annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, like so:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class)
+public class MyConfiguration {
+
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder loadBalancedWebClientBuilder() {
+        return WebClient.builder();
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is also possible to pass together multiple configurations (for more than one load-balancer client) via the <code>@LoadBalancerClients</code> annotation, as shown below:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+@LoadBalancerClients({@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class), @LoadBalancerClient(value = "customers", configuration = CustomersLoadBalancerClientConfiguration.class)})
+public class MyConfiguration {
+
+    @Bean
+    @LoadBalanced
+    public WebClient.Builder loadBalancedWebClientBuilder() {
+        return WebClient.builder();
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="spring-cloud-circuit-breaker"><a class="anchor" href="#spring-cloud-circuit-breaker"></a><a class="link" href="#spring-cloud-circuit-breaker">4. Spring Cloud Circuit Breaker</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="introduction"><a class="anchor" href="#introduction"></a><a class="link" href="#introduction">3.1. Introduction</a></h3>
+<h3 id="introduction"><a class="anchor" href="#introduction"></a><a class="link" href="#introduction">4.1. Introduction</a></h3>
 <div class="paragraph">
 <p>Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations.
 It provides a consistent API to use in your applications allowing you the developer to choose the circuit breaker implementation that best fits your needs for your app.</p>
 </div>
 <div class="sect3">
-<h4 id="supported-implementations"><a class="anchor" href="#supported-implementations"></a><a class="link" href="#supported-implementations">3.1.1. Supported Implementations</a></h4>
+<h4 id="supported-implementations"><a class="anchor" href="#supported-implementations"></a><a class="link" href="#supported-implementations">4.1.1. Supported Implementations</a></h4>
 <div class="ulist">
 <ul>
 <li>
@@ -1343,7 +1405,7 @@ It provides a consistent API to use in your applications allowing you the develo
 </div>
 </div>
 <div class="sect2">
-<h3 id="core-concepts"><a class="anchor" href="#core-concepts"></a><a class="link" href="#core-concepts">3.2. Core Concepts</a></h3>
+<h3 id="core-concepts"><a class="anchor" href="#core-concepts"></a><a class="link" href="#core-concepts">4.2. Core Concepts</a></h3>
 <div class="paragraph">
 <p>To create a circuit breaker in your code you can use the <code>CircuitBreakerFactory</code> API. When you include a Spring Cloud Circuit Breaker starter on your classpath a bean implementing this API will automatically be created for you.
 A very simple example of using this API is given below</p>
@@ -1380,7 +1442,7 @@ The function will be passed the <code>Throwable</code> that caused the fallback 
 You can optionally exclude the fallback if you do not want to provide one.</p>
 </div>
 <div class="sect3">
-<h4 id="circuit-breakers-in-reactive-code"><a class="anchor" href="#circuit-breakers-in-reactive-code"></a><a class="link" href="#circuit-breakers-in-reactive-code">3.2.1. Circuit Breakers In Reactive Code</a></h4>
+<h4 id="circuit-breakers-in-reactive-code"><a class="anchor" href="#circuit-breakers-in-reactive-code"></a><a class="link" href="#circuit-breakers-in-reactive-code">4.2.1. Circuit Breakers In Reactive Code</a></h4>
 <div class="paragraph">
 <p>If Project Reactor is on the class path then you can also use <code>ReactiveCircuitBreakerFactory</code> for your reactive code.</p>
 </div>
@@ -1417,7 +1479,7 @@ that caused the failure.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="configuration"><a class="anchor" href="#configuration"></a><a class="link" href="#configuration">3.3. Configuration</a></h3>
+<h3 id="configuration"><a class="anchor" href="#configuration"></a><a class="link" href="#configuration">4.3. Configuration</a></h3>
 <div class="paragraph">
 <p>You can configure your circuit breakers using by creating beans of type <code>Customizer</code>.
 The <code>Customizer</code> interface has a single method called <code>customize</code> that takes in the <code>Object</code> to customize.</p>
@@ -1446,7 +1508,7 @@ the links below</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="configuration-properties"><a class="anchor" href="#configuration-properties"></a><a class="link" href="#configuration-properties">4. Configuration Properties</a></h2>
+<h2 id="configuration-properties"><a class="anchor" href="#configuration-properties"></a><a class="link" href="#configuration-properties">5. Configuration Properties</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To see the list of all Spring Cloud Commons related configuration properties please check <a href="appendix.html">the Appendix page</a>.</p>
