@@ -77,7 +77,8 @@ public class CachingServiceInstanceListSupplier implements ServiceInstanceListSu
 									.getCache(SERVICE_INSTANCE_CACHE_NAME);
 							if (cache == null) {
 								if (log.isErrorEnabled()) {
-									log.error("Unable to find cache for writing: " + SERVICE_INSTANCE_CACHE_NAME);
+									log.error("Unable to find cache for writing: "
+											+ SERVICE_INSTANCE_CACHE_NAME);
 								}
 							}
 							else {
