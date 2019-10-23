@@ -19,8 +19,8 @@ package reactor.core.publisher;
 import org.reactivestreams.Publisher;
 
 /**
- * INTERNAL USAGE ONLY. This functionality is ported to reactor-core and will be removed
- * in a next release.
+ * INTERNAL USAGE ONLY. This functionality will be ported to reactor-core and will be
+ * removed in a next release.
  *
  * @author Tim Ysewyn
  */
@@ -29,8 +29,10 @@ public abstract class CloudFlux<T> extends Flux<T> {
 	/**
 	 * Pick the first {@link Publisher} to emit an onNext/onError signal and replay all
 	 * signals from that {@link Publisher}, effectively behaving like the fastest of these
-	 * competing sources. If none of the sources is emitting a signal, a completion signal
-	 * will be send.
+	 * competing sources. If all the sources complete empty, a single completion signal is
+	 * sent. Note that if all the sources are empty (never emit an element, ie. no onNext)
+	 * AND at least one is also infinite (no onComplete/onError signal), the resulting
+	 * {@link Flux} will be infinite and empty (like {@link Flux#never()}).
 	 * @param sources The competing source publishers
 	 * @param <I> The type of values in both source and output sequences
 	 * @return a new {@link Flux} behaving like the fastest of its sources
@@ -43,8 +45,10 @@ public abstract class CloudFlux<T> extends Flux<T> {
 	/**
 	 * Pick the first {@link Publisher} to emit an onNext/onError signal and replay all
 	 * signals from that {@link Publisher}, effectively behaving like the fastest of these
-	 * competing sources. If none of the sources is emitting a signal, a completion signal
-	 * will be send.
+	 * competing sources. If all the sources complete empty, a single completion signal is
+	 * sent. Note that if all the sources are empty (never emit an element, ie. no onNext)
+	 * AND at least one is also infinite (no onComplete/onError signal), the resulting
+	 * {@link Flux} will be infinite and empty (like {@link Flux#never()}).
 	 * @param sources The competing source publishers
 	 * @param <I> The type of values in both source and output sequences
 	 * @return a new {@link reactor.core.publisher.Flux} behaving like the fastest of its

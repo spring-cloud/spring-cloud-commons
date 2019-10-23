@@ -28,20 +28,23 @@ import reactor.test.StepVerifier;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 /**
  * @author Tim Ysewyn
  */
 public class FluxFirstNonEmptyEmittingTests {
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void arrayNull() {
-		CloudFlux.firstNonEmpty((Publisher<Integer>[]) null);
+		assertThatNullPointerException()
+				.isThrownBy(() -> CloudFlux.firstNonEmpty((Publisher<Integer>[]) null));
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void iterableNull() {
-		CloudFlux.firstNonEmpty((Iterable<Publisher<Integer>>) null);
+		assertThatNullPointerException().isThrownBy(
+				() -> CloudFlux.firstNonEmpty((Iterable<Publisher<Integer>>) null));
 	}
 
 	@Test
@@ -89,9 +92,12 @@ public class FluxFirstNonEmptyEmittingTests {
 
 	@Test
 	public void neverAndEmpty() {
-		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.never(), Flux.empty()))
-				.thenAwait(Duration.ofSeconds(2)).thenCancel().verifyThenAssertThat()
-				.hasNotDiscardedElements().hasNotDroppedElements().hasNotDroppedErrors();
+		StepVerifier
+				.withVirtualTime(
+						() -> CloudFlux.firstNonEmpty(Flux.never(), Flux.empty()))
+				.expectSubscription().expectNoEvent(Duration.ofDays(1)).thenCancel()
+				.verifyThenAssertThat().hasNotDiscardedElements().hasNotDroppedElements()
+				.hasNotDroppedErrors();
 	}
 
 	@Test
@@ -99,7 +105,7 @@ public class FluxFirstNonEmptyEmittingTests {
 		RuntimeException ex = new RuntimeException("forced failure");
 		StepVerifier
 				.create(CloudFlux.firstNonEmpty(Flux.<Integer>error(ex), Flux.empty()))
-				.expectError(RuntimeException.class).verifyThenAssertThat()
+				.expectErrorMessage("forced failure").verifyThenAssertThat()
 				.hasNotDiscardedElements().hasNotDroppedElements().hasNotDroppedErrors();
 	}
 
@@ -108,7 +114,7 @@ public class FluxFirstNonEmptyEmittingTests {
 		RuntimeException ex = new RuntimeException("forced failure");
 		StepVerifier
 				.create(CloudFlux.firstNonEmpty(Flux.empty(), Flux.<Integer>error(ex)))
-				.expectError(RuntimeException.class).verifyThenAssertThat()
+				.expectErrorMessage("forced failure").verifyThenAssertThat()
 				.hasNotDiscardedElements().hasNotDroppedElements().hasNotDroppedErrors();
 	}
 
@@ -117,7 +123,7 @@ public class FluxFirstNonEmptyEmittingTests {
 		RuntimeException ex = new RuntimeException("forced failure");
 		StepVerifier
 				.create(CloudFlux.firstNonEmpty(Flux.never(), Flux.<Integer>error(ex)))
-				.expectError(RuntimeException.class).verifyThenAssertThat()
+				.expectErrorMessage("forced failure").verifyThenAssertThat()
 				.hasNotDiscardedElements().hasNotDroppedElements().hasNotDroppedErrors();
 	}
 
