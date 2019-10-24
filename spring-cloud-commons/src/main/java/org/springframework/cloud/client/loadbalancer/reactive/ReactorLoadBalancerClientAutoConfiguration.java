@@ -23,6 +23,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -66,14 +67,21 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 
 		@Bean
 		public WebClientCustomizer loadBalancerClientWebClientCustomizer(
-				ReactorLoadBalancerExchangeFilterFunction filterFunction) {
-			return builder -> builder.filter(filterFunction);
+				DeferringReactorLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction) {
+			return builder -> builder.filter(deferringExchangeFilterFunction);
 		}
 
 		@Bean
 		public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
 				ReactiveLoadBalancer.Factory loadBalancerFactory) {
 			return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory);
+		}
+
+		@Bean
+		DeferringReactorLoadBalancerExchangeFilterFunction deferringLoadBalancerExchangeFilterFunction(
+				ObjectProvider<ReactorLoadBalancerExchangeFilterFunction> exchangeFilterFunctionProvider) {
+			return new DeferringReactorLoadBalancerExchangeFilterFunction(
+					exchangeFilterFunctionProvider);
 		}
 
 	}
