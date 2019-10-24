@@ -32,6 +32,8 @@ public class DeferringReactorLoadBalancerExchangeFilterFunction
 
 	private final ObjectProvider<ReactorLoadBalancerExchangeFilterFunction> exchangeFilterFunctionProvider;
 
+	private ReactorLoadBalancerExchangeFilterFunction delegate;
+
 	public DeferringReactorLoadBalancerExchangeFilterFunction(
 			ObjectProvider<ReactorLoadBalancerExchangeFilterFunction> exchangeFilterFunctionProvider) {
 		this.exchangeFilterFunctionProvider = exchangeFilterFunctionProvider;
@@ -39,13 +41,18 @@ public class DeferringReactorLoadBalancerExchangeFilterFunction
 
 	@Override
 	public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
-		ReactorLoadBalancerExchangeFilterFunction delegate = exchangeFilterFunctionProvider
-				.getIfAvailable();
-		if (delegate == null) {
-			throw new IllegalStateException(
-					"ReactorLoadBalancerExchangeFilterFunction not available.");
-		}
+		tryResolveDelegate();
 		return delegate.filter(request, next);
+	}
+
+	private void tryResolveDelegate() {
+		if (delegate == null) {
+			delegate = exchangeFilterFunctionProvider.getIfAvailable();
+			if (delegate == null) {
+				throw new IllegalStateException(
+						"ReactorLoadBalancerExchangeFilterFunction not available.");
+			}
+		}
 	}
 
 }

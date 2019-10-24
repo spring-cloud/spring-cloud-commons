@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
@@ -61,14 +59,9 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 
 		@Bean
 		public LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
-				final List<WebClientCustomizer> customizers) {
-			return new LoadBalancerWebClientBuilderBeanPostProcessor(customizers);
-		}
-
-		@Bean
-		public WebClientCustomizer loadBalancerClientWebClientCustomizer(
 				DeferringReactorLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction) {
-			return builder -> builder.filter(deferringExchangeFilterFunction);
+			return new LoadBalancerWebClientBuilderBeanPostProcessor(
+					deferringExchangeFilterFunction);
 		}
 
 		@Bean

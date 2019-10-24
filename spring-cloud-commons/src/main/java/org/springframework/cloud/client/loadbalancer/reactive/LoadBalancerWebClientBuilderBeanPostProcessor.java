@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import java.util.List;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -30,14 +28,14 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 public class LoadBalancerWebClientBuilderBeanPostProcessor implements BeanPostProcessor {
 
-	private final List<WebClientCustomizer> customizers;
+	private final DeferringReactorLoadBalancerExchangeFilterFunction exchangeFilterFunction;
 
 	@Autowired
 	ApplicationContext context;
 
 	public LoadBalancerWebClientBuilderBeanPostProcessor(
-			List<WebClientCustomizer> customizers) {
-		this.customizers = customizers;
+			DeferringReactorLoadBalancerExchangeFilterFunction exchangeFilterFunction) {
+		this.exchangeFilterFunction = exchangeFilterFunction;
 	}
 
 	@Override
@@ -47,8 +45,7 @@ public class LoadBalancerWebClientBuilderBeanPostProcessor implements BeanPostPr
 			if (context.findAnnotationOnBean(beanName, LoadBalanced.class) == null) {
 				return bean;
 			}
-			customizers.forEach(
-					customizer -> customizer.customize((WebClient.Builder) bean));
+			((WebClient.Builder) bean).filter(exchangeFilterFunction);
 		}
 		return bean;
 	}
