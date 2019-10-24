@@ -41,7 +41,7 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
 
 	private static final Log LOG = LogFactory
-			.getLog(LoadBalancerExchangeFilterFunction.class);
+			.getLog(ReactorLoadBalancerExchangeFilterFunction.class);
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
