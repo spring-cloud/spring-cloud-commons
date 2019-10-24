@@ -86,12 +86,13 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 	private ConfigurableApplicationContext init(Class<?> config) {
 		return LoadBalancerTestUtils.init(config,
-				ReactorLoadBalancerClientAutoConfiguration.class);
+				ReactorLoadBalancerClientAutoConfiguration.class,
+				ReactorLoadBalancerBeanPostProcessorConfiguration.class);
 	}
 
 	private void assertLoadBalanced(WebClient.Builder webClientBuilder) {
 		LoadBalancerTestUtils.assertLoadBalanced(webClientBuilder,
-				ReactorLoadBalancerExchangeFilterFunction.class);
+				DeferringReactorLoadBalancerExchangeFilterFunction.class);
 	}
 
 	@Configuration

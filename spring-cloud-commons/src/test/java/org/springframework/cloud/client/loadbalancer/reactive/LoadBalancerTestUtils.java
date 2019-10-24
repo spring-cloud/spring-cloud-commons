@@ -18,6 +18,8 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.util.List;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -39,9 +41,10 @@ final class LoadBalancerTestUtils {
 		throw new IllegalStateException("Can't instantiate a utility class");
 	}
 
-	static ConfigurableApplicationContext init(Class<?> config, Class<?> clientClass) {
+	static ConfigurableApplicationContext init(Class<?>... configClasses) {
 		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.sources(config, WebClientAutoConfiguration.class, clientClass).run();
+				.sources(ArrayUtils.add(configClasses, WebClientAutoConfiguration.class))
+				.run();
 	}
 
 	@SuppressWarnings("unchecked")
