@@ -25,7 +25,12 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 
 /**
+ * An {@link ExchangeFilterFunction} implementation that uses {@link ObjectProvider} to resolve
+ * appropriate load-balancing {@link ExchangeFilterFunction} delegate when the {@link ExchangeFilterFunction#filter(ClientRequest, ExchangeFunction)}
+ * method is first called.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
 public class DeferringLoadBalancerExchangeFilterFunction<T extends ExchangeFilterFunction>
 		implements ExchangeFilterFunction {

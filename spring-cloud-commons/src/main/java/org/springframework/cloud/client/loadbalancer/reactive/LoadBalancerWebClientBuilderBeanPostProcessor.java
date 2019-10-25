@@ -23,7 +23,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
+ * A {@link BeanPostProcessor} that applies {@link DeferringLoadBalancerExchangeFilterFunction} filter
+ * to all {@link WebClient.Builder} instances annotated with {@link LoadBalanced}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
 public class LoadBalancerWebClientBuilderBeanPostProcessor implements BeanPostProcessor {
 
