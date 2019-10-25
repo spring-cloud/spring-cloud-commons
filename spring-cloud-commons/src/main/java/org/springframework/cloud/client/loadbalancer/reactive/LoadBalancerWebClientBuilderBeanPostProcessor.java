@@ -17,7 +17,6 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.ApplicationContext;
@@ -28,14 +27,15 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 public class LoadBalancerWebClientBuilderBeanPostProcessor implements BeanPostProcessor {
 
-	private final DeferringReactorLoadBalancerExchangeFilterFunction exchangeFilterFunction;
+	private final DeferringLoadBalancerExchangeFilterFunction exchangeFilterFunction;
 
-	@Autowired
-	ApplicationContext context;
+	private final ApplicationContext context;
 
 	public LoadBalancerWebClientBuilderBeanPostProcessor(
-			DeferringReactorLoadBalancerExchangeFilterFunction exchangeFilterFunction) {
+			DeferringLoadBalancerExchangeFilterFunction exchangeFilterFunction,
+			ApplicationContext context) {
 		this.exchangeFilterFunction = exchangeFilterFunction;
+		this.context = context;
 	}
 
 	@Override

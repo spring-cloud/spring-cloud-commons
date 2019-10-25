@@ -27,15 +27,15 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class DeferringReactorLoadBalancerExchangeFilterFunction
+public class DeferringLoadBalancerExchangeFilterFunction<T extends ExchangeFilterFunction>
 		implements ExchangeFilterFunction {
 
-	private final ObjectProvider<ReactorLoadBalancerExchangeFilterFunction> exchangeFilterFunctionProvider;
+	private final ObjectProvider<T> exchangeFilterFunctionProvider;
 
-	private ReactorLoadBalancerExchangeFilterFunction delegate;
+	private T delegate;
 
-	public DeferringReactorLoadBalancerExchangeFilterFunction(
-			ObjectProvider<ReactorLoadBalancerExchangeFilterFunction> exchangeFilterFunctionProvider) {
+	public DeferringLoadBalancerExchangeFilterFunction(
+			ObjectProvider<T> exchangeFilterFunctionProvider) {
 		this.exchangeFilterFunctionProvider = exchangeFilterFunctionProvider;
 	}
 
@@ -45,7 +45,8 @@ public class DeferringReactorLoadBalancerExchangeFilterFunction
 		return delegate.filter(request, next);
 	}
 
-	private void tryResolveDelegate() {
+	// Visible for tests
+	void tryResolveDelegate() {
 		if (delegate == null) {
 			delegate = exchangeFilterFunctionProvider.getIfAvailable();
 			if (delegate == null) {
@@ -53,6 +54,11 @@ public class DeferringReactorLoadBalancerExchangeFilterFunction
 						"ReactorLoadBalancerExchangeFilterFunction not available.");
 			}
 		}
+	}
+
+	// Visible for tests
+	T getDelegate() {
+		return delegate;
 	}
 
 }

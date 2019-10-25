@@ -57,8 +57,12 @@ final class LoadBalancerTestUtils {
 			Class<?> exchangeFilterFunctionClass) {
 		List<ExchangeFilterFunction> filters = getFilters(webClientBuilder);
 		then(filters).hasSize(1);
-		ExchangeFilterFunction interceptor = filters.get(0);
-		then(interceptor).isInstanceOf(exchangeFilterFunctionClass);
+		then(filters.get(0))
+				.isInstanceOf(DeferringLoadBalancerExchangeFilterFunction.class);
+		DeferringLoadBalancerExchangeFilterFunction interceptor = (DeferringLoadBalancerExchangeFilterFunction) filters
+				.get(0);
+		interceptor.tryResolveDelegate();
+		then(interceptor.getDelegate()).isInstanceOf(exchangeFilterFunctionClass);
 	}
 
 }

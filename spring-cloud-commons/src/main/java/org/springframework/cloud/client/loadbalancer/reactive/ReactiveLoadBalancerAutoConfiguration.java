@@ -16,16 +16,10 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,32 +37,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @ConditionalOnMissingBean(ReactorLoadBalancerExchangeFilterFunction.class)
 @Deprecated
 public class ReactiveLoadBalancerAutoConfiguration {
-
-	@LoadBalanced
-	@Autowired(required = false)
-	private List<WebClient.Builder> webClientBuilders = Collections.emptyList();
-
-	public List<WebClient.Builder> getBuilders() {
-		return this.webClientBuilders;
-	}
-
-	@Bean
-	public SmartInitializingSingleton loadBalancedWebClientInitializer(
-			final List<WebClientCustomizer> customizers) {
-		return () -> {
-			for (WebClient.Builder webClientBuilder : getBuilders()) {
-				for (WebClientCustomizer customizer : customizers) {
-					customizer.customize(webClientBuilder);
-				}
-			}
-		};
-	}
-
-	@Bean
-	public WebClientCustomizer loadBalancerClientWebClientCustomizer(
-			LoadBalancerExchangeFilterFunction filterFunction) {
-		return builder -> builder.filter(filterFunction);
-	}
 
 	@Bean
 	public LoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
