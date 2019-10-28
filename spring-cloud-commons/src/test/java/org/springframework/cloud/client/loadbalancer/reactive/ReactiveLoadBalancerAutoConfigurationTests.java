@@ -60,6 +60,14 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		then(webClientBuilder).isNotNull();
 
 		assertLoadBalanced(webClientBuilder, LoadBalancerExchangeFilterFunction.class);
+
+		final Map<String, OneWebClientBuilder.TestService> testServiceMap = context
+				.getBeansOfType(OneWebClientBuilder.TestService.class);
+		then(testServiceMap).isNotNull().hasSize(1);
+		OneWebClientBuilder.TestService testService = testServiceMap.values().stream()
+				.findFirst().get();
+		assertLoadBalanced(testService.webClient,
+				LoadBalancerExchangeFilterFunction.class);
 	}
 
 	@Test
@@ -157,6 +165,21 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		@LoadBalanced
 		WebClient.Builder loadBalancedWebClientBuilder() {
 			return WebClient.builder();
+		}
+
+		@Bean
+		TestService testService() {
+			return new TestService(loadBalancedWebClientBuilder());
+		}
+
+		private final class TestService {
+
+			public final WebClient webClient;
+
+			private TestService(WebClient.Builder builder) {
+				this.webClient = builder.build();
+			}
+
 		}
 
 	}

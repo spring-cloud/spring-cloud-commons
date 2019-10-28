@@ -65,4 +65,11 @@ final class LoadBalancerTestUtils {
 		then(interceptor.getDelegate()).isInstanceOf(exchangeFilterFunctionClass);
 	}
 
+	static void assertLoadBalanced(WebClient webClient,
+			Class<?> exchangeFilterFunctionClass) {
+		assertLoadBalanced(
+				(WebClient.Builder) ReflectionTestUtils.getField(webClient, "builder"),
+				exchangeFilterFunctionClass);
+	}
+
 }
