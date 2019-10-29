@@ -53,6 +53,8 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 	@Bean
 	@ConditionalOnClass(
 			name = "org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.ribbon.enabled",
+			matchIfMissing = true)
 	public ReactorLoadBalancerClientRibbonWarnLogger reactorLoadBalancerClientRibbonWarnLogger() {
 		return new ReactorLoadBalancerClientRibbonWarnLogger();
 	}
