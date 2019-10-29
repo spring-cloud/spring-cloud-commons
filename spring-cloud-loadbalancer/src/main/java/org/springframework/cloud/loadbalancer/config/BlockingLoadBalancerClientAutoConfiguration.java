@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
@@ -52,6 +53,7 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 
 	@Bean
 	@ConditionalOnClass(name = "org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.ribbon.enabled", matchIfMissing = true)
 	public RibbonWarnLogger ribbonWarnLogger() {
 		return new RibbonWarnLogger();
 	}
