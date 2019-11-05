@@ -543,7 +543,7 @@ TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set 
 `WebClient` can be configured to use the `ReactiveLoadBalancer`.
 If you add <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> to your project,
  `ReactorLoadBalancerExchangeFilterFunction` is auto-configured if `spring-webflux` is on the classpath.
-The following example shows how to configure a `WebClient` to use reactive load balancer under the hood:
+The following example shows how to configure a `WebClient` to use reactive load-balancer under the hood:
 
 [source,java,indent=0]
 ----
@@ -578,7 +578,7 @@ If you you don't have <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBala
 but you do have spring-cloud-starter-netflix-ribbon, you can still use `WebClient` with `LoadBalancerClient`. `LoadBalancerExchangeFilterFunction`
 will be auto-configured if `spring-webflux` is on the classpath. Please note, however, that this is
 uses a non-reactive client under the hood.
-The following example shows how to configure a `WebClient` to use load balancer:
+The following example shows how to configure a `WebClient` to use load-balancer:
 
 [source,java,indent=0]
 ----
