@@ -35,8 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BlockingLoadBalancerClientAutoConfigurationTests {
 
 	private ApplicationContextRunner applicationContextRunner = new ApplicationContextRunner()
-			.withPropertyValues("spring.cloud.loadbalancer.ribbon.enabled=false",
-					"debug=true")
+			.withPropertyValues("spring.cloud.loadbalancer.ribbon.enabled=false")
 			.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class,
 					BlockingLoadBalancerClientAutoConfiguration.class));
 
