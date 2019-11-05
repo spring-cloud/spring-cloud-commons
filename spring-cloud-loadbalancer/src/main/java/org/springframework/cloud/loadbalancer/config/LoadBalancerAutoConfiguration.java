@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
@@ -36,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @LoadBalancerClients
 @AutoConfigureBefore({ ReactorLoadBalancerClientAutoConfiguration.class,
+		LoadBalancerBeanPostProcessorAutoConfiguration.class,
 		ReactiveLoadBalancerAutoConfiguration.class })
 public class LoadBalancerAutoConfiguration {
 

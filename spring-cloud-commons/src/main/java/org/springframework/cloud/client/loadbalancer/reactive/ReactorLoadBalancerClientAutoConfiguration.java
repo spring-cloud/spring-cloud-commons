@@ -16,16 +16,11 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import java.util.Collections;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -63,45 +58,15 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 	@Conditional(OnNoRibbonDefaultCondition.class)
 	protected static class ReactorLoadBalancerExchangeFilterFunctionConfig {
 
-		private List<WebClient.Builder> webClientBuilders = Collections.emptyList();
-
-		List<WebClient.Builder> getBuilders() {
-			return this.webClientBuilders;
-		}
-
-		@Bean
-		public SmartInitializingSingleton loadBalancedWebClientInitializer(
-				final List<WebClientCustomizer> customizers) {
-			return () -> {
-				for (WebClient.Builder webClientBuilder : getBuilders()) {
-					for (WebClientCustomizer customizer : customizers) {
-						customizer.customize(webClientBuilder);
-					}
-				}
-			};
-		}
-
-		@Bean
-		public WebClientCustomizer loadBalancerClientWebClientCustomizer(
-				ReactorLoadBalancerExchangeFilterFunction filterFunction) {
-			return builder -> builder.filter(filterFunction);
-		}
-
 		@Bean
 		public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
 				ReactiveLoadBalancer.Factory loadBalancerFactory) {
 			return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory);
 		}
 
-		@LoadBalanced
-		@Autowired(required = false)
-		void setWebClientBuilders(List<WebClient.Builder> webClientBuilders) {
-			this.webClientBuilders = webClientBuilders;
-		}
-
 	}
 
-	private static final class OnNoRibbonDefaultCondition extends AnyNestedCondition {
+	static final class OnNoRibbonDefaultCondition extends AnyNestedCondition {
 
 		private OnNoRibbonDefaultCondition() {
 			super(ConfigurationPhase.REGISTER_BEAN);
