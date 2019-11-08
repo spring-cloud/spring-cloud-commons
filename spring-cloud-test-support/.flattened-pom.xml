@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-commons-parent</artifactId>
-    <version>2.2.0.RC2</version>
+    <version>2.2.0.BUILD-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
   <groupId>org.springframework.cloud</groupId>
   <artifactId>spring-cloud-test-support</artifactId>
-  <version>2.2.0.RC2</version>
+  <version>2.2.0.BUILD-SNAPSHOT</version>
   <name>spring-cloud-test-support</name>
   <description>Spring Cloud Test Support</description>
   <url>https://projects.spring.io/spring-cloud/spring-cloud-test-support/</url>
