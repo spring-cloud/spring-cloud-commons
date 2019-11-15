@@ -43,7 +43,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(WebClient.class)
 @Conditional(LoadBalancerBeanPostProcessorAutoConfiguration.OnAnyLoadBalancerImplementationPresentCondition.class)
 public class LoadBalancerBeanPostProcessorAutoConfiguration {
@@ -56,7 +56,7 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 				deferringExchangeFilterFunction, context);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@Conditional(ReactorLoadBalancerClientAutoConfiguration.OnNoRibbonDefaultCondition.class)
 	@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 	protected static class ReactorDeferringLoadBalancerFilterConfig {
@@ -71,7 +71,7 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnBean(LoadBalancerClient.class)
 	@AutoConfigureAfter(ReactorDeferringLoadBalancerFilterConfig.class)
 	@Deprecated

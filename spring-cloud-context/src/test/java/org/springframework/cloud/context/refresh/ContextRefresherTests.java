@@ -160,12 +160,12 @@ public class ContextRefresherTests {
 		return list;
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class Empty {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	// This is added to bootstrap context as a source in bootstrap.properties
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 

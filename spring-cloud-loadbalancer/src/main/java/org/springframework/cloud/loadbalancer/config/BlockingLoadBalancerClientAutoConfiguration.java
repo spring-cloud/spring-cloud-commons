@@ -44,7 +44,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Olga Maciaszek-Sharma
  * @since 2.1.3
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @LoadBalancerClients
 @AutoConfigureAfter(LoadBalancerAutoConfiguration.class)
 @AutoConfigureBefore({
@@ -61,7 +61,7 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 		return new BlockingLoadBalancerClientRibbonWarnLogger();
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(RestTemplate.class)
 	@Conditional(OnNoRibbonDefaultCondition.class)
 	protected static class BlockingLoadbalancerClientConfig {

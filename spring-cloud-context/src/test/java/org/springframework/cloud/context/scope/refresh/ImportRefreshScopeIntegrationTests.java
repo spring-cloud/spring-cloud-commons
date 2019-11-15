@@ -52,7 +52,7 @@ public class ImportRefreshScopeIntegrationTests {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 	}
 
-	@Configuration("service")
+	@Configuration(value = "service", proxyBeanMethods = false)
 	@RefreshScope
 	public static class ExampleService {
 
@@ -62,7 +62,7 @@ public class ImportRefreshScopeIntegrationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@Import({ RefreshAutoConfiguration.class, ExampleService.class })
 	protected static class TestConfiguration {
 

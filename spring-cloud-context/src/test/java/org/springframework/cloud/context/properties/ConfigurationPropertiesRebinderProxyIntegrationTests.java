@@ -68,7 +68,7 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 		then(this.properties.getExpiry().get("one")).isEqualTo(new Integer(56));
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	@Import({ Interceptor.class, RefreshConfiguration.RebinderConfiguration.class,
 			PropertyPlaceholderAutoConfiguration.class, AopAutoConfiguration.class })
@@ -94,7 +94,7 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 	// Hack out a protected inner class for testing
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
 
-		@Configuration
+		@Configuration(proxyBeanMethods = false)
 		protected static class RebinderConfiguration
 				extends ConfigurationPropertiesRebinderAutoConfiguration {
 

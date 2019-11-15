@@ -38,7 +38,7 @@ import org.springframework.core.annotation.Order;
  *
  * @author Biju Kunjummen
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore({ NoopDiscoveryClientAutoConfiguration.class,
 		CommonsClientAutoConfiguration.class })
 public class SimpleDiscoveryClientAutoConfiguration

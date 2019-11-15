@@ -30,7 +30,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(WebClient.class)
 @ConditionalOnBean(LoadBalancerClient.class)
 @AutoConfigureAfter(ReactorLoadBalancerClientAutoConfiguration.class)

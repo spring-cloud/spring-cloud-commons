@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Primary;
  * @author Biju Kunjummen
  */
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore(SimpleDiscoveryClientAutoConfiguration.class)
 public class CompositeDiscoveryClientAutoConfiguration {
 

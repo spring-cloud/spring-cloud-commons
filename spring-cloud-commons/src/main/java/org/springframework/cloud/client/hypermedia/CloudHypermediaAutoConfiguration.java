@@ -35,7 +35,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Oliver Gierke
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(type = "org.springframework.cloud.client.hypermedia.RemoteResource")
 @EnableConfigurationProperties(CloudHypermediaProperties.class)
 public class CloudHypermediaAutoConfiguration {

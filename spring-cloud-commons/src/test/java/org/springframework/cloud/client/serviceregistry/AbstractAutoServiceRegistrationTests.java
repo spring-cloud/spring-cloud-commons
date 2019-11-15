@@ -93,7 +93,7 @@ public class AbstractAutoServiceRegistrationTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class Config {
 
 		@Bean

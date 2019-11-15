@@ -49,7 +49,7 @@ public class EncryptionIntegrationTests {
 		then(context.getBean(PasswordProperties.class).getPassword()).isEqualTo("test");
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(PasswordProperties.class)
 	protected static class TestConfiguration {
 

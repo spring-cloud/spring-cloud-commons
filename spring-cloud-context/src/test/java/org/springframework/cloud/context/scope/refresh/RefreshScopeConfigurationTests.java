@@ -133,7 +133,7 @@ public class RefreshScopeConfigurationTests {
 
 	}
 
-	@Configuration("application")
+	@Configuration(value = "application", proxyBeanMethods = false)
 	@RefreshScope
 	protected static class Application {
 
@@ -151,7 +151,7 @@ public class RefreshScopeConfigurationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class ClientApp {
 
 		public static void main(String[] args) {

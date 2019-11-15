@@ -72,7 +72,7 @@ public class RestartIntegrationTests {
 		then(json).containsOnlyOnce("parent\": null");
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	protected static class TestConfiguration {
 

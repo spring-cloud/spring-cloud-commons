@@ -50,7 +50,7 @@ public class ReactiveSimpleDiscoveryPropertiesAutoConfigurationTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class Config {
 
 	}

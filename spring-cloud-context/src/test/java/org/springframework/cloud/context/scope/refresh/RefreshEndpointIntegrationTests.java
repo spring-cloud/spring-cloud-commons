@@ -87,7 +87,7 @@ public class RefreshEndpointIntegrationTests {
 		return entity;
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	protected static class ClientApp {
 

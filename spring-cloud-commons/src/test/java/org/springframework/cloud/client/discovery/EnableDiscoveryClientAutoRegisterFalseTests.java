@@ -59,7 +59,7 @@ public class EnableDiscoveryClientAutoRegisterFalseTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableDiscoveryClient(autoRegister = false)
 	public static class App {
 

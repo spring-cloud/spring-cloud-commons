@@ -59,7 +59,7 @@ public class RefreshAutoConfigurationMoreClassPathTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	static class Config {
 

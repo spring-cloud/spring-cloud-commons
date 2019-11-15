@@ -32,7 +32,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
  * @author Dave Syer
  *
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @AutoConfigureAfter(WebMvcAutoConfiguration.class)
 public class LifecycleMvcEndpointAutoConfiguration {
 

@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Primary;
  * @author Tim Ysewyn
  * @since 2.2.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnDiscoveryEnabled
 @ConditionalOnReactiveDiscoveryEnabled
 public class ReactiveCompositeDiscoveryClientAutoConfiguration {

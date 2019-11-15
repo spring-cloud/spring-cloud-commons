@@ -61,7 +61,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  * @author Venil Noronha
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RefreshScope.class)
 @ConditionalOnProperty(name = RefreshAutoConfiguration.REFRESH_SCOPE_ENABLED,
 		matchIfMissing = true)
@@ -107,7 +107,7 @@ public class RefreshAutoConfiguration {
 		return new RefreshEventListener(contextRefresher);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(name = "javax.persistence.EntityManagerFactory")
 	protected static class JpaInvokerConfiguration implements LoadTimeWeaverAware {
 

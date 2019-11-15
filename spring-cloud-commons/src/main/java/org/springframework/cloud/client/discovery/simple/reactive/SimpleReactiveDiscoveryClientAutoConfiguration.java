@@ -46,7 +46,7 @@ import org.springframework.core.annotation.Order;
  * @author Tim Ysewyn
  * @since 2.2.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnDiscoveryEnabled
 @ConditionalOnReactiveDiscoveryEnabled
 @EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
@@ -101,7 +101,7 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(ReactiveHealthIndicator.class)
 	protected static class HealthConfiguration {
 

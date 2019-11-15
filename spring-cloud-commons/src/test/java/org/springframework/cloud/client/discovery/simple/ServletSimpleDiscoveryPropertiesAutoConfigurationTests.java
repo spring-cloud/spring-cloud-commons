@@ -49,7 +49,7 @@ public class ServletSimpleDiscoveryPropertiesAutoConfigurationTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class Config {
 
 	}

@@ -87,7 +87,7 @@ public class DiscoveryClientHealthIndicatorTests {
 		return status;
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	public static class Config {
 

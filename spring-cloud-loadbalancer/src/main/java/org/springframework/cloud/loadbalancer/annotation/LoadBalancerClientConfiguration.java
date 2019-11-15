@@ -46,7 +46,7 @@ import org.springframework.core.env.Environment;
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties
 @ConditionalOnDiscoveryEnabled
 public class LoadBalancerClientConfiguration {
@@ -63,7 +63,7 @@ public class LoadBalancerClientConfiguration {
 				ServiceInstanceListSupplier.class), name);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnReactiveDiscoveryEnabled
 	@Order(REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER)
 	public static class ReactiveSupportConfiguration {
@@ -100,7 +100,7 @@ public class LoadBalancerClientConfiguration {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnBlockingDiscoveryEnabled
 	@Order(REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER + 1)
 	public static class BlockingSupportConfiguration {

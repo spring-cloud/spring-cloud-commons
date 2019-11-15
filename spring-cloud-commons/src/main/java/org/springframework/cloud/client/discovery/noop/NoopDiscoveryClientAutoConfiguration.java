@@ -45,7 +45,7 @@ import org.springframework.core.env.Environment;
  * instead}.
  * @author Dave Syer
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties
 @ConditionalOnMissingBean(DiscoveryClient.class)
 @Deprecated
@@ -120,7 +120,7 @@ public class NoopDiscoveryClientAutoConfiguration
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(name = {
 			"org.springframework.web.context.support.GenericWebApplicationContext",
 			"org.springframework.boot.context.embedded.EmbeddedWebApplicationContext" })

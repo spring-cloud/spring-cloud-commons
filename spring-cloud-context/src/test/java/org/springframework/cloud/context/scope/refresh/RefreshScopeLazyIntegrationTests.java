@@ -199,7 +199,7 @@ public class RefreshScopeLazyIntegrationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(TestProperties.class)
 	@ImportAutoConfiguration({ RefreshAutoConfiguration.class,
 			PropertyPlaceholderAutoConfiguration.class })

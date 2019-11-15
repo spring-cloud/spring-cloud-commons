@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 /**
  * @author Spencer Gibb
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @Import(AutoServiceRegistrationConfiguration.class)
 @ConditionalOnProperty(value = "spring.cloud.service-registry.auto-registration.enabled",
 		matchIfMissing = true)

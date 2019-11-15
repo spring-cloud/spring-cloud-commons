@@ -153,7 +153,7 @@ public class RefreshScopeScaleTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(TestProperties.class)
 	@Import({ RefreshAutoConfiguration.class,
 			PropertyPlaceholderAutoConfiguration.class })

@@ -59,7 +59,7 @@ public class BootstrapOrderingAutoConfigurationIntegrationTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class Application {
 
 	}

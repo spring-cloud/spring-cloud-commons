@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @LoadBalancerClients
 @AutoConfigureBefore({ ReactorLoadBalancerClientAutoConfiguration.class,
 		LoadBalancerBeanPostProcessorAutoConfiguration.class,

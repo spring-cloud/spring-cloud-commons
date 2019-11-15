@@ -81,7 +81,7 @@ public class ContextRefresherIntegrationTests {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(TestProperties.class)
 	@EnableAutoConfiguration
 	protected static class TestConfiguration {

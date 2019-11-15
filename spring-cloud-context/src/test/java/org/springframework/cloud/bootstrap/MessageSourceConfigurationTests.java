@@ -49,7 +49,7 @@ public class MessageSourceConfigurationTests {
 				.isEqualTo("Hello World!");
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	protected static class TestApplication {
 

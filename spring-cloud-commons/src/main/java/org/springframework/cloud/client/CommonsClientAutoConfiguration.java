@@ -47,10 +47,10 @@ import org.springframework.context.annotation.Configuration;
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class CommonsClientAutoConfiguration {
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(HealthIndicator.class)
 	@EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
 	@ConditionalOnBean(DiscoveryClient.class)
@@ -84,7 +84,7 @@ public class CommonsClientAutoConfiguration {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(Endpoint.class)
 	@ConditionalOnProperty(value = "spring.cloud.features.enabled", matchIfMissing = true)
 	protected static class ActuatorConfiguration {

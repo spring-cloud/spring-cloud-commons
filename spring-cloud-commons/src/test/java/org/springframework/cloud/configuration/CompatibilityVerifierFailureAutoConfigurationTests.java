@@ -50,7 +50,7 @@ public class CompatibilityVerifierFailureAutoConfigurationTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	static class TestConfiguration {
 

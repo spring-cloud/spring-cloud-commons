@@ -60,7 +60,7 @@ public class AutoRegisterPropertyFalseTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class App {
 
 	}

@@ -60,7 +60,7 @@ public class CustomOkHttpClientBuilderConfigurationTests {
 
 }
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableAutoConfiguration
 class CustomOkHttpClientBuilderApplication {
 
@@ -68,7 +68,7 @@ class CustomOkHttpClientBuilderApplication {
 		SpringApplication.run(MyApplication.class, args);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class MyConfig {
 
 		@Bean

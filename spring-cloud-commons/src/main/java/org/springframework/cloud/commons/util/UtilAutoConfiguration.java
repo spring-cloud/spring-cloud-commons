@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Spencer Gibb
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(value = "spring.cloud.util.enabled", matchIfMissing = true)
 @AutoConfigureOrder(0)
 @EnableConfigurationProperties

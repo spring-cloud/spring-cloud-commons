@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
  * @see CacheAutoConfiguration
  * @see CacheAspectSupport
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ CacheManager.class, CacheAutoConfiguration.class })
 @ConditionalOnMissingBean(CacheAspectSupport.class)
 @EnableCaching

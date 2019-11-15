@@ -133,7 +133,7 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 				.isEqualTo(this.transformedRequest2);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class Transformer {
 
 		@Bean
@@ -148,7 +148,7 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class TransformersAreOrdered {
 
 		@Bean
@@ -169,7 +169,7 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class NoTransformer {
 
 		@Bean

@@ -36,7 +36,7 @@ import static org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapCon
  * @author Spencer Gibb
  */
 @Order(0)
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties
 public class TestBootstrapConfiguration {
 

@@ -34,7 +34,7 @@ import static java.util.Collections.singletonList;
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableAutoConfiguration
 public class CompositeDiscoveryClientTestsConfig {
 

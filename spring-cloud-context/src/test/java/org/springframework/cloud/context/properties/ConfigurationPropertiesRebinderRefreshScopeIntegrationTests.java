@@ -86,7 +86,7 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 		then(this.properties.getCount()).isEqualTo(1);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	@Import({ RefreshAutoConfiguration.class,
 			ConfigurationPropertiesRebinderAutoConfiguration.class,

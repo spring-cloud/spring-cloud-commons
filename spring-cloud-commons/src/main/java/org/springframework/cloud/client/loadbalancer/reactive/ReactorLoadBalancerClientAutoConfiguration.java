@@ -40,7 +40,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(WebClient.class)
 @ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 public class ReactorLoadBalancerClientAutoConfiguration {
@@ -54,7 +54,7 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 		return new ReactorLoadBalancerClientRibbonWarnLogger();
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@Conditional(OnNoRibbonDefaultCondition.class)
 	protected static class ReactorLoadBalancerExchangeFilterFunctionConfig {
 
