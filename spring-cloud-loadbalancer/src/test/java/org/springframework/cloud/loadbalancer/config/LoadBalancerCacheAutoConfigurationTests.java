@@ -88,9 +88,8 @@ class LoadBalancerCacheAutoConfigurationTests {
 	}
 
 	private ApplicationContextRunner baseApplicationRunner() {
-		return new ApplicationContextRunner()
-				.withConfiguration(AutoConfigurations
-						.of(CacheAutoConfiguration.class, LoadBalancerCacheAutoConfiguration.class));
+		return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
+				CacheAutoConfiguration.class, LoadBalancerCacheAutoConfiguration.class));
 	}
 
 	@Configuration(proxyBeanMethods = false)

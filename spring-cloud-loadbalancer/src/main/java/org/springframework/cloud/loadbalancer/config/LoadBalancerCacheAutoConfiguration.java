@@ -16,13 +16,18 @@
 
 package org.springframework.cloud.loadbalancer.config;
 
+import javax.annotation.PostConstruct;
+
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheAspectSupport;
@@ -41,17 +46,50 @@ import org.springframework.context.annotation.Configuration;
  * @see CacheAspectSupport
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass({CacheManager.class, CacheAutoConfiguration.class, Caffeine.class})
+@ConditionalOnClass({CacheManager.class, CacheAutoConfiguration.class})
 @AutoConfigureAfter(CacheAutoConfiguration.class)
 @ConditionalOnProperty(value = "spring.cloud.loadbalancer.cache.enabled",
 		matchIfMissing = true)
 public class LoadBalancerCacheAutoConfiguration {
 
-	@Bean(autowireCandidate = false)
-	@ConditionalOnMissingBean
-	LoadBalancerCacheManager loadBalancerCacheManager(
-			@Value("${spring.cloud.loadbalancer.caffeine.spec:}") String specification) {
-		return new CaffeineBasedLoadBalancerCacheManager(specification);
+	@Configuration
+	@ConditionalOnClass(Caffeine.class)
+	protected static class LoadBalancerCacheManagerConfiguration {
+
+		@Bean(autowireCandidate = false)
+		@ConditionalOnMissingBean
+		LoadBalancerCacheManager loadBalancerCacheManager(
+				@Value("${spring.cloud.loadbalancer.caffeine.spec:}") String specification) {
+			return new CaffeineBasedLoadBalancerCacheManager(specification);
+		}
+
+	}
+
+	@Configuration
+	@ConditionalOnMissingClass("com.github.benmanes.caffeine.cache.Caffeine")
+	protected static class LoadBalancerCacheManagerWarnConfiguration {
+
+		@Bean
+		LoadBalancerCaffeineWarnLogger caffeineWarnLogger() {
+			return new LoadBalancerCaffeineWarnLogger();
+		}
+
+	}
+
+	static class LoadBalancerCaffeineWarnLogger {
+
+		private static final Log LOG = LogFactory
+				.getLog(LoadBalancerCaffeineWarnLogger.class);
+
+		@PostConstruct
+		void logWarning() {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(
+						"Spring Cloud LoadBalancer is currently working without cache. To enable cache, add "
+								+ "com.github.ben-manes.caffeine:caffeine dependency to classpath.");
+			}
+		}
+
 	}
 
 }

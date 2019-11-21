@@ -41,4 +41,5 @@ public class CaffeineBasedLoadBalancerCacheManager extends CaffeineCacheManager
 					.softValues());
 		}
 	}
+
 }
