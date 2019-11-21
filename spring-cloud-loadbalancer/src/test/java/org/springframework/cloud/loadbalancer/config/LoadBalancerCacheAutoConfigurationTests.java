@@ -71,7 +71,7 @@ class LoadBalancerCacheAutoConfigurationTests {
 	@Test
 	void loadBalancerCacheShouldNotOverrideExistingCaffeineCacheManager() {
 		ApplicationContextRunner contextRunner = baseApplicationRunner()
-				.withUserConfiguration(LoadBalancerCacheIntegrationTests.TestConfiguration.class);
+				.withUserConfiguration(TestConfiguration.class);
 
 		contextRunner.run(context -> {
 			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
