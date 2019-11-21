@@ -507,7 +507,7 @@ public class MyConfiguration {
 <section xml:id="_multiple_resttemplate_objects">
 <title>Multiple RestTemplate objects</title>
 <simpara>If you want a <literal>RestTemplate</literal> that is not load-balanced, create a <literal>RestTemplate</literal> bean and inject it.
-To access the load-balanced <literal>RestTemplate</literal>, use the <literal>@LoadBalanced</literal> qualifier when you create your <literal>@Bean</literal>, as shown in the following example:\</simpara>
+To access the load-balanced <literal>RestTemplate</literal>, use the <literal>@LoadBalanced</literal> qualifier when you create your <literal>@Bean</literal>, as shown in the following example:</simpara>
 <programlisting language="java" linenumbering="unnumbered">@Configuration
 public class MyConfiguration {
 
@@ -525,8 +525,8 @@ public class MyConfiguration {
 }
 
 public class MyClass {
-    @Autowired
-    private RestTemplate restTemplate;
+@Autowired
+private RestTemplate restTemplate;
 
     @Autowired
     @LoadBalanced
@@ -546,6 +546,45 @@ public class MyClass {
 <tip>
 <simpara>If you see errors such as <literal>java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89</literal>, try injecting <literal>RestOperations</literal> or setting <literal>spring.aop.proxyTargetClass=true</literal>.</simpara>
 </tip>
+</section>
+<section xml:id="_multiple_webclient_objects">
+<title>Multiple WebClient Objects</title>
+<simpara>If you want a <literal>WebClient</literal> that is not load-balanced, create a <literal>WebClient</literal> bean and inject it.
+To access the load-balanced <literal>WebClient</literal>, use the <literal>@LoadBalanced</literal> qualifier when you create your <literal>@Bean</literal>, as shown in the following example:</simpara>
+<programlisting language="java" linenumbering="unnumbered">@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    WebClient.Builder loadBalanced() {
+        return WebClient.builder();
+    }
+
+    @Primary
+    @Bean
+    WebClient.Builder webClient() {
+        return WebClient.builder();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private WebClient.Builder webClientBuilder;
+
+    @Autowired
+    @LoadBalanced
+    private WebClient.Builder loadBalanced;
+
+    public Mono&lt;String&gt; doOtherStuff() {
+        return loadBalanced.build().get().uri("http://stores/stores")
+        				.retrieve().bodyToMono(String.class);
+    }
+
+    public Mono&lt;String&gt; doStuff() {
+        return webClientBuilder.build().get().uri("http://example.com")
+        				.retrieve().bodyToMono(String.class);
+    }
+}</programlisting>
 </section>
 <section xml:id="loadbalanced-webclient">
 <title>Spring WebFlux WebClient as a Load Balancer Client</title>
@@ -595,8 +634,7 @@ The following example shows how to configure a <literal>WebClient</literal> to u
 }</programlisting>
 <simpara>The URI needs to use a virtual host name (that is, a service name, not a host name).
 The <literal>LoadBalancerClient</literal> is used to create a full physical address.</simpara>
-<simpara>WARN:
-This approach is now deprecated.
+<simpara>WARN: This approach is now deprecated.
 We suggest you use <link linkend="webflux-with-reactive-loadbalancer">WebFlux with reactive Load-Balancer</link>
 instead.</simpara>
 </section>
