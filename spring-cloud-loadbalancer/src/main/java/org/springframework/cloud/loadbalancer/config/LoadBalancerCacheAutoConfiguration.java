@@ -16,13 +16,19 @@
 
 package org.springframework.cloud.loadbalancer.config;
 
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheAspectSupport;
+import org.springframework.cloud.loadbalancer.cache.CaffeineBasedLoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -35,10 +41,17 @@ import org.springframework.context.annotation.Configuration;
  * @see CacheAspectSupport
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass({ CacheManager.class, CacheAutoConfiguration.class })
-@ConditionalOnMissingBean(CacheAspectSupport.class)
-@EnableCaching
-@AutoConfigureBefore(CacheAutoConfiguration.class)
+@ConditionalOnClass({CacheManager.class, CacheAutoConfiguration.class, Caffeine.class})
+@AutoConfigureAfter(CacheAutoConfiguration.class)
+@ConditionalOnProperty(value = "spring.cloud.loadbalancer.cache.enabled",
+		matchIfMissing = true)
 public class LoadBalancerCacheAutoConfiguration {
+
+	@Bean(autowireCandidate = false)
+	@ConditionalOnMissingBean
+	LoadBalancerCacheManager loadBalancerCacheManager(
+			@Value("${spring.cloud.loadbalancer.caffeine.spec:}") String specification) {
+		return new CaffeineBasedLoadBalancerCacheManager(specification);
+	}
 
 }
