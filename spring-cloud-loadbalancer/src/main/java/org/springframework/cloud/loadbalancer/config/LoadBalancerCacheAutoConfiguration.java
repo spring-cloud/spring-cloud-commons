@@ -61,7 +61,7 @@ public class LoadBalancerCacheAutoConfiguration {
 		@Bean(autowireCandidate = false)
 		@ConditionalOnMissingBean
 		LoadBalancerCacheManager loadBalancerCacheManager(
-				@Value("${spring.cloud.loadbalancer.caffeine.spec:}") String specification) {
+				@Value("${spring.cloud.loadbalancer.cache.caffeine.spec:}") String specification) {
 			return new CaffeineBasedLoadBalancerCacheManager(specification);
 		}
 
