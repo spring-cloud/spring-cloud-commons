@@ -37,10 +37,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * An AutoConfiguration that automatically enables caching when when Spring Boot and
- * Spring Framework Cache support classes are present.
+ * An AutoConfiguration that automatically enables caching when when Spring Boot, and
+ * Spring Framework Cache support and Caffeine classes are present and warns if Caffeine is not present
+ * (we are only warning about Caffeine because the other dependencies are in spring-cloud-starter-loadbalancer).
  *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  * @see CacheManager
  * @see CacheAutoConfiguration
  * @see CacheAspectSupport
