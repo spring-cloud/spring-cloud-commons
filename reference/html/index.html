@@ -136,21 +136,22 @@ $(addBlockSwitches);
 </ul>
 </li>
 <li><a href="#multiple-resttemplate-objects">2.5. Multiple RestTemplate objects</a></li>
-<li><a href="#loadbalanced-webclient">2.6. Spring WebFlux WebClient as a Load Balancer Client</a>
+<li><a href="#multiple-webclient-objects">2.6. Multiple WebClient Objects</a></li>
+<li><a href="#loadbalanced-webclient">2.7. Spring WebFlux WebClient as a Load Balancer Client</a>
 <ul class="sectlevel3">
-<li><a href="#webflux-with-reactive-loadbalancer">2.6.1. Spring WebFlux WebClient with ReactorLoadBalancerExchangeFilterFunction</a></li>
-<li><a href="#load-balancer-exchange-filter-function">2.6.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></li>
+<li><a href="#webflux-with-reactive-loadbalancer">2.7.1. Spring WebFlux WebClient with ReactorLoadBalancerExchangeFilterFunction</a></li>
+<li><a href="#load-balancer-exchange-filter-function">2.7.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></li>
 </ul>
 </li>
-<li><a href="#ignore-network-interfaces">2.7. Ignore Network Interfaces</a></li>
-<li><a href="#http-clients">2.8. HTTP Client Factories</a></li>
-<li><a href="#enabled-features">2.9. Enabled Features</a>
+<li><a href="#ignore-network-interfaces">2.8. Ignore Network Interfaces</a></li>
+<li><a href="#http-clients">2.9. HTTP Client Factories</a></li>
+<li><a href="#enabled-features">2.10. Enabled Features</a>
 <ul class="sectlevel3">
-<li><a href="#feature-types">2.9.1. Feature types</a></li>
-<li><a href="#declaring-features">2.9.2. Declaring features</a></li>
+<li><a href="#feature-types">2.10.1. Feature types</a></li>
+<li><a href="#declaring-features">2.10.2. Declaring features</a></li>
 </ul>
 </li>
-<li><a href="#spring-cloud-compatibility-verification">2.10. Spring Cloud Compatibility Verification</a></li>
+<li><a href="#spring-cloud-compatibility-verification">2.11. Spring Cloud Compatibility Verification</a></li>
 </ul>
 </li>
 <li><a href="#spring-cloud-loadbalancer">3. Spring Cloud LoadBalancer</a>
@@ -958,7 +959,7 @@ public class MyConfiguration {
 <h3 id="multiple-resttemplate-objects"><a class="anchor" href="#multiple-resttemplate-objects"></a><a class="link" href="#multiple-resttemplate-objects">2.5. Multiple RestTemplate objects</a></h3>
 <div class="paragraph">
 <p>If you want a <code>RestTemplate</code> that is not load-balanced, create a <code>RestTemplate</code> bean and inject it.
-To access the load-balanced <code>RestTemplate</code>, use the <code>@LoadBalanced</code> qualifier when you create your <code>@Bean</code>, as shown in the following example:\</p>
+To access the load-balanced <code>RestTemplate</code>, use the <code>@LoadBalanced</code> qualifier when you create your <code>@Bean</code>, as shown in the following example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -979,8 +980,8 @@ public class MyConfiguration {
 }
 
 public class MyClass {
-    @Autowired
-    private RestTemplate restTemplate;
+@Autowired
+private RestTemplate restTemplate;
 
     @Autowired
     @LoadBalanced
@@ -1022,9 +1023,54 @@ If you see errors such as <code>java.lang.IllegalArgumentException: Can not set 
 </div>
 </div>
 <div class="sect2">
-<h3 id="loadbalanced-webclient"><a class="anchor" href="#loadbalanced-webclient"></a><a class="link" href="#loadbalanced-webclient">2.6. Spring WebFlux WebClient as a Load Balancer Client</a></h3>
+<h3 id="multiple-webclient-objects"><a class="anchor" href="#multiple-webclient-objects"></a><a class="link" href="#multiple-webclient-objects">2.6. Multiple WebClient Objects</a></h3>
+<div class="paragraph">
+<p>If you want a <code>WebClient</code> that is not load-balanced, create a <code>WebClient</code> bean and inject it.
+To access the load-balanced <code>WebClient</code>, use the <code>@LoadBalanced</code> qualifier when you create your <code>@Bean</code>, as shown in the following example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    WebClient.Builder loadBalanced() {
+        return WebClient.builder();
+    }
+
+    @Primary
+    @Bean
+    WebClient.Builder webClient() {
+        return WebClient.builder();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private WebClient.Builder webClientBuilder;
+
+    @Autowired
+    @LoadBalanced
+    private WebClient.Builder loadBalanced;
+
+    public Mono&lt;String&gt; doOtherStuff() {
+        return loadBalanced.build().get().uri("http://stores/stores")
+                        .retrieve().bodyToMono(String.class);
+    }
+
+    public Mono&lt;String&gt; doStuff() {
+        return webClientBuilder.build().get().uri("http://example.com")
+                        .retrieve().bodyToMono(String.class);
+    }
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="loadbalanced-webclient"><a class="anchor" href="#loadbalanced-webclient"></a><a class="link" href="#loadbalanced-webclient">2.7. Spring WebFlux WebClient as a Load Balancer Client</a></h3>
 <div class="sect3">
-<h4 id="webflux-with-reactive-loadbalancer"><a class="anchor" href="#webflux-with-reactive-loadbalancer"></a><a class="link" href="#webflux-with-reactive-loadbalancer">2.6.1. Spring WebFlux WebClient with ReactorLoadBalancerExchangeFilterFunction</a></h4>
+<h4 id="webflux-with-reactive-loadbalancer"><a class="anchor" href="#webflux-with-reactive-loadbalancer"></a><a class="link" href="#webflux-with-reactive-loadbalancer">2.7.1. Spring WebFlux WebClient with ReactorLoadBalancerExchangeFilterFunction</a></h4>
 <div class="paragraph">
 <p><code>WebClient</code> can be configured to use the <code>ReactiveLoadBalancer</code>.
 If you add <a href="#spring-cloud-loadbalancer-starter">Spring Cloud LoadBalancer starter</a> to your project,
@@ -1070,7 +1116,7 @@ to <code>false</code>.
 </div>
 </div>
 <div class="sect3">
-<h4 id="load-balancer-exchange-filter-function"><a class="anchor" href="#load-balancer-exchange-filter-function"></a><a class="link" href="#load-balancer-exchange-filter-function">2.6.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></h4>
+<h4 id="load-balancer-exchange-filter-function"><a class="anchor" href="#load-balancer-exchange-filter-function"></a><a class="link" href="#load-balancer-exchange-filter-function">2.7.2. Spring WebFlux WebClient with non-reactive Load Balancer Client</a></h4>
 <div class="paragraph">
 <p>If you you don&#8217;t have <a href="#spring-cloud-loadbalancer-starter">Spring Cloud LoadBalancer starter</a> in your project,
 but you do have spring-cloud-starter-netflix-ribbon, you can still use <code>WebClient</code> with <code>LoadBalancerClient</code>. <code>LoadBalancerExchangeFilterFunction</code>
@@ -1101,15 +1147,14 @@ The following example shows how to configure a <code>WebClient</code> to use loa
 The <code>LoadBalancerClient</code> is used to create a full physical address.</p>
 </div>
 <div class="paragraph">
-<p>WARN:
-This approach is now deprecated.
+<p>WARN: This approach is now deprecated.
 We suggest you use <a href="#webflux-with-reactive-loadbalancer">WebFlux with reactive Load-Balancer</a>
 instead.</p>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="ignore-network-interfaces"><a class="anchor" href="#ignore-network-interfaces"></a><a class="link" href="#ignore-network-interfaces">2.7. Ignore Network Interfaces</a></h3>
+<h3 id="ignore-network-interfaces"><a class="anchor" href="#ignore-network-interfaces"></a><a class="link" href="#ignore-network-interfaces">2.8. Ignore Network Interfaces</a></h3>
 <div class="paragraph">
 <p>Sometimes, it is useful to ignore certain named network interfaces so that they can be excluded from Service Discovery registration (for example, when running in a Docker container).
 A list of regular expressions can be set to cause the desired network interfaces to be ignored.
@@ -1157,7 +1202,7 @@ The following configuration ignores the <code>docker0</code> interface and all i
 </div>
 </div>
 <div class="sect2">
-<h3 id="http-clients"><a class="anchor" href="#http-clients"></a><a class="link" href="#http-clients">2.8. HTTP Client Factories</a></h3>
+<h3 id="http-clients"><a class="anchor" href="#http-clients"></a><a class="link" href="#http-clients">2.9. HTTP Client Factories</a></h3>
 <div class="paragraph">
 <p>Spring Cloud Commons provides beans for creating both Apache HTTP clients (<code>ApacheHttpClientFactory</code>) and OK HTTP clients (<code>OkHttpClientFactory</code>).
 The <code>OkHttpClientFactory</code> bean is created only if the OK HTTP jar is on the classpath.
@@ -1168,14 +1213,14 @@ You can also disable the creation of these beans by setting <code>spring.cloud.h
 </div>
 </div>
 <div class="sect2">
-<h3 id="enabled-features"><a class="anchor" href="#enabled-features"></a><a class="link" href="#enabled-features">2.9. Enabled Features</a></h3>
+<h3 id="enabled-features"><a class="anchor" href="#enabled-features"></a><a class="link" href="#enabled-features">2.10. Enabled Features</a></h3>
 <div class="paragraph">
 <p>Spring Cloud Commons provides a <code>/features</code> actuator endpoint.
 This endpoint returns features available on the classpath and whether they are enabled.
 The information returned includes the feature type, name, version, and vendor.</p>
 </div>
 <div class="sect3">
-<h4 id="feature-types"><a class="anchor" href="#feature-types"></a><a class="link" href="#feature-types">2.9.1. Feature types</a></h4>
+<h4 id="feature-types"><a class="anchor" href="#feature-types"></a><a class="link" href="#feature-types">2.10.1. Feature types</a></h4>
 <div class="paragraph">
 <p>There are two types of 'features': abstract and named.</p>
 </div>
@@ -1189,7 +1234,7 @@ The version displayed is <code>bean.getClass().getPackage().getImplementationVer
 </div>
 </div>
 <div class="sect3">
-<h4 id="declaring-features"><a class="anchor" href="#declaring-features"></a><a class="link" href="#declaring-features">2.9.2. Declaring features</a></h4>
+<h4 id="declaring-features"><a class="anchor" href="#declaring-features"></a><a class="link" href="#declaring-features">2.10.2. Declaring features</a></h4>
 <div class="paragraph">
 <p>Any module can declare any number of <code>HasFeature</code> beans, as shown in the following examples:</p>
 </div>
@@ -1223,7 +1268,7 @@ HasFeatures localFeatures() {
 </div>
 </div>
 <div class="sect2">
-<h3 id="spring-cloud-compatibility-verification"><a class="anchor" href="#spring-cloud-compatibility-verification"></a><a class="link" href="#spring-cloud-compatibility-verification">2.10. Spring Cloud Compatibility Verification</a></h3>
+<h3 id="spring-cloud-compatibility-verification"><a class="anchor" href="#spring-cloud-compatibility-verification"></a><a class="link" href="#spring-cloud-compatibility-verification">2.11. Spring Cloud Compatibility Verification</a></h3>
 <div class="paragraph">
 <p>Due to the fact that some users have problem with setting up Spring Cloud application, we&#8217;ve decided
 to add a compatibility verification mechanism. It will break if your current setup is not compatible
