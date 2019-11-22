@@ -801,6 +801,28 @@ in the following sections:
 * <<webclinet-loadbalancer-client, Spring WebClient as a Load Balancer Client>>
 * <<webflux-with-reactive-loadbalancer,Spring WebFlux WebClient with `ReactorLoadBalancerExchangeFilterFunction`>>
 
+=== Spring Cloud LoadBalancer Caching
+
+Apart from the basic `ServiceInstanceListSupplier` implementation that retrieves instances
+via `DiscoveryClient` each time it has to choose an instance, we provide a https://github.com/ben-manes/caffeine[Caffeine-backed]
+implementation.
+To make use of it, you need to have `com.github.ben-manes.caffeine:caffeine` in the classpath.
+The default setup includes `expireAfterWrite` set to 30 seconds and records set to soft references.
+
+You can set your own `TTL` value (the time after write after which entries should be expired), expressed as `Duration`, by passing a `String` compliant with the https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/Duration.html#parse(java.lang.CharSequence)[`Duration` API]
+as the value of `spring.cloud.loadbalancer.cache.ttl` property.
+
+You can also override the default Caffeine Cache setup for the LoadBalancer by passing your own https://static.javadoc.io/com.github.ben-manes.caffeine/caffeine/2.2.2/com/github/benmanes/caffeine/cache/CaffeineSpec.html[Caffeine Specification]
+in the `spring.cloud.loadbalancer.cache.caffeine.spec` property.
+
+WARN: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including `TTL`.
+
+You can also altogether disable loadBalancer caching by setting the value of `spring.cloud.loadbalancer.cache.enabled`
+to `false`.
+
+WARNING: Although the basic, non-cached, implementation is useful for prototyping and testing, it's much less efficient
+than the cached versions, so we recommend always using the cached version in production.
+
 [[spring-cloud-loadbalancer-starter]]
 === Spring Cloud LoadBalancer starter
 
@@ -808,11 +830,8 @@ We also provide a starter that allows you to easily add Spring Cloud LoadBalance
 In order to use it, just add `org.springframework.cloud:spring-cloud-starter-loadbalancer` to your Spring
 Cloud dependencies in your build file.
 
-WARNING: In order to make use of the more efficient cached version of `ServiceInstanceListSupplier`,
- `spring-cloud-starter-loadbalancer` will *enable caching* by default.
-https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching]
-mechanism will be used under the hood. If you don't want caching to be used, you can set
-the value of `spring.cache.type` to `none`.
+NOTE: Spring Cloud LoadBalancer starter includes
+https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching].
 
 WARNING: If you have both Ribbon and Spring Cloud LoadBalancer int the classpath, in order to maintain
 backward compatibility, Ribbon-based implementations will be used by default. In order

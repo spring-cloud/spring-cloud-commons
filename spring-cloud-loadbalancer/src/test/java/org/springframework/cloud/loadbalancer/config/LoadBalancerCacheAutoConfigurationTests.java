@@ -16,17 +16,16 @@
 
 package org.springframework.cloud.loadbalancer.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
-import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.util.StringUtils;
+import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,31 +39,63 @@ class LoadBalancerCacheAutoConfigurationTests {
 
 	@Test
 	void shouldAutoEnableCaching() {
-		AnnotationConfigApplicationContext context = setup("");
-		assertThat(context.getBeansOfType(CacheManager.class)).isNotEmpty();
-		assertThat(context.getBeansOfType(CacheManager.class).get("cacheManager"))
-				.isNotInstanceOf(NoOpCacheManager.class);
+		ApplicationContextRunner contextRunner = baseApplicationRunner();
+
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+			assertThat(((CacheManager) context.getBean("loadBalancerCacheManager"))
+					.getCacheNames()).hasSize(1);
+			assertThat(context.getBean("loadBalancerCacheManager"))
+					.isInstanceOf(CaffeineCacheManager.class);
+			assertThat(((CacheManager) context.getBean("loadBalancerCacheManager"))
+					.getCacheNames()).contains("CachingServiceInstanceListSupplierCache");
+		});
 	}
 
 	@Test
-	void shouldUseNoOpCacheIfCacheTypeNone() {
-		AnnotationConfigApplicationContext context = setup("spring.cache.type=none");
-		assertThat(context.getBeansOfType(CacheManager.class)).isNotEmpty();
-		assertThat(context.getBeansOfType(CacheManager.class).get("cacheManager"))
-				.isInstanceOf(NoOpCacheManager.class);
+	void loadBalancerCacheShouldNotOverrideCacheTypeSetting() {
+		ApplicationContextRunner contextRunner = baseApplicationRunner()
+				.withUserConfiguration(TestConfiguration.class)
+				.withPropertyValues("spring.cache.type=none");
+
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
+			assertThat(context.getBean("loadBalancerCacheManager"))
+					.isInstanceOf(CaffeineCacheManager.class);
+			assertThat(context.getBeansOfType(CacheManager.class).get("cacheManager"))
+					.isInstanceOf(NoOpCacheManager.class);
+
+		});
 	}
 
-	private AnnotationConfigApplicationContext setup(String property) {
-		List<Class> config = new ArrayList<>();
-		config.add(LoadBalancerCacheAutoConfiguration.class);
-		config.add(CacheAutoConfiguration.class);
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		if (StringUtils.hasText(property)) {
-			TestPropertyValues.of(property).applyTo(context);
-		}
-		context.register(config.toArray(new Class[0]));
-		context.refresh();
-		return context;
+	@Test
+	void loadBalancerCacheShouldNotOverrideExistingCaffeineCacheManager() {
+		ApplicationContextRunner contextRunner = baseApplicationRunner()
+				.withUserConfiguration(TestConfiguration.class);
+
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
+			assertThat(context.getBean("cacheManager"))
+					.isInstanceOf(CaffeineCacheManager.class);
+			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames())
+					.isEmpty();
+			assertThat(((CacheManager) context.getBean("loadBalancerCacheManager"))
+					.getCacheNames()).hasSize(1);
+			assertThat(((CacheManager) context.getBean("loadBalancerCacheManager"))
+					.getCacheNames()).contains("CachingServiceInstanceListSupplierCache");
+		});
+
+	}
+
+	private ApplicationContextRunner baseApplicationRunner() {
+		return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
+				CacheAutoConfiguration.class, LoadBalancerCacheAutoConfiguration.class));
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@EnableCaching
+	static class TestConfiguration {
+
 	}
 
 }
