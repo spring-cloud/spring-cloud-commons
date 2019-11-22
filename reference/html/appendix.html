@@ -265,6 +265,16 @@ Also, you can define your own properties.
 <td class="tableblock halign-left valign-top"><p class="tableblock">Whether to use only interfaces with site local addresses. See {@link InetAddress#isSiteLocalAddress()} for more details.</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">spring.cloud.loadbalancer.cache.caffeine.spec</p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The spec to use to create caches. See CaffeineSpec for more details on the spec format.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">spring.cloud.loadbalancer.cache.ttl</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">30s</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Time To Live - time counted from writing of the record, after which cache entries are expired, expressed as a {@link Duration}. The property {@link String} has to be in keeping with the appropriate syntax as specified in Spring Boot &lt;code&gt;StringToDurationConverter&lt;/code&gt;. @see &lt;a href= "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java"&gt;StringToDurationConverter.java&lt;/a&gt;</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">spring.cloud.loadbalancer.retry.enabled</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
