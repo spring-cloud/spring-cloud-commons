@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.loadbalancer.cache;
 
+import java.time.Duration;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -29,6 +31,14 @@ public class LoadBalancerCacheProperties {
 
 	private Caffeine caffeine = new Caffeine();
 
+	/**
+	 * Time To Live - time counted from writing of the record, after which cache entries
+	 * are expired, expressed as a {@link Duration}. The property {@link String} has to be
+	 * in keeping with the appropriate syntax as specified in
+	 * {@link Duration#parse(CharSequence)}.
+	 */
+	private Duration ttl = Duration.ofSeconds(30);
+
 	public Caffeine getCaffeine() {
 		return caffeine;
 	}
@@ -37,8 +47,18 @@ public class LoadBalancerCacheProperties {
 		this.caffeine = caffeine;
 	}
 
+	public Duration getTtl() {
+		return ttl;
+	}
+
+	public void setTtl(String ttl) {
+		this.ttl = Duration.parse(ttl);
+	}
+
 	/**
 	 * Caffeine-specific LoadBalancer cache properties.
+	 * NOTE: Passing your own Caffeine specification will override any other LoadBalancerCache settings,
+	 * including TTL.
 	 */
 	public static class Caffeine {
 

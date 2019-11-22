@@ -92,8 +92,7 @@ public class LoadBalancerCacheAutoConfiguration {
 		@ConditionalOnMissingBean
 		LoadBalancerCacheManager loadBalancerCacheManager(
 				LoadBalancerCacheProperties cacheProperties) {
-			return new CaffeineBasedLoadBalancerCacheManager(
-					cacheProperties.getCaffeine().getSpec());
+			return new CaffeineBasedLoadBalancerCacheManager(cacheProperties);
 		}
 
 	}

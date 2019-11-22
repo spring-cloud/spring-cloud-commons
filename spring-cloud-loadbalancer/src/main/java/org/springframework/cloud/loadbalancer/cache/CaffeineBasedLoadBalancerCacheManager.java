@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.loadbalancer.cache;
 
-import java.util.concurrent.TimeUnit;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 import org.springframework.cache.caffeine.CaffeineCacheManager;
@@ -26,7 +24,7 @@ import org.springframework.util.StringUtils;
 import static org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier.SERVICE_INSTANCE_CACHE_NAME;
 
 /**
- * A Spring Cloud LoadBalancer specifi implementation of {@link CaffeineCacheManager} that
+ * A Spring Cloud LoadBalancer specific implementation of {@link CaffeineCacheManager} that
  * implements the {@link LoadBalancerCacheManager} marker interface.
  *
  * @author Olga Maciaszek-Sharma
@@ -35,15 +33,21 @@ import static org.springframework.cloud.loadbalancer.core.CachingServiceInstance
 public class CaffeineBasedLoadBalancerCacheManager extends CaffeineCacheManager
 		implements LoadBalancerCacheManager {
 
-	public CaffeineBasedLoadBalancerCacheManager(String specification) {
-		super(SERVICE_INSTANCE_CACHE_NAME);
-		if (!StringUtils.isEmpty(specification)) {
-			setCacheSpecification(specification);
+	public CaffeineBasedLoadBalancerCacheManager(String cacheName,
+			LoadBalancerCacheProperties properties) {
+		super(cacheName);
+		if (!StringUtils.isEmpty(properties.getCaffeine().getSpec())) {
+			setCacheSpecification(properties.getCaffeine().getSpec());
 		}
 		else {
-			setCaffeine(Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS)
+			setCaffeine(Caffeine.newBuilder().expireAfterWrite(properties.getTtl())
 					.softValues());
 		}
+
+	}
+
+	public CaffeineBasedLoadBalancerCacheManager(LoadBalancerCacheProperties properties) {
+		this(SERVICE_INSTANCE_CACHE_NAME, properties);
 	}
 
 }
