@@ -157,8 +157,9 @@ $(addBlockSwitches);
 <li><a href="#spring-cloud-loadbalancer">3. Spring Cloud LoadBalancer</a>
 <ul class="sectlevel2">
 <li><a href="#spring-cloud-loadbalancer-integrations">3.1. Spring Cloud LoadBalancer integrations</a></li>
-<li><a href="#spring-cloud-loadbalancer-starter">3.2. Spring Cloud LoadBalancer starter</a></li>
-<li><a href="#passing-your-own-spring-cloud-loadbalancer-configuration">3.3. Passing your own Spring Cloud LoadBalancer configuration</a></li>
+<li><a href="#spring-cloud-loadbalancer-caching">3.2. Spring Cloud LoadBalancer Caching</a></li>
+<li><a href="#spring-cloud-loadbalancer-starter">3.3. Spring Cloud LoadBalancer starter</a></li>
+<li><a href="#passing-your-own-spring-cloud-loadbalancer-configuration">3.4. Passing your own Spring Cloud LoadBalancer configuration</a></li>
 </ul>
 </li>
 <li><a href="#spring-cloud-circuit-breaker">4. Spring Cloud Circuit Breaker</a>
@@ -1343,11 +1344,28 @@ in the following sections:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="spring-cloud-loadbalancer-starter"><a class="anchor" href="#spring-cloud-loadbalancer-starter"></a><a class="link" href="#spring-cloud-loadbalancer-starter">3.2. Spring Cloud LoadBalancer starter</a></h3>
+<h3 id="spring-cloud-loadbalancer-caching"><a class="anchor" href="#spring-cloud-loadbalancer-caching"></a><a class="link" href="#spring-cloud-loadbalancer-caching">3.2. Spring Cloud LoadBalancer Caching</a></h3>
 <div class="paragraph">
-<p>We also provide a starter that allows you to easily add Spring Cloud LoadBalancer in a Spring Boot app.
-In order to use it, just add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> to your Spring
-Cloud dependencies in your build file.</p>
+<p>Apart from the basic <code>ServiceInstanceListSupplier</code> implementation that retrieves instances
+via <code>DiscoveryClient</code> each time it has to choose an instance, we provide a <a href="https://github.com/ben-manes/caffeine">Caffeine-backed</a>
+implementation.
+To make use of it, you need to have <code>com.github.ben-manes.caffeine:caffeine</code> in the classpath.
+The default setup includes <code>expireAfterWrite</code> set to 30 seconds and records set to soft references.</p>
+</div>
+<div class="paragraph">
+<p>You can set your own <code>TTL</code> value (the time after write after which entries should be expired), expressed as <code>Duration</code>, by passing a <code>String</code> compliant with the <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/Duration.html#parse(java.lang.CharSequence)"><code>Duration</code> API</a>
+as the value of <code>spring.cloud.loadbalancer.cache.ttl</code> property.</p>
+</div>
+<div class="paragraph">
+<p>You can also override the default Caffeine Cache setup for the LoadBalancer by passing your own <a href="https://static.javadoc.io/com.github.ben-manes.caffeine/caffeine/2.2.2/com/github/benmanes/caffeine/cache/CaffeineSpec.html">Caffeine Specification</a>
+in the <code>spring.cloud.loadbalancer.cache.caffeine.spec</code> property.</p>
+</div>
+<div class="paragraph">
+<p>WARN: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including <code>TTL</code>.</p>
+</div>
+<div class="paragraph">
+<p>You can also altogether disable loadBalancer caching by setting the value of <code>spring.cloud.loadbalancer.cache.enabled</code>
+to <code>false</code>.</p>
 </div>
 <div class="admonitionblock warning">
 <table>
@@ -1356,11 +1374,29 @@ Cloud dependencies in your build file.</p>
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-In order to make use of the more efficient cached version of <code>ServiceInstanceListSupplier</code>,
- <code>spring-cloud-starter-loadbalancer</code> will <strong>enable caching</strong> by default.
-<a href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html">Spring Boot Caching</a>
-mechanism will be used under the hood. If you don&#8217;t want caching to be used, you can set
-the value of <code>spring.cache.type</code> to <code>none</code>.
+Although the basic, non-cached, implementation is useful for prototyping and testing, it&#8217;s much less efficient
+than the cached versions, so we recommend always using the cached version in production.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="spring-cloud-loadbalancer-starter"><a class="anchor" href="#spring-cloud-loadbalancer-starter"></a><a class="link" href="#spring-cloud-loadbalancer-starter">3.3. Spring Cloud LoadBalancer starter</a></h3>
+<div class="paragraph">
+<p>We also provide a starter that allows you to easily add Spring Cloud LoadBalancer in a Spring Boot app.
+In order to use it, just add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> to your Spring
+Cloud dependencies in your build file.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Spring Cloud LoadBalancer starter includes
+<a href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html">Spring Boot Caching</a>.
 </td>
 </tr>
 </table>
@@ -1382,7 +1418,7 @@ make sure you set the property <code>spring.cloud.loadbalancer.ribbon.enabled</c
 </div>
 </div>
 <div class="sect2">
-<h3 id="passing-your-own-spring-cloud-loadbalancer-configuration"><a class="anchor" href="#passing-your-own-spring-cloud-loadbalancer-configuration"></a><a class="link" href="#passing-your-own-spring-cloud-loadbalancer-configuration">3.3. Passing your own Spring Cloud LoadBalancer configuration</a></h3>
+<h3 id="passing-your-own-spring-cloud-loadbalancer-configuration"><a class="anchor" href="#passing-your-own-spring-cloud-loadbalancer-configuration"></a><a class="link" href="#passing-your-own-spring-cloud-loadbalancer-configuration">3.4. Passing your own Spring Cloud LoadBalancer configuration</a></h3>
 <div class="paragraph">
 <p>You can also use the <code>@LoadBalancerClient</code> annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, like so:</p>
 </div>
