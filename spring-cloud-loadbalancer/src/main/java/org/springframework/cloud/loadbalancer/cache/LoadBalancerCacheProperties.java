@@ -34,8 +34,10 @@ public class LoadBalancerCacheProperties {
 	/**
 	 * Time To Live - time counted from writing of the record, after which cache entries
 	 * are expired, expressed as a {@link Duration}. The property {@link String} has to be
-	 * in keeping with the appropriate syntax as specified in
-	 * {@link Duration#parse(CharSequence)}.
+	 * in keeping with the appropriate syntax as specified in Spring Boot
+	 * <code>StringToDurationConverter</code>.
+	 * @see <a href=
+	 * "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java">StringToDurationConverter.java</a>
 	 */
 	private Duration ttl = Duration.ofSeconds(30);
 
@@ -51,14 +53,13 @@ public class LoadBalancerCacheProperties {
 		return ttl;
 	}
 
-	public void setTtl(String ttl) {
-		this.ttl = Duration.parse(ttl);
+	public void setTtl(Duration ttl) {
+		this.ttl = ttl;
 	}
 
 	/**
-	 * Caffeine-specific LoadBalancer cache properties.
-	 * NOTE: Passing your own Caffeine specification will override any other LoadBalancerCache settings,
-	 * including TTL.
+	 * Caffeine-specific LoadBalancer cache properties. NOTE: Passing your own Caffeine
+	 * specification will override any other LoadBalancerCache settings, including TTL.
 	 */
 	public static class Caffeine {
 

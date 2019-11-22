@@ -24,8 +24,8 @@ import org.springframework.util.StringUtils;
 import static org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier.SERVICE_INSTANCE_CACHE_NAME;
 
 /**
- * A Spring Cloud LoadBalancer specific implementation of {@link CaffeineCacheManager} that
- * implements the {@link LoadBalancerCacheManager} marker interface.
+ * A Spring Cloud LoadBalancer specific implementation of {@link CaffeineCacheManager}
+ * that implements the {@link LoadBalancerCacheManager} marker interface.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0

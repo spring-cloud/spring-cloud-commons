@@ -809,7 +809,7 @@ implementation.
 To make use of it, you need to have `com.github.ben-manes.caffeine:caffeine` in the classpath.
 The default setup includes `expireAfterWrite` set to 30 seconds and records set to soft references.
 
-You can set your own `TTL` value (the time after write after which entries should be expired), expressed as `Duration`, by passing a `String` compliant with the https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/time/Duration.html#parse(java.lang.CharSequence)[`Duration` API]
+You can set your own `TTL` value (the time after write after which entries should be expired), expressed as `Duration`, by passing a `String` compliant with the https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration[Spring Boot `String` to `Duration` converter syntax].
 as the value of `spring.cloud.loadbalancer.cache.ttl` property.
 
 You can also override the default Caffeine Cache setup for the LoadBalancer by passing your own https://static.javadoc.io/com.github.ben-manes.caffeine/caffeine/2.2.2/com/github/benmanes/caffeine/cache/CaffeineSpec.html[Caffeine Specification]
