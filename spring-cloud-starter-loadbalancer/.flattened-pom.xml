@@ -115,5 +115,11 @@
       <version>2.2.1.RELEASE</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>com.stoyanr</groupId>
+      <artifactId>evictor</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>

@@ -169,5 +169,12 @@
       <scope>compile</scope>
       <optional>true</optional>
     </dependency>
+    <dependency>
+      <groupId>com.stoyanr</groupId>
+      <artifactId>evictor</artifactId>
+      <version>1.0.0</version>
+      <scope>compile</scope>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 </project>
