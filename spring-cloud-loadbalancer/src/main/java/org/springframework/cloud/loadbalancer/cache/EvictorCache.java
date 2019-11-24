@@ -24,10 +24,9 @@ import javax.validation.constraints.Null;
 import com.stoyanr.evictor.ConcurrentMapWithTimedEviction;
 import com.stoyanr.evictor.map.ConcurrentHashMapWithTimedEviction;
 import com.stoyanr.evictor.scheduler.DelayedTaskEvictionScheduler;
-import jdk.internal.jline.internal.Nullable;
 
-import org.springframework.cache.Cache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -42,15 +41,17 @@ public class EvictorCache extends AbstractValueAdaptingCache {
 	private final long evictMs;
 
 	/**
-	 * Create a new EvictorCache with the specified name and the
-	 * given internal {@link ConcurrentMapWithTimedEviction} to use.
+	 * Create a new EvictorCache with the specified name and the given internal
+	 * {@link ConcurrentMapWithTimedEviction} to use.
 	 * @param name the name of the cache
-	 * @param evictMs default time to Evict for the underlyin {@link ConcurrentMapWithTimedEviction}
+	 * @param evictMs default time to Evict for the underlyin
+	 * {@link ConcurrentMapWithTimedEviction}
 	 * @param cache the ConcurrentMap to use as an internal store
-	 * @param allowNullValues whether to allow {@code null} values
-	 * (adapting them to an internal null holder value)
+	 * @param allowNullValues whether to allow {@code null} values (adapting them to an
+	 * internal null holder value)
 	 */
-	public EvictorCache(String name, ConcurrentMapWithTimedEviction<Object, Object> cache, long evictMs, boolean allowNullValues) {
+	public EvictorCache(String name, ConcurrentMapWithTimedEviction<Object, Object> cache,
+			long evictMs, boolean allowNullValues) {
 		super(allowNullValues);
 		Assert.notNull(name, "Name must not be null");
 		Assert.notNull(cache, "Cache must not be null");
@@ -64,29 +65,32 @@ public class EvictorCache extends AbstractValueAdaptingCache {
 	 * @param name the name of the cache
 	 */
 	public EvictorCache(String name) {
-		this(name, new ConcurrentHashMapWithTimedEviction<>(256, new DelayedTaskEvictionScheduler<>()), 0, true);
+		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
+				new DelayedTaskEvictionScheduler<>()), 0, true);
 	}
 
 	/**
 	 * Create a new EvictorCache with the specified name.
 	 * @param name the name of the cache
-	 * @param evictMs default time to Evict for the underlyin {@link ConcurrentMapWithTimedEviction}
-	 * @param allowNullValues whether to accept and convert {@code null}
-	 * values for this cache
+	 * @param evictMs default time to Evict for the underlyin
+	 * {@link ConcurrentMapWithTimedEviction}
+	 * @param allowNullValues whether to accept and convert {@code null} values for this
+	 * cache
 	 */
 	public EvictorCache(String name, long evictMs, boolean allowNullValues) {
-		this(name, new ConcurrentHashMapWithTimedEviction<>(256, new DelayedTaskEvictionScheduler<>()), evictMs, allowNullValues);
+		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
+				new DelayedTaskEvictionScheduler<>()), evictMs, allowNullValues);
 	}
-
 
 	/**
 	 * Create a new EvictorCache with the specified name.
 	 * @param name the name of the cache
-	 * @param allowNullValues whether to accept and convert {@code null}
-	 * values for this cache
+	 * @param allowNullValues whether to accept and convert {@code null} values for this
+	 * cache
 	 */
 	public EvictorCache(String name, boolean allowNullValues) {
-		this(name, new ConcurrentHashMapWithTimedEviction<>(256, new DelayedTaskEvictionScheduler<>()), 0, allowNullValues);
+		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
+				new DelayedTaskEvictionScheduler<>()), 0, allowNullValues);
 	}
 
 	@Override
@@ -119,12 +123,8 @@ public class EvictorCache extends AbstractValueAdaptingCache {
 		}));
 	}
 
-	/**
-	 * In order to conform to {@link Cache#put(Object, Object)}, we use {@link ConcurrentMapWithTimedEviction#replace(Object, Object)}
-	 * and not {@link ConcurrentMapWithTimedEviction#put(Object, Object)}
-	 */
 	public void put(Object key, @Nullable Object value, long evictMs) {
-		cache.replace(key, toStoreValue(value), evictMs);
+		cache.put(key, toStoreValue(value), evictMs);
 	}
 
 	@Override
@@ -140,13 +140,9 @@ public class EvictorCache extends AbstractValueAdaptingCache {
 		return toValueWrapper(existing);
 	}
 
-	/**
-	 * In order to conform to {@link Cache#put(Object, Object)}, we use {@link ConcurrentMapWithTimedEviction#replace(Object, Object)}
-	 * and not {@link ConcurrentMapWithTimedEviction#put(Object, Object)}
-	 */
 	@Override
 	public void put(Object key, @Nullable Object value) {
-		cache.replace(key, toStoreValue(value), evictMs);
+		cache.put(key, toStoreValue(value), evictMs);
 	}
 
 	@Override
@@ -170,5 +166,5 @@ public class EvictorCache extends AbstractValueAdaptingCache {
 		cache.clear();
 		return notEmpty;
 	}
-}
 
+}

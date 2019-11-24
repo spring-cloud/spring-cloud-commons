@@ -43,12 +43,15 @@ class LoadBalancerCacheAutoConfigurationTests {
 
 		contextRunner.run(context -> {
 			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
-			assertThat(((CacheManager) context.getBean("loadBalancerCacheManager"))
-					.getCacheNames()).hasSize(1);
-			assertThat(context.getBean("loadBalancerCacheManager"))
+			assertThat(
+					((CacheManager) context.getBean("caffeineLoadBalancerCacheManager"))
+							.getCacheNames()).hasSize(1);
+			assertThat(context.getBean("caffeineLoadBalancerCacheManager"))
 					.isInstanceOf(CaffeineCacheManager.class);
-			assertThat(((CacheManager) context.getBean("loadBalancerCacheManager"))
-					.getCacheNames()).contains("CachingServiceInstanceListSupplierCache");
+			assertThat(
+					((CacheManager) context.getBean("caffeineLoadBalancerCacheManager"))
+							.getCacheNames())
+									.contains("CachingServiceInstanceListSupplierCache");
 		});
 	}
 
@@ -60,7 +63,7 @@ class LoadBalancerCacheAutoConfigurationTests {
 
 		contextRunner.run(context -> {
 			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
-			assertThat(context.getBean("loadBalancerCacheManager"))
+			assertThat(context.getBean("caffeineLoadBalancerCacheManager"))
 					.isInstanceOf(CaffeineCacheManager.class);
 			assertThat(context.getBeansOfType(CacheManager.class).get("cacheManager"))
 					.isInstanceOf(NoOpCacheManager.class);
@@ -79,10 +82,13 @@ class LoadBalancerCacheAutoConfigurationTests {
 					.isInstanceOf(CaffeineCacheManager.class);
 			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames())
 					.isEmpty();
-			assertThat(((CacheManager) context.getBean("loadBalancerCacheManager"))
-					.getCacheNames()).hasSize(1);
-			assertThat(((CacheManager) context.getBean("loadBalancerCacheManager"))
-					.getCacheNames()).contains("CachingServiceInstanceListSupplierCache");
+			assertThat(
+					((CacheManager) context.getBean("caffeineLoadBalancerCacheManager"))
+							.getCacheNames()).hasSize(1);
+			assertThat(
+					((CacheManager) context.getBean("caffeineLoadBalancerCacheManager"))
+							.getCacheNames())
+									.contains("CachingServiceInstanceListSupplierCache");
 		});
 
 	}

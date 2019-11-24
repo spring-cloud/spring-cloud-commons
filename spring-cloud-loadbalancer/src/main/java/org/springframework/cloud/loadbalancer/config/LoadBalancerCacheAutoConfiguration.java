@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.config;
 import javax.annotation.PostConstruct;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.stoyanr.evictor.ConcurrentMapWithTimedEviction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,6 +33,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheAspectSupport;
 import org.springframework.cloud.loadbalancer.cache.CaffeineBasedLoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.EvictorBasedLoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheProperties;
 import org.springframework.context.annotation.Bean;
@@ -86,13 +88,27 @@ public class LoadBalancerCacheAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(Caffeine.class)
-	protected static class LoadBalancerCacheManagerConfiguration {
+	protected static class CaffeineLoadBalancerCacheManagerConfiguration {
 
 		@Bean(autowireCandidate = false)
 		@ConditionalOnMissingBean
-		LoadBalancerCacheManager loadBalancerCacheManager(
+		LoadBalancerCacheManager caffeineLoadBalancerCacheManager(
 				LoadBalancerCacheProperties cacheProperties) {
 			return new CaffeineBasedLoadBalancerCacheManager(cacheProperties);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnMissingClass("com.github.benmanes.caffeine.cache.Caffeine")
+	@ConditionalOnClass(ConcurrentMapWithTimedEviction.class)
+	protected static class EvictorLoadBalancerCacheManagerConfiguration {
+
+		@Bean(autowireCandidate = false)
+		@ConditionalOnMissingBean
+		LoadBalancerCacheManager evictorLoadBalancerCacheManager(
+				LoadBalancerCacheProperties cacheProperties) {
+			return new EvictorBasedLoadBalancerCacheManager(cacheProperties);
 		}
 
 	}

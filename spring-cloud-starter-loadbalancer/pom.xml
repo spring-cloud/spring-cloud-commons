@@ -9,7 +9,6 @@
 		<relativePath>..</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-
 	<artifactId>spring-cloud-starter-loadbalancer</artifactId>
 	<name>spring-cloud-starter-loadbalancer</name>
 	<description>Spring Cloud Starter LoadBalancer</description>
@@ -20,6 +19,7 @@
 	</organization>
 	<properties>
 		<main.basedir>${basedir}/../..</main.basedir>
+		<evictor.version>1.0.0</evictor.version>
 	</properties>
 
 	<dependencies>
@@ -34,6 +34,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.stoyanr</groupId>
+			<artifactId>evictor</artifactId>
+			<version>${evictor.version}</version>
 		</dependency>
 	</dependencies>
 </project>

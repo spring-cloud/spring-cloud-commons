@@ -41,6 +41,8 @@ public class LoadBalancerCacheProperties {
 	 */
 	private Duration ttl = Duration.ofSeconds(30);
 
+	private int initialCapacity = 256;
+
 	public Caffeine getCaffeine() {
 		return caffeine;
 	}
@@ -55,6 +57,14 @@ public class LoadBalancerCacheProperties {
 
 	public void setTtl(Duration ttl) {
 		this.ttl = ttl;
+	}
+
+	int getInitialCapacity() {
+		return initialCapacity;
+	}
+
+	void setInitialCapacity(int initialCapacity) {
+		this.initialCapacity = initialCapacity;
 	}
 
 	/**
