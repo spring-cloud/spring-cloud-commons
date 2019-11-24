@@ -25,12 +25,21 @@ import com.stoyanr.evictor.ConcurrentMapWithTimedEviction;
 import com.stoyanr.evictor.map.ConcurrentHashMapWithTimedEviction;
 import com.stoyanr.evictor.scheduler.DelayedTaskEvictionScheduler;
 
+import org.springframework.cache.Cache;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * An {@link ConcurrentMapWithTimedEviction}-based {@link Cache} implementation. Based on
+ * {@link ConcurrentMapCache}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
+ * @see <a href="https://github.com/stoyanr/Evictor">Evictor</a>
+ * @see ConcurrentMapWithTimedEviction
+ * @see ConcurrentMapCache
  */
 public class EvictorCache extends AbstractValueAdaptingCache {
 
@@ -165,6 +174,11 @@ public class EvictorCache extends AbstractValueAdaptingCache {
 		boolean notEmpty = !cache.isEmpty();
 		cache.clear();
 		return notEmpty;
+	}
+
+	// Visible for tests
+	long getEvictMs() {
+		return evictMs;
 	}
 
 }

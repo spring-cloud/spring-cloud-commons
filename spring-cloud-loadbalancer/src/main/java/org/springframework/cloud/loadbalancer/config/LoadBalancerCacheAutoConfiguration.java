@@ -41,15 +41,16 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * An AutoConfiguration that automatically enables caching when when Spring Boot, and
- * Spring Framework Cache support and Caffeine classes are present and warns if Caffeine
- * is not present (we are only warning about Caffeine because the other dependencies are
- * in spring-cloud-starter-loadbalancer).
+ * Spring Framework Cache support are present. If Caffeine is present in the classpath, it
+ * will be used for loadbalancer caching. If not, Evictor-based cache will be used.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  * @see CacheManager
  * @see CacheAutoConfiguration
  * @see CacheAspectSupport
+ * @see <a href="https://github.com/ben-manes/caffeine>Caffeine</a>
+ * @see <a href="https://github.com/stoyanr/Evictor">Evictor</a>
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ CacheManager.class, CacheAutoConfiguration.class })
@@ -79,8 +80,8 @@ public class LoadBalancerCacheAutoConfiguration {
 		void logWarning() {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(
-						"Spring Cloud LoadBalancer is currently working without cache. To enable cache, add "
-								+ "com.github.ben-manes.caffeine:caffeine dependency to classpath.");
+						"Spring Cloud LoadBalancer is currently working with default Evictor-based cache. "
+								+ "If you prefer to use Caffeine cache, make sure you add it to classpath.");
 			}
 		}
 

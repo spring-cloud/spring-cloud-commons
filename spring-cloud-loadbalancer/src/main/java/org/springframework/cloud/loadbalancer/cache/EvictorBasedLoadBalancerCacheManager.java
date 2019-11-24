@@ -41,6 +41,8 @@ import static org.springframework.cloud.loadbalancer.core.CachingServiceInstance
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
+ * @see <a href="https://github.com/stoyanr/Evictor">Evictor</a>
+ * @see ConcurrentHashMapWithTimedEviction
  */
 public class EvictorBasedLoadBalancerCacheManager implements LoadBalancerCacheManager {
 
@@ -61,7 +63,7 @@ public class EvictorBasedLoadBalancerCacheManager implements LoadBalancerCacheMa
 
 	private Set<EvictorCache> createEvictorCaches(String[] cacheNames,
 			LoadBalancerCacheProperties loadBalancerCacheProperties) {
-		return Arrays.stream(cacheNames)
+		return Arrays.stream(cacheNames).distinct()
 				.map(name -> new EvictorCache(name,
 						new ConcurrentHashMapWithTimedEviction<>(
 								loadBalancerCacheProperties.getInitialCapacity(),

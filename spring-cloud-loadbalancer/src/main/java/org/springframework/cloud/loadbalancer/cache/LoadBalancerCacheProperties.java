@@ -41,6 +41,9 @@ public class LoadBalancerCacheProperties {
 	 */
 	private Duration ttl = Duration.ofSeconds(30);
 
+	/**
+	 * Initial cache capacity expressed as int.
+	 */
 	private int initialCapacity = 256;
 
 	public Caffeine getCaffeine() {
