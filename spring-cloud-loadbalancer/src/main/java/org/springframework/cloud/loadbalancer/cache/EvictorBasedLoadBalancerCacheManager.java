@@ -66,7 +66,7 @@ public class EvictorBasedLoadBalancerCacheManager implements LoadBalancerCacheMa
 		return Arrays.stream(cacheNames).distinct()
 				.map(name -> new EvictorCache(name,
 						new ConcurrentHashMapWithTimedEviction<>(
-								loadBalancerCacheProperties.getInitialCapacity(),
+								loadBalancerCacheProperties.getCapacity(),
 								new DelayedTaskEvictionScheduler<>()),
 						loadBalancerCacheProperties.getTtl().toMillis(), false))
 				.collect(Collectors.toSet());

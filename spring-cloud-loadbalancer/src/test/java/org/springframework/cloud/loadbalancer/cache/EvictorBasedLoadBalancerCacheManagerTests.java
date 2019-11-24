@@ -38,7 +38,7 @@ class EvictorBasedLoadBalancerCacheManagerTests {
 	void shouldCreateLoadBalancerCacheFromProperties() {
 		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
 		properties.setTtl(Duration.ofMinutes(5));
-		properties.setInitialCapacity(128);
+		properties.setCapacity(128);
 
 		EvictorBasedLoadBalancerCacheManager cacheManager = new EvictorBasedLoadBalancerCacheManager(
 				properties);

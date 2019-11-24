@@ -44,7 +44,7 @@ public class LoadBalancerCacheProperties {
 	/**
 	 * Initial cache capacity expressed as int.
 	 */
-	private int initialCapacity = 256;
+	private int capacity = 256;
 
 	public Caffeine getCaffeine() {
 		return caffeine;
@@ -62,12 +62,12 @@ public class LoadBalancerCacheProperties {
 		this.ttl = ttl;
 	}
 
-	int getInitialCapacity() {
-		return initialCapacity;
+	int getCapacity() {
+		return capacity;
 	}
 
-	void setInitialCapacity(int initialCapacity) {
-		this.initialCapacity = initialCapacity;
+	void setCapacity(int capacity) {
+		this.capacity = capacity;
 	}
 
 	/**

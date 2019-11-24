@@ -803,19 +803,26 @@ in the following sections:
 
 === Spring Cloud LoadBalancer Caching
 
-Apart from the basic `ServiceInstanceListSupplier` implementation that retrieves instances
-via `DiscoveryClient` each time it has to choose an instance, we provide a https://github.com/ben-manes/caffeine[Caffeine-backed]
-implementation.
-To make use of it, you need to have `com.github.ben-manes.caffeine:caffeine` in the classpath.
+Apart from the basic `ServiceInstanceListSupplier` implementation that retrieves instances via `DiscoveryClient` each time it has to choose an instance, we provide two caching implementations:
+
+* https://github.com/ben-manes/caffeine[Caffeine-backed]
+* https://github.com/stoyanr[Evictor-backed]
+
+If you have `com.github.ben-manes.caffeine:caffeine` in the classpath, Caffeine-based implementation will be used.
 The default setup includes `expireAfterWrite` set to 30 seconds and records set to soft references.
+The default `initialCapacity` is `256`.
 
-You can set your own `TTL` value (the time after write after which entries should be expired), expressed as `Duration`, by passing a `String` compliant with the https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration[Spring Boot `String` to `Duration` converter syntax].
-as the value of `spring.cloud.loadbalancer.cache.ttl` property.
+If you do not have Caffeine in the classpath, but have `com.stoyanr:evictor` in the classpath, Evictor-based implementation will be used.
+The default setup includes `evictMs` set to 30 seconds and the default `initialCapacity` is `256`.
 
-You can also override the default Caffeine Cache setup for the LoadBalancer by passing your own https://static.javadoc.io/com.github.ben-manes.caffeine/caffeine/2.2.2/com/github/benmanes/caffeine/cache/CaffeineSpec.html[Caffeine Specification]
+You can set your own `ttl` value (the time after write after which entries should be expired), expressed as `Duration`, by passing a `String` compliant with the https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration[Spring Boot `String` to `Duration` converter syntax].
+as the value of the `spring.cloud.loadbalancer.cache.ttl` property.
+You can also set your own LoadBalancer cache initial capacity by setting the value of the `spring.cloud.loadbalancer.cache.capacity` property.
+
+If you are using Caffeine, you can also override the default Caffeine Cache setup for the LoadBalancer by passing your own https://static.javadoc.io/com.github.ben-manes.caffeine/caffeine/2.2.2/com/github/benmanes/caffeine/cache/CaffeineSpec.html[Caffeine Specification]
 in the `spring.cloud.loadbalancer.cache.caffeine.spec` property.
 
-WARN: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including `TTL`.
+WARN: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including `ttl` and `capacity`.
 
 You can also altogether disable loadBalancer caching by setting the value of `spring.cloud.loadbalancer.cache.enabled`
 to `false`.
@@ -831,7 +838,8 @@ In order to use it, just add `org.springframework.cloud:spring-cloud-starter-loa
 Cloud dependencies in your build file.
 
 NOTE: Spring Cloud LoadBalancer starter includes
-https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching].
+https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching]
+and https://github.com/stoyanr[Evictor].
 
 WARNING: If you have both Ribbon and Spring Cloud LoadBalancer int the classpath, in order to maintain
 backward compatibility, Ribbon-based implementations will be used by default. In order
