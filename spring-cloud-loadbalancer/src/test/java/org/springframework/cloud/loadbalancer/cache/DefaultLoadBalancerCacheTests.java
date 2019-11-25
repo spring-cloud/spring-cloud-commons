@@ -29,23 +29,23 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Tests for {@link DefaultCache}.
+ * Tests for {@link DefaultLoadBalancerCache}.
  *
  * @author Olga Maciaszek-Sharma
  */
 @ExtendWith(MockitoExtension.class)
-class DefaultCacheTests {
+class DefaultLoadBalancerCacheTests {
 
 	@Test
 	void shouldAllowNullValuesByDefault() {
-		DefaultCache cache = new DefaultCache("test");
+		DefaultLoadBalancerCache cache = new DefaultLoadBalancerCache("test");
 
 		assertThatCode(() -> cache.put("testKey", null)).doesNotThrowAnyException();
 	}
 
 	@Test
 	void shouldThrowExceptionIfNullPutWithNonNullSetup() {
-		DefaultCache cache = new DefaultCache("test", false);
+		DefaultLoadBalancerCache cache = new DefaultLoadBalancerCache("test", false);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> cache.put("testKey", null))
 				.withMessageContaining(
@@ -54,7 +54,7 @@ class DefaultCacheTests {
 
 	@Test
 	void shouldNotEvictEntriesByDefault() {
-		DefaultCache cache = new DefaultCache("test");
+		DefaultLoadBalancerCache cache = new DefaultLoadBalancerCache("test");
 
 		assertThat(cache.getEvictMs()).isEqualTo(0);
 	}
@@ -64,7 +64,8 @@ class DefaultCacheTests {
 	void assertThatTtlApplied() {
 		ConcurrentHashMapWithTimedEviction nativeCache = mock(
 				ConcurrentHashMapWithTimedEviction.class);
-		DefaultCache cache = new DefaultCache("test", nativeCache, 50, true);
+		DefaultLoadBalancerCache cache = new DefaultLoadBalancerCache("test", nativeCache,
+				50, true);
 
 		cache.put("testKey", "testValue");
 

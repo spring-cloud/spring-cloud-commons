@@ -807,6 +807,7 @@ Apart from the basic `ServiceInstanceListSupplier` implementation that retrieves
 
 ==== https://github.com/ben-manes/caffeine[Caffeine]-backed LoadBalancer Cache Implementation
 If you have `com.github.ben-manes.caffeine:caffeine` in the classpath, Caffeine-based implementation will be used.
+See the <<loadbalancer-cache-configuration, LoadBalancerCacheConfiguration>> section for information on how to configure it.
 
 If you are using Caffeine, you can also override the default Caffeine Cache setup for the LoadBalancer by passing your own https://static.javadoc.io/com.github.ben-manes.caffeine/caffeine/2.2.2/com/github/benmanes/caffeine/cache/CaffeineSpec.html[Caffeine Specification]
 in the `spring.cloud.loadbalancer.cache.caffeine.spec` property.
@@ -815,7 +816,10 @@ WARN: Passing your own Caffeine specification will override any other LoadBalanc
 
 ==== Default LoadBalancer Cache Implementation
 
-If you do not have Caffeine in the classpath, but have https://github.com/stoyanr[`com.stoyanr:evictor`] (which comes automatically with `spring-cloud-starter-loadbalancer`), the default, Evictor-based, implementation will be used.
+If you do not have Caffeine in the classpath, the `DefaultLoadBalancerCache`, which comes automatically with `spring-cloud-starter-loadbalancer`, will be used.
+See the <<loadbalancer-cache-configuration, LoadBalancerCacheConfiguration>> section for information on how to configure it.
+
+TIP: To use Caffeine instead of the default cache, add the `com.github.ben-manes.caffeine:caffeine` dependency to classpath.
 
 [[loadbalancer-cache-configuration]]
 ==== LoadBalancer Cache Configuration
@@ -831,7 +835,6 @@ to `false`.
 
 WARNING: Although the basic, non-cached, implementation is useful for prototyping and testing, it's much less efficient
 than the cached versions, so we recommend always using the cached version in production.
-If you are using `spring-cloud-starter-loadbalancer`, the cache will be set up and enabled for you by default, but if you are using just the loadbalancer module dependency (and not the starter), that will not be done.
 
 [[spring-cloud-loadbalancer-starter]]
 === Spring Cloud LoadBalancer starter

@@ -42,7 +42,7 @@ import org.springframework.util.Assert;
  * @see ConcurrentMapWithTimedEviction
  * @see ConcurrentMapCache
  */
-public class DefaultCache extends AbstractValueAdaptingCache {
+public class DefaultLoadBalancerCache extends AbstractValueAdaptingCache {
 
 	private final String name;
 
@@ -50,8 +50,9 @@ public class DefaultCache extends AbstractValueAdaptingCache {
 
 	private final long evictMs;
 
-	DefaultCache(String name, ConcurrentMapWithTimedEviction<Object, Object> cache,
-			long evictMs, boolean allowNullValues) {
+	DefaultLoadBalancerCache(String name,
+			ConcurrentMapWithTimedEviction<Object, Object> cache, long evictMs,
+			boolean allowNullValues) {
 		super(allowNullValues);
 		Assert.notNull(name, "Name must not be null");
 		Assert.notNull(cache, "Cache must not be null");
@@ -64,7 +65,7 @@ public class DefaultCache extends AbstractValueAdaptingCache {
 	 * Create a new DefaultCache with the specified name.
 	 * @param name the name of the cache
 	 */
-	public DefaultCache(String name) {
+	public DefaultLoadBalancerCache(String name) {
 		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
 				new DelayedTaskEvictionScheduler<>()), 0, true);
 	}
@@ -77,7 +78,7 @@ public class DefaultCache extends AbstractValueAdaptingCache {
 	 * @param allowNullValues whether to accept and convert {@code null} values for this
 	 * cache
 	 */
-	public DefaultCache(String name, long evictMs, boolean allowNullValues) {
+	public DefaultLoadBalancerCache(String name, long evictMs, boolean allowNullValues) {
 		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
 				new DelayedTaskEvictionScheduler<>()), evictMs, allowNullValues);
 	}
@@ -88,7 +89,7 @@ public class DefaultCache extends AbstractValueAdaptingCache {
 	 * @param allowNullValues whether to accept and convert {@code null} values for this
 	 * cache
 	 */
-	public DefaultCache(String name, boolean allowNullValues) {
+	public DefaultLoadBalancerCache(String name, boolean allowNullValues) {
 		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
 				new DelayedTaskEvictionScheduler<>()), 0, allowNullValues);
 	}

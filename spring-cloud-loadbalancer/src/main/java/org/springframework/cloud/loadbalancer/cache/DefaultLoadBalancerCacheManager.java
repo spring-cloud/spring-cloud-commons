@@ -33,7 +33,8 @@ import org.springframework.lang.Nullable;
 import static org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier.SERVICE_INSTANCE_CACHE_NAME;
 
 /**
- * An {@link DefaultCache}-based {@link LoadBalancerCacheManager} implementation.
+ * An {@link DefaultLoadBalancerCache}-based {@link LoadBalancerCacheManager}
+ * implementation.
  *
  * NOTE: This is a very basic implementation as required for the LoadBalancer caching
  * mechanism at the moment. The underlying implementation can be modified in future to
@@ -52,7 +53,8 @@ public class DefaultLoadBalancerCacheManager implements LoadBalancerCacheManager
 			LoadBalancerCacheProperties loadBalancerCacheProperties,
 			String... cacheNames) {
 		cacheMap.putAll(createCaches(cacheNames, loadBalancerCacheProperties).stream()
-				.collect(Collectors.toMap(DefaultCache::getName, cache -> cache)));
+				.collect(Collectors.toMap(DefaultLoadBalancerCache::getName,
+						cache -> cache)));
 	}
 
 	public DefaultLoadBalancerCacheManager(
@@ -60,10 +62,10 @@ public class DefaultLoadBalancerCacheManager implements LoadBalancerCacheManager
 		this(loadBalancerCacheProperties, SERVICE_INSTANCE_CACHE_NAME);
 	}
 
-	private Set<DefaultCache> createCaches(String[] cacheNames,
+	private Set<DefaultLoadBalancerCache> createCaches(String[] cacheNames,
 			LoadBalancerCacheProperties loadBalancerCacheProperties) {
 		return Arrays.stream(cacheNames).distinct()
-				.map(name -> new DefaultCache(name,
+				.map(name -> new DefaultLoadBalancerCache(name,
 						new ConcurrentHashMapWithTimedEviction<>(
 								loadBalancerCacheProperties.getCapacity(),
 								new DelayedTaskEvictionScheduler<>()),

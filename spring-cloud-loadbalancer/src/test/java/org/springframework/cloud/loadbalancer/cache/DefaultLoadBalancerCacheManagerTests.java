@@ -45,9 +45,9 @@ class DefaultLoadBalancerCacheManagerTests {
 
 		assertThat(cacheManager.getCacheNames()).hasSize(1);
 		assertThat(cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME))
-				.isInstanceOf(DefaultCache.class);
-		assertThat(((DefaultCache) cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME))
-				.getEvictMs()).isEqualTo(300000);
+				.isInstanceOf(DefaultLoadBalancerCache.class);
+		assertThat(((DefaultLoadBalancerCache) cacheManager
+				.getCache(SERVICE_INSTANCE_CACHE_NAME)).getEvictMs()).isEqualTo(300000);
 	}
 
 	@Test
@@ -67,7 +67,8 @@ class DefaultLoadBalancerCacheManagerTests {
 				"test", "test");
 
 		assertThat(cacheManager.getCacheNames()).hasSize(1);
-		assertThat(cacheManager.getCache("test")).isInstanceOf(DefaultCache.class);
+		assertThat(cacheManager.getCache("test"))
+				.isInstanceOf(DefaultLoadBalancerCache.class);
 	}
 
 }
