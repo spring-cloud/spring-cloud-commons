@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.config;
 import javax.annotation.PostConstruct;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.stoyanr.evictor.ConcurrentMapWithTimedEviction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,6 +33,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheAspectSupport;
 import org.springframework.cloud.loadbalancer.cache.CaffeineBasedLoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheProperties;
 import org.springframework.context.annotation.Bean;
@@ -39,15 +41,15 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * An AutoConfiguration that automatically enables caching when when Spring Boot, and
- * Spring Framework Cache support and Caffeine classes are present and warns if Caffeine
- * is not present (we are only warning about Caffeine because the other dependencies are
- * in spring-cloud-starter-loadbalancer).
+ * Spring Framework Cache support are present. If Caffeine is present in the classpath, it
+ * will be used for loadbalancer caching. If not, a default cache will be used.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  * @see CacheManager
  * @see CacheAutoConfiguration
  * @see CacheAspectSupport
+ * @see <a href="https://github.com/ben-manes/caffeine>Caffeine</a>
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ CacheManager.class, CacheAutoConfiguration.class })
@@ -77,8 +79,8 @@ public class LoadBalancerCacheAutoConfiguration {
 		void logWarning() {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(
-						"Spring Cloud LoadBalancer is currently working without cache. To enable cache, add "
-								+ "com.github.ben-manes.caffeine:caffeine dependency to classpath.");
+						"Spring Cloud LoadBalancer is currently working with default default cache. "
+								+ "You can switch to using Caffeine cache, by adding it to the classpath.");
 			}
 		}
 
@@ -86,13 +88,27 @@ public class LoadBalancerCacheAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(Caffeine.class)
-	protected static class LoadBalancerCacheManagerConfiguration {
+	protected static class CaffeineLoadBalancerCacheManagerConfiguration {
 
 		@Bean(autowireCandidate = false)
 		@ConditionalOnMissingBean
-		LoadBalancerCacheManager loadBalancerCacheManager(
+		LoadBalancerCacheManager caffeineLoadBalancerCacheManager(
 				LoadBalancerCacheProperties cacheProperties) {
 			return new CaffeineBasedLoadBalancerCacheManager(cacheProperties);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnMissingClass("com.github.benmanes.caffeine.cache.Caffeine")
+	@ConditionalOnClass(ConcurrentMapWithTimedEviction.class)
+	protected static class DefaultLoadBalancerCacheManagerConfiguration {
+
+		@Bean(autowireCandidate = false)
+		@ConditionalOnMissingBean
+		LoadBalancerCacheManager defaultLoadBalancerCacheManager(
+				LoadBalancerCacheProperties cacheProperties) {
+			return new DefaultLoadBalancerCacheManager(cacheProperties);
 		}
 
 	}

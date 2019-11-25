@@ -27,6 +27,7 @@
 	</scm>
 	<properties>
 		<bintray.package>commons</bintray.package>
+		<evictor.version>1.0.0</evictor.version>
 	</properties>
 	<build>
 		<plugins>

@@ -29,6 +29,9 @@ import static org.springframework.cloud.loadbalancer.core.CachingServiceInstance
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
+ * @see <a href="https://github.com/ben-manes/caffeine>Caffeine</a>
+ * @see CaffeineCacheManager
+ * @see Caffeine
  */
 public class CaffeineBasedLoadBalancerCacheManager extends CaffeineCacheManager
 		implements LoadBalancerCacheManager {
@@ -40,8 +43,8 @@ public class CaffeineBasedLoadBalancerCacheManager extends CaffeineCacheManager
 			setCacheSpecification(properties.getCaffeine().getSpec());
 		}
 		else {
-			setCaffeine(Caffeine.newBuilder().expireAfterWrite(properties.getTtl())
-					.softValues());
+			setCaffeine(Caffeine.newBuilder().initialCapacity(properties.getCapacity())
+					.expireAfterWrite(properties.getTtl()).softValues());
 		}
 
 	}
