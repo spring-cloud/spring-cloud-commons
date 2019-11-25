@@ -16,15 +16,19 @@
 
 package org.springframework.cloud.loadbalancer.config;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
+import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
+import org.springframework.cloud.loadbalancer.cache.EvictorBasedLoadBalancerCacheManager;
 import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,7 +60,7 @@ class LoadBalancerCacheAutoConfigurationTests {
 	}
 
 	@Test
-	void loadBalancerCacheShouldNotOverrideCacheTypeSetting() {
+	void caffeineLoadBalancerCacheShouldNotOverrideCacheTypeSetting() {
 		ApplicationContextRunner contextRunner = baseApplicationRunner()
 				.withUserConfiguration(TestConfiguration.class)
 				.withPropertyValues("spring.cache.type=none");
@@ -93,9 +97,74 @@ class LoadBalancerCacheAutoConfigurationTests {
 
 	}
 
+	@Test
+	void shouldUseEvictorIfCaffeineNotInClasspath() {
+		ApplicationContextRunner contextRunner = noCaffeineRunner();
+
+		contextRunner.run(context -> {
+			assertThat(context
+					.getBean(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
+					.isNotNull();
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+			assertThat(
+					((CacheManager) context.getBean("evictorLoadBalancerCacheManager"))
+							.getCacheNames()).hasSize(1);
+			assertThat(context.getBean("evictorLoadBalancerCacheManager"))
+					.isInstanceOf(EvictorBasedLoadBalancerCacheManager.class);
+			assertThat(
+					((CacheManager) context.getBean("evictorLoadBalancerCacheManager"))
+							.getCacheNames())
+					.contains("CachingServiceInstanceListSupplierCache");
+		});
+	}
+
+
+	@Test
+	void evictorLoadBalancerCacheShouldNotOverrideCacheTypeSetting() {
+		ApplicationContextRunner contextRunner = noCaffeineRunner()
+				.withUserConfiguration(TestConfiguration.class)
+				.withPropertyValues("spring.cache.type=none");
+
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
+			assertThat(context.getBean("evictorLoadBalancerCacheManager"))
+					.isInstanceOf(EvictorBasedLoadBalancerCacheManager.class);
+			assertThat(context.getBeansOfType(CacheManager.class).get("cacheManager"))
+					.isInstanceOf(NoOpCacheManager.class);
+
+		});
+	}
+
+	@Test
+	void evictorLoadBalancerCacheShouldNotOverrideExistingCacheManager() {
+		ApplicationContextRunner contextRunner = noCaffeineRunner()
+				.withUserConfiguration(TestConfiguration.class);
+
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
+			assertThat(context.getBean("cacheManager"))
+					.isInstanceOf(ConcurrentMapCacheManager.class);
+			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames())
+					.isEmpty();
+			assertThat(
+					((CacheManager) context.getBean("evictorLoadBalancerCacheManager"))
+							.getCacheNames()).hasSize(1);
+			assertThat(
+					((CacheManager) context.getBean("evictorLoadBalancerCacheManager"))
+							.getCacheNames())
+					.contains("CachingServiceInstanceListSupplierCache");
+		});
+
+	}
+
 	private ApplicationContextRunner baseApplicationRunner() {
 		return new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(
 				CacheAutoConfiguration.class, LoadBalancerCacheAutoConfiguration.class));
+	}
+
+	private ApplicationContextRunner noCaffeineRunner() {
+		return baseApplicationRunner()
+				.withClassLoader(new FilteredClassLoader(Caffeine.class));
 	}
 
 	@Configuration(proxyBeanMethods = false)
