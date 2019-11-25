@@ -157,7 +157,13 @@ $(addBlockSwitches);
 <li><a href="#spring-cloud-loadbalancer">3. Spring Cloud LoadBalancer</a>
 <ul class="sectlevel2">
 <li><a href="#spring-cloud-loadbalancer-integrations">3.1. Spring Cloud LoadBalancer integrations</a></li>
-<li><a href="#spring-cloud-loadbalancer-caching">3.2. Spring Cloud LoadBalancer Caching</a></li>
+<li><a href="#spring-cloud-loadbalancer-caching">3.2. Spring Cloud LoadBalancer Caching</a>
+<ul class="sectlevel3">
+<li><a href="#caffeine-backed-loadbalancer-cache-implementation">3.2.1. Caffeine-backed LoadBalancer Cache Implementation</a></li>
+<li><a href="#default-loadbalancer-cache-implementation">3.2.2. Default LoadBalancer Cache Implementation</a></li>
+<li><a href="#loadbalancer-cache-configuration">3.2.3. LoadBalancer Cache Configuration</a></li>
+</ul>
+</li>
 <li><a href="#spring-cloud-loadbalancer-starter">3.3. Spring Cloud LoadBalancer starter</a></li>
 <li><a href="#passing-your-own-spring-cloud-loadbalancer-configuration">3.4. Passing your own Spring Cloud LoadBalancer configuration</a></li>
 </ul>
@@ -1346,22 +1352,50 @@ in the following sections:</p>
 <div class="sect2">
 <h3 id="spring-cloud-loadbalancer-caching"><a class="anchor" href="#spring-cloud-loadbalancer-caching"></a><a class="link" href="#spring-cloud-loadbalancer-caching">3.2. Spring Cloud LoadBalancer Caching</a></h3>
 <div class="paragraph">
-<p>Apart from the basic <code>ServiceInstanceListSupplier</code> implementation that retrieves instances
-via <code>DiscoveryClient</code> each time it has to choose an instance, we provide a <a href="https://github.com/ben-manes/caffeine">Caffeine-backed</a>
-implementation.
-To make use of it, you need to have <code>com.github.ben-manes.caffeine:caffeine</code> in the classpath.
-The default setup includes <code>expireAfterWrite</code> set to 30 seconds and records set to soft references.</p>
+<p>Apart from the basic <code>ServiceInstanceListSupplier</code> implementation that retrieves instances via <code>DiscoveryClient</code> each time it has to choose an instance, we provide two caching implementations.</p>
+</div>
+<div class="sect3">
+<h4 id="caffeine-backed-loadbalancer-cache-implementation"><a class="anchor" href="#caffeine-backed-loadbalancer-cache-implementation"></a><a class="link" href="#caffeine-backed-loadbalancer-cache-implementation">3.2.1. <a href="https://github.com/ben-manes/caffeine">Caffeine</a>-backed LoadBalancer Cache Implementation</a></h4>
+<div class="paragraph">
+<p>If you have <code>com.github.ben-manes.caffeine:caffeine</code> in the classpath, Caffeine-based implementation will be used.
+See the <a href="#loadbalancer-cache-configuration">LoadBalancerCacheConfiguration</a> section for information on how to configure it.</p>
 </div>
 <div class="paragraph">
-<p>You can set your own <code>TTL</code> value (the time after write after which entries should be expired), expressed as <code>Duration</code>, by passing a <code>String</code> compliant with the <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration">Spring Boot <code>String</code> to <code>Duration</code> converter syntax</a>.
-as the value of <code>spring.cloud.loadbalancer.cache.ttl</code> property.</p>
-</div>
-<div class="paragraph">
-<p>You can also override the default Caffeine Cache setup for the LoadBalancer by passing your own <a href="https://static.javadoc.io/com.github.ben-manes.caffeine/caffeine/2.2.2/com/github/benmanes/caffeine/cache/CaffeineSpec.html">Caffeine Specification</a>
+<p>If you are using Caffeine, you can also override the default Caffeine Cache setup for the LoadBalancer by passing your own <a href="https://static.javadoc.io/com.github.ben-manes.caffeine/caffeine/2.2.2/com/github/benmanes/caffeine/cache/CaffeineSpec.html">Caffeine Specification</a>
 in the <code>spring.cloud.loadbalancer.cache.caffeine.spec</code> property.</p>
 </div>
 <div class="paragraph">
-<p>WARN: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including <code>TTL</code>.</p>
+<p>WARN: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including <a href="#loadbalancer-cache-configuration">General LoadBalancer Cache Configuration</a> fields, such as <code>ttl</code> and <code>capacity</code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="default-loadbalancer-cache-implementation"><a class="anchor" href="#default-loadbalancer-cache-implementation"></a><a class="link" href="#default-loadbalancer-cache-implementation">3.2.2. Default LoadBalancer Cache Implementation</a></h4>
+<div class="paragraph">
+<p>If you do not have Caffeine in the classpath, the <code>DefaultLoadBalancerCache</code>, which comes automatically with <code>spring-cloud-starter-loadbalancer</code>, will be used.
+See the <a href="#loadbalancer-cache-configuration">LoadBalancerCacheConfiguration</a> section for information on how to configure it.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+To use Caffeine instead of the default cache, add the <code>com.github.ben-manes.caffeine:caffeine</code> dependency to classpath.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="loadbalancer-cache-configuration"><a class="anchor" href="#loadbalancer-cache-configuration"></a><a class="link" href="#loadbalancer-cache-configuration">3.2.3. LoadBalancer Cache Configuration</a></h4>
+<div class="paragraph">
+<p>You can set your own <code>ttl</code> value (the time after write after which entries should be expired), expressed as <code>Duration</code>, by passing a <code>String</code> compliant with the <a href="https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration">Spring Boot <code>String</code> to <code>Duration</code> converter syntax</a>.
+as the value of the <code>spring.cloud.loadbalancer.cache.ttl</code> property.
+You can also set your own LoadBalancer cache initial capacity by setting the value of the <code>spring.cloud.loadbalancer.cache.capacity</code> property.</p>
+</div>
+<div class="paragraph">
+<p>The default setup includes <code>ttl</code> set to 30 seconds and the default <code>initialCapacity</code> is <code>256</code>.</p>
 </div>
 <div class="paragraph">
 <p>You can also altogether disable loadBalancer caching by setting the value of <code>spring.cloud.loadbalancer.cache.enabled</code>
@@ -1381,6 +1415,7 @@ than the cached versions, so we recommend always using the cached version in pro
 </table>
 </div>
 </div>
+</div>
 <div class="sect2">
 <h3 id="spring-cloud-loadbalancer-starter"><a class="anchor" href="#spring-cloud-loadbalancer-starter"></a><a class="link" href="#spring-cloud-loadbalancer-starter">3.3. Spring Cloud LoadBalancer starter</a></h3>
 <div class="paragraph">
@@ -1396,7 +1431,8 @@ Cloud dependencies in your build file.</p>
 </td>
 <td class="content">
 Spring Cloud LoadBalancer starter includes
-<a href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html">Spring Boot Caching</a>.
+<a href="https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html">Spring Boot Caching</a>
+and <a href="https://github.com/stoyanr">Evictor</a>.
 </td>
 </tr>
 </table>
