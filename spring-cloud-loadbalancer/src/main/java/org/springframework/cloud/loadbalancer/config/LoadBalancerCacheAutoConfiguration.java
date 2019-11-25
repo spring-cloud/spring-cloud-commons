@@ -33,7 +33,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.interceptor.CacheAspectSupport;
 import org.springframework.cloud.loadbalancer.cache.CaffeineBasedLoadBalancerCacheManager;
-import org.springframework.cloud.loadbalancer.cache.EvictorBasedLoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,7 +42,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * An AutoConfiguration that automatically enables caching when when Spring Boot, and
  * Spring Framework Cache support are present. If Caffeine is present in the classpath, it
- * will be used for loadbalancer caching. If not, Evictor-based cache will be used.
+ * will be used for loadbalancer caching. If not, a default cache will be used.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
@@ -50,7 +50,6 @@ import org.springframework.context.annotation.Configuration;
  * @see CacheAutoConfiguration
  * @see CacheAspectSupport
  * @see <a href="https://github.com/ben-manes/caffeine>Caffeine</a>
- * @see <a href="https://github.com/stoyanr/Evictor">Evictor</a>
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ CacheManager.class, CacheAutoConfiguration.class })
@@ -80,8 +79,8 @@ public class LoadBalancerCacheAutoConfiguration {
 		void logWarning() {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(
-						"Spring Cloud LoadBalancer is currently working with default Evictor-based cache. "
-								+ "If you prefer to use Caffeine cache, make sure you add it to classpath.");
+						"Spring Cloud LoadBalancer is currently working with default default cache. "
+								+ "You can switch to using Caffeine cache, by adding it to the classpath.");
 			}
 		}
 
@@ -103,13 +102,13 @@ public class LoadBalancerCacheAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnMissingClass("com.github.benmanes.caffeine.cache.Caffeine")
 	@ConditionalOnClass(ConcurrentMapWithTimedEviction.class)
-	protected static class EvictorLoadBalancerCacheManagerConfiguration {
+	protected static class DefaultLoadBalancerCacheManagerConfiguration {
 
 		@Bean(autowireCandidate = false)
 		@ConditionalOnMissingBean
-		LoadBalancerCacheManager evictorLoadBalancerCacheManager(
+		LoadBalancerCacheManager defaultLoadBalancerCacheManager(
 				LoadBalancerCacheProperties cacheProperties) {
-			return new EvictorBasedLoadBalancerCacheManager(cacheProperties);
+			return new DefaultLoadBalancerCacheManager(cacheProperties);
 		}
 
 	}

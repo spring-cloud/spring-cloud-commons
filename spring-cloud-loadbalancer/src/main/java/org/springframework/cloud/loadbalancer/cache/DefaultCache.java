@@ -32,7 +32,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * An {@link ConcurrentMapWithTimedEviction}-based {@link Cache} implementation. Based on
+ * A default {@link Cache} implementation used by Spring Cloud LoadBalancer. The current
+ * implementation uses {@link ConcurrentMapWithTimedEviction} underneath. Based on
  * {@link ConcurrentMapCache}.
  *
  * @author Olga Maciaszek-Sharma
@@ -41,7 +42,7 @@ import org.springframework.util.Assert;
  * @see ConcurrentMapWithTimedEviction
  * @see ConcurrentMapCache
  */
-public class EvictorCache extends AbstractValueAdaptingCache {
+public class DefaultCache extends AbstractValueAdaptingCache {
 
 	private final String name;
 
@@ -49,17 +50,7 @@ public class EvictorCache extends AbstractValueAdaptingCache {
 
 	private final long evictMs;
 
-	/**
-	 * Create a new EvictorCache with the specified name and the given internal
-	 * {@link ConcurrentMapWithTimedEviction} to use.
-	 * @param name the name of the cache
-	 * @param evictMs default time to Evict for the underlyin
-	 * {@link ConcurrentMapWithTimedEviction}
-	 * @param cache the ConcurrentMap to use as an internal store
-	 * @param allowNullValues whether to allow {@code null} values (adapting them to an
-	 * internal null holder value)
-	 */
-	public EvictorCache(String name, ConcurrentMapWithTimedEviction<Object, Object> cache,
+	DefaultCache(String name, ConcurrentMapWithTimedEviction<Object, Object> cache,
 			long evictMs, boolean allowNullValues) {
 		super(allowNullValues);
 		Assert.notNull(name, "Name must not be null");
@@ -70,23 +61,23 @@ public class EvictorCache extends AbstractValueAdaptingCache {
 	}
 
 	/**
-	 * Create a new EvictorCache with the specified name.
+	 * Create a new DefaultCache with the specified name.
 	 * @param name the name of the cache
 	 */
-	public EvictorCache(String name) {
+	public DefaultCache(String name) {
 		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
 				new DelayedTaskEvictionScheduler<>()), 0, true);
 	}
 
 	/**
-	 * Create a new EvictorCache with the specified name.
+	 * Create a new DefaultCache with the specified name.
 	 * @param name the name of the cache
-	 * @param evictMs default time to Evict for the underlyin
+	 * @param evictMs default time to evict the entries
 	 * {@link ConcurrentMapWithTimedEviction}
 	 * @param allowNullValues whether to accept and convert {@code null} values for this
 	 * cache
 	 */
-	public EvictorCache(String name, long evictMs, boolean allowNullValues) {
+	public DefaultCache(String name, long evictMs, boolean allowNullValues) {
 		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
 				new DelayedTaskEvictionScheduler<>()), evictMs, allowNullValues);
 	}
@@ -97,7 +88,7 @@ public class EvictorCache extends AbstractValueAdaptingCache {
 	 * @param allowNullValues whether to accept and convert {@code null} values for this
 	 * cache
 	 */
-	public EvictorCache(String name, boolean allowNullValues) {
+	public DefaultCache(String name, boolean allowNullValues) {
 		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
 				new DelayedTaskEvictionScheduler<>()), 0, allowNullValues);
 	}

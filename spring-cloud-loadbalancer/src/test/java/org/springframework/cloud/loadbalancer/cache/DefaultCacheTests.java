@@ -29,23 +29,23 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
- * Tests for {@link EvictorCache}.
+ * Tests for {@link DefaultCache}.
  *
  * @author Olga Maciaszek-Sharma
  */
 @ExtendWith(MockitoExtension.class)
-class EvictorCacheTests {
+class DefaultCacheTests {
 
 	@Test
 	void shouldAllowNullValuesByDefault() {
-		EvictorCache cache = new EvictorCache("test");
+		DefaultCache cache = new DefaultCache("test");
 
 		assertThatCode(() -> cache.put("testKey", null)).doesNotThrowAnyException();
 	}
 
 	@Test
 	void shouldThrowExceptionIfNullPutWithNonNullSetup() {
-		EvictorCache cache = new EvictorCache("test", false);
+		DefaultCache cache = new DefaultCache("test", false);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> cache.put("testKey", null))
 				.withMessageContaining(
@@ -54,7 +54,7 @@ class EvictorCacheTests {
 
 	@Test
 	void shouldNotEvictEntriesByDefault() {
-		EvictorCache cache = new EvictorCache("test");
+		DefaultCache cache = new DefaultCache("test");
 
 		assertThat(cache.getEvictMs()).isEqualTo(0);
 	}
@@ -64,7 +64,7 @@ class EvictorCacheTests {
 	void assertThatTtlApplied() {
 		ConcurrentHashMapWithTimedEviction nativeCache = mock(
 				ConcurrentHashMapWithTimedEviction.class);
-		EvictorCache cache = new EvictorCache("test", nativeCache, 50, true);
+		DefaultCache cache = new DefaultCache("test", nativeCache, 50, true);
 
 		cache.put("testKey", "testValue");
 

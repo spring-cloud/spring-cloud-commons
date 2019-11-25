@@ -27,11 +27,11 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier.SERVICE_INSTANCE_CACHE_NAME;
 
 /**
- * Tests for {@link EvictorBasedLoadBalancerCacheManager}.
+ * Tests for {@link DefaultLoadBalancerCacheManager}.
  *
  * @author Olga Maciaszek-Sharma
  */
-class EvictorBasedLoadBalancerCacheManagerTests {
+class DefaultLoadBalancerCacheManagerTests {
 
 	@SuppressWarnings("ConstantConditions")
 	@Test
@@ -40,13 +40,13 @@ class EvictorBasedLoadBalancerCacheManagerTests {
 		properties.setTtl(Duration.ofMinutes(5));
 		properties.setCapacity(128);
 
-		EvictorBasedLoadBalancerCacheManager cacheManager = new EvictorBasedLoadBalancerCacheManager(
+		DefaultLoadBalancerCacheManager cacheManager = new DefaultLoadBalancerCacheManager(
 				properties);
 
 		assertThat(cacheManager.getCacheNames()).hasSize(1);
 		assertThat(cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME))
-				.isInstanceOf(EvictorCache.class);
-		assertThat(((EvictorCache) cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME))
+				.isInstanceOf(DefaultCache.class);
+		assertThat(((DefaultCache) cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME))
 				.getEvictMs()).isEqualTo(300000);
 	}
 
@@ -54,19 +54,20 @@ class EvictorBasedLoadBalancerCacheManagerTests {
 	void shouldNotThrowExceptionOnDuplicateCacheName() {
 		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
 
-		assertThatCode(() -> new EvictorBasedLoadBalancerCacheManager(properties, "test",
-				"test")).doesNotThrowAnyException();
+		assertThatCode(
+				() -> new DefaultLoadBalancerCacheManager(properties, "test", "test"))
+						.doesNotThrowAnyException();
 	}
 
 	@Test
 	void shouldOnlyCreateOneCacheWithGivenName() {
 		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
 
-		CacheManager cacheManager = new EvictorBasedLoadBalancerCacheManager(properties,
+		CacheManager cacheManager = new DefaultLoadBalancerCacheManager(properties,
 				"test", "test");
 
 		assertThat(cacheManager.getCacheNames()).hasSize(1);
-		assertThat(cacheManager.getCache("test")).isInstanceOf(EvictorCache.class);
+		assertThat(cacheManager.getCache("test")).isInstanceOf(DefaultCache.class);
 	}
 
 }

@@ -28,7 +28,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
-import org.springframework.cloud.loadbalancer.cache.EvictorBasedLoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
 import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -113,7 +113,7 @@ class LoadBalancerCacheAutoConfigurationTests {
 	}
 
 	@Test
-	void shouldUseEvictorIfCaffeineNotInClasspath() {
+	void shouldUseDefaultCacheIfCaffeineNotInClasspath() {
 		ApplicationContextRunner contextRunner = noCaffeineRunner();
 
 		contextRunner.run(context -> {
@@ -121,25 +121,25 @@ class LoadBalancerCacheAutoConfigurationTests {
 					LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
 							.isNotNull();
 			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
-			assertThat(((CacheManager) context.getBean("evictorLoadBalancerCacheManager"))
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager"))
 					.getCacheNames()).hasSize(1);
-			assertThat(context.getBean("evictorLoadBalancerCacheManager"))
-					.isInstanceOf(EvictorBasedLoadBalancerCacheManager.class);
-			assertThat(((CacheManager) context.getBean("evictorLoadBalancerCacheManager"))
+			assertThat(context.getBean("defaultLoadBalancerCacheManager"))
+					.isInstanceOf(DefaultLoadBalancerCacheManager.class);
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager"))
 					.getCacheNames()).contains("CachingServiceInstanceListSupplierCache");
 		});
 	}
 
 	@Test
-	void evictorLoadBalancerCacheShouldNotOverrideCacheTypeSetting() {
+	void defaultLoadBalancerCacheShouldNotOverrideCacheTypeSetting() {
 		ApplicationContextRunner contextRunner = noCaffeineRunner()
 				.withUserConfiguration(TestConfiguration.class)
 				.withPropertyValues("spring.cache.type=none");
 
 		contextRunner.run(context -> {
 			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
-			assertThat(context.getBean("evictorLoadBalancerCacheManager"))
-					.isInstanceOf(EvictorBasedLoadBalancerCacheManager.class);
+			assertThat(context.getBean("defaultLoadBalancerCacheManager"))
+					.isInstanceOf(DefaultLoadBalancerCacheManager.class);
 			assertThat(context.getBeansOfType(CacheManager.class).get("cacheManager"))
 					.isInstanceOf(NoOpCacheManager.class);
 
@@ -147,7 +147,7 @@ class LoadBalancerCacheAutoConfigurationTests {
 	}
 
 	@Test
-	void evictorLoadBalancerCacheShouldNotOverrideExistingCacheManager() {
+	void defaultLoadBalancerCacheShouldNotOverrideExistingCacheManager() {
 		ApplicationContextRunner contextRunner = noCaffeineRunner()
 				.withUserConfiguration(TestConfiguration.class);
 
@@ -157,16 +157,16 @@ class LoadBalancerCacheAutoConfigurationTests {
 					.isInstanceOf(ConcurrentMapCacheManager.class);
 			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames())
 					.isEmpty();
-			assertThat(((CacheManager) context.getBean("evictorLoadBalancerCacheManager"))
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager"))
 					.getCacheNames()).hasSize(1);
-			assertThat(((CacheManager) context.getBean("evictorLoadBalancerCacheManager"))
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager"))
 					.getCacheNames()).contains("CachingServiceInstanceListSupplierCache");
 		});
 
 	}
 
 	@Test
-	void shouldNotInstantiateEvictorLoadBalancerCacheIfDisabled() {
+	void shouldNotInstantiateDefaultLoadBalancerCacheIfDisabled() {
 		ApplicationContextRunner contextRunner = noCaffeineRunner()
 				.withPropertyValues("spring.cloud.loadbalancer.cache.enabled=false")
 				.withUserConfiguration(TestConfiguration.class);

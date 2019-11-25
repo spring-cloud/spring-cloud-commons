@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
 import static org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier.SERVICE_INSTANCE_CACHE_NAME;
 
 /**
- * An {@link EvictorCache}-based {@link LoadBalancerCacheManager} implementation.
+ * An {@link DefaultCache}-based {@link LoadBalancerCacheManager} implementation.
  *
  * NOTE: This is a very basic implementation as required for the LoadBalancer caching
  * mechanism at the moment. The underlying implementation can be modified in future to
@@ -44,27 +44,26 @@ import static org.springframework.cloud.loadbalancer.core.CachingServiceInstance
  * @see <a href="https://github.com/stoyanr/Evictor">Evictor</a>
  * @see ConcurrentHashMapWithTimedEviction
  */
-public class EvictorBasedLoadBalancerCacheManager implements LoadBalancerCacheManager {
+public class DefaultLoadBalancerCacheManager implements LoadBalancerCacheManager {
 
 	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
-	public EvictorBasedLoadBalancerCacheManager(
+	public DefaultLoadBalancerCacheManager(
 			LoadBalancerCacheProperties loadBalancerCacheProperties,
 			String... cacheNames) {
-		cacheMap.putAll(createEvictorCaches(cacheNames, loadBalancerCacheProperties)
-				.stream()
-				.collect(Collectors.toMap(EvictorCache::getName, cache -> cache)));
+		cacheMap.putAll(createCaches(cacheNames, loadBalancerCacheProperties).stream()
+				.collect(Collectors.toMap(DefaultCache::getName, cache -> cache)));
 	}
 
-	public EvictorBasedLoadBalancerCacheManager(
+	public DefaultLoadBalancerCacheManager(
 			LoadBalancerCacheProperties loadBalancerCacheProperties) {
 		this(loadBalancerCacheProperties, SERVICE_INSTANCE_CACHE_NAME);
 	}
 
-	private Set<EvictorCache> createEvictorCaches(String[] cacheNames,
+	private Set<DefaultCache> createCaches(String[] cacheNames,
 			LoadBalancerCacheProperties loadBalancerCacheProperties) {
 		return Arrays.stream(cacheNames).distinct()
-				.map(name -> new EvictorCache(name,
+				.map(name -> new DefaultCache(name,
 						new ConcurrentHashMapWithTimedEviction<>(
 								loadBalancerCacheProperties.getCapacity(),
 								new DelayedTaskEvictionScheduler<>()),
