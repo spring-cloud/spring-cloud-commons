@@ -19,7 +19,6 @@
 	</organization>
 	<properties>
 		<main.basedir>${basedir}/../..</main.basedir>
-		<evictor.version>1.0.0</evictor.version>
 	</properties>
 
 	<dependencies>
