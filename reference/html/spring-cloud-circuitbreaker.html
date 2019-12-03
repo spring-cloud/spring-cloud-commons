@@ -115,10 +115,13 @@ $(addBlockSwitches);
 <div class="sectionbody">
 <div class="paragraph">
 <p>Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations.
-It provides a consistent API to use in your applications allowing you the developer to choose the circuit breaker implementation that best fits your needs for your app.</p>
+It provides a consistent API to use in your applications, letting you, the developer, choose the circuit breaker implementation that best fits your needs for your application.</p>
 </div>
 <div class="sect2">
 <h3 id="_supported_implementations"><a class="link" href="#_supported_implementations">Supported Implementations</a></h3>
+<div class="paragraph">
+<p>Spring Cloud supports the following circuit-breaker implementations:</p>
+</div>
 <div class="ulist">
 <ul>
 <li>
@@ -142,8 +145,8 @@ It provides a consistent API to use in your applications allowing you the develo
 <h2 id="_core_concepts"><a class="link" href="#_core_concepts">Core Concepts</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>To create a circuit breaker in your code you can use the <code>CircuitBreakerFactory</code> API. When you include a Spring Cloud Circuit Breaker starter on your classpath a bean implementing this API will automatically be created for you.
-A very simple example of using this API is given below</p>
+<p>To create a circuit breaker in your code, you can use the <code>CircuitBreakerFactory</code> API. When you include a Spring Cloud Circuit Breaker starter on your classpath, a bean that implements this API is automatically created for you.
+The following example shows a simple example of how to use this API:</p>
 </div>
 <div class="exampleblock">
 <div class="content">
@@ -169,17 +172,18 @@ public static class DemoControllerService {
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>CircuitBreakerFactory.create</code> API will create an instance of a class called <code>CircuitBreaker</code>.
+<p>The <code>CircuitBreakerFactory.create</code> API creates an instance of a class called <code>CircuitBreaker</code>.
 The <code>run</code> method takes a <code>Supplier</code> and a <code>Function</code>.
 The <code>Supplier</code> is the code that you are going to wrap in a circuit breaker.
-The <code>Function</code> is the fallback that will be executed if the circuit breaker is tripped.
-The function will be passed the <code>Throwable</code> that caused the fallback to be triggered.
+The <code>Function</code> is the fallback that is executed if the circuit breaker is tripped.
+The function is passed the <code>Throwable</code> that caused the fallback to be triggered.
 You can optionally exclude the fallback if you do not want to provide one.</p>
 </div>
 <div class="sect2">
 <h3 id="_circuit_breakers_in_reactive_code"><a class="link" href="#_circuit_breakers_in_reactive_code">Circuit Breakers In Reactive Code</a></h3>
 <div class="paragraph">
-<p>If Project Reactor is on the class path then you can also use <code>ReactiveCircuitBreakerFactory</code> for your reactive code.</p>
+<p>If Project Reactor is on the class path, you can also use <code>ReactiveCircuitBreakerFactory</code> for your reactive code.
+The following example shows how to do so:</p>
 </div>
 <div class="exampleblock">
 <div class="content">
@@ -206,9 +210,9 @@ public static class DemoControllerService {
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>ReactiveCircuitBreakerFactory.create</code> API will create an instance of a class called <code>ReactiveCircuitBreaker</code>.
-The <code>run</code> method takes with a <code>Mono</code> or <code>Flux</code> and wraps it in a circuit breaker.
-You can optionally profile a fallback <code>Function</code> which will be called if the circuit breaker is tripped and will be passed the <code>Throwable</code>
+<p>The <code>ReactiveCircuitBreakerFactory.create</code> API creates an instance of a class called <code>ReactiveCircuitBreaker</code>.
+The <code>run</code> method takes a <code>Mono</code> or a <code>Flux</code> and wraps it in a circuit breaker.
+You can optionally profile a fallback <code>Function</code>, which will be called if the circuit breaker is tripped and is passed the <code>Throwable</code>
 that caused the failure.</p>
 </div>
 </div>
@@ -218,12 +222,12 @@ that caused the failure.</p>
 <h2 id="_configuration"><a class="link" href="#_configuration">Configuration</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can configure your circuit breakers using by creating beans of type <code>Customizer</code>.
-The <code>Customizer</code> interface has a single method called <code>customize</code> that takes in the <code>Object</code> to customize.</p>
+<p>You can configure your circuit breakers by creating beans of type <code>Customizer</code>.
+The <code>Customizer</code> interface has a single method (called <code>customize</code>) that takes the <code>Object</code> to customize.</p>
 </div>
 <div class="paragraph">
 <p>For detailed information on how to customize a given implementation see
-the links below</p>
+the following documentation:</p>
 </div>
 <div class="ulist">
 <ul>
