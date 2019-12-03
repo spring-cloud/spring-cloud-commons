@@ -12,21 +12,21 @@ If you would like to contribute to this section of the documentation or if you f
 
 Spring Boot has an opinionated view of how to build an application with Spring.
 For instance, it has conventional locations for common configuration files and has endpoints for common management and monitoring tasks.
-Spring Cloud builds on top of that and adds a few features that probably all components in a system would use or occasionally need.
+Spring Cloud builds on top of that and adds a few features that many components in a system would use or occasionally need.
 
 === The Bootstrap Application Context
 
 A Spring Cloud application operates by creating a "`bootstrap`" context, which is a parent context for the main application.
-It is responsible for loading configuration properties from the external sources and for decrypting properties in the local external configuration files.
+This context is responsible for loading configuration properties from the external sources and for decrypting properties in the local external configuration files.
 The two contexts share an `Environment`, which is the source of external properties for any Spring application.
 By default, bootstrap properties (not `bootstrap.properties` but properties that are loaded during the bootstrap phase) are added with high precedence, so they cannot be overridden by local configuration.
 
 The bootstrap context uses a different convention for locating external configuration than the main application context.
-Instead of `application.yml` (or `.properties`), you can use `bootstrap.yml`, keeping the external configuration for bootstrap and main context
-nicely separate.
+Instead of `application.yml` (or `.properties`), you can use `bootstrap.yml`, keeping the external configuration for bootstrap and main context nicely separate.
 The following listing shows an example:
 
 .bootstrap.yml
+====
 ----
 spring:
   application:
@@ -35,27 +35,27 @@ spring:
     config:
       uri: ${SPRING_CONFIG_URI:http://localhost:8888}
 ----
+====
 
 If your application needs any application-specific configuration from the server, it is a good idea to set the `spring.application.name` (in `bootstrap.yml` or `application.yml`).
-In order for the property `spring.application.name` to be used as the application's context ID you
-must set it in `bootstrap.[properties | yml]`.
+For the property `spring.application.name` to be used as the application's context ID, you must set it in `bootstrap.[properties | yml]`.
 
 You can disable the bootstrap process completely by setting `spring.cloud.bootstrap.enabled=false` (for example, in system properties).
 
 === Application Context Hierarchies
 
-If you build an application context from `SpringApplication` or `SpringApplicationBuilder`, then the Bootstrap context is added as a parent to that context.
+If you build an application context from `SpringApplication` or `SpringApplicationBuilder`, the Bootstrap context is added as a parent to that context.
 It is a feature of Spring that child contexts inherit property sources and profiles from their parent, so the "`main`" application context contains additional property sources, compared to building the same context without Spring Cloud Config.
 The additional property sources are:
 
-* "`bootstrap`": If any `PropertySourceLocators` are found in the Bootstrap context and if they have non-empty properties, an optional `CompositePropertySource` appears with high priority.
+* "`bootstrap`": If any `PropertySourceLocators` are found in the bootstrap context and if they have non-empty properties, an optional `CompositePropertySource` appears with high priority.
 An example would be properties from the Spring Cloud Config Server.
-See "`<<customizing-bootstrap-property-sources>>`" for instructions on how to customize the contents of this property source.
+See "`<<customizing-bootstrap-property-sources>>`" for how to customize the contents of this property source.
 
-* "`applicationConfig: [classpath:bootstrap.yml]`" (and related files if Spring profiles are active): If you have a `bootstrap.yml` (or `.properties`), those properties are used to configure the Bootstrap context.
+* "`applicationConfig: [classpath:bootstrap.yml]`" (and related files if Spring profiles are active): If you have a `bootstrap.yml` (or `.properties`), those properties are used to configure the bootstrap context.
 Then they get added to the child context when its parent is set.
 They have lower precedence than the `application.yml` (or `.properties`) and any other property sources that are added to the child as a normal part of the process of creating a Spring Boot application.
-See "`<<customizing-bootstrap-properties>>`" for instructions on how to customize the contents of these property sources.
+See "`<<customizing-bootstrap-properties>>`" for how to customize the contents of these property sources.
 
 Because of the ordering rules of property sources, the "`bootstrap`" entries take precedence.
 However, note that these do not contain any data from `bootstrap.yml`, which has very low precedence but can be used to set defaults.
@@ -63,29 +63,28 @@ However, note that these do not contain any data from `bootstrap.yml`, which has
 You can extend the context hierarchy by setting the parent context of any `ApplicationContext` you create -- for example, by using its own interface or with the `SpringApplicationBuilder` convenience methods (`parent()`, `child()` and `sibling()`).
 The bootstrap context is the parent of the most senior ancestor that you create yourself.
 Every context in the hierarchy has its own "`bootstrap`" (possibly empty) property source to avoid promoting values inadvertently from parents down to their descendants.
-If there is a Config Server, every context in the hierarchy can also (in principle) have a different `spring.application.name` and, hence, a different remote property source.
+If there is a config server, every context in the hierarchy can also (in principle) have a different `spring.application.name` and, hence, a different remote property source.
 Normal Spring application context behavior rules apply to property resolution: properties from a child context override those in
 the parent, by name and also by property source name.
 (If the child has a property source with the same name as the parent, the value from the parent is not included in the child).
 
 Note that the `SpringApplicationBuilder` lets you share an `Environment` amongst the whole hierarchy, but that is not the default.
-Thus, sibling contexts, in particular, do not need to have the same profiles or property sources, even though they may share common values with their parent.
+Thus, sibling contexts (in particular) do not need to have the same profiles or property sources, even though they may share common values with their parent.
 
 [[customizing-bootstrap-properties]]
 === Changing the Location of Bootstrap Properties
 
-The `bootstrap.yml` (or `.properties`) location can be specified by setting `spring.cloud.bootstrap.name` (default: `bootstrap`) or `spring.cloud.bootstrap.location` (default: empty) -- for example, in System properties.
+You can specify the `bootstrap.yml` (or `.properties`) location by setting `spring.cloud.bootstrap.name` (default: `bootstrap`) or `spring.cloud.bootstrap.location` (default: empty) -- for example, in system properties.
 Those properties behave like the `spring.config.*` variants with the same name.
 In fact, they are used to set up the bootstrap `ApplicationContext` by setting those properties in its `Environment`.
-If there is an active profile (from `spring.profiles.active` or through the `Environment` API in the
-context you are building), properties in that profile get loaded as well, the same as in a regular Spring Boot app -- for example, from `bootstrap-development.properties` for a `development` profile.
+If there is an active profile (from `spring.profiles.active` or through the `Environment` API in the context you are building), properties in that profile get loaded as well, the same as in a regular Spring Boot app -- for example, from `bootstrap-development.properties` for a `development` profile.
 
 [[overriding-bootstrap-properties]]
 === Overriding the Values of Remote Properties
 
 The property sources that are added to your application by the bootstrap context are often "`remote`" (from example, from Spring Cloud Config Server).
 By default, they cannot be overridden locally.
-If you want to let your applications override the remote properties with their own System properties or config files, the remote property source has to grant it permission by setting `spring.cloud.config.allowOverride=true` (it does not work to set this locally).
+If you want to let your applications override the remote properties with their own system properties or config files, the remote property source has to grant it permission by setting `spring.cloud.config.allowOverride=true` (it does not work to set this locally).
 Once that flag is set, two finer-grained settings control the location of the remote properties in relation to system properties and the application's local configuration:
 
 * `spring.cloud.config.overrideNone=true`: Override from any local property source.
@@ -97,12 +96,12 @@ The bootstrap context can be set to do anything you like by adding entries to `/
 This holds a comma-separated list of Spring `@Configuration` classes that are used to create the context.
 Any beans that you want to be available to the main application context for autowiring can be created here.
 There is a special contract for `@Beans` of type `ApplicationContextInitializer`.
-If you want to control the startup sequence, classes can be marked with an `@Order` annotation (the default order is `last`).
+If you want to control the startup sequence, you can mark classes with the `@Order` annotation (the default order is `last`).
 
 WARNING: When adding custom `BootstrapConfiguration`, be careful that the classes you add are not `@ComponentScanned` by mistake into your "`main`" application context, where they might not be needed.
 Use a separate package name for boot configuration classes and make sure that name is not already covered by your `@ComponentScan` or `@SpringBootApplication` annotated configuration classes.
 
-The bootstrap process ends by injecting initializers into the main `SpringApplication` instance (which is the normal Spring Boot startup sequence, whether it is running as a standalone application or deployed in an application server).
+The bootstrap process ends by injecting initializers into the main `SpringApplication` instance (which is the normal Spring Boot startup sequence, whether it runs as a standalone application or is deployed in an application server).
 First, a bootstrap context is created from the classes found in `spring.factories`.
 Then, all `@Beans` of type `ApplicationContextInitializer` are added to the main `SpringApplication` before it is started.
 
@@ -114,6 +113,7 @@ For instance, you can insert additional properties from a different server or fr
 
 As an example, consider the following custom locator:
 
+====
 [source,java]
 ----
 @Configuration
@@ -127,42 +127,44 @@ public class CustomPropertySourceLocator implements PropertySourceLocator {
 
 }
 ----
+====
 
-The `Environment` that is passed in is the one for the `ApplicationContext` about to be created -- in other words, the one for which we supply additional property sources for.
+The `Environment` that is passed in is the one for the `ApplicationContext` about to be created -- in other words, the one for which we supply additional property sources.
 It already has its normal Spring Boot-provided property sources, so you can use those to locate a property source specific to this `Environment` (for example, by keying it on `spring.application.name`, as is done in the default Spring Cloud Config Server property source locator).
 
-If you create a jar with this class in it and then add a `META-INF/spring.factories` containing the following, the `customProperty` `PropertySource` appears in any application that includes that jar on its classpath:
+If you create a jar with this class in it and then add a `META-INF/spring.factories` containing the following setting, the `customProperty` `PropertySource` appears in any application that includes that jar on its classpath:
 
+====
+[source]
 ----
 org.springframework.cloud.bootstrap.BootstrapConfiguration=sample.custom.CustomPropertySourceLocator
 ----
+====
 
 === Logging Configuration
 
-If you are going to use Spring Boot to configure log settings than
-you should place this configuration in `bootstrap.[yml | properties]
-if you would like it to apply to all events.
+If you use Spring Boot to configure log settings, you should place this configuration in `bootstrap.[yml | properties]` if you would like it to apply to all events.
 
-NOTE: For Spring Cloud to initialize logging configuration properly you cannot use a custom prefix.  For example,
-using `custom.loggin.logpath` will not be recognized by Spring Cloud when initializing the logging system.
+NOTE: For Spring Cloud to initialize logging configuration properly, you cannot use a custom prefix.
+For example, using `custom.loggin.logpath` is not recognized by Spring Cloud when initializing the logging system.
 
 === Environment Changes
 
-The application listens for an `EnvironmentChangeEvent` and reacts to the change in a couple of standard ways (additional `ApplicationListeners` can be added as `@Beans` by the user in the normal way).
+The application listens for an `EnvironmentChangeEvent` and reacts to the change in a couple of standard ways (additional `ApplicationListeners` can be added as `@Beans` in the normal way).
 When an `EnvironmentChangeEvent` is observed, it has a list of key values that have changed, and the application uses those to:
 
-* Re-bind any `@ConfigurationProperties` beans in the context
-* Set the logger levels for any properties in `logging.level.*`
+* Re-bind any `@ConfigurationProperties` beans in the context.
+* Set the logger levels for any properties in `logging.level.*`.
 
-Note that the Config Client does not, by default, poll for changes in the `Environment`.
+Note that the Spring Cloud Config Client does not, by default, poll for changes in the `Environment`.
 Generally, we would not recommend that approach for detecting changes (although you could set it up with a
 `@Scheduled` annotation).
 If you have a scaled-out client application, it is better to broadcast the `EnvironmentChangeEvent` to all the instances instead of having them polling for changes (for example, by using the https://github.com/spring-cloud/spring-cloud-bus[Spring Cloud Bus]).
 
 The `EnvironmentChangeEvent` covers a large class of refresh use cases, as long as you can actually make a change to the `Environment` and publish the event.
 Note that those APIs are public and part of core Spring).
-You can verify that the changes are bound to `@ConfigurationProperties` beans by visiting the `/configprops` endpoint (a normal Spring Boot Actuator feature).
-For instance, a `DataSource` can have its `maxPoolSize` changed at runtime (the default `DataSource` created by Spring Boot is an `@ConfigurationProperties` bean) and grow capacity dynamically.
+You can verify that the changes are bound to `@ConfigurationProperties` beans by visiting the `/configprops` endpoint (a standard Spring Boot Actuator feature).
+For instance, a `DataSource` can have its `maxPoolSize` changed at runtime (the default `DataSource` created by Spring Boot is a `@ConfigurationProperties` bean) and grow capacity dynamically.
 Re-binding `@ConfigurationProperties` does not cover another large class of use cases, where you need more control over the refresh and where you need a change to be atomic over the whole `ApplicationContext`.
 To address those concerns, we have `@RefreshScope`.
 
@@ -170,29 +172,27 @@ To address those concerns, we have `@RefreshScope`.
 === Refresh Scope
 
 When there is a configuration change, a Spring `@Bean` that is marked as `@RefreshScope` gets special treatment.
-This feature addresses the problem of stateful beans that only get their configuration injected when they are initialized.
-For instance, if a `DataSource` has open connections when the database URL is changed via the `Environment`, you probably want the holders of those connections to be able to complete what they are doing.
+This feature addresses the problem of stateful beans that get their configuration injected only when they are initialized.
+For instance, if a `DataSource` has open connections when the database URL is changed through the `Environment`, you probably want the holders of those connections to be able to complete what they are doing.
 Then, the next time something borrows a connection from the pool, it gets one with the new URL.
 
-Sometimes, it might even be mandatory to apply the `@RefreshScope`
-annotation on some beans which can be only initialized once. If a bean
-is "immutable", you will have to either annotate the bean with `@RefreshScope`
-or specify the classname under the property key
-`spring.cloud.refresh.extra-refreshable`.
+Sometimes, it might even be mandatory to apply the `@RefreshScope` annotation on some beans that can be only initialized once.
+If a bean is "`immutable`", you have to either annotate the bean with `@RefreshScope` or specify the classname under the property key: `spring.cloud.refresh.extra-refreshable`.
 
 IMPORTANT: If you create a `DataSource` bean yourself and the implementation is a `HikariDataSource`, return the
-most specific type, in this case `HikariDataSource`. Otherwise, you will need to set
+most specific type, in this case `HikariDataSource`. Otherwise, you need to set
 `spring.cloud.refresh.extra-refreshable=javax.sql.DataSource`.
 
 Refresh scope beans are lazy proxies that initialize when they are used (that is, when a method is called), and the scope acts as a cache of initialized values.
 To force a bean to re-initialize on the next method call, you must invalidate its cache entry.
 
-The `RefreshScope` is a bean in the context and has a public  `refreshAll()` method to refresh all beans in the scope by clearing the target cache.
+The `RefreshScope` is a bean in the context and has a public `refreshAll()` method to refresh all beans in the scope by clearing the target cache.
 The `/refresh` endpoint exposes this functionality (over HTTP or JMX).
 To refresh an individual bean by name, there is also a `refresh(String)` method.
 
 To expose the `/refresh` endpoint, you need to add following configuration to your application:
 
+====
 [source,yaml]
 ----
 management:
@@ -201,18 +201,20 @@ management:
       exposure:
         include: refresh
 ----
+====
 
-NOTE: `@RefreshScope` works (technically) on an `@Configuration` class, but it might lead to surprising behavior.
+NOTE: `@RefreshScope` works (technically) on a `@Configuration` class, but it might lead to surprising behavior.
 For example, it does not mean that all the `@Beans` defined in that class are themselves in `@RefreshScope`.
 Specifically, anything that depends on those beans cannot rely on them being updated when a refresh is initiated, unless it is itself in `@RefreshScope`.
-In that case, it is rebuilt on a refresh and its dependencies are re-injected. At that point, they are re-initialized from the refreshed `@Configuration`).
+In that case, it is rebuilt on a refresh and its dependencies are re-injected.
+At that point, they are re-initialized from the refreshed `@Configuration`).
 
 === Encryption and Decryption
 
 Spring Cloud has an `Environment` pre-processor for decrypting property values locally.
-It follows the same rules as the Config Server and has the same external configuration through `encrypt.\*`.
-Thus, you can use encrypted values in the form of `{cipher}*` and, as long as there is a valid key, they are decrypted before the main application context gets the `Environment` settings.
-To use the encryption features in an application, you need to include Spring Security RSA in your classpath (Maven co-ordinates: "org.springframework.security:spring-security-rsa"), and you also need the full strength JCE extensions in your JVM.
+It follows the same rules as the Spring Cloud Config Server and has the same external configuration through `encrypt.\*`.
+Thus, you can use encrypted values in the form of `{cipher}*`, and, as long as there is a valid key, they are decrypted before the main application context gets the `Environment` settings.
+To use the encryption features in an application, you need to include Spring Security RSA in your classpath (Maven co-ordinates: `org.springframework.security:spring-security-rsa`), and you also need the full strength JCE extensions in your JVM.
 
 include::jce.adoc[]
 
@@ -233,7 +235,7 @@ will also be disabled since they are just a special case of `/actuator/restart`.
 Patterns such as service discovery, load balancing, and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (for example, discovery with Eureka or Consul).
 
 [[discovery-client]]
-=== @EnableDiscoveryClient
+=== The `@EnableDiscoveryClient` Annotation
 
 Spring Cloud Commons provides the `@EnableDiscoveryClient` annotation.
 This looks for implementations of the `DiscoveryClient` and `ReactiveDiscoveryClient` interfaces with `META-INF/spring.factories`.
@@ -277,6 +279,7 @@ Commons now provides a `ServiceRegistry` interface that provides methods such as
 
 The following example shows the `ServiceRegistry` in use:
 
+====
 [source,java,indent=0]
 ----
 @Configuration
@@ -295,6 +298,7 @@ public class MyConfiguration {
     }
 }
 ----
+====
 
 Each `ServiceRegistry` implementation has its own `Registry` implementation.
 
@@ -321,7 +325,7 @@ There are two events that will be fired when a service auto-registers.  The firs
 event, called `InstanceRegisteredEvent`, is fired after the service is registered.  You can register an
 `ApplicationListener`(s) to listen to and react to these events.
 
-NOTE: These events will not be fired if `spring.cloud.service-registry.auto-registration.enabled` is set to `false`.
+NOTE: These events will not be fired if the `spring.cloud.service-registry.auto-registration.enabled` property is set to `false`.
 
 ==== Service Registry Actuator Endpoint
 
@@ -336,9 +340,10 @@ For instance, Eureka's supported statuses are `UP`, `DOWN`, `OUT_OF_SERVICE`, an
 [[rest-template-loadbalancer-client]]
 === Spring RestTemplate as a Load Balancer Client
 
-`RestTemplate` can be automatically configured to use a Load-balancer client under the hood.
-To create a load-balanced `RestTemplate`, create a `RestTemplate` `@Bean` and use the `@LoadBalanced` qualifier, as shown in the following example:
+You can configure a `RestTemplate` to use a Load-balancer client.
+To create a load-balanced `RestTemplate`, create a `RestTemplate` `@Bean` and use the `@LoadBalanced` qualifier, as the following example shows:
 
+====
 [source,java,indent=0]
 ----
 @Configuration
@@ -361,30 +366,32 @@ public class MyClass {
     }
 }
 ----
+====
 
 CAUTION: A `RestTemplate` bean is no longer created through auto-configuration.
 Individual applications must create it.
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The Ribbon client is used to create a full physical address.
-See {githubroot}/spring-cloud-netflix/blob/master/spring-cloud-netflix-ribbon/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java[RibbonAutoConfiguration] for details of how the `RestTemplate` is set up.
+See {githubroot}/spring-cloud-netflix/blob/master/spring-cloud-netflix-ribbon/src/main/java/org/springframework/cloud/netflix/ribbon/RibbonAutoConfiguration.java[`RibbonAutoConfiguration`] for the details of how the `RestTemplate` is set up.
 
-IMPORTANT: In order to use a load-balanced `RestTemplate`, you need to have a load-balancer implementation in your classpath.
-The recommended implementation is `BlockingLoadBalancerClient`
-- add <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> to your project in order to use it.
+IMPORTANT: To use a load-balanced `RestTemplate`, you need to have a load-balancer implementation in your classpath.
+The recommended implementation is `BlockingLoadBalancerClient`.
+Add <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> to your project in order to use it.
 The
 `RibbonLoadBalancerClient` also can be used, but it's now under maintenance and we do not recommend adding it to new projects.
 
-WARNING: If you have both `RibbonLoadBalancerClient` and `BlockingLoadBalancerClient`, in order to
-preserve backward compatibility, `RibbonLoadBalancerClient` will be used by default. In order
-to override it, you can set the property `spring.cloud.loadbalancer.ribbon.enabled` to `false`.
+WARNING:  By default, if you have both `RibbonLoadBalancerClient` and `BlockingLoadBalancerClient`, to
+preserve backward compatibility, `RibbonLoadBalancerClient` is used.
+To override it, you can set the `spring.cloud.loadbalancer.ribbon.enabled` property to `false`.
 
 [[webclinet-loadbalancer-client]]
 === Spring WebClient as a Load Balancer Client
 
-`WebClient` can be automatically configured to use a load-balancer client.
-To create a load-balanced `WebClient`, create a `WebClient.Builder` `@Bean` and use the `@LoadBalanced` qualifier, as shown in the following example:
+You can configure `WebClient` to automatically use a load-balancer client.
+To create a load-balanced `WebClient`, create a `WebClient.Builder` `@Bean` and use the `@LoadBalanced` qualifier, as follows:
 
+====
 [source,java,indent=0]
 ----
 @Configuration
@@ -407,21 +414,22 @@ public class MyClass {
     }
 }
 ----
+====
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The Ribbon client or Spring Cloud LoadBalancer is used to create a full physical address.
 
-IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder`, you need to have a loadbalancer
-implementation in the classpath. It is recommended that you add the
+IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder`, you need to have a load balancer
+implementation in the classpath. We recommend that you add the
 <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> to your project.
-Then, `ReactiveLoadBalancer` will be used underneath.
-Alternatively, this functionality will also work with `spring-cloud-starter-netflix-ribbon`, but the request
-will be handled by a non-reactive `LoadBalancerClient` under the hood. Additionally,
-spring-cloud-starter-netflix-ribbon is already in maintenance mode, so we do not recommend
+Then, `ReactiveLoadBalancer` is used underneath.
+Alternatively, this functionality also works with `spring-cloud-starter-netflix-ribbon`, but the request
+is handled by a non-reactive `LoadBalancerClient` under the hood. Additionally,
+`spring-cloud-starter-netflix-ribbon` is already in maintenance mode, so we do not recommend
 adding it to new projects.
 If you have both `spring-cloud-starter-loadbalancer` and `spring-cloud-starter-netflix-ribbon`
-in your classpath, Ribbon will be used by default. In order to switch to Spring Cloud LoadBalancer,
-set the value of `spring.cloud.loadbalancer.ribbon.enabled` to false.
+in your classpath, Ribbon is used by default. To switch to Spring Cloud LoadBalancer,
+set the `spring.cloud.loadbalancer.ribbon.enabled` property to `false`.
 
 ==== Retrying Failed Requests
 
@@ -435,6 +443,7 @@ See the https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-fi
 
 If you would like to implement a `BackOffPolicy` in your retries, you need to create a bean of type `LoadBalancedRetryFactory` and override the `createBackOffPolicy` method:
 
+====
 [source,java,indent=0]
 ----
 @Configuration
@@ -450,13 +459,15 @@ public class MyConfiguration {
     }
 }
 ----
+====
 
 NOTE: `client` in the preceding examples should be replaced with your Ribbon client's name.
 
 If you want to add one or more `RetryListener` implementations to your retry functionality, you need to
 create a bean of type `LoadBalancedRetryListenerFactory` and return the `RetryListener` array
-you would like to use for a given service, as shown in the following example:
+you would like to use for a given service, as the following example shows:
 
+====
 [source,java,indent=0]
 ----
 @Configuration
@@ -488,12 +499,14 @@ public class MyConfiguration {
     }
 }
 ----
+====
 
-=== Multiple RestTemplate objects
+=== Multiple `RestTemplate` Objects
 
 If you want a `RestTemplate` that is not load-balanced, create a `RestTemplate` bean and inject it.
-To access the load-balanced `RestTemplate`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as shown in the following example:
+To access the load-balanced `RestTemplate`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
 
+====
 [source,java,indent=0]
 ----
 @Configuration
@@ -529,6 +542,7 @@ private RestTemplate restTemplate;
     }
 }
 ----
+====
 
 IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestTemplate` declaration in the preceding example to disambiguate the unqualified `@Autowired` injection.
 
@@ -537,8 +551,9 @@ TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set 
 === Multiple WebClient Objects
 
 If you want a `WebClient` that is not load-balanced, create a `WebClient` bean and inject it.
-To access the load-balanced `WebClient`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as shown in the following example:
+To access the load-balanced `WebClient`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
 
+====
 [source,java,indent=0]
 ----
 @Configuration
@@ -576,18 +591,25 @@ public class MyClass {
     }
 }
 ----
+====
 
 [[loadbalanced-webclient]]
-=== Spring WebFlux WebClient as a Load Balancer Client
+=== Spring WebFlux `WebClient` as a Load Balancer Client
+
+The Spring WebFlux can work with both reactive and non-reactive `WebClient` configurations, as the topics describe:
+
+* <<webflux-with-reactive-loadbalancer>>
+* <<load-balancer-exchange-filter-functionload-balancer-exchange-filter-function>>
 
 [[webflux-with-reactive-loadbalancer]]
-==== Spring WebFlux WebClient with ReactorLoadBalancerExchangeFilterFunction
+==== Spring WebFlux `WebClient` with `ReactorLoadBalancerExchangeFilterFunction`
 
-`WebClient` can be configured to use the `ReactiveLoadBalancer`.
-If you add <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> to your project,
- `ReactorLoadBalancerExchangeFilterFunction` is auto-configured if `spring-webflux` is on the classpath.
-The following example shows how to configure a `WebClient` to use reactive load-balancer under the hood:
+You can configure `WebClient` to use the `ReactiveLoadBalancer`.
+If you add <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> to your project
+and if `spring-webflux` is on the classpath, `ReactorLoadBalancerExchangeFilterFunction` is auto-configured.
+The following example shows how to configure a `WebClient` to use reactive load-balancer:
 
+====
 [source,java,indent=0]
 ----
 public class MyClass {
@@ -605,24 +627,27 @@ public class MyClass {
     }
 }
 ----
+====
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The `ReactorLoadBalancer` is used to create a full physical address.
 
-NOTE: If you have `spring-cloud-netflix-ribbon` in your classpath, <<load-balancer-exchange-filter-function,`LoadBalancerExchangeFilterFunction`>>
-will be used by default to maintain backward compatibility. In order to be able to use
-`ReactorLoadBalancerExchangeFilterFunction`, set the value of `spring.cloud.loadbalancer.ribbon.enabled` property
+NOTE: By default, if you have `spring-cloud-netflix-ribbon` in your classpath, <<load-balancer-exchange-filter-function,`LoadBalancerExchangeFilterFunction`>>
+is used to maintain backward compatibility. To use
+`ReactorLoadBalancerExchangeFilterFunction`, set the `spring.cloud.loadbalancer.ribbon.enabled` property
 to `false`.
 
 [[load-balancer-exchange-filter-function]]
-==== Spring WebFlux WebClient with non-reactive Load Balancer Client
+==== Spring WebFlux `WebClient` with a Non-reactive Load Balancer Client
 
-If you you don't have <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> in your project,
-but you do have spring-cloud-starter-netflix-ribbon, you can still use `WebClient` with `LoadBalancerClient`. `LoadBalancerExchangeFilterFunction`
-will be auto-configured if `spring-webflux` is on the classpath. Please note, however, that this is
+If you you do not have <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> in your project
+but you do have spring-cloud-starter-netflix-ribbon, you can still use `WebClient` with `LoadBalancerClient`.
+If `spring-webflux` is on the classpath, `LoadBalancerExchangeFilterFunction`
+is auto-configured. Note, however, that this
 uses a non-reactive client under the hood.
 The following example shows how to configure a `WebClient` to use load-balancer:
 
+====
 [source,java,indent=0]
 ----
 public class MyClass {
@@ -640,12 +665,13 @@ public class MyClass {
     }
 }
 ----
+====
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The `LoadBalancerClient` is used to create a full physical address.
 
 WARN: This approach is now deprecated.
-We suggest you use <<webflux-with-reactive-loadbalancer,WebFlux with reactive Load-Balancer>>
+We suggest that you use <<webflux-with-reactive-loadbalancer,WebFlux with reactive Load-Balancer>>
 instead.
 
 [[ignore-network-interfaces]]
@@ -656,6 +682,7 @@ A list of regular expressions can be set to cause the desired network interfaces
 The following configuration ignores the `docker0` interface and all interfaces that start with `veth`:
 
 .application.yml
+====
 ----
 spring:
   cloud:
@@ -664,10 +691,12 @@ spring:
         - docker0
         - veth.*
 ----
+====
 
-You can also force the use of only specified network addresses by using a list of regular expressions, as shown in the following example:
+You can also force the use of only specified network addresses by using a list of regular expressions, as the following example shows:
 
 .bootstrap.yml
+====
 ----
 spring:
   cloud:
@@ -676,15 +705,19 @@ spring:
         - 192.168
         - 10.0
 ----
+====
 
-You can also force the use of only site-local addresses, as shown in the following example:
+You can also force the use of only site-local addresses, as the following example shows:
+
 .application.yml
+====
 ----
 spring:
   cloud:
     inetutils:
       useOnlySiteLocalInterfaces: true
 ----
+====
 
 See https://docs.oracle.com/javase/8/docs/api/java/net/Inet4Address.html#isSiteLocalAddress--[Inet4Address.html.isSiteLocalAddress()] for more details about what constitutes a site-local address.
 
@@ -713,12 +746,13 @@ Abstract features are features where an interface or abstract class is defined a
 The abstract class or interface is used to find a bean of that type in the context.
 The version displayed is `bean.getClass().getPackage().getImplementationVersion()`.
 
-Named features are features that do not have a particular class they implement, such as "Circuit Breaker", "API Gateway", "Spring Cloud Bus", and others. These features require a name and a bean type.
+Named features are features that do not have a particular class they implement. These features include "`Circuit Breaker`", "`API Gateway`", "`Spring Cloud Bus`", and others. These features require a name and a bean type.
 
 ==== Declaring features
 
-Any module can declare any number of `HasFeature` beans, as shown in the following examples:
+Any module can declare any number of `HasFeature` beans, as the following examples show:
 
+====
 [source,java,indent=0]
 ----
 @Bean
@@ -736,12 +770,13 @@ public HasFeatures consulFeatures() {
 @Bean
 HasFeatures localFeatures() {
   return HasFeatures.builder()
-      .abstractFeature(Foo.class)
-      .namedFeature(new NamedFeature("Bar Feature", Bar.class))
-      .abstractFeature(Baz.class)
+      .abstractFeature(Something.class)
+      .namedFeature(new NamedFeature("Some Other Feature", Someother.class))
+      .abstractFeature(Somethingelse.class)
       .build();
 }
 ----
+====
 
 Each of these beans should go in an appropriately guarded `@Configuration`.
 
@@ -756,6 +791,7 @@ At the moment we verify which version of Spring Boot is added to your classpath.
 
 Example of a report
 
+====
 ----
 ***************************
 APPLICATION FAILED TO START
@@ -776,7 +812,7 @@ Consider applying the following actions:
 You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
 If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.
 ----
-
+====
 
 In order to disable this feature, set `spring.cloud.compatibility-verifier.enabled` to `false`.
 If you want to override the compatible Spring Boot versions, just set the
@@ -837,7 +873,7 @@ WARNING: Although the basic, non-cached, implementation is useful for prototypin
 than the cached versions, so we recommend always using the cached version in production.
 
 [[spring-cloud-loadbalancer-starter]]
-=== Spring Cloud LoadBalancer starter
+=== Spring Cloud LoadBalancer Starter
 
 We also provide a starter that allows you to easily add Spring Cloud LoadBalancer in a Spring Boot app.
 In order to use it, just add `org.springframework.cloud:spring-cloud-starter-loadbalancer` to your Spring
@@ -852,10 +888,11 @@ backward compatibility, Ribbon-based implementations will be used by default. In
 to switch to using Spring Cloud LoadBalancer under the hood,
 make sure you set the property `spring.cloud.loadbalancer.ribbon.enabled` to `false`.
 
-=== Passing your own Spring Cloud LoadBalancer configuration
+=== Passing Your Own Spring Cloud LoadBalancer Configuration
 
-You can also use the `@LoadBalancerClient` annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, like so:
+You can also use the `@LoadBalancerClient` annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, as follows:
 
+====
 [source,java,indent=0]
 ----
 @Configuration
@@ -869,9 +906,11 @@ public class MyConfiguration {
 	}
 }
 ----
+====
 
-It is also possible to pass together multiple configurations (for more than one load-balancer client) via the `@LoadBalancerClients` annotation, as shown below:
+You can also pass multiple configurations (for more than one load-balancer client) through the `@LoadBalancerClients` annotation, as the following example shows:
 
+====
 [source,java,indent=0]
 ----
 @Configuration
@@ -885,6 +924,7 @@ public class MyConfiguration {
 	}
 }
 ----
+====
 
 == Spring Cloud Circuit Breaker
 
