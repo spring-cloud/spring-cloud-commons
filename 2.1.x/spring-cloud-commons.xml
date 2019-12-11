@@ -62,6 +62,7 @@ The following listing shows an example:</simpara>
 <simpara>If your application needs any application-specific configuration from the server, it is a good idea to set the <literal>spring.application.name</literal> (in <literal>bootstrap.yml</literal> or <literal>application.yml</literal>).
 In order for the property <literal>spring.application.name</literal> to be used as the application&#8217;s context ID you
 must set it in <literal>bootstrap.[properties | yml]</literal>.</simpara>
+<simpara>If you want to retrieve specific profile configuration, you should also set <literal>spring.profiles.active</literal> in <literal>bootstrap.[properties | yml]</literal>.</simpara>
 <simpara>You can disable the bootstrap process completely by setting <literal>spring.cloud.bootstrap.enabled=false</literal> (for example, in system properties).</simpara>
 </section>
 <section xml:id="_application_context_hierarchies">
