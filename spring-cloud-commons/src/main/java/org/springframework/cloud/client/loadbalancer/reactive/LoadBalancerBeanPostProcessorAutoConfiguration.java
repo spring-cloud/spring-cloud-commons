@@ -57,7 +57,7 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@Conditional(ReactorLoadBalancerClientAutoConfiguration.OnNoRibbonDefaultCondition.class)
+	@Conditional(OnNoRibbonDefaultCondition.class)
 	@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 	protected static class ReactorDeferringLoadBalancerFilterConfig {
 
