@@ -31,6 +31,7 @@ import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.cloud.bootstrap.TestBootstrapConfiguration;
+import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -90,7 +91,9 @@ public class ContextRefresherTests {
 					.applyTo(context.getEnvironment(), Type.MAP, "defaultProperties");
 			refresher.refresh();
 			names = names(context.getEnvironment().getPropertySources());
-			then(names).first().isEqualTo("bootstrapProperties");
+			then(names).first().isEqualTo(
+					PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
+							+ "-refreshTest");
 		}
 	}
 
