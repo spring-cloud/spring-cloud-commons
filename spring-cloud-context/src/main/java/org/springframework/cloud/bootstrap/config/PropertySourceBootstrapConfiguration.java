@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -103,9 +102,10 @@ public class PropertySourceBootstrapConfiguration implements
 			if (source == null) {
 				continue;
 			}
-			List sourceList = source.stream().map(p -> new BootstrapPropertySource(p))
-					.collect(Collectors.toList());
-
+			List sourceList = new ArrayList<>();
+			for (PropertySource p : source) {
+				sourceList.add(new BootstrapPropertySource(p));
+			}
 			logger.info("Located property source: " + sourceList);
 			composite.addAll(sourceList);
 			empty = false;
@@ -172,31 +172,41 @@ public class PropertySourceBootstrapConfiguration implements
 		// Wherever we call addLast we can use the order in the List since the first item
 		// will end up before the rest
 		Collections.reverse(reversedComposite);
-		reversedComposite.stream().forEach(p -> incoming.addFirst(p));
+		for (PropertySource p : reversedComposite) {
+			incoming.addFirst(p);
+		}
 		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
 		Binder.get(environment(incoming)).bind("spring.cloud.config",
 				Bindable.ofInstance(remoteProperties));
 		if (!remoteProperties.isAllowOverride() || (!remoteProperties.isOverrideNone()
 				&& remoteProperties.isOverrideSystemProperties())) {
-			reversedComposite.stream().forEach(p -> propertySources.addFirst(p));
+			for (PropertySource p : reversedComposite) {
+				propertySources.addFirst(p);
+			}
 			return;
 		}
 		if (remoteProperties.isOverrideNone()) {
-			composite.stream().forEach(p -> propertySources.addLast(p));
+			for (PropertySource p : composite) {
+				propertySources.addLast(p);
+			}
 			return;
 		}
 		if (propertySources.contains(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
 			if (!remoteProperties.isOverrideSystemProperties()) {
-				composite.stream().forEach(p -> propertySources
-						.addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, p));
+				for (PropertySource p : composite) {
+					propertySources.addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, p);
+				}
 			}
 			else {
-				reversedComposite.stream().forEach(p -> propertySources
-						.addBefore(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, p));
+				for (PropertySource p : reversedComposite) {
+					propertySources.addBefore(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, p);
+				}
 			}
 		}
 		else {
-			composite.stream().forEach(p -> propertySources.addLast(p));
+			for (PropertySource p : composite) {
+				propertySources.addLast(p);
+			}
 		}
 	}
 
