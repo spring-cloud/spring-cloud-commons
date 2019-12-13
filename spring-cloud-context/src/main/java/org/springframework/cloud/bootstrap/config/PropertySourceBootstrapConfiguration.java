@@ -17,8 +17,10 @@
 package org.springframework.cloud.bootstrap.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,12 +47,16 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME;
+import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
 
 /**
  * @author Dave Syer
@@ -87,27 +93,31 @@ public class PropertySourceBootstrapConfiguration implements
 
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
-		CompositePropertySource composite = new CompositePropertySource(
-				BOOTSTRAP_PROPERTY_SOURCE_NAME);
+		List<PropertySource<?>> composite = new ArrayList<>();
 		AnnotationAwareOrderComparator.sort(this.propertySourceLocators);
 		boolean empty = true;
 		ConfigurableEnvironment environment = applicationContext.getEnvironment();
 		for (PropertySourceLocator locator : this.propertySourceLocators) {
-			PropertySource<?> source = null;
-			source = locator.locate(environment);
+			Collection<PropertySource<?>> source = locator.locateCollection(environment);
 			if (source == null) {
 				continue;
 			}
-			logger.info("Located property source: " + source);
-			composite.addPropertySource(source);
+			List sourceList = new ArrayList<>();
+			for (PropertySource p : source) {
+				sourceList.add(new BootstrapPropertySource(p));
+			}
+			logger.info("Located property source: " + sourceList);
+			composite.addAll(sourceList);
 			empty = false;
 		}
 		if (!empty) {
 			MutablePropertySources propertySources = environment.getPropertySources();
 			String logConfig = environment.resolvePlaceholders("${logging.config:}");
 			LogFile logFile = LogFile.get(environment);
-			if (propertySources.contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
-				propertySources.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
+			for (PropertySource p : environment.getPropertySources()) {
+				if (p.getName().startsWith(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+					propertySources.remove(p.getName());
+				}
 			}
 			insertPropertySources(propertySources, composite);
 			reinitializeLoggingSystem(environment, logConfig, logFile);
@@ -154,36 +164,49 @@ public class PropertySourceBootstrapConfiguration implements
 	}
 
 	private void insertPropertySources(MutablePropertySources propertySources,
-			CompositePropertySource composite) {
+			List<PropertySource<?>> composite) {
 		MutablePropertySources incoming = new MutablePropertySources();
-		incoming.addFirst(composite);
+		List<PropertySource<?>> reversedComposite = new ArrayList(composite);
+		// Reverse the list so that when we call addFirst below we are maintaining the
+		// same order of PropertySournces
+		// Wherever we call addLast we can use the order in the List since the first item
+		// will end up before the rest
+		Collections.reverse(reversedComposite);
+		for (PropertySource p : reversedComposite) {
+			incoming.addFirst(p);
+		}
 		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
 		Binder.get(environment(incoming)).bind("spring.cloud.config",
 				Bindable.ofInstance(remoteProperties));
 		if (!remoteProperties.isAllowOverride() || (!remoteProperties.isOverrideNone()
 				&& remoteProperties.isOverrideSystemProperties())) {
-			propertySources.addFirst(composite);
+			for (PropertySource p : reversedComposite) {
+				propertySources.addFirst(p);
+			}
 			return;
 		}
 		if (remoteProperties.isOverrideNone()) {
-			propertySources.addLast(composite);
+			for (PropertySource p : composite) {
+				propertySources.addLast(p);
+			}
 			return;
 		}
-		if (propertySources
-				.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
+		if (propertySources.contains(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
 			if (!remoteProperties.isOverrideSystemProperties()) {
-				propertySources.addAfter(
-						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-						composite);
+				for (PropertySource p : composite) {
+					propertySources.addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, p);
+				}
 			}
 			else {
-				propertySources.addBefore(
-						StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
-						composite);
+				for (PropertySource p : reversedComposite) {
+					propertySources.addBefore(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, p);
+				}
 			}
 		}
 		else {
-			propertySources.addLast(composite);
+			for (PropertySource p : composite) {
+				propertySources.addLast(p);
+			}
 		}
 	}
 
@@ -238,6 +261,35 @@ public class PropertySourceBootstrapConfiguration implements
 		final String value = (property == null ? null : property.toString());
 		return property == null ? new String[0]
 				: StringUtils.tokenizeToStringArray(value, ",");
+	}
+
+}
+
+class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
+
+	private PropertySource<T> p;
+
+	BootstrapPropertySource(PropertySource<T> p) {
+		super(BOOTSTRAP_PROPERTY_SOURCE_NAME + "-" + p.getName(), p.getSource());
+		this.p = p;
+	}
+
+	@Override
+	public Object getProperty(String name) {
+		return p.getProperty(name);
+	}
+
+	@Override
+	public String[] getPropertyNames() {
+		Set<String> names = new LinkedHashSet<>();
+		if (!(this.p instanceof EnumerablePropertySource)) {
+			throw new IllegalStateException(
+					"Failed to enumerate property names due to non-enumerable property source: "
+							+ p);
+		}
+		names.addAll(Arrays.asList(((EnumerablePropertySource<?>) p).getPropertyNames()));
+
+		return StringUtils.toStringArray(names);
 	}
 
 }
