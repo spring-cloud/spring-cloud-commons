@@ -16,8 +16,10 @@
 
 package org.springframework.cloud.bootstrap.config;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.env.CompositePropertySource;
@@ -43,8 +45,19 @@ public interface PropertySourceLocator {
 
 	default Collection<PropertySource<?>> locateCollection(Environment environment) {
 		PropertySource propertySource = locate(environment);
+		if (propertySource == null) {
+			return Collections.EMPTY_LIST;
+		}
 		if (CompositePropertySource.class.isInstance(propertySource)) {
-			return ((CompositePropertySource) propertySource).getPropertySources();
+			Collection<PropertySource<?>> sources = ((CompositePropertySource) propertySource)
+					.getPropertySources();
+			List<PropertySource<?>> filteredSources = new ArrayList<>();
+			for (PropertySource p : sources) {
+				if (p != null) {
+					filteredSources.add(p);
+				}
+			}
+			return filteredSources;
 		}
 		else {
 			return (List) Arrays.asList(propertySource);
