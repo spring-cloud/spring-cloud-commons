@@ -99,7 +99,7 @@ public class PropertySourceBootstrapConfiguration implements
 		ConfigurableEnvironment environment = applicationContext.getEnvironment();
 		for (PropertySourceLocator locator : this.propertySourceLocators) {
 			Collection<PropertySource<?>> source = locator.locateCollection(environment);
-			if (source == null) {
+			if (source == null || source.size() == 0) {
 				continue;
 			}
 			List sourceList = new ArrayList<>();
