@@ -20,3 +20,4 @@ _site/
 /spring-cloud-release-tools*.jar
 antrun
 .vscode/
+.flattened-pom.xml
