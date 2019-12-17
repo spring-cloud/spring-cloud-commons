@@ -881,7 +881,9 @@ We use `DiscoveryClient`-specific `zone` configuration (for example, `eureka.ins
 
 NOTE: You can also override `DiscoveryClient`-specific zone setup by setting the value of `spring.cloud.loadbalancer.zone` property.
 
-The `ZonePreferenceServiceInstanceListSupplier` filters retrieved instances and only returns the sones within the same zone.
+NOTE: To determine the zone of a retrieved `ServiceInstance`, we check the value under the `"zone"` key in its metadata map.
+
+The `ZonePreferenceServiceInstanceListSupplier` filters retrieved instances and only returns the ones within the same zone.
 If the zone is `null` or there are no instances within the same zone, it returns all the retrieved instances.
 
 In order to use the zone-based load-balancing approach, you will have to instantiate a `ZonePreferenceServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.
