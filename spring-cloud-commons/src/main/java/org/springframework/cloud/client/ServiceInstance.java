@@ -27,6 +27,8 @@ import java.util.Map;
  */
 public interface ServiceInstance {
 
+	String ZONE = "zone";
+
 	/**
 	 * @return The unique instance ID as registered.
 	 */
@@ -68,6 +70,14 @@ public interface ServiceInstance {
 	 * @return The scheme of the service instance.
 	 */
 	default String getScheme() {
+		return null;
+	}
+
+	default String getZone() {
+		Map<String, String> metadata = getMetadata();
+		if (metadata != null) {
+			return metadata.get(ZONE);
+		}
 		return null;
 	}
 
