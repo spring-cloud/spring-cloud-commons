@@ -24,9 +24,13 @@ import java.util.Map;
  *
  * @author Spencer Gibb
  * @author Tim Ysewyn
+ * @author Olga Maciaszek-Sharma
  */
 public interface ServiceInstance {
 
+	/**
+	 * Metadata zone key.
+	 */
 	String ZONE = "zone";
 
 	/**
@@ -73,6 +77,10 @@ public interface ServiceInstance {
 		return null;
 	}
 
+	/**
+	 * @return The {@link String} value from instance metadata corresponding to the
+	 * {@link ServiceInstance#ZONE} key.
+	 */
 	default String getZone() {
 		Map<String, String> metadata = getMetadata();
 		if (metadata != null) {
