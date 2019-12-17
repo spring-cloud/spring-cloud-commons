@@ -831,19 +831,20 @@ that retrieves available instances from Service Discovery using a <<discovery-cl
 
 === Spring Cloud LoadBalancer integrations
 
-In order to make it easy to use Spring Cloud LoadBalancer, we provide `ReactorLoadBalancerExchangeFilterFunction` that can be used
-with `WebClient` and `BlockingLoadBalancerClient` that works with `RestTemplate`. You can see more information and examples of usage
-in the following sections:
+In order to make it easy to use Spring Cloud LoadBalancer, we provide `ReactorLoadBalancerExchangeFilterFunction` that can be used with `WebClient` and `BlockingLoadBalancerClient` that works with `RestTemplate`.
+You can see more information and examples of usage in the following sections:
 
 * <<rest-template-loadbalancer-client,Spring RestTemplate as a Load Balancer Client>>
 * <<webclinet-loadbalancer-client, Spring WebClient as a Load Balancer Client>>
 * <<webflux-with-reactive-loadbalancer,Spring WebFlux WebClient with `ReactorLoadBalancerExchangeFilterFunction`>>
 
+[[loadbalancer-caching]]
 === Spring Cloud LoadBalancer Caching
 
 Apart from the basic `ServiceInstanceListSupplier` implementation that retrieves instances via `DiscoveryClient` each time it has to choose an instance, we provide two caching implementations.
 
 ==== https://github.com/ben-manes/caffeine[Caffeine]-backed LoadBalancer Cache Implementation
+
 If you have `com.github.ben-manes.caffeine:caffeine` in the classpath, Caffeine-based implementation will be used.
 See the <<loadbalancer-cache-configuration, LoadBalancerCacheConfiguration>> section for information on how to configure it.
 
@@ -871,25 +872,64 @@ The default setup includes `ttl` set to 30 seconds and the default `initialCapac
 You can also altogether disable loadBalancer caching by setting the value of `spring.cloud.loadbalancer.cache.enabled`
 to `false`.
 
-WARNING: Although the basic, non-cached, implementation is useful for prototyping and testing, it's much less efficient
-than the cached versions, so we recommend always using the cached version in production.
+WARNING: Although the basic, non-cached, implementation is useful for prototyping and testing, it's much less efficient than the cached versions, so we recommend always using the cached version in production.
+
+=== Zone-Based Load-Balancing
+
+To enable zone-based load-balancing, we provide the `ZonePreferenceServiceInstanceListSupplier`.
+We use `DiscoveryClient`-specific `zone` configuration (for example, `eureka.instance.metadata-map.zone`) to pick the zone that the client tries to filter available service instances for.
+
+NOTE: You can also override `DiscoveryClient`-specific zone setup by setting the value of `spring.cloud.loadbalancer.zone` property.
+
+The `ZonePreferenceServiceInstanceListSupplier` filters retrieved instances and only returns the sones within the same zone.
+If the zone is `null` or there are no instances within the same zone, it returns all the retrieved instances.
+
+In order to use the zone-based load-balancing approach, you will have to instantiate a `ZonePreferenceServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.
+
+We use delegates to work with `ServiceInstanceListSupplier` beans.
+We suggest passing a `DiscoveryClientServiceInstanceListSupplier` delegate in the constructor of `ZonePreferenceServiceInstanceListSupplier` and, in turn, wrapping the latter with a `CachingServiceInstanceListSupplier` to leverage <<loadbalancer-caching, LoadBalancer caching mechanism>>.
+
+You could use this sample configuration to set it up:
+
+[[zoned-based-custom-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ReactiveDiscoveryClient discoveryClient, Environment environment,
+			ApplicationContext context) {
+		DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
+				discoveryClient, environment);
+		ZonePreferenceServiceInstanceListSupplier delegate = new ZonePreferenceServiceInstanceListSupplier(firstDelegate,
+				environment);
+		ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
+				.getBeanProvider(LoadBalancerCacheManager.class);
+		if (cacheManagerProvider.getIfAvailable() != null) {
+			return new CachingServiceInstanceListSupplier(delegate,
+					cacheManagerProvider.getIfAvailable());
+		}
+		return delegate;
+	}
+
+}
+----
 
 [[spring-cloud-loadbalancer-starter]]
 === Spring Cloud LoadBalancer Starter
 
 We also provide a starter that allows you to easily add Spring Cloud LoadBalancer in a Spring Boot app.
-In order to use it, just add `org.springframework.cloud:spring-cloud-starter-loadbalancer` to your Spring
-Cloud dependencies in your build file.
+In order to use it, just add `org.springframework.cloud:spring-cloud-starter-loadbalancer` to your Spring Cloud dependencies in your build file.
 
 NOTE: Spring Cloud LoadBalancer starter includes
 https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching]
 and https://github.com/stoyanr[Evictor].
 
-WARNING: If you have both Ribbon and Spring Cloud LoadBalancer int the classpath, in order to maintain
-backward compatibility, Ribbon-based implementations will be used by default. In order
-to switch to using Spring Cloud LoadBalancer under the hood,
-make sure you set the property `spring.cloud.loadbalancer.ribbon.enabled` to `false`.
+WARNING: If you have both Ribbon and Spring Cloud LoadBalancer int the classpath, in order to maintain backward compatibility, Ribbon-based implementations will be used by default.
+In order to switch to using Spring Cloud LoadBalancer under the hood, make sure you set the property `spring.cloud.loadbalancer.ribbon.enabled` to `false`.
 
+[[custom-loadbalancer-configuration]]
 === Passing Your Own Spring Cloud LoadBalancer Configuration
 
 You can also use the `@LoadBalancerClient` annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, as follows:
@@ -898,7 +938,7 @@ You can also use the `@LoadBalancerClient` annotation to pass your own load-bala
 [source,java,indent=0]
 ----
 @Configuration
-@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class)
+@LoadBalancerClient(value = "stores", configuration = CustomLoadBalancerConfiguration.class)
 public class MyConfiguration {
 
 	@Bean
@@ -909,6 +949,13 @@ public class MyConfiguration {
 }
 ----
 ====
+
+You can use this feature to instantiate different implementations of `ServiceInstanceListSupplier` or `ReactorLoadBalancer`,
+either written by you, or provided by us as alternatives (for example `ZonePreferenceServiceInstanceListSupplier`) to override the default setup.
+
+You can see an example of a custom cofiguration <<zoned-based-custom-loadbalancer-configuration,here>>.
+
+NOTE: The annotation `value` arguments (`stores` in the example above) specifies the service id of the service that we should send the requests to with the given custom configuration.
 
 You can also pass multiple configurations (for more than one load-balancer client) through the `@LoadBalancerClients` annotation, as the following example shows:
 
