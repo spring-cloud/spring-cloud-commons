@@ -28,9 +28,9 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 
 /**
- * Calls {@link RefreshEventListener#refresh} when a {@link RefreshEvent} is received.
- * Only responds to {@link RefreshEvent} after receiving an {@link ApplicationReadyEvent},
- * as the RefreshEvents might come too early in the application lifecycle.
+ * Calls {@link ContextRefresher#refresh} when a {@link RefreshEvent} is received. Only
+ * responds to {@link RefreshEvent} after receiving an {@link ApplicationReadyEvent}, as
+ * the RefreshEvents might come too early in the application lifecycle.
  *
  * @author Spencer Gibb
  */

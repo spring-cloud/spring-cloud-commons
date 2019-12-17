@@ -34,7 +34,7 @@ import org.springframework.lang.Nullable;
  */
 class ClientFactoryObjectProvider<T> implements ObjectProvider<T> {
 
-	private final NamedContextFactory clientFactory;
+	private final NamedContextFactory<?> clientFactory;
 
 	private final String name;
 
@@ -42,7 +42,7 @@ class ClientFactoryObjectProvider<T> implements ObjectProvider<T> {
 
 	private ObjectProvider<T> provider;
 
-	ClientFactoryObjectProvider(NamedContextFactory clientFactory, String name,
+	ClientFactoryObjectProvider(NamedContextFactory<?> clientFactory, String name,
 			Class<T> type) {
 		this.clientFactory = clientFactory;
 		this.name = name;
@@ -111,7 +111,6 @@ class ClientFactoryObjectProvider<T> implements ObjectProvider<T> {
 		return delegate().spliterator();
 	}
 
-	@SuppressWarnings("unchecked")
 	private ObjectProvider<T> delegate() {
 		if (this.provider == null) {
 			this.provider = this.clientFactory.getProvider(this.name, this.type);

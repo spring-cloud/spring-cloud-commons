@@ -23,15 +23,19 @@ import java.util.Collections;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.integration.monitor.IntegrationMBeanExporter;
 import org.springframework.util.ClassUtils;
 
@@ -83,6 +87,7 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 			this.context = this.event.getApplicationContext();
 			this.args = this.event.getArgs();
 			this.application = this.event.getSpringApplication();
+			this.application.addInitializers(new PostProcessorInitializer());
 		}
 	}
 
@@ -173,6 +178,29 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 	private void overrideClassLoaderForRestart() {
 		ClassUtils.overrideThreadContextClassLoader(
 				this.application.getClass().getClassLoader());
+	}
+
+	class PostProcessorInitializer
+			implements ApplicationContextInitializer<GenericApplicationContext> {
+
+		@Override
+		public void initialize(GenericApplicationContext context) {
+			context.registerBean(PostProcessor.class, () -> new PostProcessor());
+		}
+
+	}
+
+	class PostProcessor implements BeanPostProcessor {
+
+		@Override
+		public Object postProcessBeforeInitialization(Object bean, String beanName)
+				throws BeansException {
+			if (bean instanceof RestartEndpoint) {
+				return RestartEndpoint.this;
+			}
+			return bean;
+		}
+
 	}
 
 	/**
