@@ -28,8 +28,9 @@ import org.springframework.core.env.Environment;
 /**
  * An implementation of {@link ServiceInstanceListSupplier} that filters instances
  * retrieved by the delegate by zone. The zone is retrieved from the
- * <code>spring.cloud.loadbalancer.zone</code> property. If the zone is not set or no instances are found for the
- * requested zone, all instances retrieved by the delegate are returned.
+ * <code>spring.cloud.loadbalancer.zone</code> property. If the zone is not set or no
+ * instances are found for the requested zone, all instances retrieved by the delegate are
+ * returned.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.1

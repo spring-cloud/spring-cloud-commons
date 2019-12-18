@@ -65,7 +65,8 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 	void shouldFilterInstancesByZone() {
 		when(environment.getProperty("spring.cloud.loadbalancer.zone"))
 				.thenReturn("zone1");
-		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(first, second, third, fourth, fifth)));
+		when(delegate.get()).thenReturn(
+				Flux.just(Arrays.asList(first, second, third, fourth, fifth)));
 
 		List<ServiceInstance> filtered = supplier.get().blockFirst();
 
