@@ -157,15 +157,16 @@ $(addBlockSwitches);
 <li><a href="#spring-cloud-loadbalancer">3. Spring Cloud LoadBalancer</a>
 <ul class="sectlevel2">
 <li><a href="#spring-cloud-loadbalancer-integrations">3.1. Spring Cloud LoadBalancer integrations</a></li>
-<li><a href="#spring-cloud-loadbalancer-caching">3.2. Spring Cloud LoadBalancer Caching</a>
+<li><a href="#loadbalancer-caching">3.2. Spring Cloud LoadBalancer Caching</a>
 <ul class="sectlevel3">
 <li><a href="#caffeine-backed-loadbalancer-cache-implementation">3.2.1. Caffeine-backed LoadBalancer Cache Implementation</a></li>
 <li><a href="#default-loadbalancer-cache-implementation">3.2.2. Default LoadBalancer Cache Implementation</a></li>
 <li><a href="#loadbalancer-cache-configuration">3.2.3. LoadBalancer Cache Configuration</a></li>
 </ul>
 </li>
-<li><a href="#spring-cloud-loadbalancer-starter">3.3. Spring Cloud LoadBalancer Starter</a></li>
-<li><a href="#passing-your-own-spring-cloud-loadbalancer-configuration">3.4. Passing Your Own Spring Cloud LoadBalancer Configuration</a></li>
+<li><a href="#zone-based-load-balancing">3.3. Zone-Based Load-Balancing</a></li>
+<li><a href="#spring-cloud-loadbalancer-starter">3.4. Spring Cloud LoadBalancer Starter</a></li>
+<li><a href="#custom-loadbalancer-configuration">3.5. Passing Your Own Spring Cloud LoadBalancer Configuration</a></li>
 </ul>
 </li>
 <li><a href="#spring-cloud-circuit-breaker">4. Spring Cloud Circuit Breaker</a>
@@ -1413,9 +1414,8 @@ that retrieves available instances from Service Discovery using a <a href="#disc
 <div class="sect2">
 <h3 id="spring-cloud-loadbalancer-integrations"><a class="anchor" href="#spring-cloud-loadbalancer-integrations"></a><a class="link" href="#spring-cloud-loadbalancer-integrations">3.1. Spring Cloud LoadBalancer integrations</a></h3>
 <div class="paragraph">
-<p>In order to make it easy to use Spring Cloud LoadBalancer, we provide <code>ReactorLoadBalancerExchangeFilterFunction</code> that can be used
-with <code>WebClient</code> and <code>BlockingLoadBalancerClient</code> that works with <code>RestTemplate</code>. You can see more information and examples of usage
-in the following sections:</p>
+<p>In order to make it easy to use Spring Cloud LoadBalancer, we provide <code>ReactorLoadBalancerExchangeFilterFunction</code> that can be used with <code>WebClient</code> and <code>BlockingLoadBalancerClient</code> that works with <code>RestTemplate</code>.
+You can see more information and examples of usage in the following sections:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -1432,7 +1432,7 @@ in the following sections:</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="spring-cloud-loadbalancer-caching"><a class="anchor" href="#spring-cloud-loadbalancer-caching"></a><a class="link" href="#spring-cloud-loadbalancer-caching">3.2. Spring Cloud LoadBalancer Caching</a></h3>
+<h3 id="loadbalancer-caching"><a class="anchor" href="#loadbalancer-caching"></a><a class="link" href="#loadbalancer-caching">3.2. Spring Cloud LoadBalancer Caching</a></h3>
 <div class="paragraph">
 <p>Apart from the basic <code>ServiceInstanceListSupplier</code> implementation that retrieves instances via <code>DiscoveryClient</code> each time it has to choose an instance, we provide two caching implementations.</p>
 </div>
@@ -1490,8 +1490,7 @@ to <code>false</code>.</p>
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Although the basic, non-cached, implementation is useful for prototyping and testing, it&#8217;s much less efficient
-than the cached versions, so we recommend always using the cached version in production.
+Although the basic, non-cached, implementation is useful for prototyping and testing, it&#8217;s much less efficient than the cached versions, so we recommend always using the cached version in production.
 </td>
 </tr>
 </table>
@@ -1499,11 +1498,79 @@ than the cached versions, so we recommend always using the cached version in pro
 </div>
 </div>
 <div class="sect2">
-<h3 id="spring-cloud-loadbalancer-starter"><a class="anchor" href="#spring-cloud-loadbalancer-starter"></a><a class="link" href="#spring-cloud-loadbalancer-starter">3.3. Spring Cloud LoadBalancer Starter</a></h3>
+<h3 id="zone-based-load-balancing"><a class="anchor" href="#zone-based-load-balancing"></a><a class="link" href="#zone-based-load-balancing">3.3. Zone-Based Load-Balancing</a></h3>
+<div class="paragraph">
+<p>To enable zone-based load-balancing, we provide the <code>ZonePreferenceServiceInstanceListSupplier</code>.
+We use <code>DiscoveryClient</code>-specific <code>zone</code> configuration (for example, <code>eureka.instance.metadata-map.zone</code>) to pick the zone that the client tries to filter available service instances for.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You can also override <code>DiscoveryClient</code>-specific zone setup by setting the value of <code>spring.cloud.loadbalancer.zone</code> property.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+To determine the zone of a retrieved <code>ServiceInstance</code>, we check the value under the <code>"zone"</code> key in its metadata map.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <code>ZonePreferenceServiceInstanceListSupplier</code> filters retrieved instances and only returns the ones within the same zone.
+If the zone is <code>null</code> or there are no instances within the same zone, it returns all the retrieved instances.</p>
+</div>
+<div class="paragraph">
+<p>In order to use the zone-based load-balancing approach, you will have to instantiate a <code>ZonePreferenceServiceInstanceListSupplier</code> bean in a <a href="#custom-loadbalancer-configuration">custom configuration</a>.</p>
+</div>
+<div class="paragraph">
+<p>We use delegates to work with <code>ServiceInstanceListSupplier</code> beans.
+We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> delegate in the constructor of <code>ZonePreferenceServiceInstanceListSupplier</code> and, in turn, wrapping the latter with a <code>CachingServiceInstanceListSupplier</code> to leverage <a href="#loadbalancer-caching">LoadBalancer caching mechanism</a>.</p>
+</div>
+<div class="paragraph">
+<p>You could use this sample configuration to set it up:</p>
+</div>
+<div id="zoned-based-custom-loadbalancer-configuration" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class CustomLoadBalancerConfiguration {
+
+    @Bean
+    public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+            ReactiveDiscoveryClient discoveryClient, Environment environment,
+            ApplicationContext context) {
+        DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
+                discoveryClient, environment);
+        ZonePreferenceServiceInstanceListSupplier delegate = new ZonePreferenceServiceInstanceListSupplier(firstDelegate,
+                environment);
+        ObjectProvider&lt;LoadBalancerCacheManager&gt; cacheManagerProvider = context
+                .getBeanProvider(LoadBalancerCacheManager.class);
+        if (cacheManagerProvider.getIfAvailable() != null) {
+            return new CachingServiceInstanceListSupplier(delegate,
+                    cacheManagerProvider.getIfAvailable());
+        }
+        return delegate;
+    }
+
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="spring-cloud-loadbalancer-starter"><a class="anchor" href="#spring-cloud-loadbalancer-starter"></a><a class="link" href="#spring-cloud-loadbalancer-starter">3.4. Spring Cloud LoadBalancer Starter</a></h3>
 <div class="paragraph">
 <p>We also provide a starter that allows you to easily add Spring Cloud LoadBalancer in a Spring Boot app.
-In order to use it, just add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> to your Spring
-Cloud dependencies in your build file.</p>
+In order to use it, just add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> to your Spring Cloud dependencies in your build file.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -1526,17 +1593,15 @@ and <a href="https://github.com/stoyanr">Evictor</a>.
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-If you have both Ribbon and Spring Cloud LoadBalancer int the classpath, in order to maintain
-backward compatibility, Ribbon-based implementations will be used by default. In order
-to switch to using Spring Cloud LoadBalancer under the hood,
-make sure you set the property <code>spring.cloud.loadbalancer.ribbon.enabled</code> to <code>false</code>.
+If you have both Ribbon and Spring Cloud LoadBalancer int the classpath, in order to maintain backward compatibility, Ribbon-based implementations will be used by default.
+In order to switch to using Spring Cloud LoadBalancer under the hood, make sure you set the property <code>spring.cloud.loadbalancer.ribbon.enabled</code> to <code>false</code>.
 </td>
 </tr>
 </table>
 </div>
 </div>
 <div class="sect2">
-<h3 id="passing-your-own-spring-cloud-loadbalancer-configuration"><a class="anchor" href="#passing-your-own-spring-cloud-loadbalancer-configuration"></a><a class="link" href="#passing-your-own-spring-cloud-loadbalancer-configuration">3.4. Passing Your Own Spring Cloud LoadBalancer Configuration</a></h3>
+<h3 id="custom-loadbalancer-configuration"><a class="anchor" href="#custom-loadbalancer-configuration"></a><a class="link" href="#custom-loadbalancer-configuration">3.5. Passing Your Own Spring Cloud LoadBalancer Configuration</a></h3>
 <div class="paragraph">
 <p>You can also use the <code>@LoadBalancerClient</code> annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, as follows:</p>
 </div>
@@ -1545,7 +1610,7 @@ make sure you set the property <code>spring.cloud.loadbalancer.ribbon.enabled</c
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Configuration
-@LoadBalancerClient(value = "stores", configuration = StoresLoadBalancerClientConfiguration.class)
+@LoadBalancerClient(value = "stores", configuration = CustomLoadBalancerConfiguration.class)
 public class MyConfiguration {
 
     @Bean
@@ -1557,6 +1622,25 @@ public class MyConfiguration {
 </div>
 </div>
 </div>
+</div>
+<div class="paragraph">
+<p>You can use this feature to instantiate different implementations of <code>ServiceInstanceListSupplier</code> or <code>ReactorLoadBalancer</code>,
+either written by you, or provided by us as alternatives (for example <code>ZonePreferenceServiceInstanceListSupplier</code>) to override the default setup.</p>
+</div>
+<div class="paragraph">
+<p>You can see an example of a custom cofiguration <a href="#zoned-based-custom-loadbalancer-configuration">here</a>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The annotation <code>value</code> arguments (<code>stores</code> in the example above) specifies the service id of the service that we should send the requests to with the given custom configuration.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>You can also pass multiple configurations (for more than one load-balancer client) through the <code>@LoadBalancerClients</code> annotation, as the following example shows:</p>
