@@ -16,8 +16,9 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import reactor.core.publisher.Flux;
 
@@ -27,7 +28,7 @@ import org.springframework.core.env.Environment;
 /**
  * An implementation of {@link ServiceInstanceListSupplier} that filters instances
  * retrieved by the delegate by zone. The zone is retrieved from the
- * <code>spring.cloud.loadbalancer.zone</code> property. If no instances are found for the
+ * <code>spring.cloud.loadbalancer.zone</code> property. If the zone is not set or no instances are found for the
  * requested zone, all instances retrieved by the delegate are returned.
  *
  * @author Olga Maciaszek-Sharma
@@ -35,6 +36,8 @@ import org.springframework.core.env.Environment;
  */
 public class ZonePreferenceServiceInstanceListSupplier
 		implements ServiceInstanceListSupplier {
+
+	private final String ZONE = "zone";
 
 	private final ServiceInstanceListSupplier delegate;
 
@@ -63,16 +66,28 @@ public class ZonePreferenceServiceInstanceListSupplier
 			zone = environment.getProperty("spring.cloud.loadbalancer.zone");
 		}
 		if (zone != null) {
-			List<ServiceInstance> filteredInstances = serviceInstances.stream()
-					.filter(serviceInstance -> serviceInstance.getZone() != null)
-					.filter(serviceInstance -> zone
-							.equalsIgnoreCase(serviceInstance.getZone()))
-					.collect(Collectors.toList());
+			List<ServiceInstance> filteredInstances = new ArrayList<>();
+			for (ServiceInstance serviceInstance : serviceInstances) {
+				String instanceZone = getZone(serviceInstance);
+				if (zone.equalsIgnoreCase(instanceZone)) {
+					filteredInstances.add(serviceInstance);
+				}
+			}
 			if (filteredInstances.size() > 0) {
 				return filteredInstances;
 			}
 		}
+		// If the zone is not set or there are no zone-specific instances available,
+		// we return all instances retrieved for given service id.
 		return serviceInstances;
+	}
+
+	private String getZone(ServiceInstance serviceInstance) {
+		Map<String, String> metadata = serviceInstance.getMetadata();
+		if (metadata != null) {
+			return metadata.get(ZONE);
+		}
+		return null;
 	}
 
 }
