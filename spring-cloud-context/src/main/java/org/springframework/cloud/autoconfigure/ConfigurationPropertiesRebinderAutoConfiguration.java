@@ -48,12 +48,13 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
-	public ConfigurationPropertiesBeans configurationPropertiesBeans() {
+	public static ConfigurationPropertiesBeans configurationPropertiesBeans(
+			ApplicationContext context) {
 		// Since this is a BeanPostProcessor we have to be super careful not to
 		// cause a cascade of bean instantiation. Knowing the *name* of the beans we
 		// need is super optimal, but a little brittle (unfortunately we have no
 		// choice).
-		ConfigurationBeanFactoryMetadata metaData = this.context.getBean(
+		ConfigurationBeanFactoryMetadata metaData = context.getBean(
 				ConfigurationBeanFactoryMetadata.BEAN_NAME,
 				ConfigurationBeanFactoryMetadata.class);
 		ConfigurationPropertiesBeans beans = new ConfigurationPropertiesBeans();
