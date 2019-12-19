@@ -19,7 +19,6 @@ package org.springframework.cloud.loadbalancer.annotation;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ConditionalOnBlockingDiscoveryEnabled;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
@@ -50,7 +49,7 @@ import org.springframework.core.env.Environment;
  * @author Tim Ysewyn
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties
+@EnableConfigurationProperties(LoadBalancerProperties.class)
 @ConditionalOnDiscoveryEnabled
 public class LoadBalancerClientConfiguration {
 
@@ -58,7 +57,6 @@ public class LoadBalancerClientConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConfigurationProperties("spring.cloud.loadbalancer")
 	LoadBalancerProperties loadBalancerProperties() {
 		return new LoadBalancerProperties();
 	}
