@@ -26,6 +26,7 @@ import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceSupplier;
@@ -48,11 +49,17 @@ import org.springframework.core.env.Environment;
  * @author Tim Ysewyn
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties
+@EnableConfigurationProperties(LoadBalancerProperties.class)
 @ConditionalOnDiscoveryEnabled
 public class LoadBalancerClientConfiguration {
 
 	private static final int REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER = 193827465;
+
+	@Bean
+	@ConditionalOnMissingBean
+	LoadBalancerProperties loadBalancerProperties() {
+		return new LoadBalancerProperties();
+	}
 
 	@Bean
 	@ConditionalOnMissingBean

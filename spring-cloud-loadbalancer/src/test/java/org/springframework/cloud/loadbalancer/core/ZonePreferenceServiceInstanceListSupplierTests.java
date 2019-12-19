@@ -27,7 +27,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.core.env.Environment;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -44,10 +44,10 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 	private DiscoveryClientServiceInstanceListSupplier delegate = mock(
 			DiscoveryClientServiceInstanceListSupplier.class);
 
-	private Environment environment = mock(Environment.class);
+	private LoadBalancerProperties loadBalancerProperties = new LoadBalancerProperties();
 
 	private ZonePreferenceServiceInstanceListSupplier supplier = new ZonePreferenceServiceInstanceListSupplier(
-			delegate, environment);
+			delegate, loadBalancerProperties);
 
 	private ServiceInstance first = serviceInstance("test-1", buildZoneMetadata("zone1"));
 
@@ -63,8 +63,7 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldFilterInstancesByZone() {
-		when(environment.getProperty("spring.cloud.loadbalancer.zone"))
-				.thenReturn("zone1");
+		loadBalancerProperties.setZone("zone1");
 		when(delegate.get()).thenReturn(
 				Flux.just(Arrays.asList(first, second, third, fourth, fifth)));
 
@@ -79,8 +78,7 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldReturnAllInstancesIfNoZoneInstances() {
-		when(environment.getProperty("spring.cloud.loadbalancer.zone"))
-				.thenReturn("zone1");
+		loadBalancerProperties.setZone("zone1");
 		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(third, fourth)));
 
 		List<ServiceInstance> filtered = supplier.get().blockFirst();
@@ -91,8 +89,7 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldNotThrowNPEIfNullInstanceMetadata() {
-		when(environment.getProperty("spring.cloud.loadbalancer.zone"))
-				.thenReturn("zone1");
+		loadBalancerProperties.setZone("zone1");
 		when(delegate.get()).thenReturn(
 				Flux.just(Collections.singletonList(serviceInstance("test-6", null))));
 		assertThatCode(() -> supplier.get().blockFirst()).doesNotThrowAnyException();
@@ -100,7 +97,7 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldReturnAllInstancesIfNoZone() {
-		when(environment.getProperty("spring.cloud.loadbalancer.zone")).thenReturn(null);
+		loadBalancerProperties.setZone(null);
 		when(delegate.get())
 				.thenReturn(Flux.just(Arrays.asList(first, second, third, fourth)));
 

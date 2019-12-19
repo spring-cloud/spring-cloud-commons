@@ -881,6 +881,8 @@ We use `DiscoveryClient`-specific `zone` configuration (for example, `eureka.ins
 
 NOTE: You can also override `DiscoveryClient`-specific zone setup by setting the value of `spring.cloud.loadbalancer.zone` property.
 
+WARNING: For the time being, only Eureka Discovery Client is instrumented to set the LoadBalancer zone. For other discovery client, set the `spring.cloud.loadbalancer.zone` property. More instrumentations coming shortly.
+
 NOTE: To determine the zone of a retrieved `ServiceInstance`, we check the value under the `"zone"` key in its metadata map.
 
 The `ZonePreferenceServiceInstanceListSupplier` filters retrieved instances and only returns the ones within the same zone.
@@ -901,11 +903,12 @@ public class CustomLoadBalancerConfiguration {
 	@Bean
 	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 			ReactiveDiscoveryClient discoveryClient, Environment environment,
+			LoadBalancerProperties loadBalancerProperties,
 			ApplicationContext context) {
 		DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
 				discoveryClient, environment);
 		ZonePreferenceServiceInstanceListSupplier delegate = new ZonePreferenceServiceInstanceListSupplier(firstDelegate,
-				environment);
+				loadBalancerProperties);
 		ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
 				.getBeanProvider(LoadBalancerCacheManager.class);
 		if (cacheManagerProvider.getIfAvailable() != null) {
@@ -914,8 +917,7 @@ public class CustomLoadBalancerConfiguration {
 		}
 		return delegate;
 	}
-
-}
+	}
 ----
 
 [[spring-cloud-loadbalancer-starter]]
@@ -952,10 +954,9 @@ public class MyConfiguration {
 ----
 ====
 
-You can use this feature to instantiate different implementations of `ServiceInstanceListSupplier` or `ReactorLoadBalancer`,
-either written by you, or provided by us as alternatives (for example `ZonePreferenceServiceInstanceListSupplier`) to override the default setup.
+You can use this feature to instantiate different implementations of `ServiceInstanceListSupplier` or `ReactorLoadBalancer`, either written by you, or provided by us as alternatives (for example `ZonePreferenceServiceInstanceListSupplier`) to override the default setup.
 
-You can see an example of a custom cofiguration <<zoned-based-custom-loadbalancer-configuration,here>>.
+You can see an example of a custom configuration <<zoned-based-custom-loadbalancer-configuration,here>>.
 
 NOTE: The annotation `value` arguments (`stores` in the example above) specifies the service id of the service that we should send the requests to with the given custom configuration.
 

@@ -23,7 +23,7 @@ import java.util.Map;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.core.env.Environment;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 
 /**
  * An implementation of {@link ServiceInstanceListSupplier} that filters instances
@@ -42,14 +42,14 @@ public class ZonePreferenceServiceInstanceListSupplier
 
 	private final ServiceInstanceListSupplier delegate;
 
-	private final Environment environment;
+	private final LoadBalancerProperties loadBalancerProperties;
 
 	private String zone;
 
 	public ZonePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			Environment environment) {
+			LoadBalancerProperties loadBalancerProperties) {
 		this.delegate = delegate;
-		this.environment = environment;
+		this.loadBalancerProperties = loadBalancerProperties;
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public class ZonePreferenceServiceInstanceListSupplier
 
 	private List<ServiceInstance> filteredByZone(List<ServiceInstance> serviceInstances) {
 		if (zone == null) {
-			zone = environment.getProperty("spring.cloud.loadbalancer.zone");
+			zone = loadBalancerProperties.getZone();
 		}
 		if (zone != null) {
 			List<ServiceInstance> filteredInstances = new ArrayList<>();
