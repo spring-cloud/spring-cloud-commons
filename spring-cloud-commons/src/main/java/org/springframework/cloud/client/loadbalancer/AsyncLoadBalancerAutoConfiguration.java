@@ -30,7 +30,7 @@ import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.web.client.AsyncRestTemplate;
 
 /**
- * Auto-configuration for Ribbon (client-side load balancing).
+ * Auto-configuration for async load balancer (client-side load balancing).
  *
  * @author Rob Worsnop
  */
