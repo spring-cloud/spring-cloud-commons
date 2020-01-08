@@ -98,6 +98,7 @@ public final class LoadBalancerUriTools {
 	private static URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
 		String host = serviceInstance.getHost();
 		String scheme = Optional.ofNullable(serviceInstance.getScheme())
+				.map(s -> s.endsWith("://") ? s.substring(0, s.length() - 3) : s)
 				.orElse(computeScheme(original, serviceInstance));
 		int port = computePort(serviceInstance.getPort(), scheme);
 

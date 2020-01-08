@@ -207,6 +207,19 @@ class LoadBalancerUriToolsTests {
 		assertThat(reconstructed.getPort()).isEqualTo(serviceInstance.getPort());
 	}
 
+	@Test
+	void trimDoubleSlashInScheme() {
+		TestServiceInstance serviceInstance = new TestServiceInstance()
+				.withScheme("http://");
+		URI original = UriComponentsBuilder.fromUriString("http://test.example:8080/xxx")
+				.build().toUri();
+
+		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance,
+				original);
+
+		assertThat(reconstructed).isEqualTo(original);
+	}
+
 }
 
 class TestServiceInstance implements ServiceInstance {
