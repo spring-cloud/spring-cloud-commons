@@ -20,8 +20,18 @@ package org.springframework.cloud.client.loadbalancer.reactive;
  * Marker interface for a request.
  *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 public interface Request {
+
+	/**
+	 * A hint that can be used by {@link ReactiveLoadBalancer} implementations to pick the
+	 * correct instance.
+	 * @return a {@link String} representation of the hint
+	 */
+	default String getHint() {
+		return "default";
+	}
 
 	// TODO: define contents
 
