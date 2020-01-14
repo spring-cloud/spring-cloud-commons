@@ -49,7 +49,7 @@ public class EnableDiscoveryClientMissingImplTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableDiscoveryClient
 	// this will fail with @EnableDiscoveryClient and no implementation (nothing in
 	// spring.factories)

@@ -125,7 +125,7 @@ public class EnvironmentManagerIntegrationTests {
 				.isInstanceOf(WritableEnvironmentEndpointWebExtension.class);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	protected static class TestConfiguration {
 

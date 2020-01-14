@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Marcin Grzejszczak
  * @since 1.3.6
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(value = "spring.cloud.compatibility-verifier.enabled",
 		matchIfMissing = true)
 @AutoConfigureOrder(0)

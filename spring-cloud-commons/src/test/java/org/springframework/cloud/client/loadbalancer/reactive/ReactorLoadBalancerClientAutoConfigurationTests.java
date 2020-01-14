@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerTestUtils.assertLoadBalanced;
 import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerTestUtils.getFilters;
 
 /**
@@ -50,7 +51,16 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		WebClient.Builder webClientBuilder = webClientBuilders.values().iterator().next();
 		then(webClientBuilder).isNotNull();
 
-		assertLoadBalanced(webClientBuilder);
+		assertLoadBalanced(webClientBuilder,
+				ReactorLoadBalancerExchangeFilterFunction.class);
+
+		final Map<String, OneWebClientBuilder.TestService> testServiceMap = context
+				.getBeansOfType(OneWebClientBuilder.TestService.class);
+		then(testServiceMap).isNotNull().hasSize(1);
+		OneWebClientBuilder.TestService testService = testServiceMap.values().stream()
+				.findFirst().get();
+		assertLoadBalanced(testService.webClient,
+				ReactorLoadBalancerExchangeFilterFunction.class);
 	}
 
 	@Test
@@ -64,7 +74,8 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		TwoWebClientBuilders.Two two = context.getBean(TwoWebClientBuilders.Two.class);
 
 		then(two.loadBalanced).isNotNull();
-		assertLoadBalanced(two.loadBalanced);
+		assertLoadBalanced(two.loadBalanced,
+				ReactorLoadBalancerExchangeFilterFunction.class);
 
 		then(two.nonLoadBalanced).isNotNull();
 		then(getFilters(two.nonLoadBalanced)).isNullOrEmpty();
@@ -86,12 +97,8 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 	private ConfigurableApplicationContext init(Class<?> config) {
 		return LoadBalancerTestUtils.init(config,
-				ReactorLoadBalancerClientAutoConfiguration.class);
-	}
-
-	private void assertLoadBalanced(WebClient.Builder webClientBuilder) {
-		LoadBalancerTestUtils.assertLoadBalanced(webClientBuilder,
-				ReactorLoadBalancerExchangeFilterFunction.class);
+				ReactorLoadBalancerClientAutoConfiguration.class,
+				LoadBalancerBeanPostProcessorAutoConfiguration.class);
 	}
 
 	@Configuration
@@ -117,6 +124,21 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		@LoadBalanced
 		WebClient.Builder loadBalancedWebClientBuilder() {
 			return WebClient.builder();
+		}
+
+		@Bean
+		TestService testService() {
+			return new TestService(loadBalancedWebClientBuilder());
+		}
+
+		private final class TestService {
+
+			public final WebClient webClient;
+
+			private TestService(WebClient.Builder builder) {
+				this.webClient = builder.build();
+			}
+
 		}
 
 	}

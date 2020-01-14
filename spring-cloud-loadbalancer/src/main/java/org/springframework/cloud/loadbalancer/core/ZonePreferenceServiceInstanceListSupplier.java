@@ -1,0 +1,94 @@
+/*
+ * Copyright 2012-2019 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.cloud.loadbalancer.core;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import reactor.core.publisher.Flux;
+
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+
+/**
+ * An implementation of {@link ServiceInstanceListSupplier} that filters instances
+ * retrieved by the delegate by zone. The zone is retrieved from the
+ * <code>spring.cloud.loadbalancer.zone</code> property. If the zone is not set or no
+ * instances are found for the requested zone, all instances retrieved by the delegate are
+ * returned.
+ *
+ * @author Olga Maciaszek-Sharma
+ * @since 2.2.1
+ */
+public class ZonePreferenceServiceInstanceListSupplier
+		implements ServiceInstanceListSupplier {
+
+	private final String ZONE = "zone";
+
+	private final ServiceInstanceListSupplier delegate;
+
+	private final LoadBalancerProperties loadBalancerProperties;
+
+	private String zone;
+
+	public ZonePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			LoadBalancerProperties loadBalancerProperties) {
+		this.delegate = delegate;
+		this.loadBalancerProperties = loadBalancerProperties;
+	}
+
+	@Override
+	public String getServiceId() {
+		return delegate.getServiceId();
+	}
+
+	@Override
+	public Flux<List<ServiceInstance>> get() {
+		return delegate.get().map(this::filteredByZone);
+	}
+
+	private List<ServiceInstance> filteredByZone(List<ServiceInstance> serviceInstances) {
+		if (zone == null) {
+			zone = loadBalancerProperties.getZone();
+		}
+		if (zone != null) {
+			List<ServiceInstance> filteredInstances = new ArrayList<>();
+			for (ServiceInstance serviceInstance : serviceInstances) {
+				String instanceZone = getZone(serviceInstance);
+				if (zone.equalsIgnoreCase(instanceZone)) {
+					filteredInstances.add(serviceInstance);
+				}
+			}
+			if (filteredInstances.size() > 0) {
+				return filteredInstances;
+			}
+		}
+		// If the zone is not set or there are no zone-specific instances available,
+		// we return all instances retrieved for given service id.
+		return serviceInstances;
+	}
+
+	private String getZone(ServiceInstance serviceInstance) {
+		Map<String, String> metadata = serviceInstance.getMetadata();
+		if (metadata != null) {
+			return metadata.get(ZONE);
+		}
+		return null;
+	}
+
+}

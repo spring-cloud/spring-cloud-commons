@@ -19,6 +19,7 @@ package org.springframework.cloud.autoconfigure;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnEnabledEndpoint;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
@@ -44,7 +45,7 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  * @author Spencer Gibb
  * @author Venil Noronha
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ EndpointAutoConfiguration.class, Health.class })
 @AutoConfigureAfter({ LifecycleMvcEndpointAutoConfiguration.class,
 		RefreshAutoConfiguration.class })
@@ -62,13 +63,13 @@ public class RefreshEndpointAutoConfiguration {
 		return new RefreshScopeHealthIndicator(scope, rebinder);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnBean(PropertySourceBootstrapConfiguration.class)
 	protected static class RefreshEndpointConfiguration {
 
 		@Bean
 		@ConditionalOnBean(ContextRefresher.class)
-		@ConditionalOnEnabledEndpoint
+		@ConditionalOnAvailableEndpoint
 		@ConditionalOnMissingBean
 		public RefreshEndpoint refreshEndpoint(ContextRefresher contextRefresher) {
 			return new RefreshEndpoint(contextRefresher);
@@ -78,7 +79,7 @@ public class RefreshEndpointAutoConfiguration {
 
 }
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(IntegrationMBeanExporter.class)
 class RestartEndpointWithIntegrationConfiguration {
 
@@ -98,7 +99,7 @@ class RestartEndpointWithIntegrationConfiguration {
 
 }
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnMissingClass("org.springframework.integration.monitor.IntegrationMBeanExporter")
 class RestartEndpointWithoutIntegrationConfiguration {
 
@@ -111,7 +112,7 @@ class RestartEndpointWithoutIntegrationConfiguration {
 
 }
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class PauseResumeEndpointsConfiguration {
 
 	@Bean

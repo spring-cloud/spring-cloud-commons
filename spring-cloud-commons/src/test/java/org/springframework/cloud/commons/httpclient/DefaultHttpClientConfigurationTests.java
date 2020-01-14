@@ -80,7 +80,7 @@ public class DefaultHttpClientConfigurationTests {
 
 }
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableAutoConfiguration
 class MyApplication {
 

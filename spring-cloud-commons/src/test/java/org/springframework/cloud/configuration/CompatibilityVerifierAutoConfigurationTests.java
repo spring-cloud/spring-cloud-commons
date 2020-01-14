@@ -43,7 +43,7 @@ public class CompatibilityVerifierAutoConfigurationTests {
 		then(this.myMismatchVerifier.called).isTrue();
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	static class TestConfiguration {
 

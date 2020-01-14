@@ -253,7 +253,7 @@ public class ContextRefresher {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class Empty {
 
 	}

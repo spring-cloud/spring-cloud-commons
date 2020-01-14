@@ -50,7 +50,7 @@ public class CustomHttpClientBuilderConfigurationTests {
 
 }
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableAutoConfiguration
 class CustomHttpClientBuilderApplication {
 
@@ -58,7 +58,7 @@ class CustomHttpClientBuilderApplication {
 		SpringApplication.run(MyApplication.class, args);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@AutoConfigureBefore(HttpClientConfiguration.class)
 	static class MyConfig {
 

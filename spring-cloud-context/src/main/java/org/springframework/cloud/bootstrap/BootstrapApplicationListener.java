@@ -302,28 +302,43 @@ public class BootstrapApplicationListener
 
 	}
 
+	@SuppressWarnings("unchecked")
 	private void apply(ConfigurableApplicationContext context,
 			SpringApplication application, ConfigurableEnvironment environment) {
+		if (application.getAllSources().contains(BootstrapMarkerConfiguration.class)) {
+			return;
+		}
+		application.addPrimarySources(Arrays.asList(BootstrapMarkerConfiguration.class));
 		@SuppressWarnings("rawtypes")
-		List<ApplicationContextInitializer> initializers = getOrderedBeansOfType(context,
-				ApplicationContextInitializer.class);
-		application.addInitializers(initializers
-				.toArray(new ApplicationContextInitializer[initializers.size()]));
+		Set target = new LinkedHashSet<>(application.getInitializers());
+		target.addAll(
+				getOrderedBeansOfType(context, ApplicationContextInitializer.class));
+		application.setInitializers(target);
 		addBootstrapDecryptInitializer(application);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void addBootstrapDecryptInitializer(SpringApplication application) {
 		DelegatingEnvironmentDecryptApplicationInitializer decrypter = null;
+		Set<ApplicationContextInitializer<?>> initializers = new LinkedHashSet<>();
 		for (ApplicationContextInitializer<?> ini : application.getInitializers()) {
 			if (ini instanceof EnvironmentDecryptApplicationInitializer) {
-				@SuppressWarnings("unchecked")
-				ApplicationContextInitializer del = (ApplicationContextInitializer) ini;
+				@SuppressWarnings("rawtypes")
+				ApplicationContextInitializer del = ini;
 				decrypter = new DelegatingEnvironmentDecryptApplicationInitializer(del);
+				initializers.add(ini);
+				initializers.add(decrypter);
+			}
+			else if (ini instanceof DelegatingEnvironmentDecryptApplicationInitializer) {
+				// do nothing
+			}
+			else {
+				initializers.add(ini);
 			}
 		}
-		if (decrypter != null) {
-			application.addInitializers(decrypter);
-		}
+		ArrayList<ApplicationContextInitializer<?>> target = new ArrayList<ApplicationContextInitializer<?>>(
+				initializers);
+		application.setInitializers(target);
 	}
 
 	private <T> List<T> getOrderedBeansOfType(ListableBeanFactory context,
@@ -343,6 +358,10 @@ public class BootstrapApplicationListener
 
 	public void setOrder(int order) {
 		this.order = order;
+	}
+
+	private static class BootstrapMarkerConfiguration {
+
 	}
 
 	private static class AncestorInitializer implements

@@ -85,7 +85,7 @@ public class RefreshAutoConfigurationTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration(exclude = DataSourceAutoConfiguration.class)
 	@EnableConfigurationProperties(ConfigProps.class)
 	static class Config {

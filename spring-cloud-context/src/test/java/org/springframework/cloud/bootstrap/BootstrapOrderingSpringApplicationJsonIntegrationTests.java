@@ -55,7 +55,7 @@ public class BootstrapOrderingSpringApplicationJsonIntegrationTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class Application {
 
 	}

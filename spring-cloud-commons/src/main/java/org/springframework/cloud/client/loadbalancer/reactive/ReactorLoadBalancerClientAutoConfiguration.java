@@ -16,20 +16,13 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import java.util.Collections;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
@@ -45,7 +38,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(WebClient.class)
 @ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 public class ReactorLoadBalancerClientAutoConfiguration {
@@ -53,67 +46,20 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 	@Bean
 	@ConditionalOnClass(
 			name = "org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.ribbon.enabled",
+			matchIfMissing = true)
 	public ReactorLoadBalancerClientRibbonWarnLogger reactorLoadBalancerClientRibbonWarnLogger() {
 		return new ReactorLoadBalancerClientRibbonWarnLogger();
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@Conditional(OnNoRibbonDefaultCondition.class)
 	protected static class ReactorLoadBalancerExchangeFilterFunctionConfig {
-
-		private List<WebClient.Builder> webClientBuilders = Collections.emptyList();
-
-		List<WebClient.Builder> getBuilders() {
-			return this.webClientBuilders;
-		}
-
-		@Bean
-		public SmartInitializingSingleton loadBalancedWebClientInitializer(
-				final List<WebClientCustomizer> customizers) {
-			return () -> {
-				for (WebClient.Builder webClientBuilder : getBuilders()) {
-					for (WebClientCustomizer customizer : customizers) {
-						customizer.customize(webClientBuilder);
-					}
-				}
-			};
-		}
-
-		@Bean
-		public WebClientCustomizer loadBalancerClientWebClientCustomizer(
-				ReactorLoadBalancerExchangeFilterFunction filterFunction) {
-			return builder -> builder.filter(filterFunction);
-		}
 
 		@Bean
 		public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
 				ReactiveLoadBalancer.Factory loadBalancerFactory) {
 			return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory);
-		}
-
-		@LoadBalanced
-		@Autowired(required = false)
-		void setWebClientBuilders(List<WebClient.Builder> webClientBuilders) {
-			this.webClientBuilders = webClientBuilders;
-		}
-
-	}
-
-	private static final class OnNoRibbonDefaultCondition extends AnyNestedCondition {
-
-		private OnNoRibbonDefaultCondition() {
-			super(ConfigurationPhase.REGISTER_BEAN);
-		}
-
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.ribbon.enabled",
-				havingValue = "false")
-		static class RibbonNotEnabled {
-
-		}
-
-		@ConditionalOnMissingClass("org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
-		static class RibbonLoadBalancerNotPresent {
-
 		}
 
 	}

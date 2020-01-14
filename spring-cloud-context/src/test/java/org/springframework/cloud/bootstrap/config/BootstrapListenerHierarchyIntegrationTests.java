@@ -85,12 +85,12 @@ public class BootstrapListenerHierarchyIntegrationTests {
 		then(bootstrapContext.getParent()).isNull();
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class BasicConfiguration {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class RootConfiguration {
 
 		@Bean

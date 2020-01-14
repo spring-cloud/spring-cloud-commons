@@ -17,8 +17,9 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.List;
-import java.util.Objects;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.cache.CacheFlux;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,6 +39,9 @@ import org.springframework.cloud.client.ServiceInstance;
  */
 public class CachingServiceInstanceListSupplier implements ServiceInstanceListSupplier {
 
+	private static final Log log = LogFactory
+			.getLog(CachingServiceInstanceListSupplier.class);
+
 	/**
 	 * Name of the service cache instance.
 	 */
@@ -55,8 +59,13 @@ public class CachingServiceInstanceListSupplier implements ServiceInstanceListSu
 		this.serviceInstances = CacheFlux.lookup(key -> {
 			// TODO: configurable cache name
 			Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
-			List<ServiceInstance> list = Objects.requireNonNull(cache).get(key,
-					List.class);
+			if (cache == null) {
+				if (log.isErrorEnabled()) {
+					log.error("Unable to find cache: " + SERVICE_INSTANCE_CACHE_NAME);
+				}
+				return Mono.empty();
+			}
+			List<ServiceInstance> list = cache.get(key, List.class);
 			if (list == null || list.isEmpty()) {
 				return Mono.empty();
 			}
@@ -66,7 +75,15 @@ public class CachingServiceInstanceListSupplier implements ServiceInstanceListSu
 						.doOnNext(instances -> {
 							Cache cache = cacheManager
 									.getCache(SERVICE_INSTANCE_CACHE_NAME);
-							Objects.requireNonNull(cache).put(key, instances);
+							if (cache == null) {
+								if (log.isErrorEnabled()) {
+									log.error("Unable to find cache for writing: "
+											+ SERVICE_INSTANCE_CACHE_NAME);
+								}
+							}
+							else {
+								cache.put(key, instances);
+							}
 						}).then());
 	}
 

@@ -50,7 +50,7 @@ public class ServiceRegistryAutoConfigurationTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class TestConfig {
 
 	}

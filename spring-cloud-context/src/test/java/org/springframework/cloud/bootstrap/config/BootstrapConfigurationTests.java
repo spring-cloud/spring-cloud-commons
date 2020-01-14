@@ -18,6 +18,7 @@ package org.springframework.cloud.bootstrap.config;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
@@ -29,10 +30,13 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
@@ -63,6 +67,8 @@ public class BootstrapConfigurationTests {
 		// Used to test system properties override
 		System.clearProperty("bootstrap.foo");
 		PropertySourceConfiguration.MAP.clear();
+		CompositePropertySourceConfiguration.MAP1.clear();
+		CompositePropertySourceConfiguration.MAP2.clear();
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -82,8 +88,8 @@ public class BootstrapConfigurationTests {
 		then(this.context.getEnvironment().getProperty("info.name"))
 				.isEqualTo("externalPropertiesInfoName");
 		then(this.context.getEnvironment().getPropertySources().contains(
-				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME))
-						.isTrue();
+				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
+						+ "-testBootstrap")).isTrue();
 	}
 
 	@Test
@@ -101,8 +107,8 @@ public class BootstrapConfigurationTests {
 						})
 				.run();
 		then(this.context.getEnvironment().getPropertySources().contains(
-				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME))
-						.isTrue();
+				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
+						+ "-testBootstrap")).isTrue();
 	}
 
 	/**
@@ -122,8 +128,8 @@ public class BootstrapConfigurationTests {
 				.sources(BareConfiguration.class).run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 		then(this.context.getEnvironment().getPropertySources().contains(
-				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME))
-						.isTrue();
+				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
+						+ "-testBootstrap")).isTrue();
 	}
 
 	@Test
@@ -262,7 +268,8 @@ public class BootstrapConfigurationTests {
 		MutablePropertySources sources = this.context.getEnvironment()
 				.getPropertySources();
 		PropertySource<?> bootstrap = sources
-				.get(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME);
+				.get(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
+						+ "-testBootstrap");
 		then(bootstrap).isNotNull();
 		then(sources.precedenceOf(bootstrap)).isEqualTo(0);
 	}
@@ -278,6 +285,17 @@ public class BootstrapConfigurationTests {
 		then(this.context.getParent().getParent().getId()).isEqualTo("bootstrap");
 		then(this.context.getParent().getParent().getParent()).isNull();
 		then(this.context.getEnvironment().getProperty("custom.foo")).isEqualTo("bar");
+	}
+
+	@Test
+	public void listOverride() {
+		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
+				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
+		ListProperties listProperties = new ListProperties();
+		Binder.get(this.context.getEnvironment()).bind("list",
+				Bindable.ofInstance(listProperties));
+		then(listProperties.getFoo().size()).isEqualTo(1);
+		then(listProperties.getFoo().get(0)).isEqualTo("hello world");
 	}
 
 	@Test
@@ -318,12 +336,12 @@ public class BootstrapConfigurationTests {
 		then(this.context.getParent().getEnvironment())
 				.isNotSameAs(this.context.getEnvironment());
 		then(this.context.getEnvironment().getPropertySources().contains(
-				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME))
-						.isTrue();
+				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
+						+ "-testBootstrap")).isTrue();
 		then(((ConfigurableEnvironment) this.context.getParent().getEnvironment())
 				.getPropertySources().contains(
-						PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME))
-								.isTrue();
+						PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
+								+ "-testBootstrap")).isTrue();
 	}
 
 	@Test
@@ -347,8 +365,8 @@ public class BootstrapConfigurationTests {
 				.isTrue();
 		then(((ConfigurableEnvironment) this.context.getParent().getEnvironment())
 				.getPropertySources().contains(
-						PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME))
-								.isTrue();
+						PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
+								+ "-testBootstrap")).isTrue();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 		// The "bootstrap" property source is not shared now, but it has the same
 		// properties in it because they are pulled from the PropertySourceConfiguration
@@ -379,13 +397,13 @@ public class BootstrapConfigurationTests {
 				.isEqualTo("Hello added!");
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	protected static class BareConfiguration {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConfigurationProperties("expected")
 	// This is added to bootstrap context as a source in bootstrap.properties
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
@@ -423,6 +441,76 @@ public class BootstrapConfigurationTests {
 
 		public void setFail(boolean fail) {
 			this.fail = fail;
+		}
+
+	}
+
+	@Configuration
+	@ConfigurationProperties("compositeexpected")
+	// This is added to bootstrap context as a source in bootstrap.properties
+	protected static class CompositePropertySourceConfiguration
+			implements PropertySourceLocator {
+
+		public static Map<String, Object> MAP1 = new HashMap<String, Object>();
+
+		public static Map<String, Object> MAP2 = new HashMap<String, Object>();
+
+		public CompositePropertySourceConfiguration() {
+			MAP1.put("list.foo[0]", "hello");
+			MAP1.put("list.food[1]", "world");
+			MAP2.put("list.foo[0]", "hello world");
+		}
+
+		private String name;
+
+		private boolean fail = false;
+
+		@Override
+		public PropertySource<?> locate(Environment environment) {
+			if (this.name != null) {
+				then(this.name)
+						.isEqualTo(environment.getProperty("spring.application.name"));
+			}
+			if (this.fail) {
+				throw new RuntimeException("Planned");
+			}
+			CompositePropertySource compositePropertySource = new CompositePropertySource(
+					"listTestBootstrap");
+			compositePropertySource.addFirstPropertySource(
+					new MapPropertySource("testBootstrap1", MAP1));
+			compositePropertySource.addFirstPropertySource(
+					new MapPropertySource("testBootstrap2", MAP2));
+			return compositePropertySource;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public boolean isFail() {
+			return this.fail;
+		}
+
+		public void setFail(boolean fail) {
+			this.fail = fail;
+		}
+
+	}
+
+	protected static class ListProperties {
+
+		private List<String> foo;
+
+		public List<String> getFoo() {
+			return foo;
+		}
+
+		public void setFoo(List<String> foo) {
+			this.foo = foo;
 		}
 
 	}

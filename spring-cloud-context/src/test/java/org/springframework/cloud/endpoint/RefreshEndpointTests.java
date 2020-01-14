@@ -169,7 +169,7 @@ public class RefreshEndpointTests {
 		return map.size();
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class Empty implements SmartApplicationListener {
 
 		private List<ApplicationEvent> events = new ArrayList<ApplicationEvent>();

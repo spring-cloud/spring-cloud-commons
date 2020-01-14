@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Dave Syer
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(ConfigurationPropertiesBindingPostProcessor.class)
 public class ConfigurationPropertiesRebinderAutoConfiguration
 		implements ApplicationContextAware, SmartInitializingSingleton {
@@ -47,7 +47,7 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
-	public ConfigurationPropertiesBeans configurationPropertiesBeans() {
+	public static ConfigurationPropertiesBeans configurationPropertiesBeans() {
 		return new ConfigurationPropertiesBeans();
 	}
 

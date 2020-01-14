@@ -29,10 +29,10 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Ryan Baxter
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class HttpClientConfiguration {
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.apache.enabled",
 			matchIfMissing = true)
 	@ConditionalOnClass(HttpClient.class)
@@ -59,7 +59,7 @@ public class HttpClientConfiguration {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.ok.enabled",
 			matchIfMissing = true)
 	@ConditionalOnClass(OkHttpClient.class)

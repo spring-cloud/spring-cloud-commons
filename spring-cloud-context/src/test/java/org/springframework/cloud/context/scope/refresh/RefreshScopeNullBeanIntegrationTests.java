@@ -66,7 +66,7 @@ public class RefreshScopeNullBeanIntegrationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class OptionalConfiguration {
 
 		@Bean
@@ -77,7 +77,7 @@ public class RefreshScopeNullBeanIntegrationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@Import({ RefreshAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class,
 			OptionalConfiguration.class })
 	protected static class TestConfiguration {

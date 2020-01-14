@@ -59,7 +59,7 @@ public class RestartIntegrationTests {
 		then(this.context.getParent().getParent()).isNull();
 
 		RestartEndpoint next = this.context.getBean(RestartEndpoint.class);
-		then(next).isNotSameAs(endpoint);
+		then(next).isSameAs(endpoint);
 		this.context = next.doRestart();
 
 		then(this.context).isNotNull();
@@ -72,7 +72,7 @@ public class RestartIntegrationTests {
 		then(json).containsOnlyOnce("parent\": null");
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	protected static class TestConfiguration {
 

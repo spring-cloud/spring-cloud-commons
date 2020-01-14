@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-commons-parent</artifactId>
-		<version>2.2.0.BUILD-SNAPSHOT</version>
+		<version>2.2.2.BUILD-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>spring-cloud-commons</artifactId>
@@ -68,6 +68,7 @@
 	<properties>
 		<okhttp3.version>3.6.0</okhttp3.version>
 		<apachehttpclient.version>4.5.4</apachehttpclient.version>
+		<evictor.version>1.0.0</evictor.version>
 	</properties>
 	<dependencies>
 		<dependency>

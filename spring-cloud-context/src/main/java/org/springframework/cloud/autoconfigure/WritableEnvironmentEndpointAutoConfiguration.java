@@ -42,7 +42,7 @@ import org.springframework.core.env.Environment;
  * @author Stephane Nicoll
  * @since 2.0.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ EnvironmentEndpoint.class, EnvironmentEndpointProperties.class })
 @ConditionalOnBean(EnvironmentManager.class)
 @AutoConfigureBefore(EnvironmentEndpointAutoConfiguration.class)

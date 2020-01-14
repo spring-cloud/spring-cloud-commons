@@ -91,7 +91,7 @@ public class RefreshScopeListBindingIntegrationTests {
 		throw new IllegalStateException("Could not find test property source");
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	@Import({ RefreshAutoConfiguration.class,
 			PropertyPlaceholderAutoConfiguration.class })

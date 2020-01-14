@@ -93,7 +93,7 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 		then(this.discoveryClient.getInstances("nonexistent")).isEmpty();
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	public static class SampleConfig {
 

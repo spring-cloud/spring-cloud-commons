@@ -67,7 +67,7 @@ public class ServiceRegistryEndpointNoRegistrationTests {
 			WebMvcAutoConfiguration.class
 			// ManagementServerPropertiesAutoConfiguration.class
 	})
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class TestConfiguration {
 
 		@Bean

@@ -23,12 +23,11 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
+import org.springframework.cloud.client.loadbalancer.reactive.OnNoRibbonDefaultCondition;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -42,9 +41,9 @@ import org.springframework.web.client.RestTemplate;
  * An autoconfiguration for {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
- * @since 2.2.0
+ * @since 2.1.3
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @LoadBalancerClients
 @AutoConfigureAfter(LoadBalancerAutoConfiguration.class)
 @AutoConfigureBefore({
@@ -55,11 +54,13 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@Bean
 	@ConditionalOnClass(
 			name = "org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.ribbon.enabled",
+			matchIfMissing = true)
 	public BlockingLoadBalancerClientRibbonWarnLogger blockingLoadBalancerClientRibbonWarnLogger() {
 		return new BlockingLoadBalancerClientRibbonWarnLogger();
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(RestTemplate.class)
 	@Conditional(OnNoRibbonDefaultCondition.class)
 	protected static class BlockingLoadbalancerClientConfig {
@@ -70,25 +71,6 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 		public BlockingLoadBalancerClient blockingLoadBalancerClient(
 				LoadBalancerClientFactory loadBalancerClientFactory) {
 			return new BlockingLoadBalancerClient(loadBalancerClientFactory);
-		}
-
-	}
-
-	private static final class OnNoRibbonDefaultCondition extends AnyNestedCondition {
-
-		private OnNoRibbonDefaultCondition() {
-			super(ConfigurationPhase.REGISTER_BEAN);
-		}
-
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.ribbon.enabled",
-				havingValue = "false")
-		static class RibbonNotEnabled {
-
-		}
-
-		@ConditionalOnMissingClass("org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
-		static class RibbonLoadBalancerNotPresent {
-
 		}
 
 	}

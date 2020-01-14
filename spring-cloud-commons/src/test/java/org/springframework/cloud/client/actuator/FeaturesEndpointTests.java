@@ -68,7 +68,7 @@ public class FeaturesEndpointTests {
 		return new FeaturesEndpoint.Feature(name, type.getCanonicalName(), null, null);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class FeaturesConfig {
 
 		@Bean
@@ -87,7 +87,7 @@ public class FeaturesEndpointTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	public static class Config {
 

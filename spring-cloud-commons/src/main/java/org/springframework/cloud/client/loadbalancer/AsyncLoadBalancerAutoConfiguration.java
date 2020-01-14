@@ -34,12 +34,12 @@ import org.springframework.web.client.AsyncRestTemplate;
  *
  * @author Rob Worsnop
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(LoadBalancerClient.class)
 @ConditionalOnClass(AsyncRestTemplate.class)
 public class AsyncLoadBalancerAutoConfiguration {
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class AsyncRestTemplateCustomizerConfig {
 
 		@LoadBalanced
@@ -63,7 +63,7 @@ public class AsyncLoadBalancerAutoConfiguration {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class LoadBalancerInterceptorConfig {
 
 		@Bean

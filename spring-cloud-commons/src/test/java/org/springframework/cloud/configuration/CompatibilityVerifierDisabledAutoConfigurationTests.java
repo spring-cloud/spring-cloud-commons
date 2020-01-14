@@ -42,7 +42,7 @@ public class CompatibilityVerifierDisabledAutoConfigurationTests {
 		then(this.compositeCompatibilityVerifier).isNull();
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	static class TestConfiguration {
 

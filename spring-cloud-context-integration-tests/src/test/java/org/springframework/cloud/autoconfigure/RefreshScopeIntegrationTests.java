@@ -218,7 +218,7 @@ public class RefreshScopeIntegrationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(TestProperties.class)
 	@EnableAutoConfiguration
 	protected static class TestConfiguration {

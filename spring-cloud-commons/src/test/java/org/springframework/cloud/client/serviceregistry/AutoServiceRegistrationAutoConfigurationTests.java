@@ -94,7 +94,7 @@ public class AutoServiceRegistrationAutoConfigurationTests {
 		return context;
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class HasAutoServiceRegistrationConfiguration {
 
 		@Bean

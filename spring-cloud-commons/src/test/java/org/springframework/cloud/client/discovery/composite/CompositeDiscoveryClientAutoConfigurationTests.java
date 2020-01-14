@@ -65,7 +65,7 @@ public class CompositeDiscoveryClientAutoConfigurationTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class Config {
 
 		@Bean

@@ -16,29 +16,104 @@
 
 package org.springframework.cloud.loadbalancer.config;
 
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import javax.annotation.PostConstruct;
+
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.stoyanr.evictor.ConcurrentMapWithTimedEviction;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.CacheAspectSupport;
+import org.springframework.cloud.client.loadbalancer.reactive.OnNoRibbonDefaultCondition;
+import org.springframework.cloud.loadbalancer.cache.CaffeineBasedLoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * An AutoConfiguration that automatically enables caching when when Spring Boot and
- * Spring Framework Cache support classes are present.
+ * An AutoConfiguration that automatically enables caching when when Spring Boot, and
+ * Spring Framework Cache support are present. If Caffeine is present in the classpath, it
+ * will be used for loadbalancer caching. If not, a default cache will be used.
  *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  * @see CacheManager
  * @see CacheAutoConfiguration
  * @see CacheAspectSupport
+ * @see <a href="https://github.com/ben-manes/caffeine>Caffeine</a>
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ CacheManager.class, CacheAutoConfiguration.class })
-@ConditionalOnMissingBean(CacheAspectSupport.class)
-@EnableCaching
-@AutoConfigureBefore(CacheAutoConfiguration.class)
+@AutoConfigureAfter(CacheAutoConfiguration.class)
+@ConditionalOnProperty(value = "spring.cloud.loadbalancer.cache.enabled",
+		matchIfMissing = true)
+@EnableConfigurationProperties(LoadBalancerCacheProperties.class)
+@Conditional(OnNoRibbonDefaultCondition.class)
 public class LoadBalancerCacheAutoConfiguration {
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnMissingClass("com.github.benmanes.caffeine.cache.Caffeine")
+	protected static class LoadBalancerCacheManagerWarnConfiguration {
+
+		@Bean
+		LoadBalancerCaffeineWarnLogger caffeineWarnLogger() {
+			return new LoadBalancerCaffeineWarnLogger();
+		}
+
+	}
+
+	static class LoadBalancerCaffeineWarnLogger {
+
+		private static final Log LOG = LogFactory
+				.getLog(LoadBalancerCaffeineWarnLogger.class);
+
+		@PostConstruct
+		void logWarning() {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(
+						"Spring Cloud LoadBalancer is currently working with default default cache. "
+								+ "You can switch to using Caffeine cache, by adding it to the classpath.");
+			}
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass(Caffeine.class)
+	protected static class CaffeineLoadBalancerCacheManagerConfiguration {
+
+		@Bean(autowireCandidate = false)
+		@ConditionalOnMissingBean
+		LoadBalancerCacheManager caffeineLoadBalancerCacheManager(
+				LoadBalancerCacheProperties cacheProperties) {
+			return new CaffeineBasedLoadBalancerCacheManager(cacheProperties);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnMissingClass("com.github.benmanes.caffeine.cache.Caffeine")
+	@ConditionalOnClass(ConcurrentMapWithTimedEviction.class)
+	protected static class DefaultLoadBalancerCacheManagerConfiguration {
+
+		@Bean(autowireCandidate = false)
+		@ConditionalOnMissingBean
+		LoadBalancerCacheManager defaultLoadBalancerCacheManager(
+				LoadBalancerCacheProperties cacheProperties) {
+			return new DefaultLoadBalancerCacheManager(cacheProperties);
+		}
+
+	}
 
 }

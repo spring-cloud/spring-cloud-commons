@@ -23,6 +23,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -36,7 +37,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerTestUtils.assertLoadBalanced;
 import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerTestUtils.getFilters;
 
 /**
@@ -56,7 +59,15 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		WebClient.Builder webClientBuilder = webClientBuilders.values().iterator().next();
 		then(webClientBuilder).isNotNull();
 
-		assertLoadBalanced(webClientBuilder);
+		assertLoadBalanced(webClientBuilder, LoadBalancerExchangeFilterFunction.class);
+
+		final Map<String, OneWebClientBuilder.TestService> testServiceMap = context
+				.getBeansOfType(OneWebClientBuilder.TestService.class);
+		then(testServiceMap).isNotNull().hasSize(1);
+		OneWebClientBuilder.TestService testService = testServiceMap.values().stream()
+				.findFirst().get();
+		assertLoadBalanced(testService.webClient,
+				LoadBalancerExchangeFilterFunction.class);
 	}
 
 	@Test
@@ -70,7 +81,7 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		TwoWebClientBuilders.Two two = context.getBean(TwoWebClientBuilders.Two.class);
 
 		then(two.loadBalanced).isNotNull();
-		assertLoadBalanced(two.loadBalanced);
+		assertLoadBalanced(two.loadBalanced, LoadBalancerExchangeFilterFunction.class);
 
 		then(two.nonLoadBalanced).isNotNull();
 		then(getFilters(two.nonLoadBalanced)).isNullOrEmpty();
@@ -99,20 +110,20 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 
 		then(webClientBuilders).hasSize(1);
 
+		assertThatThrownBy(
+				() -> context.getBean(LoadBalancerExchangeFilterFunction.class))
+						.isInstanceOf(NoSuchBeanDefinitionException.class);
+
 		WebClient.Builder builder = context.getBean(WebClient.Builder.class);
 
 		then(builder).isNotNull();
-		then(getFilters(builder)).isNullOrEmpty();
+		assertLoadBalanced(builder, ReactorLoadBalancerExchangeFilterFunction.class);
 	}
 
 	private ConfigurableApplicationContext init(Class<?> config) {
 		return LoadBalancerTestUtils.init(config,
-				ReactiveLoadBalancerAutoConfiguration.class);
-	}
-
-	private void assertLoadBalanced(WebClient.Builder builder) {
-		LoadBalancerTestUtils.assertLoadBalanced(builder,
-				LoadBalancerExchangeFilterFunction.class);
+				ReactiveLoadBalancerAutoConfiguration.class,
+				LoadBalancerBeanPostProcessorAutoConfiguration.class);
 	}
 
 	@Configuration
@@ -154,6 +165,21 @@ public class ReactiveLoadBalancerAutoConfigurationTests {
 		@LoadBalanced
 		WebClient.Builder loadBalancedWebClientBuilder() {
 			return WebClient.builder();
+		}
+
+		@Bean
+		TestService testService() {
+			return new TestService(loadBalancedWebClientBuilder());
+		}
+
+		private final class TestService {
+
+			public final WebClient webClient;
+
+			private TestService(WebClient.Builder builder) {
+				this.webClient = builder.build();
+			}
+
 		}
 
 	}

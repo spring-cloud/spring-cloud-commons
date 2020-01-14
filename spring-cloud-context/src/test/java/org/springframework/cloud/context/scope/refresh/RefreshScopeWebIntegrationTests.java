@@ -71,7 +71,7 @@ public class RefreshScopeWebIntegrationTests {
 		then(message).isEqualTo("Hello Dave!");
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	protected static class Application {
 

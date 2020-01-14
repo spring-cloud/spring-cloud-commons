@@ -40,7 +40,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  *
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ TextEncryptor.class })
 @EnableConfigurationProperties({ KeyProperties.class })
 public class EncryptionBootstrapConfiguration {
@@ -62,7 +62,7 @@ public class EncryptionBootstrapConfiguration {
 		return listener;
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@Conditional(KeyCondition.class)
 	@ConditionalOnClass(RsaSecretEncryptor.class)
 	@EnableConfigurationProperties({ RsaProperties.class })
@@ -97,7 +97,7 @@ public class EncryptionBootstrapConfiguration {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@Conditional(KeyCondition.class)
 	@ConditionalOnMissingClass("org.springframework.security.rsa.crypto.RsaSecretEncryptor")
 	protected static class VanillaEncryptionConfiguration {

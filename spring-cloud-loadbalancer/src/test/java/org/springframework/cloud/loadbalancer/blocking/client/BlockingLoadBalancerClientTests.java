@@ -141,7 +141,7 @@ class BlockingLoadBalancerClientTests {
 		}
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	@SpringBootConfiguration
 	@LoadBalancerClients({

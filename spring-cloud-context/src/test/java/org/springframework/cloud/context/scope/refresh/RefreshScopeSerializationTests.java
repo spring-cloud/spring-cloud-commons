@@ -56,7 +56,7 @@ public class RefreshScopeSerializationTests {
 		return factory;
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class TestConfiguration {
 
 		@Bean

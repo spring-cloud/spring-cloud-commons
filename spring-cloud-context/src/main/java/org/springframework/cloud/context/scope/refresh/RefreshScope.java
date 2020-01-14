@@ -45,14 +45,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  *
  * <p>
  * Note that all beans in this scope are <em>only</em> initialized when first accessed, so
- * the scope forces lazy initialization semantics. The implementation involves creating a
- * proxy for every bean in the scope, so there is a flag
- * {@link #setProxyTargetClass(boolean) proxyTargetClass} which controls the proxy
- * creation, defaulting to JDK dynamic proxies and therefore only exposing the interfaces
- * implemented by a bean. If callers need access to other methods, then the flag needs to
- * be set (and CGLib must be present on the classpath). Because this scope automatically
- * proxies all its beans, there is no need to add <code>&lt;aop:auto-proxy/&gt;</code> to
- * any bean definitions.
+ * the scope forces lazy initialization semantics.
  * </p>
  *
  * <p>

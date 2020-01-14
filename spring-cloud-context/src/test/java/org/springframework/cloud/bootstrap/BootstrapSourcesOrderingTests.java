@@ -40,7 +40,7 @@ public class BootstrapSourcesOrderingTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class Application {
 
 	}

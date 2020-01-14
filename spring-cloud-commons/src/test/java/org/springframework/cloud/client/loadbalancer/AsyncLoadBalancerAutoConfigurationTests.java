@@ -92,7 +92,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 				.sources(config, AsyncLoadBalancerAutoConfiguration.class).run();
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class OneRestTemplate {
 
 		@LoadBalanced
@@ -114,7 +114,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	protected static class TwoRestTemplates {
 
 		@Primary
@@ -134,7 +134,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 			return new NoopLoadBalancerClient();
 		}
 
-		@Configuration
+		@Configuration(proxyBeanMethods = false)
 		protected static class Two {
 
 			@Autowired

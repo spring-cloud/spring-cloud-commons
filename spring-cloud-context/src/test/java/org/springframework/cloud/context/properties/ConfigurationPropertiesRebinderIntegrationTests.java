@@ -115,7 +115,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	@ImportAutoConfiguration({ RefreshConfiguration.RebinderConfiguration.class,
 			PropertyPlaceholderAutoConfiguration.class })
@@ -139,7 +139,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 	// Hack out a protected inner class for testing
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
 
-		@Configuration
+		@Configuration(proxyBeanMethods = false)
 		protected static class RebinderConfiguration
 				extends ConfigurationPropertiesRebinderAutoConfiguration {
 

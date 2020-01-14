@@ -88,7 +88,7 @@ public class CustomHttpClientConfigurationTests {
 
 }
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @EnableAutoConfiguration
 class CustomApplication {
 
@@ -96,7 +96,7 @@ class CustomApplication {
 		SpringApplication.run(MyApplication.class, args);
 	}
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	static class MyConfig {
 
 		@Bean

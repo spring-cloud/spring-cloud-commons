@@ -40,10 +40,10 @@ import org.springframework.context.annotation.Configuration;
  * @author Tim Ysewyn
  * @since 2.2.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class ReactiveCommonsClientAutoConfiguration {
 
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
 	@ConditionalOnClass(ReactiveHealthIndicator.class)
 	@ConditionalOnBean(ReactiveDiscoveryClient.class)

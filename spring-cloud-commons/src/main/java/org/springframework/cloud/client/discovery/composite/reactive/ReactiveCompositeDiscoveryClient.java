@@ -19,6 +19,7 @@ package org.springframework.cloud.client.discovery.composite.reactive;
 import java.util.ArrayList;
 import java.util.List;
 
+import reactor.core.publisher.CloudFlux;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -55,7 +56,7 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 		for (ReactiveDiscoveryClient discoveryClient : discoveryClients) {
 			serviceInstances.add(discoveryClient.getInstances(serviceId));
 		}
-		return Flux.first(serviceInstances);
+		return CloudFlux.firstNonEmpty(serviceInstances);
 	}
 
 	@Override
