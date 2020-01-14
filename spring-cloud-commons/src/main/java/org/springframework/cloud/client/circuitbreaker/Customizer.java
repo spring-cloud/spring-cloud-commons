@@ -16,9 +16,8 @@
 
 package org.springframework.cloud.client.circuitbreaker;
 
-import java.util.Collections;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 /**
@@ -42,13 +41,13 @@ public interface Customizer<TOCUSTOMIZE> {
 	 */
 	static <T, K> Customizer<T> once(Customizer<T> customizer,
 			Function<? super T, ? extends K> keyMapper) {
-		final Set<K> customized = Collections.newSetFromMap(new ConcurrentHashMap<>());
+		final ConcurrentMap<K, Boolean> customized = new ConcurrentHashMap<>();
 		return t -> {
 			final K key = keyMapper.apply(t);
-			if (!customized.contains(key)) {
-				customized.add(key);
+			customized.computeIfAbsent(key, k -> {
 				customizer.customize(t);
-			}
+				return true;
+			});
 		};
 	}
 
