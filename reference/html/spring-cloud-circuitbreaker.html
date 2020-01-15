@@ -245,6 +245,26 @@ the following documentation:</p>
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p>Some <code>CircuitBreaker</code> implementations such as <code>Resilience4JCircuitBreaker</code> call <code>customize</code> method every time <code>CircuitBreaker#run</code> is called.
+It can be inefficient. In that case, you can use <code>CircuitBreaker#once</code> method. It is useful where calling <code>customize</code> many times doesn&#8217;t make sense,
+for example, in case of <a href="https://resilience4j.readme.io/docs/circuitbreaker#section-consume-emitted-circuitbreakerevents">consuming Resilience4j&#8217;s  events</a>.</p>
+</div>
+<div class="paragraph">
+<p>The following example shows the way for each <code>io.github.resilience4j.circuitbreaker.CircuitBreaker</code> to consume events.</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Customizer.once(circuitBreaker -&gt; {
+  circuitBreaker.getEventPublisher()
+    .onStateTransition(event -&gt; log.info("{}: {}", event.getCircuitBreakerName(), event.getStateTransition()));
+}, CircuitBreaker::getName)</code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
