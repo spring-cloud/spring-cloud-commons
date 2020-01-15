@@ -89,3 +89,19 @@ the following documentation:
 * link:../../../../spring-cloud-circuitbreaker/current/reference/html/spring-cloud-circuitbreaker.html#configuring-resilience4j-circuit-breakers[Resilience4J]
 * link:https://github.com/alibaba/spring-cloud-alibaba/blob/master/spring-cloud-alibaba-docs/src/main/asciidoc/circuitbreaker-sentinel.adoc#circuit-breaker-spring-cloud-circuit-breaker-with-sentinel--configuring-sentinel-circuit-breakers[Sentinal]
 * link:../../../../spring-cloud-circuitbreaker/current/reference/html/spring-cloud-circuitbreaker.html#configuring-spring-retry-circuit-breakers[Spring Retry]
+
+Some `CircuitBreaker` implementations such as `Resilience4JCircuitBreaker` call `customize` method every time `CircuitBreaker#run` is called.
+It can be inefficient. In that case, you can use `CircuitBreaker#once` method. It is useful where calling `customize` many times doesn't make sense,
+for example, in case of https://resilience4j.readme.io/docs/circuitbreaker#section-consume-emitted-circuitbreakerevents[consuming Resilience4j's  events].
+
+The following example shows the way for each `io.github.resilience4j.circuitbreaker.CircuitBreaker` to consume events.
+
+====
+[source,java]
+----
+Customizer.once(circuitBreaker -> {
+  circuitBreaker.getEventPublisher()
+    .onStateTransition(event -> log.info("{}: {}", event.getCircuitBreakerName(), event.getStateTransition()));
+}, CircuitBreaker::getName)
+----
+====
