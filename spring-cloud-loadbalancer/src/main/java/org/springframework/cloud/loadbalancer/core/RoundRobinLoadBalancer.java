@@ -104,6 +104,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 		this.position = new AtomicInteger(seedPosition);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	// see original
 	// https://github.com/Netflix/ocelli/blob/master/ocelli-core/

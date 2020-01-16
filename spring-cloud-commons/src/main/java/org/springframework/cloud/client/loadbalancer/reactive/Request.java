@@ -22,7 +22,12 @@ package org.springframework.cloud.client.loadbalancer.reactive;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-public interface Request {
+public interface Request<C> {
+
+	// Avoid breaking backward compatibility
+	default C getContext() {
+		return null;
+	}
 
 	/**
 	 * A hint that can be used by {@link ReactiveLoadBalancer} implementations to pick the

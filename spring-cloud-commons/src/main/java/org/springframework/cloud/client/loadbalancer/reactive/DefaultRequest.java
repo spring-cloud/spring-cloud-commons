@@ -22,25 +22,25 @@ package org.springframework.cloud.client.loadbalancer.reactive;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-public class DefaultRequest implements Request {
+public class DefaultRequest implements Request<DefaultRequestContext> {
 
-	private String hint;
+	private DefaultRequestContext context;
 
 	public DefaultRequest() {
-		this("default");
+		new DefaultRequestContext();
 	}
 
-	public DefaultRequest(String hint) {
-		this.hint = hint;
+	public DefaultRequest(DefaultRequestContext context) {
+		this.context = context;
 	}
 
 	@Override
-	public String getHint() {
-		return hint;
+	public DefaultRequestContext getContext() {
+		return context;
 	}
 
-	public void setHint(String hint) {
-		this.hint = hint;
+	public void setContext(DefaultRequestContext context) {
+		this.context = context;
 	}
 
 }

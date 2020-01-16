@@ -35,6 +35,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
@@ -155,7 +156,8 @@ public class LoadBalancerTests {
 						instance(serviceId, "1host", false),
 						instance(serviceId, "2host-secure", true)),
 				serviceId);
-		Request request = new DefaultRequest("test2");
+		Request<DefaultRequestContext> request = new DefaultRequest(
+				new DefaultRequestContext("test2"));
 
 		ServiceInstance serviceInstance = loadBalancer.choose(request).block()
 				.getServer();
@@ -171,10 +173,16 @@ public class LoadBalancerTests {
 			super(serviceInstanceListSupplierProvider, serviceId);
 		}
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public Mono<Response<ServiceInstance>> choose(Request request) {
-			return Mono.just(
-					new DefaultResponse(instance(request.getHint(), "host", false)));
+			if (request.getContext() instanceof DefaultRequestContext) {
+				DefaultRequestContext requestContext = (DefaultRequestContext) request
+						.getContext();
+				return Mono.just(new DefaultResponse(
+						instance(requestContext.getHint(), "host", false)));
+			}
+			return Mono.empty();
 		}
 
 	}
