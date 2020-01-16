@@ -193,12 +193,12 @@ public class PropertySourceBootstrapConfiguration implements
 		}
 		if (propertySources.contains(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
 			if (!remoteProperties.isOverrideSystemProperties()) {
-				for (PropertySource<?> p : composite) {
+				for (PropertySource<?> p : reversedComposite) {
 					propertySources.addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, p);
 				}
 			}
 			else {
-				for (PropertySource<?> p : reversedComposite) {
+				for (PropertySource<?> p : composite) {
 					propertySources.addBefore(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, p);
 				}
 			}
