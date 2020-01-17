@@ -25,7 +25,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.rule.OutputCapture;
+import org.springframework.boot.test.system.OutputCaptureRule;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +38,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 public class RefreshAutoConfigurationTests {
 
 	@Rule
-	public OutputCapture output = new OutputCapture();
+	public OutputCaptureRule output = new OutputCaptureRule();
 
 	private static ConfigurableApplicationContext getApplicationContext(
 			WebApplicationType type, Class<?> configuration, String... properties) {
