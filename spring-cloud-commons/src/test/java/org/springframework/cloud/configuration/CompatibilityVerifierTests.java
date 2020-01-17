@@ -23,7 +23,7 @@ import org.assertj.core.api.BDDAssertions;
 import org.junit.Rule;
 import org.junit.Test;
 
-import org.springframework.boot.test.rule.OutputCapture;
+import org.springframework.boot.test.system.OutputCaptureRule;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
@@ -33,7 +33,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 public class CompatibilityVerifierTests {
 
 	@Rule
-	public OutputCapture outputCapture = new OutputCapture();
+	public OutputCaptureRule outputCapture = new OutputCaptureRule();
 
 	@Test
 	public void should_not_print_the_report_when_no_errors_were_found() {
