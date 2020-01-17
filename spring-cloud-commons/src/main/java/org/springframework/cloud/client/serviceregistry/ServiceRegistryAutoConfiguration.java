@@ -17,7 +17,7 @@
 package org.springframework.cloud.client.serviceregistry;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnEnabledEndpoint;
+import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -39,7 +39,7 @@ public class ServiceRegistryAutoConfiguration {
 		private Registration registration;
 
 		@Bean
-		@ConditionalOnEnabledEndpoint
+		@ConditionalOnAvailableEndpoint
 		public ServiceRegistryEndpoint serviceRegistryEndpoint(
 				ServiceRegistry serviceRegistry) {
 			ServiceRegistryEndpoint endpoint = new ServiceRegistryEndpoint(

@@ -47,6 +47,7 @@ public class RestartIntegrationTests {
 
 		this.context = SpringApplication.run(TestConfiguration.class,
 				"--management.endpoint.restart.enabled=true", "--server.port=0",
+				"--management.endpoints.web.exposure.include=restart",
 				"--spring.liveBeansView.mbeanDomain=livebeans");
 
 		RestartEndpoint endpoint = this.context.getBean(RestartEndpoint.class);

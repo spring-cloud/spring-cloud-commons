@@ -20,7 +20,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
-import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnEnabledEndpoint;
 import org.springframework.boot.actuate.autoconfigure.health.ConditionalOnEnabledHealthIndicator;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -87,7 +86,7 @@ class RestartEndpointWithIntegrationConfiguration {
 	private IntegrationMBeanExporter exporter;
 
 	@Bean
-	@ConditionalOnEnabledEndpoint
+	@ConditionalOnAvailableEndpoint
 	@ConditionalOnMissingBean
 	public RestartEndpoint restartEndpoint() {
 		RestartEndpoint endpoint = new RestartEndpoint();
@@ -104,7 +103,7 @@ class RestartEndpointWithIntegrationConfiguration {
 class RestartEndpointWithoutIntegrationConfiguration {
 
 	@Bean
-	@ConditionalOnEnabledEndpoint
+	@ConditionalOnAvailableEndpoint
 	@ConditionalOnMissingBean
 	public RestartEndpoint restartEndpointWithoutIntegration() {
 		return new RestartEndpoint();
@@ -118,7 +117,7 @@ class PauseResumeEndpointsConfiguration {
 	@Bean
 	@ConditionalOnBean(RestartEndpoint.class)
 	@ConditionalOnMissingBean
-	@ConditionalOnEnabledEndpoint
+	@ConditionalOnAvailableEndpoint
 	public RestartEndpoint.PauseEndpoint pauseEndpoint(RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getPauseEndpoint();
 	}
@@ -126,7 +125,7 @@ class PauseResumeEndpointsConfiguration {
 	@Bean
 	@ConditionalOnBean(RestartEndpoint.class)
 	@ConditionalOnMissingBean
-	@ConditionalOnEnabledEndpoint
+	@ConditionalOnAvailableEndpoint
 	public RestartEndpoint.ResumeEndpoint resumeEndpoint(
 			RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getResumeEndpoint();

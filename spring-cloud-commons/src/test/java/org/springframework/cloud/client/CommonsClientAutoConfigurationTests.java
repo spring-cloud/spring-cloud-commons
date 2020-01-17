@@ -51,6 +51,7 @@ public class CommonsClientAutoConfigurationTests {
 		applicationContextRunner
 				.withConfiguration(
 						AutoConfigurations.of(HealthEndpointAutoConfiguration.class))
+				.withPropertyValues("management.endpoints.web.exposure.include=features")
 				.run(ctxt -> {
 					then(ctxt.getBean(DiscoveryClientHealthIndicator.class)).isNotNull();
 					then(ctxt.getBean(DiscoveryCompositeHealthContributor.class))
@@ -63,7 +64,9 @@ public class CommonsClientAutoConfigurationTests {
 	@Test
 	public void disableAll() {
 		applicationContextRunner
-				.withPropertyValues("spring.cloud.discovery.enabled=false").run(ctxt -> {
+				.withPropertyValues("spring.cloud.discovery.enabled=false",
+						"management.endpoints.web.exposure.include=features")
+				.run(ctxt -> {
 					assertThat(ctxt)
 							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
 					assertThat(ctxt)
@@ -77,7 +80,8 @@ public class CommonsClientAutoConfigurationTests {
 	@Test
 	public void disableBlocking() {
 		applicationContextRunner
-				.withPropertyValues("spring.cloud.discovery.blocking.enabled=false")
+				.withPropertyValues("spring.cloud.discovery.blocking.enabled=false",
+						"management.endpoints.web.exposure.include=features")
 				.run(ctxt -> {
 					assertThat(ctxt)
 							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
