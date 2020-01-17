@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.autoconfigure;
 
-import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnEnabledEndpoint;
+import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.actuate.autoconfigure.env.EnvironmentEndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.env.EnvironmentEndpointProperties;
 import org.springframework.boot.actuate.env.EnvironmentEndpoint;
@@ -61,7 +61,7 @@ public class WritableEnvironmentEndpointAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	@ConditionalOnEnabledEndpoint
+	@ConditionalOnAvailableEndpoint
 	public WritableEnvironmentEndpoint environmentEndpoint(Environment environment) {
 		WritableEnvironmentEndpoint endpoint = new WritableEnvironmentEndpoint(
 				environment);
@@ -73,7 +73,7 @@ public class WritableEnvironmentEndpointAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnEnabledEndpoint
+	@ConditionalOnAvailableEndpoint
 	public WritableEnvironmentEndpointWebExtension environmentEndpointWebExtension(
 			WritableEnvironmentEndpoint endpoint, EnvironmentManager environment) {
 		return new WritableEnvironmentEndpointWebExtension(endpoint, environment);

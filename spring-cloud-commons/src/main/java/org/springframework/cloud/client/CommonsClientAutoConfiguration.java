@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnEnabledEndpoint;
+import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -93,7 +93,7 @@ public class CommonsClientAutoConfiguration {
 		private List<HasFeatures> hasFeatures = new ArrayList<>();
 
 		@Bean
-		@ConditionalOnEnabledEndpoint
+		@ConditionalOnAvailableEndpoint
 		public FeaturesEndpoint featuresEndpoint() {
 			return new FeaturesEndpoint(this.hasFeatures);
 		}
