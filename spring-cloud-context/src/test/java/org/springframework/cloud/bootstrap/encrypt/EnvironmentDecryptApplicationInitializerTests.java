@@ -24,7 +24,7 @@ import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 
-import org.springframework.boot.test.rule.OutputCapture;
+import org.springframework.boot.test.system.OutputCaptureRule;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.context.ApplicationContext;
@@ -59,7 +59,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 			Encryptors.noOpText());
 
 	@Rule
-	public OutputCapture outputCapture = new OutputCapture();
+	public OutputCaptureRule outputCapture = new OutputCaptureRule();
 
 	@Test
 	public void decryptCipherKey() {
