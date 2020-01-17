@@ -29,15 +29,6 @@ public interface Request<C> {
 		return null;
 	}
 
-	/**
-	 * A hint that can be used by {@link ReactiveLoadBalancer} implementations to pick the
-	 * correct instance.
-	 * @return a {@link String} representation of the hint
-	 */
-	default String getHint() {
-		return "default";
-	}
-
 	// TODO: define contents
 
 }

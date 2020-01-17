@@ -156,7 +156,7 @@ public class LoadBalancerTests {
 						instance(serviceId, "1host", false),
 						instance(serviceId, "2host-secure", true)),
 				serviceId);
-		Request<DefaultRequestContext> request = new DefaultRequest(
+		Request<DefaultRequestContext> request = new DefaultRequest<>(
 				new DefaultRequestContext("test2"));
 
 		ServiceInstance serviceInstance = loadBalancer.choose(request).block()
