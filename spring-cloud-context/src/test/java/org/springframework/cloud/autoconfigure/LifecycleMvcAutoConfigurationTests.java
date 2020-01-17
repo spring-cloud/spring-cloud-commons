@@ -63,7 +63,8 @@ public class LifecycleMvcAutoConfigurationTests {
 	@Test
 	public void environmentWebEndpointExtensionEnabled() {
 		beanCreated("environmentEndpointWebExtension",
-				"management.endpoint.env.enabled=true");
+				"management.endpoint.env.enabled=true",
+				"management.endpoints.web.exposure.include=env");
 	}
 
 	// restartEndpoint
@@ -80,7 +81,8 @@ public class LifecycleMvcAutoConfigurationTests {
 	@Test
 	public void restartEndpointEnabled() {
 		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class,
-				RestartEndpoint::restart, "management.endpoint.restart.enabled=true");
+				RestartEndpoint::restart, "management.endpoint.restart.enabled=true",
+				"management.endpoints.web.exposure.include=restart");
 	}
 
 	// pauseEndpoint
@@ -105,6 +107,7 @@ public class LifecycleMvcAutoConfigurationTests {
 		beanCreatedAndEndpointEnabled("pauseEndpoint",
 				RestartEndpoint.PauseEndpoint.class, RestartEndpoint.PauseEndpoint::pause,
 				"management.endpoint.restart.enabled=true",
+				"management.endpoints.web.exposure.include=restart,pause",
 				"management.endpoint.pause.enabled=true");
 	}
 
@@ -112,12 +115,14 @@ public class LifecycleMvcAutoConfigurationTests {
 	@Test
 	public void resumeEndpointDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.restart.enabled=true",
+				"management.endpoints.web.exposure.include=restart",
 				"management.endpoint.resume.enabled=false");
 	}
 
 	@Test
 	public void resumeEndpointRestartDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.restart.enabled=false",
+				"management.endpoints.web.exposure.include=resume",
 				"management.endpoint.resume.enabled=true");
 	}
 
@@ -132,7 +137,8 @@ public class LifecycleMvcAutoConfigurationTests {
 				RestartEndpoint.ResumeEndpoint.class,
 				RestartEndpoint.ResumeEndpoint::resume,
 				"management.endpoint.restart.enabled=true",
-				"management.endpoint.resume.enabled=true");
+				"management.endpoint.resume.enabled=true",
+				"management.endpoints.web.exposure.include=restart,resume");
 	}
 
 	private void beanNotCreated(String beanName, String... contextProperties) {

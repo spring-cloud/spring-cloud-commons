@@ -46,20 +46,24 @@ public class ReactiveCommonsClientAutoConfigurationTests {
 
 	@Test
 	public void beansCreatedNormally() {
-		applicationContextRunner.run(context -> {
-			then(context.getBean(ReactiveDiscoveryClientHealthIndicator.class))
-					.isNotNull();
-			then(context.getBean(ReactiveDiscoveryCompositeHealthContributor.class))
-					.isNotNull();
-			then(context.getBean(FeaturesEndpoint.class)).isNotNull();
-			then(context.getBeansOfType(HasFeatures.class).values()).isNotEmpty();
-		});
+		applicationContextRunner
+				.withPropertyValues("management.endpoints.web.exposure.include=features")
+				.run(context -> {
+					then(context.getBean(ReactiveDiscoveryClientHealthIndicator.class))
+							.isNotNull();
+					then(context
+							.getBean(ReactiveDiscoveryCompositeHealthContributor.class))
+									.isNotNull();
+					then(context.getBean(FeaturesEndpoint.class)).isNotNull();
+					then(context.getBeansOfType(HasFeatures.class).values()).isNotEmpty();
+				});
 	}
 
 	@Test
 	public void disableAll() {
 		applicationContextRunner
-				.withPropertyValues("spring.cloud.discovery.enabled=false")
+				.withPropertyValues("spring.cloud.discovery.enabled=false",
+						"management.endpoints.web.exposure.include=features")
 				.run(context -> {
 					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryClientHealthIndicator.class);
@@ -74,7 +78,8 @@ public class ReactiveCommonsClientAutoConfigurationTests {
 	@Test
 	public void disableReactive() {
 		applicationContextRunner
-				.withPropertyValues("spring.cloud.discovery.reactive.enabled=false")
+				.withPropertyValues("spring.cloud.discovery.reactive.enabled=false",
+						"management.endpoints.web.exposure.include=features")
 				.run(context -> {
 					assertThat(context).doesNotHaveBean(
 							ReactiveDiscoveryClientHealthIndicator.class);
