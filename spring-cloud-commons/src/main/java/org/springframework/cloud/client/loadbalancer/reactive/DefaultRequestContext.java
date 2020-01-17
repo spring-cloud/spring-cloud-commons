@@ -16,39 +16,32 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import org.reactivestreams.Publisher;
-
 /**
- * Reactive load balancer.
+ * Contains information relevant to the request.
  *
- * @param <T> type of the response
- * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-public interface ReactiveLoadBalancer<T> {
+public class DefaultRequestContext {
 
 	/**
-	 * Default implementation of a request.
+	 * A {@link String} value of hint that can be used to choose the correct service
+	 * instance.
 	 */
-	Request<DefaultRequestContext> REQUEST = new DefaultRequest();
+	private String hint = "default";
 
-	/**
-	 * Choose the next server based on the load balancing algorithm.
-	 * @param request - incoming request
-	 * @return publisher for the response
-	 */
-	@SuppressWarnings("rawtypes")
-	Publisher<Response<T>> choose(Request request);
-
-	default Publisher<Response<T>> choose() { // conflicting name
-		return choose(REQUEST);
+	public DefaultRequestContext() {
 	}
 
-	@FunctionalInterface
-	interface Factory<T> {
+	public DefaultRequestContext(String hint) {
+		this.hint = hint;
+	}
 
-		ReactiveLoadBalancer<T> getInstance(String serviceId);
+	public String getHint() {
+		return hint;
+	}
 
+	public void setHint(String hint) {
+		this.hint = hint;
 	}
 
 }

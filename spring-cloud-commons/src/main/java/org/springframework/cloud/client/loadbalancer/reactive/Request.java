@@ -20,8 +20,14 @@ package org.springframework.cloud.client.loadbalancer.reactive;
  * Marker interface for a request.
  *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
-public interface Request {
+public interface Request<C> {
+
+	// Avoid breaking backward compatibility
+	default C getContext() {
+		return null;
+	}
 
 	// TODO: define contents
 

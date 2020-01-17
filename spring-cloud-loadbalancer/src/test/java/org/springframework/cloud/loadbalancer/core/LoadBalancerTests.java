@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -33,7 +34,11 @@ import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
+import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
@@ -45,6 +50,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
@@ -125,6 +131,11 @@ public class LoadBalancerTests {
 		assertLoadBalancer(loadBalancer, Arrays.asList("1host", "2host-secure"));
 	}
 
+	private static DefaultServiceInstance instance(String serviceId, String host,
+			boolean secure) {
+		return new DefaultServiceInstance(serviceId, serviceId, host, 80, secure);
+	}
+
 	@Test
 	public void staticConfigurationWorksWithServiceInstanceListSupplier() {
 		String serviceId = "test1";
@@ -136,9 +147,44 @@ public class LoadBalancerTests {
 		assertLoadBalancer(loadBalancer, Arrays.asList("1host", "2host-secure"));
 	}
 
-	private DefaultServiceInstance instance(String serviceId, String host,
-			boolean secure) {
-		return new DefaultServiceInstance(serviceId, serviceId, host, 80, secure);
+	@SuppressWarnings("ConstantConditions")
+	@Test
+	public void canPassHintViaRequest() {
+		String serviceId = "test1";
+		RoundRobinLoadBalancer loadBalancer = new TestHintLoadBalancer(
+				ServiceInstanceListSuppliers.toProvider(serviceId,
+						instance(serviceId, "1host", false),
+						instance(serviceId, "2host-secure", true)),
+				serviceId);
+		Request<DefaultRequestContext> request = new DefaultRequest<>(
+				new DefaultRequestContext("test2"));
+
+		ServiceInstance serviceInstance = loadBalancer.choose(request).block()
+				.getServer();
+
+		assertThat(serviceInstance.getServiceId()).isEqualTo("test2");
+	}
+
+	private static class TestHintLoadBalancer extends RoundRobinLoadBalancer {
+
+		TestHintLoadBalancer(
+				ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+				String serviceId) {
+			super(serviceInstanceListSupplierProvider, serviceId);
+		}
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public Mono<Response<ServiceInstance>> choose(Request request) {
+			if (request.getContext() instanceof DefaultRequestContext) {
+				DefaultRequestContext requestContext = (DefaultRequestContext) request
+						.getContext();
+				return Mono.just(new DefaultResponse(
+						instance(requestContext.getHint(), "host", false)));
+			}
+			return Mono.empty();
+		}
+
 	}
 
 	@EnableAutoConfiguration

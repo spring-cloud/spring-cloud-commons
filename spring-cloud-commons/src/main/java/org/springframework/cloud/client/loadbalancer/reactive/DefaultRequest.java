@@ -17,8 +17,30 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 /**
+ * A default implementation of {@link Request}.
+ *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
-public class DefaultRequest implements Request {
+public class DefaultRequest<T> implements Request<T> {
+
+	private T context;
+
+	public DefaultRequest() {
+		new DefaultRequestContext();
+	}
+
+	public DefaultRequest(T context) {
+		this.context = context;
+	}
+
+	@Override
+	public T getContext() {
+		return context;
+	}
+
+	public void setContext(T context) {
+		this.context = context;
+	}
 
 }
