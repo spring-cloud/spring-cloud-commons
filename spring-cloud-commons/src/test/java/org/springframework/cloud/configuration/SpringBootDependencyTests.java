@@ -144,7 +144,7 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_manifest() {
-		List<String> acceptedVersions = Collections.singletonList("2.2");
+		List<String> acceptedVersions = Collections.singletonList("2.3");
 		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
 				acceptedVersions);
 		versionVerifier.ACCEPTED_VERSIONS.clear();
