@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.8">
+<title>Introduction</title>
+<link rel="stylesheet" href="css/spring.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+.hidden {
+	display: none;
+}
+
+.switch {
+	border-width: 1px 1px 0 1px;
+	border-style: solid;
+	border-color: #7a2518;
+	display: inline-block;
+}
+
+.switch--item {
+	padding: 10px;
+	background-color: #ffffff;
+	color: #7a2518;
+	display: inline-block;
+	cursor: pointer;
+}
+
+.switch--item:not(:first-child) {
+	border-width: 0 0 0 1px;
+	border-style: solid;
+	border-color: #7a2518;
+}
+
+.switch--item.selected {
+	background-color: #7a2519;
+	color: #ffffff;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js"></script>
+<script type="text/javascript">
+function addBlockSwitches() {
+	$('.primary').each(function() {
+		primary = $(this);
+		createSwitchItem(primary, createBlockSwitch(primary)).item.addClass("selected");
+		primary.children('.title').remove();
+	});
+	$('.secondary').each(function(idx, node) {
+		secondary = $(node);
+		primary = findPrimary(secondary);
+		switchItem = createSwitchItem(secondary, primary.children('.switch'));
+		switchItem.content.addClass('hidden');
+		findPrimary(secondary).append(switchItem.content);
+		secondary.remove();
+	});
+}
+
+function createBlockSwitch(primary) {
+	blockSwitch = $('<div class="switch"></div>');
+	primary.prepend(blockSwitch);
+	return blockSwitch;
+}
+
+function findPrimary(secondary) {
+	candidate = secondary.prev();
+	while (!candidate.is('.primary')) {
+		candidate = candidate.prev();
+	}
+	return candidate;
+}
+
+function createSwitchItem(block, blockSwitch) {
+	blockName = block.children('.title').text();
+	content = block.children('.content').first().append(block.next('.colist'));
+	item = $('<div class="switch--item">' + blockName + '</div>');
+	item.on('click', '', content, function(e) {
+		$(this).addClass('selected');
+		$(this).siblings().removeClass('selected');
+		e.data.siblings('.content').addClass('hidden');
+		e.data.removeClass('hidden');
+	});
+	blockSwitch.append(item);
+	return {'item': item, 'content': content};
+}
+
+$(addBlockSwitches);
+</script>
+
+</head>
+<body class="book toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">Introduction</a>
+<ul class="sectlevel2">
+<li><a href="#_supported_implementations">Supported Implementations</a></li>
+</ul>
+</li>
+<li><a href="#_core_concepts">Core Concepts</a>
+<ul class="sectlevel2">
+<li><a href="#_circuit_breakers_in_reactive_code">Circuit Breakers In Reactive Code</a></li>
+</ul>
+</li>
+<li><a href="#_configuration">Configuration</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_introduction"><a class="link" href="#_introduction">Introduction</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations.
+It provides a consistent API to use in your applications, letting you, the developer, choose the circuit breaker implementation that best fits your needs for your application.</p>
+</div>
+<div class="sect2">
+<h3 id="_supported_implementations"><a class="link" href="#_supported_implementations">Supported Implementations</a></h3>
+<div class="paragraph">
+<p>Spring Cloud supports the following circuit-breaker implementations:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/Netflix/Hystrix">Netfix Hystrix</a></p>
+</li>
+<li>
+<p><a href="https://github.com/resilience4j/resilience4j">Resilience4J</a></p>
+</li>
+<li>
+<p><a href="https://github.com/alibaba/Sentinel">Sentinel</a></p>
+</li>
+<li>
+<p><a href="https://github.com/spring-projects/spring-retry">Spring Retry</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_core_concepts"><a class="link" href="#_core_concepts">Core Concepts</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To create a circuit breaker in your code, you can use the <code>CircuitBreakerFactory</code> API. When you include a Spring Cloud Circuit Breaker starter on your classpath, a bean that implements this API is automatically created for you.
+The following example shows a simple example of how to use this API:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Service
+public static class DemoControllerService {
+	private RestTemplate rest;
+	private CircuitBreakerFactory cbFactory;
+
+	public DemoControllerService(RestTemplate rest, CircuitBreakerFactory cbFactory) {
+		this.rest = rest;
+		this.cbFactory = cbFactory;
+	}
+
+	public String slow() {
+		return cbFactory.create("slow").run(() -&gt; rest.getForObject("/slow", String.class), throwable -&gt; "fallback");
+	}
+
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>CircuitBreakerFactory.create</code> API creates an instance of a class called <code>CircuitBreaker</code>.
+The <code>run</code> method takes a <code>Supplier</code> and a <code>Function</code>.
+The <code>Supplier</code> is the code that you are going to wrap in a circuit breaker.
+The <code>Function</code> is the fallback that is executed if the circuit breaker is tripped.
+The function is passed the <code>Throwable</code> that caused the fallback to be triggered.
+You can optionally exclude the fallback if you do not want to provide one.</p>
+</div>
+<div class="sect2">
+<h3 id="_circuit_breakers_in_reactive_code"><a class="link" href="#_circuit_breakers_in_reactive_code">Circuit Breakers In Reactive Code</a></h3>
+<div class="paragraph">
+<p>If Project Reactor is on the class path, you can also use <code>ReactiveCircuitBreakerFactory</code> for your reactive code.
+The following example shows how to do so:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">@Service
+public static class DemoControllerService {
+	private ReactiveCircuitBreakerFactory cbFactory;
+	private WebClient webClient;
+
+
+	public DemoControllerService(WebClient webClient, ReactiveCircuitBreakerFactory cbFactory) {
+		this.webClient = webClient;
+		this.cbFactory = cbFactory;
+	}
+
+	public Mono&lt;String&gt; slow() {
+		return webClient.get().uri("/slow").retrieve().bodyToMono(String.class).transform(
+		it -&gt; cbFactory.create("slow").run(it, throwable -&gt; return Mono.just("fallback")));
+	}
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>ReactiveCircuitBreakerFactory.create</code> API creates an instance of a class called <code>ReactiveCircuitBreaker</code>.
+The <code>run</code> method takes a <code>Mono</code> or a <code>Flux</code> and wraps it in a circuit breaker.
+You can optionally profile a fallback <code>Function</code>, which will be called if the circuit breaker is tripped and is passed the <code>Throwable</code>
+that caused the failure.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuration"><a class="link" href="#_configuration">Configuration</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can configure your circuit breakers by creating beans of type <code>Customizer</code>.
+The <code>Customizer</code> interface has a single method (called <code>customize</code>) that takes the <code>Object</code> to customize.</p>
+</div>
+<div class="paragraph">
+<p>For detailed information on how to customize a given implementation see
+the following documentation:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="../../../../spring-cloud-netflix/current/reference/html/#circuit-breaker-spring-cloud-circuit-breaker-with-hystrix">Hystrix</a></p>
+</li>
+<li>
+<p><a href="../../../../spring-cloud-circuitbreaker/current/reference/html/spring-cloud-circuitbreaker.html#configuring-resilience4j-circuit-breakers">Resilience4J</a></p>
+</li>
+<li>
+<p><a href="https://github.com/alibaba/spring-cloud-alibaba/blob/master/spring-cloud-alibaba-docs/src/main/asciidoc/circuitbreaker-sentinel.adoc#circuit-breaker-spring-cloud-circuit-breaker-with-sentinel&#8212;&#8203;configuring-sentinel-circuit-breakers">Sentinal</a></p>
+</li>
+<li>
+<p><a href="../../../../spring-cloud-circuitbreaker/current/reference/html/spring-cloud-circuitbreaker.html#configuring-spring-retry-circuit-breakers">Spring Retry</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Some <code>CircuitBreaker</code> implementations such as <code>Resilience4JCircuitBreaker</code> call <code>customize</code> method every time <code>CircuitBreaker#run</code> is called.
+It can be inefficient. In that case, you can use <code>CircuitBreaker#once</code> method. It is useful where calling <code>customize</code> many times doesn&#8217;t make sense,
+for example, in case of <a href="https://resilience4j.readme.io/docs/circuitbreaker#section-consume-emitted-circuitbreakerevents">consuming Resilience4j&#8217;s  events</a>.</p>
+</div>
+<div class="paragraph">
+<p>The following example shows the way for each <code>io.github.resilience4j.circuitbreaker.CircuitBreaker</code> to consume events.</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Customizer.once(circuitBreaker -&gt; {
+  circuitBreaker.getEventPublisher()
+    .onStateTransition(event -&gt; log.info("{}: {}", event.getCircuitBreakerName(), event.getStateTransition()));
+}, CircuitBreaker::getName)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script type="text/javascript" src="js/tocbot/tocbot.min.js"></script>
+<script type="text/javascript" src="js/toc.js"></script>
+<link rel="stylesheet" href="js/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="js/highlight/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>
