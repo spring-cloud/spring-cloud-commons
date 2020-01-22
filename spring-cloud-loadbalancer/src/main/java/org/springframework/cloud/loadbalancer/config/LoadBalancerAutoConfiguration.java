@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
@@ -29,6 +30,7 @@ import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 /**
  * @author Spencer Gibb
@@ -46,6 +48,15 @@ public class LoadBalancerAutoConfiguration {
 	public LoadBalancerAutoConfiguration(
 			ObjectProvider<List<LoadBalancerClientSpecification>> configurations) {
 		this.configurations = configurations;
+	}
+
+	// Adding a @Primary bean to avoid NoUniqueBeanDefinition exception during constructor
+	// argument resolution in multiple contexts created while processing
+	// @LoadBalancerClients.
+	@Bean
+	@Primary
+	public LoadBalancerProperties loadBalancerProperties() {
+		return new LoadBalancerProperties();
 	}
 
 	@Bean
