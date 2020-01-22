@@ -16,12 +16,17 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
 import reactor.core.publisher.Flux;
 
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.core.env.Environment;
+
+import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory.PROPERTY_NAME;
 
 /**
  * A {@link Supplier} of lists of {@link ServiceInstance} objects.
@@ -34,4 +39,70 @@ public interface ServiceInstanceListSupplier
 
 	String getServiceId();
 
+	static FixedServiceInstanceListSupplier.Builder fixed(Environment environment) {
+		return new FixedServiceInstanceListSupplier.Builder(environment);
+	}
+
+	class FixedServiceInstanceListSupplier implements ServiceInstanceListSupplier {
+
+		private final String serviceId;
+
+		private List<ServiceInstance> instances;
+
+		public static Builder with(Environment env) {
+			return new Builder(env);
+		}
+
+		private FixedServiceInstanceListSupplier(Environment env,
+				List<ServiceInstance> instances) {
+			this.serviceId = env.getProperty(PROPERTY_NAME);
+			this.instances = instances;
+		}
+
+		@Override
+		public String getServiceId() {
+			return serviceId;
+		}
+
+		@Override
+		public Flux<List<ServiceInstance>> get() {
+			return Flux.just(instances);
+		}
+
+		public static final class Builder {
+
+			private final Environment env;
+
+			private final ArrayList<ServiceInstance> instances = new ArrayList<>();
+
+			private Builder(Environment env) {
+				this.env = env;
+			}
+
+			public Builder instance(ServiceInstance instance) {
+				instances.add(instance);
+				return this;
+			}
+
+			public Builder instance(int port, String serviceId) {
+				return instance("localhost", port, serviceId);
+			}
+
+			public Builder instance(String host, int port, String serviceId) {
+				DefaultServiceInstance instance = new DefaultServiceInstance(
+						instanceId(serviceId, host, port), serviceId, host, port, false);
+				return instance(instance);
+			}
+
+			private String instanceId(String serviceId, String host, int port) {
+				return serviceId + ":" + host + ":" + port;
+			}
+
+			public FixedServiceInstanceListSupplier build() {
+				return new FixedServiceInstanceListSupplier(env, instances);
+			}
+
+		}
+
+	}
 }
