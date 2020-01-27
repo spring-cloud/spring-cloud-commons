@@ -62,11 +62,11 @@ public class LoadBalancerCacheProperties {
 		this.ttl = ttl;
 	}
 
-	int getCapacity() {
+	public int getCapacity() {
 		return capacity;
 	}
 
-	void setCapacity(int capacity) {
+	public void setCapacity(int capacity) {
 		this.capacity = capacity;
 	}
 
