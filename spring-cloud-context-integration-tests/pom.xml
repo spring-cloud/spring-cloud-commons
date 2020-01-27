@@ -13,7 +13,7 @@
 	<artifactId>spring-cloud-context-integration-tests</artifactId>
 	<packaging>jar</packaging>
 	<name>spring-cloud-context-integration-tests</name>
-	<description>Spring Cloud Context</description>
+	<description>Spring Cloud Context Integration Tests</description>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
