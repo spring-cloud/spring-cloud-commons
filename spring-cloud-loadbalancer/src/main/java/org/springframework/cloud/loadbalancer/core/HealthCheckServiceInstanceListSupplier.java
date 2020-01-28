@@ -41,10 +41,13 @@ public class HealthCheckServiceInstanceListSupplier
 
 	private List<ServiceInstance> healthyInstances;
 
+	private final InstanceHealthChecker healthChecker;
+
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			LoadBalancerProperties loadBalancerProperties) {
+			LoadBalancerProperties loadBalancerProperties, InstanceHealthChecker healthChecker) {
 		this.delegate = delegate;
 		this.loadBalancerProperties = loadBalancerProperties;
+		this.healthChecker = healthChecker;
 		initInstances();
 
 	}
@@ -72,9 +75,8 @@ public class HealthCheckServiceInstanceListSupplier
 				}, 0, 30, TimeUnit.SECONDS), FluxSink.OverflowStrategy.LATEST);
 	}
 
-	// TODO
 	private boolean healthCheckPassed(ServiceInstance serviceInstance) {
-		return true;
+		return healthChecker.isAlive(serviceInstance);
 	}
 
 	@Override
