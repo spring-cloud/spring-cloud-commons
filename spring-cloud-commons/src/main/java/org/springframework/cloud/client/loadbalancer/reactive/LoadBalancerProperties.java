@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -33,6 +35,8 @@ public class LoadBalancerProperties {
 	 */
 	private String zone;
 
+	private HealthCheck healthCheck;
+
 	public String getZone() {
 		return zone;
 	}
@@ -41,4 +45,43 @@ public class LoadBalancerProperties {
 		this.zone = zone;
 	}
 
+	public HealthCheck getHealthCheck() {
+		return healthCheck;
+	}
+
+	public void setHealthCheck(HealthCheck healthCheck) {
+		this.healthCheck = healthCheck;
+	}
+
+	public static class HealthCheck {
+
+		private int initialDelay = 0;
+		private int period = 30;
+		private TimeUnit unit = TimeUnit.SECONDS;
+
+		public int getInitialDelay() {
+			return initialDelay;
+		}
+
+		public void setInitialDelay(int initialDelay) {
+			this.initialDelay = initialDelay;
+		}
+
+		public int getPeriod() {
+			return period;
+		}
+
+		public void setPeriod(int period) {
+			this.period = period;
+		}
+
+		public TimeUnit getUnit() {
+			return unit;
+		}
+
+		public void setUnit(TimeUnit unit) {
+			this.unit = unit;
+		}
+	}
 }
+

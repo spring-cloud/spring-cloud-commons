@@ -18,7 +18,6 @@ package org.springframework.cloud.loadbalancer.core;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -62,17 +61,21 @@ public class HealthCheckServiceInstanceListSupplier
 	}
 
 	private Flux<List<ServiceInstance>> healthCheckFlux() {
-		return Flux.create(emitter -> Schedulers.newSingle("Health Check Verifier", true)
-				.schedulePeriodically(() -> {
-					List<ServiceInstance> verifiedInstances = new ArrayList<>();
-					for (ServiceInstance instance : instances) {
-						if (healthCheckPassed(instance)) {
-							verifiedInstances.add(instance);
-						}
-					}
-					emitter.next(verifiedInstances);
+		return Flux.create(emitter -> Schedulers.newSingle("Health Check Verifier: "
+						+ getServiceId(), true)
+						.schedulePeriodically(() -> {
+									List<ServiceInstance> verifiedInstances = new ArrayList<>();
+									for (ServiceInstance instance : instances) {
+										if (healthCheckPassed(instance)) {
+											verifiedInstances.add(instance);
+										}
+									}
+									emitter.next(verifiedInstances);
 
-				}, 0, 30, TimeUnit.SECONDS), FluxSink.OverflowStrategy.LATEST);
+								}, loadBalancerProperties.getHealthCheck().getInitialDelay(),
+								loadBalancerProperties.getHealthCheck().getPeriod(),
+								loadBalancerProperties.getHealthCheck().getUnit()),
+				FluxSink.OverflowStrategy.LATEST);
 	}
 
 	private boolean healthCheckPassed(ServiceInstance serviceInstance) {
