@@ -1,0 +1,27 @@
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            myservice:
+              - service-id: myservice
+                uri: http://ahost:8080
+              - service-id: myservice
+                uri: http://chost:8081
+              - service-id: myservice
+                uri: https://bhostsecure:8082
+            anotherservice:
+              - service-id: myservice
+                uri: http://dhost:8180
+              - service-id: myservice
+                uri: https://fhost:8181
+              - service-id: myservice
+                uri: http://ehost:8182
+            thirdservice:
+              - service-id: myservice
+                uri: http://ghost:8280
+              - service-id: myservice
+                uri: http://hhost:8281
+              - service-id: myservice
+                uri: http://ihost:8282
