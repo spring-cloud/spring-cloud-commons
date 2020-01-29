@@ -157,6 +157,8 @@ public class BootstrapApplicationListener
 		}
 		String configLocation = environment
 				.resolvePlaceholders("${spring.cloud.bootstrap.location:}");
+		String configAdditionalLocation = environment
+				.resolvePlaceholders("${spring.cloud.bootstrap.additional-location:}");
 		Map<String, Object> bootstrapMap = new HashMap<>();
 		bootstrapMap.put("spring.config.name", configName);
 		// if an app (or test) uses spring.main.web-application-type=reactive, bootstrap
@@ -167,6 +169,10 @@ public class BootstrapApplicationListener
 		bootstrapMap.put("spring.main.web-application-type", "none");
 		if (StringUtils.hasText(configLocation)) {
 			bootstrapMap.put("spring.config.location", configLocation);
+		}
+		if (StringUtils.hasText(configAdditionalLocation)) {
+			bootstrapMap.put("spring.config.additional-location",
+					configAdditionalLocation);
 		}
 		bootstrapProperties.addFirst(
 				new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME, bootstrapMap));
