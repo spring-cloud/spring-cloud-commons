@@ -97,8 +97,10 @@ Thus, sibling contexts, in particular, do not need to have the same profiles or 
 </section>
 <section xml:id="customizing-bootstrap-properties">
 <title>Changing the Location of Bootstrap Properties</title>
-<simpara>The <literal>bootstrap.yml</literal> (or <literal>.properties</literal>) location can be specified by setting <literal>spring.cloud.bootstrap.name</literal> (default: <literal>bootstrap</literal>) or <literal>spring.cloud.bootstrap.location</literal> (default: empty)&#8201;&#8212;&#8201;for example, in System properties.
+<simpara>The <literal>bootstrap.yml</literal> (or <literal>.properties</literal>) location can be specified by setting <literal>spring.cloud.bootstrap.name</literal> (default: <literal>bootstrap</literal>), <literal>spring.cloud.bootstrap.location</literal> (default: empty) or <literal>spring.cloud.bootstrap.additional-location</literal> (default: empty)&#8201;&#8212;&#8201;for example, in System properties.
 Those properties behave like the <literal>spring.config.*</literal> variants with the same name.
+With <literal>spring.cloud.bootstrap.location</literal> the default locations are replaced and only the specified ones are used.
+To add locations to the list of default ones, <literal>spring.cloud.bootstrap.additional-location</literal> could be used.
 In fact, they are used to set up the bootstrap <literal>ApplicationContext</literal> by setting those properties in its <literal>Environment</literal>.
 If there is an active profile (from <literal>spring.profiles.active</literal> or through the <literal>Environment</literal> API in the
 context you are building), properties in that profile get loaded as well, the same as in a regular Spring Boot app&#8201;&#8212;&#8201;for example, from <literal>bootstrap-development.properties</literal> for a <literal>development</literal> profile.</simpara>
