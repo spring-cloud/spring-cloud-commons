@@ -78,7 +78,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void pickupExternalBootstrapProperties() {
+	public void pickupOnlyExternalBootstrapProperties() {
 		String externalPropertiesPath = getExternalProperties();
 
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
@@ -87,6 +87,25 @@ public class BootstrapConfigurationTests {
 				.run();
 		then(this.context.getEnvironment().getProperty("info.name"))
 				.isEqualTo("externalPropertiesInfoName");
+		then(this.context.getEnvironment().getProperty("info.desc")).isNull();
+		then(this.context.getEnvironment().getPropertySources().contains(
+				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
+						+ "-testBootstrap")).isTrue();
+	}
+
+	@Test
+	public void pickupAdditionalExternalBootstrapProperties() {
+		String externalPropertiesPath = getExternalProperties();
+
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+				.sources(BareConfiguration.class)
+				.properties("spring.cloud.bootstrap.additional-location="
+						+ externalPropertiesPath)
+				.run();
+		then(this.context.getEnvironment().getProperty("info.name"))
+				.isEqualTo("externalPropertiesInfoName");
+		then(this.context.getEnvironment().getProperty("info.desc"))
+				.isEqualTo("defaultPropertiesInfoDesc");
 		then(this.context.getEnvironment().getPropertySources().contains(
 				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
 						+ "-testBootstrap")).isTrue();
@@ -117,7 +136,7 @@ public class BootstrapConfigurationTests {
 	 * @return
 	 */
 	private String getExternalProperties() {
-		String externalPropertiesPath = "classpath:bootstrap.properties,classpath:external-properties/bootstrap.properties";
+		String externalPropertiesPath = "classpath:external-properties/bootstrap.properties";
 		return externalPropertiesPath;
 	}
 
