@@ -76,17 +76,17 @@ public class HealthCheckServiceInstanceListSupplier
 
 	private Flux<List<ServiceInstance>> healthCheckFlux() {
 		return Flux.create(emitter -> Schedulers
-						.newSingle("Health Check Verifier: " + getServiceId(), true)
-						.schedulePeriodically(() -> {
-									List<ServiceInstance> verifiedInstances = new ArrayList<>();
-									Flux.fromIterable(instances).filterWhen(healthChecker::isAlive)
-											.subscribe(serviceInstance -> {
-												verifiedInstances.add(serviceInstance);
-												emitter.next(verifiedInstances);
-											});
-								}, loadBalancerProperties.getHealthCheck().getInitialDelay(),
-								loadBalancerProperties.getHealthCheck().getPeriod(),
-								loadBalancerProperties.getHealthCheck().getUnit()),
+				.newSingle("Health Check Verifier: " + getServiceId(), true)
+				.schedulePeriodically(() -> {
+					List<ServiceInstance> verifiedInstances = new ArrayList<>();
+					Flux.fromIterable(instances).filterWhen(healthChecker::isAlive)
+							.subscribe(serviceInstance -> {
+								verifiedInstances.add(serviceInstance);
+								emitter.next(verifiedInstances);
+							});
+				}, loadBalancerProperties.getHealthCheck().getInitialDelay(),
+						loadBalancerProperties.getHealthCheck().getPeriod(),
+						loadBalancerProperties.getHealthCheck().getUnit()),
 				FluxSink.OverflowStrategy.LATEST);
 	}
 

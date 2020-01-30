@@ -32,6 +32,8 @@ import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSup
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceSupplier;
+import org.springframework.cloud.loadbalancer.core.InstanceHealthChecker;
+import org.springframework.cloud.loadbalancer.core.PingHealthChecker;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
@@ -69,6 +71,12 @@ public class LoadBalancerClientConfiguration {
 		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
 		return new RoundRobinLoadBalancer(loadBalancerClientFactory.getLazyProvider(name,
 				ServiceInstanceListSupplier.class), name);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public InstanceHealthChecker healthChecker(Environment environment) {
+		return new PingHealthChecker(environment);
 	}
 
 	@Configuration(proxyBeanMethods = false)
