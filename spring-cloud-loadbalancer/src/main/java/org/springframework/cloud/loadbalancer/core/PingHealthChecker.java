@@ -25,7 +25,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
+ * The default {@link InstanceHealthChecker} implementation that uses {@link WebClient} to
+ * ping the <code>health</code> endpoint of the instances. Used by
+ * {@link HealthCheckServiceInstanceListSupplier}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
+ * @see HealthCheckServiceInstanceListSupplier
  */
 public class PingHealthChecker implements InstanceHealthChecker {
 

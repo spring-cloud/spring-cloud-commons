@@ -34,6 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link HealthCheckServiceInstanceListSupplier}.
+ *
  * @author Olga Maciaszek-Sharma
  */
 @ExtendWith(SpringExtension.class)

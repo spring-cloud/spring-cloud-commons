@@ -30,7 +30,11 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 
 /**
+ * A {@link ServiceInstanceListSupplier} implementation that verifies whether the
+ * instances are alive and only returns the healthy one, unless there are none.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.0
  */
 public class HealthCheckServiceInstanceListSupplier
 		implements ServiceInstanceListSupplier {

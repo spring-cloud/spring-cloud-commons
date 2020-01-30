@@ -35,6 +35,9 @@ public class LoadBalancerProperties {
 	 */
 	private String zone;
 
+	/**
+	 * Properties for <code>HealthCheckServiceInstanceListSupplier</code>.
+	 */
 	private HealthCheck healthCheck = new HealthCheck();
 
 	public String getZone() {
@@ -55,10 +58,19 @@ public class LoadBalancerProperties {
 
 	public static class HealthCheck {
 
+		/**
+		 * Initial delay value for the HealthCheck scheduler.
+		 */
 		private int initialDelay = 0;
 
+		/**
+		 * Period for rerunning the HealthCheck scheduler.
+		 */
 		private int period = 30;
 
+		/**
+		 * TimeUnit for rerunning the HealthCheck scheduler.
+		 */
 		private TimeUnit unit = TimeUnit.SECONDS;
 
 		public int getInitialDelay() {
