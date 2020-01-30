@@ -182,6 +182,8 @@ public class ContextRefresher {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("spring.jmx.enabled", false);
 		map.put("spring.main.sources", "");
+		// gh-678 without this apps with this property set to REACTIVE or SERVLET fail
+		map.put("spring.main.web-application-type", "NONE");
 		capturedPropertySources
 				.addFirst(new MapPropertySource(REFRESH_ARGS_PROPERTY_SOURCE, map));
 		return environment;
