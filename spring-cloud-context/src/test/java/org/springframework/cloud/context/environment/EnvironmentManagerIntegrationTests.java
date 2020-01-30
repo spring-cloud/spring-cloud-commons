@@ -52,7 +52,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class,
-		properties = "management.endpoints.web.exposure.include=*")
+		properties = { "management.endpoints.web.exposure.include=*",
+				"management.endpoint.env.post.enabled=true" })
 @AutoConfigureMockMvc
 public class EnvironmentManagerIntegrationTests {
 
@@ -114,14 +115,14 @@ public class EnvironmentManagerIntegrationTests {
 	public void environmentBeansConfiguredCorrectly() {
 		Map<String, EnvironmentEndpoint> envbeans = this.context
 				.getBeansOfType(EnvironmentEndpoint.class);
-		then(envbeans).hasSize(1).containsKey("environmentEndpoint");
-		then(envbeans.get("environmentEndpoint"))
+		then(envbeans).hasSize(1).containsKey("writableEnvironmentEndpoint");
+		then(envbeans.get("writableEnvironmentEndpoint"))
 				.isInstanceOf(WritableEnvironmentEndpoint.class);
 
 		Map<String, EnvironmentEndpointWebExtension> extbeans = this.context
 				.getBeansOfType(EnvironmentEndpointWebExtension.class);
-		then(extbeans).hasSize(1).containsKey("environmentEndpointWebExtension");
-		then(extbeans.get("environmentEndpointWebExtension"))
+		then(extbeans).hasSize(1).containsKey("writableEnvironmentEndpointWebExtension");
+		then(extbeans.get("writableEnvironmentEndpointWebExtension"))
 				.isInstanceOf(WritableEnvironmentEndpointWebExtension.class);
 	}
 

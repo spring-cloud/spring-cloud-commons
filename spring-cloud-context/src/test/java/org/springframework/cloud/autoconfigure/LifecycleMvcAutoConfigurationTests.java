@@ -50,20 +50,21 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	@Test
 	public void environmentWebEndpointExtensionDisabled() {
-		beanNotCreated("environmentWebEndpointExtension",
+		beanNotCreated("writableEnvironmentEndpointWebExtension",
 				"management.endpoint.env.enabled=false");
 	}
 
 	@Test
 	public void environmentWebEndpointExtensionGloballyDisabled() {
-		beanNotCreated("environmentWebEndpointExtension",
+		beanNotCreated("writableEnvironmentEndpointWebExtension",
 				"management.endpoints.enabled-by-default=false");
 	}
 
 	@Test
 	public void environmentWebEndpointExtensionEnabled() {
-		beanCreated("environmentEndpointWebExtension",
+		beanCreated("writableEnvironmentEndpointWebExtension",
 				"management.endpoint.env.enabled=true",
+				"management.endpoint.env.post.enabled=true",
 				"management.endpoints.web.exposure.include=env");
 	}
 
@@ -144,16 +145,16 @@ public class LifecycleMvcAutoConfigurationTests {
 	private void beanNotCreated(String beanName, String... contextProperties) {
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
 				contextProperties)) {
-			then(context.containsBeanDefinition(beanName)).as("bean was created")
-					.isFalse();
+			then(context.containsBeanDefinition(beanName))
+					.as("%s bean was created", beanName).isFalse();
 		}
 	}
 
 	private void beanCreated(String beanName, String... contextProperties) {
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
 				contextProperties)) {
-			then(context.containsBeanDefinition(beanName)).as("bean was not created")
-					.isTrue();
+			then(context.containsBeanDefinition(beanName))
+					.as("%s bean was not created", beanName).isTrue();
 		}
 	}
 
@@ -162,8 +163,8 @@ public class LifecycleMvcAutoConfigurationTests {
 			Function<T, Object> function, String... properties) {
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
 				properties)) {
-			then(context.containsBeanDefinition(beanName)).as("bean was not created")
-					.isTrue();
+			then(context.containsBeanDefinition(beanName))
+					.as("%s bean was not created", beanName).isTrue();
 
 			Object endpoint = context.getBean(beanName, type);
 			Object result = function.apply((T) endpoint);
