@@ -31,8 +31,6 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 
-import static java.util.Collections.emptyList;
-
 /**
  * Properties to hold the details of a {@link ReactiveDiscoveryClient} service instance
  * for a given service. It also holds the user-configurable order that will be used to
@@ -57,7 +55,10 @@ public class SimpleReactiveDiscoveryProperties {
 	private int order = DiscoveryClient.DEFAULT_ORDER;
 
 	public Flux<ServiceInstance> getInstances(String service) {
-		return Flux.fromIterable(instances.getOrDefault(service, emptyList()));
+		if (instances.containsKey(service)) {
+			return Flux.fromIterable(instances.get(service));
+		}
+		return Flux.empty();
 	}
 
 	Map<String, List<SimpleServiceInstance>> getInstances() {

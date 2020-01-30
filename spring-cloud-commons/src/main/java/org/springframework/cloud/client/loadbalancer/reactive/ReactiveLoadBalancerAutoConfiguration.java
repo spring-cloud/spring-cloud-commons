@@ -16,32 +16,45 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.cloud.client.loadbalancer.reactive.endpoint.LoadBalancerEndpoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * @deprecated in favour of {@link ReactorLoadBalancerClientAutoConfiguration}
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(WebClient.class)
-@ConditionalOnBean(LoadBalancerClient.class)
 @AutoConfigureAfter(ReactorLoadBalancerClientAutoConfiguration.class)
-@ConditionalOnMissingBean(ReactorLoadBalancerExchangeFilterFunction.class)
-@Deprecated
 public class ReactiveLoadBalancerAutoConfiguration {
 
 	@Bean
+	@ConditionalOnClass(
+			name = "org.springframework.web.reactive.function.client.WebClient")
+	@ConditionalOnMissingBean(ReactorLoadBalancerExchangeFilterFunction.class)
+	@ConditionalOnBean(LoadBalancerClient.class)
+	@Deprecated
 	public LoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
 			LoadBalancerClient client) {
 		return new LoadBalancerExchangeFilterFunction(client);
+	}
+
+	@Bean
+	@ConditionalOnAvailableEndpoint
+	@ConditionalOnClass(
+			name = "org.springframework.boot.actuate.endpoint.annotation.Endpoint")
+	@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
+	public LoadBalancerEndpoint loadBalancerEndpoint(
+			ObjectProvider<ReactiveLoadBalancer.Factory<ServiceInstance>> clientFactory) {
+		return new LoadBalancerEndpoint(clientFactory);
 	}
 
 }
