@@ -16,10 +16,11 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -29,29 +30,35 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class PingHealthChecker implements InstanceHealthChecker {
 
 	private static final String LOADBALANCER_PREFIX = "spring.cloud.loadbalancer.";
+
 	private static final String HEALTH_CHECK_SUFFIX = ".healthcheck.path";
+
 	private static final String ACTUATOR_HEALTH = "/actuator/health";
+
 	private final WebClient webClient;
+
 	private final Environment environment;
+
 	private final String defaultHealthCheckPath;
 
-	public PingHealthChecker(WebClient webClient, Environment environment) {
-		this.webClient = webClient;
+	public PingHealthChecker(Environment environment) {
+		webClient = WebClient.builder().build();
 		this.environment = environment;
 		defaultHealthCheckPath = environment
 				.getProperty(LOADBALANCER_PREFIX + HEALTH_CHECK_SUFFIX, ACTUATOR_HEALTH);
 	}
 
 	@Override
-	public boolean isAlive(ServiceInstance serviceInstance) {
-		String healthCheckPropertyValue = environment
-				.getProperty(LOADBALANCER_PREFIX + serviceInstance
-						.getServiceId() + HEALTH_CHECK_SUFFIX);
-		String healthCheckPath = healthCheckPropertyValue != null ? healthCheckPropertyValue : defaultHealthCheckPath;
-		HttpStatus status = webClient.get()
+	public Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
+		String healthCheckPropertyValue = environment.getProperty(LOADBALANCER_PREFIX
+				+ serviceInstance.getServiceId() + HEALTH_CHECK_SUFFIX);
+		String healthCheckPath = healthCheckPropertyValue != null
+				? healthCheckPropertyValue : defaultHealthCheckPath;
+		return webClient.get()
 				.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri())
 						.path(healthCheckPath).build().toUri())
-				.exchange().map(ClientResponse::statusCode).block();
-		return HttpStatus.OK.equals(status);
+				.exchange()
+				.map(clientResponse -> HttpStatus.OK.equals(clientResponse.statusCode()));
 	}
+
 }

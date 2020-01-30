@@ -16,16 +16,18 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
  * Provides API for verifying service instance health.
  *
  * @author Olga Maciaszek-Sharma
- *
  * @since 2.2.0
  */
 public interface InstanceHealthChecker {
 
-	boolean isAlive(ServiceInstance serviceInstance);
+	Mono<Boolean> isAlive(ServiceInstance serviceInstance);
+
 }

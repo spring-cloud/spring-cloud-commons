@@ -35,7 +35,7 @@ public class LoadBalancerProperties {
 	 */
 	private String zone;
 
-	private HealthCheck healthCheck;
+	private HealthCheck healthCheck = new HealthCheck();
 
 	public String getZone() {
 		return zone;
@@ -56,7 +56,9 @@ public class LoadBalancerProperties {
 	public static class HealthCheck {
 
 		private int initialDelay = 0;
+
 		private int period = 30;
+
 		private TimeUnit unit = TimeUnit.SECONDS;
 
 		public int getInitialDelay() {
@@ -82,6 +84,7 @@ public class LoadBalancerProperties {
 		public void setUnit(TimeUnit unit) {
 			this.unit = unit;
 		}
-	}
-}
 
+	}
+
+}

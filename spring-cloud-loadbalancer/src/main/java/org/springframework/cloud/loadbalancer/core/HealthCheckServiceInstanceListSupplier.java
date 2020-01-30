@@ -17,8 +17,11 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Schedulers;
@@ -32,18 +35,24 @@ import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProper
 public class HealthCheckServiceInstanceListSupplier
 		implements ServiceInstanceListSupplier {
 
+	private static final Log LOG = LogFactory
+			.getLog(HealthCheckServiceInstanceListSupplier.class);
+
 	private final ServiceInstanceListSupplier delegate;
 
 	private final LoadBalancerProperties loadBalancerProperties;
 
-	private List<ServiceInstance> instances;
+	private List<ServiceInstance> instances = Collections
+			.synchronizedList(new ArrayList<>());
 
-	private List<ServiceInstance> healthyInstances;
+	private List<ServiceInstance> healthyInstances = Collections
+			.synchronizedList(new ArrayList<>());
 
 	private final InstanceHealthChecker healthChecker;
 
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			LoadBalancerProperties loadBalancerProperties, InstanceHealthChecker healthChecker) {
+			LoadBalancerProperties loadBalancerProperties,
+			InstanceHealthChecker healthChecker) {
 		this.delegate = delegate;
 		this.loadBalancerProperties = loadBalancerProperties;
 		this.healthChecker = healthChecker;
@@ -52,34 +61,33 @@ public class HealthCheckServiceInstanceListSupplier
 	}
 
 	private void initInstances() {
-		delegate.get().subscribe(delegateInstances -> instances = delegateInstances);
+		delegate.get().subscribe(delegateInstances -> {
+			instances.clear();
+			instances.addAll(delegateInstances);
+		});
 
 		Flux<List<ServiceInstance>> healthCheckFlux = healthCheckFlux();
 
-		healthCheckFlux
-				.subscribe(verifiedInstances -> healthyInstances = verifiedInstances);
+		healthCheckFlux.subscribe(verifiedInstances -> {
+			healthyInstances.clear();
+			healthyInstances.addAll(verifiedInstances);
+		});
 	}
 
 	private Flux<List<ServiceInstance>> healthCheckFlux() {
-		return Flux.create(emitter -> Schedulers.newSingle("Health Check Verifier: "
-						+ getServiceId(), true)
+		return Flux.create(emitter -> Schedulers
+						.newSingle("Health Check Verifier: " + getServiceId(), true)
 						.schedulePeriodically(() -> {
 									List<ServiceInstance> verifiedInstances = new ArrayList<>();
-									for (ServiceInstance instance : instances) {
-										if (healthCheckPassed(instance)) {
-											verifiedInstances.add(instance);
-										}
-									}
-									emitter.next(verifiedInstances);
-
+									Flux.fromIterable(instances).filterWhen(healthChecker::isAlive)
+											.subscribe(serviceInstance -> {
+												verifiedInstances.add(serviceInstance);
+												emitter.next(verifiedInstances);
+											});
 								}, loadBalancerProperties.getHealthCheck().getInitialDelay(),
 								loadBalancerProperties.getHealthCheck().getPeriod(),
 								loadBalancerProperties.getHealthCheck().getUnit()),
 				FluxSink.OverflowStrategy.LATEST);
-	}
-
-	private boolean healthCheckPassed(ServiceInstance serviceInstance) {
-		return healthChecker.isAlive(serviceInstance);
 	}
 
 	@Override
@@ -89,7 +97,16 @@ public class HealthCheckServiceInstanceListSupplier
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		return Flux.defer(() -> Flux.fromIterable(healthyInstances).collectList());
+		if (!healthyInstances.isEmpty()) {
+			return Flux.defer(() -> Flux.fromIterable(healthyInstances).collectList());
+		}
+		// If there are no healthy instances, it might be better to still retry on all of
+		// them
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(
+					"No verified healthy instances were found, returning all listed instances.");
+		}
+		return Flux.defer(() -> Flux.fromIterable(instances).collectList());
 	}
 
 }
