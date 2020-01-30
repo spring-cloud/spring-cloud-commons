@@ -365,7 +365,7 @@ public class GenericScope implements Scope, BeanFactoryPostProcessor,
 
 		private final ObjectFactory<?> objectFactory;
 
-		private Object bean;
+		private volatile Object bean;
 
 		private Runnable callback;
 
