@@ -48,8 +48,7 @@ import org.springframework.core.env.Environment;
 @AutoConfigureBefore(EnvironmentEndpointAutoConfiguration.class)
 @AutoConfigureAfter(LifecycleMvcEndpointAutoConfiguration.class)
 @EnableConfigurationProperties({ EnvironmentEndpointProperties.class })
-@ConditionalOnProperty(value = "management.endpoint.env.post.enabled",
-		matchIfMissing = true)
+@ConditionalOnProperty("management.endpoint.env.post.enabled")
 public class WritableEnvironmentEndpointAutoConfiguration {
 
 	private final EnvironmentEndpointProperties properties;
@@ -62,7 +61,8 @@ public class WritableEnvironmentEndpointAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnAvailableEndpoint
-	public WritableEnvironmentEndpoint environmentEndpoint(Environment environment) {
+	public WritableEnvironmentEndpoint writableEnvironmentEndpoint(
+			Environment environment) {
 		WritableEnvironmentEndpoint endpoint = new WritableEnvironmentEndpoint(
 				environment);
 		String[] keysToSanitize = this.properties.getKeysToSanitize();
@@ -74,7 +74,7 @@ public class WritableEnvironmentEndpointAutoConfiguration {
 
 	@Bean
 	@ConditionalOnAvailableEndpoint
-	public WritableEnvironmentEndpointWebExtension environmentEndpointWebExtension(
+	public WritableEnvironmentEndpointWebExtension writableEnvironmentEndpointWebExtension(
 			WritableEnvironmentEndpoint endpoint, EnvironmentManager environment) {
 		return new WritableEnvironmentEndpointWebExtension(endpoint, environment);
 	}
