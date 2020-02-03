@@ -943,9 +943,9 @@ of `InstanceHealthChecker` instead.
 for the scheduler.
 
 For the `PingHealthChecker`, you can set the default path for the healthcheck URL by setting
-the value of the `spring.cloud.loadbalancer.healthcheck.path`. You can also set a specific value
-for any given service by settin the value of the `spring.cloud.loadbalancer.[SERVICE_ID].healthcheck.path`,
-substituting the `[SERVICE_ID]` with the correct Id of your service. If the path is not set,
+the value of the `spring.cloud.loadbalancer.healthcheck.path.default`. You can also set a specific value
+for any given service by setting the value of the `spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]`,
+substituting the `[SERVICE_ID]` with the correct ID of your service. If the path is not set,
 `/actuator/health` is used by default.
 
 In order to use the health-check scheduler approach, you will have to instantiate a `HealthCheckServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.

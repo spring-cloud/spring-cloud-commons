@@ -24,14 +24,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * A {@link ServiceInstanceListSupplier} implementation that verifies whether the
- * instances are alive and only returns the healthy one, unless there are none.
+ * instances are alive and only returns the healthy one, unless there are none. Uses
+ * {@link WebClient} to ping the <code>health</code> endpoint of the instances.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
@@ -46,20 +51,23 @@ public class HealthCheckServiceInstanceListSupplier
 
 	private final LoadBalancerProperties loadBalancerProperties;
 
+	private final WebClient webClient;
+
+	private final String defaultHealthCheckPath;
+
 	private List<ServiceInstance> instances = Collections
 			.synchronizedList(new ArrayList<>());
 
 	private List<ServiceInstance> healthyInstances = Collections
 			.synchronizedList(new ArrayList<>());
 
-	private final InstanceHealthChecker healthChecker;
-
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			LoadBalancerProperties loadBalancerProperties,
-			InstanceHealthChecker healthChecker) {
+			LoadBalancerProperties loadBalancerProperties) {
 		this.delegate = delegate;
 		this.loadBalancerProperties = loadBalancerProperties;
-		this.healthChecker = healthChecker;
+		webClient = WebClient.builder().build();
+		defaultHealthCheckPath = loadBalancerProperties.getHealthCheck().getPath()
+				.getOrDefault("default", "/actuator/health");
 		initInstances();
 
 	}
@@ -78,17 +86,17 @@ public class HealthCheckServiceInstanceListSupplier
 		});
 	}
 
-	private Flux<List<ServiceInstance>> healthCheckFlux() {
+	protected Flux<List<ServiceInstance>> healthCheckFlux() {
 		return Flux.create(emitter -> Schedulers
-				.newSingle("Health Check Verifier: " + getServiceId(), true)
-				.schedulePeriodically(() -> {
-					List<ServiceInstance> verifiedInstances = new ArrayList<>();
-					Flux.fromIterable(instances).filterWhen(healthChecker::isAlive)
-							.subscribe(serviceInstance -> {
-								verifiedInstances.add(serviceInstance);
-								emitter.next(verifiedInstances);
-							});
-				}, loadBalancerProperties.getHealthCheck().getInitialDelay(),
+						.newSingle("Health Check Verifier: " + getServiceId(), true)
+						.schedulePeriodically(() -> {
+									List<ServiceInstance> verifiedInstances = new ArrayList<>();
+									Flux.fromIterable(instances).filterWhen(this::isAlive)
+											.subscribe(serviceInstance -> {
+												verifiedInstances.add(serviceInstance);
+												emitter.next(verifiedInstances);
+											});
+								}, loadBalancerProperties.getHealthCheck().getInitialDelay(),
 						loadBalancerProperties.getHealthCheck().getPeriod(),
 						loadBalancerProperties.getHealthCheck().getUnit()),
 				FluxSink.OverflowStrategy.LATEST);
@@ -106,11 +114,23 @@ public class HealthCheckServiceInstanceListSupplier
 		}
 		// If there are no healthy instances, it might be better to still retry on all of
 		// them
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(
-					"No verified healthy instances were found, returning all listed instances.");
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("No verified healthy instances were found, returning all listed instances.");
 		}
 		return Flux.defer(() -> Flux.fromIterable(instances).collectList());
+	}
+
+	// Visible for tests
+	Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
+		String healthCheckPropertyValue = loadBalancerProperties.getHealthCheck()
+				.getPath().get(serviceInstance.getServiceId());
+		String healthCheckPath = healthCheckPropertyValue != null
+				? healthCheckPropertyValue : defaultHealthCheckPath;
+		return webClient.get()
+				.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri())
+						.path(healthCheckPath).build().toUri())
+				.exchange()
+				.map(clientResponse -> HttpStatus.OK.equals(clientResponse.statusCode()));
 	}
 
 }

@@ -16,9 +16,11 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * A {@link ConfigurationProperties} bean for Spring Cloud LoadBalancer.
@@ -59,6 +61,8 @@ public class LoadBalancerProperties {
 		 */
 		private TimeUnit unit = TimeUnit.SECONDS;
 
+		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
+
 		public int getInitialDelay() {
 			return initialDelay;
 		}
@@ -81,6 +85,14 @@ public class LoadBalancerProperties {
 
 		public void setUnit(TimeUnit unit) {
 			this.unit = unit;
+		}
+
+		public Map<String, String> getPath() {
+			return path;
+		}
+
+		public void setPath(Map<String, String> path) {
+			this.path = path;
 		}
 
 	}

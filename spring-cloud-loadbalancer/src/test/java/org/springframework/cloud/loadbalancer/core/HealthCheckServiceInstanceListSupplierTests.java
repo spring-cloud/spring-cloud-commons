@@ -25,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -39,24 +40,31 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Olga Maciaszek-Sharma
  */
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = PingHealthCheckerTests.TestApplication.class,
+@SpringBootTest(
+		classes = HealthCheckServiceInstanceListSupplierTests.TestApplication.class,
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class PingHealthCheckerTests {
+class HealthCheckServiceInstanceListSupplierTests {
 
 	@LocalServerPort
 	private int port;
 
+	private LoadBalancerProperties loadBalancerProperties = new LoadBalancerProperties();
+
+	private LoadBalancerProperties.HealthCheck healthCheck = new LoadBalancerProperties.HealthCheck();
+
 	@SuppressWarnings("ConstantConditions")
 	@Test
 	void shouldCheckInstanceWithProvidedHealthCheckPath() {
-		PingHealthChecker healthChecker = new PingHealthChecker(
-				new MockEnvironment().withProperty(
-						"spring.cloud.loadbalancer.ignored-service.healthcheck.path",
-						"/health"));
+		healthCheck.getPath().put("ignored-service", "/health");
+		loadBalancerProperties.setHealthCheck(healthCheck);
+		HealthCheckServiceInstanceListSupplier listSupplier = new HealthCheckServiceInstanceListSupplier(
+				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
+						.with(new MockEnvironment()).build(),
+				loadBalancerProperties);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
-		boolean alive = healthChecker.isAlive(serviceInstance).block();
+		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
 		assertThat(alive).isTrue();
 	}
@@ -64,11 +72,15 @@ class PingHealthCheckerTests {
 	@SuppressWarnings("ConstantConditions")
 	@Test
 	void shouldCheckInstanceWithDefaultHealthCheckPath() {
-		PingHealthChecker healthChecker = new PingHealthChecker(new MockEnvironment());
+		loadBalancerProperties.setHealthCheck(healthCheck);
+		HealthCheckServiceInstanceListSupplier listSupplier = new HealthCheckServiceInstanceListSupplier(
+				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
+						.with(new MockEnvironment()).build(),
+				loadBalancerProperties);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
-		boolean alive = healthChecker.isAlive(serviceInstance).block();
+		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
 		assertThat(alive).isTrue();
 	}
@@ -76,14 +88,16 @@ class PingHealthCheckerTests {
 	@SuppressWarnings("ConstantConditions")
 	@Test
 	void shouldReturnFalseIfEndpointNotFound() {
-		PingHealthChecker healthChecker = new PingHealthChecker(
-				new MockEnvironment().withProperty(
-						"spring.cloud.loadbalancer.ignored-service.healthcheck.path",
-						"/test"));
+		healthCheck.getPath().put("ignored-service", "/test");
+		loadBalancerProperties.setHealthCheck(healthCheck);
+		HealthCheckServiceInstanceListSupplier listSupplier = new HealthCheckServiceInstanceListSupplier(
+				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
+						.with(new MockEnvironment()).build(),
+				loadBalancerProperties);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
-		boolean alive = healthChecker.isAlive(serviceInstance).block();
+		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
 		assertThat(alive).isFalse();
 	}
@@ -94,7 +108,9 @@ class PingHealthCheckerTests {
 	static class TestApplication {
 
 		public static void main(String[] args) {
-			SpringApplication.run(TestApplication.class, args);
+			SpringApplication.run(
+					HealthCheckServiceInstanceListSupplierTests.TestApplication.class,
+					args);
 		}
 
 		@GetMapping("/health")
