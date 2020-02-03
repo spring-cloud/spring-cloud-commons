@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.core;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -88,17 +89,17 @@ public class HealthCheckServiceInstanceListSupplier
 
 	protected Flux<List<ServiceInstance>> healthCheckFlux() {
 		return Flux.create(emitter -> Schedulers
-						.newSingle("Health Check Verifier: " + getServiceId(), true)
-						.schedulePeriodically(() -> {
-									List<ServiceInstance> verifiedInstances = new ArrayList<>();
-									Flux.fromIterable(instances).filterWhen(this::isAlive)
-											.subscribe(serviceInstance -> {
-												verifiedInstances.add(serviceInstance);
-												emitter.next(verifiedInstances);
-											});
-								}, loadBalancerProperties.getHealthCheck().getInitialDelay(),
-						loadBalancerProperties.getHealthCheck().getPeriod(),
-						loadBalancerProperties.getHealthCheck().getUnit()),
+				.newSingle("Health Check Verifier: " + getServiceId(), true)
+				.schedulePeriodically(() -> {
+					List<ServiceInstance> verifiedInstances = new ArrayList<>();
+					Flux.fromIterable(instances).filterWhen(this::isAlive)
+							.subscribe(serviceInstance -> {
+								verifiedInstances.add(serviceInstance);
+								emitter.next(verifiedInstances);
+							});
+				}, loadBalancerProperties.getHealthCheck().getInitialDelay(),
+						loadBalancerProperties.getHealthCheck().getInterval().toMillis(),
+						TimeUnit.MILLISECONDS),
 				FluxSink.OverflowStrategy.LATEST);
 	}
 

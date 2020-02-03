@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.time.Duration;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -52,14 +52,9 @@ public class LoadBalancerProperties {
 		private int initialDelay = 0;
 
 		/**
-		 * Period for rerunning the HealthCheck scheduler.
+		 * Interval for rerunning the HealthCheck scheduler.
 		 */
-		private int period = 30;
-
-		/**
-		 * TimeUnit for rerunning the HealthCheck scheduler.
-		 */
-		private TimeUnit unit = TimeUnit.SECONDS;
+		private Duration interval = Duration.ofSeconds(30);
 
 		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
 
@@ -71,28 +66,20 @@ public class LoadBalancerProperties {
 			this.initialDelay = initialDelay;
 		}
 
-		public int getPeriod() {
-			return period;
-		}
-
-		public void setPeriod(int period) {
-			this.period = period;
-		}
-
-		public TimeUnit getUnit() {
-			return unit;
-		}
-
-		public void setUnit(TimeUnit unit) {
-			this.unit = unit;
-		}
-
 		public Map<String, String> getPath() {
 			return path;
 		}
 
 		public void setPath(Map<String, String> path) {
 			this.path = path;
+		}
+
+		public Duration getInterval() {
+			return interval;
+		}
+
+		public void setInterval(Duration interval) {
+			this.interval = interval;
 		}
 
 	}

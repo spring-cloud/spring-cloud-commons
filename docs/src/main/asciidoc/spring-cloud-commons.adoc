@@ -939,7 +939,7 @@ requests against the `health` endpoint of the instance. You can also provide you
 of `InstanceHealthChecker` instead.
 
 `HealthCheckServiceInstanceListSupplier` uses properties prefixed with
-`spring.cloud.loadbalancer.healthcheck`. You can set the `initialDelay`, `period` and `unit`
+`spring.cloud.loadbalancer.healthcheck`. You can set the `initialDelay` and `interval`
 for the scheduler.
 
 For the `PingHealthChecker`, you can set the default path for the healthcheck URL by setting
