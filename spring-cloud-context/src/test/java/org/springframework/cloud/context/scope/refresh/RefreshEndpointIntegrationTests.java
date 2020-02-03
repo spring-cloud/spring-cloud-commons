@@ -52,7 +52,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ClientApp.class,
-		properties = { "management.endpoints.web.exposure.include=*" },
+		properties = { "management.endpoints.web.exposure.include=*",
+				"management.endpoint.env.post.enabled=true" },
 		webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
 
