@@ -115,7 +115,8 @@ public class HealthCheckServiceInstanceListSupplier
 		// If there are no healthy instances, it might be better to still retry on all of
 		// them
 		if (LOG.isWarnEnabled()) {
-			LOG.warn("No verified healthy instances were found, returning all listed instances.");
+			LOG.warn(
+					"No verified healthy instances were found, returning all listed instances.");
 		}
 		return Flux.defer(() -> Flux.fromIterable(instances).collectList());
 	}

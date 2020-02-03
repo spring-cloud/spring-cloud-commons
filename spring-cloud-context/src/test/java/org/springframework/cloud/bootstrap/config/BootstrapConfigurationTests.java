@@ -89,8 +89,8 @@ public class BootstrapConfigurationTests {
 				.isEqualTo("externalPropertiesInfoName");
 		then(this.context.getEnvironment().getProperty("info.desc")).isNull();
 		then(this.context.getEnvironment().getPropertySources().contains(
-				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME))
-				.isTrue();
+				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME
+						+ "-testBootstrap")).isTrue();
 	}
 
 	@Test
@@ -99,7 +99,8 @@ public class BootstrapConfigurationTests {
 
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.additional-location=" + externalPropertiesPath)
+				.properties("spring.cloud.bootstrap.additional-location="
+						+ externalPropertiesPath)
 				.run();
 		then(this.context.getEnvironment().getProperty("info.name"))
 				.isEqualTo("externalPropertiesInfoName");

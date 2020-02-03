@@ -76,7 +76,8 @@ Thus, sibling contexts (in particular) do not need to have the same profiles or 
 [[customizing-bootstrap-properties]]
 === Changing the Location of Bootstrap Properties
 
-You can specify the `bootstrap.yml` (or `.properties`) location by setting `spring.cloud.bootstrap.name` (default: `bootstrap`) or `spring.cloud.bootstrap.location` (default: empty) -- for example, in system properties.
+The `bootstrap.yml` (or `.properties`) location can be specified by setting `spring.cloud.bootstrap.name` (default: `bootstrap`), `spring.cloud.bootstrap.location` (default: empty) or `spring.cloud.bootstrap.additional-location` (default: empty) -- for example, in System properties.
+
 Those properties behave like the `spring.config.*` variants with the same name.
 With `spring.cloud.bootstrap.location` the default locations are replaced and only the specified ones are used.
 To add locations to the list of default ones, `spring.cloud.bootstrap.additional-location` could be used.
