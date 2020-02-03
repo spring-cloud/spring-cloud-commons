@@ -59,12 +59,6 @@ public class LoadBalancerClientConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	LoadBalancerProperties loadBalancerProperties() {
-		return new LoadBalancerProperties();
-	}
-
-	@Bean
-	@ConditionalOnMissingBean
 	public ReactorLoadBalancer<ServiceInstance> reactorServiceInstanceLoadBalancer(
 			Environment environment,
 			LoadBalancerClientFactory loadBalancerClientFactory) {

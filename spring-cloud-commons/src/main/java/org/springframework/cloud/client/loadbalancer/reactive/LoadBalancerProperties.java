@@ -30,23 +30,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class LoadBalancerProperties {
 
 	/**
-	 * A {@link String} representation of the <code>zone</code> used for filtering
-	 * instances by zoned load-balancing implementations.
-	 */
-	private String zone;
-
-	/**
 	 * Properties for <code>HealthCheckServiceInstanceListSupplier</code>.
 	 */
 	private HealthCheck healthCheck = new HealthCheck();
-
-	public String getZone() {
-		return zone;
-	}
-
-	public void setZone(String zone) {
-		this.zone = zone;
-	}
 
 	public HealthCheck getHealthCheck() {
 		return healthCheck;

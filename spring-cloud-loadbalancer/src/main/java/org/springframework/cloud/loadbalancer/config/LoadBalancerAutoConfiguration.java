@@ -30,6 +30,7 @@ import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 
 /**
  * @author Spencer Gibb
@@ -47,6 +48,13 @@ public class LoadBalancerAutoConfiguration {
 	public LoadBalancerAutoConfiguration(
 			ObjectProvider<List<LoadBalancerClientSpecification>> configurations) {
 		this.configurations = configurations;
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public LoadBalancerZoneConfig zoneConfig(Environment environment) {
+		return new LoadBalancerZoneConfig(
+				environment.getProperty("spring.cloud.loadbalancer.zone"));
 	}
 
 	@ConditionalOnMissingBean

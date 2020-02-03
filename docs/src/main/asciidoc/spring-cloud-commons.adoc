@@ -905,12 +905,12 @@ public class CustomLoadBalancerConfiguration {
 	@Bean
 	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 			ReactiveDiscoveryClient discoveryClient, Environment environment,
-			LoadBalancerProperties loadBalancerProperties,
+			LoadBalancerZoneConfig zoneConfig,
 			ApplicationContext context) {
 		DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
 				discoveryClient, environment);
 		ZonePreferenceServiceInstanceListSupplier delegate = new ZonePreferenceServiceInstanceListSupplier(firstDelegate,
-				loadBalancerProperties);
+				zoneConfig);
 		ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
 				.getBeanProvider(LoadBalancerCacheManager.class);
 		if (cacheManagerProvider.getIfAvailable() != null) {
