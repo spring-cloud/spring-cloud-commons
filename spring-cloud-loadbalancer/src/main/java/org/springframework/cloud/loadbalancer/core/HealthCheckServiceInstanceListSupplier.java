@@ -50,7 +50,7 @@ public class HealthCheckServiceInstanceListSupplier
 
 	private final ServiceInstanceListSupplier delegate;
 
-	private final LoadBalancerProperties loadBalancerProperties;
+	private final LoadBalancerProperties.HealthCheck healthCheck;
 
 	private final WebClient webClient;
 
@@ -63,12 +63,12 @@ public class HealthCheckServiceInstanceListSupplier
 			.synchronizedList(new ArrayList<>());
 
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			LoadBalancerProperties loadBalancerProperties) {
+			LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
 		this.delegate = delegate;
-		this.loadBalancerProperties = loadBalancerProperties;
-		webClient = WebClient.builder().build();
-		defaultHealthCheckPath = loadBalancerProperties.getHealthCheck().getPath()
-				.getOrDefault("default", "/actuator/health");
+		this.healthCheck = healthCheck;
+		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default",
+				"/actuator/health");
+		this.webClient = webClient;
 		initInstances();
 
 	}
@@ -97,8 +97,7 @@ public class HealthCheckServiceInstanceListSupplier
 								verifiedInstances.add(serviceInstance);
 								emitter.next(verifiedInstances);
 							});
-				}, loadBalancerProperties.getHealthCheck().getInitialDelay(),
-						loadBalancerProperties.getHealthCheck().getInterval().toMillis(),
+				}, healthCheck.getInitialDelay(), healthCheck.getInterval().toMillis(),
 						TimeUnit.MILLISECONDS),
 				FluxSink.OverflowStrategy.LATEST);
 	}
@@ -123,8 +122,8 @@ public class HealthCheckServiceInstanceListSupplier
 
 	// Visible for tests
 	Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
-		String healthCheckPropertyValue = loadBalancerProperties.getHealthCheck()
-				.getPath().get(serviceInstance.getServiceId());
+		String healthCheckPropertyValue = healthCheck.getPath()
+				.get(serviceInstance.getServiceId());
 		String healthCheckPath = healthCheckPropertyValue != null
 				? healthCheckPropertyValue : defaultHealthCheckPath;
 		return webClient.get()

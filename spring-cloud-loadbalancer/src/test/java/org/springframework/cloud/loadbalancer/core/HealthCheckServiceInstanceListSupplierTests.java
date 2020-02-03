@@ -31,6 +31,7 @@ import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,7 +49,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@LocalServerPort
 	private int port;
 
-	private LoadBalancerProperties loadBalancerProperties = new LoadBalancerProperties();
+	private final WebClient webClient = WebClient.create();
 
 	private LoadBalancerProperties.HealthCheck healthCheck = new LoadBalancerProperties.HealthCheck();
 
@@ -56,11 +57,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@Test
 	void shouldCheckInstanceWithProvidedHealthCheckPath() {
 		healthCheck.getPath().put("ignored-service", "/health");
-		loadBalancerProperties.setHealthCheck(healthCheck);
 		HealthCheckServiceInstanceListSupplier listSupplier = new HealthCheckServiceInstanceListSupplier(
 				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
 						.with(new MockEnvironment()).build(),
-				loadBalancerProperties);
+				healthCheck, webClient);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
@@ -72,11 +72,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@SuppressWarnings("ConstantConditions")
 	@Test
 	void shouldCheckInstanceWithDefaultHealthCheckPath() {
-		loadBalancerProperties.setHealthCheck(healthCheck);
 		HealthCheckServiceInstanceListSupplier listSupplier = new HealthCheckServiceInstanceListSupplier(
 				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
 						.with(new MockEnvironment()).build(),
-				loadBalancerProperties);
+				healthCheck, webClient);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
@@ -89,11 +88,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@Test
 	void shouldReturnFalseIfEndpointNotFound() {
 		healthCheck.getPath().put("ignored-service", "/test");
-		loadBalancerProperties.setHealthCheck(healthCheck);
 		HealthCheckServiceInstanceListSupplier listSupplier = new HealthCheckServiceInstanceListSupplier(
 				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
 						.with(new MockEnvironment()).build(),
-				loadBalancerProperties);
+				healthCheck, webClient);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
