@@ -121,8 +121,7 @@ public class HealthCheckServiceInstanceListSupplier
 		return Flux.defer(() -> Flux.fromIterable(instances).collectList());
 	}
 
-	// Visible for tests
-	Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
+	protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 		String healthCheckPropertyValue = healthCheck.getPath()
 				.get(serviceInstance.getServiceId());
 		String healthCheckPath = healthCheckPropertyValue != null
