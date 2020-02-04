@@ -16,7 +16,11 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.time.Duration;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * A {@link ConfigurationProperties} bean for Spring Cloud LoadBalancer.
@@ -28,17 +32,56 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class LoadBalancerProperties {
 
 	/**
-	 * A {@link String} representation of the <code>zone</code> used for filtering
-	 * instances by zoned load-balancing implementations.
+	 * Properties for <code>HealthCheckServiceInstanceListSupplier</code>.
 	 */
-	private String zone;
+	private HealthCheck healthCheck = new HealthCheck();
 
-	public String getZone() {
-		return zone;
+	public HealthCheck getHealthCheck() {
+		return healthCheck;
 	}
 
-	public void setZone(String zone) {
-		this.zone = zone;
+	public void setHealthCheck(HealthCheck healthCheck) {
+		this.healthCheck = healthCheck;
+	}
+
+	public static class HealthCheck {
+
+		/**
+		 * Initial delay value for the HealthCheck scheduler.
+		 */
+		private int initialDelay = 0;
+
+		/**
+		 * Interval for rerunning the HealthCheck scheduler.
+		 */
+		private Duration interval = Duration.ofSeconds(30);
+
+		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
+
+		public int getInitialDelay() {
+			return initialDelay;
+		}
+
+		public void setInitialDelay(int initialDelay) {
+			this.initialDelay = initialDelay;
+		}
+
+		public Map<String, String> getPath() {
+			return path;
+		}
+
+		public void setPath(Map<String, String> path) {
+			this.path = path;
+		}
+
+		public Duration getInterval() {
+			return interval;
+		}
+
+		public void setInterval(Duration interval) {
+			this.interval = interval;
+		}
+
 	}
 
 }
