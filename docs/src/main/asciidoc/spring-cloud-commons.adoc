@@ -289,10 +289,6 @@ for the ID of the service in question, while `[0]` indicates the index number of
 (as visible in the example, indexes start with `0`), and then the value of `uri` is
 the actual URI under which the instance is available.
 
-WARN:: `SimpleDiscoveryClient` has been added for testing and demo purposes. We do not recommend
-using it in production.
-
-
 === ServiceRegistry
 
 Commons now provides a `ServiceRegistry` interface that provides methods such as `register(Registration)` and `deregister(Registration)`, which let you provide custom registered services.
