@@ -82,7 +82,7 @@ public class LoadBalancerCacheAutoConfiguration {
 		void logWarning() {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(
-						"Spring Cloud LoadBalancer is currently working with default default cache. "
+						"Spring Cloud LoadBalancer is currently working with the default cache. "
 								+ "You can switch to using Caffeine cache, by adding it to the classpath.");
 			}
 		}
