@@ -277,6 +277,18 @@ implementations provided by Spring Cloud, among others  `ConsulDiscoveryClient`,
 `ZookeeperDiscoveryClient`. In order to do it, you just need to set the
 `spring.cloud.{clientIdentifier}.discovery.order` (or `eureka.client.order` for Eureka) property to the desired value.
 
+==== SimpleDiscoveryClient
+
+If there is no Service-Registry-backed `DiscoveryClient` in the classpath, `SimpleDiscoveryClient`
+instance, that uses properties to get information on service and instances, will be used.
+
+The information about the available instances should be passed to via properties in the following format:
+`spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s11:8080`, where
+`spring.cloud.discovery.client.simple.instances` is the common prefix, then `service1` stands
+for the ID of the service in question, while `[0]` indicates the index number of the instance
+(as visible in the example, indexes start with `0`), and then the value of `uri` is
+the actual URI under which the instance is available.
+
 === ServiceRegistry
 
 Commons now provides a `ServiceRegistry` interface that provides methods such as `register(Registration)` and `deregister(Registration)`, which let you provide custom registered services.
