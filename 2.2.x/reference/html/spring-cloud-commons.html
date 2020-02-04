@@ -165,8 +165,9 @@ $(addBlockSwitches);
 </ul>
 </li>
 <li><a href="#zone-based-load-balancing">3.3. Zone-Based Load-Balancing</a></li>
-<li><a href="#spring-cloud-loadbalancer-starter">3.4. Spring Cloud LoadBalancer Starter</a></li>
-<li><a href="#custom-loadbalancer-configuration">3.5. Passing Your Own Spring Cloud LoadBalancer Configuration</a></li>
+<li><a href="#instance-health-check-for-loadbalancer">3.4. Instance Health-Check for LoadBalancer</a></li>
+<li><a href="#spring-cloud-loadbalancer-starter">3.5. Spring Cloud LoadBalancer Starter</a></li>
+<li><a href="#custom-loadbalancer-configuration">3.6. Passing Your Own Spring Cloud LoadBalancer Configuration</a></li>
 </ul>
 </li>
 <li><a href="#spring-cloud-circuit-breaker">4. Spring Cloud Circuit Breaker</a>
@@ -1564,12 +1565,12 @@ We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> del
     @Bean
     public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
             ReactiveDiscoveryClient discoveryClient, Environment environment,
-            LoadBalancerProperties loadBalancerProperties,
+            LoadBalancerZoneConfig zoneConfig,
             ApplicationContext context) {
         DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
                 discoveryClient, environment);
         ZonePreferenceServiceInstanceListSupplier delegate = new ZonePreferenceServiceInstanceListSupplier(firstDelegate,
-                loadBalancerProperties);
+                zoneConfig);
         ObjectProvider&lt;LoadBalancerCacheManager&gt; cacheManagerProvider = context
                 .getBeanProvider(LoadBalancerCacheManager.class);
         if (cacheManagerProvider.getIfAvailable() != null) {
@@ -1583,7 +1584,83 @@ We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> del
 </div>
 </div>
 <div class="sect2">
-<h3 id="spring-cloud-loadbalancer-starter"><a class="anchor" href="#spring-cloud-loadbalancer-starter"></a><a class="link" href="#spring-cloud-loadbalancer-starter">3.4. Spring Cloud LoadBalancer Starter</a></h3>
+<h3 id="instance-health-check-for-loadbalancer"><a class="anchor" href="#instance-health-check-for-loadbalancer"></a><a class="link" href="#instance-health-check-for-loadbalancer">3.4. Instance Health-Check for LoadBalancer</a></h3>
+<div class="paragraph">
+<p>It is possible to enable a scheduled HealthCheck for the LoadBalancer. The <code>HealthCheckServiceInstanceListSupplier</code>
+is provided for that. It regularly verifies if the instances provided by a delegate
+<code>ServiceInstanceListSupplier</code> are still alive and only returns the healthy instances,
+unless there are none - then it returns all the retrieved instances.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+This mechanism is particularly helpful while using the <code>SimpleDiscoveryClient</code>. For the
+clients backed by an actual Service Registry, it&#8217;s not necessary to use, as we already get
+healthy instances after querying the external ServiceDiscovery.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <code>HealthCheckServiceInstanceListSupplier</code> uses <code>InstanceHealthChecker</code> to verify if the instances are
+alive. We provide a default <code>PingHealthChecker</code> instance. It uses <code>WebClient</code> to execute
+requests against the <code>health</code> endpoint of the instance. You can also provide your own implementation
+of <code>InstanceHealthChecker</code> instead.</p>
+</div>
+<div class="paragraph">
+<p><code>HealthCheckServiceInstanceListSupplier</code> uses properties prefixed with
+<code>spring.cloud.loadbalancer.healthcheck</code>. You can set the <code>initialDelay</code> and <code>interval</code>
+for the scheduler.</p>
+</div>
+<div class="paragraph">
+<p>For the <code>PingHealthChecker</code>, you can set the default path for the healthcheck URL by setting
+the value of the <code>spring.cloud.loadbalancer.healthcheck.path.default</code>. You can also set a specific value
+for any given service by setting the value of the <code>spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]</code>,
+substituting the <code>[SERVICE_ID]</code> with the correct ID of your service. If the path is not set,
+<code>/actuator/health</code> is used by default.</p>
+</div>
+<div class="paragraph">
+<p>In order to use the health-check scheduler approach, you will have to instantiate a <code>HealthCheckServiceInstanceListSupplier</code> bean in a <a href="#custom-loadbalancer-configuration">custom configuration</a>.</p>
+</div>
+<div class="paragraph">
+<p>We use delegates to work with <code>ServiceInstanceListSupplier</code> beans.
+We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> delegate in the constructor of <code>HealthCheckServiceInstanceListSupplier</code> and, in turn, wrapping the latter with a <code>CachingServiceInstanceListSupplier</code> to leverage <a href="#loadbalancer-caching">LoadBalancer caching mechanism</a>.</p>
+</div>
+<div class="paragraph">
+<p>You could use this sample configuration to set it up:</p>
+</div>
+<div id="zoned-based-custom-loadbalancer-configuration" class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class CustomLoadBalancerConfiguration {
+
+    @Bean
+    public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+            ReactiveDiscoveryClient discoveryClient, Environment environment,
+            LoadBalancerProperties loadBalancerProperties,
+            ApplicationContext context,
+            InstanceHealthChecker healthChecker) {
+        DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
+                discoveryClient, environment);
+        HealthCheckServiceInstanceListSupplier delegate = new HealthCheckServiceInstanceListSupplier(firstDelegate,
+                loadBalancerProperties, healthChecker);
+        ObjectProvider&lt;LoadBalancerCacheManager&gt; cacheManagerProvider = context
+                .getBeanProvider(LoadBalancerCacheManager.class);
+        if (cacheManagerProvider.getIfAvailable() != null) {
+            return new CachingServiceInstanceListSupplier(delegate,
+                    cacheManagerProvider.getIfAvailable());
+        }
+        return delegate;
+    }
+    }</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="spring-cloud-loadbalancer-starter"><a class="anchor" href="#spring-cloud-loadbalancer-starter"></a><a class="link" href="#spring-cloud-loadbalancer-starter">3.5. Spring Cloud LoadBalancer Starter</a></h3>
 <div class="paragraph">
 <p>We also provide a starter that allows you to easily add Spring Cloud LoadBalancer in a Spring Boot app.
 In order to use it, just add <code>org.springframework.cloud:spring-cloud-starter-loadbalancer</code> to your Spring Cloud dependencies in your build file.</p>
@@ -1617,7 +1694,7 @@ In order to switch to using Spring Cloud LoadBalancer under the hood, make sure 
 </div>
 </div>
 <div class="sect2">
-<h3 id="custom-loadbalancer-configuration"><a class="anchor" href="#custom-loadbalancer-configuration"></a><a class="link" href="#custom-loadbalancer-configuration">3.5. Passing Your Own Spring Cloud LoadBalancer Configuration</a></h3>
+<h3 id="custom-loadbalancer-configuration"><a class="anchor" href="#custom-loadbalancer-configuration"></a><a class="link" href="#custom-loadbalancer-configuration">3.6. Passing Your Own Spring Cloud LoadBalancer Configuration</a></h3>
 <div class="paragraph">
 <p>You can also use the <code>@LoadBalancerClient</code> annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, as follows:</p>
 </div>
