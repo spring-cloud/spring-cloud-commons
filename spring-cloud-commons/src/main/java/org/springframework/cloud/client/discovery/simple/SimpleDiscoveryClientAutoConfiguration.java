@@ -30,7 +30,6 @@ import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
 /**
@@ -68,7 +67,7 @@ public class SimpleDiscoveryClientAutoConfiguration
 	}
 
 	@Bean
-	@Order(Ordered.LOWEST_PRECEDENCE)
+	@Order
 	public DiscoveryClient simpleDiscoveryClient() {
 		return new SimpleDiscoveryClient(simpleDiscoveryProperties());
 	}
