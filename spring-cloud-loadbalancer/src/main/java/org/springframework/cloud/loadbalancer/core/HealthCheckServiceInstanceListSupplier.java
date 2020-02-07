@@ -16,18 +16,20 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.http.HttpStatus;
@@ -40,10 +42,11 @@ import org.springframework.web.util.UriComponentsBuilder;
  * {@link WebClient} to ping the <code>health</code> endpoint of the instances.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Roman Matiushchenko
  * @since 2.2.0
  */
 public class HealthCheckServiceInstanceListSupplier
-		implements ServiceInstanceListSupplier {
+		implements ServiceInstanceListSupplier, DisposableBean {
 
 	private static final Log LOG = LogFactory
 			.getLog(HealthCheckServiceInstanceListSupplier.class);
@@ -56,11 +59,11 @@ public class HealthCheckServiceInstanceListSupplier
 
 	private final String defaultHealthCheckPath;
 
-	private List<ServiceInstance> instances = Collections
-			.synchronizedList(new ArrayList<>());
+	private List<ServiceInstance> instances = Collections.emptyList();
 
-	private List<ServiceInstance> healthyInstances = Collections
-			.synchronizedList(new ArrayList<>());
+	private volatile List<ServiceInstance> healthyInstances = Collections.emptyList();
+
+	private Disposable healthCheckDisposable;
 
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
@@ -74,32 +77,31 @@ public class HealthCheckServiceInstanceListSupplier
 	}
 
 	private void initInstances() {
-		delegate.get().subscribe(delegateInstances -> {
-			instances.clear();
-			instances.addAll(delegateInstances);
-		});
-
-		Flux<List<ServiceInstance>> healthCheckFlux = healthCheckFlux();
-
-		healthCheckFlux.subscribe(verifiedInstances -> {
-			healthyInstances.clear();
-			healthyInstances.addAll(verifiedInstances);
-		});
+		healthCheckDisposable = delegate.get().doOnNext(delegateInstances -> {
+			instances = Collections.unmodifiableList(new ArrayList<>(delegateInstances));
+		}).thenMany(healthCheckFlux()).subscribeOn(Schedulers.parallel())
+				.subscribe(verifiedInstances -> healthyInstances = verifiedInstances);
 	}
 
 	protected Flux<List<ServiceInstance>> healthCheckFlux() {
-		return Flux.create(emitter -> Schedulers
-				.newSingle("Health Check Verifier: " + getServiceId(), true)
-				.schedulePeriodically(() -> {
-					List<ServiceInstance> verifiedInstances = new ArrayList<>();
-					Flux.fromIterable(instances).filterWhen(this::isAlive)
-							.subscribe(serviceInstance -> {
-								verifiedInstances.add(serviceInstance);
-								emitter.next(verifiedInstances);
-							});
-				}, healthCheck.getInitialDelay(), healthCheck.getInterval().toMillis(),
-						TimeUnit.MILLISECONDS),
-				FluxSink.OverflowStrategy.LATEST);
+		return Flux.defer(() -> {
+			List<ServiceInstance> result = new CopyOnWriteArrayList<>();
+
+			List<Mono<ServiceInstance>> checks = new ArrayList<>();
+			for (ServiceInstance instance : instances) {
+				Mono<ServiceInstance> alive = isAlive(instance)
+						.onErrorResume(throwable -> Mono.empty())
+						.timeout(healthCheck.getInterval(), Mono.empty()).filter(it -> it)
+						.map(check -> instance);
+
+				checks.add(alive);
+			}
+			return Flux.merge(checks).map(alive -> {
+				result.add(alive);
+				return result;
+			}).defaultIfEmpty(result);
+		}).repeatWhen(restart -> restart.delayElements(healthCheck.getInterval()))
+				.delaySubscription(Duration.ofMillis(healthCheck.getInitialDelay()));
 	}
 
 	@Override
@@ -109,16 +111,17 @@ public class HealthCheckServiceInstanceListSupplier
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		if (!healthyInstances.isEmpty()) {
-			return Flux.defer(() -> Flux.fromIterable(healthyInstances).collectList());
-		}
-		// If there are no healthy instances, it might be better to still retry on all of
-		// them
-		if (LOG.isWarnEnabled()) {
-			LOG.warn(
-					"No verified healthy instances were found, returning all listed instances.");
-		}
-		return Flux.defer(() -> Flux.fromIterable(instances).collectList());
+		return Flux.defer(() -> {
+			List<ServiceInstance> it = new ArrayList<>(healthyInstances);
+			if (it.isEmpty()) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(
+							"No verified healthy instances were found, returning all listed instances.");
+				}
+				it = instances;
+			}
+			return Flux.just(it);
+		});
 	}
 
 	protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
@@ -129,8 +132,13 @@ public class HealthCheckServiceInstanceListSupplier
 		return webClient.get()
 				.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri())
 						.path(healthCheckPath).build().toUri())
-				.exchange()
-				.map(clientResponse -> HttpStatus.OK.equals(clientResponse.statusCode()));
+				.exchange().flatMap(clientResponse -> clientResponse.releaseBody()
+						.thenReturn(HttpStatus.OK.equals(clientResponse.statusCode())));
+	}
+
+	@Override
+	public void destroy() {
+		this.healthCheckDisposable.dispose();
 	}
 
 }
