@@ -80,27 +80,47 @@ public class HealthCheckServiceInstanceListSupplier
 		healthCheckDisposable = delegate.get().doOnNext(delegateInstances -> {
 			instances = Collections.unmodifiableList(new ArrayList<>(delegateInstances));
 		})
-		.thenMany(healthCheckFlux()).subscribeOn(Schedulers.parallel())
+		.thenMany(healthCheckFlux())
+		.subscribeOn(Schedulers.parallel())
 		.subscribe(verifiedInstances -> healthyInstances = verifiedInstances);
 	}
 
 	protected Flux<List<ServiceInstance>> healthCheckFlux() {
 		return Flux.defer(() -> {
-			List<ServiceInstance> result = new CopyOnWriteArrayList<>();
-
-			List<Mono<ServiceInstance>> checks = new ArrayList<>();
+			List<Mono<ServiceInstance>> checks = new ArrayList<>(instances.size());
 			for (ServiceInstance instance : instances) {
 				Mono<ServiceInstance> alive = isAlive(instance)
-						.onErrorResume(throwable -> Mono.empty())
-						.timeout(healthCheck.getInterval(), Mono.empty()).filter(it -> it)
-						.map(check -> instance);
+						.onErrorResume(error -> {
+							if (LOG.isDebugEnabled()) {
+								LOG.debug(String.format(
+										"Exception occurred during health check of the instance for service %s: %s",
+										instance.getServiceId(), instance.getUri()), error);
+							}
+							return Mono.empty();
+						})
+						.timeout(healthCheck.getInterval(), Mono.fromSupplier(() -> {
+							if (LOG.isDebugEnabled()) {
+								LOG.debug(String.format(
+										"The instance for service %s: %s did not respond for %s during health check",
+										instance.getServiceId(), instance.getUri(), healthCheck.getInterval()));
+							}
+							//returns Completion signal if null
+							return null;
+						}))
+						.handle((isHealthy, sink) -> {
+							if (isHealthy) {
+								sink.next(instance);
+							}
+						});
 
 				checks.add(alive);
 			}
+			List<ServiceInstance> result = new CopyOnWriteArrayList<>();
 			return Flux.merge(checks).map(alive -> {
 				result.add(alive);
 				return result;
-			}).defaultIfEmpty(result);
+			})
+			.defaultIfEmpty(result);
 		})
 		.repeatWhen(restart -> restart.delayElements(healthCheck.getInterval()))
 		.delaySubscription(Duration.ofMillis(healthCheck.getInitialDelay()));
@@ -135,7 +155,7 @@ public class HealthCheckServiceInstanceListSupplier
 						.path(healthCheckPath).build().toUri())
 				.exchange()
 				.flatMap(clientResponse -> clientResponse.releaseBody()
-						.thenReturn(HttpStatus.OK.equals(clientResponse.statusCode()))
+						.thenReturn(HttpStatus.OK.value() == clientResponse.rawStatusCode())
 				);
 	}
 
