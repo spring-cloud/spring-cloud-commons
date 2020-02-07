@@ -59,7 +59,7 @@ public class HealthCheckServiceInstanceListSupplier
 
 	private final String defaultHealthCheckPath;
 
-	private List<ServiceInstance> instances = Collections.emptyList();
+	private volatile List<ServiceInstance> instances = Collections.emptyList();
 
 	private volatile List<ServiceInstance> healthyInstances = Collections.emptyList();
 
@@ -69,7 +69,7 @@ public class HealthCheckServiceInstanceListSupplier
 			LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
 		this.delegate = delegate;
 		this.healthCheck = healthCheck;
-		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default",
+		this.defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default",
 				"/actuator/health");
 		this.webClient = webClient;
 		initInstances();
@@ -77,18 +77,24 @@ public class HealthCheckServiceInstanceListSupplier
 	}
 
 	private void initInstances() {
-		healthCheckDisposable = delegate.get().doOnNext(delegateInstances -> {
-			instances = Collections.unmodifiableList(new ArrayList<>(delegateInstances));
-		})
-		.thenMany(healthCheckFlux())
-		.subscribeOn(Schedulers.parallel())
-		.subscribe(verifiedInstances -> healthyInstances = verifiedInstances);
+		Flux<List<ServiceInstance>> instancesFlux = this.delegate.get().doOnNext(delegateInstances -> {
+			this.instances = Collections.unmodifiableList(new ArrayList<>(delegateInstances));
+		});
+
+		Flux<List<ServiceInstance>> verifiedInstancesFlux = healthCheckFlux()
+				.doOnNext((verifiedInstances -> {
+					this.healthyInstances = verifiedInstances;
+				}));
+
+		this.healthCheckDisposable = Flux.merge(instancesFlux.then(), verifiedInstancesFlux.then())
+				.subscribeOn(Schedulers.parallel())
+				.subscribe();
 	}
 
 	protected Flux<List<ServiceInstance>> healthCheckFlux() {
 		return Flux.defer(() -> {
-			List<Mono<ServiceInstance>> checks = new ArrayList<>(instances.size());
-			for (ServiceInstance instance : instances) {
+			List<Mono<ServiceInstance>> checks = new ArrayList<>(this.instances.size());
+			for (ServiceInstance instance : this.instances) {
 				Mono<ServiceInstance> alive = isAlive(instance)
 						.onErrorResume(error -> {
 							if (LOG.isDebugEnabled()) {
@@ -98,11 +104,11 @@ public class HealthCheckServiceInstanceListSupplier
 							}
 							return Mono.empty();
 						})
-						.timeout(healthCheck.getInterval(), Mono.fromSupplier(() -> {
+						.timeout(this.healthCheck.getInterval(), Mono.fromSupplier(() -> {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug(String.format(
 										"The instance for service %s: %s did not respond for %s during health check",
-										instance.getServiceId(), instance.getUri(), healthCheck.getInterval()));
+										instance.getServiceId(), instance.getUri(), this.healthCheck.getInterval()));
 							}
 							//returns Completion signal if null
 							return null;
@@ -134,12 +140,14 @@ public class HealthCheckServiceInstanceListSupplier
 	@Override
 	public Flux<List<ServiceInstance>> get() {
 		return Flux.defer(() -> {
-			List<ServiceInstance> it = new ArrayList<>(healthyInstances);
+			List<ServiceInstance> it = new ArrayList<>(this.healthyInstances);
 			if (it.isEmpty()) {
+				// If there are no healthy instances, it might be better to still retry on all of
+				// them
 				if (LOG.isWarnEnabled()) {
 					LOG.warn("No verified healthy instances were found, returning all listed instances.");
 				}
-				it = instances;
+				it = this.instances;
 			}
 			return Flux.just(it);
 		});
