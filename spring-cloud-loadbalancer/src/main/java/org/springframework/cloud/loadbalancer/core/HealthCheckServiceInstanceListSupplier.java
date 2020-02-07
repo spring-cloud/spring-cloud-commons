@@ -79,8 +79,9 @@ public class HealthCheckServiceInstanceListSupplier
 	private void initInstances() {
 		healthCheckDisposable = delegate.get().doOnNext(delegateInstances -> {
 			instances = Collections.unmodifiableList(new ArrayList<>(delegateInstances));
-		}).thenMany(healthCheckFlux()).subscribeOn(Schedulers.parallel())
-				.subscribe(verifiedInstances -> healthyInstances = verifiedInstances);
+		})
+		.thenMany(healthCheckFlux()).subscribeOn(Schedulers.parallel())
+		.subscribe(verifiedInstances -> healthyInstances = verifiedInstances);
 	}
 
 	protected Flux<List<ServiceInstance>> healthCheckFlux() {
@@ -100,8 +101,9 @@ public class HealthCheckServiceInstanceListSupplier
 				result.add(alive);
 				return result;
 			}).defaultIfEmpty(result);
-		}).repeatWhen(restart -> restart.delayElements(healthCheck.getInterval()))
-				.delaySubscription(Duration.ofMillis(healthCheck.getInitialDelay()));
+		})
+		.repeatWhen(restart -> restart.delayElements(healthCheck.getInterval()))
+		.delaySubscription(Duration.ofMillis(healthCheck.getInitialDelay()));
 	}
 
 	@Override
@@ -115,8 +117,7 @@ public class HealthCheckServiceInstanceListSupplier
 			List<ServiceInstance> it = new ArrayList<>(healthyInstances);
 			if (it.isEmpty()) {
 				if (LOG.isWarnEnabled()) {
-					LOG.warn(
-							"No verified healthy instances were found, returning all listed instances.");
+					LOG.warn("No verified healthy instances were found, returning all listed instances.");
 				}
 				it = instances;
 			}
@@ -132,8 +133,10 @@ public class HealthCheckServiceInstanceListSupplier
 		return webClient.get()
 				.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri())
 						.path(healthCheckPath).build().toUri())
-				.exchange().flatMap(clientResponse -> clientResponse.releaseBody()
-						.thenReturn(HttpStatus.OK.equals(clientResponse.statusCode())));
+				.exchange()
+				.flatMap(clientResponse -> clientResponse.releaseBody()
+						.thenReturn(HttpStatus.OK.equals(clientResponse.statusCode()))
+				);
 	}
 
 	@Override
