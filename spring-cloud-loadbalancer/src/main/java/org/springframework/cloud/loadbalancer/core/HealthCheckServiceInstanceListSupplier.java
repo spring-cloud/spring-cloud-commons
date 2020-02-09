@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.cloud.client.ServiceInstance;
@@ -87,7 +86,6 @@ public class HealthCheckServiceInstanceListSupplier
 				}));
 
 		this.healthCheckDisposable = Flux.merge(instancesFlux.then(), verifiedInstancesFlux.then())
-				.subscribeOn(Schedulers.parallel())
 				.subscribe();
 	}
 
@@ -104,14 +102,13 @@ public class HealthCheckServiceInstanceListSupplier
 							}
 							return Mono.empty();
 						})
-						.timeout(this.healthCheck.getInterval(), Mono.fromSupplier(() -> {
+						.timeout(this.healthCheck.getInterval(), Mono.defer(() -> {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug(String.format(
 										"The instance for service %s: %s did not respond for %s during health check",
 										instance.getServiceId(), instance.getUri(), this.healthCheck.getInterval()));
 							}
-							//returns Completion signal if null
-							return null;
+							return Mono.empty();
 						}))
 						.handle((isHealthy, sink) -> {
 							if (isHealthy) {
