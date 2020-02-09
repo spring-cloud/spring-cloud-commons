@@ -140,7 +140,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 				.expectNext(Lists.list(si1))
 				.expectNoEvent(healthCheck.getInterval())
 				.thenCancel()
-				.verify();
+				.verify(healthCheck.getInterval().multipliedBy(4));
 	}
 
 	@Test
@@ -167,7 +167,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 				.expectNext(Lists.list(si1, si2))
 				.expectNoEvent(healthCheck.getInterval())
 				.thenCancel()
-				.verify();
+				.verify(healthCheck.getInterval().multipliedBy(4));
 	}
 
 	@Test
@@ -192,7 +192,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 				.expectNext(Lists.list(si1))
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()).plus(healthCheck.getInterval()))
 				.thenCancel()
-				.verify();
+				.verify(healthCheck.getInterval().multipliedBy(4));
 	}
 
 	@Test
@@ -217,7 +217,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 				.expectNext(Lists.list())
 				.expectNoEvent(healthCheck.getInterval())
 				.thenCancel()
-				.verify();
+				.verify(healthCheck.getInterval().multipliedBy(4));
 	}
 
 	@Test
@@ -245,7 +245,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 				.expectNoEvent(healthCheck.getInterval())
 				.expectNext(Lists.list(si1))
 				.thenCancel()
-				.verify();
+				.verify(healthCheck.getInterval().multipliedBy(4));
 	}
 
 	@Test
