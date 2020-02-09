@@ -125,8 +125,8 @@ public class HealthCheckServiceInstanceListSupplier
 			})
 			.defaultIfEmpty(result);
 		})
-		.repeatWhen(restart -> restart.delayElements(healthCheck.getInterval()))
-		.delaySubscription(Duration.ofMillis(healthCheck.getInitialDelay()));
+		.repeatWhen(restart -> restart.delayElements(this.healthCheck.getInterval()))
+		.delaySubscription(Duration.ofMillis(this.healthCheck.getInitialDelay()));
 	}
 
 	@Override
