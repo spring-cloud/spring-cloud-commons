@@ -18,7 +18,6 @@ package org.springframework.cloud.loadbalancer.core;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -29,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.http.HttpStatus;
@@ -45,7 +45,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @since 2.2.0
  */
 public class HealthCheckServiceInstanceListSupplier
-		implements ServiceInstanceListSupplier, DisposableBean {
+		implements ServiceInstanceListSupplier, InitializingBean, DisposableBean {
 
 	private static final Log LOG = LogFactory
 			.getLog(HealthCheckServiceInstanceListSupplier.class);
@@ -58,11 +58,9 @@ public class HealthCheckServiceInstanceListSupplier
 
 	private final String defaultHealthCheckPath;
 
-	private volatile List<ServiceInstance> instances = Collections.emptyList();
-
-	private volatile List<ServiceInstance> healthyInstances = Collections.emptyList();
-
 	private Disposable healthCheckDisposable;
+
+	private Flux<List<ServiceInstance>> aliveInstancesReplay;
 
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
@@ -71,50 +69,51 @@ public class HealthCheckServiceInstanceListSupplier
 		this.defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default",
 				"/actuator/health");
 		this.webClient = webClient;
-		initInstances();
-
+		this.aliveInstancesReplay = delegate.get()
+				.delaySubscription(Duration.ofMillis(this.healthCheck.getInitialDelay()))
+				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
+						.map(alive -> (List<ServiceInstance>) new ArrayList<>(alive))
+				)
+				.replay(1)
+				.refCount(1)
+				.onBackpressureLatest();
 	}
 
-	private void initInstances() {
-		Flux<List<ServiceInstance>> instancesFlux = this.delegate.get().doOnNext(delegateInstances -> {
-			this.instances = Collections.unmodifiableList(new ArrayList<>(delegateInstances));
-		});
-
-		Flux<List<ServiceInstance>> verifiedInstancesFlux = healthCheckFlux()
-				.doOnNext((verifiedInstances -> {
-					this.healthyInstances = verifiedInstances;
-				}));
-
-		this.healthCheckDisposable = Flux.merge(instancesFlux.then(), verifiedInstancesFlux.then())
-				.subscribe();
+	@Override
+	public void afterPropertiesSet() {
+		Disposable healthCheckDisposable = this.healthCheckDisposable;
+		if (healthCheckDisposable != null) {
+			healthCheckDisposable.dispose();
+		}
+		this.healthCheckDisposable = aliveInstancesReplay.subscribe();
 	}
 
-	protected Flux<List<ServiceInstance>> healthCheckFlux() {
+	protected Flux<List<ServiceInstance>> healthCheckFlux(List<ServiceInstance> instances) {
 		return Flux.defer(() -> {
-			List<Mono<ServiceInstance>> checks = new ArrayList<>(this.instances.size());
-			for (ServiceInstance instance : this.instances) {
-				Mono<ServiceInstance> alive = isAlive(instance)
-						.onErrorResume(error -> {
-							if (LOG.isDebugEnabled()) {
-								LOG.debug(String.format(
-										"Exception occurred during health check of the instance for service %s: %s",
-										instance.getServiceId(), instance.getUri()), error);
-							}
-							return Mono.empty();
-						})
-						.timeout(this.healthCheck.getInterval(), Mono.defer(() -> {
-							if (LOG.isDebugEnabled()) {
-								LOG.debug(String.format(
-										"The instance for service %s: %s did not respond for %s during health check",
-										instance.getServiceId(), instance.getUri(), this.healthCheck.getInterval()));
-							}
-							return Mono.empty();
-						}))
-						.handle((isHealthy, sink) -> {
-							if (isHealthy) {
-								sink.next(instance);
-							}
-						});
+			List<Mono<ServiceInstance>> checks = new ArrayList<>(instances.size());
+			for (ServiceInstance instance : instances) {
+				Mono<ServiceInstance> alive = isAlive(instance).onErrorResume(error -> {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(String.format(
+								"Exception occurred during health check of the instance for service %s: %s",
+								instance.getServiceId(), instance.getUri()), error);
+					}
+					return Mono.empty();
+				})
+				.timeout(this.healthCheck.getInterval(), Mono.defer(() -> {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(String.format(
+								"The instance for service %s: %s did not respond for %s during health check",
+								instance.getServiceId(), instance.getUri(),
+								this.healthCheck.getInterval()));
+					}
+					return Mono.empty();
+				}))
+				.handle((isHealthy, sink) -> {
+					if (isHealthy) {
+						sink.next(instance);
+					}
+				});
 
 				checks.add(alive);
 			}
@@ -125,8 +124,7 @@ public class HealthCheckServiceInstanceListSupplier
 			})
 			.defaultIfEmpty(result);
 		})
-		.repeatWhen(restart -> restart.delayElements(this.healthCheck.getInterval()))
-		.delaySubscription(Duration.ofMillis(this.healthCheck.getInitialDelay()));
+		.repeatWhen(restart -> restart.delayElements(this.healthCheck.getInterval()));
 	}
 
 	@Override
@@ -136,18 +134,7 @@ public class HealthCheckServiceInstanceListSupplier
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		return Flux.defer(() -> {
-			List<ServiceInstance> it = new ArrayList<>(this.healthyInstances);
-			if (it.isEmpty()) {
-				// If there are no healthy instances, it might be better to still retry on all of
-				// them
-				if (LOG.isWarnEnabled()) {
-					LOG.warn("No verified healthy instances were found, returning all listed instances.");
-				}
-				it = this.instances;
-			}
-			return Flux.just(it);
-		});
+		return aliveInstancesReplay;
 	}
 
 	protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
@@ -166,7 +153,10 @@ public class HealthCheckServiceInstanceListSupplier
 
 	@Override
 	public void destroy() {
-		this.healthCheckDisposable.dispose();
+		Disposable healthCheckDisposable = this.healthCheckDisposable;
+		if (healthCheckDisposable != null) {
+			healthCheckDisposable.dispose();
+		}
 	}
 
 }
