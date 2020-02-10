@@ -58,9 +58,9 @@ public class HealthCheckServiceInstanceListSupplier
 
 	private final String defaultHealthCheckPath;
 
-	private Disposable healthCheckDisposable;
+	private final Flux<List<ServiceInstance>> aliveInstancesReplay;
 
-	private Flux<List<ServiceInstance>> aliveInstancesReplay;
+	private Disposable healthCheckDisposable;
 
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
@@ -75,8 +75,7 @@ public class HealthCheckServiceInstanceListSupplier
 						.map(alive -> (List<ServiceInstance>) new ArrayList<>(alive))
 				)
 				.replay(1)
-				.refCount(1)
-				.onBackpressureLatest();
+				.refCount(1);
 	}
 
 	@Override

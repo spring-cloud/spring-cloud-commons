@@ -167,7 +167,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
 				.expectNext(Lists.list(si1))
 				.expectNoEvent(healthCheck.getInterval())
-				.thenCancel().verify(VERIFY_TIMEOUT);
+				.thenCancel()
+				.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -307,8 +308,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 		})
 				.expectSubscription()
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
-				.expectNext(Lists.list(si1)).expectNoEvent(healthCheck.getInterval())
-				.thenCancel().verify(VERIFY_TIMEOUT);
+				.expectNext(Lists.list(si1))
+				.expectNoEvent(healthCheck.getInterval())
+				.thenCancel()
+				.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
