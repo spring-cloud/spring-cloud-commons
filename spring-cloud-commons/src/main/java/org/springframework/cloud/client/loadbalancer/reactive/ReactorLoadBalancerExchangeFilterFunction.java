@@ -85,7 +85,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 		});
 	}
 
-	private Mono<Response<ServiceInstance>> choose(String serviceId) {
+	protected Mono<Response<ServiceInstance>> choose(String serviceId) {
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory
 				.getInstance(serviceId);
 		if (loadBalancer == null) {
