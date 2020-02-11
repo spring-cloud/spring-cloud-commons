@@ -18,6 +18,7 @@ package org.springframework.cloud.loadbalancer.core;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -69,10 +70,10 @@ public class HealthCheckServiceInstanceListSupplier
 		this.defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default",
 				"/actuator/health");
 		this.webClient = webClient;
-		this.aliveInstancesReplay = delegate.get()
+		this.aliveInstancesReplay = Flux.defer(delegate)
 				.delaySubscription(Duration.ofMillis(this.healthCheck.getInitialDelay()))
 				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
-						.map(alive -> (List<ServiceInstance>) new ArrayList<>(alive))
+						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive)))
 				)
 				.replay(1)
 				.refCount(1);
