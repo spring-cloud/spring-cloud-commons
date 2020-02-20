@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * An autoConfiguration for {@link BlockingLoadBalancerClient}.
+ * An autoconfiguration for {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.1.3
