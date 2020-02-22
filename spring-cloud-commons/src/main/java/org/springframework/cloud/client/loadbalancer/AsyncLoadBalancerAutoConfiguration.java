@@ -30,7 +30,7 @@ import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.web.client.AsyncRestTemplate;
 
 /**
- * Auto-configuration for Ribbon (client-side load balancing).
+ * Auto-configuration for blocking client-side load balancing.
  *
  * @author Rob Worsnop
  */
@@ -49,13 +49,10 @@ public class AsyncLoadBalancerAutoConfiguration {
 		@Bean
 		public SmartInitializingSingleton loadBalancedAsyncRestTemplateInitializer(
 				final List<AsyncRestTemplateCustomizer> customizers) {
-			return new SmartInitializingSingleton() {
-				@Override
-				public void afterSingletonsInstantiated() {
-					for (AsyncRestTemplate restTemplate : AsyncRestTemplateCustomizerConfig.this.restTemplates) {
-						for (AsyncRestTemplateCustomizer customizer : customizers) {
-							customizer.customize(restTemplate);
-						}
+			return () -> {
+				for (AsyncRestTemplate restTemplate : AsyncRestTemplateCustomizerConfig.this.restTemplates) {
+					for (AsyncRestTemplateCustomizer customizer : customizers) {
+						customizer.customize(restTemplate);
 					}
 				}
 			};
@@ -75,14 +72,11 @@ public class AsyncLoadBalancerAutoConfiguration {
 		@Bean
 		public AsyncRestTemplateCustomizer asyncRestTemplateCustomizer(
 				final AsyncLoadBalancerInterceptor loadBalancerInterceptor) {
-			return new AsyncRestTemplateCustomizer() {
-				@Override
-				public void customize(AsyncRestTemplate restTemplate) {
-					List<AsyncClientHttpRequestInterceptor> list = new ArrayList<>(
-							restTemplate.getInterceptors());
-					list.add(loadBalancerInterceptor);
-					restTemplate.setInterceptors(list);
-				}
+			return restTemplate -> {
+				List<AsyncClientHttpRequestInterceptor> list = new ArrayList<>(
+						restTemplate.getInterceptors());
+				list.add(loadBalancerInterceptor);
+				restTemplate.setInterceptors(list);
 			};
 		}
 

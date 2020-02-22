@@ -18,11 +18,9 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.ApplicationContext;
@@ -57,7 +55,6 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@Conditional(OnNoRibbonDefaultCondition.class)
 	@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 	protected static class ReactorDeferringLoadBalancerFilterConfig {
 
@@ -65,22 +62,6 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 		@Primary
 		DeferringLoadBalancerExchangeFilterFunction<ReactorLoadBalancerExchangeFilterFunction> reactorDeferringLoadBalancerExchangeFilterFunction(
 				ObjectProvider<ReactorLoadBalancerExchangeFilterFunction> exchangeFilterFunctionProvider) {
-			return new DeferringLoadBalancerExchangeFilterFunction<>(
-					exchangeFilterFunctionProvider);
-		}
-
-	}
-
-	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnBean(LoadBalancerClient.class)
-	@AutoConfigureAfter(ReactorDeferringLoadBalancerFilterConfig.class)
-	@Deprecated
-	protected static class ReactiveLoadBalancerConfig {
-
-		@Bean
-		@ConditionalOnMissingBean
-		DeferringLoadBalancerExchangeFilterFunction<LoadBalancerExchangeFilterFunction> deferringLoadBalancerExchangeFilterFunction(
-				ObjectProvider<LoadBalancerExchangeFilterFunction> exchangeFilterFunctionProvider) {
 			return new DeferringLoadBalancerExchangeFilterFunction<>(
 					exchangeFilterFunctionProvider);
 		}

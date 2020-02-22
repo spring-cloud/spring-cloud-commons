@@ -25,7 +25,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
@@ -42,8 +41,7 @@ import org.springframework.core.env.Environment;
 @LoadBalancerClients
 @EnableConfigurationProperties(LoadBalancerProperties.class)
 @AutoConfigureBefore({ ReactorLoadBalancerClientAutoConfiguration.class,
-		LoadBalancerBeanPostProcessorAutoConfiguration.class,
-		ReactiveLoadBalancerAutoConfiguration.class })
+		LoadBalancerBeanPostProcessorAutoConfiguration.class })
 public class LoadBalancerAutoConfiguration {
 
 	private final ObjectProvider<List<LoadBalancerClientSpecification>> configurations;
