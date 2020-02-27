@@ -17,10 +17,8 @@
 package org.springframework.cloud.bootstrap.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +45,6 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -55,7 +52,6 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
 
 /**
@@ -261,36 +257,6 @@ public class PropertySourceBootstrapConfiguration implements
 		final String value = (property == null ? null : property.toString());
 		return property == null ? new String[0]
 				: StringUtils.tokenizeToStringArray(value, ",");
-	}
-
-}
-
-class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
-
-	private PropertySource<T> p;
-
-	BootstrapPropertySource(PropertySource<T> p) {
-		super(BOOTSTRAP_PROPERTY_SOURCE_NAME + "-" + p.getName(), p.getSource());
-		this.p = p;
-	}
-
-	@Override
-	public Object getProperty(String name) {
-		return this.p.getProperty(name);
-	}
-
-	@Override
-	public String[] getPropertyNames() {
-		Set<String> names = new LinkedHashSet<>();
-		if (!(this.p instanceof EnumerablePropertySource)) {
-			throw new IllegalStateException(
-					"Failed to enumerate property names due to non-enumerable property source: "
-							+ this.p);
-		}
-		names.addAll(
-				Arrays.asList(((EnumerablePropertySource<?>) this.p).getPropertyNames()));
-
-		return StringUtils.toStringArray(names);
 	}
 
 }
