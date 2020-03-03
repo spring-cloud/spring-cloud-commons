@@ -71,11 +71,9 @@ public class HealthCheckServiceInstanceListSupplier
 		this.webClient = webClient;
 		this.aliveInstancesReplay = Flux.defer(delegate)
 				.delaySubscription(Duration.ofMillis(this.healthCheck.getInitialDelay()))
-				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
-						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive)))
-				)
-				.replay(1)
-				.refCount(1);
+				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(
+						alive -> Collections.unmodifiableList(new ArrayList<>(alive))))
+				.replay(1).refCount(1);
 	}
 
 	@Override
@@ -87,7 +85,8 @@ public class HealthCheckServiceInstanceListSupplier
 		this.healthCheckDisposable = aliveInstancesReplay.subscribe();
 	}
 
-	protected Flux<List<ServiceInstance>> healthCheckFlux(List<ServiceInstance> instances) {
+	protected Flux<List<ServiceInstance>> healthCheckFlux(
+			List<ServiceInstance> instances) {
 		return Flux.defer(() -> {
 			List<Mono<ServiceInstance>> checks = new ArrayList<>(instances.size());
 			for (ServiceInstance instance : instances) {
@@ -98,8 +97,7 @@ public class HealthCheckServiceInstanceListSupplier
 								instance.getServiceId(), instance.getUri()), error);
 					}
 					return Mono.empty();
-				})
-				.timeout(this.healthCheck.getInterval(), Mono.defer(() -> {
+				}).timeout(this.healthCheck.getInterval(), Mono.defer(() -> {
 					if (LOG.isDebugEnabled()) {
 						LOG.debug(String.format(
 								"The instance for service %s: %s did not respond for %s during health check",
@@ -107,8 +105,7 @@ public class HealthCheckServiceInstanceListSupplier
 								this.healthCheck.getInterval()));
 					}
 					return Mono.empty();
-				}))
-				.handle((isHealthy, sink) -> {
+				})).handle((isHealthy, sink) -> {
 					if (isHealthy) {
 						sink.next(instance);
 					}
@@ -120,10 +117,8 @@ public class HealthCheckServiceInstanceListSupplier
 			return Flux.merge(checks).map(alive -> {
 				result.add(alive);
 				return result;
-			})
-			.defaultIfEmpty(result);
-		})
-		.repeatWhen(restart -> restart.delayElements(this.healthCheck.getInterval()));
+			}).defaultIfEmpty(result);
+		}).repeatWhen(restart -> restart.delayElements(this.healthCheck.getInterval()));
 	}
 
 	@Override
@@ -145,9 +140,8 @@ public class HealthCheckServiceInstanceListSupplier
 				.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri())
 						.path(healthCheckPath).build().toUri())
 				.exchange()
-				.flatMap(clientResponse -> clientResponse.releaseBody()
-						.thenReturn(HttpStatus.OK.value() == clientResponse.rawStatusCode())
-				);
+				.flatMap(clientResponse -> clientResponse.releaseBody().thenReturn(
+						HttpStatus.OK.value() == clientResponse.rawStatusCode()));
 	}
 
 	@Override
