@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -117,7 +116,7 @@ public class HealthCheckServiceInstanceListSupplier
 
 				checks.add(alive);
 			}
-			List<ServiceInstance> result = new CopyOnWriteArrayList<>();
+			List<ServiceInstance> result = new ArrayList<>();
 			return Flux.merge(checks).map(alive -> {
 				result.add(alive);
 				return result;
