@@ -491,16 +491,16 @@ Then, the next time something borrows a connection from the pool, it gets one wi
 <p>Sometimes, it might even be mandatory to apply the <code>@RefreshScope</code> annotation on some beans that can be only initialized once.
 If a bean is &#8220;immutable&#8221;, you have to either annotate the bean with <code>@RefreshScope</code> or specify the classname under the property key: <code>spring.cloud.refresh.extra-refreshable</code>.</p>
 </div>
-<div class="admonitionblock important">
+<div class="admonitionblock warning">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-important" title="Important"></i>
+<i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-If you create a <code>DataSource</code> bean yourself and the implementation is a <code>HikariDataSource</code>, return the
-most specific type, in this case <code>HikariDataSource</code>. Otherwise, you need to set
-<code>spring.cloud.refresh.extra-refreshable=javax.sql.DataSource</code>.
+If you hava a <code>DataSource</code> bean that is a <code>HikariDataSource</code>, it can not be
+refreshed. It is the default value for <code>spring.cloud.refresh.never-refreshable</code>. Choose a
+different <code>DataSource</code> implementation if you need it to be refreshed.
 </td>
 </tr>
 </table>
