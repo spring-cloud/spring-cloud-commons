@@ -26,7 +26,8 @@ import java.lang.annotation.Target;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Annotation to mark a RestTemplate bean to be configured to use a LoadBalancerClient.
+ * Annotation to mark a RestTemplate or WebClient bean to be configured to use a
+ * LoadBalancerClient.
  * @author Spencer Gibb
  */
 @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })
