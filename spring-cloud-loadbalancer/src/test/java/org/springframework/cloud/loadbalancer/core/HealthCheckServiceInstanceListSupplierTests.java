@@ -162,13 +162,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		})
-				.expectSubscription()
+		}).expectSubscription()
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
-				.expectNext(Lists.list(si1))
-				.expectNoEvent(healthCheck.getInterval())
-				.thenCancel()
-				.verify(VERIFY_TIMEOUT);
+				.expectNext(Lists.list(si1)).expectNoEvent(healthCheck.getInterval())
+				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -199,13 +196,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		})
-				.expectSubscription()
+		}).expectSubscription()
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
-				.expectNext(Lists.list(si1))
-				.expectNext(Lists.list(si1, si2))
-				.expectNoEvent(healthCheck.getInterval())
-				.thenCancel()
+				.expectNext(Lists.list(si1)).expectNext(Lists.list(si1, si2))
+				.expectNoEvent(healthCheck.getInterval()).thenCancel()
 				.verify(VERIFY_TIMEOUT);
 	}
 
@@ -238,13 +232,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		})
-				.expectSubscription()
+		}).expectSubscription()
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
-				.expectNext(Lists.list(si1))
-				.expectNoEvent(healthCheck.getInterval())
-				.thenCancel()
-				.verify(VERIFY_TIMEOUT);
+				.expectNext(Lists.list(si1)).expectNoEvent(healthCheck.getInterval())
+				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -274,13 +265,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		})
-				.expectSubscription()
+		}).expectSubscription()
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
-				.expectNext(Lists.list())
-				.expectNoEvent(healthCheck.getInterval())
-				.thenCancel()
-				.verify(VERIFY_TIMEOUT);
+				.expectNext(Lists.list()).expectNoEvent(healthCheck.getInterval())
+				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -305,13 +293,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 			listSupplier.afterPropertiesSet();
 
 			return listSupplier.get();
-		})
-				.expectSubscription()
+		}).expectSubscription()
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
-				.expectNext(Lists.list(si1))
-				.expectNoEvent(healthCheck.getInterval())
-				.thenCancel()
-				.verify(VERIFY_TIMEOUT);
+				.expectNext(Lists.list(si1)).expectNoEvent(healthCheck.getInterval())
+				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -343,15 +328,11 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		})
-				.expectSubscription()
+		}).expectSubscription()
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
-				.expectNext(Lists.list())
-				.expectNoEvent(healthCheck.getInterval())
-				.expectNext(Lists.list(si1))
-				.expectNoEvent(healthCheck.getInterval())
-				.expectNext(Lists.list(si1))
-				.thenCancel().verify(VERIFY_TIMEOUT);
+				.expectNext(Lists.list()).expectNoEvent(healthCheck.getInterval())
+				.expectNext(Lists.list(si1)).expectNoEvent(healthCheck.getInterval())
+				.expectNext(Lists.list(si1)).thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -379,15 +360,11 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		})
-				.expectSubscription()
+		}).expectSubscription()
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
-				.expectNoEvent(healthCheck.getInterval())
-				.expectNext(Lists.list())
-				.expectNoEvent(healthCheck.getInterval())
-				.expectNext(Lists.list(si1))
-				.expectNoEvent(healthCheck.getInterval())
-				.expectNext(Lists.list(si1))
+				.expectNoEvent(healthCheck.getInterval()).expectNext(Lists.list())
+				.expectNoEvent(healthCheck.getInterval()).expectNext(Lists.list(si1))
+				.expectNoEvent(healthCheck.getInterval()).expectNext(Lists.list(si1))
 				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
@@ -417,18 +394,13 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		})
-				.expectSubscription()
+		}).expectSubscription()
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
 				.expectNext(Lists.list(si1))
 				.thenAwait(healthCheck.getInterval().dividedBy(2))
-				.expectNext(Lists.list(si1))
-				.expectNext(Lists.list(si1, si2))
-				.expectNoEvent(healthCheck.getInterval())
-				.expectNext(Lists.list(si1))
-				.expectNext(Lists.list(si1, si2))
-				.thenCancel()
-				.verify(VERIFY_TIMEOUT);
+				.expectNext(Lists.list(si1)).expectNext(Lists.list(si1, si2))
+				.expectNoEvent(healthCheck.getInterval()).expectNext(Lists.list(si1))
+				.expectNext(Lists.list(si1, si2)).thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -453,20 +425,19 @@ class HealthCheckServiceInstanceListSupplierTests {
 				}
 
 				@Override
-				protected Flux<List<ServiceInstance>> healthCheckFlux(List<ServiceInstance> instances) {
-					return super.healthCheckFlux(instances).doOnNext(it -> emitCounter.incrementAndGet());
+				protected Flux<List<ServiceInstance>> healthCheckFlux(
+						List<ServiceInstance> instances) {
+					return super.healthCheckFlux(instances)
+							.doOnNext(it -> emitCounter.incrementAndGet());
 				}
 			};
 
 			listSupplier.afterPropertiesSet();
 
 			return listSupplier.get().take(1).concatWith(listSupplier.get().take(1));
-		})
-				.expectSubscription()
+		}).expectSubscription()
 				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
-				.expectNext(Lists.list(si1))
-				.expectNext(Lists.list(si1))
-				.thenCancel()
+				.expectNext(Lists.list(si1)).expectNext(Lists.list(si1)).thenCancel()
 				.verify(VERIFY_TIMEOUT);
 
 		Assertions.assertThat(emitCounter).hasValue(1);
@@ -479,20 +450,19 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 		ServiceInstanceListSupplier delegate = Mockito
 				.mock(ServiceInstanceListSupplier.class);
-		Mockito.when(delegate.get())
-				.thenReturn(Flux.<List<ServiceInstance>>never()
-				.log("test")
-				.doOnCancel(instancesCanceled::incrementAndGet));
+		Mockito.when(delegate.get()).thenReturn(Flux.<List<ServiceInstance>>never()
+				.log("test").doOnCancel(instancesCanceled::incrementAndGet));
 
-		listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient);
+		listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+				webClient);
 
 		listSupplier.afterPropertiesSet();
 
 		Assertions.assertThat(instancesCanceled).hasValue(0);
 
 		listSupplier.destroy();
-		Awaitility.await()
-				.pollDelay(Duration.ofMillis(100)).atMost(VERIFY_TIMEOUT).untilAsserted(
+		Awaitility.await().pollDelay(Duration.ofMillis(100)).atMost(VERIFY_TIMEOUT)
+				.untilAsserted(
 						() -> Assertions.assertThat(instancesCanceled).hasValue(1));
 	}
 
