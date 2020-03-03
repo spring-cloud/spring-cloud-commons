@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.autoconfigure;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -140,8 +139,7 @@ public class RefreshAutoConfiguration {
 		 * Class names for beans to post process into refresh scope. Useful when you don't
 		 * control the bean definition (e.g. it came from auto-configuration).
 		 */
-		private Set<String> refreshables = new HashSet<>(
-				Arrays.asList("com.zaxxer.hikari.HikariDataSource"));
+		private Set<String> refreshables = new HashSet<>();
 
 		public Set<String> getRefreshable() {
 			return this.refreshables;

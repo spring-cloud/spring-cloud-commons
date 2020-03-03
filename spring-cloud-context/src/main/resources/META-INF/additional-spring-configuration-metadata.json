@@ -41,6 +41,12 @@
 			"type": "java.util.Set<java.lang.String>",
 			"description": "Additional class names for beans to post process into refresh scope.",
 			"defaultValue": true
+		},
+		{
+			"name": "spring.cloud.refresh.never-refreshable",
+			"type": "java.lang.String",
+			"description": "Comma separated list of class names for beans to never be refreshed or rebound.",
+			"defaultValue": true
 		}
 	]
 }

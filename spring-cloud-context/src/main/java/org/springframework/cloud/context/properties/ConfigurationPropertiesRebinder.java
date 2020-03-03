@@ -35,6 +35,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Listens for {@link EnvironmentChangeEvent} and rebinds beans that were bound to the
@@ -96,6 +97,11 @@ public class ConfigurationPropertiesRebinder
 					bean = ProxyUtils.getTargetObject(bean);
 				}
 				if (bean != null) {
+					// TODO: determine a more general approach to fix this.
+					// see https://github.com/spring-cloud/spring-cloud-commons/issues/571
+					if (getNeverRefreshable().contains(bean.getClass().getName())) {
+						return false; // ignore
+					}
 					this.applicationContext.getAutowireCapableBeanFactory()
 							.destroyBean(bean);
 					this.applicationContext.getAutowireCapableBeanFactory()
@@ -113,6 +119,14 @@ public class ConfigurationPropertiesRebinder
 			}
 		}
 		return false;
+	}
+
+	@ManagedAttribute
+	public Set<String> getNeverRefreshable() {
+		String neverRefresh = this.applicationContext.getEnvironment().getProperty(
+				"spring.cloud.refresh.never-refreshable",
+				"com.zaxxer.hikari.HikariDataSource");
+		return StringUtils.commaDelimitedListToSet(neverRefresh);
 	}
 
 	@ManagedAttribute

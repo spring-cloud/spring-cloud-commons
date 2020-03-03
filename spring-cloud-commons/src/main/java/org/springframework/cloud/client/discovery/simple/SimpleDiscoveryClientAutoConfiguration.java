@@ -68,8 +68,8 @@ public class SimpleDiscoveryClientAutoConfiguration
 
 	@Bean
 	@Order
-	public DiscoveryClient simpleDiscoveryClient() {
-		return new SimpleDiscoveryClient(simpleDiscoveryProperties());
+	public DiscoveryClient simpleDiscoveryClient(SimpleDiscoveryProperties properties) {
+		return new SimpleDiscoveryClient(properties);
 	}
 
 	private int findPort() {

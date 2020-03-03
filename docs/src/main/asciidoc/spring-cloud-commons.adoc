@@ -184,9 +184,9 @@ Then, the next time something borrows a connection from the pool, it gets one wi
 Sometimes, it might even be mandatory to apply the `@RefreshScope` annotation on some beans that can be only initialized once.
 If a bean is "`immutable`", you have to either annotate the bean with `@RefreshScope` or specify the classname under the property key: `spring.cloud.refresh.extra-refreshable`.
 
-IMPORTANT: If you create a `DataSource` bean yourself and the implementation is a `HikariDataSource`, return the
-most specific type, in this case `HikariDataSource`. Otherwise, you need to set
-`spring.cloud.refresh.extra-refreshable=javax.sql.DataSource`.
+WARNING: If you hava a `DataSource` bean that is a `HikariDataSource`, it can not be
+refreshed. It is the default value for `spring.cloud.refresh.never-refreshable`. Choose a
+different `DataSource` implementation if you need it to be refreshed.
 
 Refresh scope beans are lazy proxies that initialize when they are used (that is, when a method is called), and the scope acts as a cache of initialized values.
 To force a bean to re-initialize on the next method call, you must invalidate its cache entry.

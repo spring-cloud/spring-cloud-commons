@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.autoconfigure;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -30,6 +32,7 @@ import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
@@ -68,8 +71,9 @@ public class RefreshAutoConfigurationTests {
 	public void refreshables() {
 		try (ConfigurableApplicationContext context = getApplicationContext(
 				WebApplicationType.NONE, Config.class, "config.foo=bar",
-				"spring.cloud.refresh.refreshable:" + ConfigProps.class.getName())) {
-			context.getBean(ConfigProps.class);
+				"spring.cloud.refresh.refreshable:"
+						+ SealedConfigProps.class.getName())) {
+			context.getBean(SealedConfigProps.class);
 			context.getBean(ContextRefresher.class).refresh();
 		}
 	}
@@ -77,23 +81,37 @@ public class RefreshAutoConfigurationTests {
 	@Test
 	public void extraRefreshables() {
 		try (ConfigurableApplicationContext context = getApplicationContext(
-				WebApplicationType.NONE, Config.class, "config.foo=bar",
+				WebApplicationType.NONE, Config.class, "sealedconfig.foo=bar",
 				"spring.cloud.refresh.extra-refreshable:"
-						+ ConfigProps.class.getName())) {
-			context.getBean(ConfigProps.class);
+						+ SealedConfigProps.class.getName())) {
+			context.getBean(SealedConfigProps.class);
 			context.getBean(ContextRefresher.class).refresh();
+		}
+	}
+
+	@Test
+	public void neverRefreshable() {
+		try (ConfigurableApplicationContext context = getApplicationContext(
+				WebApplicationType.NONE, Config.class, "countingconfig.foo=bar",
+				"spring.cloud.refresh.never-refreshable:"
+						+ CountingConfigProps.class.getName())) {
+			CountingConfigProps configProps = context.getBean(CountingConfigProps.class);
+			context.getBean(ContextRefresher.class).refresh();
+			assertThat(configProps.count)
+					.as("config props was rebound when it should not have been")
+					.hasValue(1);
 		}
 	}
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration(exclude = DataSourceAutoConfiguration.class)
-	@EnableConfigurationProperties(ConfigProps.class)
+	@EnableConfigurationProperties({ SealedConfigProps.class, CountingConfigProps.class })
 	static class Config {
 
 	}
 
-	@ConfigurationProperties("config")
-	static class ConfigProps {
+	@ConfigurationProperties("sealedconfig")
+	static class SealedConfigProps {
 
 		private String foo;
 
@@ -109,6 +127,24 @@ public class RefreshAutoConfigurationTests {
 			}
 			this.foo = foo;
 			this.sealed = true;
+		}
+
+	}
+
+	@ConfigurationProperties("countingconfig")
+	static class CountingConfigProps {
+
+		private final AtomicInteger count = new AtomicInteger();
+
+		private String foo;
+
+		public String getFoo() {
+			return this.foo;
+		}
+
+		public void setFoo(String foo) {
+			count.incrementAndGet();
+			this.foo = foo;
 		}
 
 	}
