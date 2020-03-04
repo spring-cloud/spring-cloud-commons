@@ -18,6 +18,7 @@ package org.springframework.cloud.loadbalancer.core;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
@@ -40,6 +41,19 @@ public interface ReactorLoadBalancer<T> extends ReactiveLoadBalancer<T> {
 
 	default Mono<Response<T>> choose() {
 		return choose(REQUEST);
+	}
+
+	default <R, C> Mono<R> execute(RequestExecution<R, C, T> execution) {
+		return choose(execution.createRequest()).flatMap(response -> {
+			if (!response.hasServer()) {
+				response.onComplete(CompletionContext.discard());
+				return Mono.from(execution.apply(response));
+			}
+			return Mono.from(execution.apply(response)).doOnSuccess(
+					r -> response.onComplete(CompletionContext.success()))
+					.doOnError(throwable -> response
+							.onComplete(CompletionContext.failed(throwable)));
+		});
 	}
 
 }
