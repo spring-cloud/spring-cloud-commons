@@ -62,7 +62,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	private static final String SERVICE_ID = "ignored-service";
 
-	private static final Duration VERIFY_TIMEOUT = Duration.ofSeconds(5);
+	private static final Duration VERIFY_TIMEOUT = Duration.ofSeconds(10);
 
 	@LocalServerPort
 	private int port;
