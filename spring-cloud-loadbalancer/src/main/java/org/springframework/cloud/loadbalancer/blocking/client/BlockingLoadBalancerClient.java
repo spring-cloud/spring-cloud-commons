@@ -25,6 +25,8 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
+import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -48,11 +50,12 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	@Override
 	public <T> T execute(String serviceId, LoadBalancerRequest<T> request)
 			throws IOException {
-		ServiceInstance serviceInstance = choose(serviceId);
-		if (serviceInstance == null) {
+		Response<ServiceInstance> response = chooseResponse(serviceId);
+		if (response == null || !response.hasServer()) {
+			response.onComplete(new CompletionContext(Status.DISCARD));
 			throw new IllegalStateException("No instances available for " + serviceId);
 		}
-		return execute(serviceId, serviceInstance, request);
+		return execute(serviceId, response, request);
 	}
 
 	@Override
@@ -70,6 +73,24 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		return null;
 	}
 
+	public <T> T execute(String serviceId, Response<ServiceInstance> response,
+			LoadBalancerRequest<T> request) throws IOException {
+		T retVal = null;
+		try {
+			retVal = request.apply(response.getServer());
+			response.onComplete(new CompletionContext(Status.SUCCESSS));
+		}
+		catch (IOException iOException) {
+			response.onComplete(new CompletionContext(Status.FAILED, iOException));
+			throw iOException;
+		}
+		catch (Exception exception) {
+			response.onComplete(new CompletionContext(Status.FAILED, exception));
+			ReflectionUtils.rethrowRuntimeException(exception);
+		}
+		return retVal;
+	}
+
 	@Override
 	public URI reconstructURI(ServiceInstance serviceInstance, URI original) {
 		return LoadBalancerUriTools.reconstructURI(serviceInstance, original);
@@ -77,6 +98,12 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	@Override
 	public ServiceInstance choose(String serviceId) {
+		Response<ServiceInstance> loadBalancerResponse = chooseResponse(serviceId);
+		if (loadBalancerResponse == null) return null;
+		return loadBalancerResponse.getServer();
+	}
+
+	private Response<ServiceInstance> chooseResponse(String serviceId) {
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory
 				.getInstance(serviceId);
 		if (loadBalancer == null) {
@@ -87,7 +114,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		if (loadBalancerResponse == null) {
 			return null;
 		}
-		return loadBalancerResponse.getServer();
+		return loadBalancerResponse;
 	}
 
 }

@@ -28,6 +28,18 @@ public class CompletionContext {
 
 	private final Throwable throwable;
 
+	public static CompletionContext success() {
+		return new CompletionContext(Status.SUCCESSS);
+	}
+
+	public static CompletionContext discard() {
+		return new CompletionContext(Status.DISCARD);
+	}
+
+	public static CompletionContext failed(Throwable t) {
+		return new CompletionContext(Status.FAILED, t);
+	}
+
 	public CompletionContext(Status status) {
 		this(status, null);
 	}

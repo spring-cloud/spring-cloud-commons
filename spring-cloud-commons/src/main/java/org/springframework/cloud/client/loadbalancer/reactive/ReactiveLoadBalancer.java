@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.util.function.Function;
+
 import org.reactivestreams.Publisher;
 
 /**
@@ -42,6 +44,14 @@ public interface ReactiveLoadBalancer<T> {
 
 	default Publisher<Response<T>> choose() { // conflicting name
 		return choose(REQUEST);
+	}
+
+	<R, C> Publisher<R> execute(RequestExecution<R, C, T> execution);
+
+	interface RequestExecution<R, C, TT> extends Function<Response<TT>, Publisher<R>> {
+		default Request<C> createRequest() {
+			return new DefaultRequest<>();
+		}
 	}
 
 	@FunctionalInterface

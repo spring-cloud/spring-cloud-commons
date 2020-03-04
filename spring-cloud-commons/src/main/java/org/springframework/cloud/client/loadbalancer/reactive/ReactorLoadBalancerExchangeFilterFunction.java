@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
+import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -64,15 +65,16 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
 		return choose(serviceId).flatMap(response -> {
-			ServiceInstance instance = response.getServer();
-			if (instance == null) {
+			if (!response.hasServer()) {
 				String message = serviceInstanceUnavailableMessage(serviceId);
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(message);
 				}
+				response.onComplete(new CompletionContext(Status.DISCARD));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
 			}
+			ServiceInstance instance = response.getServer();
 
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(String.format(
@@ -81,7 +83,11 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			}
 			ClientRequest newRequest = buildClientRequest(request,
 					reconstructURI(instance, originalUrl));
-			return next.exchange(newRequest);
+			return next.exchange(newRequest)
+					.doOnError(throwable -> response
+							.onComplete(new CompletionContext(Status.FAILED, throwable)))
+					.doOnSuccess(clientResponse -> response
+							.onComplete(new CompletionContext(Status.SUCCESSS)));
 		});
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.core;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +27,8 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
@@ -50,10 +53,17 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	private final String serviceId;
 
+	private Function<ServiceInstance, Response<ServiceInstance>> responseCreator = instance -> {
+		if (instance == null) {
+			return new EmptyResponse();
+		}
+		return new DefaultResponse(instance);
+	};
+
 	/**
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
-	 * will be used to get available instances
+	 *     will be used to get available instances
 	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, String)}} instead.
 	 */
 	@Deprecated
@@ -64,7 +74,8 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
-	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 *     {@link ServiceInstanceListSupplier} that will be used to get available
+	 *     instances
 	 * @param serviceId id of the service for which to choose an instance
 	 */
 	public RoundRobinLoadBalancer(
@@ -75,7 +86,8 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
-	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 *     {@link ServiceInstanceListSupplier} that will be used to get available
+	 *     instances
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param seedPosition Round Robin element position marker
 	 */
@@ -90,7 +102,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	/**
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
-	 * will be used to get available instances
+	 *     will be used to get available instances
 	 * @param seedPosition Round Robin element position marker
 	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, String, int)}}
 	 * instead.
@@ -102,6 +114,11 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 		this.serviceId = serviceId;
 		this.serviceInstanceSupplier = serviceInstanceSupplier;
 		this.position = new AtomicInteger(seedPosition);
+	}
+
+	public void setResponseCreator(
+			Function<ServiceInstance, Response<ServiceInstance>> responseCreator) {
+		this.responseCreator = responseCreator;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -126,14 +143,14 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 			List<ServiceInstance> instances) {
 		if (instances.isEmpty()) {
 			log.warn("No servers available for service: " + this.serviceId);
-			return new EmptyResponse();
+			return responseCreator.apply(null);
 		}
 		// TODO: enforce order?
 		int pos = Math.abs(this.position.incrementAndGet());
 
 		ServiceInstance instance = instances.get(pos % instances.size());
 
-		return new DefaultResponse(instance);
+		return responseCreator.apply(instance);
 	}
 
 }
