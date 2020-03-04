@@ -37,7 +37,7 @@ public interface ReactiveLoadBalancer<T> {
 	/**
 	 * Choose the next server based on the load balancing algorithm.
 	 * @param request - incoming request
-	 * @return publisher for the response
+	 * @return publisher for the response, never null.
 	 */
 	@SuppressWarnings("rawtypes")
 	Publisher<Response<T>> choose(Request request);
