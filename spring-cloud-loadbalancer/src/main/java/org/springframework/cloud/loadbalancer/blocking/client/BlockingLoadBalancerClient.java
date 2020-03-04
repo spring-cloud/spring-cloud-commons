@@ -27,6 +27,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
+import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -48,14 +49,27 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	}
 
 	@Override
-	public <T> T execute(String serviceId, LoadBalancerRequest<T> request)
-			throws IOException {
-		Response<ServiceInstance> response = chooseResponse(serviceId);
-		if (response == null || !response.hasServer()) {
-			response.onComplete(new CompletionContext(Status.DISCARD));
-			throw new IllegalStateException("No instances available for " + serviceId);
+	public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
+		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory
+				.getInstance(serviceId);
+		if (loadBalancer == null) {
+			return null;
 		}
-		return execute(serviceId, response, request);
+		return Mono.from(loadBalancer.execute(response -> {
+			if (response.hasServer()) {
+				try {
+					return Mono.just(request.apply(response.getServer()));
+				}
+				catch (Exception e) {
+					ReflectionUtils.rethrowRuntimeException(e);
+				}
+			}
+			if (!response.hasServer()) {
+				response.onComplete(new CompletionContext(Status.DISCARD));
+				throw new IllegalStateException("No instances available for " + serviceId);
+			}
+			return Mono.empty();
+		})).block();
 	}
 
 	@Override
@@ -73,24 +87,6 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		return null;
 	}
 
-	public <T> T execute(String serviceId, Response<ServiceInstance> response,
-			LoadBalancerRequest<T> request) throws IOException {
-		T retVal = null;
-		try {
-			retVal = request.apply(response.getServer());
-			response.onComplete(new CompletionContext(Status.SUCCESSS));
-		}
-		catch (IOException iOException) {
-			response.onComplete(new CompletionContext(Status.FAILED, iOException));
-			throw iOException;
-		}
-		catch (Exception exception) {
-			response.onComplete(new CompletionContext(Status.FAILED, exception));
-			ReflectionUtils.rethrowRuntimeException(exception);
-		}
-		return retVal;
-	}
-
 	@Override
 	public URI reconstructURI(ServiceInstance serviceInstance, URI original) {
 		return LoadBalancerUriTools.reconstructURI(serviceInstance, original);
@@ -98,9 +94,11 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	@Override
 	public ServiceInstance choose(String serviceId) {
-		Response<ServiceInstance> loadBalancerResponse = chooseResponse(serviceId);
-		if (loadBalancerResponse == null) return null;
-		return loadBalancerResponse.getServer();
+		Response<ServiceInstance> response = chooseResponse(serviceId);
+		if (!response.hasServer()) {
+			return null;
+		}
+		return response.getServer();
 	}
 
 	private Response<ServiceInstance> chooseResponse(String serviceId) {
@@ -109,12 +107,12 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		if (loadBalancer == null) {
 			return null;
 		}
-		Response<ServiceInstance> loadBalancerResponse = Mono.from(loadBalancer.choose())
+		Response<ServiceInstance> response = Mono.from(loadBalancer.choose())
 				.block();
-		if (loadBalancerResponse == null) {
-			return null;
+		if (response == null) {
+			return new EmptyResponse();
 		}
-		return loadBalancerResponse;
+		return response;
 	}
 
 }
