@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * @author Spencer Gibb
  */
 @SuppressWarnings("unchecked")
-@Endpoint(id = "service-registry")
+@Endpoint(id = "serviceregistry")
 public class ServiceRegistryEndpoint {
 
 	private final ServiceRegistry serviceRegistry;
