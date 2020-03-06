@@ -7,7 +7,6 @@ org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration,\
 org.springframework.cloud.autoconfigure.WritableEnvironmentEndpointAutoConfiguration
 # Application Listeners
 org.springframework.context.ApplicationListener=\
-org.springframework.cloud.bootstrap.BootstrapApplicationListener,\
 org.springframework.cloud.bootstrap.LoggingSystemShutdownListener,\
 org.springframework.cloud.context.restart.RestartListener
 # Bootstrap components
@@ -17,3 +16,8 @@ org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfiguration,\
 org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration,\
 org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration,\
 org.springframework.cloud.util.random.CachedRandomPropertySourceAutoConfiguration
+
+org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration
+# Environment post processors
+org.springframework.boot.env.EnvironmentPostProcessor=\
+org.springframework.cloud.bootstrap.BootstrapEnvironmentPostProcessor
