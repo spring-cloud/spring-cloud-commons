@@ -57,7 +57,8 @@ public class SimpleReactiveDiscoveryProperties {
 	private int order = DiscoveryClient.DEFAULT_ORDER;
 
 	public Flux<ServiceInstance> getInstances(String service) {
-		return Flux.fromIterable(instances.getOrDefault(service, emptyList()));
+		return Flux.defer(
+				() -> Flux.fromIterable(instances.getOrDefault(service, emptyList())));
 	}
 
 	Map<String, List<SimpleServiceInstance>> getInstances() {
