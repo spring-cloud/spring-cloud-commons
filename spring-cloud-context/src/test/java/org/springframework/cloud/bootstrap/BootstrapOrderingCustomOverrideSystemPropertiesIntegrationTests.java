@@ -41,8 +41,8 @@ import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class,
-		properties = { "spring.cloud.bootstrap.name:ordering" })
+@SpringBootTest(classes = Application.class, properties = {
+		"spring.cloud.bootstrap.name:ordering" })
 public class BootstrapOrderingCustomOverrideSystemPropertiesIntegrationTests {
 
 	@Autowired
