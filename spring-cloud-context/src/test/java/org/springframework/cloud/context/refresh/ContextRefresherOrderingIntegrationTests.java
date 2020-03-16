@@ -96,7 +96,7 @@ public class ContextRefresherOrderingIntegrationTests {
 
 	}
 
-	@Configuration(proxyBeanMethods = false)
+	@Configuration
 	// This is added to bootstrap context as a source in
 	// contextrefresherordering.properties
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {

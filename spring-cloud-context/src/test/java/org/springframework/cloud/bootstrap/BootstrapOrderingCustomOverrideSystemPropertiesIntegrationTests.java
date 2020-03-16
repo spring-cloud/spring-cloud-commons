@@ -65,12 +65,12 @@ public class BootstrapOrderingCustomOverrideSystemPropertiesIntegrationTests {
 	}
 
 	@EnableAutoConfiguration
-	@Configuration(proxyBeanMethods = false)
+	@Configuration
 	protected static class Application {
 
 	}
 
-	@Configuration(proxyBeanMethods = false)
+	@Configuration
 	// This is added to bootstrap context as a source in ordering.properties
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 
