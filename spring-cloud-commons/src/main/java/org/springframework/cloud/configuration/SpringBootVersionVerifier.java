@@ -87,7 +87,8 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		if (log.isDebugEnabled()) {
 			log.debug("Version found in Boot manifest [" + version + "]");
 		}
-		return StringUtils.hasText(version) && version.startsWith(s);
+		return StringUtils.hasText(version)
+				&& version.startsWith(stripWildCardFromVersion(s));
 	}
 
 	String getVersionFromManifest() {
@@ -216,7 +217,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			else {
 				// 2.0, 2.1
 				CompatibilityPredicate predicate = this.ACCEPTED_VERSIONS
-						.get(acceptedVersionWithoutX(acceptedVersion));
+						.get(stripWildCardFromVersion(acceptedVersion));
 				if (predicate != null && predicate.isCompatible()) {
 					if (log.isDebugEnabled()) {
 						log.debug("Predicate [" + predicate + "] was matched");
@@ -228,11 +229,11 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		return false;
 	}
 
-	private String acceptedVersionWithoutX(String acceptedVersion) {
-		if (acceptedVersion.endsWith(".x")) {
-			return acceptedVersion.substring(0, acceptedVersion.indexOf(".x"));
+	static String stripWildCardFromVersion(String version) {
+		if (version.endsWith(".x")) {
+			return version.substring(0, version.indexOf(".x"));
 		}
-		return acceptedVersion;
+		return version;
 	}
 
 }
