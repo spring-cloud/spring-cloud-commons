@@ -467,7 +467,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 		Assertions.assertThat(emitCounter).hasValue(1);
 	}
 
-	@Ignore // Fixme: see https://github.com/spring-cloud/spring-cloud-gateway/issues/1627
+	@Ignore // Fixme: see https://github.com/spring-cloud/spring-cloud-commons/issues/716
 	@Test
 	void shouldCancelSubscription() {
 
