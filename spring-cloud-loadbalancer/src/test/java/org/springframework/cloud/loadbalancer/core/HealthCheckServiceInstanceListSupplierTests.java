@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.awaitility.Awaitility;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -466,6 +467,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 		Assertions.assertThat(emitCounter).hasValue(1);
 	}
 
+	@Ignore // Fixme: see https://github.com/spring-cloud/spring-cloud-gateway/issues/1627
 	@Test
 	void shouldCancelSubscription() {
 
