@@ -66,11 +66,11 @@ public class HealthCheckServiceInstanceListSupplier
 			LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
 		this.delegate = delegate;
 		this.healthCheck = healthCheck;
-		this.defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default",
+		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default",
 				"/actuator/health");
 		this.webClient = webClient;
-		this.aliveInstancesReplay = Flux.defer(delegate)
-				.delaySubscription(Duration.ofMillis(this.healthCheck.getInitialDelay()))
+		aliveInstancesReplay = Flux.defer(delegate)
+				.delaySubscription(Duration.ofMillis(healthCheck.getInitialDelay()))
 				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(
 						alive -> Collections.unmodifiableList(new ArrayList<>(alive))))
 				.replay(1).refCount(1);
@@ -97,12 +97,12 @@ public class HealthCheckServiceInstanceListSupplier
 								instance.getServiceId(), instance.getUri()), error);
 					}
 					return Mono.empty();
-				}).timeout(this.healthCheck.getInterval(), Mono.defer(() -> {
+				}).timeout(healthCheck.getInterval(), Mono.defer(() -> {
 					if (LOG.isDebugEnabled()) {
 						LOG.debug(String.format(
 								"The instance for service %s: %s did not respond for %s during health check",
 								instance.getServiceId(), instance.getUri(),
-								this.healthCheck.getInterval()));
+								healthCheck.getInterval()));
 					}
 					return Mono.empty();
 				})).handle((isHealthy, sink) -> {
@@ -118,7 +118,7 @@ public class HealthCheckServiceInstanceListSupplier
 				result.add(alive);
 				return result;
 			}).defaultIfEmpty(result);
-		}).repeatWhen(restart -> restart.delayElements(this.healthCheck.getInterval()));
+		}).repeatWhen(restart -> restart.delayElements(healthCheck.getInterval()));
 	}
 
 	@Override

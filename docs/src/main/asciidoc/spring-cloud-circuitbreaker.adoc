@@ -7,7 +7,7 @@ It provides a consistent API to use in your applications, letting you, the devel
 
 Spring Cloud supports the following circuit-breaker implementations:
 
-* https://github.com/Netflix/Hystrix[Netfix Hystrix]
+* https://github.com/Netflix/Hystrix[Netflix Hystrix]
 * https://github.com/resilience4j/resilience4j[Resilience4J]
 * https://github.com/alibaba/Sentinel[Sentinel]
 * https://github.com/spring-projects/spring-retry[Spring Retry]

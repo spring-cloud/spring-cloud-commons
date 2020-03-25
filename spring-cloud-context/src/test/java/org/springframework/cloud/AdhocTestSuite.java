@@ -50,6 +50,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderListIntegrationTests.class,
 		org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderLifecycleIntegrationTests.class,
 		org.springframework.cloud.context.named.NamedContextFactoryTests.class,
+		org.springframework.cloud.context.refresh.ContextRefresherOrderingIntegrationTests.class,
 		org.springframework.cloud.context.refresh.ContextRefresherIntegrationTests.class,
 		org.springframework.cloud.context.refresh.ContextRefresherTests.class,
 		org.springframework.cloud.context.environment.EnvironmentManagerTest.class,

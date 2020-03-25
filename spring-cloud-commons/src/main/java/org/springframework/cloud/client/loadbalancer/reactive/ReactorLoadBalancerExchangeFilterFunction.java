@@ -82,13 +82,17 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 						serviceId, instance.getUri()));
 			}
 			ClientRequest newRequest = buildClientRequest(request,
-					LoadBalancerUriTools.reconstructURI(instance, originalUrl));
+					reconstructURI(instance, originalUrl));
 			return next.exchange(newRequest)
 					.doOnError(throwable -> response
 							.onComplete(new CompletionContext(Status.FAILED, throwable)))
 					.doOnSuccess(clientResponse -> response
 							.onComplete(new CompletionContext(Status.SUCCESSS)));
 		});
+	}
+
+	protected URI reconstructURI(ServiceInstance instance, URI original) {
+		return LoadBalancerUriTools.reconstructURI(instance, original);
 	}
 
 	protected Mono<Response<ServiceInstance>> choose(String serviceId) {
