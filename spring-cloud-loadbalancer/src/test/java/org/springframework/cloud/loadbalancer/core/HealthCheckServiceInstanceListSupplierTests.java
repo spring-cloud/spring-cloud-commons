@@ -18,12 +18,12 @@ package org.springframework.cloud.loadbalancer.core;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
 import org.awaitility.Awaitility;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -467,27 +467,31 @@ class HealthCheckServiceInstanceListSupplierTests {
 		Assertions.assertThat(emitCounter).hasValue(1);
 	}
 
-	@Ignore // Fixme: see https://github.com/spring-cloud/spring-cloud-commons/issues/716
 	@Test
 	void shouldCancelSubscription() {
 
 		final AtomicInteger instancesCanceled = new AtomicInteger();
-
+		final AtomicBoolean subscribed = new AtomicBoolean();
 		ServiceInstanceListSupplier delegate = Mockito
 				.mock(ServiceInstanceListSupplier.class);
-		Mockito.when(delegate.get()).thenReturn(Flux.<List<ServiceInstance>>never()
-				.log("test").doOnCancel(instancesCanceled::incrementAndGet));
+		Mockito.when(delegate.get())
+				.thenReturn(Flux.<List<ServiceInstance>>never()
+						.doOnSubscribe(subscription -> subscribed.set(true))
+						.doOnCancel(instancesCanceled::incrementAndGet));
 
 		listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
 				webClient);
 
 		listSupplier.afterPropertiesSet();
 
+		Awaitility.await("delegate subscription").pollDelay(Duration.ofMillis(50))
+				.atMost(VERIFY_TIMEOUT).untilTrue(subscribed);
+
 		Assertions.assertThat(instancesCanceled).hasValue(0);
 
 		listSupplier.destroy();
-		Awaitility.await().pollDelay(Duration.ofMillis(100)).atMost(VERIFY_TIMEOUT)
-				.untilAsserted(
+		Awaitility.await("delegate cancellation").pollDelay(Duration.ofMillis(100))
+				.atMost(VERIFY_TIMEOUT).untilAsserted(
 						() -> Assertions.assertThat(instancesCanceled).hasValue(1));
 	}
 
