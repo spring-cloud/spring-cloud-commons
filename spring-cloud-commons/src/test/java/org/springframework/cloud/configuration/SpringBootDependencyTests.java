@@ -19,6 +19,7 @@ package org.springframework.cloud.configuration;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -142,6 +143,7 @@ public class SpringBootDependencyTests {
 		then(verificationResult.action).isNotEmpty();
 	}
 
+	@Ignore // FIXME: https://github.com/spring-cloud/spring-cloud-commons/issues/717
 	@Test
 	public void should_match_against_current_manifest() {
 		verifyCurrentVersionFromManifest("2.3");
