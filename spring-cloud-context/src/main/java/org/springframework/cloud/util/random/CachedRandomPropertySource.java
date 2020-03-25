@@ -76,35 +76,28 @@ public class CachedRandomPropertySource
 
 	private Object getRandom(String type, String key) {
 		Map<String, Object> randomValueCache = getCacheForKey(key);
-		Object random = randomValueCache.get(type);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking in random cache for key " + key + " with type " + type);
 		}
-		if (random == null) {
+		return randomValueCache.computeIfAbsent(type, (theType) -> {
 			if (logger.isDebugEnabled()) {
 				logger.debug(
 						"No random value found in cache for key and value, generating a new value");
 			}
-			random = getSource().getProperty("random." + type);
-			randomValueCache.put(type, random);
-		}
-		return random;
+			return getSource().getProperty("random." + type);
+		});
 	}
 
 	private Map<String, Object> getCacheForKey(String key) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Looking in random cache for key: " + key);
 		}
-		Map<String, Object> randomValueCache = cache.get(key);
-		if (randomValueCache == null) {
+		return cache.computeIfAbsent(key, theKey -> {
 			if (logger.isDebugEnabled()) {
 				logger.debug("No cached value found for key: " + key);
 			}
-			randomValueCache = new ConcurrentHashMap<>();
-			cache.put(key, randomValueCache);
-		}
-		return randomValueCache;
-
+			return new ConcurrentHashMap<>();
+		});
 	}
 
 	public static void clearCache() {

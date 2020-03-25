@@ -18,6 +18,7 @@ package org.springframework.cloud.util.random;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,8 +72,8 @@ public class CachedRandomPropertySourceTests {
 				.isEqualTo(new Long(1234));
 		then(cachedRandomPropertySource.getProperty("cachedrandom.foo.long"))
 				.isEqualTo(new Long(5678));
-		verify(spyedCache, times(1)).put(eq("app"), isA(Map.class));
-		verify(spyedTypeCache, times(1)).get(eq("long"));
+		verify(spyedCache, times(1)).computeIfAbsent(eq("app"), isA(Function.class));
+		verify(spyedTypeCache, times(1)).computeIfAbsent(eq("long"), isA(Function.class));
 	}
 
 }
