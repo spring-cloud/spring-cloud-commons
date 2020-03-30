@@ -186,7 +186,8 @@ $(addBlockSwitches);
 <li><a href="#configuration">4.3. Configuration</a></li>
 </ul>
 </li>
-<li><a href="#configuration-properties">5. Configuration Properties</a></li>
+<li><a href="#cachedrandompropertysource">5. CachedRandomPropertySource</a></li>
+<li><a href="#configuration-properties">6. Configuration Properties</a></li>
 </ul>
 </div>
 </div>
@@ -1855,7 +1856,28 @@ for example, in case of <a href="https://resilience4j.readme.io/docs/circuitbrea
 </div>
 </div>
 <div class="sect1">
-<h2 id="configuration-properties"><a class="anchor" href="#configuration-properties"></a><a class="link" href="#configuration-properties">5. Configuration Properties</a></h2>
+<h2 id="cachedrandompropertysource"><a class="anchor" href="#cachedrandompropertysource"></a><a class="link" href="#cachedrandompropertysource">5. CachedRandomPropertySource</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Spring Cloud Context provides a <code>PropertySource</code> that caches random values based on a key.  Outside of the caching
+functionality it works the same as Spring Boot&#8217;s <a href="https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/env/RandomValuePropertySource.java"><code>RandomValuePropertySource</code></a>.
+This random value might be useful in the case where you want a random value that is consistent even after the Spring Application
+context restarts.  The property value takes the form of <code>cachedrandom.[yourkey].[type]</code> where <code>yourkey</code> is the key in the cache.  The <code>type</code> value can
+be any type supported by Spring Boot&#8217;s <code>RandomValuePropertySource</code>.</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-properties hljs" data-lang="properties">myrandom=${cachedrandom.appname.value}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="configuration-properties"><a class="anchor" href="#configuration-properties"></a><a class="link" href="#configuration-properties">6. Configuration Properties</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>To see the list of all Spring Cloud Commons related configuration properties please check <a href="appendix.html">the Appendix page</a>.</p>
