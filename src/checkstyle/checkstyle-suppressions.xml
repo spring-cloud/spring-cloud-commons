@@ -13,4 +13,5 @@
 	<suppress files=".*RefreshScopeConfigurationTests.*" checks="JavadocVariable"/>
 	<suppress files=".*RefreshAutoConfigurationTests.*" checks="JavadocVariable"/>
 	<suppress files=".*RefreshAutoConfigurationMoreClassPathTests.*" checks="JavadocVariable"/>
+	<suppress files=".*EnvironmentDecryptApplicationInitializerTests.*" checks="JavadocVariable"/>
 </suppressions>
