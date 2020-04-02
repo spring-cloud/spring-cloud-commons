@@ -111,4 +111,41 @@ public class IdUtilsTests {
 				.as("instanceId was wrong");
 	}
 
+	@Test
+	public void testUnresolvedServiceId() {
+		then(IdUtils.DEFAULT_SERVICE_ID_STRING)
+				.isEqualTo(IdUtils.getUnresolvedServiceId());
+	}
+
+	@Test
+	public void testServiceIdDefaults() {
+		this.env.setProperty("cachedrandom.application.value", "123abc");
+		then("application:0:123abc").isEqualTo(IdUtils.getResolvedServiceId(this.env));
+	}
+
+	@Test
+	public void testVCAPServiceId() {
+		env.setProperty("vcap.application.name", "vcapname");
+		env.setProperty("vcap.application.instance_index", "vcapindex");
+		env.setProperty("vcap.application.instance_id", "vcapid");
+		then("vcapname:vcapindex:vcapid").isEqualTo(IdUtils.getResolvedServiceId(env));
+	}
+
+	@Test
+	public void testSpringServiceId() {
+		env.setProperty("spring.application.name", "springname");
+		env.setProperty("spring.application.index", "springindex");
+		env.setProperty("cachedrandom.springname.value", "123abc");
+		then("springname:springindex:123abc")
+				.isEqualTo(IdUtils.getResolvedServiceId(env));
+	}
+
+	@Test
+	public void testServerPortServiceId() {
+		env.setProperty("spring.application.name", "springname");
+		env.setProperty("server.port", "1234");
+		env.setProperty("cachedrandom.springname.value", "123abc");
+		then("springname:1234:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
+	}
+
 }

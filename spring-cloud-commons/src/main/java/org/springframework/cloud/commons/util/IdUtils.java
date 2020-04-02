@@ -26,6 +26,11 @@ public final class IdUtils {
 
 	private static final String SEPARATOR = ":";
 
+	// @checkstyle:off
+	public static final String DEFAULT_SERVICE_ID_STRING = "${vcap.application.name:${spring.application.name:application}}:${vcap.application.instance_index:${spring.application.index:${local.server.port:${server.port:0}}}}:${vcap.application.instance_id:${cachedrandom.${vcap.application.name:${spring.application.name:application}}.value}}";
+
+	// @checkstyle:on
+
 	private IdUtils() {
 		throw new IllegalStateException("Can't instantiate a utility class");
 	}
@@ -53,6 +58,23 @@ public final class IdUtils {
 				resolver.getProperty("server.port"));
 
 		return combineParts(namePart, SEPARATOR, indexPart);
+	}
+
+	/**
+	 * Gets the resolved service id.
+	 * @param resolver A property resolved
+	 * @return A unique id that can be used to uniquely identify a service
+	 */
+	public static String getResolvedServiceId(PropertyResolver resolver) {
+		return resolver.resolvePlaceholders(getUnresolvedServiceId());
+	}
+
+	/**
+	 * Gets an the unresolved service id.
+	 * @return The combination of properties to create a unique service id
+	 */
+	public static String getUnresolvedServiceId() {
+		return DEFAULT_SERVICE_ID_STRING;
 	}
 
 	public static String combineParts(String firstPart, String separator,
