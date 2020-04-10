@@ -99,7 +99,7 @@ public class LoadBalancerTests {
 					then(instance.isSecure()).isFalse();
 				}
 
-				response.onComplete(new CompletionContext(Status.SUCCESSS));
+				response.onComplete(new CompletionContext(Status.SUCCESS));
 			}).verifyComplete();
 		}
 	}
