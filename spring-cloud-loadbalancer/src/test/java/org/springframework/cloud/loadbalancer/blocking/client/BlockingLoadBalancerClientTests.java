@@ -126,21 +126,6 @@ class BlockingLoadBalancerClientTests {
 		}
 	}
 
-	@Test
-	void IOExceptionRethrown() {
-		try {
-			loadBalancerClient.execute("myservice", instance -> {
-				assertThat(instance.getHost()).isEqualTo("test.example");
-				throw new IOException("Should throw IO exception.");
-			});
-			fail("Should have thrown exception.");
-		}
-		catch (Exception exception) {
-			assertThat(exception).isNotNull();
-			assertThat(exception).isInstanceOf(IOException.class);
-		}
-	}
-
 	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	@SpringBootConfiguration
