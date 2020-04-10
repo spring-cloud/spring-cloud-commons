@@ -19,9 +19,14 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * A {@link Response} with no selected {@link ServiceInstance}.
+ *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 public class EmptyResponse implements Response<ServiceInstance> {
+
+	private CompletionContext completionContext;
 
 	@Override
 	public boolean hasServer() {
@@ -35,7 +40,12 @@ public class EmptyResponse implements Response<ServiceInstance> {
 
 	@Override
 	public void onComplete(CompletionContext completionContext) {
-		// TODO: implement
+		this.completionContext = completionContext;
+	}
+
+	@Override
+	public CompletionContext getCompletionContext() {
+		return completionContext;
 	}
 
 }

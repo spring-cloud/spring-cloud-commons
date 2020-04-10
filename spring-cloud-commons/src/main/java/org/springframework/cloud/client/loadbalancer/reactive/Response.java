@@ -21,6 +21,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
  *
  * @param <T> type of the server
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 public interface Response<T> {
 
@@ -33,5 +34,7 @@ public interface Response<T> {
 	 * @param completionContext - completion context
 	 */
 	void onComplete(CompletionContext completionContext);
+
+	CompletionContext getCompletionContext();
 
 }

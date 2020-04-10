@@ -19,11 +19,16 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * A default {@link Response} implementation.
+ *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 public class DefaultResponse implements Response<ServiceInstance> {
 
 	private final ServiceInstance serviceInstance;
+
+	private CompletionContext completionContext;
 
 	public DefaultResponse(ServiceInstance serviceInstance) {
 		this.serviceInstance = serviceInstance;
@@ -41,7 +46,12 @@ public class DefaultResponse implements Response<ServiceInstance> {
 
 	@Override
 	public void onComplete(CompletionContext completionContext) {
-		// TODO: implement
+		this.completionContext = completionContext;
+	}
+
+	@Override
+	public CompletionContext getCompletionContext() {
+		return completionContext;
 	}
 
 }

@@ -85,7 +85,7 @@ class BlockingLoadBalancerClientTests {
 	}
 
 	@Test
-	void requestExecutedAgainstCorrectInstance() throws IOException {
+	void requestExecutedAgainstCorrectInstance() {
 		final String result = "result";
 		Object actualResult = loadBalancerClient.execute("myservice",
 				(LoadBalancerRequest<Object>) instance -> {
