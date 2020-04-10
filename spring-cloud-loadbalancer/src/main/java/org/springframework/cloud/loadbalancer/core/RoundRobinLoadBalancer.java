@@ -27,8 +27,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
-import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
@@ -63,7 +61,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	/**
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
-	 *     will be used to get available instances
+	 * will be used to get available instances
 	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, String)}} instead.
 	 */
 	@Deprecated
@@ -74,8 +72,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
-	 *     {@link ServiceInstanceListSupplier} that will be used to get available
-	 *     instances
+	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
 	 * @param serviceId id of the service for which to choose an instance
 	 */
 	public RoundRobinLoadBalancer(
@@ -86,8 +83,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
-	 *     {@link ServiceInstanceListSupplier} that will be used to get available
-	 *     instances
+	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param seedPosition Round Robin element position marker
 	 */
@@ -102,7 +98,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	/**
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
-	 *     will be used to get available instances
+	 * will be used to get available instances
 	 * @param seedPosition Round Robin element position marker
 	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, String, int)}}
 	 * instead.

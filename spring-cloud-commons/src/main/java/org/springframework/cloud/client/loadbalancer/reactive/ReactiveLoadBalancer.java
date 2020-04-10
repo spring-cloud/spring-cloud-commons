@@ -20,6 +20,8 @@ import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.cloud.client.ServiceInstance;
+
 /**
  * Reactive load balancer.
  *
@@ -46,12 +48,31 @@ public interface ReactiveLoadBalancer<T> {
 		return choose(REQUEST);
 	}
 
+	/**
+	 * Executes a request using {@link ServiceInstance} provided in LoadBalancer
+	 * {@link Response}.
+	 * @param execution defining how a LoadBalancer {@link Response} should be mapped to
+	 * the request execution result {@link Publisher}
+	 * @param <R> execution result type
+	 * @param <C> LoadBalancer {@link Request} context type
+	 * @return a {@link Publisher} of execution result
+	 */
 	<R, C> Publisher<R> execute(RequestExecution<R, C, T> execution);
 
+	/**
+	 * Defines how a LoadBalancer {@link Response} should be mapped to the request
+	 * execution result {@link Publisher}.
+	 *
+	 * @param <R> execution result type
+	 * @param <C> LoadBalancer {@link Request} context type
+	 * @param <TT> LoadBalancer {@link Response} type
+	 */
 	interface RequestExecution<R, C, TT> extends Function<Response<TT>, Publisher<R>> {
+
 		default Request<C> createRequest() {
 			return new DefaultRequest<>();
 		}
+
 	}
 
 	@FunctionalInterface

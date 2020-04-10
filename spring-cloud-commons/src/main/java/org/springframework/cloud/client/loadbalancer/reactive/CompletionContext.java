@@ -29,7 +29,7 @@ public class CompletionContext {
 	private final Throwable throwable;
 
 	public static CompletionContext success() {
-		return new CompletionContext(Status.SUCCESSS);
+		return new CompletionContext(Status.SUCCESS);
 	}
 
 	public static CompletionContext discard() {
@@ -71,7 +71,7 @@ public class CompletionContext {
 	public enum Status {
 
 		/** Request was handled successfully. */
-		SUCCESSS,
+		SUCCESS,
 		/** Request reached the server but failed due to timeout or internal error. */
 		FAILED,
 		/** Request did not go off box and should not be counted for statistics. */

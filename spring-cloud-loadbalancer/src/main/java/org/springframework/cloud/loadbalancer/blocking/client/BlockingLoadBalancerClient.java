@@ -66,7 +66,8 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 			}
 			if (!response.hasServer()) {
 				response.onComplete(new CompletionContext(Status.DISCARD));
-				throw new IllegalStateException("No instances available for " + serviceId);
+				throw new IllegalStateException(
+						"No instances available for " + serviceId);
 			}
 			return Mono.empty();
 		})).block();
@@ -107,8 +108,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		if (loadBalancer == null) {
 			return null;
 		}
-		Response<ServiceInstance> response = Mono.from(loadBalancer.choose())
-				.block();
+		Response<ServiceInstance> response = Mono.from(loadBalancer.choose()).block();
 		if (response == null) {
 			return new EmptyResponse();
 		}

@@ -49,8 +49,8 @@ public interface ReactorLoadBalancer<T> extends ReactiveLoadBalancer<T> {
 				response.onComplete(CompletionContext.discard());
 				return Mono.from(execution.apply(response));
 			}
-			return Mono.from(execution.apply(response)).doOnSuccess(
-					r -> response.onComplete(CompletionContext.success()))
+			return Mono.from(execution.apply(response))
+					.doOnSuccess(r -> response.onComplete(CompletionContext.success()))
 					.doOnError(throwable -> response
 							.onComplete(CompletionContext.failed(throwable)));
 		});

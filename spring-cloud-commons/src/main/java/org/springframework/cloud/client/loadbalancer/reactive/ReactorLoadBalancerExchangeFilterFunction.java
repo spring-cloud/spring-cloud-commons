@@ -87,7 +87,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 					.doOnError(throwable -> response
 							.onComplete(new CompletionContext(Status.FAILED, throwable)))
 					.doOnSuccess(clientResponse -> response
-							.onComplete(new CompletionContext(Status.SUCCESSS)));
+							.onComplete(new CompletionContext(Status.SUCCESS)));
 		});
 	}
 

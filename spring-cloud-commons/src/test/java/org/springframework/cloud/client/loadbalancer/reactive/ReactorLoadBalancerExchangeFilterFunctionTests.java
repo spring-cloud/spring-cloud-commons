@@ -150,7 +150,9 @@ class DiscoveryClientBasedReactiveLoadBalancer
 	}
 
 	@Override
-	public <R, C> Publisher<R> execute(RequestExecution<R, C, ServiceInstance> execution) {
+	public <R, C> Publisher<R> execute(
+			RequestExecution<R, C, ServiceInstance> execution) {
 		throw new UnsupportedOperationException("execute() is not implemented");
 	}
+
 }
