@@ -37,7 +37,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class,
-		properties = { "spring.datasource.hikari.read-only=false" })
+		properties = { "spring.datasource.hikari.read-only=false", "debug=true" })
 public class ContextRefresherIntegrationTests {
 
 	@Autowired
@@ -81,6 +81,17 @@ public class ContextRefresherIntegrationTests {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 	}
 
+	@Test
+	@DirtiesContext
+	public void testCachedRandom() {
+		long cachedRandomLong = properties.getCachedRandomLong();
+		long randomLong = properties.randomLong();
+		then(cachedRandomLong).isNotNull();
+		this.refresher.refresh();
+		then(randomLong).isNotEqualTo(properties.randomLong());
+		then(cachedRandomLong).isEqualTo(properties.cachedRandomLong);
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(TestProperties.class)
 	@EnableAutoConfiguration
@@ -95,6 +106,10 @@ public class ContextRefresherIntegrationTests {
 		private String message;
 
 		private int delay;
+
+		private Long cachedRandomLong;
+
+		private Long randomLong;
 
 		@ManagedAttribute
 		public String getMessage() {
@@ -112,6 +127,22 @@ public class ContextRefresherIntegrationTests {
 
 		public void setDelay(int delay) {
 			this.delay = delay;
+		}
+
+		public long getCachedRandomLong() {
+			return cachedRandomLong;
+		}
+
+		public void setCachedRandomLong(long cachedRandomLong) {
+			this.cachedRandomLong = cachedRandomLong;
+		}
+
+		public long randomLong() {
+			return randomLong;
+		}
+
+		public void setRandomLong(long randomLong) {
+			this.randomLong = randomLong;
 		}
 
 	}

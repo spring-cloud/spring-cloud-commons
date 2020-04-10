@@ -20,13 +20,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringBootVersion;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.springframework.cloud.configuration.SpringBootVersionVerifier.stripWildCardFromVersion;
 
 /**
  * @author Marcin Grzejszczak
@@ -38,9 +42,27 @@ public class CompatibilityVerifierAutoConfigurationTests {
 	@Autowired
 	MyCompatibilityVerifier myMismatchVerifier;
 
+	@Autowired
+	CompatibilityVerifierProperties verifierProperties;
+
 	@Test
 	public void contextLoads() {
 		then(this.myMismatchVerifier.called).isTrue();
+	}
+
+	@Test
+	public void verifierPropertiesContainsCurrentBootVersion() {
+		String version = SpringBootVersion.getVersion();
+		assertThat(version).isNotBlank();
+
+		for (String compatibleVersion : verifierProperties.getCompatibleBootVersions()) {
+			if (version.startsWith(stripWildCardFromVersion(compatibleVersion))) {
+				// success we found the current boot version in our list of compatible
+				// versions.
+				return;
+			}
+		}
+		fail(version + " not found in " + verifierProperties.getCompatibleBootVersions());
 	}
 
 	@Configuration(proxyBeanMethods = false)

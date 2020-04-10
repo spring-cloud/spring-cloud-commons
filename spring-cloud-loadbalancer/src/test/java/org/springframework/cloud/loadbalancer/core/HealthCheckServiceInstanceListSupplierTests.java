@@ -18,6 +18,7 @@ package org.springframework.cloud.loadbalancer.core;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.Assertions;
@@ -470,22 +471,27 @@ class HealthCheckServiceInstanceListSupplierTests {
 	void shouldCancelSubscription() {
 
 		final AtomicInteger instancesCanceled = new AtomicInteger();
-
+		final AtomicBoolean subscribed = new AtomicBoolean();
 		ServiceInstanceListSupplier delegate = Mockito
 				.mock(ServiceInstanceListSupplier.class);
-		Mockito.when(delegate.get()).thenReturn(Flux.<List<ServiceInstance>>never()
-				.log("test").doOnCancel(instancesCanceled::incrementAndGet));
+		Mockito.when(delegate.get())
+				.thenReturn(Flux.<List<ServiceInstance>>never()
+						.doOnSubscribe(subscription -> subscribed.set(true))
+						.doOnCancel(instancesCanceled::incrementAndGet));
 
 		listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
 				webClient);
 
 		listSupplier.afterPropertiesSet();
 
+		Awaitility.await("delegate subscription").pollDelay(Duration.ofMillis(50))
+				.atMost(VERIFY_TIMEOUT).untilTrue(subscribed);
+
 		Assertions.assertThat(instancesCanceled).hasValue(0);
 
 		listSupplier.destroy();
-		Awaitility.await().pollDelay(Duration.ofMillis(100)).atMost(VERIFY_TIMEOUT)
-				.untilAsserted(
+		Awaitility.await("delegate cancellation").pollDelay(Duration.ofMillis(100))
+				.atMost(VERIFY_TIMEOUT).untilAsserted(
 						() -> Assertions.assertThat(instancesCanceled).hasValue(1));
 	}
 

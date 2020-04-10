@@ -70,7 +70,7 @@ public class RetryLoadBalancerInterceptorTest {
 	};
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		this.client = mock(LoadBalancerClient.class);
 		this.lbProperties = new LoadBalancerRetryProperties();
 		this.lbRequestFactory = mock(LoadBalancerRequestFactory.class);

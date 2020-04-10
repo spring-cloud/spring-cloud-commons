@@ -7,7 +7,6 @@ It provides a consistent API to use in your applications, letting you, the devel
 
 Spring Cloud supports the following circuit-breaker implementations:
 
-* https://github.com/Netflix/Hystrix[Netflix Hystrix]
 * https://github.com/resilience4j/resilience4j[Resilience4J]
 * https://github.com/alibaba/Sentinel[Sentinel]
 * https://github.com/spring-projects/spring-retry[Spring Retry]
@@ -85,7 +84,6 @@ The `Customizer` interface has a single method (called `customize`) that takes t
 For detailed information on how to customize a given implementation see
 the following documentation:
 
-* link:../../../../spring-cloud-netflix/current/reference/html/#circuit-breaker-spring-cloud-circuit-breaker-with-hystrix[Hystrix]
 * link:../../../../spring-cloud-circuitbreaker/current/reference/html/spring-cloud-circuitbreaker.html#configuring-resilience4j-circuit-breakers[Resilience4J]
 * link:https://github.com/alibaba/spring-cloud-alibaba/blob/master/spring-cloud-alibaba-docs/src/main/asciidoc/circuitbreaker-sentinel.adoc#circuit-breaker-spring-cloud-circuit-breaker-with-sentinel--configuring-sentinel-circuit-breakers[Sentinal]
 * link:../../../../spring-cloud-circuitbreaker/current/reference/html/spring-cloud-circuitbreaker.html#configuring-spring-retry-circuit-breakers[Spring Retry]

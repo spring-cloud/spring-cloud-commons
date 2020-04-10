@@ -73,17 +73,6 @@ public class ConfigurationPropertiesBeans
 		}
 	}
 
-	/**
-	 * @param beans The bean meta data to set.
-	 * @deprecated since 2.2.0 because
-	 * {@link org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata}
-	 * has been deprecated
-	 */
-	@Deprecated
-	public void setBeanMetaDataStore(
-			org.springframework.boot.context.properties.ConfigurationBeanFactoryMetadata beans) {
-	}
-
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName)
 			throws BeansException {

@@ -22,7 +22,6 @@ import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
-import org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration.BlockingLoadBalancerClientRibbonWarnLogger;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,17 +34,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class BlockingLoadBalancerClientAutoConfigurationTests {
 
 	private ApplicationContextRunner applicationContextRunner = new ApplicationContextRunner()
-			.withPropertyValues("spring.cloud.loadbalancer.ribbon.enabled=false")
 			.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class,
 					BlockingLoadBalancerClientAutoConfiguration.class));
 
 	@Test
 	public void beansCreatedNormally() {
-		applicationContextRunner.run(ctxt -> {
-			assertThat(ctxt).hasSingleBean(BlockingLoadBalancerClient.class);
-			assertThat(ctxt)
-					.doesNotHaveBean(BlockingLoadBalancerClientRibbonWarnLogger.class);
-		});
+		applicationContextRunner.run(
+				ctxt -> assertThat(ctxt).hasSingleBean(BlockingLoadBalancerClient.class));
 	}
 
 	@Test
@@ -54,8 +49,6 @@ public class BlockingLoadBalancerClientAutoConfigurationTests {
 				.withClassLoader(new FilteredClassLoader(RestTemplate.class))
 				.run(context -> {
 					assertThat(context).doesNotHaveBean(BlockingLoadBalancerClient.class);
-					assertThat(context).doesNotHaveBean(
-							BlockingLoadBalancerClientRibbonWarnLogger.class);
 				});
 	}
 

@@ -40,6 +40,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			this.put("2.0", is2_0());
 			this.put("2.1", is2_1());
 			this.put("2.2", is2_2());
+			this.put("2.3", is2_3());
 		}
 	};
 
@@ -86,7 +87,8 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		if (log.isDebugEnabled()) {
 			log.debug("Version found in Boot manifest [" + version + "]");
 		}
-		return StringUtils.hasText(version) && version.startsWith(s);
+		return StringUtils.hasText(version)
+				&& version.startsWith(stripWildCardFromVersion(s));
 	}
 
 	String getVersionFromManifest() {
@@ -162,6 +164,30 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		};
 	}
 
+	CompatibilityPredicate is2_3() {
+		return new CompatibilityPredicate() {
+
+			@Override
+			public String toString() {
+				return "Predicate for Boot 2.3";
+			}
+
+			@Override
+			public boolean isCompatible() {
+				try {
+					// since 2.3
+					Class.forName(
+							"org.springframework.boot.context.propertie.BoundConfigurationProperties");
+					return true;
+				}
+				catch (ClassNotFoundException e) {
+					return false;
+				}
+
+			}
+		};
+	}
+
 	private String errorDescription() {
 		String versionFromManifest = getVersionFromManifest();
 		if (StringUtils.hasText(versionFromManifest)) {
@@ -191,7 +217,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			else {
 				// 2.0, 2.1
 				CompatibilityPredicate predicate = this.ACCEPTED_VERSIONS
-						.get(acceptedVersionWithoutX(acceptedVersion));
+						.get(stripWildCardFromVersion(acceptedVersion));
 				if (predicate != null && predicate.isCompatible()) {
 					if (log.isDebugEnabled()) {
 						log.debug("Predicate [" + predicate + "] was matched");
@@ -203,11 +229,11 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		return false;
 	}
 
-	private String acceptedVersionWithoutX(String acceptedVersion) {
-		if (acceptedVersion.endsWith(".x")) {
-			return acceptedVersion.substring(0, acceptedVersion.indexOf(".x"));
+	static String stripWildCardFromVersion(String version) {
+		if (version.endsWith(".x")) {
+			return version.substring(0, version.indexOf(".x"));
 		}
-		return acceptedVersion;
+		return version;
 	}
 
 }

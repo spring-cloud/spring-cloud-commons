@@ -16,18 +16,11 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -44,46 +37,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 @ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 public class ReactorLoadBalancerClientAutoConfiguration {
 
+	@ConditionalOnMissingBean
 	@Bean
-	@ConditionalOnClass(
-			name = "org.springframework.cloud.netflix.ribbon.RibbonLoadBalancerClient")
-	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.ribbon.enabled",
-			matchIfMissing = true)
-	public ReactorLoadBalancerClientRibbonWarnLogger reactorLoadBalancerClientRibbonWarnLogger() {
-		return new ReactorLoadBalancerClientRibbonWarnLogger();
-	}
-
-	@Configuration(proxyBeanMethods = false)
-	@Conditional(OnNoRibbonDefaultCondition.class)
-	protected static class ReactorLoadBalancerExchangeFilterFunctionConfig {
-
-		@ConditionalOnMissingBean
-		@Bean
-		public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
-				ReactiveLoadBalancer.Factory loadBalancerFactory) {
-			return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory);
-		}
-
-	}
-
-	private static class ReactorLoadBalancerClientRibbonWarnLogger {
-
-		private static final Log LOG = LogFactory
-				.getLog(ReactorLoadBalancerClientRibbonWarnLogger.class);
-
-		@PostConstruct
-		void logWarning() {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn("You have RibbonLoadBalancerClient on your classpath. "
-						+ "LoadBalancerExchangeFilterFunction that uses it under the "
-						+ "hood will be used by default. Spring Cloud Ribbon is now in maintenance mode, "
-						+ "so we suggest switching to "
-						+ ReactorLoadBalancerExchangeFilterFunction.class.getSimpleName()
-						+ " instead. In order to use it, set the value of `spring.cloud.loadbalancer.ribbon.enabled` to `false` or "
-						+ "remove spring-cloud-starter-netflix-ribbon from your project.");
-			}
-		}
-
+	public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
+			ReactiveLoadBalancer.Factory loadBalancerFactory) {
+		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory);
 	}
 
 }

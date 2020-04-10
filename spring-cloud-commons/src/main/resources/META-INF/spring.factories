@@ -12,7 +12,6 @@ org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration
 org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration,\
 org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration,\
 org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration,\
-org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoConfiguration,\
 org.springframework.cloud.client.serviceregistry.ServiceRegistryAutoConfiguration,\
 org.springframework.cloud.commons.httpclient.HttpClientConfiguration,\
 org.springframework.cloud.commons.util.UtilAutoConfiguration,\
