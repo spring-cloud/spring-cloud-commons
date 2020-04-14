@@ -63,7 +63,9 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			return Mono.just(
 					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
-		return choose(serviceId).flatMap(response -> {
+		Request<?> lbRequest = loadBalancerFactory
+				.getRequestFactory(serviceId).create(request);
+		return choose(serviceId, lbRequest).flatMap(response -> {
 			ServiceInstance instance = response.getServer();
 			if (instance == null) {
 				String message = serviceInstanceUnavailableMessage(serviceId);
@@ -89,13 +91,14 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 		return LoadBalancerUriTools.reconstructURI(instance, original);
 	}
 
-	protected Mono<Response<ServiceInstance>> choose(String serviceId) {
+	protected Mono<Response<ServiceInstance>> choose(String serviceId,
+			Request<?> request) {
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory
 				.getInstance(serviceId);
 		if (loadBalancer == null) {
 			return Mono.just(new EmptyResponse());
 		}
-		return Mono.from(loadBalancer.choose());
+		return Mono.from(loadBalancer.choose(request));
 	}
 
 	private String serviceInstanceUnavailableMessage(String serviceId) {

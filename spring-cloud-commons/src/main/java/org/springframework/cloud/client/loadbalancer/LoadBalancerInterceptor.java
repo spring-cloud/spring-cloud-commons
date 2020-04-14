@@ -19,6 +19,12 @@ package org.springframework.cloud.client.loadbalancer;
 import java.io.IOException;
 import java.net.URI;
 
+import reactor.core.publisher.Mono;
+
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.cloud.client.loadbalancer.reactive.Request;
+import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -37,15 +43,22 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 
 	private LoadBalancerRequestFactory requestFactory;
 
-	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer,
+	private ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
+
+	public LoadBalancerInterceptor(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerRequestFactory requestFactory) {
-		this.loadBalancer = loadBalancer;
+		this.loadBalancerFactory = loadBalancerFactory;
 		this.requestFactory = requestFactory;
 	}
 
 	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer) {
 		// for backwards compatibility
 		this(loadBalancer, new LoadBalancerRequestFactory(loadBalancer));
+	}
+
+	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRequestFactory requestFactory) {
+		this.loadBalancer = loadBalancer;
+		this.requestFactory = requestFactory;
 	}
 
 	@Override
@@ -55,6 +68,15 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 		String serviceName = originalUri.getHost();
 		Assert.state(serviceName != null,
 				"Request URI does not contain a valid hostname: " + originalUri);
+
+		// Locate the actual service
+		ReactiveLoadBalancer<ServiceInstance> lb = loadBalancerFactory.getInstance(serviceName);
+
+		Request<?> lbRequest = loadBalancerFactory.getRequestFactory(serviceName).create(request);
+
+		Response<ServiceInstance> response = Mono.from(lb.choose(lbRequest)).block();
+		assert response != null;
+
 		return this.loadBalancer.execute(serviceName,
 				this.requestFactory.createRequest(request, body, execution));
 	}

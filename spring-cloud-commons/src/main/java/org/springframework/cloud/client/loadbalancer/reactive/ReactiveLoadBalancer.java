@@ -18,6 +18,8 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.cloud.client.loadbalancer.RequestFactory;
+
 /**
  * Reactive load balancer.
  *
@@ -46,9 +48,9 @@ public interface ReactiveLoadBalancer<T> {
 
 	@FunctionalInterface
 	interface Factory<T> {
+		<S, V> RequestFactory<S, V> getRequestFactory(String serviceId);
 
 		ReactiveLoadBalancer<T> getInstance(String serviceId);
-
 	}
 
 }

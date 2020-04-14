@@ -17,6 +17,7 @@
 package org.springframework.cloud.loadbalancer.support;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.RequestFactory;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.context.named.NamedContextFactory;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientConfiguration;
@@ -56,8 +57,12 @@ public class LoadBalancerClientFactory
 	}
 
 	@Override
+	public <S, V> RequestFactory<S, V> getRequestFactory(String serviceId) {
+		return getInstance(serviceId, RequestFactory.class);
+	}
+
+	@Override
 	public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
 		return getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class);
 	}
-
 }
