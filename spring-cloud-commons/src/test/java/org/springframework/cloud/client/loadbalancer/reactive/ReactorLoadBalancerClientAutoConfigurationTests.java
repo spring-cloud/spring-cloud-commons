@@ -24,10 +24,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
+import org.springframework.cloud.client.loadbalancer.RequestFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -106,7 +108,19 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 		@Bean
 		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory() {
-			return serviceId -> new TestReactiveLoadBalancer();
+			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
+				@Override
+				public RequestFactory<ClientRequest, Request<?>> getRequestFactory(
+						String serviceId) {
+					return request -> new DefaultRequest<>();
+				}
+
+				@Override
+				public ReactiveLoadBalancer<ServiceInstance> getInstance(
+						String serviceId) {
+					return new TestReactiveLoadBalancer();
+				}
+			};
 		}
 
 		@Bean

@@ -45,7 +45,8 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 
 	private ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	public LoadBalancerInterceptor(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+	public LoadBalancerInterceptor(
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerRequestFactory requestFactory) {
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.requestFactory = requestFactory;
@@ -56,7 +57,8 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 		this(loadBalancer, new LoadBalancerRequestFactory(loadBalancer));
 	}
 
-	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRequestFactory requestFactory) {
+	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer,
+			LoadBalancerRequestFactory requestFactory) {
 		this.loadBalancer = loadBalancer;
 		this.requestFactory = requestFactory;
 	}
@@ -70,9 +72,11 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 				"Request URI does not contain a valid hostname: " + originalUri);
 
 		// Locate the actual service
-		ReactiveLoadBalancer<ServiceInstance> lb = loadBalancerFactory.getInstance(serviceName);
+		ReactiveLoadBalancer<ServiceInstance> lb = loadBalancerFactory
+				.getInstance(serviceName);
 
-		Request<?> lbRequest = loadBalancerFactory.getRequestFactory(serviceName).create(request);
+		Request<?> lbRequest = loadBalancerFactory.getRequestFactory(serviceName)
+				.create(request);
 
 		Response<ServiceInstance> response = Mono.from(lb.choose(lbRequest)).block();
 		assert response != null;

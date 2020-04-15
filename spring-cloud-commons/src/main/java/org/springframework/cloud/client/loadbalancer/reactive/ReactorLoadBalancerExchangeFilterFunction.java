@@ -63,8 +63,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			return Mono.just(
 					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
-		Request<?> lbRequest = loadBalancerFactory
-				.getRequestFactory(serviceId).create(request);
+		Request<?> lbRequest = loadBalancerFactory.getRequestFactory(serviceId)
+				.create(request);
 		return choose(serviceId, lbRequest).flatMap(response -> {
 			ServiceInstance instance = response.getServer();
 			if (instance == null) {

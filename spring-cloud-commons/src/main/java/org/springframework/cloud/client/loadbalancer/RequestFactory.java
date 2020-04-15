@@ -32,6 +32,7 @@ import org.springframework.web.reactive.function.client.ClientRequest;
  * @param <T> Type of the converted request.
  * @author Miran Andaziar
  */
+@FunctionalInterface
 public interface RequestFactory<S, T> {
 
 	T create(S request);
@@ -43,8 +44,7 @@ public interface RequestFactory<S, T> {
 	}
 
 	default Request<?> create(HttpRequest request) {
-		return Optional
-				.ofNullable(request.getHeaders().getFirst("loadBalancerHint"))
+		return Optional.ofNullable(request.getHeaders().getFirst("loadBalancerHint"))
 				.map((Function<Object, DefaultRequest<?>>) DefaultRequest::new)
 				.orElse(new DefaultRequest<>());
 	}

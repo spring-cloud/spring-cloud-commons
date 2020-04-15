@@ -46,11 +46,12 @@ public interface ReactiveLoadBalancer<T> {
 		return choose(REQUEST);
 	}
 
-	@FunctionalInterface
 	interface Factory<T> {
+
 		<S, V> RequestFactory<S, V> getRequestFactory(String serviceId);
 
 		ReactiveLoadBalancer<T> getInstance(String serviceId);
+
 	}
 
 }
