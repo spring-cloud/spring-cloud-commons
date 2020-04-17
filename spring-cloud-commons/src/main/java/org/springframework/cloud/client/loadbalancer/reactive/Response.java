@@ -35,6 +35,10 @@ public interface Response<T> {
 	 */
 	void onComplete(CompletionContext completionContext);
 
+	/**
+	 * Allows accessing the response's {@link CompletionContext}.
+	 * @return completion context
+	 */
 	CompletionContext getCompletionContext();
 
 }

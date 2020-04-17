@@ -35,7 +35,9 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 
 /**
  * An {@link ExchangeFilterFunction} that uses {@link ReactiveLoadBalancer} to execute
- * requests against a correct {@link ServiceInstance}.
+ * requests against a correct {@link ServiceInstance}. Implements
+ * {@link ApplicationEventPublisherAware} in order to publish events with retrieved
+ * {@link Response}.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
