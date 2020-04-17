@@ -20,6 +20,8 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,8 +38,10 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,6 +65,9 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 
 	@Autowired
 	private SimpleDiscoveryProperties properties;
+
+	@Autowired
+	TestLoadBalancerResponseEventListener eventListener;
 
 	@LocalServerPort
 	private int port;
@@ -97,6 +104,17 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
+	@Test
+	void loadBalancerResponseEventGenerated() {
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
+				.block();
+		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
+		then(eventListener.events).isNotEmpty();
+		then(eventListener.events).extracting("source").first()
+				.isInstanceOf(DefaultResponse.class);
+	}
+
 	@EnableDiscoveryClient
 	@EnableAutoConfiguration
 	@SpringBootConfiguration
@@ -115,6 +133,23 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 					discoveryClient);
 		}
 
+		@Bean
+		TestLoadBalancerResponseEventListener loadBalancerResponseEventListener() {
+			return new TestLoadBalancerResponseEventListener();
+		}
+
+	}
+
+}
+
+class TestLoadBalancerResponseEventListener
+		implements ApplicationListener<LoadBalancerResponseEvent> {
+
+	final BlockingQueue<LoadBalancerResponseEvent> events = new LinkedBlockingQueue<>();
+
+	@Override
+	public void onApplicationEvent(@NonNull LoadBalancerResponseEvent event) {
+		events.add(event);
 	}
 
 }

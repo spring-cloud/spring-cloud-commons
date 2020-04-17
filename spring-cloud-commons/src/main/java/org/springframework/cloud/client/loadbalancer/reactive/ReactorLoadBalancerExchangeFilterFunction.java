@@ -43,7 +43,8 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 public class ReactorLoadBalancerExchangeFilterFunction
 		implements ExchangeFilterFunction, ApplicationEventPublisherAware {
 
-	private static final Log LOG = LogFactory.getLog(ReactorLoadBalancerExchangeFilterFunction.class);
+	private static final Log LOG = LogFactory
+			.getLog(ReactorLoadBalancerExchangeFilterFunction.class);
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
@@ -59,11 +60,14 @@ public class ReactorLoadBalancerExchangeFilterFunction
 		URI originalUrl = request.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
-			String message = String.format("Request URI does not contain a valid hostname: %s", originalUrl.toString());
+			String message = String.format(
+					"Request URI does not contain a valid hostname: %s",
+					originalUrl.toString());
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(message);
 			}
-			return Mono.just(ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
+			return Mono.just(
+					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
 		return choose(serviceId).flatMap(response -> {
 			if (!response.hasServer()) {
@@ -71,27 +75,30 @@ public class ReactorLoadBalancerExchangeFilterFunction
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(message);
 				}
-				completeAndPublishLoadBalancerResponse(response, new CompletionContext(Status.DISCARD));
+				completeAndPublishLoadBalancerResponse(response,
+						new CompletionContext(Status.DISCARD));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
 			}
 			ServiceInstance instance = response.getServer();
 
 			if (LOG.isDebugEnabled()) {
-				LOG.debug(String.format("Load balancer has retrieved the instance for service %s: %s", serviceId,
-						instance.getUri()));
+				LOG.debug(String.format(
+						"Load balancer has retrieved the instance for service %s: %s",
+						serviceId, instance.getUri()));
 			}
-			ClientRequest newRequest = buildClientRequest(request, reconstructURI(instance, originalUrl));
+			ClientRequest newRequest = buildClientRequest(request,
+					reconstructURI(instance, originalUrl));
 			return next.exchange(newRequest)
-					.doOnError(throwable -> completeAndPublishLoadBalancerResponse(response,
-							new CompletionContext(Status.FAILED, throwable)))
-					.doOnSuccess(clientResponse -> completeAndPublishLoadBalancerResponse(response,
-							new CompletionContext(Status.SUCCESS)));
+					.doOnError(throwable -> completeAndPublishLoadBalancerResponse(
+							response, new CompletionContext(Status.FAILED, throwable)))
+					.doOnSuccess(clientResponse -> completeAndPublishLoadBalancerResponse(
+							response, new CompletionContext(Status.SUCCESS)));
 		});
 	}
 
-	private void completeAndPublishLoadBalancerResponse(Response<ServiceInstance> response,
-			CompletionContext completionContext) {
+	private void completeAndPublishLoadBalancerResponse(
+			Response<ServiceInstance> response, CompletionContext completionContext) {
 		response.onComplete(completionContext);
 		eventPublisher.publishEvent(new LoadBalancerResponseEvent(response));
 	}
@@ -101,7 +108,8 @@ public class ReactorLoadBalancerExchangeFilterFunction
 	}
 
 	protected Mono<Response<ServiceInstance>> choose(String serviceId) {
-		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory.getInstance(serviceId);
+		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory
+				.getInstance(serviceId);
 		if (loadBalancer == null) {
 			return Mono.just(new EmptyResponse());
 		}
@@ -113,13 +121,16 @@ public class ReactorLoadBalancerExchangeFilterFunction
 	}
 
 	private ClientRequest buildClientRequest(ClientRequest request, URI uri) {
-		return ClientRequest.create(request.method(), uri).headers(headers -> headers.addAll(request.headers()))
+		return ClientRequest.create(request.method(), uri)
+				.headers(headers -> headers.addAll(request.headers()))
 				.cookies(cookies -> cookies.addAll(request.cookies()))
-				.attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
+				.attributes(attributes -> attributes.putAll(request.attributes()))
+				.body(request.body()).build();
 	}
 
 	@Override
-	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+	public void setApplicationEventPublisher(
+			ApplicationEventPublisher applicationEventPublisher) {
 		eventPublisher = applicationEventPublisher;
 	}
 

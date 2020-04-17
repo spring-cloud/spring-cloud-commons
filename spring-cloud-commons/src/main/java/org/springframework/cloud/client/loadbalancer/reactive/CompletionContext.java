@@ -37,6 +37,18 @@ public class CompletionContext {
 		this.throwable = throwable;
 	}
 
+	public static CompletionContext success() {
+		return new CompletionContext(Status.SUCCESS);
+	}
+
+	public static CompletionContext discard() {
+		return new CompletionContext(Status.DISCARD);
+	}
+
+	public static CompletionContext failed(Throwable t) {
+		return new CompletionContext(Status.FAILED, t);
+	}
+
 	public Status getStatus() {
 		return this.status;
 	}
