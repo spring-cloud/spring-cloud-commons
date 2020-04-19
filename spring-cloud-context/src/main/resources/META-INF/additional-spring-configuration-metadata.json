@@ -10,7 +10,7 @@
 			"name": "management.endpoint.env.post.enabled",
 			"type": "java.lang.Boolean",
 			"description": "Enable changing the Environment through a POST to /env.",
-			"defaultValue": true
+			"defaultValue": false
 		},
 		{
 			"name": "management.endpoint.refresh.enabled",
