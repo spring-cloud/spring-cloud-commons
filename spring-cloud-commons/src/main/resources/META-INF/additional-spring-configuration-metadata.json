@@ -43,7 +43,7 @@
 			"type": "java.lang.Boolean"
 		},
 		{
-			"defaultValue": true,
+			"defaultValue": false,
 			"name": "management.endpoint.env.post.enabled",
 			"description": "Enables writable environment endpoint.",
 			"type": "java.lang.Boolean"
