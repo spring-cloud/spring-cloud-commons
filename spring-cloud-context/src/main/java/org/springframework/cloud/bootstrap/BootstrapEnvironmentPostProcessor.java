@@ -22,17 +22,21 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.env.OriginTrackedMapPropertySource;
 import org.springframework.boot.origin.Origin;
 import org.springframework.boot.origin.OriginLookup;
 import org.springframework.cloud.bootstrap.support.OriginTrackedCompositePropertySource;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.Lifecycle;
+import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
@@ -43,10 +47,12 @@ import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.util.StringUtils;
 
 public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcessor {
+
 	/**
 	 * Property source name for bootstrap.
 	 */
 	public static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
+
 	/**
 	 * The name of the default properties.
 	 */
@@ -105,6 +111,7 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 			bootstrapProperties.addLast(source);
 		}
 		// TODO: is it possible or sensible to share a ResourceLoader?
+		/*
 		SpringApplicationBuilder builder = new SpringApplicationBuilder()
 				.profiles(environment.getActiveProfiles()).bannerMode(Banner.Mode.OFF)
 				.environment(bootstrapEnvironment)
@@ -132,6 +139,18 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 		}
 		builder.sources(BootstrapImportSelectorConfiguration.class);
 		final ConfigurableApplicationContext context = builder.run();
+		 */
+
+		final StaticApplicationContext context = new StaticApplicationContext();
+		AnnotatedBeanDefinitionReader annotatedReader = new AnnotatedBeanDefinitionReader(
+				context);
+		annotatedReader.setEnvironment(bootstrapEnvironment);
+		annotatedReader.register(BootstrapImportSelectorConfiguration.class,
+				BootstrapConfigFileConfiguration.class);
+		context.setEnvironment(bootstrapEnvironment);
+
+		context.refresh();
+
 		// gh-214 using spring.application.name=bootstrap to set the context id via
 		// `ContextIdApplicationContextInitializer` prevents apps from getting the actual
 		// spring.application.name
@@ -201,6 +220,58 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 		else {
 			environment.addLast(result);
 		}
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	private static class BootstrapConfigFileConfiguration {
+
+		@Bean
+		public BootstrapConfigFileLoader bootstrapConfigFileLoader(
+				ConfigurableEnvironment env) {
+			return new BootstrapConfigFileLoader(env);
+		}
+
+	}
+
+	private static class BootstrapConfigFileLoader implements Lifecycle {
+
+		private final AtomicBoolean started = new AtomicBoolean();
+
+		private final ConfigurableEnvironment environment;
+
+		BootstrapConfigFileLoader(ConfigurableEnvironment environment) {
+			this.environment = environment;
+			ConfigFileApplicationListener listener = new ConfigFileApplicationListener();
+			listener.postProcessEnvironment(this.environment, new BootstrapApplication());
+		}
+
+		@Override
+		public void start() {
+			if (started.compareAndSet(false, true)) {
+				ConfigFileApplicationListener listener = new ConfigFileApplicationListener();
+				listener.postProcessEnvironment(this.environment,
+						new BootstrapApplication());
+			}
+		}
+
+		@Override
+		public void stop() {
+			started.compareAndSet(true, false);
+		}
+
+		@Override
+		public boolean isRunning() {
+			return started.get();
+		}
+
+	}
+
+	private static class BootstrapApplication extends SpringApplication {
+
+		BootstrapApplication() {
+			// setResourceLoader(new DefaultResourceLoader(getClassLoader()));
+		}
+
 	}
 
 	private static class ExtendedDefaultPropertySource

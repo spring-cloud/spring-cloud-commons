@@ -19,13 +19,11 @@ package org.springframework.cloud.bootstrap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -46,7 +44,8 @@ public class BootstrapEnvironmentPostProcessorTests {
 	@Test
 	public void contextLoads() {
 		// from bootstrap.properties
-		assertThat(env.getProperty("test.property")).isEqualTo("from bootstrap.properties");
+		assertThat(env.getProperty("test.property"))
+				.isEqualTo("from bootstrap.properties");
 
 		try {
 			assertThat(context.getBean("foo-during-bootstrap"));

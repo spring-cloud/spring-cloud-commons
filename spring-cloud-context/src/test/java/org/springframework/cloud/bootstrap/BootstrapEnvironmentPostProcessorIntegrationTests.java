@@ -29,12 +29,14 @@ import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 // see https://github.com/spring-cloud/spring-cloud-commons/issues/476
 @RunWith(SpringRunner.class)
+@ActiveProfiles("epptests")
 @SpringBootTest
 public class BootstrapEnvironmentPostProcessorIntegrationTests {
 
@@ -53,6 +55,8 @@ public class BootstrapEnvironmentPostProcessorIntegrationTests {
 		assertThat(this.env.getProperty("conditional.property"))
 				.as("Environment has wrong value for conditional.property")
 				.isEqualTo("conditional.value");
+		assertThat(this.env.getProperty("info.name"))
+				.isEqualTo("from bootstrap-epptests");
 	}
 
 	@EnableAutoConfiguration
