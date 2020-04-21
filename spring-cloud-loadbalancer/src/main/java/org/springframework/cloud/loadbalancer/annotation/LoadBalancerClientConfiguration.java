@@ -66,7 +66,6 @@ public class LoadBalancerClientConfiguration {
 	@Order(REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER)
 	public static class ReactiveSupportConfiguration {
 
-
 		@Bean
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
@@ -92,6 +91,7 @@ public class LoadBalancerClientConfiguration {
 			}
 			return delegate;
 		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
