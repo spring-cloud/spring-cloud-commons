@@ -25,13 +25,11 @@ import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.loadbalancer.annotation.configutil.LoadBalancers;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
-import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceSupplier;
-import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
-import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -40,6 +38,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+
+import static org.springframework.cloud.loadbalancer.annotation.configutil.ServiceInstanceListSuppliers.cachedOrDelegate;
+import static org.springframework.cloud.loadbalancer.annotation.configutil.ServiceInstanceListSuppliers.discoveryClientBased;
 
 /**
  * @author Spencer Gibb
@@ -57,9 +58,7 @@ public class LoadBalancerClientConfiguration {
 	public ReactorLoadBalancer<ServiceInstance> reactorServiceInstanceLoadBalancer(
 			Environment environment,
 			LoadBalancerClientFactory loadBalancerClientFactory) {
-		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
-		return new RoundRobinLoadBalancer(loadBalancerClientFactory.getLazyProvider(name,
-				ServiceInstanceListSupplier.class), name);
+		return LoadBalancers.roundRobin(loadBalancerClientFactory, environment);
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -67,21 +66,14 @@ public class LoadBalancerClientConfiguration {
 	@Order(REACTIVE_SERVICE_INSTANCE_SUPPLIER_ORDER)
 	public static class ReactiveSupportConfiguration {
 
+
 		@Bean
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
 		public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 				ReactiveDiscoveryClient discoveryClient, Environment env,
 				ApplicationContext context) {
-			DiscoveryClientServiceInstanceListSupplier delegate = new DiscoveryClientServiceInstanceListSupplier(
-					discoveryClient, env);
-			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
-					.getBeanProvider(LoadBalancerCacheManager.class);
-			if (cacheManagerProvider.getIfAvailable() != null) {
-				return new CachingServiceInstanceListSupplier(delegate,
-						cacheManagerProvider.getIfAvailable());
-			}
-			return delegate;
+			return cachedOrDelegate(context, discoveryClientBased(discoveryClient, env));
 		}
 
 		@Bean
@@ -100,7 +92,6 @@ public class LoadBalancerClientConfiguration {
 			}
 			return delegate;
 		}
-
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -114,15 +105,7 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 				DiscoveryClient discoveryClient, Environment env,
 				ApplicationContext context) {
-			DiscoveryClientServiceInstanceListSupplier delegate = new DiscoveryClientServiceInstanceListSupplier(
-					discoveryClient, env);
-			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
-					.getBeanProvider(LoadBalancerCacheManager.class);
-			if (cacheManagerProvider.getIfAvailable() != null) {
-				return new CachingServiceInstanceListSupplier(delegate,
-						cacheManagerProvider.getIfAvailable());
-			}
-			return delegate;
+			return cachedOrDelegate(context, discoveryClientBased(discoveryClient, env));
 		}
 
 		@Bean
