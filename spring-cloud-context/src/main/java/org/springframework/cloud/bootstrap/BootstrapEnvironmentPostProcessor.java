@@ -22,8 +22,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Set;
 
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.env.EnvironmentPostProcessor;
@@ -31,12 +32,11 @@ import org.springframework.boot.env.OriginTrackedMapPropertySource;
 import org.springframework.boot.origin.Origin;
 import org.springframework.boot.origin.OriginLookup;
 import org.springframework.cloud.bootstrap.support.OriginTrackedCompositePropertySource;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
@@ -44,6 +44,8 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcessor {
@@ -111,8 +113,9 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 			bootstrapProperties.addLast(source);
 		}
 		// TODO: is it possible or sensible to share a ResourceLoader?
-		/*
-		SpringApplicationBuilder builder = new SpringApplicationBuilder()
+
+		// @formatter:off
+		/* SpringApplicationBuilder builder = new SpringApplicationBuilder()
 				.profiles(environment.getActiveProfiles()).bannerMode(Banner.Mode.OFF)
 				.environment(bootstrapEnvironment)
 				// Don't use the default properties in this builder
@@ -138,24 +141,48 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 			// .setListeners(filterListeners(builderApplication.getListeners()));
 		}
 		builder.sources(BootstrapImportSelectorConfiguration.class);
-		final ConfigurableApplicationContext context = builder.run();
-		 */
+		final ConfigurableApplicationContext context = builder.run(); */
+		// @formatter:on
 
 		final StaticApplicationContext context = new StaticApplicationContext();
 		AnnotatedBeanDefinitionReader annotatedReader = new AnnotatedBeanDefinitionReader(
 				context);
-		annotatedReader.setEnvironment(bootstrapEnvironment);
-		annotatedReader.register(BootstrapImportSelectorConfiguration.class,
-				BootstrapConfigFileConfiguration.class);
-		context.setEnvironment(bootstrapEnvironment);
+		ConfigFileApplicationListener listener = new ConfigFileApplicationListener();
+		SpringApplication bootstrapApplication = new SpringApplication();
+		listener.postProcessEnvironment(bootstrapEnvironment, bootstrapApplication);
 
-		context.refresh();
+		annotatedReader.setEnvironment(bootstrapEnvironment);
+		annotatedReader.register(BootstrapImportSelectorConfiguration.class);
+
+		String sourcesProp = bootstrapEnvironment.getProperty("spring.main.sources");
+		if (StringUtils.hasText(sourcesProp)) {
+			Set<String> sources = StringUtils.commaDelimitedListToSet(sourcesProp);
+			for (String source : sources) {
+				try {
+					String resolvedSource = bootstrapEnvironment.resolvePlaceholders(source);
+					annotatedReader.register(ClassUtils.forName(resolvedSource, null));
+				}
+				catch (IllegalArgumentException | ClassNotFoundException ex) {
+					// swallow exception and continue
+				}
+			};
+		}
+		context.setEnvironment(bootstrapEnvironment);
 
 		// gh-214 using spring.application.name=bootstrap to set the context id via
 		// `ContextIdApplicationContextInitializer` prevents apps from getting the actual
 		// spring.application.name
 		// during the bootstrap phase.
 		context.setId("bootstrap");
+
+		context.refresh();
+
+		List<ApplicationContextInitializer> initializers = getOrderedBeansOfType(context, ApplicationContextInitializer.class);
+		if (!CollectionUtils.isEmpty(initializers)) {
+			for (ApplicationContextInitializer initializer : initializers) {
+				initializer.initialize(context);
+			}
+		}
 
 		// Make the bootstrap context a parent of the app context
 		// addAncestorInitializer(application, context);
@@ -222,56 +249,14 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 		}
 	}
 
-	@Configuration(proxyBeanMethods = false)
-	private static class BootstrapConfigFileConfiguration {
-
-		@Bean
-		public BootstrapConfigFileLoader bootstrapConfigFileLoader(
-				ConfigurableEnvironment env) {
-			return new BootstrapConfigFileLoader(env);
+	private <T> List<T> getOrderedBeansOfType(ListableBeanFactory context,
+			Class<T> type) {
+		List<T> result = new ArrayList<T>();
+		for (String name : context.getBeanNamesForType(type)) {
+			result.add(context.getBean(name, type));
 		}
-
-	}
-
-	private static class BootstrapConfigFileLoader implements Lifecycle {
-
-		private final AtomicBoolean started = new AtomicBoolean();
-
-		private final ConfigurableEnvironment environment;
-
-		BootstrapConfigFileLoader(ConfigurableEnvironment environment) {
-			this.environment = environment;
-			ConfigFileApplicationListener listener = new ConfigFileApplicationListener();
-			listener.postProcessEnvironment(this.environment, new BootstrapApplication());
-		}
-
-		@Override
-		public void start() {
-			if (started.compareAndSet(false, true)) {
-				ConfigFileApplicationListener listener = new ConfigFileApplicationListener();
-				listener.postProcessEnvironment(this.environment,
-						new BootstrapApplication());
-			}
-		}
-
-		@Override
-		public void stop() {
-			started.compareAndSet(true, false);
-		}
-
-		@Override
-		public boolean isRunning() {
-			return started.get();
-		}
-
-	}
-
-	private static class BootstrapApplication extends SpringApplication {
-
-		BootstrapApplication() {
-			// setResourceLoader(new DefaultResourceLoader(getClassLoader()));
-		}
-
+		AnnotationAwareOrderComparator.sort(result);
+		return result;
 	}
 
 	private static class ExtendedDefaultPropertySource
@@ -340,6 +325,12 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 			return this.sources.getOrigin(name);
 		}
 
+		@Override
+		public String toString() {
+			return sources != null ? sources.toString()
+					: "Empty ExtendedDefaultPropertySource";
+
+		}
 	}
 
 }
