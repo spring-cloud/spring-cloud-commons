@@ -159,13 +159,14 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 			Set<String> sources = StringUtils.commaDelimitedListToSet(sourcesProp);
 			for (String source : sources) {
 				try {
-					String resolvedSource = bootstrapEnvironment.resolvePlaceholders(source);
+					String resolvedSource = bootstrapEnvironment
+							.resolvePlaceholders(source);
 					annotatedReader.register(ClassUtils.forName(resolvedSource, null));
 				}
 				catch (IllegalArgumentException | ClassNotFoundException ex) {
 					// swallow exception and continue
 				}
-			};
+			}
 		}
 		context.setEnvironment(bootstrapEnvironment);
 
@@ -177,7 +178,8 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 
 		context.refresh();
 
-		List<ApplicationContextInitializer> initializers = getOrderedBeansOfType(context, ApplicationContextInitializer.class);
+		List<ApplicationContextInitializer> initializers = getOrderedBeansOfType(context,
+				ApplicationContextInitializer.class);
 		if (!CollectionUtils.isEmpty(initializers)) {
 			for (ApplicationContextInitializer initializer : initializers) {
 				initializer.initialize(context);
@@ -191,6 +193,16 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 		// it (and it will be added back later)
 		bootstrapProperties.remove(BOOTSTRAP_PROPERTY_SOURCE_NAME);
 		mergeDefaultProperties(environment.getPropertySources(), bootstrapProperties);
+
+		// TODO: Should probably be something new, maybe BootstrapEnvironmentPostProcessor
+		List<EnvironmentPostProcessor> processors = getOrderedBeansOfType(context,
+				EnvironmentPostProcessor.class);
+		if (!CollectionUtils.isEmpty(initializers)) {
+			for (EnvironmentPostProcessor processor : processors) {
+				processor.postProcessEnvironment(environment, bootstrapApplication);
+			}
+		}
+
 		return context;
 	}
 
@@ -331,6 +343,7 @@ public class BootstrapEnvironmentPostProcessor implements EnvironmentPostProcess
 					: "Empty ExtendedDefaultPropertySource";
 
 		}
+
 	}
 
 }
