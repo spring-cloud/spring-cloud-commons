@@ -140,6 +140,19 @@ public class ContextRefresher {
 					}
 				}
 			}
+
+			MutablePropertySources newPropertySources = environment.getPropertySources();
+			List<String> toRemove = new ArrayList<>();
+			// this is a CopyOnWriteArrayList, it doesn't support Iterator.remove
+			for (PropertySource<?> propertySource : target) {
+					String name = propertySource.getName();
+					if (!newPropertySources.contains(name)) {
+						toRemove.add(name);
+					}
+			}
+			for (String name : toRemove) {
+				target.remove(name);
+			}
 		}
 		finally {
 			ConfigurableApplicationContext closeable = capture;

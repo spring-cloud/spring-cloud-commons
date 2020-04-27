@@ -75,6 +75,24 @@ public class ContextRefresherTests {
 	}
 
 	@Test
+	public void propertySourceDeleted() {
+		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
+				"--spring.main.web-application-type=none", "--debug=false",
+				"--spring.main.bannerMode=OFF")) {
+			context.getEnvironment().setActiveProfiles("refresh");
+			context.getEnvironment().getPropertySources().addLast(new MapPropertySource("to-remove", Collections.emptyMap()));
+
+			List<String> names = names(context.getEnvironment().getPropertySources());
+			then(names).containsSequence("to-remove");
+
+			ContextRefresher refresher = new ContextRefresher(context, this.scope);
+			refresher.refresh();
+			names = names(context.getEnvironment().getPropertySources());
+			then(names).doesNotContain("to-remove");
+		}
+	}
+
+	@Test
 	public void bootstrapPropertySourceAlwaysFirst() {
 		// Use spring.cloud.bootstrap.name to switch off the defaults (which would pick up
 		// a bootstrapProperties immediately
