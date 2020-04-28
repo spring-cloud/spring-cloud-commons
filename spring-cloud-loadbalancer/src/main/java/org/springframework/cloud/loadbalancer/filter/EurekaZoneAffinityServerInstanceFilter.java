@@ -19,7 +19,6 @@ package org.springframework.cloud.loadbalancer.filter;
 import java.util.Map;
 
 import io.micrometer.core.instrument.util.StringUtils;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
