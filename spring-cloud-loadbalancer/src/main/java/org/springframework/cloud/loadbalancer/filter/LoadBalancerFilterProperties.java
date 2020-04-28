@@ -4,6 +4,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.List;
 
+/**
+ * @author Hash.Jang
+ */
 @ConfigurationProperties("spring.cloud.loadbalancer.filter")
 public class LoadBalancerFilterProperties {
     private List<String> list;

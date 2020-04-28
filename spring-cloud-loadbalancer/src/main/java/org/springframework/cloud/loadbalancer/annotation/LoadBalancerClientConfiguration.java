@@ -52,6 +52,7 @@ import java.util.List;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
+ * @author Hash.Jang
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnDiscoveryEnabled

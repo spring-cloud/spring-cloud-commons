@@ -8,6 +8,9 @@ import org.springframework.core.env.Environment;
 
 import java.util.Map;
 
+/**
+ * @author Hash.Jang
+ */
 public class EurekaZoneAffinityServerInstanceFilter implements ServerInstanceFilter<String> {
     private static Log log = LogFactory.getLog(EurekaZoneAffinityServerInstanceFilter.class);
     private final String currentZone;
