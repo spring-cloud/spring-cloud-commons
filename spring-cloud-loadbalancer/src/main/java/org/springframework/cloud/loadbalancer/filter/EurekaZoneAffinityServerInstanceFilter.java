@@ -19,15 +19,17 @@ package org.springframework.cloud.loadbalancer.filter;
 import java.util.Map;
 
 import io.micrometer.core.instrument.util.StringUtils;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.env.Environment;
 
 /**
  * @author Hash.Jang
  */
-public class EurekaZoneAffinityServerInstanceFilter implements ServerInstanceFilter<String> {
+public class EurekaZoneAffinityServerInstanceFilter implements ServerInstanceFilter {
     private static Log log = LogFactory.getLog(EurekaZoneAffinityServerInstanceFilter.class);
     private final String currentZone;
 
