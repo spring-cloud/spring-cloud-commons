@@ -21,6 +21,6 @@ import org.springframework.cloud.client.ServiceInstance;
 /**
  * @author Hash.Jang
  */
-public interface ServerInstanceFilter<T> {
+public interface ServerInstanceFilter {
     boolean filter(ServiceInstance serviceInstance);
 }
