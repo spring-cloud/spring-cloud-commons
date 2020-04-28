@@ -34,12 +34,19 @@ import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceSupplier;
+import org.springframework.cloud.loadbalancer.filter.ServerInstanceFilter;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Spencer Gibb
@@ -58,8 +65,25 @@ public class LoadBalancerClientConfiguration {
 			Environment environment,
 			LoadBalancerClientFactory loadBalancerClientFactory) {
 		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
+
+		List<ServerInstanceFilter> serverInstanceFilters = new ArrayList<>();
+		String property = environment
+				.getProperty("spring.cloud." + LoadBalancerClientFactory.NAMESPACE + "." + name + ".filters");
+		if (StringUtils.hasText(property)) {
+			Arrays.stream(property.split(",")).map(String::trim).forEach(className -> {
+				if (StringUtils.hasText(className)) {
+					try {
+						Class<?> toInstantiate = Class.forName(className);
+						Constructor constructor = toInstantiate.getConstructor(Environment.class);
+						serverInstanceFilters.add((ServerInstanceFilter) constructor.newInstance(environment));
+					} catch (Exception e) {
+						throw new IllegalArgumentException("failed to load " + className + " named " + name, e);
+					}
+				}
+			});
+		}
 		return new RoundRobinLoadBalancer(loadBalancerClientFactory.getLazyProvider(name,
-				ServiceInstanceListSupplier.class), name);
+				ServiceInstanceListSupplier.class), serverInstanceFilters, name);
 	}
 
 	@Configuration(proxyBeanMethods = false)

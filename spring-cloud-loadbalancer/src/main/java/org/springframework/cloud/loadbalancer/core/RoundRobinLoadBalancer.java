@@ -19,9 +19,11 @@ package org.springframework.cloud.loadbalancer.core;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cloud.loadbalancer.filter.ServerInstanceFilter;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -48,13 +50,15 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
 
+	private List<ServerInstanceFilter> serviceInstanceFilters;
+
 	private final String serviceId;
 
 	/**
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
 	 * will be used to get available instances
-	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, String)}} instead.
+	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, List, String)}} instead.
 	 */
 	@Deprecated
 	public RoundRobinLoadBalancer(String serviceId,
@@ -66,7 +70,9 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	 * @param serviceInstanceListSupplierProvider a provider of
 	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
 	 * @param serviceId id of the service for which to choose an instance
+	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, List, String)}} instead.
 	 */
+	@Deprecated
 	public RoundRobinLoadBalancer(
 			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId) {
@@ -74,11 +80,28 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	}
 
 	/**
+	 *
+	 * @param serviceInstanceListSupplierProvider a provider of
+	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 * @param serviceInstanceFilters filters list of servers supplied
+	 * @param serviceId id of the service for which to choose an instance
+	 */
+	public RoundRobinLoadBalancer(
+			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+			List<ServerInstanceFilter> serviceInstanceFilters,
+			String serviceId) {
+		this(serviceInstanceListSupplierProvider, serviceInstanceFilters, serviceId, new Random().nextInt(1000));
+	}
+
+	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
 	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param seedPosition Round Robin element position marker
+	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, List, String, int)}}
+	 * instead.
 	 */
+	@Deprecated
 	public RoundRobinLoadBalancer(
 			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId, int seedPosition) {
@@ -88,11 +111,29 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	}
 
 	/**
+	 *
+	 * @param serviceInstanceListSupplierProvider a provider of
+	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 * @param serviceInstanceFilters filters list of servers supplied
+	 * @param serviceId id of the service for which to choose an instance
+	 * @param seedPosition Round Robin element position marker
+	 */
+	public RoundRobinLoadBalancer(
+			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+			List<ServerInstanceFilter> serviceInstanceFilters,
+			String serviceId, int seedPosition) {
+		this.serviceId = serviceId;
+		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
+		this.serviceInstanceFilters = serviceInstanceFilters;
+		this.position = new AtomicInteger(seedPosition);
+	}
+
+	/**
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
 	 * will be used to get available instances
 	 * @param seedPosition Round Robin element position marker
-	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, String, int)}}
+	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, List, String, int)}}
 	 * instead.
 	 */
 	@Deprecated
@@ -128,6 +169,17 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 			log.warn("No servers available for service: " + this.serviceId);
 			return new EmptyResponse();
 		}
+		instances = instances.stream().filter(serviceInstance -> {
+			if (serviceInstanceFilters != null) {
+				for (ServerInstanceFilter serverInstanceFilter : serviceInstanceFilters) {
+					if (!serverInstanceFilter.filter(serviceInstance)) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}).collect(Collectors.toList());
+
 		// TODO: enforce order?
 		int pos = Math.abs(this.position.incrementAndGet());
 
