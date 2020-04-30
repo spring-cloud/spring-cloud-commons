@@ -1585,22 +1585,11 @@ healthy instances after querying the external ServiceDiscovery.
 </table>
 </div>
 <div class="paragraph">
-<p>The <code>HealthCheckServiceInstanceListSupplier</code> uses <code>InstanceHealthChecker</code> to verify if the instances are
-alive. We provide a default <code>PingHealthChecker</code> instance. It uses <code>WebClient</code> to execute
-requests against the <code>health</code> endpoint of the instance. You can also provide your own implementation
-of <code>InstanceHealthChecker</code> instead.</p>
-</div>
-<div class="paragraph">
 <p><code>HealthCheckServiceInstanceListSupplier</code> uses properties prefixed with
 <code>spring.cloud.loadbalancer.healthcheck</code>. You can set the <code>initialDelay</code> and <code>interval</code>
-for the scheduler.</p>
-</div>
-<div class="paragraph">
-<p>For the <code>PingHealthChecker</code>, you can set the default path for the healthcheck URL by setting
+for the scheduler. You can set the default path for the healthcheck URL by setting
 the value of the <code>spring.cloud.loadbalancer.healthcheck.path.default</code>. You can also set a specific value
-for any given service by setting the value of the <code>spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]</code>,
-substituting the <code>[SERVICE_ID]</code> with the correct ID of your service. If the path is not set,
-<code>/actuator/health</code> is used by default.</p>
+for any given service by setting the value of the <code>spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]</code>, substituting the <code>[SERVICE_ID]</code> with the correct ID of your service. If the path is not set, <code>/actuator/health</code> is used by default.</p>
 </div>
 <div class="paragraph">
 <p>In order to use the health-check scheduler approach, you will have to instantiate a <code>HealthCheckServiceInstanceListSupplier</code> bean in a <a href="#custom-loadbalancer-configuration">custom configuration</a>.</p>
