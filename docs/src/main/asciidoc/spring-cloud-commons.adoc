@@ -919,20 +919,11 @@ TIP: This mechanism is particularly helpful while using the `SimpleDiscoveryClie
 clients backed by an actual Service Registry, it's not necessary to use, as we already get
 healthy instances after querying the external ServiceDiscovery.
 
-The `HealthCheckServiceInstanceListSupplier` uses `InstanceHealthChecker` to verify if the instances are
-alive. We provide a default `PingHealthChecker` instance. It uses `WebClient` to execute
-requests against the `health` endpoint of the instance. You can also provide your own implementation
-of `InstanceHealthChecker` instead.
-
 `HealthCheckServiceInstanceListSupplier` uses properties prefixed with
 `spring.cloud.loadbalancer.healthcheck`. You can set the `initialDelay` and `interval`
-for the scheduler.
-
-For the `PingHealthChecker`, you can set the default path for the healthcheck URL by setting
+for the scheduler. You can set the default path for the healthcheck URL by setting
 the value of the `spring.cloud.loadbalancer.healthcheck.path.default`. You can also set a specific value
-for any given service by setting the value of the `spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]`,
-substituting the `[SERVICE_ID]` with the correct ID of your service. If the path is not set,
-`/actuator/health` is used by default.
+for any given service by setting the value of the `spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]`, substituting the `[SERVICE_ID]` with the correct ID of your service. If the path is not set, `/actuator/health` is used by default.
 
 In order to use the health-check scheduler approach, you will have to instantiate a `HealthCheckServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.
 
