@@ -44,13 +44,11 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Roman Matiushchenko
  * @since 2.2.0
  */
-public class HealthCheckServiceInstanceListSupplier
-		implements ServiceInstanceListSupplier, InitializingBean, DisposableBean {
+public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier
+		implements InitializingBean, DisposableBean {
 
 	private static final Log LOG = LogFactory
 			.getLog(HealthCheckServiceInstanceListSupplier.class);
-
-	private final ServiceInstanceListSupplier delegate;
 
 	private final LoadBalancerProperties.HealthCheck healthCheck;
 
@@ -64,7 +62,7 @@ public class HealthCheckServiceInstanceListSupplier
 
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
-		this.delegate = delegate;
+		super(delegate);
 		this.healthCheck = healthCheck;
 		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default",
 				"/actuator/health");
@@ -119,11 +117,6 @@ public class HealthCheckServiceInstanceListSupplier
 				return result;
 			}).defaultIfEmpty(result);
 		}).repeatWhen(restart -> restart.delayElements(healthCheck.getInterval()));
-	}
-
-	@Override
-	public String getServiceId() {
-		return delegate.getServiceId();
 	}
 
 	@Override
