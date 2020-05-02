@@ -5,6 +5,11 @@
 			"name": "spring.cloud.loadbalancer.ribbon.enabled",
 			"description": "Causes `RibbonLoadBalancerClient` to be used by default.",
 			"type": "java.lang.Boolean"
+		},
+		{
+			"name": "spring.cloud.loadbalancer.zone",
+			"type": "java.lang.String",
+			"description": "Spring cloud loadbalancer zone."
 		}
 	]
 }
