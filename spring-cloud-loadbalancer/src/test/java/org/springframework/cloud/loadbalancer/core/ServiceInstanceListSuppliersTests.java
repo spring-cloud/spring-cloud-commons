@@ -37,11 +37,8 @@ public class ServiceInstanceListSuppliersTests {
 		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class)
 				.run(context -> {
 					ServiceInstanceListSupplier supplier = ServiceInstanceListSuppliers
-							.builder()
-							.withDiscoveryClient()
-							.withHealthChecks()
-							.withCaching()
-							.build(context);
+							.builder().withDiscoveryClient().withHealthChecks()
+							.withCaching().build(context);
 					assertThat(supplier)
 							.isInstanceOf(CachingServiceInstanceListSupplier.class);
 					DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
@@ -49,8 +46,8 @@ public class ServiceInstanceListSuppliersTests {
 							.isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
 					delegating = (DelegatingServiceInstanceListSupplier) delegating
 							.getDelegate();
-					assertThat(delegating.getDelegate())
-							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+					assertThat(delegating.getDelegate()).isInstanceOf(
+							DiscoveryClientServiceInstanceListSupplier.class);
 				});
 	}
 
@@ -59,8 +56,7 @@ public class ServiceInstanceListSuppliersTests {
 		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class)
 				.run(context -> {
 					try {
-						ServiceInstanceListSuppliers.builder()
-								.withHealthChecks()
+						ServiceInstanceListSuppliers.builder().withHealthChecks()
 								.build(context);
 						fail("Should have thrown exception.");
 					}
@@ -77,18 +73,15 @@ public class ServiceInstanceListSuppliersTests {
 		new ApplicationContextRunner().withUserConfiguration(BaseTestConfig.class)
 				.run(context -> {
 					ServiceInstanceListSupplier supplier = ServiceInstanceListSuppliers
-							.builder()
-							.withDiscoveryClient()
-							.withHealthChecks()
-							.withCaching()
-							.build(context);
+							.builder().withDiscoveryClient().withHealthChecks()
+							.withCaching().build(context);
 					assertThat(supplier)
 							.isNotInstanceOf(CachingServiceInstanceListSupplier.class);
 					assertThat(supplier)
 							.isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
 					DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
-					assertThat(delegating.getDelegate())
-							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+					assertThat(delegating.getDelegate()).isInstanceOf(
+							DiscoveryClientServiceInstanceListSupplier.class);
 				});
 	}
 
@@ -99,6 +92,7 @@ public class ServiceInstanceListSuppliersTests {
 		public LoadBalancerCacheManager cacheManager() {
 			return mock(LoadBalancerCacheManager.class);
 		}
+
 	}
 
 	private static class BaseTestConfig {
@@ -117,5 +111,7 @@ public class ServiceInstanceListSuppliersTests {
 		public WebClient.Builder webClientBuilder() {
 			return WebClient.builder();
 		}
+
 	}
+
 }

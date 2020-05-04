@@ -37,7 +37,8 @@ import org.springframework.cloud.client.ServiceInstance;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-public class CachingServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
+public class CachingServiceInstanceListSupplier
+		extends DelegatingServiceInstanceListSupplier {
 
 	private static final Log log = LogFactory
 			.getLog(CachingServiceInstanceListSupplier.class);

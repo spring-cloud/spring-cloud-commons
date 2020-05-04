@@ -44,7 +44,8 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Roman Matiushchenko
  * @since 2.2.0
  */
-public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier
+public class HealthCheckServiceInstanceListSupplier
+		extends DelegatingServiceInstanceListSupplier
 		implements InitializingBean, DisposableBean {
 
 	private static final Log LOG = LogFactory
