@@ -33,6 +33,13 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.client.WebClient;
 
+/**
+ * A utility class providing a {@link Builder} for creating a {@link ServiceInstanceListSupplier}
+ * hierarchy to be used in {@link ReactorLoadBalancer} configuration.
+ *
+ * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
+ */
 public abstract class ServiceInstanceListSuppliers {
 
 	private ServiceInstanceListSuppliers() {
@@ -43,14 +50,25 @@ public abstract class ServiceInstanceListSuppliers {
 		return new Builder();
 	}
 
+	/**
+	 * Allows creating a {@link ServiceInstanceListSupplier} instance based on provided {@link ConfigurableApplicationContext}.
+	 */
 	public interface Creator extends Function<ConfigurableApplicationContext, ServiceInstanceListSupplier> {
 
 	}
 
+	/**
+	 * Allows creating a {@link ServiceInstanceListSupplier} instance based on provided {@link ConfigurableApplicationContext}
+	 * and another {@link ServiceInstanceListSupplier} instance that will be used as a delegate.
+	 */
 	public interface DelegateCreator extends BiFunction<ConfigurableApplicationContext, ServiceInstanceListSupplier, ServiceInstanceListSupplier> {
 
 	}
 
+	/**
+	 * A builder for creating a {@link ServiceInstanceListSupplier} hierarchy to be used in
+	 * {@link ReactorLoadBalancer} configuration.
+	 */
 	public static class Builder {
 
 		private static final Log LOG = LogFactory.getLog(Builder.class);
@@ -62,6 +80,11 @@ public abstract class ServiceInstanceListSuppliers {
 		public Builder() {
 		}
 
+		/**
+		 * Sets a blocking {@link DiscoveryClient}-based {@link DiscoveryClientServiceInstanceListSupplier} as a base {@link ServiceInstanceListSupplier}
+		 * in the hierarchy.
+		 * @return the {@link Builder} object
+		 */
 		public Builder withBlockingDiscoveryClient() {
 			if (baseCreator != null && LOG.isWarnEnabled()) {
 				LOG.warn("Overriding a previously set baseCreator with a blocking DiscoveryClient baseCreator.");
@@ -75,6 +98,11 @@ public abstract class ServiceInstanceListSuppliers {
 			return this;
 		}
 
+		/**
+		 * Sets a {@link ReactiveDiscoveryClient}-based {@link DiscoveryClientServiceInstanceListSupplier} as a base {@link ServiceInstanceListSupplier}
+		 * in the hierarchy.
+		 * @return the {@link Builder} object
+		 */
 		public Builder withDiscoveryClient() {
 			if (baseCreator != null && LOG.isWarnEnabled()) {
 				LOG.warn("Overriding a previously set baseCreator with a ReactiveDiscoveryClient baseCreator.");
@@ -89,11 +117,22 @@ public abstract class ServiceInstanceListSuppliers {
 			return this;
 		}
 
+		/**
+		 * Sets a user-provided {@link ServiceInstanceListSupplier} as a base
+		 * {@link ServiceInstanceListSupplier} in the hierarchy.
+		 * @param supplier a user-provided {@link ServiceInstanceListSupplier} instance
+		 * @return the {@link Builder} object
+		 */
 		public Builder withBase(ServiceInstanceListSupplier supplier) {
 			this.baseCreator = context -> supplier;
 			return this;
 		}
 
+		/**
+		 * Adds a {@link HealthCheckServiceInstanceListSupplier} to the
+		 * {@link ServiceInstanceListSupplier} hierarchy.
+		 * @return the {@link Builder} object
+		 */
 		public Builder withHealthChecks() {
 			DelegateCreator creator = (context, delegate) -> {
 				LoadBalancerProperties properties = context
@@ -106,6 +145,12 @@ public abstract class ServiceInstanceListSuppliers {
 			return this;
 		}
 
+		/**
+		 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided {@link WebClient} instance
+		 * to the {@link ServiceInstanceListSupplier} hierarchy.
+		 * @param webClient a user-provided {@link WebClient} instance
+		 * @return the {@link Builder} object
+		 */
 		public Builder withHealthChecks(WebClient webClient) {
 			DelegateCreator creator = (context, delegate) -> {
 				LoadBalancerProperties properties = context
@@ -117,6 +162,11 @@ public abstract class ServiceInstanceListSuppliers {
 			return this;
 		}
 
+		/**
+		 * Adds a {@link ZonePreferenceServiceInstanceListSupplier} to the
+		 * {@link ServiceInstanceListSupplier} hierarchy.
+		 * @return the {@link Builder} object
+		 */
 		public Builder withZonePreference() {
 			DelegateCreator creator = (context, delegate) -> {
 				LoadBalancerZoneConfig zoneConfig = context
@@ -127,6 +177,11 @@ public abstract class ServiceInstanceListSuppliers {
 			return this;
 		}
 
+		/**
+		 * Wraps created {@link ServiceInstanceListSupplier} hierarchy with a {@link CachingServiceInstanceListSupplier}
+		 * instance to provide a caching mechanism for service instances.
+		 * @return the {@link Builder} object
+		 */
 		public Builder withCaching() {
 			if (cachingCreator != null && LOG.isWarnEnabled()) {
 				LOG.warn("Overriding a previously set cachingCreator with a CachingServiceInstanceListSupplier-based cachingCreator.");
@@ -139,6 +194,11 @@ public abstract class ServiceInstanceListSuppliers {
 			return this;
 		}
 
+		/**
+		 * Builds the {@link ServiceInstanceListSupplier} hierarchy.
+		 * @param context application context
+		 * @return a {@link ServiceInstanceListSupplier} instance on top of the delegate hierarchy
+		 */
 		public ServiceInstanceListSupplier build(ConfigurableApplicationContext context) {
 			Assert.notNull(baseCreator, "A baseCreator must not be null");
 

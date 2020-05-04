@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.core;
 import org.springframework.util.Assert;
 
 /**
+ * Represents a {@link ServiceInstanceListSupplier} that uses a delegate {@link ServiceInstanceListSupplier} instance underneath.
  * @author Spencer Gibb
  */
 public abstract class DelegatingServiceInstanceListSupplier
