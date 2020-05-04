@@ -24,10 +24,12 @@ import java.util.function.Function;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.Assert;
@@ -178,8 +180,11 @@ public abstract class ServiceInstanceListSuppliers {
 		}
 
 		/**
-		 * Wraps created {@link ServiceInstanceListSupplier} hierarchy with a {@link CachingServiceInstanceListSupplier}
+		 * If {@link LoadBalancerCacheManager} is available in the context, wraps created {@link ServiceInstanceListSupplier}
+		 * hierarchy with a {@link CachingServiceInstanceListSupplier}
 		 * instance to provide a caching mechanism for service instances.
+		 * Uses {@link ObjectProvider<LoadBalancerCacheManager>} to lazily resolve {@link CacheManager}.
+		 *
 		 * @return the {@link Builder} object
 		 */
 		public Builder withCaching() {
@@ -187,9 +192,16 @@ public abstract class ServiceInstanceListSuppliers {
 				LOG.warn("Overriding a previously set cachingCreator with a CachingServiceInstanceListSupplier-based cachingCreator.");
 			}
 			this.cachingCreator = (context, delegate) -> {
-				CacheManager cacheManager = context.getBean(CacheManager.class);
-
-				return new CachingServiceInstanceListSupplier(delegate, cacheManager);
+				ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
+						.getBeanProvider(LoadBalancerCacheManager.class);
+				if (cacheManagerProvider.getIfAvailable() != null) {
+					return new CachingServiceInstanceListSupplier(delegate,
+							cacheManagerProvider.getIfAvailable());
+				}
+				if(LOG.isWarnEnabled()){
+					LOG.warn("LoadBalancerCacheManager not available, returning delegate without caching.");
+				}
+				return delegate;
 			};
 			return this;
 		}

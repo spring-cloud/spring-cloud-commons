@@ -19,10 +19,11 @@ package org.springframework.cloud.loadbalancer.core;
 import org.junit.Test;
 
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
-import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,25 +34,29 @@ public class ServiceInstanceListSuppliersTests {
 
 	@Test
 	public void testBuilder() {
-		new ApplicationContextRunner().withUserConfiguration(TestConfig.class).run(context -> {
-			ServiceInstanceListSupplier supplier = ServiceInstanceListSuppliers.builder()
-					.withDiscoveryClient()
-					.withHealthChecks()
-					.withCaching()
-					.build(context);
-			assertThat(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
-			DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
-			assertThat(delegating.getDelegate())
-					.isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
-			delegating = (DelegatingServiceInstanceListSupplier) delegating.getDelegate();
-			assertThat(delegating.getDelegate())
-					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-		});
+		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class)
+				.run(context -> {
+					ServiceInstanceListSupplier supplier = ServiceInstanceListSuppliers
+							.builder()
+							.withDiscoveryClient()
+							.withHealthChecks()
+							.withCaching()
+							.build(context);
+					assertThat(supplier)
+							.isInstanceOf(CachingServiceInstanceListSupplier.class);
+					DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
+					assertThat(delegating.getDelegate())
+							.isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
+					delegating = (DelegatingServiceInstanceListSupplier) delegating
+							.getDelegate();
+					assertThat(delegating.getDelegate())
+							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+				});
 	}
 
 	@Test
 	public void testIllegalArgumentExceptionThrownWhenBaseBuilderNull() {
-		new ApplicationContextRunner().withUserConfiguration(TestConfig.class)
+		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class)
 				.run(context -> {
 					try {
 						ServiceInstanceListSuppliers.builder()
@@ -67,7 +72,36 @@ public class ServiceInstanceListSuppliersTests {
 				});
 	}
 
-	private static class TestConfig {
+	@Test
+	public void testDelegateReturnedIfLoadBalancerCacheManagerNotAvailable() {
+		new ApplicationContextRunner().withUserConfiguration(BaseTestConfig.class)
+				.run(context -> {
+					ServiceInstanceListSupplier supplier = ServiceInstanceListSuppliers
+							.builder()
+							.withDiscoveryClient()
+							.withHealthChecks()
+							.withCaching()
+							.build(context);
+					assertThat(supplier)
+							.isNotInstanceOf(CachingServiceInstanceListSupplier.class);
+					assertThat(supplier)
+							.isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
+					DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
+					assertThat(delegating.getDelegate())
+							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+				});
+	}
+
+	@Import(BaseTestConfig.class)
+	private static class CacheTestConfig {
+
+		@Bean
+		public LoadBalancerCacheManager cacheManager() {
+			return mock(LoadBalancerCacheManager.class);
+		}
+	}
+
+	private static class BaseTestConfig {
 
 		@Bean
 		public ReactiveDiscoveryClient reactiveDiscoveryClient() {
@@ -77,11 +111,6 @@ public class ServiceInstanceListSuppliersTests {
 		@Bean
 		public LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
-		}
-
-		@Bean
-		public CacheManager cacheManager() {
-			return mock(CacheManager.class);
 		}
 
 		@Bean
