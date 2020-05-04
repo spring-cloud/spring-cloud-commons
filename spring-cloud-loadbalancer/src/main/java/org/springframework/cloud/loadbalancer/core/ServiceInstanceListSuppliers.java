@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
@@ -50,29 +53,38 @@ public abstract class ServiceInstanceListSuppliers {
 
 	public static class Builder {
 
+		private static final Log LOG = LogFactory.getLog(Builder.class);
+
 		private Creator baseCreator;
 		private DelegateCreator cachingCreator;
-		private List<DelegateCreator> creators = new ArrayList<>();
+		private final List<DelegateCreator> creators = new ArrayList<>();
 
 		public Builder() {
 		}
 
 		public Builder withBlockingDiscoveryClient() {
-			//TODO: warn if baseCreator is not null
+			if (baseCreator != null && LOG.isWarnEnabled()) {
+				LOG.warn("Overriding a previously set baseCreator with a blocking DiscoveryClient baseCreator.");
+			}
 			this.baseCreator = context -> {
 				DiscoveryClient discoveryClient = context.getBean(DiscoveryClient.class);
 
-				return new DiscoveryClientServiceInstanceListSupplier(discoveryClient, context.getEnvironment());
+				return new DiscoveryClientServiceInstanceListSupplier(discoveryClient, context
+						.getEnvironment());
 			};
 			return this;
 		}
 
 		public Builder withDiscoveryClient() {
-			//TODO: warn if baseCreator is not null
+			if (baseCreator != null && LOG.isWarnEnabled()) {
+				LOG.warn("Overriding a previously set baseCreator with a ReactiveDiscoveryClient baseCreator.");
+			}
 			this.baseCreator = context -> {
-				ReactiveDiscoveryClient discoveryClient = context.getBean(ReactiveDiscoveryClient.class);
+				ReactiveDiscoveryClient discoveryClient = context
+						.getBean(ReactiveDiscoveryClient.class);
 
-				return new DiscoveryClientServiceInstanceListSupplier(discoveryClient, context.getEnvironment());
+				return new DiscoveryClientServiceInstanceListSupplier(discoveryClient, context
+						.getEnvironment());
 			};
 			return this;
 		}
@@ -82,12 +94,24 @@ public abstract class ServiceInstanceListSuppliers {
 			return this;
 		}
 
-		//TODO: overload with WebClient?
 		public Builder withHealthChecks() {
 			DelegateCreator creator = (context, delegate) -> {
-				LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+				LoadBalancerProperties properties = context
+						.getBean(LoadBalancerProperties.class);
 				WebClient.Builder webClient = context.getBean(WebClient.Builder.class);
-				return new HealthCheckServiceInstanceListSupplier(delegate, properties.getHealthCheck(), webClient.build());
+				return new HealthCheckServiceInstanceListSupplier(delegate, properties
+						.getHealthCheck(), webClient.build());
+			};
+			this.creators.add(creator);
+			return this;
+		}
+
+		public Builder withHealthChecks(WebClient webClient) {
+			DelegateCreator creator = (context, delegate) -> {
+				LoadBalancerProperties properties = context
+						.getBean(LoadBalancerProperties.class);
+				return new HealthCheckServiceInstanceListSupplier(delegate, properties
+						.getHealthCheck(), webClient);
 			};
 			this.creators.add(creator);
 			return this;
@@ -95,7 +119,8 @@ public abstract class ServiceInstanceListSuppliers {
 
 		public Builder withZonePreference() {
 			DelegateCreator creator = (context, delegate) -> {
-				LoadBalancerZoneConfig zoneConfig = context.getBean(LoadBalancerZoneConfig.class);
+				LoadBalancerZoneConfig zoneConfig = context
+						.getBean(LoadBalancerZoneConfig.class);
 				return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig);
 			};
 			this.creators.add(creator);
@@ -103,7 +128,9 @@ public abstract class ServiceInstanceListSuppliers {
 		}
 
 		public Builder withCaching() {
-			//TODO: warn if baseCreator is not null
+			if (cachingCreator != null && LOG.isWarnEnabled()) {
+				LOG.warn("Overriding a previously set cachingCreator with a CachingServiceInstanceListSupplier-based cachingCreator.");
+			}
 			this.cachingCreator = (context, delegate) -> {
 				CacheManager cacheManager = context.getBean(CacheManager.class);
 

@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import java.util.function.Supplier;
-
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.util.Assert;
 
 /**
