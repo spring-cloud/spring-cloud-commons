@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 public class ServiceInstanceListSuppliersTests {
@@ -40,10 +41,30 @@ public class ServiceInstanceListSuppliersTests {
 					.build(context);
 			assertThat(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
 			DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
-			assertThat(delegating.getDelegate()).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
+			assertThat(delegating.getDelegate())
+					.isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
 			delegating = (DelegatingServiceInstanceListSupplier) delegating.getDelegate();
-			assertThat(delegating.getDelegate()).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			assertThat(delegating.getDelegate())
+					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
 		});
+	}
+
+	@Test
+	public void testIllegalArgumentExceptionThrownWhenBaseBuilderNull() {
+		new ApplicationContextRunner().withUserConfiguration(TestConfig.class)
+				.run(context -> {
+					try {
+						ServiceInstanceListSuppliers.builder()
+								.withHealthChecks()
+								.build(context);
+						fail("Should have thrown exception.");
+					}
+					catch (Exception exception) {
+						assertThat(exception)
+								.isInstanceOf(IllegalArgumentException.class);
+					}
+
+				});
 	}
 
 	private static class TestConfig {
