@@ -9,7 +9,7 @@
 		{
 			"name": "spring.cloud.loadbalancer.zone",
 			"type": "java.lang.String",
-			"description": "Spring cloud loadbalancer zone."
+			"description": "Spring Cloud LoadBalancer zone."
 		}
 	]
 }
