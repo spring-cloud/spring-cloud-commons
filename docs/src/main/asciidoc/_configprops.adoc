@@ -34,6 +34,8 @@
 |spring.cloud.loadbalancer.health-check.interval | 30s | Interval for rerunning the HealthCheck scheduler.
 |spring.cloud.loadbalancer.health-check.path |  | 
 |spring.cloud.loadbalancer.retry.enabled | true | 
+|spring.cloud.loadbalancer.ribbon.enabled | true | Causes `RibbonLoadBalancerClient` to be used by default.
+|spring.cloud.loadbalancer.zone |  | Spring Cloud LoadBalancer zone.
 |spring.cloud.refresh.enabled | true | Enables autoconfiguration for the refresh scope and associated features.
 |spring.cloud.refresh.extra-refreshable | true | Additional class names for beans to post process into refresh scope.
 |spring.cloud.refresh.never-refreshable | true | Comma separated list of class names for beans to never be refreshed or rebound.
