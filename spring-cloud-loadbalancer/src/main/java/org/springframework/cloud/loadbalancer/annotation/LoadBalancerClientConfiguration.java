@@ -26,16 +26,16 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
-import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceSupplier;
-import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSuppliers;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -71,17 +71,9 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
 		public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
-				ReactiveDiscoveryClient discoveryClient, Environment env,
-				ApplicationContext context) {
-			DiscoveryClientServiceInstanceListSupplier delegate = new DiscoveryClientServiceInstanceListSupplier(
-					discoveryClient, env);
-			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
-					.getBeanProvider(LoadBalancerCacheManager.class);
-			if (cacheManagerProvider.getIfAvailable() != null) {
-				return new CachingServiceInstanceListSupplier(delegate,
-						cacheManagerProvider.getIfAvailable());
-			}
-			return delegate;
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSuppliers.builder().withDiscoveryClient()
+					.withCaching().build(context);
 		}
 
 		@Bean
@@ -112,17 +104,9 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnBean(DiscoveryClient.class)
 		@ConditionalOnMissingBean
 		public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
-				DiscoveryClient discoveryClient, Environment env,
-				ApplicationContext context) {
-			DiscoveryClientServiceInstanceListSupplier delegate = new DiscoveryClientServiceInstanceListSupplier(
-					discoveryClient, env);
-			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
-					.getBeanProvider(LoadBalancerCacheManager.class);
-			if (cacheManagerProvider.getIfAvailable() != null) {
-				return new CachingServiceInstanceListSupplier(delegate,
-						cacheManagerProvider.getIfAvailable());
-			}
-			return delegate;
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSuppliers.builder().withBlockingDiscoveryClient()
+					.withCaching().build(context);
 		}
 
 		@Bean
