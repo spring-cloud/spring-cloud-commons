@@ -1543,22 +1543,14 @@ We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> del
 
     @Bean
     public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
-            ReactiveDiscoveryClient discoveryClient, Environment environment,
-            LoadBalancerZoneConfig zoneConfig,
-            ApplicationContext context) {
-        DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
-                discoveryClient, environment);
-        ZonePreferenceServiceInstanceListSupplier delegate = new ZonePreferenceServiceInstanceListSupplier(firstDelegate,
-                zoneConfig);
-        ObjectProvider&lt;LoadBalancerCacheManager&gt; cacheManagerProvider = context
-                .getBeanProvider(LoadBalancerCacheManager.class);
-        if (cacheManagerProvider.getIfAvailable() != null) {
-            return new CachingServiceInstanceListSupplier(delegate,
-                    cacheManagerProvider.getIfAvailable());
-        }
-        return delegate;
+            ConfigurableApplicationContext context) {
+        return ServiceInstanceListSuppliers.builder()
+                    .withDiscoveryClient()
+                    .withZonePreference()
+                    .withCaching()
+                    .build(context);
     }
-    }</code></pre>
+}</code></pre>
 </div>
 </div>
 </div>
@@ -1607,24 +1599,23 @@ We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> del
 
     @Bean
     public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
-            ReactiveDiscoveryClient discoveryClient, Environment environment,
-            LoadBalancerProperties loadBalancerProperties,
-            ApplicationContext context,
-            InstanceHealthChecker healthChecker) {
-        DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
-                discoveryClient, environment);
-        HealthCheckServiceInstanceListSupplier delegate = new HealthCheckServiceInstanceListSupplier(firstDelegate,
-                loadBalancerProperties, healthChecker);
-        ObjectProvider&lt;LoadBalancerCacheManager&gt; cacheManagerProvider = context
-                .getBeanProvider(LoadBalancerCacheManager.class);
-        if (cacheManagerProvider.getIfAvailable() != null) {
-            return new CachingServiceInstanceListSupplier(delegate,
-                    cacheManagerProvider.getIfAvailable());
+            ConfigurableApplicationContext context) {
+        return ServiceInstanceListSuppliers.builder()
+                    .withDiscoveryClient()
+                    .withHealthChecks()
+                    .withCaching()
+                    .build(context);
         }
-        return delegate;
-    }
     }</code></pre>
 </div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">TIP</dt>
+<dd>
+<p>In order to make working on your own LoadBalancer configuration easier, we have added some utility methods in <code>ServiceInstanceListSuppliers</code> class.</p>
+</dd>
+</dl>
 </div>
 </div>
 <div class="sect2">
