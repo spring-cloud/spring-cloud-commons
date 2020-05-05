@@ -36,11 +36,9 @@ import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
  * @since 2.2.1
  */
 public class ZonePreferenceServiceInstanceListSupplier
-		implements ServiceInstanceListSupplier {
+		extends DelegatingServiceInstanceListSupplier {
 
 	private final String ZONE = "zone";
-
-	private final ServiceInstanceListSupplier delegate;
 
 	private final LoadBalancerZoneConfig zoneConfig;
 
@@ -48,18 +46,13 @@ public class ZonePreferenceServiceInstanceListSupplier
 
 	public ZonePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerZoneConfig zoneConfig) {
-		this.delegate = delegate;
+		super(delegate);
 		this.zoneConfig = zoneConfig;
 	}
 
 	@Override
-	public String getServiceId() {
-		return delegate.getServiceId();
-	}
-
-	@Override
 	public Flux<List<ServiceInstance>> get() {
-		return delegate.get().map(this::filteredByZone);
+		return getDelegate().get().map(this::filteredByZone);
 	}
 
 	private List<ServiceInstance> filteredByZone(List<ServiceInstance> serviceInstances) {
