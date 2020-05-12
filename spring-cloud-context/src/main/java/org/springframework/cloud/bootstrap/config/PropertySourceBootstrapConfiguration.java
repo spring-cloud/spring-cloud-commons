@@ -102,9 +102,9 @@ public class PropertySourceBootstrapConfiguration implements
 			if (source == null || source.size() == 0) {
 				continue;
 			}
-			List sourceList = new ArrayList<>();
-			for (PropertySource p : source) {
-				sourceList.add(new BootstrapPropertySource(p));
+			List<PropertySource<?>> sourceList = new ArrayList<>();
+			for (PropertySource<?> p : source) {
+				sourceList.add(new BootstrapPropertySource<>(p));
 			}
 			logger.info("Located property source: " + sourceList);
 			composite.addAll(sourceList);
@@ -114,7 +114,7 @@ public class PropertySourceBootstrapConfiguration implements
 			MutablePropertySources propertySources = environment.getPropertySources();
 			String logConfig = environment.resolvePlaceholders("${logging.config:}");
 			LogFile logFile = LogFile.get(environment);
-			for (PropertySource p : environment.getPropertySources()) {
+			for (PropertySource<?> p : environment.getPropertySources()) {
 				if (p.getName().startsWith(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 					propertySources.remove(p.getName());
 				}
@@ -166,13 +166,13 @@ public class PropertySourceBootstrapConfiguration implements
 	private void insertPropertySources(MutablePropertySources propertySources,
 			List<PropertySource<?>> composite) {
 		MutablePropertySources incoming = new MutablePropertySources();
-		List<PropertySource<?>> reversedComposite = new ArrayList(composite);
+		List<PropertySource<?>> reversedComposite = new ArrayList<>(composite);
 		// Reverse the list so that when we call addFirst below we are maintaining the
-		// same order of PropertySournces
+		// same order of PropertySources
 		// Wherever we call addLast we can use the order in the List since the first item
 		// will end up before the rest
 		Collections.reverse(reversedComposite);
-		for (PropertySource p : reversedComposite) {
+		for (PropertySource<?> p : reversedComposite) {
 			incoming.addFirst(p);
 		}
 		PropertySourceBootstrapProperties remoteProperties = new PropertySourceBootstrapProperties();
@@ -180,31 +180,31 @@ public class PropertySourceBootstrapConfiguration implements
 				Bindable.ofInstance(remoteProperties));
 		if (!remoteProperties.isAllowOverride() || (!remoteProperties.isOverrideNone()
 				&& remoteProperties.isOverrideSystemProperties())) {
-			for (PropertySource p : reversedComposite) {
+			for (PropertySource<?> p : reversedComposite) {
 				propertySources.addFirst(p);
 			}
 			return;
 		}
 		if (remoteProperties.isOverrideNone()) {
-			for (PropertySource p : composite) {
+			for (PropertySource<?> p : composite) {
 				propertySources.addLast(p);
 			}
 			return;
 		}
 		if (propertySources.contains(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
 			if (!remoteProperties.isOverrideSystemProperties()) {
-				for (PropertySource p : composite) {
+				for (PropertySource<?> p : reversedComposite) {
 					propertySources.addAfter(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, p);
 				}
 			}
 			else {
-				for (PropertySource p : reversedComposite) {
+				for (PropertySource<?> p : composite) {
 					propertySources.addBefore(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, p);
 				}
 			}
 		}
 		else {
-			for (PropertySource p : composite) {
+			for (PropertySource<?> p : composite) {
 				propertySources.addLast(p);
 			}
 		}
@@ -276,7 +276,7 @@ class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
 
 	@Override
 	public Object getProperty(String name) {
-		return p.getProperty(name);
+		return this.p.getProperty(name);
 	}
 
 	@Override
@@ -285,9 +285,10 @@ class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
 		if (!(this.p instanceof EnumerablePropertySource)) {
 			throw new IllegalStateException(
 					"Failed to enumerate property names due to non-enumerable property source: "
-							+ p);
+							+ this.p);
 		}
-		names.addAll(Arrays.asList(((EnumerablePropertySource<?>) p).getPropertyNames()));
+		names.addAll(
+				Arrays.asList(((EnumerablePropertySource<?>) this.p).getPropertyNames()));
 
 		return StringUtils.toStringArray(names);
 	}
