@@ -21,3 +21,4 @@ _site/
 antrun
 .vscode/
 .flattened-pom.xml
+.sdkmanrc
