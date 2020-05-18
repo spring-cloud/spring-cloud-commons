@@ -1615,6 +1615,10 @@ We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> del
 <dd>
 <p>In order to make working on your own LoadBalancer configuration easier, we have added some utility methods in <code>ServiceInstanceListSuppliers</code> class.</p>
 </dd>
+<dt class="hdlist1">TIP</dt>
+<dd>
+<p>You can also use our alternative predefined configurations in place of the default ones by setting the value of <code>spring.cloud.loadbalancer.configurations</code> property to <code>zone-preference</code> to use <code>ZonePreferenceServiceInstanceListSupplier</code> with caching or to <code>health-check</code> to use <code>HealthCheckServiceInstanceListSupplier</code> with caching.</p>
+</dd>
 </dl>
 </div>
 </div>
