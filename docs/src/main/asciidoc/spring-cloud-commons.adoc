@@ -943,6 +943,8 @@ public class CustomLoadBalancerConfiguration {
 
 TIP:: In order to make working on your own LoadBalancer configuration easier, we have added some utility methods in `ServiceInstanceListSuppliers` class.
 
+TIP:: You can also use our alternative predefined configurations in place of the default ones by setting the value of `spring.cloud.loadbalancer.configurations` property to `zone-preference` to use `ZonePreferenceServiceInstanceListSupplier` with caching or to `health-check` to use `HealthCheckServiceInstanceListSupplier` with caching.
+
 [[spring-cloud-loadbalancer-starter]]
 === Spring Cloud LoadBalancer Starter
 
