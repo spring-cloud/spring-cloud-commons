@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.annotation;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.ConditionalOnBlockingDiscoveryEnabled;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
 import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
@@ -70,10 +71,34 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "default", matchIfMissing = true)
 		public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSuppliers.builder().withDiscoveryClient()
 					.withCaching().build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "zone-preference")
+		public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSuppliers.builder().withDiscoveryClient()
+					.withZonePreference().withCaching().build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "health-check")
+		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSuppliers.builder().withDiscoveryClient()
+					.withHealthChecks().withCaching().build(context);
 		}
 
 		@Bean
@@ -103,10 +128,34 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(DiscoveryClient.class)
 		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "default", matchIfMissing = true)
 		public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSuppliers.builder().withBlockingDiscoveryClient()
 					.withCaching().build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "zone-preference")
+		public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSuppliers.builder().withBlockingDiscoveryClient()
+					.withZonePreference().withCaching().build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "health-check")
+		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSuppliers.builder().withBlockingDiscoveryClient()
+					.withHealthChecks().withCaching().build(context);
 		}
 
 		@Bean
