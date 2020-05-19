@@ -26,12 +26,10 @@ import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerCacheAutoConfiguration;
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier;
-import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.core.DelegatingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.HealthCheckServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
-import org.springframework.cloud.loadbalancer.core.ServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.core.ZonePreferenceServiceInstanceListSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -147,18 +145,6 @@ class LoadBalancerClientConfigurationTests {
 					then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
 							.isInstanceOf(
 									DiscoveryClientServiceInstanceListSupplier.class);
-				});
-	}
-
-	@Test
-	void shouldInstantiateServiceInstanceSupplierRegardlessOfConfigurationProperty() {
-		reactiveDiscoveryClientRunner
-				.withPropertyValues(
-						"spring.cloud.loadbalancer.configurations=zone-preference")
-				.run(context -> {
-					ServiceInstanceSupplier supplier = context
-							.getBean(ServiceInstanceSupplier.class);
-					then(supplier).isInstanceOf(CachingServiceInstanceSupplier.class);
 				});
 	}
 

@@ -43,24 +43,9 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	private final AtomicInteger position;
 
-	@Deprecated
-	private ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier;
-
 	private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
 
 	private final String serviceId;
-
-	/**
-	 * @param serviceId id of the service for which to choose an instance
-	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
-	 * will be used to get available instances
-	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, String)}} instead.
-	 */
-	@Deprecated
-	public RoundRobinLoadBalancer(String serviceId,
-			ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier) {
-		this(serviceId, serviceInstanceSupplier, new Random().nextInt(1000));
-	}
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
@@ -87,39 +72,15 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 		this.position = new AtomicInteger(seedPosition);
 	}
 
-	/**
-	 * @param serviceId id of the service for which to choose an instance
-	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
-	 * will be used to get available instances
-	 * @param seedPosition Round Robin element position marker
-	 * @deprecated Use {@link #RoundRobinLoadBalancer(ObjectProvider, String, int)}}
-	 * instead.
-	 */
-	@Deprecated
-	public RoundRobinLoadBalancer(String serviceId,
-			ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier,
-			int seedPosition) {
-		this.serviceId = serviceId;
-		this.serviceInstanceSupplier = serviceInstanceSupplier;
-		this.position = new AtomicInteger(seedPosition);
-	}
-
 	@SuppressWarnings("rawtypes")
 	@Override
 	// see original
 	// https://github.com/Netflix/ocelli/blob/master/ocelli-core/
 	// src/main/java/netflix/ocelli/loadbalancer/RoundRobinLoadBalancer.java
 	public Mono<Response<ServiceInstance>> choose(Request request) {
-		// TODO: move supplier to Request?
-		// Temporary conditional logic till deprecated members are removed.
-		if (serviceInstanceListSupplierProvider != null) {
-			ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
-					.getIfAvailable(NoopServiceInstanceListSupplier::new);
-			return supplier.get().next().map(this::getInstanceResponse);
-		}
-		ServiceInstanceSupplier supplier = this.serviceInstanceSupplier
-				.getIfAvailable(NoopServiceInstanceSupplier::new);
-		return supplier.get().collectList().map(this::getInstanceResponse);
+		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
+				.getIfAvailable(NoopServiceInstanceListSupplier::new);
+		return supplier.get().next().map(this::getInstanceResponse);
 	}
 
 	private Response<ServiceInstance> getInstanceResponse(
