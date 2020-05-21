@@ -416,9 +416,34 @@ public class BootstrapConfigurationTests {
 				.isEqualTo("Hello added!");
 	}
 
+	@Test
+	public void nonEnumerablePropertySourceWorks() {
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+				.sources(BareConfiguration.class)
+				.properties("spring.cloud.bootstrap.name=nonenumerable").run();
+		then(this.context.getEnvironment().getProperty("foo")).isEqualTo("bar");
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	protected static class BareConfiguration {
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	// This is added to bootstrap context as a source in bootstrap.properties
+	protected static class SimplePropertySourceConfiguration
+			implements PropertySourceLocator {
+
+		@Override
+		public PropertySource<?> locate(Environment environment) {
+			return new PropertySource("testBootstrapSimple", this) {
+				@Override
+				public Object getProperty(String name) {
+					return ("foo".equals(name)) ? "bar" : null;
+				}
+			};
+		}
 
 	}
 

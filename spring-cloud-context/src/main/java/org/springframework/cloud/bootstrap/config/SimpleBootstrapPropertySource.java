@@ -16,26 +16,19 @@
 
 package org.springframework.cloud.bootstrap.config;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
-import org.springframework.util.StringUtils;
 
 import static org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 /**
- * Enumerable wrapper for a property source.
- *
+ * Simple, non-enumerable PropertySource wrapper.
  * @author Ryan Baxter
  */
-public class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
+public class SimpleBootstrapPropertySource<T> extends PropertySource<T> {
 
-	private EnumerablePropertySource<T> delegate;
+	private PropertySource<T> delegate;
 
-	public BootstrapPropertySource(EnumerablePropertySource<T> delegate) {
+	public SimpleBootstrapPropertySource(PropertySource<T> delegate) {
 		super(BOOTSTRAP_PROPERTY_SOURCE_NAME + "-" + delegate.getName(),
 				delegate.getSource());
 		this.delegate = delegate;
@@ -44,14 +37,6 @@ public class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
 	@Override
 	public Object getProperty(String name) {
 		return this.delegate.getProperty(name);
-	}
-
-	@Override
-	public String[] getPropertyNames() {
-		Set<String> names = new LinkedHashSet<>();
-		names.addAll(Arrays.asList(this.delegate.getPropertyNames()));
-
-		return StringUtils.toStringArray(names);
 	}
 
 	public PropertySource<T> getDelegate() {
