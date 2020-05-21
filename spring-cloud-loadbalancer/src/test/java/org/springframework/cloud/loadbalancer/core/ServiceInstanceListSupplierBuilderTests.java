@@ -30,13 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-public class ServiceInstanceListSuppliersTests {
+public class ServiceInstanceListSupplierBuilderTests {
 
 	@Test
 	public void testBuilder() {
 		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class)
 				.run(context -> {
-					ServiceInstanceListSupplier supplier = ServiceInstanceListSuppliers
+					ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier
 							.builder().withDiscoveryClient().withHealthChecks()
 							.withCaching().build(context);
 					assertThat(supplier)
@@ -56,7 +56,7 @@ public class ServiceInstanceListSuppliersTests {
 		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class)
 				.run(context -> {
 					try {
-						ServiceInstanceListSuppliers.builder().withHealthChecks()
+						ServiceInstanceListSupplier.builder().withHealthChecks()
 								.build(context);
 						fail("Should have thrown exception.");
 					}
@@ -72,7 +72,7 @@ public class ServiceInstanceListSuppliersTests {
 	public void testDelegateReturnedIfLoadBalancerCacheManagerNotAvailable() {
 		new ApplicationContextRunner().withUserConfiguration(BaseTestConfig.class)
 				.run(context -> {
-					ServiceInstanceListSupplier supplier = ServiceInstanceListSuppliers
+					ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier
 							.builder().withDiscoveryClient().withHealthChecks()
 							.withCaching().build(context);
 					assertThat(supplier)

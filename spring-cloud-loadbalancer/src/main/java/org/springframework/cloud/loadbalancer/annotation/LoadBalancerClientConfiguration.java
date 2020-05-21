@@ -32,7 +32,6 @@ import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanc
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
-import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSuppliers;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ApplicationContext;
@@ -75,7 +74,7 @@ public class LoadBalancerClientConfiguration {
 				havingValue = "default", matchIfMissing = true)
 		public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSuppliers.builder().withDiscoveryClient()
+			return ServiceInstanceListSupplier.builder().withDiscoveryClient()
 					.withCaching().build(context);
 		}
 
@@ -86,7 +85,7 @@ public class LoadBalancerClientConfiguration {
 				havingValue = "zone-preference")
 		public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSuppliers.builder().withDiscoveryClient()
+			return ServiceInstanceListSupplier.builder().withDiscoveryClient()
 					.withZonePreference().withCaching().build(context);
 		}
 
@@ -97,7 +96,7 @@ public class LoadBalancerClientConfiguration {
 				havingValue = "health-check")
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSuppliers.builder().withDiscoveryClient()
+			return ServiceInstanceListSupplier.builder().withDiscoveryClient()
 					.withHealthChecks().withCaching().build(context);
 		}
 
@@ -132,7 +131,7 @@ public class LoadBalancerClientConfiguration {
 				havingValue = "default", matchIfMissing = true)
 		public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSuppliers.builder().withBlockingDiscoveryClient()
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient()
 					.withCaching().build(context);
 		}
 
@@ -143,7 +142,7 @@ public class LoadBalancerClientConfiguration {
 				havingValue = "zone-preference")
 		public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSuppliers.builder().withBlockingDiscoveryClient()
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient()
 					.withZonePreference().withCaching().build(context);
 		}
 
@@ -154,7 +153,7 @@ public class LoadBalancerClientConfiguration {
 				havingValue = "health-check")
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSuppliers.builder().withBlockingDiscoveryClient()
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient()
 					.withHealthChecks().withCaching().build(context);
 		}
 
