@@ -1600,7 +1600,7 @@ We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> del
     @Bean
     public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
             ConfigurableApplicationContext context) {
-        return ServiceInstanceListSuppliers.builder()
+        return ServiceInstanceListSupplier.builder()
                     .withDiscoveryClient()
                     .withHealthChecks()
                     .withCaching()
@@ -1613,7 +1613,7 @@ We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> del
 <dl>
 <dt class="hdlist1">TIP</dt>
 <dd>
-<p>In order to make working on your own LoadBalancer configuration easier, we have added some utility methods in <code>ServiceInstanceListSuppliers</code> class.</p>
+<p>In order to make working on your own LoadBalancer configuration easier, we have added a <code>builder()</code> method to the <code>ServiceInstanceListSupplier</code> class.</p>
 </dd>
 <dt class="hdlist1">TIP</dt>
 <dd>
