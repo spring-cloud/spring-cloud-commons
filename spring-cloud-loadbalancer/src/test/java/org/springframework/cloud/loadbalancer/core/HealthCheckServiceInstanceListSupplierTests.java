@@ -41,7 +41,6 @@ import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -92,9 +91,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 	void shouldCheckInstanceWithProvidedHealthCheckPath() {
 		healthCheck.getPath().put("ignored-service", "/health");
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
-						.with(new MockEnvironment()).build(),
-				healthCheck, webClient);
+				ServiceInstanceListSupplier.fixed("ignored-service").build(), healthCheck,
+				webClient);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
@@ -107,9 +105,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@Test
 	void shouldCheckInstanceWithDefaultHealthCheckPath() {
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
-						.with(new MockEnvironment()).build(),
-				healthCheck, webClient);
+				ServiceInstanceListSupplier.fixed("ignored-service").build(), healthCheck,
+				webClient);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
@@ -123,9 +120,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 	void shouldReturnFalseIfEndpointNotFound() {
 		healthCheck.getPath().put("ignored-service", "/test");
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
-						.with(new MockEnvironment()).build(),
-				healthCheck, webClient);
+				ServiceInstanceListSupplier.fixed("ignored-service").build(), healthCheck,
+				webClient);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
