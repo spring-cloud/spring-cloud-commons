@@ -22,6 +22,7 @@ import static org.springframework.cloud.bootstrap.config.PropertySourceBootstrap
 
 /**
  * Simple, non-enumerable PropertySource wrapper.
+ *
  * @author Ryan Baxter
  */
 public class SimpleBootstrapPropertySource<T> extends PropertySource<T> {
