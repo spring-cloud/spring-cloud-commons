@@ -21,6 +21,7 @@ import java.net.URI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.client.CommonsClientAutoConfiguration;
@@ -57,6 +58,7 @@ public class SimpleDiscoveryClientAutoConfiguration
 	private SimpleDiscoveryProperties simple = new SimpleDiscoveryProperties();
 
 	@Bean
+	@ConditionalOnMissingBean
 	public SimpleDiscoveryProperties simpleDiscoveryProperties() {
 		simple.getLocal().setServiceId(this.serviceId);
 		simple.getLocal()
