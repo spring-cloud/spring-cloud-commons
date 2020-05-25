@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 public abstract class DelegatingServiceInstanceListSupplier
 		implements ServiceInstanceListSupplier {
 
-	private final ServiceInstanceListSupplier delegate;
+	protected final ServiceInstanceListSupplier delegate;
 
 	public DelegatingServiceInstanceListSupplier(ServiceInstanceListSupplier delegate) {
 		Assert.notNull(delegate, "delegate may not be null");
