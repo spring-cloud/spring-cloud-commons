@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 
 /**
@@ -23,9 +25,10 @@ import org.springframework.util.Assert;
  * {@link ServiceInstanceListSupplier} instance underneath.
  *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 public abstract class DelegatingServiceInstanceListSupplier
-		implements ServiceInstanceListSupplier {
+		implements ServiceInstanceListSupplier, InitializingBean, DisposableBean {
 
 	protected final ServiceInstanceListSupplier delegate;
 
@@ -41,6 +44,20 @@ public abstract class DelegatingServiceInstanceListSupplier
 	@Override
 	public String getServiceId() {
 		return this.delegate.getServiceId();
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if (delegate instanceof InitializingBean) {
+			((InitializingBean) delegate).afterPropertiesSet();
+		}
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		if (delegate instanceof DisposableBean) {
+			((DisposableBean) delegate).destroy();
+		}
 	}
 
 }
