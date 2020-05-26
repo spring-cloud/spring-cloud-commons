@@ -47,14 +47,14 @@ public class DiscoveryClientServiceInstanceListSupplier
 			Environment environment) {
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
 		this.serviceInstances = Flux
-				.defer(() -> Flux.fromIterable(delegate.getInstances(serviceId)))
-				.subscribeOn(Schedulers.boundedElastic());
+				.defer(() -> Flux.fromIterable(delegate.getInstances(serviceId))
+						.subscribeOn(Schedulers.boundedElastic()));
 	}
 
 	public DiscoveryClientServiceInstanceListSupplier(ReactiveDiscoveryClient delegate,
 			Environment environment) {
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
-		this.serviceInstances = delegate.getInstances(serviceId);
+		this.serviceInstances = Flux.defer(() -> delegate.getInstances(serviceId));
 	}
 
 	@Override
