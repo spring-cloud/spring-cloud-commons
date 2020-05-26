@@ -69,7 +69,7 @@ public class CachingServiceInstanceListSupplier
 				return Mono.empty();
 			}
 			return Flux.just(list).materialize().collectList();
-		}, delegate.getServiceId()).onCacheMissResume(delegate)
+		}, delegate.getServiceId()).onCacheMissResume(delegate.get().take(1))
 				.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize()
 						.doOnNext(instances -> {
 							Cache cache = cacheManager
