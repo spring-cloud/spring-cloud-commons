@@ -109,21 +109,18 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldUpdateReturnRetrievedInstancesBlockingClient() {
-		when(discoveryClient.getInstances(SERVICE_ID)).thenReturn(
-				Lists.list(instance("1host", false), instance("2host-secure", true)));
-		supplier = new DiscoveryClientServiceInstanceListSupplier(discoveryClient,
-				environment);
+		StepVerifier.withVirtualTime(() -> {
+			when(discoveryClient.getInstances(SERVICE_ID)).thenReturn(
+					Lists.list(instance("1host", false), instance("2host-secure", true)));
+			supplier = new DiscoveryClientServiceInstanceListSupplier(discoveryClient,
+					environment);
+			supplier.get();
 
-		StepVerifier.withVirtualTime(() -> supplier.get()).expectSubscription()
-				.expectNext(Lists.list(instance("1host", false),
-						instance("2host-secure", true)))
-				.thenCancel().verify();
-
-		when(discoveryClient.getInstances(SERVICE_ID))
-				.thenReturn(Lists.list(instance("1host", false),
-						instance("2host-secure", true), instance("3host", false)));
-
-		StepVerifier.withVirtualTime(() -> supplier.get()).expectSubscription()
+			when(discoveryClient.getInstances(SERVICE_ID))
+					.thenReturn(Lists.list(instance("1host", false),
+							instance("2host-secure", true), instance("3host", false)));
+			return supplier.get();
+		}).expectSubscription()
 				.expectNext(Lists.list(instance("1host", false),
 						instance("2host-secure", true), instance("3host", false)))
 				.thenCancel().verify();
