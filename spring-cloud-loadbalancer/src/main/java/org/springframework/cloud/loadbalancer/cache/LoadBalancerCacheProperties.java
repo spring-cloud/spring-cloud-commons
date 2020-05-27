@@ -39,7 +39,7 @@ public class LoadBalancerCacheProperties {
 	 * @see <a href=
 	 * "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java">StringToDurationConverter.java</a>
 	 */
-	private Duration ttl = Duration.ofSeconds(30);
+	private Duration ttl = Duration.ofSeconds(35);
 
 	/**
 	 * Initial cache capacity expressed as int.

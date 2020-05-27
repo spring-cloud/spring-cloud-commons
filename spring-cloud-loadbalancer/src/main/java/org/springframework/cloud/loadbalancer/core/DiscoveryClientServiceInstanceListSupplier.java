@@ -47,8 +47,8 @@ public class DiscoveryClientServiceInstanceListSupplier
 			Environment environment) {
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
 		this.serviceInstances = Flux
-				.defer(() -> Flux.fromIterable(delegate.getInstances(serviceId))
-						.collectList().flux().subscribeOn(Schedulers.boundedElastic()));
+				.defer(() -> Flux.just(delegate.getInstances(serviceId)))
+				.subscribeOn(Schedulers.boundedElastic());
 	}
 
 	public DiscoveryClientServiceInstanceListSupplier(ReactiveDiscoveryClient delegate,
