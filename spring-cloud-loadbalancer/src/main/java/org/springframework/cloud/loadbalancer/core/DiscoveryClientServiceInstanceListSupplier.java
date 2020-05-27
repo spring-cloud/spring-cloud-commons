@@ -16,11 +16,16 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import org.springframework.boot.convert.DurationStyle;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
@@ -39,6 +44,16 @@ import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientF
 public class DiscoveryClientServiceInstanceListSupplier
 		implements ServiceInstanceListSupplier {
 
+	/**
+	 * Property that establishes the timeout for calls to service discovery.
+	 */
+	public static final String SERVICE_DISCOVERY_TIMEOUT = "spring.cloud.loadbalancer.service-discovery.timeout";
+
+	private static final Log LOG = LogFactory
+			.getLog(DiscoveryClientServiceInstanceListSupplier.class);
+
+	private Duration timeout = Duration.ofSeconds(30);
+
 	private final String serviceId;
 
 	private final Flux<List<ServiceInstance>> serviceInstances;
@@ -46,16 +61,30 @@ public class DiscoveryClientServiceInstanceListSupplier
 	public DiscoveryClientServiceInstanceListSupplier(DiscoveryClient delegate,
 			Environment environment) {
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
+		resolveTimeout(environment);
 		this.serviceInstances = Flux
 				.defer(() -> Flux.just(delegate.getInstances(serviceId)))
-				.subscribeOn(Schedulers.boundedElastic());
+				.timeout(timeout, Flux.defer(() -> {
+					logTimeout();
+					return Flux.just(new ArrayList<>());
+				})).onErrorResume(error -> {
+					logException(error);
+					return Flux.just(new ArrayList<>());
+				}).subscribeOn(Schedulers.boundedElastic());
 	}
 
 	public DiscoveryClientServiceInstanceListSupplier(ReactiveDiscoveryClient delegate,
 			Environment environment) {
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
-		this.serviceInstances = Flux
-				.defer(() -> delegate.getInstances(serviceId).collectList().flux());
+		resolveTimeout(environment);
+		this.serviceInstances = Flux.defer(() -> delegate.getInstances(serviceId)
+				.collectList().flux().timeout(timeout, Flux.defer(() -> {
+					logTimeout();
+					return Flux.just(new ArrayList<>());
+				})).onErrorResume(error -> {
+					logException(error);
+					return Flux.just(new ArrayList<>());
+				}));
 	}
 
 	@Override
@@ -66,6 +95,30 @@ public class DiscoveryClientServiceInstanceListSupplier
 	@Override
 	public Flux<List<ServiceInstance>> get() {
 		return serviceInstances;
+	}
+
+	private void resolveTimeout(Environment environment) {
+		String providedTimeout = environment.getProperty(SERVICE_DISCOVERY_TIMEOUT);
+		if (providedTimeout != null) {
+			timeout = DurationStyle.detectAndParse(providedTimeout);
+		}
+	}
+
+	private void logTimeout() {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(String.format(
+					"Timeout occurred while retrieving instances for service %s."
+							+ "The instances could not be retrieved during %s",
+					serviceId, timeout));
+		}
+	}
+
+	private void logException(Throwable error) {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(String.format(
+					"Exception occurred while retrieving instances for service %s",
+					serviceId), error);
+		}
 	}
 
 }
