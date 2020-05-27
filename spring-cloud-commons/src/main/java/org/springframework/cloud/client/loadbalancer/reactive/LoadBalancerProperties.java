@@ -54,7 +54,7 @@ public class LoadBalancerProperties {
 		/**
 		 * Interval for rerunning the HealthCheck scheduler.
 		 */
-		private Duration interval = Duration.ofSeconds(30);
+		private Duration interval = Duration.ofSeconds(25);
 
 		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
 

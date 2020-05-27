@@ -855,7 +855,7 @@ You can set your own `ttl` value (the time after write after which entries shoul
 as the value of the `spring.cloud.loadbalancer.cache.ttl` property.
 You can also set your own LoadBalancer cache initial capacity by setting the value of the `spring.cloud.loadbalancer.cache.capacity` property.
 
-The default setup includes `ttl` set to 30 seconds and the default `initialCapacity` is `256`.
+The default setup includes `ttl` set to 35 seconds and the default `initialCapacity` is `256`.
 
 You can also altogether disable loadBalancer caching by setting the value of `spring.cloud.loadbalancer.cache.enabled`
 to `false`.
@@ -924,7 +924,7 @@ We suggest passing a `DiscoveryClientServiceInstanceListSupplier` delegate in th
 
 You could use this sample configuration to set it up:
 
-[[zoned-based-custom-loadbalancer-configuration]]
+[[health-check-based-custom-loadbalancer-configuration]]
 [source,java,indent=0]
 ----
 public class CustomLoadBalancerConfiguration {
@@ -935,11 +935,12 @@ public class CustomLoadBalancerConfiguration {
 		return ServiceInstanceListSupplier.builder()
 					.withDiscoveryClient()
 					.withHealthChecks()
-					.withCaching()
 					.build(context);
 	    }
 	}
 ----
+
+NOTE:: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`, therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
 
 TIP:: In order to make working on your own LoadBalancer configuration easier, we have added a `builder()` method to the `ServiceInstanceListSupplier` class.
 
