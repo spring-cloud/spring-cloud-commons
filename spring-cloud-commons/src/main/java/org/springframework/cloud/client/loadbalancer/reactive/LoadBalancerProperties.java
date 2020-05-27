@@ -49,7 +49,7 @@ public class LoadBalancerProperties {
 		/**
 		 * Initial delay value for the HealthCheck scheduler.
 		 */
-		private int initialDelay = 0;
+		private Duration initialDelay = Duration.ZERO;
 
 		/**
 		 * Interval for rerunning the HealthCheck scheduler.
@@ -58,11 +58,11 @@ public class LoadBalancerProperties {
 
 		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
 
-		public int getInitialDelay() {
+		public Duration getInitialDelay() {
 			return initialDelay;
 		}
 
-		public void setInitialDelay(int initialDelay) {
+		public void setInitialDelay(Duration initialDelay) {
 			this.initialDelay = initialDelay;
 		}
 
