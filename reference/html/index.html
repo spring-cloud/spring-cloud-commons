@@ -1576,6 +1576,15 @@ healthy instances after querying the external ServiceDiscovery.
 </tr>
 </table>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">TIP</dt>
+<dd>
+<p>This supplier is also recommended for setups with a small number of instances per service
+in order to avoid retrying calls on a failing instance.</p>
+</dd>
+</dl>
+</div>
 <div class="paragraph">
 <p><code>HealthCheckServiceInstanceListSupplier</code> uses properties prefixed with
 <code>spring.cloud.loadbalancer.healthcheck</code>. You can set the <code>initialDelay</code> and <code>interval</code>
@@ -1583,12 +1592,20 @@ for the scheduler. You can set the default path for the healthcheck URL by setti
 the value of the <code>spring.cloud.loadbalancer.healthcheck.path.default</code>. You can also set a specific value
 for any given service by setting the value of the <code>spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]</code>, substituting the <code>[SERVICE_ID]</code> with the correct ID of your service. If the path is not set, <code>/actuator/health</code> is used by default.</p>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">TIP</dt>
+<dd>
+<p>If you rely on the default path (<code>/actuator/health</code>), make sure you add <code>spring-boot-starter-actuator</code> to your collaborator&#8217;s dependencies, unless you are planning to add such an endpoint on your own.</p>
+</dd>
+</dl>
+</div>
 <div class="paragraph">
 <p>In order to use the health-check scheduler approach, you will have to instantiate a <code>HealthCheckServiceInstanceListSupplier</code> bean in a <a href="#custom-loadbalancer-configuration">custom configuration</a>.</p>
 </div>
 <div class="paragraph">
 <p>We use delegates to work with <code>ServiceInstanceListSupplier</code> beans.
-We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> delegate in the constructor of <code>HealthCheckServiceInstanceListSupplier</code> and, in turn, wrapping the latter with a <code>CachingServiceInstanceListSupplier</code> to leverage <a href="#loadbalancer-caching">LoadBalancer caching mechanism</a>.</p>
+We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> delegate in the constructor of <code>HealthCheckServiceInstanceListSupplier</code>.</p>
 </div>
 <div class="paragraph">
 <p>You could use this sample configuration to set it up:</p>
@@ -1613,14 +1630,6 @@ We suggest passing a <code>DiscoveryClientServiceInstanceListSupplier</code> del
 <dt class="hdlist1">NOTE</dt>
 <dd>
 <p><code>HealthCheckServiceInstanceListSupplier</code> has its own caching mechanism based on Reactor Flux <code>replay()</code>, therefore, if it&#8217;s being used, you may want to skip wrapping that supplier with <code>CachingServiceInstanceListSupplier</code>.</p>
-</dd>
-<dt class="hdlist1">TIP</dt>
-<dd>
-<p>In order to make working on your own LoadBalancer configuration easier, we have added a <code>builder()</code> method to the <code>ServiceInstanceListSupplier</code> class.</p>
-</dd>
-<dt class="hdlist1">TIP</dt>
-<dd>
-<p>You can also use our alternative predefined configurations in place of the default ones by setting the value of <code>spring.cloud.loadbalancer.configurations</code> property to <code>zone-preference</code> to use <code>ZonePreferenceServiceInstanceListSupplier</code> with caching or to <code>health-check</code> to use <code>HealthCheckServiceInstanceListSupplier</code> with caching.</p>
 </dd>
 </dl>
 </div>
@@ -1666,6 +1675,18 @@ public class MyConfiguration {
     }
 }</code></pre>
 </div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">TIP</dt>
+<dd>
+<p>In order to make working on your own LoadBalancer configuration easier, we have added a <code>builder()</code> method to the <code>ServiceInstanceListSupplier</code> class.</p>
+</dd>
+<dt class="hdlist1">TIP</dt>
+<dd>
+<p>You can also use our alternative predefined configurations in place of the default ones by setting the value of <code>spring.cloud.loadbalancer.configurations</code> property to <code>zone-preference</code> to use <code>ZonePreferenceServiceInstanceListSupplier</code> with caching or to <code>health-check</code> to use <code>HealthCheckServiceInstanceListSupplier</code> with caching.</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
