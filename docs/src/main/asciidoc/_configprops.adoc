@@ -29,12 +29,14 @@
 |spring.cloud.inetutils.use-only-site-local-interfaces | false | Whether to use only interfaces with site local addresses. See {@link InetAddress#isSiteLocalAddress()} for more details.
 |spring.cloud.loadbalancer.cache.caffeine.spec |  | The spec to use to create caches. See CaffeineSpec for more details on the spec format.
 |spring.cloud.loadbalancer.cache.capacity | 256 | Initial cache capacity expressed as int.
+|spring.cloud.loadbalancer.cache.enabled | true | Enables Spring Cloud LoadBalancer caching mechanism.
 |spring.cloud.loadbalancer.cache.ttl | 35s | Time To Live - time counted from writing of the record, after which cache entries are expired, expressed as a {@link Duration}. The property {@link String} has to be in keeping with the appropriate syntax as specified in Spring Boot <code>StringToDurationConverter</code>. @see <a href= "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java">StringToDurationConverter.java</a>
 |spring.cloud.loadbalancer.health-check.initial-delay | 0 | Initial delay value for the HealthCheck scheduler.
 |spring.cloud.loadbalancer.health-check.interval | 25s | Interval for rerunning the HealthCheck scheduler.
 |spring.cloud.loadbalancer.health-check.path | null | null
 |spring.cloud.loadbalancer.retry.enabled | true | null
 |spring.cloud.loadbalancer.ribbon.enabled | true | Causes `RibbonLoadBalancerClient` to be used by default.
+|spring.cloud.loadbalancer.service-discovery.timeout | null | String representation of Duration of the timeout for calls to service discovery.
 |spring.cloud.loadbalancer.zone | null | Spring Cloud LoadBalancer zone.
 |spring.cloud.refresh.enabled | true | Enables autoconfiguration for the refresh scope and associated features.
 |spring.cloud.refresh.extra-refreshable | true | Additional class names for beans to post process into refresh scope.

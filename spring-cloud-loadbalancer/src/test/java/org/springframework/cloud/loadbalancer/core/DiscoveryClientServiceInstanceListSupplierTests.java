@@ -16,9 +16,13 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.time.Duration;
+
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.internal.stubbing.answers.AnswersWithDelay;
+import org.mockito.internal.stubbing.answers.Returns;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -29,6 +33,7 @@ import org.springframework.mock.env.MockEnvironment;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier.SERVICE_DISCOVERY_TIMEOUT;
 
 /**
  * Tests for {@link DiscoveryClientServiceInstanceListSupplier}.
@@ -38,6 +43,8 @@ import static org.mockito.Mockito.when;
 class DiscoveryClientServiceInstanceListSupplierTests {
 
 	private static final String SERVICE_ID = "test";
+
+	private static final Duration VERIFICATION_TIMEOUT = Duration.ofSeconds(10);
 
 	private final MockEnvironment environment = new MockEnvironment();
 
@@ -66,9 +73,10 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 			supplier = new DiscoveryClientServiceInstanceListSupplier(
 					reactiveDiscoveryClient, environment);
 			return supplier.get();
-		}).expectSubscription().expectNext(
-				Lists.list(instance("1host", false), instance("2host-secure", true)))
-				.thenCancel().verify();
+		}).expectSubscription()
+				.expectNext(Lists.list(instance("1host", false),
+						instance("2host-secure", true)))
+				.thenCancel().verify(VERIFICATION_TIMEOUT);
 	}
 
 	@Test
@@ -81,7 +89,7 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 		StepVerifier.withVirtualTime(() -> supplier.get()).expectSubscription()
 				.expectNext(Lists.list(instance("1host", false),
 						instance("2host-secure", true)))
-				.thenCancel().verify();
+				.thenCancel().verify(VERIFICATION_TIMEOUT);
 
 		when(reactiveDiscoveryClient.getInstances(SERVICE_ID))
 				.thenReturn(Flux.just(instance("1host", false),
@@ -90,7 +98,31 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 		StepVerifier.withVirtualTime(() -> supplier.get()).expectSubscription()
 				.expectNext(Lists.list(instance("1host", false),
 						instance("2host-secure", true), instance("3host", false)))
-				.thenCancel().verify();
+				.thenCancel().verify(VERIFICATION_TIMEOUT);
+	}
+
+	@Test
+	void shouldReturnEmptyInstancesListOnException() {
+		when(reactiveDiscoveryClient.getInstances(SERVICE_ID))
+				.thenReturn(Flux.error(new RuntimeException("Exception")));
+
+		StepVerifier.withVirtualTime(() -> {
+			supplier = new DiscoveryClientServiceInstanceListSupplier(
+					reactiveDiscoveryClient, environment);
+			return supplier.get();
+		}).expectSubscription().expectNext(Lists.emptyList()).thenCancel()
+				.verify(VERIFICATION_TIMEOUT);
+	}
+
+	@Test
+	void shouldReturnEmptyInstancesListOnTimeout() {
+		environment.setProperty(SERVICE_DISCOVERY_TIMEOUT, "100ms");
+		when(reactiveDiscoveryClient.getInstances(SERVICE_ID)).thenReturn(Flux.never());
+		StepVerifier
+				.create(new DiscoveryClientServiceInstanceListSupplier(
+						reactiveDiscoveryClient, environment).get())
+				.expectSubscription().expectNext(Lists.emptyList()).thenCancel()
+				.verify(VERIFICATION_TIMEOUT);
 	}
 
 	@Test
@@ -102,9 +134,10 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 			supplier = new DiscoveryClientServiceInstanceListSupplier(discoveryClient,
 					environment);
 			return supplier.get();
-		}).expectSubscription().expectNext(
-				Lists.list(instance("1host", false), instance("2host-secure", true)))
-				.thenCancel().verify();
+		}).expectSubscription()
+				.expectNext(Lists.list(instance("1host", false),
+						instance("2host-secure", true)))
+				.thenCancel().verify(VERIFICATION_TIMEOUT);
 	}
 
 	@Test
@@ -123,7 +156,33 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 		}).expectSubscription()
 				.expectNext(Lists.list(instance("1host", false),
 						instance("2host-secure", true), instance("3host", false)))
-				.thenCancel().verify();
+				.thenCancel().verify(VERIFICATION_TIMEOUT);
+	}
+
+	@Test
+	void shouldReturnEmptyInstancesListOnExceptionBlockingClient() {
+		when(discoveryClient.getInstances(SERVICE_ID))
+				.thenThrow(new RuntimeException("Exception"));
+
+		StepVerifier.withVirtualTime(() -> {
+			supplier = new DiscoveryClientServiceInstanceListSupplier(discoveryClient,
+					environment);
+			return supplier.get();
+		}).expectSubscription().expectNext(Lists.emptyList()).thenCancel()
+				.verify(VERIFICATION_TIMEOUT);
+	}
+
+	@Test
+	void shouldReturnEmptyInstancesListOnTimeoutBlockingClient() {
+		environment.setProperty(SERVICE_DISCOVERY_TIMEOUT, "100ms");
+		when(discoveryClient.getInstances(SERVICE_ID)).thenAnswer(
+				new AnswersWithDelay(200, new Returns(Lists.list(instance("1host", false),
+						instance("2host-secure", true), instance("3host", false)))));
+		StepVerifier
+				.create(new DiscoveryClientServiceInstanceListSupplier(discoveryClient,
+						environment).get())
+				.expectSubscription().expectNext(Lists.emptyList()).thenCancel()
+				.verify(VERIFICATION_TIMEOUT);
 	}
 
 }
