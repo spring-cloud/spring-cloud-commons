@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
  * @author Spencer Gibb
@@ -28,12 +29,23 @@ public class CompletionContext {
 
 	private final Throwable throwable;
 
+	private final ClientResponse clientResponse;
+
 	public CompletionContext(Status status) {
-		this(status, null);
+		this(status, null, null);
+	}
+
+	public CompletionContext(Status status, ClientResponse clientResponse) {
+		this(status, clientResponse, null);
 	}
 
 	public CompletionContext(Status status, Throwable throwable) {
+		this(status, null, throwable);
+	}
+
+	public CompletionContext(Status status, ClientResponse clientResponse, Throwable throwable) {
 		this.status = status;
+		this.clientResponse = clientResponse;
 		this.throwable = throwable;
 	}
 

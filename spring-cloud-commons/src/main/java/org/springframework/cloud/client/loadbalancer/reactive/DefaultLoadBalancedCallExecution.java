@@ -17,15 +17,32 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 /**
- * Response created for each request.
- *
- * @param <T> type of the server
- * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-public interface Response<T> {
+public class DefaultLoadBalancedCallExecution<C, T> implements LoadBalancedCallExecution<C, T> {
 
-	boolean hasServer();
+	private final Request<C> request;
+	private final Response<T> response;
+	private final CompletionContext completionContext;
 
-	T getServer();
+	public DefaultLoadBalancedCallExecution(Request<C> request, Response<T> response, CompletionContext completionContext) {
+		this.request = request;
+		this.response = response;
+		this.completionContext = completionContext;
+	}
+
+	@Override
+	public Request<C> getRequest() {
+		return request;
+	}
+
+	@Override
+	public Response<T> getResponse() {
+		return response;
+	}
+
+	@Override
+	public CompletionContext completionContext() {
+		return completionContext;
+	}
 }

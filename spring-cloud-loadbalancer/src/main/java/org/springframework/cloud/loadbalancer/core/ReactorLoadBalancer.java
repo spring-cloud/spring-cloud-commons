@@ -43,6 +43,7 @@ public interface ReactorLoadBalancer<T> extends ReactiveLoadBalancer<T> {
 		return choose(REQUEST);
 	}
 
+	// FIXME
 	default <R, C> Mono<R> execute(RequestExecution<R, C, T> execution) {
 		return choose(execution.createRequest()).flatMap(response -> {
 			if (!response.hasServer()) {

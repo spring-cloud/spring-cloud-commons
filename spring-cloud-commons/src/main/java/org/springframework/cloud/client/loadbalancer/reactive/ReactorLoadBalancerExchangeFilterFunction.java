@@ -25,7 +25,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -42,24 +41,25 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-public class ReactorLoadBalancerExchangeFilterFunction
-		implements ExchangeFilterFunction, ApplicationEventPublisherAware {
+public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
 
 	private static final Log LOG = LogFactory
 			.getLog(ReactorLoadBalancerExchangeFilterFunction.class);
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	private ApplicationEventPublisher eventPublisher;
+	private final LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> loadBalancerResponseCompleteCallback;
 
 	public ReactorLoadBalancerExchangeFilterFunction(
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> loadBalancerResponseCompleteCallback) {
 		this.loadBalancerFactory = loadBalancerFactory;
+		this.loadBalancerResponseCompleteCallback = loadBalancerResponseCompleteCallback;
 	}
 
 	@Override
-	public Mono<ClientResponse> filter(ClientRequest request, ExchangeFunction next) {
-		URI originalUrl = request.url();
+	public Mono<ClientResponse> filter(ClientRequest clientRequest, ExchangeFunction next) {
+		URI originalUrl = clientRequest.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
 			String message = String.format(
@@ -71,45 +71,43 @@ public class ReactorLoadBalancerExchangeFilterFunction
 			return Mono.just(
 					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
-		return choose(serviceId).flatMap(response -> {
-			if (!response.hasServer()) {
+		DefaultRequest<DefaultRequestContext> lbRequest = new DefaultRequest<>(new DefaultRequestContext(clientRequest));
+		return choose(serviceId, lbRequest).flatMap(lbResponse -> {
+			if (!lbResponse.hasServer()) {
 				String message = serviceInstanceUnavailableMessage(serviceId);
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(message);
 				}
-				completeAndPublishLoadBalancerResponse(response,
-						new CompletionContext(Status.DISCARD));
+				loadBalancerResponseCompleteCallback
+						.onComplete(new DefaultLoadBalancedCallExecution<>(lbRequest, lbResponse,
+								new CompletionContext(Status.DISCARD)));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
 			}
-			ServiceInstance instance = response.getServer();
+			ServiceInstance instance = lbResponse.getServer();
 
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(String.format(
 						"Load balancer has retrieved the instance for service %s: %s",
 						serviceId, instance.getUri()));
 			}
-			ClientRequest newRequest = buildClientRequest(request,
+			ClientRequest newRequest = buildClientRequest(clientRequest,
 					reconstructURI(instance, originalUrl));
 			return next.exchange(newRequest)
-					.doOnError(throwable -> completeAndPublishLoadBalancerResponse(
-							response, new CompletionContext(Status.FAILED, throwable)))
-					.doOnSuccess(clientResponse -> completeAndPublishLoadBalancerResponse(
-							response, new CompletionContext(Status.SUCCESS)));
+					.doOnError(throwable -> loadBalancerResponseCompleteCallback
+							.onComplete(new DefaultLoadBalancedCallExecution<>(lbRequest, lbResponse,
+									new CompletionContext(Status.FAILED, throwable))))
+					.doOnSuccess(clientResponse -> loadBalancerResponseCompleteCallback
+							.onComplete(new DefaultLoadBalancedCallExecution<>(lbRequest, lbResponse,
+									new CompletionContext(Status.SUCCESS, clientResponse))));
 		});
-	}
-
-	private void completeAndPublishLoadBalancerResponse(
-			Response<ServiceInstance> response, CompletionContext completionContext) {
-		response.onComplete(completionContext);
-		eventPublisher.publishEvent(new LoadBalancerResponseEvent(response));
 	}
 
 	protected URI reconstructURI(ServiceInstance instance, URI original) {
 		return LoadBalancerUriTools.reconstructURI(instance, original);
 	}
 
-	protected Mono<Response<ServiceInstance>> choose(String serviceId) {
+	protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<DefaultRequestContext> request) {
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory
 				.getInstance(serviceId);
 		if (loadBalancer == null) {
@@ -128,12 +126,6 @@ public class ReactorLoadBalancerExchangeFilterFunction
 				.cookies(cookies -> cookies.addAll(request.cookies()))
 				.attributes(attributes -> attributes.putAll(request.attributes()))
 				.body(request.body()).build();
-	}
-
-	@Override
-	public void setApplicationEventPublisher(
-			ApplicationEventPublisher applicationEventPublisher) {
-		eventPublisher = applicationEventPublisher;
 	}
 
 }

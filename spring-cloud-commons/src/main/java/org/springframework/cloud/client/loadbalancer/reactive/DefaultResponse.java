@@ -28,8 +28,6 @@ public class DefaultResponse implements Response<ServiceInstance> {
 
 	private final ServiceInstance serviceInstance;
 
-	private CompletionContext completionContext;
-
 	public DefaultResponse(ServiceInstance serviceInstance) {
 		this.serviceInstance = serviceInstance;
 	}
@@ -43,15 +41,4 @@ public class DefaultResponse implements Response<ServiceInstance> {
 	public ServiceInstance getServer() {
 		return this.serviceInstance;
 	}
-
-	@Override
-	public void onComplete(CompletionContext completionContext) {
-		this.completionContext = completionContext;
-	}
-
-	@Override
-	public CompletionContext getCompletionContext() {
-		return completionContext;
-	}
-
 }

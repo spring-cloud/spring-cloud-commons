@@ -29,6 +29,11 @@ public class EmptyResponse implements Response<ServiceInstance> {
 	private CompletionContext completionContext;
 
 	@Override
+	public void complete(CompletionContext completionContext) {
+		this.completionContext = completionContext;
+	}
+
+	@Override
 	public boolean hasServer() {
 		return false;
 	}
@@ -36,11 +41,6 @@ public class EmptyResponse implements Response<ServiceInstance> {
 	@Override
 	public ServiceInstance getServer() {
 		return null;
-	}
-
-	@Override
-	public void onComplete(CompletionContext completionContext) {
-		this.completionContext = completionContext;
 	}
 
 	@Override

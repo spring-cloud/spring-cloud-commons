@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,20 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import org.springframework.context.ApplicationEvent;
+import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class LoadBalancerResponseEvent extends ApplicationEvent {
+public class DefaultResponseContext {
 
-	public LoadBalancerResponseEvent(LoadBalancedCallExecution execution) {
-		super(execution);
+	private final ClientResponse clientResponse;
+
+	DefaultResponseContext(ClientResponse clientResponse) {
+		this.clientResponse = clientResponse;
 	}
 
+	ClientResponse getClientResponse() {
+		return clientResponse;
+	}
 }

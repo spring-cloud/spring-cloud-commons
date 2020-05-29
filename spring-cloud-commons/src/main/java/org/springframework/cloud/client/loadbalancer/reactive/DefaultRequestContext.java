@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import org.springframework.web.reactive.function.client.ClientRequest;
+
 /**
  * Contains information relevant to the request.
  *
@@ -29,7 +31,13 @@ public class DefaultRequestContext {
 	 */
 	private String hint = "default";
 
+	private ClientRequest originalRequest;
+
 	public DefaultRequestContext() {
+	}
+
+	public DefaultRequestContext(ClientRequest request) {
+		this.originalRequest = request;
 	}
 
 	public DefaultRequestContext(String hint) {
@@ -44,4 +52,11 @@ public class DefaultRequestContext {
 		this.hint = hint;
 	}
 
+	public ClientRequest getOriginalRequest() {
+		return originalRequest;
+	}
+
+	public void setOriginalRequest(ClientRequest originalRequest) {
+		this.originalRequest = originalRequest;
+	}
 }
