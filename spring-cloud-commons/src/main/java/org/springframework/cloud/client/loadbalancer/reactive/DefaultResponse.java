@@ -24,13 +24,20 @@ import org.springframework.cloud.client.ServiceInstance;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-public class DefaultResponse implements Response<ServiceInstance> {
+public class DefaultResponse implements Response<ServiceInstance, DefaultResponseContext> {
 
 	private final ServiceInstance serviceInstance;
 
 	private CompletionContext completionContext;
 
+	private DefaultResponseContext responseContext;
+
 	public DefaultResponse(ServiceInstance serviceInstance) {
+		this.serviceInstance = serviceInstance;
+	}
+
+	public DefaultResponse(DefaultResponseContext responseContext, ServiceInstance serviceInstance) {
+		this.responseContext = responseContext;
 		this.serviceInstance = serviceInstance;
 	}
 
@@ -54,4 +61,8 @@ public class DefaultResponse implements Response<ServiceInstance> {
 		return completionContext;
 	}
 
+	@Override
+	public DefaultResponseContext getContext() {
+		return responseContext;
+	}
 }

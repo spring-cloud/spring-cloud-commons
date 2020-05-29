@@ -17,6 +17,8 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
  * @author Spencer Gibb
@@ -28,25 +30,39 @@ public class CompletionContext {
 
 	private final Throwable throwable;
 
-	public CompletionContext(Status status) {
-		this(status, null);
+	private final ClientRequest clientRequest;
+
+	private final ClientResponse clientResponse;
+
+	public CompletionContext(Status status, ClientRequest clientRequest) {
+		this(status, clientRequest, null, null);
 	}
 
-	public CompletionContext(Status status, Throwable throwable) {
+	public CompletionContext(Status status, ClientRequest clientRequest, Throwable throwable) {
+		this(status, clientRequest, null, throwable);
+	}
+
+	public CompletionContext(Status status, ClientRequest clientRequest, ClientResponse clientResponse) {
+		this(status, clientRequest, clientResponse, null);
+	}
+
+	public CompletionContext(Status status, ClientRequest clientRequest, ClientResponse clientResponse, Throwable throwable) {
 		this.status = status;
+		this.clientRequest = clientRequest;
+		this.clientResponse = clientResponse;
 		this.throwable = throwable;
 	}
 
-	public static CompletionContext success() {
-		return new CompletionContext(Status.SUCCESS);
+	public static CompletionContext success(ClientRequest clientRequest, ClientResponse clientResponse) {
+		return new CompletionContext(Status.SUCCESS, clientRequest, clientResponse);
 	}
 
-	public static CompletionContext discard() {
-		return new CompletionContext(Status.DISCARD);
+	public static CompletionContext discard(ClientRequest clientRequest) {
+		return new CompletionContext(Status.DISCARD, clientRequest);
 	}
 
-	public static CompletionContext failed(Throwable t) {
-		return new CompletionContext(Status.FAILED, t);
+	public static CompletionContext failed(Throwable throwable, ClientRequest clientRequest) {
+		return new CompletionContext(Status.FAILED, clientRequest, throwable);
 	}
 
 	public Status getStatus() {

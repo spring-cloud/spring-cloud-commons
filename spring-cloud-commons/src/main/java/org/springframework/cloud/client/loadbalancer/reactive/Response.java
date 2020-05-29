@@ -23,7 +23,12 @@ package org.springframework.cloud.client.loadbalancer.reactive;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-public interface Response<T> {
+public interface Response<T, C> {
+
+	default C getContext() {
+		// Avoid breaking backward compatibility
+		return null;
+	}
 
 	boolean hasServer();
 
