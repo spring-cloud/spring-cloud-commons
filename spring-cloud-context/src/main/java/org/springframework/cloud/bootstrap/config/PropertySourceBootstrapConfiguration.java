@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -100,7 +101,13 @@ public class PropertySourceBootstrapConfiguration implements
 			}
 			List<PropertySource<?>> sourceList = new ArrayList<>();
 			for (PropertySource<?> p : source) {
-				sourceList.add(new BootstrapPropertySource<>(p));
+				if (p instanceof EnumerablePropertySource) {
+					EnumerablePropertySource<?> enumerable = (EnumerablePropertySource<?>) p;
+					sourceList.add(new BootstrapPropertySource<>(enumerable));
+				}
+				else {
+					sourceList.add(new SimpleBootstrapPropertySource(p));
+				}
 			}
 			logger.info("Located property source: " + sourceList);
 			composite.addAll(sourceList);

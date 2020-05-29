@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,12 +44,11 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @since 2.2.0
  */
 public class HealthCheckServiceInstanceListSupplier
-		implements ServiceInstanceListSupplier, InitializingBean, DisposableBean {
+		extends DelegatingServiceInstanceListSupplier
+		implements InitializingBean, DisposableBean {
 
 	private static final Log LOG = LogFactory
 			.getLog(HealthCheckServiceInstanceListSupplier.class);
-
-	private final ServiceInstanceListSupplier delegate;
 
 	private final LoadBalancerProperties.HealthCheck healthCheck;
 
@@ -64,13 +62,13 @@ public class HealthCheckServiceInstanceListSupplier
 
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
-		this.delegate = delegate;
+		super(delegate);
 		this.healthCheck = healthCheck;
 		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default",
 				"/actuator/health");
 		this.webClient = webClient;
 		aliveInstancesReplay = Flux.defer(delegate)
-				.delaySubscription(Duration.ofMillis(healthCheck.getInitialDelay()))
+				.delaySubscription(healthCheck.getInitialDelay())
 				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(
 						alive -> Collections.unmodifiableList(new ArrayList<>(alive))))
 				.replay(1).refCount(1);
@@ -119,11 +117,6 @@ public class HealthCheckServiceInstanceListSupplier
 				return result;
 			}).defaultIfEmpty(result);
 		}).repeatWhen(restart -> restart.delayElements(healthCheck.getInterval()));
-	}
-
-	@Override
-	public String getServiceId() {
-		return delegate.getServiceId();
 	}
 
 	@Override

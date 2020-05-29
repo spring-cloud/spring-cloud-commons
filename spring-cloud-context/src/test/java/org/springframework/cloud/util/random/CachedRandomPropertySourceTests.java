@@ -26,7 +26,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import org.springframework.boot.env.RandomValuePropertySource;
+import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -45,20 +45,19 @@ import static org.mockito.Mockito.when;
 public class CachedRandomPropertySourceTests {
 
 	@Mock
-	RandomValuePropertySource randomValuePropertySource;
+	private PropertySource randomValuePropertySource;
 
 	@Before
 	public void setup() {
-
-		when(randomValuePropertySource.getProperty(eq("random.long")))
-				.thenReturn(new Long(1234));
+		when(randomValuePropertySource.getProperty(eq("random.long"))).thenReturn(1234L);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void getProperty() {
 		Map<String, Map<String, Object>> cache = new HashMap<>();
 		Map<String, Object> typeCache = new HashMap<>();
-		typeCache.put("long", new Long(5678));
+		typeCache.put("long", 5678L);
 		Map<String, Object> spyedTypeCache = spy(typeCache);
 		cache.put("foo", spyedTypeCache);
 		Map<String, Map<String, Object>> spyedCache = spy(cache);
@@ -69,9 +68,9 @@ public class CachedRandomPropertySourceTests {
 		then(cachedRandomPropertySource.getProperty("cachedrandom.app")).isNull();
 
 		then(cachedRandomPropertySource.getProperty("cachedrandom.app.long"))
-				.isEqualTo(new Long(1234));
+				.isEqualTo(1234L);
 		then(cachedRandomPropertySource.getProperty("cachedrandom.foo.long"))
-				.isEqualTo(new Long(5678));
+				.isEqualTo(5678L);
 		verify(spyedCache, times(1)).computeIfAbsent(eq("app"), isA(Function.class));
 		verify(spyedTypeCache, times(1)).computeIfAbsent(eq("long"), isA(Function.class));
 	}

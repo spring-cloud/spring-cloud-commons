@@ -855,7 +855,7 @@ You can set your own `ttl` value (the time after write after which entries shoul
 as the value of the `spring.cloud.loadbalancer.cache.ttl` property.
 You can also set your own LoadBalancer cache initial capacity by setting the value of the `spring.cloud.loadbalancer.cache.capacity` property.
 
-The default setup includes `ttl` set to 30 seconds and the default `initialCapacity` is `256`.
+The default setup includes `ttl` set to 35 seconds and the default `initialCapacity` is `256`.
 
 You can also altogether disable loadBalancer caching by setting the value of `spring.cloud.loadbalancer.cache.enabled`
 to `false`.
@@ -890,22 +890,14 @@ public class CustomLoadBalancerConfiguration {
 
 	@Bean
 	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
-			ReactiveDiscoveryClient discoveryClient, Environment environment,
-			LoadBalancerZoneConfig zoneConfig,
-			ApplicationContext context) {
-		DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
-				discoveryClient, environment);
-		ZonePreferenceServiceInstanceListSupplier delegate = new ZonePreferenceServiceInstanceListSupplier(firstDelegate,
-				zoneConfig);
-		ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
-				.getBeanProvider(LoadBalancerCacheManager.class);
-		if (cacheManagerProvider.getIfAvailable() != null) {
-			return new CachingServiceInstanceListSupplier(delegate,
-					cacheManagerProvider.getIfAvailable());
-		}
-		return delegate;
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSuppliers.builder()
+					.withDiscoveryClient()
+					.withZonePreference()
+					.withCaching()
+					.build(context);
 	}
-	}
+}
 ----
 
 === Instance Health-Check for LoadBalancer
@@ -919,53 +911,42 @@ TIP: This mechanism is particularly helpful while using the `SimpleDiscoveryClie
 clients backed by an actual Service Registry, it's not necessary to use, as we already get
 healthy instances after querying the external ServiceDiscovery.
 
-The `HealthCheckServiceInstanceListSupplier` uses `InstanceHealthChecker` to verify if the instances are
-alive. We provide a default `PingHealthChecker` instance. It uses `WebClient` to execute
-requests against the `health` endpoint of the instance. You can also provide your own implementation
-of `InstanceHealthChecker` instead.
+TIP:: This supplier is also recommended for setups with a small number of instances per service
+in order to avoid retrying calls on a failing instance.
 
 `HealthCheckServiceInstanceListSupplier` uses properties prefixed with
 `spring.cloud.loadbalancer.healthcheck`. You can set the `initialDelay` and `interval`
-for the scheduler.
-
-For the `PingHealthChecker`, you can set the default path for the healthcheck URL by setting
+for the scheduler. You can set the default path for the healthcheck URL by setting
 the value of the `spring.cloud.loadbalancer.healthcheck.path.default`. You can also set a specific value
-for any given service by setting the value of the `spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]`,
-substituting the `[SERVICE_ID]` with the correct ID of your service. If the path is not set,
-`/actuator/health` is used by default.
+for any given service by setting the value of the `spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]`, substituting the `[SERVICE_ID]` with the correct ID of your service. If the path is not set, `/actuator/health` is used by default.
+
+TIP:: If you rely on the default path (`/actuator/health`), make sure you add `spring-boot-starter-actuator` to your collaborator's dependencies, unless you are planning to add such an endpoint on your own.
 
 In order to use the health-check scheduler approach, you will have to instantiate a `HealthCheckServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.
 
 We use delegates to work with `ServiceInstanceListSupplier` beans.
-We suggest passing a `DiscoveryClientServiceInstanceListSupplier` delegate in the constructor of `HealthCheckServiceInstanceListSupplier` and, in turn, wrapping the latter with a `CachingServiceInstanceListSupplier` to leverage <<loadbalancer-caching, LoadBalancer caching mechanism>>.
+We suggest passing a `DiscoveryClientServiceInstanceListSupplier` delegate in the constructor of `HealthCheckServiceInstanceListSupplier`.
 
 You could use this sample configuration to set it up:
 
-[[zoned-based-custom-loadbalancer-configuration]]
+[[health-check-based-custom-loadbalancer-configuration]]
 [source,java,indent=0]
 ----
 public class CustomLoadBalancerConfiguration {
 
 	@Bean
 	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
-			ReactiveDiscoveryClient discoveryClient, Environment environment,
-			LoadBalancerProperties loadBalancerProperties,
-			ApplicationContext context,
-			InstanceHealthChecker healthChecker) {
-		DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
-				discoveryClient, environment);
-		HealthCheckServiceInstanceListSupplier delegate = new HealthCheckServiceInstanceListSupplier(firstDelegate,
-				loadBalancerProperties, healthChecker);
-		ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
-				.getBeanProvider(LoadBalancerCacheManager.class);
-		if (cacheManagerProvider.getIfAvailable() != null) {
-			return new CachingServiceInstanceListSupplier(delegate,
-					cacheManagerProvider.getIfAvailable());
-		}
-		return delegate;
-	}
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withHealthChecks()
+					.build(context);
+	    }
 	}
 ----
+
+NOTE:: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`, therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
+
 
 [[spring-cloud-loadbalancer-starter]]
 === Spring Cloud LoadBalancer Starter
@@ -996,6 +977,10 @@ public class MyConfiguration {
 	}
 }
 ----
+
+TIP:: In order to make working on your own LoadBalancer configuration easier, we have added a `builder()` method to the `ServiceInstanceListSupplier` class.
+
+TIP:: You can also use our alternative predefined configurations in place of the default ones by setting the value of `spring.cloud.loadbalancer.configurations` property to `zone-preference` to use `ZonePreferenceServiceInstanceListSupplier` with caching or to `health-check` to use `HealthCheckServiceInstanceListSupplier` with caching.
 ====
 
 You can use this feature to instantiate different implementations of `ServiceInstanceListSupplier` or `ReactorLoadBalancer`, either written by you, or provided by us as alternatives (for example `ZonePreferenceServiceInstanceListSupplier`) to override the default setup.

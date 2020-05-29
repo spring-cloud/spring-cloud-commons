@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -416,9 +416,34 @@ public class BootstrapConfigurationTests {
 				.isEqualTo("Hello added!");
 	}
 
+	@Test
+	public void nonEnumerablePropertySourceWorks() {
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+				.sources(BareConfiguration.class)
+				.properties("spring.cloud.bootstrap.name=nonenumerable").run();
+		then(this.context.getEnvironment().getProperty("foo")).isEqualTo("bar");
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	protected static class BareConfiguration {
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	// This is added to bootstrap context as a source in bootstrap.properties
+	protected static class SimplePropertySourceConfiguration
+			implements PropertySourceLocator {
+
+		@Override
+		public PropertySource<?> locate(Environment environment) {
+			return new PropertySource("testBootstrapSimple", this) {
+				@Override
+				public Object getProperty(String name) {
+					return ("foo".equals(name)) ? "bar" : null;
+				}
+			};
+		}
 
 	}
 

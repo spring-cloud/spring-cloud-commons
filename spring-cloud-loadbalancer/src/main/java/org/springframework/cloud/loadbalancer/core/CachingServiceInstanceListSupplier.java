@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,8 @@ import org.springframework.cloud.client.ServiceInstance;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-public class CachingServiceInstanceListSupplier implements ServiceInstanceListSupplier {
+public class CachingServiceInstanceListSupplier
+		extends DelegatingServiceInstanceListSupplier {
 
 	private static final Log log = LogFactory
 			.getLog(CachingServiceInstanceListSupplier.class);
@@ -48,14 +49,12 @@ public class CachingServiceInstanceListSupplier implements ServiceInstanceListSu
 	public static final String SERVICE_INSTANCE_CACHE_NAME = CachingServiceInstanceListSupplier.class
 			.getSimpleName() + "Cache";
 
-	private final ServiceInstanceListSupplier delegate;
-
 	private final Flux<List<ServiceInstance>> serviceInstances;
 
 	@SuppressWarnings("unchecked")
 	public CachingServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			CacheManager cacheManager) {
-		this.delegate = delegate;
+		super(delegate);
 		this.serviceInstances = CacheFlux.lookup(key -> {
 			// TODO: configurable cache name
 			Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
@@ -70,7 +69,7 @@ public class CachingServiceInstanceListSupplier implements ServiceInstanceListSu
 				return Mono.empty();
 			}
 			return Flux.just(list).materialize().collectList();
-		}, delegate.getServiceId()).onCacheMissResume(this.delegate)
+		}, delegate.getServiceId()).onCacheMissResume(delegate.get().take(1))
 				.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize()
 						.doOnNext(instances -> {
 							Cache cache = cacheManager
@@ -85,11 +84,6 @@ public class CachingServiceInstanceListSupplier implements ServiceInstanceListSu
 								cache.put(key, instances);
 							}
 						}).then());
-	}
-
-	@Override
-	public String getServiceId() {
-		return delegate.getServiceId();
 	}
 
 	@Override
