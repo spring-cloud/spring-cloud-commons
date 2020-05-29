@@ -27,13 +27,15 @@ import org.springframework.util.StringUtils;
 import static org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
 /**
+ * Enumerable wrapper for a property source.
+ *
  * @author Ryan Baxter
  */
 public class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
 
-	private PropertySource<T> delegate;
+	private EnumerablePropertySource<T> delegate;
 
-	public BootstrapPropertySource(PropertySource<T> delegate) {
+	public BootstrapPropertySource(EnumerablePropertySource<T> delegate) {
 		super(BOOTSTRAP_PROPERTY_SOURCE_NAME + "-" + delegate.getName(),
 				delegate.getSource());
 		this.delegate = delegate;
@@ -47,13 +49,7 @@ public class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
 	@Override
 	public String[] getPropertyNames() {
 		Set<String> names = new LinkedHashSet<>();
-		if (!(this.delegate instanceof EnumerablePropertySource)) {
-			throw new IllegalStateException(
-					"Failed to enumerate property names due to non-enumerable property source: "
-							+ this.delegate);
-		}
-		names.addAll(Arrays.asList(
-				((EnumerablePropertySource<?>) this.delegate).getPropertyNames()));
+		names.addAll(Arrays.asList(this.delegate.getPropertyNames()));
 
 		return StringUtils.toStringArray(names);
 	}

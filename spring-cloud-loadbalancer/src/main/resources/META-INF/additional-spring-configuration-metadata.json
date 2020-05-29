@@ -1,0 +1,26 @@
+{
+	"properties": [
+		{
+			"defaultValue": true,
+			"name": "spring.cloud.loadbalancer.ribbon.enabled",
+			"description": "Causes `RibbonLoadBalancerClient` to be used by default.",
+			"type": "java.lang.Boolean"
+		},
+		{
+			"name": "spring.cloud.loadbalancer.zone",
+			"type": "java.lang.String",
+			"description": "Spring Cloud LoadBalancer zone."
+		},
+		{
+			"name": "spring.cloud.loadbalancer.service-discovery.timeout",
+			"description": "String representation of Duration of the timeout for calls to service discovery.",
+			"type": "java.lang.String"
+		},
+		{
+			"defaultValue": true,
+			"name": "spring.cloud.loadbalancer.cache.enabled",
+			"description": "Enables Spring Cloud LoadBalancer caching mechanism.",
+			"type": "java.lang.Boolean"
+		}
+	]
+}

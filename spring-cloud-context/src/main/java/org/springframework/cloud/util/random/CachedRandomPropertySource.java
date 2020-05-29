@@ -19,15 +19,13 @@ package org.springframework.cloud.util.random;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.boot.env.RandomValuePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.StringUtils;
 
 /**
  * @author Ryan Baxter
  */
-public class CachedRandomPropertySource
-		extends PropertySource<RandomValuePropertySource> {
+public class CachedRandomPropertySource extends PropertySource<PropertySource> {
 
 	private static final String NAME = "cachedrandom";
 
@@ -35,13 +33,12 @@ public class CachedRandomPropertySource
 
 	private static Map<String, Map<String, Object>> cache = new ConcurrentHashMap<>();
 
-	public CachedRandomPropertySource(
-			RandomValuePropertySource randomValuePropertySource) {
+	public CachedRandomPropertySource(PropertySource randomValuePropertySource) {
 		super(NAME, randomValuePropertySource);
 
 	}
 
-	CachedRandomPropertySource(RandomValuePropertySource randomValuePropertySource,
+	CachedRandomPropertySource(PropertySource randomValuePropertySource,
 			Map<String, Map<String, Object>> cache) {
 		super(NAME, randomValuePropertySource);
 		this.cache = cache;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class LoadBalancerCacheProperties {
 	 * @see <a href=
 	 * "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java">StringToDurationConverter.java</a>
 	 */
-	private Duration ttl = Duration.ofSeconds(30);
+	private Duration ttl = Duration.ofSeconds(35);
 
 	/**
 	 * Initial cache capacity expressed as int.

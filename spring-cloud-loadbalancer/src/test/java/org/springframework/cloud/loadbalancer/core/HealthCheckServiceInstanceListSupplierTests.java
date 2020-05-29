@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,6 @@ import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -80,7 +79,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 	}
 
 	@AfterEach
-	void tearDown() throws Exception {
+	void tearDown() {
 		if (listSupplier != null) {
 			listSupplier.destroy();
 			listSupplier = null;
@@ -92,9 +91,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 	void shouldCheckInstanceWithProvidedHealthCheckPath() {
 		healthCheck.getPath().put("ignored-service", "/health");
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
-						.with(new MockEnvironment()).build(),
-				healthCheck, webClient);
+				ServiceInstanceListSupplier.fixed("ignored-service").build(), healthCheck,
+				webClient);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
@@ -107,9 +105,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@Test
 	void shouldCheckInstanceWithDefaultHealthCheckPath() {
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
-						.with(new MockEnvironment()).build(),
-				healthCheck, webClient);
+				ServiceInstanceListSupplier.fixed("ignored-service").build(), healthCheck,
+				webClient);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
@@ -123,9 +120,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 	void shouldReturnFalseIfEndpointNotFound() {
 		healthCheck.getPath().put("ignored-service", "/test");
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSupplier.FixedServiceInstanceListSupplier
-						.with(new MockEnvironment()).build(),
-				healthCheck, webClient);
+				ServiceInstanceListSupplier.fixed("ignored-service").build(), healthCheck,
+				webClient);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1",
 				"ignored-service", "127.0.0.1", port, false);
 
@@ -136,7 +132,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldReturnOnlyAliveService() {
-		healthCheck.setInitialDelay(1000);
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
 
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1",
 				SERVICE_ID, "127.0.0.1", port, false);
@@ -164,8 +160,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription()
-				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
+		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay())
 				.expectNext(Lists.list(serviceInstance1))
 				.expectNoEvent(healthCheck.getInterval()).thenCancel()
 				.verify(VERIFY_TIMEOUT);
@@ -173,7 +168,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldEmitOnEachAliveServiceInBatch() {
-		healthCheck.setInitialDelay(1000);
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1",
 				SERVICE_ID, "127.0.0.1", port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2",
@@ -200,8 +195,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription()
-				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
+		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay())
 				.expectNext(Lists.list(serviceInstance1))
 				.expectNext(Lists.list(serviceInstance1, serviceInstance2))
 				.expectNoEvent(healthCheck.getInterval()).thenCancel()
@@ -210,7 +204,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldNotFailIfIsAliveReturnsError() {
-		healthCheck.setInitialDelay(1000);
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1",
 				SERVICE_ID, "127.0.0.1", port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2",
@@ -238,8 +232,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription()
-				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
+		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay())
 				.expectNext(Lists.list(serviceInstance1))
 				.expectNoEvent(healthCheck.getInterval()).thenCancel()
 				.verify(VERIFY_TIMEOUT);
@@ -247,7 +240,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldEmitAllInstancesIfAllIsAliveChecksFailed() {
-		healthCheck.setInitialDelay(1000);
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1",
 				SERVICE_ID, "127.0.0.1", port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2",
@@ -273,15 +266,14 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription()
-				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
+		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay())
 				.expectNext(Lists.list()).expectNoEvent(healthCheck.getInterval())
 				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldMakeInitialDaleyAfterPropertiesSet() {
-		healthCheck.setInitialDelay(1000);
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1",
 				SERVICE_ID, "127.0.0.1", port, false);
 
@@ -302,8 +294,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			listSupplier.afterPropertiesSet();
 
 			return listSupplier.get();
-		}).expectSubscription()
-				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
+		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay())
 				.expectNext(Lists.list(serviceInstance1))
 				.expectNoEvent(healthCheck.getInterval()).thenCancel()
 				.verify(VERIFY_TIMEOUT);
@@ -311,7 +302,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldRepeatIsAliveChecksIndefinitely() {
-		healthCheck.setInitialDelay(1000);
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1",
 				SERVICE_ID, "127.0.0.1", port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2",
@@ -340,8 +331,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription()
-				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
+		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay())
 				.expectNext(Lists.list()).expectNoEvent(healthCheck.getInterval())
 				.expectNext(Lists.list(serviceInstance1))
 				.expectNoEvent(healthCheck.getInterval())
@@ -351,7 +341,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldTimeoutIsAliveCheck() {
-		healthCheck.setInitialDelay(1000);
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1",
 				SERVICE_ID, "127.0.0.1", port, false);
 
@@ -376,8 +366,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription()
-				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
+		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay())
 				.expectNoEvent(healthCheck.getInterval()).expectNext(Lists.list())
 				.expectNoEvent(healthCheck.getInterval())
 				.expectNext(Lists.list(serviceInstance1))
@@ -388,7 +377,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldUpdateInstances() {
-		healthCheck.setInitialDelay(1000);
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1",
 				SERVICE_ID, "127.0.0.1", port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2",
@@ -413,8 +402,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription()
-				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
+		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay())
 				.expectNext(Lists.list(serviceInstance1))
 				.thenAwait(healthCheck.getInterval().dividedBy(2))
 				.expectNext(Lists.list(serviceInstance1))
@@ -427,7 +415,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldCacheResultIfAfterPropertiesSetInvoked() {
-		healthCheck.setInitialDelay(1000);
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1",
 				SERVICE_ID, "127.0.0.1", port, false);
 
@@ -458,8 +446,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			listSupplier.afterPropertiesSet();
 
 			return listSupplier.get().take(1).concatWith(listSupplier.get().take(1));
-		}).expectSubscription()
-				.expectNoEvent(Duration.ofMillis(healthCheck.getInitialDelay()))
+		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay())
 				.expectNext(Lists.list(serviceInstance1))
 				.expectNext(Lists.list(serviceInstance1)).thenCancel()
 				.verify(VERIFY_TIMEOUT);

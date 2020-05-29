@@ -40,8 +40,7 @@ public class CachedRandomPropertySourceAutoConfiguration {
 		PropertySource propertySource = propertySources
 				.get(RandomValuePropertySource.RANDOM_PROPERTY_SOURCE_NAME);
 		if (propertySource != null) {
-			propertySources.addLast(new CachedRandomPropertySource(
-					RandomValuePropertySource.class.cast(propertySource)));
+			propertySources.addLast(new CachedRandomPropertySource(propertySource));
 		}
 	}
 

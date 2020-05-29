@@ -18,6 +18,7 @@
 		<main.basedir>${basedir}/..</main.basedir>
 		<docs.whitelisted.branches>2.1.x,2.2.x</docs.whitelisted.branches>
 		<configprops.inclusionPattern>spring.cloud.*</configprops.inclusionPattern>
+		<upload-docs-zip.phase>deploy</upload-docs-zip.phase>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -70,8 +71,7 @@
 						<artifactId>maven-antrun-plugin</artifactId>
 					</plugin>
 					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>build-helper-maven-plugin</artifactId>
+						<artifactId>maven-deploy-plugin</artifactId>
 					</plugin>
 				</plugins>
 			</build>

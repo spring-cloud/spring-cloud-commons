@@ -7,20 +7,20 @@
 |spring.cloud.config.override-none | false | Flag to indicate that when {@link #setAllowOverride(boolean) allowOverride} is true, external properties should take lowest priority and should not override any existing property sources (including local config files). Default false.
 |spring.cloud.config.override-system-properties | true | Flag to indicate that the external properties should override system properties. Default true.
 |spring.cloud.discovery.client.composite-indicator.enabled | true | Enables discovery client composite health indicator.
-|spring.cloud.discovery.client.health-indicator.enabled | true | 
-|spring.cloud.discovery.client.health-indicator.include-description | false | 
-|spring.cloud.discovery.client.simple.instances |  | 
+|spring.cloud.discovery.client.health-indicator.enabled | true | null
+|spring.cloud.discovery.client.health-indicator.include-description | false | null
+|spring.cloud.discovery.client.simple.instances |  | null
 |spring.cloud.discovery.client.simple.local.instance-id |  | The unique identifier or name for the service instance.
 |spring.cloud.discovery.client.simple.local.metadata |  | Metadata for the service instance. Can be used by discovery clients to modify their behaviour per instance, e.g. when load balancing.
 |spring.cloud.discovery.client.simple.local.service-id |  | The identifier or name for the service. Multiple instances might share the same service ID.
 |spring.cloud.discovery.client.simple.local.uri |  | The URI of the service instance. Will be parsed to extract the scheme, host, and port.
-|spring.cloud.discovery.client.simple.order |  | 
+|spring.cloud.discovery.client.simple.order |  | null
 |spring.cloud.discovery.enabled | true | Enables discovery client health indicators.
 |spring.cloud.features.enabled | true | Enables the features endpoint.
 |spring.cloud.httpclientfactories.apache.enabled | true | Enables creation of Apache Http Client factory beans.
 |spring.cloud.httpclientfactories.ok.enabled | true | Enables creation of OK Http Client factory beans.
-|spring.cloud.hypermedia.refresh.fixed-delay | 5000 | 
-|spring.cloud.hypermedia.refresh.initial-delay | 10000 | 
+|spring.cloud.hypermedia.refresh.fixed-delay | 5000 | null
+|spring.cloud.hypermedia.refresh.initial-delay | 10000 | null
 |spring.cloud.inetutils.default-hostname | localhost | The default hostname. Used in case of errors.
 |spring.cloud.inetutils.default-ip-address | 127.0.0.1 | The default IP address. Used in case of errors.
 |spring.cloud.inetutils.ignored-interfaces |  | List of Java regular expressions for network interfaces that will be ignored.
@@ -29,11 +29,15 @@
 |spring.cloud.inetutils.use-only-site-local-interfaces | false | Whether to use only interfaces with site local addresses. See {@link InetAddress#isSiteLocalAddress()} for more details.
 |spring.cloud.loadbalancer.cache.caffeine.spec |  | The spec to use to create caches. See CaffeineSpec for more details on the spec format.
 |spring.cloud.loadbalancer.cache.capacity | 256 | Initial cache capacity expressed as int.
-|spring.cloud.loadbalancer.cache.ttl | 30s | Time To Live - time counted from writing of the record, after which cache entries are expired, expressed as a {@link Duration}. The property {@link String} has to be in keeping with the appropriate syntax as specified in Spring Boot <code>StringToDurationConverter</code>. @see <a href= "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java">StringToDurationConverter.java</a>
-|spring.cloud.loadbalancer.health-check.initial-delay | 0 | Initial delay value for the HealthCheck scheduler.
-|spring.cloud.loadbalancer.health-check.interval | 30s | Interval for rerunning the HealthCheck scheduler.
-|spring.cloud.loadbalancer.health-check.path |  | 
-|spring.cloud.loadbalancer.retry.enabled | true | 
+|spring.cloud.loadbalancer.cache.enabled | true | Enables Spring Cloud LoadBalancer caching mechanism.
+|spring.cloud.loadbalancer.cache.ttl | 35s | Time To Live - time counted from writing of the record, after which cache entries are expired, expressed as a {@link Duration}. The property {@link String} has to be in keeping with the appropriate syntax as specified in Spring Boot <code>StringToDurationConverter</code>. @see <a href= "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java">StringToDurationConverter.java</a>
+|spring.cloud.loadbalancer.health-check.initial-delay |  | Initial delay value for the HealthCheck scheduler.
+|spring.cloud.loadbalancer.health-check.interval | 25s | Interval for rerunning the HealthCheck scheduler.
+|spring.cloud.loadbalancer.health-check.path |  | null
+|spring.cloud.loadbalancer.retry.enabled | true | null
+|spring.cloud.loadbalancer.ribbon.enabled | true | Causes `RibbonLoadBalancerClient` to be used by default.
+|spring.cloud.loadbalancer.service-discovery.timeout |  | String representation of Duration of the timeout for calls to service discovery.
+|spring.cloud.loadbalancer.zone |  | Spring Cloud LoadBalancer zone.
 |spring.cloud.refresh.enabled | true | Enables autoconfiguration for the refresh scope and associated features.
 |spring.cloud.refresh.extra-refreshable | true | Additional class names for beans to post process into refresh scope.
 |spring.cloud.refresh.never-refreshable | true | Comma separated list of class names for beans to never be refreshed or rebound.
