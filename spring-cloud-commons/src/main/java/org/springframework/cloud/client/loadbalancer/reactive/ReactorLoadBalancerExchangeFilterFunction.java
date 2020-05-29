@@ -100,12 +100,13 @@ public class ReactorLoadBalancerExchangeFilterFunction
 						completeAndPublishLoadBalancerResponse(
 								lbResponse, new CompletionContext(Status.SUCCESS, clientRequest, clientResponse));
 						if (lbResponse
-								.getContext() instanceof StickySessionResponseContext)
+								.getContext() instanceof StickySessionResponseContext) {
 							clientResponse.cookies()
 									.add("affinity_key", ResponseCookie
 											.from("affinity_key", ((StickySessionResponseContext) lbResponse
 													.getContext()).getAffinityKey())
 											.build());
+						}
 					});
 		});
 	}
