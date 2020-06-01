@@ -19,30 +19,22 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class DefaultLoadBalancedCallExecution<C, T> implements LoadBalancedCallExecution<C, T> {
+public interface LoadBalancedCallExecutionData<C, T, R> {
 
-	private final Request<C> request;
-	private final Response<T> response;
-	private final CompletionContext completionContext;
+	Request<C> getRequest();
 
-	public DefaultLoadBalancedCallExecution(Request<C> request, Response<T> response, CompletionContext completionContext) {
-		this.request = request;
-		this.response = response;
-		this.completionContext = completionContext;
+	Response<T> getResponse();
+
+	CompletionContext<R> completionContext();
+
+	interface Callback<C, T, R> {
+
+		/**
+		 * // * Notification that the request completed. // * @param Response - the
+		 * response that has been completed //
+		 */
+		void onComplete(LoadBalancedCallExecutionData<C, T, R> execution);
+
 	}
 
-	@Override
-	public Request<C> getRequest() {
-		return request;
-	}
-
-	@Override
-	public Response<T> getResponse() {
-		return response;
-	}
-
-	@Override
-	public CompletionContext completionContext() {
-		return completionContext;
-	}
 }

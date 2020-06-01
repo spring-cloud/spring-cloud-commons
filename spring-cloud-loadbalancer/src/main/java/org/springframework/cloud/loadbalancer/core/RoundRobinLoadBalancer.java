@@ -54,6 +54,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 		}
 		return new DefaultResponse(instance);
 	};
+
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
 	 * {@link ServiceInstanceListSupplier} that will be used to get available instances

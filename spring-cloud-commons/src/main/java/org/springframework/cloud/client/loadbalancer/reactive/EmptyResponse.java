@@ -26,13 +26,6 @@ import org.springframework.cloud.client.ServiceInstance;
  */
 public class EmptyResponse implements Response<ServiceInstance> {
 
-	private CompletionContext completionContext;
-
-	@Override
-	public void complete(CompletionContext completionContext) {
-		this.completionContext = completionContext;
-	}
-
 	@Override
 	public boolean hasServer() {
 		return false;
@@ -41,11 +34,6 @@ public class EmptyResponse implements Response<ServiceInstance> {
 	@Override
 	public ServiceInstance getServer() {
 		return null;
-	}
-
-	@Override
-	public CompletionContext getCompletionContext() {
-		return completionContext;
 	}
 
 }

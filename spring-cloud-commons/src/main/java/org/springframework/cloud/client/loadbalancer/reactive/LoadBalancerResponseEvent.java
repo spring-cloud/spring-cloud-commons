@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public class LoadBalancerResponseEvent extends ApplicationEvent {
 
-	public LoadBalancerResponseEvent(LoadBalancedCallExecution execution) {
+	public LoadBalancerResponseEvent(LoadBalancedCallExecutionData execution) {
 		super(execution);
 	}
 

@@ -41,4 +41,5 @@ public class DefaultResponse implements Response<ServiceInstance> {
 	public ServiceInstance getServer() {
 		return this.serviceInstance;
 	}
+
 }

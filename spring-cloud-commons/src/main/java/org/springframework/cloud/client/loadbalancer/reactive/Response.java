@@ -28,4 +28,5 @@ public interface Response<T> {
 	boolean hasServer();
 
 	T getServer();
+
 }

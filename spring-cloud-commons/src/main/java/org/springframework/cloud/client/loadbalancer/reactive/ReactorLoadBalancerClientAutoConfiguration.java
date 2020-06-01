@@ -23,6 +23,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -38,18 +39,19 @@ import org.springframework.web.reactive.function.client.WebClient;
 @ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 public class ReactorLoadBalancerClientAutoConfiguration {
 
-	// TODO: switch to a stats-collecting implementation
 	@ConditionalOnMissingBean
 	@Bean
-	public LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> callback() {
+	public LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> callback() {
 		return new LoadBalancerResponseNoOpCallback();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
 	public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
-			ReactiveLoadBalancer.Factory loadBalancerFactory, LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> callback) {
-		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory, callback);
+			ReactiveLoadBalancer.Factory loadBalancerFactory,
+			LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> callback) {
+		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory,
+				callback);
 	}
 
 }

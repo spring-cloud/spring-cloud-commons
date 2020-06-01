@@ -104,17 +104,6 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
-	@Test
-	void loadBalancerResponseEventGenerated() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
-				.block();
-		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
-		then(eventListener.events).isNotEmpty();
-		then(eventListener.events).extracting("source").first()
-				.isInstanceOf(DefaultResponse.class);
-	}
-
 	@EnableDiscoveryClient
 	@EnableAutoConfiguration
 	@SpringBootConfiguration

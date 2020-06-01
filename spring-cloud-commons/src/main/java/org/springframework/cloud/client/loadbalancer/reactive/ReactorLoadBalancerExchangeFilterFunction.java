@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
-import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -48,17 +47,18 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	private final LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> loadBalancerResponseCompleteCallback;
+	private final LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> loadBalancerResponseCompleteCallback;
 
 	public ReactorLoadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
-			LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> loadBalancerResponseCompleteCallback) {
+			LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> loadBalancerResponseCompleteCallback) {
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.loadBalancerResponseCompleteCallback = loadBalancerResponseCompleteCallback;
 	}
 
 	@Override
-	public Mono<ClientResponse> filter(ClientRequest clientRequest, ExchangeFunction next) {
+	public Mono<ClientResponse> filter(ClientRequest clientRequest,
+			ExchangeFunction next) {
 		URI originalUrl = clientRequest.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
@@ -71,7 +71,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			return Mono.just(
 					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
-		DefaultRequest<DefaultRequestContext> lbRequest = new DefaultRequest<>(new DefaultRequestContext(clientRequest));
+		DefaultRequest<DefaultRequestContext> lbRequest = new DefaultRequest<>(
+				new DefaultRequestContext(clientRequest));
 		return choose(serviceId, lbRequest).flatMap(lbResponse -> {
 			if (!lbResponse.hasServer()) {
 				String message = serviceInstanceUnavailableMessage(serviceId);
@@ -79,8 +80,9 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 					LOG.warn(message);
 				}
 				loadBalancerResponseCompleteCallback
-						.onComplete(new DefaultLoadBalancedCallExecution<>(lbRequest, lbResponse,
-								new CompletionContext(Status.DISCARD)));
+						.onComplete(new DefaultLoadBalancedCallExecutionData<>(lbRequest,
+								lbResponse, new DefaultCompletionContext<>(
+										CompletionContext.Status.DISCARD)));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
 			}
@@ -95,11 +97,16 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 					reconstructURI(instance, originalUrl));
 			return next.exchange(newRequest)
 					.doOnError(throwable -> loadBalancerResponseCompleteCallback
-							.onComplete(new DefaultLoadBalancedCallExecution<>(lbRequest, lbResponse,
-									new CompletionContext(Status.FAILED, throwable))))
+							.onComplete(new DefaultLoadBalancedCallExecutionData<>(
+									lbRequest, lbResponse,
+									new DefaultCompletionContext<>(
+											CompletionContext.Status.FAILED, throwable))))
 					.doOnSuccess(clientResponse -> loadBalancerResponseCompleteCallback
-							.onComplete(new DefaultLoadBalancedCallExecution<>(lbRequest, lbResponse,
-									new CompletionContext(Status.SUCCESS, clientResponse))));
+							.onComplete(new DefaultLoadBalancedCallExecutionData<>(
+									lbRequest, lbResponse,
+									new DefaultCompletionContext<>(
+											CompletionContext.Status.SUCCESS,
+											clientResponse))));
 		});
 	}
 
@@ -107,7 +114,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 		return LoadBalancerUriTools.reconstructURI(instance, original);
 	}
 
-	protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<DefaultRequestContext> request) {
+	protected Mono<Response<ServiceInstance>> choose(String serviceId,
+			Request<DefaultRequestContext> request) {
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory
 				.getInstance(serviceId);
 		if (loadBalancer == null) {

@@ -16,9 +16,11 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedCallExecutionData;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
@@ -43,17 +45,28 @@ public interface ReactorLoadBalancer<T> extends ReactiveLoadBalancer<T> {
 		return choose(REQUEST);
 	}
 
-	// FIXME
-	default <R, C> Mono<R> execute(RequestExecution<R, C, T> execution) {
-		return choose(execution.createRequest()).flatMap(response -> {
+	// FIXME - this does not override the upstream method !!!
+	default <R, C> Publisher<R> execute(RequestExecution<R, C, T> execution,
+			LoadBalancedCallExecutionData.Callback<C, T, R> callback) {
+		Request<C> request = execution.createRequest();
+		return choose(request).flatMap(response -> {
 			if (!response.hasServer()) {
-				response.onComplete(CompletionContext.discard());
+				callback.onComplete(execution.createLoadBalancedCallExecutionData(request,
+						response, execution.createCompletionContext(
+								CompletionContext.Status.DISCARD, null, null)));
 				return Mono.from(execution.apply(response));
 			}
 			return Mono.from(execution.apply(response))
-					.doOnSuccess(r -> response.onComplete(CompletionContext.success()))
-					.doOnError(throwable -> response
-							.onComplete(CompletionContext.failed(throwable)));
+					.doOnSuccess(clientResponse -> callback.onComplete(execution
+							.createLoadBalancedCallExecutionData(request, response,
+									execution.createCompletionContext(
+											CompletionContext.Status.SUCCESS,
+											clientResponse, null))))
+					.doOnError(throwable -> callback.onComplete(execution
+							.createLoadBalancedCallExecutionData(request, response,
+									execution.createCompletionContext(
+											CompletionContext.Status.FAILED, null,
+											throwable))));
 		});
 	}
 

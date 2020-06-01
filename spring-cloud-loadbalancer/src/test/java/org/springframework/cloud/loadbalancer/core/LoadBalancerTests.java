@@ -32,8 +32,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
-import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
@@ -97,8 +95,6 @@ public class LoadBalancerTests {
 				else {
 					then(instance.isSecure()).isFalse();
 				}
-
-				response.onComplete(new CompletionContext(Status.SUCCESS));
 			}).verifyComplete();
 		}
 	}

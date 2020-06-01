@@ -27,7 +27,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedCallExecutionData;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerResponseNoOpCallback;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerCacheAutoConfiguration;
@@ -37,6 +40,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static java.time.Duration.ofMillis;
@@ -109,9 +113,16 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
+		public LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> callback() {
+			return new LoadBalancerResponseNoOpCallback();
+		}
+
+
+		@Bean
 		BlockingLoadBalancerClient blockingLoadBalancerClient(
-				LoadBalancerClientFactory loadBalancerClientFactory) {
-			return new BlockingLoadBalancerClient(loadBalancerClientFactory);
+				LoadBalancerClientFactory loadBalancerClientFactory,
+				LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> callback) {
+			return new BlockingLoadBalancerClient(loadBalancerClientFactory, callback);
 		}
 
 		@Bean

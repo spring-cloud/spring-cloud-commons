@@ -73,6 +73,18 @@ public interface ReactiveLoadBalancer<T> {
 			return new DefaultRequest<>();
 		}
 
+		default CompletionContext<R> createCompletionContext(
+				CompletionContext.Status status, R clientResponse, Throwable throwable) {
+			return new DefaultCompletionContext<>(status, clientResponse, throwable);
+		}
+
+		default LoadBalancedCallExecutionData<C, TT, R> createLoadBalancedCallExecutionData(
+				Request<C> request, Response<TT> response,
+				CompletionContext<R> completionContext) {
+			return new DefaultLoadBalancedCallExecutionData<>(request, response,
+					completionContext);
+		}
+
 	}
 
 	@FunctionalInterface

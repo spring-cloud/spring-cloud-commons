@@ -16,71 +16,21 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import org.springframework.core.style.ToStringCreator;
-import org.springframework.web.reactive.function.client.ClientResponse;
-
 /**
- * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
-// TODO: add metrics
-public class CompletionContext {
+public interface CompletionContext<R> {
 
-	private final Status status;
+	Status getStatus();
 
-	private final Throwable throwable;
+	Throwable getThrowable();
 
-	private final ClientResponse clientResponse;
-
-	public CompletionContext(Status status) {
-		this(status, null, null);
-	}
-
-	public CompletionContext(Status status, ClientResponse clientResponse) {
-		this(status, clientResponse, null);
-	}
-
-	public CompletionContext(Status status, Throwable throwable) {
-		this(status, null, throwable);
-	}
-
-	public CompletionContext(Status status, ClientResponse clientResponse, Throwable throwable) {
-		this.status = status;
-		this.clientResponse = clientResponse;
-		this.throwable = throwable;
-	}
-
-	public static CompletionContext success() {
-		return new CompletionContext(Status.SUCCESS);
-	}
-
-	public static CompletionContext discard() {
-		return new CompletionContext(Status.DISCARD);
-	}
-
-	public static CompletionContext failed(Throwable t) {
-		return new CompletionContext(Status.FAILED, t);
-	}
-
-	public Status getStatus() {
-		return this.status;
-	}
-
-	public Throwable getThrowable() {
-		return this.throwable;
-	}
-
-	@Override
-	public String toString() {
-		ToStringCreator to = new ToStringCreator(this);
-		to.append("status", this.status);
-		to.append("throwable", this.throwable);
-		return to.toString();
-	}
+	R getClientResponse();
 
 	/**
 	 * Request status state.
 	 */
-	public enum Status {
+	enum Status {
 
 		/** Request was handled successfully. */
 		SUCCESS,
