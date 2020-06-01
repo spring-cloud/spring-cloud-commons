@@ -915,10 +915,10 @@ TIP:: This supplier is also recommended for setups with a small number of instan
 in order to avoid retrying calls on a failing instance.
 
 `HealthCheckServiceInstanceListSupplier` uses properties prefixed with
-`spring.cloud.loadbalancer.healthcheck`. You can set the `initialDelay` and `interval`
+`spring.cloud.loadbalancer.health-check`. You can set the `initialDelay` and `interval`
 for the scheduler. You can set the default path for the healthcheck URL by setting
-the value of the `spring.cloud.loadbalancer.healthcheck.path.default`. You can also set a specific value
-for any given service by setting the value of the `spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]`, substituting the `[SERVICE_ID]` with the correct ID of your service. If the path is not set, `/actuator/health` is used by default.
+the value of the `spring.cloud.loadbalancer.health-check.path.default`. You can also set a specific value
+for any given service by setting the value of the `spring.cloud.loadbalancer.health-check.path.[SERVICE_ID]`, substituting the `[SERVICE_ID]` with the correct ID of your service. If the path is not set, `/actuator/health` is used by default.
 
 TIP:: If you rely on the default path (`/actuator/health`), make sure you add `spring-boot-starter-actuator` to your collaborator's dependencies, unless you are planning to add such an endpoint on your own.
 
