@@ -1625,10 +1625,10 @@ in order to avoid retrying calls on a failing instance.</p>
 </div>
 <div class="paragraph">
 <p><code>HealthCheckServiceInstanceListSupplier</code> uses properties prefixed with
-<code>spring.cloud.loadbalancer.healthcheck</code>. You can set the <code>initialDelay</code> and <code>interval</code>
+<code>spring.cloud.loadbalancer.health-check</code>. You can set the <code>initialDelay</code> and <code>interval</code>
 for the scheduler. You can set the default path for the healthcheck URL by setting
-the value of the <code>spring.cloud.loadbalancer.healthcheck.path.default</code>. You can also set a specific value
-for any given service by setting the value of the <code>spring.cloud.loadbalancer.healthcheck.path.[SERVICE_ID]</code>, substituting the <code>[SERVICE_ID]</code> with the correct ID of your service. If the path is not set, <code>/actuator/health</code> is used by default.</p>
+the value of the <code>spring.cloud.loadbalancer.health-check.path.default</code>. You can also set a specific value
+for any given service by setting the value of the <code>spring.cloud.loadbalancer.health-check.path.[SERVICE_ID]</code>, substituting the <code>[SERVICE_ID]</code> with the correct ID of your service. If the path is not set, <code>/actuator/health</code> is used by default.</p>
 </div>
 <div class="dlist">
 <dl>
