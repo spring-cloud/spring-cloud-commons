@@ -47,11 +47,11 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	private final LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> loadBalancerResponseCompleteCallback;
+	private final LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> loadBalancerResponseCompleteCallback;
 
 	public ReactorLoadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
-			LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> loadBalancerResponseCompleteCallback) {
+			LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> loadBalancerResponseCompleteCallback) {
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.loadBalancerResponseCompleteCallback = loadBalancerResponseCompleteCallback;
 	}
@@ -80,7 +80,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 					LOG.warn(message);
 				}
 				loadBalancerResponseCompleteCallback
-						.onComplete(new DefaultLoadBalancedCallExecutionData<>(lbRequest,
+						.onComplete(new DefaultLoadBalancedCallExecution<>(lbRequest,
 								lbResponse, new DefaultCompletionContext<>(
 										CompletionContext.Status.DISCARD)));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
@@ -95,15 +95,14 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			}
 			ClientRequest newRequest = buildClientRequest(clientRequest,
 					reconstructURI(instance, originalUrl));
-			return next.exchange(newRequest)
-					.doOnError(throwable -> loadBalancerResponseCompleteCallback
-							.onComplete(new DefaultLoadBalancedCallExecutionData<>(
-									lbRequest, lbResponse,
+			return next.exchange(newRequest).doOnError(
+					throwable -> loadBalancerResponseCompleteCallback.onComplete(
+							new DefaultLoadBalancedCallExecution<>(lbRequest, lbResponse,
 									new DefaultCompletionContext<>(
 											CompletionContext.Status.FAILED, throwable))))
 					.doOnSuccess(clientResponse -> loadBalancerResponseCompleteCallback
-							.onComplete(new DefaultLoadBalancedCallExecutionData<>(
-									lbRequest, lbResponse,
+							.onComplete(new DefaultLoadBalancedCallExecution<>(lbRequest,
+									lbResponse,
 									new DefaultCompletionContext<>(
 											CompletionContext.Status.SUCCESS,
 											clientResponse))));

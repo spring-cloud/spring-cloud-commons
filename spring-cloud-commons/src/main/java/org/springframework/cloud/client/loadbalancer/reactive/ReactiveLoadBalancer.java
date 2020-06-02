@@ -60,6 +60,21 @@ public interface ReactiveLoadBalancer<T> {
 	<R, C> Publisher<R> execute(RequestExecution<R, C, T> execution);
 
 	/**
+	 * Executes a request using {@link ServiceInstance} provided in LoadBalancer
+	 * {@link Response} and calls
+	 * {@link LoadBalancedCallExecution.Callback#onComplete(LoadBalancedCallExecution)} at
+	 * the end.
+	 * @param execution defines how a LoadBalancer {@link Response} should be mapped to
+	 * the request execution result {@link Publisher}
+	 * @param callback object on which to call the <code>onComplete()</code> method
+	 * @param <R> execution result type
+	 * @param <C> LoadBalancer {@link Request} context type
+	 * @return a {@link Publisher} of execution result
+	 */
+	<R, C> Publisher<R> execute(RequestExecution<R, C, T> execution,
+			LoadBalancedCallExecution.Callback<C, T, R> callback);
+
+	/**
 	 * Defines how a LoadBalancer {@link Response} should be mapped to the request
 	 * execution result {@link Publisher}.
 	 *
@@ -78,10 +93,10 @@ public interface ReactiveLoadBalancer<T> {
 			return new DefaultCompletionContext<>(status, clientResponse, throwable);
 		}
 
-		default LoadBalancedCallExecutionData<C, TT, R> createLoadBalancedCallExecutionData(
+		default LoadBalancedCallExecution<C, TT, R> createLoadBalancedCallExecutionData(
 				Request<C> request, Response<TT> response,
 				CompletionContext<R> completionContext) {
-			return new DefaultLoadBalancedCallExecutionData<>(request, response,
+			return new DefaultLoadBalancedCallExecution<>(request, response,
 					completionContext);
 		}
 

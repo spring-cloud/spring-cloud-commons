@@ -25,14 +25,10 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
-import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
-import org.springframework.cloud.client.loadbalancer.reactive.DefaultCompletionContext;
-import org.springframework.cloud.client.loadbalancer.reactive.DefaultLoadBalancedCallExecutionData;
-import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.reactive.BlockingLoadBalancedCallExecution;
+import org.springframework.cloud.client.loadbalancer.reactive.DefaultBlockingLoadBalancedCallExecution;
 import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedCallExecutionData;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
-import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.util.ReflectionUtils;
@@ -43,20 +39,19 @@ import org.springframework.util.ReflectionUtils;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-public class BlockingLoadBalancerClient<R> implements LoadBalancerClient {
+public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	private final LoadBalancerClientFactory loadBalancerClientFactory;
 
-	// TODO - the blocking callback implementation might need to be improved
-	private final LoadBalancedCallExecutionData.Callback<LoadBalancerRequest, ServiceInstance, R> callback;
+	private final BlockingLoadBalancedCallExecution.Callback callback;
 
 	public BlockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
-			LoadBalancedCallExecutionData.Callback<LoadBalancerRequest, ServiceInstance, R> callback) {
+			BlockingLoadBalancedCallExecution.Callback callback) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 		this.callback = callback;
 	}
 
-	// FIXME
+	// TODO: callbacks implementation for blocking client
 	@Override
 	public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory
@@ -74,12 +69,8 @@ public class BlockingLoadBalancerClient<R> implements LoadBalancerClient {
 				}
 			}
 			if (!response.hasServer()) {
-				// FIXME?
-				Request<LoadBalancerRequest> wrappedRequest = new DefaultRequest<>(
-						request);
-				callback.onComplete(new DefaultLoadBalancedCallExecutionData<>(
-						wrappedRequest, response,
-						new DefaultCompletionContext<>(Status.DISCARD)));
+				callback.onComplete(new DefaultBlockingLoadBalancedCallExecution());
+
 				throw new IllegalStateException(
 						"No instances available for " + serviceId);
 			}

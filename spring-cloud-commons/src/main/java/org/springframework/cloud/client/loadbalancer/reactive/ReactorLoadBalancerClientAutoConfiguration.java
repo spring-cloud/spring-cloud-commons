@@ -41,15 +41,15 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> callback() {
-		return new LoadBalancerResponseNoOpCallback();
+	public LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> callback() {
+		return new NoOpLoadBalancerResponseCallback<>();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
 	public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
-			ReactiveLoadBalancer.Factory loadBalancerFactory,
-			LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> callback) {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> callback) {
 		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory,
 				callback);
 	}

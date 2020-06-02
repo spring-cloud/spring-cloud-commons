@@ -179,4 +179,10 @@ class DiscoveryClientBasedReactiveLoadBalancer
 		throw new UnsupportedOperationException("execute() is not implemented");
 	}
 
+	@Override
+	public <R, C> Publisher<R> execute(RequestExecution<R, C, ServiceInstance> execution,
+			LoadBalancedCallExecution.Callback<C, ServiceInstance, R> callback) {
+		throw new UnsupportedOperationException("execute() is not implemented");
+	}
+
 }

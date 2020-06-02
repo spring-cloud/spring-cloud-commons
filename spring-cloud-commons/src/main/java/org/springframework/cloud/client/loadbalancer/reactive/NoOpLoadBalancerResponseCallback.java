@@ -19,35 +19,12 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class DefaultLoadBalancedCallExecutionData<C, T, R>
-		implements LoadBalancedCallExecutionData<C, T, R> {
-
-	private final Request<C> request;
-
-	private final Response<T> response;
-
-	private final CompletionContext<R> completionContext;
-
-	public DefaultLoadBalancedCallExecutionData(Request<C> request, Response<T> response,
-			CompletionContext<R> completionContext) {
-		this.request = request;
-		this.response = response;
-		this.completionContext = completionContext;
-	}
+public class NoOpLoadBalancerResponseCallback<C, T, R>
+		implements LoadBalancedCallExecution.Callback<C, T, R> {
 
 	@Override
-	public Request<C> getRequest() {
-		return request;
-	}
-
-	@Override
-	public Response<T> getResponse() {
-		return response;
-	}
-
-	@Override
-	public CompletionContext<R> completionContext() {
-		return completionContext;
+	public void onComplete(LoadBalancedCallExecution<C, T, R> execution) {
+		// do nothing
 	}
 
 }

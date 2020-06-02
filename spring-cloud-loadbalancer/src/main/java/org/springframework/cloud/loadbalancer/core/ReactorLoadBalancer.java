@@ -20,7 +20,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedCallExecutionData;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedCallExecution;
+import org.springframework.cloud.client.loadbalancer.reactive.NoOpLoadBalancerResponseCallback;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
@@ -45,9 +46,14 @@ public interface ReactorLoadBalancer<T> extends ReactiveLoadBalancer<T> {
 		return choose(REQUEST);
 	}
 
-	// FIXME - this does not override the upstream method !!!
+	@Override
+	default <R, C> Publisher<R> execute(RequestExecution<R, C, T> execution) {
+		return execute(execution, new NoOpLoadBalancerResponseCallback<>());
+	}
+
+	@Override
 	default <R, C> Publisher<R> execute(RequestExecution<R, C, T> execution,
-			LoadBalancedCallExecutionData.Callback<C, T, R> callback) {
+			LoadBalancedCallExecution.Callback<C, T, R> callback) {
 		Request<C> request = execution.createRequest();
 		return choose(request).flatMap(response -> {
 			if (!response.hasServer()) {

@@ -16,18 +16,14 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.web.reactive.function.client.ClientResponse;
-
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class LoadBalancerResponseNoOpCallback implements
-		LoadBalancedCallExecutionData.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> {
+public class NoOpBlockingLoadBalancerExecutionCallback
+		implements BlockingLoadBalancedCallExecution.Callback {
 
 	@Override
-	public void onComplete(
-			LoadBalancedCallExecutionData<DefaultRequestContext, ServiceInstance, ClientResponse> execution) {
+	public void onComplete(BlockingLoadBalancedCallExecution execution) {
 		// do nothing
 	}
 
