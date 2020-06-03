@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedCallExecution;
-import org.springframework.cloud.client.loadbalancer.reactive.NoOpLoadBalancerResponseCallback;
+import org.springframework.cloud.client.loadbalancer.reactive.NoOpLoadBalancedCallExecutionCallback;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
@@ -31,6 +31,7 @@ import org.springframework.cloud.client.loadbalancer.reactive.Response;
  *
  * @param <T> - type of the response
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 public interface ReactorLoadBalancer<T> extends ReactiveLoadBalancer<T> {
 
@@ -48,28 +49,28 @@ public interface ReactorLoadBalancer<T> extends ReactiveLoadBalancer<T> {
 
 	@Override
 	default <R, C> Publisher<R> execute(RequestExecution<R, C, T> execution) {
-		return execute(execution, new NoOpLoadBalancerResponseCallback<>());
+		return execute(execution, new NoOpLoadBalancedCallExecutionCallback<>());
 	}
 
 	@Override
 	default <R, C> Publisher<R> execute(RequestExecution<R, C, T> execution,
-			LoadBalancedCallExecution.Callback<C, T, R> callback) {
+			LoadBalancedCallExecution.Callback<C, T> callback) {
 		Request<C> request = execution.createRequest();
 		return choose(request).flatMap(response -> {
 			if (!response.hasServer()) {
-				callback.onComplete(execution.createLoadBalancedCallExecutionData(request,
+				callback.onComplete(execution.createLoadBalancedCallExecution(request,
 						response, execution.createCompletionContext(
 								CompletionContext.Status.DISCARD, null, null)));
 				return Mono.from(execution.apply(response));
 			}
 			return Mono.from(execution.apply(response))
-					.doOnSuccess(clientResponse -> callback.onComplete(execution
-							.createLoadBalancedCallExecutionData(request, response,
+					.doOnSuccess(clientResponse -> callback.onComplete(
+							execution.createLoadBalancedCallExecution(request, response,
 									execution.createCompletionContext(
 											CompletionContext.Status.SUCCESS,
 											clientResponse, null))))
-					.doOnError(throwable -> callback.onComplete(execution
-							.createLoadBalancedCallExecutionData(request, response,
+					.doOnError(throwable -> callback.onComplete(
+							execution.createLoadBalancedCallExecution(request, response,
 									execution.createCompletionContext(
 											CompletionContext.Status.FAILED, null,
 											throwable))));

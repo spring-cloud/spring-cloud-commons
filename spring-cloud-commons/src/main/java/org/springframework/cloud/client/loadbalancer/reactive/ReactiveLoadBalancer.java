@@ -72,7 +72,7 @@ public interface ReactiveLoadBalancer<T> {
 	 * @return a {@link Publisher} of execution result
 	 */
 	<R, C> Publisher<R> execute(RequestExecution<R, C, T> execution,
-			LoadBalancedCallExecution.Callback<C, T, R> callback);
+			LoadBalancedCallExecution.Callback<C, T> callback);
 
 	/**
 	 * Defines how a LoadBalancer {@link Response} should be mapped to the request
@@ -88,14 +88,14 @@ public interface ReactiveLoadBalancer<T> {
 			return new DefaultRequest<>();
 		}
 
-		default CompletionContext<R> createCompletionContext(
-				CompletionContext.Status status, R clientResponse, Throwable throwable) {
-			return new DefaultCompletionContext<>(status, clientResponse, throwable);
+		default CompletionContext createCompletionContext(CompletionContext.Status status,
+				R clientResponse, Throwable throwable) {
+			return new DefaultCompletionContext(status, clientResponse, throwable);
 		}
 
-		default LoadBalancedCallExecution<C, TT, R> createLoadBalancedCallExecutionData(
+		default LoadBalancedCallExecution<C, TT> createLoadBalancedCallExecution(
 				Request<C> request, Response<TT> response,
-				CompletionContext<R> completionContext) {
+				CompletionContext completionContext) {
 			return new DefaultLoadBalancedCallExecution<>(request, response,
 					completionContext);
 		}

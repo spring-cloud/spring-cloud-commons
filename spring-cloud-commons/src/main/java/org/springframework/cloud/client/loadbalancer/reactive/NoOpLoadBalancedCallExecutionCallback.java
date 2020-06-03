@@ -17,13 +17,16 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 /**
+ * A default no-op implementation of {@link LoadBalancedCallExecution.Callback}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
-public class NoOpBlockingLoadBalancerExecutionCallback
-		implements BlockingLoadBalancedCallExecution.Callback {
+public class NoOpLoadBalancedCallExecutionCallback<C, T>
+		implements LoadBalancedCallExecution.Callback<C, T> {
 
 	@Override
-	public void onComplete(BlockingLoadBalancedCallExecution execution) {
+	public void onComplete(LoadBalancedCallExecution<C, T> execution) {
 		// do nothing
 	}
 

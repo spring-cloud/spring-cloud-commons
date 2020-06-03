@@ -17,36 +17,39 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 /**
+ * A default implementation of {@link LoadBalancedCallExecution}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
-public class DefaultLoadBalancedCallExecution<C, T, R>
-		implements LoadBalancedCallExecution<C, T, R> {
+public class DefaultLoadBalancedCallExecution<C, T>
+		implements LoadBalancedCallExecution<C, T> {
 
-	private final Request<C> request;
+	private final Request<C> loadBalancerRequest;
 
-	private final Response<T> response;
+	private final Response<T> loadBalancerResponse;
 
-	private final CompletionContext<R> completionContext;
+	private final CompletionContext completionContext;
 
-	public DefaultLoadBalancedCallExecution(Request<C> request, Response<T> response,
-			CompletionContext<R> completionContext) {
-		this.request = request;
-		this.response = response;
+	public DefaultLoadBalancedCallExecution(Request<C> loadBalancerRequest,
+			Response<T> loadBalancerResponse, CompletionContext completionContext) {
+		this.loadBalancerRequest = loadBalancerRequest;
+		this.loadBalancerResponse = loadBalancerResponse;
 		this.completionContext = completionContext;
 	}
 
 	@Override
-	public Request<C> getRequest() {
-		return request;
+	public Request<C> getLoadBalancerRequest() {
+		return loadBalancerRequest;
 	}
 
 	@Override
-	public Response<T> getResponse() {
-		return response;
+	public Response<T> getLoadBalancerResponse() {
+		return loadBalancerResponse;
 	}
 
 	@Override
-	public CompletionContext<R> getCompletionContext() {
+	public CompletionContext getCompletionContext() {
 		return completionContext;
 	}
 

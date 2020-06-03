@@ -19,21 +19,25 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.core.style.ToStringCreator;
 
 /**
+ * A default implementation of {@link CompletionContext}.
+ *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
-public class DefaultCompletionContext<R> implements CompletionContext<R> {
+public class DefaultCompletionContext implements CompletionContext {
 
 	private final Status status;
 
 	private final Throwable throwable;
 
-	private final R clientResponse;
+	private final Object clientResponse;
 
 	public DefaultCompletionContext(Status status) {
 		this(status, null, null);
 	}
 
-	public DefaultCompletionContext(Status status, R clientResponse) {
+	public DefaultCompletionContext(Status status, Object clientResponse) {
 		this(status, clientResponse, null);
 	}
 
@@ -41,7 +45,7 @@ public class DefaultCompletionContext<R> implements CompletionContext<R> {
 		this(status, null, throwable);
 	}
 
-	public DefaultCompletionContext(Status status, R clientResponse,
+	public DefaultCompletionContext(Status status, Object clientResponse,
 			Throwable throwable) {
 		this.status = status;
 		this.clientResponse = clientResponse;
@@ -56,7 +60,7 @@ public class DefaultCompletionContext<R> implements CompletionContext<R> {
 		return this.throwable;
 	}
 
-	public R getClientResponse() {
+	public Object getClientResponse() {
 		return clientResponse;
 	}
 

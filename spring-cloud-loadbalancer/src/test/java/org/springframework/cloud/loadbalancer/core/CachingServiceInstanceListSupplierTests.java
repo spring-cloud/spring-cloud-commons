@@ -27,9 +27,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.reactive.BlockingLoadBalancedCallExecution;
+import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedCallExecution;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
-import org.springframework.cloud.client.loadbalancer.reactive.NoOpBlockingLoadBalancerExecutionCallback;
+import org.springframework.cloud.client.loadbalancer.reactive.NoOpLoadBalancedCallExecutionCallback;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerCacheAutoConfiguration;
@@ -111,16 +112,15 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
-		public BlockingLoadBalancedCallExecution.Callback blockingCallback() {
-			return new NoOpBlockingLoadBalancerExecutionCallback();
+		public LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> blockingCallback() {
+			return new NoOpLoadBalancedCallExecutionCallback<>();
 		}
 
 		@Bean
 		BlockingLoadBalancerClient blockingLoadBalancerClient(
 				LoadBalancerClientFactory loadBalancerClientFactory,
-				BlockingLoadBalancedCallExecution.Callback blockingCallback) {
-			return new BlockingLoadBalancerClient(loadBalancerClientFactory,
-					blockingCallback);
+				LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> callback) {
+			return new BlockingLoadBalancerClient(loadBalancerClientFactory, callback);
 		}
 
 		@Bean

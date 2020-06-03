@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -33,9 +32,7 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 
 /**
  * An {@link ExchangeFilterFunction} that uses {@link ReactiveLoadBalancer} to execute
- * requests against a correct {@link ServiceInstance}. Implements
- * {@link ApplicationEventPublisherAware} in order to publish events with retrieved
- * {@link Response}.
+ * requests against a correct {@link ServiceInstance}.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
@@ -47,11 +44,11 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	private final LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> loadBalancerResponseCompleteCallback;
+	private final LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> loadBalancerResponseCompleteCallback;
 
 	public ReactorLoadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
-			LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance, ClientResponse> loadBalancerResponseCompleteCallback) {
+			LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> loadBalancerResponseCompleteCallback) {
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.loadBalancerResponseCompleteCallback = loadBalancerResponseCompleteCallback;
 	}
@@ -81,7 +78,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 				}
 				loadBalancerResponseCompleteCallback
 						.onComplete(new DefaultLoadBalancedCallExecution<>(lbRequest,
-								lbResponse, new DefaultCompletionContext<>(
+								lbResponse, new DefaultCompletionContext(
 										CompletionContext.Status.DISCARD)));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
@@ -98,12 +95,12 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			return next.exchange(newRequest).doOnError(
 					throwable -> loadBalancerResponseCompleteCallback.onComplete(
 							new DefaultLoadBalancedCallExecution<>(lbRequest, lbResponse,
-									new DefaultCompletionContext<>(
+									new DefaultCompletionContext(
 											CompletionContext.Status.FAILED, throwable))))
 					.doOnSuccess(clientResponse -> loadBalancerResponseCompleteCallback
 							.onComplete(new DefaultLoadBalancedCallExecution<>(lbRequest,
 									lbResponse,
-									new DefaultCompletionContext<>(
+									new DefaultCompletionContext(
 											CompletionContext.Status.SUCCESS,
 											clientResponse))));
 		});

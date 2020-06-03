@@ -54,7 +54,7 @@ class TestReactiveLoadBalancer implements ReactiveLoadBalancer<ServiceInstance> 
 
 	@Override
 	public <R, C> Publisher<R> execute(RequestExecution<R, C, ServiceInstance> execution,
-			LoadBalancedCallExecution.Callback<C, ServiceInstance, R> callback) {
+			LoadBalancedCallExecution.Callback<C, ServiceInstance> callback) {
 		throw new UnsupportedOperationException("execute() is not implemented");
 	}
 

@@ -21,10 +21,12 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
-import org.springframework.cloud.client.loadbalancer.reactive.BlockingLoadBalancedCallExecution;
-import org.springframework.cloud.client.loadbalancer.reactive.NoOpBlockingLoadBalancerExecutionCallback;
+import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedCallExecution;
+import org.springframework.cloud.client.loadbalancer.reactive.NoOpLoadBalancedCallExecutionCallback;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -49,8 +51,8 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public BlockingLoadBalancedCallExecution.Callback blockingCallback() {
-		return new NoOpBlockingLoadBalancerExecutionCallback();
+	public LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> callback() {
+		return new NoOpLoadBalancedCallExecutionCallback<>();
 	}
 
 	@Bean
@@ -58,9 +60,8 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@ConditionalOnMissingBean
 	public LoadBalancerClient blockingLoadBalancerClient(
 			LoadBalancerClientFactory loadBalancerClientFactory,
-			BlockingLoadBalancedCallExecution.Callback blockingCallback) {
-		return new BlockingLoadBalancerClient(loadBalancerClientFactory,
-				blockingCallback);
+			LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> callback) {
+		return new BlockingLoadBalancerClient(loadBalancerClientFactory, callback);
 	}
 
 }

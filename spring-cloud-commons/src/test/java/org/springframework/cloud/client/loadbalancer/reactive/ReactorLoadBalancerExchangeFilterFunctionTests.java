@@ -20,8 +20,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,16 +37,17 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.lang.NonNull;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -67,7 +67,7 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 	private SimpleDiscoveryProperties properties;
 
 	@Autowired
-	TestLoadBalancerResponseEventListener eventListener;
+	TestLoadBalancerExecutionCallback callback;
 
 	@LocalServerPort
 	private int port;
@@ -104,6 +104,50 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
+	@Test
+	void successfulCompletionStatusRegisteredWithCallback() {
+		WebClient.builder().baseUrl("http://testservice")
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
+				.block();
+
+		assertThat(callback.executions).isNotEmpty();
+		LoadBalancedCallExecution<DefaultRequestContext, ServiceInstance> execution = callback.executions
+				.getLast();
+		assertThat(((ClientRequest) execution.getLoadBalancerRequest().getContext()
+				.getOriginalRequest())).isInstanceOf(ClientRequest.class);
+		assertThat(((ClientRequest) execution.getLoadBalancerRequest().getContext()
+				.getOriginalRequest()).method()).isEqualTo(HttpMethod.GET);
+		assertThat(execution.getLoadBalancerResponse())
+				.isInstanceOf(DefaultResponse.class);
+		assertThat(execution.getLoadBalancerResponse().getServer().getHost())
+				.isEqualTo("localhost");
+		assertThat(execution.getCompletionContext().getStatus())
+				.isEqualTo(CompletionContext.Status.SUCCESS);
+		assertThat(execution.getCompletionContext().getClientResponse())
+				.isInstanceOf(ClientResponse.class);
+		assertThat(((ClientResponse) execution.getCompletionContext().getClientResponse())
+				.statusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(((ClientResponse) execution.getCompletionContext().getClientResponse())
+				.bodyToMono(String.class).block()).isEqualTo("Hello World");
+	}
+
+	@Test
+	void discardedCompletionStatusRegisteredWithCallback() {
+		WebClient.builder().baseUrl("http://xxx").filter(this.loadBalancerFunction)
+				.build().get().exchange().block();
+
+		assertThat(callback.executions).isNotEmpty();
+		LoadBalancedCallExecution<DefaultRequestContext, ServiceInstance> execution = callback.executions
+				.getLast();
+		assertThat(((ClientRequest) execution.getLoadBalancerRequest().getContext()
+				.getOriginalRequest())).isInstanceOf(ClientRequest.class);
+		assertThat(((ClientRequest) execution.getLoadBalancerRequest().getContext()
+				.getOriginalRequest()).method()).isEqualTo(HttpMethod.GET);
+		assertThat(execution.getLoadBalancerResponse()).isInstanceOf(EmptyResponse.class);
+		assertThat(execution.getCompletionContext().getStatus())
+				.isEqualTo(CompletionContext.Status.DISCARD);
+	}
+
 	@EnableDiscoveryClient
 	@EnableAutoConfiguration
 	@SpringBootConfiguration
@@ -123,22 +167,10 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		}
 
 		@Bean
-		TestLoadBalancerResponseEventListener loadBalancerResponseEventListener() {
-			return new TestLoadBalancerResponseEventListener();
+		TestLoadBalancerExecutionCallback callback() {
+			return new TestLoadBalancerExecutionCallback();
 		}
 
-	}
-
-}
-
-class TestLoadBalancerResponseEventListener
-		implements ApplicationListener<LoadBalancerResponseEvent> {
-
-	final BlockingQueue<LoadBalancerResponseEvent> events = new LinkedBlockingQueue<>();
-
-	@Override
-	public void onApplicationEvent(@NonNull LoadBalancerResponseEvent event) {
-		events.add(event);
 	}
 
 }
@@ -181,8 +213,21 @@ class DiscoveryClientBasedReactiveLoadBalancer
 
 	@Override
 	public <R, C> Publisher<R> execute(RequestExecution<R, C, ServiceInstance> execution,
-			LoadBalancedCallExecution.Callback<C, ServiceInstance, R> callback) {
+			LoadBalancedCallExecution.Callback<C, ServiceInstance> callback) {
 		throw new UnsupportedOperationException("execute() is not implemented");
+	}
+
+}
+
+class TestLoadBalancerExecutionCallback implements
+		LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> {
+
+	final ConcurrentLinkedDeque<LoadBalancedCallExecution<DefaultRequestContext, ServiceInstance>> executions = new ConcurrentLinkedDeque<>();
+
+	@Override
+	public void onComplete(
+			LoadBalancedCallExecution<DefaultRequestContext, ServiceInstance> execution) {
+		executions.add(execution);
 	}
 
 }

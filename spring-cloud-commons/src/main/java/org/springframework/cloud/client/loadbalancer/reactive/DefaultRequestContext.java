@@ -31,12 +31,15 @@ public class DefaultRequestContext {
 	 */
 	private String hint = "default";
 
-	private ClientRequest originalRequest;
+	/**
+	 * The original load-balanced request.
+	 */
+	private Object originalRequest;
 
 	public DefaultRequestContext() {
 	}
 
-	public DefaultRequestContext(ClientRequest request) {
+	public DefaultRequestContext(Object request) {
 		this.originalRequest = request;
 	}
 
@@ -52,7 +55,7 @@ public class DefaultRequestContext {
 		this.hint = hint;
 	}
 
-	public ClientRequest getOriginalRequest() {
+	public Object getOriginalRequest() {
 		return originalRequest;
 	}
 

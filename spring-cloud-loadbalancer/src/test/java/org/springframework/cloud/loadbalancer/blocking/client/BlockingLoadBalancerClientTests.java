@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,8 +35,11 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
+import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedCallExecution;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
@@ -62,6 +66,9 @@ class BlockingLoadBalancerClientTests {
 
 	@Autowired
 	private SimpleDiscoveryProperties properties;
+
+	@Autowired
+	private TestLoadBalancerExecutionCallback callback;
 
 	@BeforeEach
 	void setUp() {
@@ -125,6 +132,68 @@ class BlockingLoadBalancerClientTests {
 		}
 	}
 
+	@Test
+	void successfulCompletionStatusRegisteredWithCallback() {
+		loadBalancerClient.execute("myservice",
+				(LoadBalancerRequest<Object>) instance -> "result");
+
+		assertThat(callback.executions).isNotEmpty();
+		LoadBalancedCallExecution<DefaultRequestContext, ServiceInstance> execution = callback.executions
+				.getLast();
+		assertThat(execution.getLoadBalancerRequest().getContext().getOriginalRequest())
+				.isNotNull();
+		assertThat(execution.getLoadBalancerResponse())
+				.isInstanceOf(DefaultResponse.class);
+		assertThat(execution.getLoadBalancerResponse().getServer().getHost())
+				.isEqualTo("test.example");
+		assertThat(execution.getCompletionContext().getStatus())
+				.isEqualTo(CompletionContext.Status.SUCCESS);
+		assertThat(execution.getCompletionContext().getClientResponse())
+				.isEqualTo("result");
+	}
+
+	@Test
+	void discardedCompletionStatusRegisteredWithCallback() {
+		try {
+			loadBalancerClient.execute("unknownservice",
+					(LoadBalancerRequest<Object>) instance -> "result");
+		}
+		catch (IllegalStateException ignored) {
+		}
+		assertThat(callback.executions).isNotEmpty();
+		LoadBalancedCallExecution<DefaultRequestContext, ServiceInstance> execution = callback.executions
+				.getLast();
+		assertThat(execution.getLoadBalancerRequest().getContext().getOriginalRequest())
+				.isNotNull();
+		assertThat(execution.getLoadBalancerResponse()).isInstanceOf(EmptyResponse.class);
+		assertThat(execution.getCompletionContext().getStatus())
+				.isEqualTo(CompletionContext.Status.DISCARD);
+	}
+
+	@Test
+	void failedCompletionStatusRegisteredWithCallback() {
+		try {
+			loadBalancerClient.execute("myservice", instance -> {
+				throw new IllegalStateException("failed");
+			});
+		}
+		catch (IllegalStateException ignored) {
+		}
+		assertThat(callback.executions).isNotEmpty();
+		LoadBalancedCallExecution<DefaultRequestContext, ServiceInstance> execution = callback.executions
+				.getLast();
+		assertThat(execution.getLoadBalancerRequest().getContext().getOriginalRequest())
+				.isNotNull();
+		assertThat(execution.getLoadBalancerResponse())
+				.isInstanceOf(DefaultResponse.class);
+		assertThat(execution.getLoadBalancerResponse().getServer().getHost())
+				.isEqualTo("test.example");
+		assertThat(execution.getCompletionContext().getStatus())
+				.isEqualTo(CompletionContext.Status.FAILED);
+		assertThat(execution.getCompletionContext().getThrowable())
+				.isInstanceOf(IllegalStateException.class);
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	@SpringBootConfiguration
@@ -135,6 +204,11 @@ class BlockingLoadBalancerClientTests {
 					name = "unknownservice",
 					configuration = UnknownServiceConfig.class) })
 	protected static class Config {
+
+		@Bean
+		LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> callback() {
+			return new TestLoadBalancerExecutionCallback();
+		}
 
 	}
 
@@ -190,6 +264,19 @@ class DiscoveryClientBasedReactiveLoadBalancer
 	@Override
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		return choose();
+	}
+
+}
+
+class TestLoadBalancerExecutionCallback implements
+		LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> {
+
+	final ConcurrentLinkedDeque<LoadBalancedCallExecution<DefaultRequestContext, ServiceInstance>> executions = new ConcurrentLinkedDeque<>();
+
+	@Override
+	public void onComplete(
+			LoadBalancedCallExecution<DefaultRequestContext, ServiceInstance> execution) {
+		executions.add(execution);
 	}
 
 }
