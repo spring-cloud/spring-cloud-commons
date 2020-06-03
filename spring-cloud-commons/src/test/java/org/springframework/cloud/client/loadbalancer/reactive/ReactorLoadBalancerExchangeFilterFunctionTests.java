@@ -36,11 +36,13 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
+import org.springframework.cloud.client.loadbalancer.RequestFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -111,8 +113,20 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		@Bean
 		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory(
 				DiscoveryClient discoveryClient) {
-			return serviceId -> new DiscoveryClientBasedReactiveLoadBalancer(serviceId,
-					discoveryClient);
+			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
+				@Override
+				public RequestFactory<ClientRequest, Request<?>> getRequestFactory(
+						String serviceId) {
+					return request -> new DefaultRequest<>();
+				}
+
+				@Override
+				public ReactiveLoadBalancer<ServiceInstance> getInstance(
+						String serviceId) {
+					return new DiscoveryClientBasedReactiveLoadBalancer(serviceId,
+							discoveryClient);
+				}
+			};
 		}
 
 	}
