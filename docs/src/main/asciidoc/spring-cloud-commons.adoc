@@ -947,6 +947,11 @@ public class CustomLoadBalancerConfiguration {
 
 NOTE:: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`, therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
 
+=== LoadBalancer Callbacks
+You can implement the `LoadBalancedCallExecution.Callback` and add it as a `@Bean` to your project configuration to defined actions that should be executed after a load-balanced call has completed.
+The `onComplete()` method that you can implement takes a `LoadBalancedCallExecution` as an argument that
+contains all available data on the completed load-balanced call, including the LoadBalancer `Request`, LoadBalancer `Response` and `CompletionContext`.
+
 
 [[spring-cloud-loadbalancer-starter]]
 === Spring Cloud LoadBalancer Starter
