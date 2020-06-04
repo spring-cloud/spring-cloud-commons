@@ -30,6 +30,7 @@ import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedCallExecution;
+import org.springframework.cloud.client.loadbalancer.reactive.NoOpLoadBalancedCallExecutionCallback;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.client.loadbalancer.reactive.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.Response;
@@ -52,6 +53,11 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 			LoadBalancedCallExecution.Callback<DefaultRequestContext, ServiceInstance> callback) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 		this.callback = callback;
+	}
+
+	public BlockingLoadBalancerClient(
+			LoadBalancerClientFactory loadBalancerClientFactory) {
+		this(loadBalancerClientFactory, new NoOpLoadBalancedCallExecutionCallback<>());
 	}
 
 	@Override
