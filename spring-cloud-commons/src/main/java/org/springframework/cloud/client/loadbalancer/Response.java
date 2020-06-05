@@ -14,23 +14,26 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 /**
- * Marker interface for a request.
- * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.Request}
+ * Response created for each request.
  *
+ * @param <T> type of the server
  * @author Spencer Gibb
- * @author Olga Maciaszek-Sharma
  */
-@Deprecated
-public interface Request<C> {
+public interface Response<T> {
 
-	// Avoid breaking backward compatibility
-	default C getContext() {
-		return null;
-	}
+	boolean hasServer();
 
-	// TODO: define contents
+	T getServer();
+
+	/**
+	 * Notification that the request completed.
+	 * @deprecated <code>onComplete<code/> callbacks for load-balanced calls are being moved to a separate interface
+	 * @param completionContext - completion context
+	 */
+	@Deprecated
+	void onComplete(CompletionContext completionContext);
 
 }

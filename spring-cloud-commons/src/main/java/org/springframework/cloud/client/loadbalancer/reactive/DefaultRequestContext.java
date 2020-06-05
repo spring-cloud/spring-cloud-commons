@@ -18,9 +18,11 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 /**
  * Contains information relevant to the request.
+ * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.DefaultRequestContext}
  *
  * @author Olga Maciaszek-Sharma
  */
+@Deprecated
 public class DefaultRequestContext {
 
 	/**

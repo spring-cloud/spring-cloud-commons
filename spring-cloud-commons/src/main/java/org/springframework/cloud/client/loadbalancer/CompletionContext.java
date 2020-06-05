@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 import org.springframework.core.style.ToStringCreator;
 
 /**
- * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.CompletionContext}
  * @author Spencer Gibb
  */
 // TODO: add metrics
-@Deprecated
 public class CompletionContext {
 
 	private final Status status;
@@ -60,8 +58,13 @@ public class CompletionContext {
 	 */
 	public enum Status {
 
-		/** Request was handled successfully. */
+		/** Request was handled successfully.
+		 * @deprecated in favour of {@link CompletionContext.Status#SUCCESS}
+		 * */
+		@Deprecated
 		SUCCESSS,
+		/** Request was handled successfully. */
+		SUCCESS,
 		/** Request reached the server but failed due to timeout or internal error. */
 		FAILED,
 		/** Request did not go off box and should not be counted for statistics. */

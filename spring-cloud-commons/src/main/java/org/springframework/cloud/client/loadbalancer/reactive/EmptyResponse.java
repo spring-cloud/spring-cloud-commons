@@ -19,8 +19,10 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.EmptyResponse}
  * @author Spencer Gibb
  */
+@Deprecated
 public class EmptyResponse implements Response<ServiceInstance> {
 
 	@Override

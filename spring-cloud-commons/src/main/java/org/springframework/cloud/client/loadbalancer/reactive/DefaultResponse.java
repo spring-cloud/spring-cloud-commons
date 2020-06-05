@@ -19,8 +19,10 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.DefaultResponse}
  * @author Spencer Gibb
  */
+@Deprecated
 public class DefaultResponse implements Response<ServiceInstance> {
 
 	private final ServiceInstance serviceInstance;

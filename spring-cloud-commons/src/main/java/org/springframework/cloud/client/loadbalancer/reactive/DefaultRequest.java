@@ -18,10 +18,12 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 /**
  * A default implementation of {@link Request}.
+ * @deprecated in favour of
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
+@Deprecated
 public class DefaultRequest<T> implements Request<T> {
 
 	private T context;

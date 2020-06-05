@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 /**
  * Marker interface for a request.
- * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.Request}
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-@Deprecated
 public interface Request<C> {
 
 	// Avoid breaking backward compatibility

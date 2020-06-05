@@ -14,23 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
+
+import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * Marker interface for a request.
- * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.Request}
- *
  * @author Spencer Gibb
- * @author Olga Maciaszek-Sharma
  */
-@Deprecated
-public interface Request<C> {
+public class DefaultResponse implements Response<ServiceInstance> {
 
-	// Avoid breaking backward compatibility
-	default C getContext() {
-		return null;
+	private final ServiceInstance serviceInstance;
+
+	public DefaultResponse(ServiceInstance serviceInstance) {
+		this.serviceInstance = serviceInstance;
 	}
 
-	// TODO: define contents
+	@Override
+	public boolean hasServer() {
+		return this.serviceInstance != null;
+	}
+
+	@Override
+	public ServiceInstance getServer() {
+		return this.serviceInstance;
+	}
+
+	@Override
+	public void onComplete(CompletionContext completionContext) {
+		// TODO: implement
+	}
 
 }

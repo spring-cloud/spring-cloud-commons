@@ -14,23 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 /**
- * Marker interface for a request.
- * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.Request}
+ * Contains information relevant to the request.
  *
- * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-@Deprecated
-public interface Request<C> {
+public class DefaultRequestContext {
 
-	// Avoid breaking backward compatibility
-	default C getContext() {
-		return null;
+	/**
+	 * A {@link String} value of hint that can be used to choose the correct service
+	 * instance.
+	 */
+	private String hint = "default";
+
+	public DefaultRequestContext() {
 	}
 
-	// TODO: define contents
+	public DefaultRequestContext(String hint) {
+		this.hint = hint;
+	}
+
+	public String getHint() {
+		return hint;
+	}
+
+	public void setHint(String hint) {
+		this.hint = hint;
+	}
 
 }
