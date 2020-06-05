@@ -19,14 +19,21 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * @deprecated in favour of
- * {@link org.springframework.cloud.client.loadbalancer.EmptyResponse}
+ * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.EmptyResponse}
  * @author Spencer Gibb
  */
 @Deprecated
-public class EmptyResponse
-		extends org.springframework.cloud.client.loadbalancer.EmptyResponse
-		implements Response<ServiceInstance> {
+public class EmptyResponse implements Response<ServiceInstance> {
+
+	@Override
+	public boolean hasServer() {
+		return false;
+	}
+
+	@Override
+	public ServiceInstance getServer() {
+		return null;
+	}
 
 	@Override
 	public void onComplete(CompletionContext completionContext) {

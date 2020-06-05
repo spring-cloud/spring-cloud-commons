@@ -18,14 +18,17 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 /**
  * Response created for each request.
- *
  * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.Response}
+ *
  * @param <T> type of the server
  * @author Spencer Gibb
  */
 @Deprecated
-public interface Response<T>
-		extends org.springframework.cloud.client.loadbalancer.Response<T> {
+public interface Response<T> {
+
+	boolean hasServer();
+
+	T getServer();
 
 	/**
 	 * Notification that the request completed.

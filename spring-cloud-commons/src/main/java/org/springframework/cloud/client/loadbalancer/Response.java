@@ -30,8 +30,7 @@ public interface Response<T> {
 
 	/**
 	 * Notification that the request completed.
-	 * @deprecated <code>onComplete</code> callbacks for load-balanced calls are being
-	 * moved to a separate interface
+	 * @deprecated <code>onComplete</code> callbacks for load-balanced calls are being moved to a separate interface
 	 * @param completionContext - completion context
 	 */
 	@Deprecated
