@@ -57,7 +57,9 @@ public class CompletionContext {
 
 	/**
 	 * Request status state.
+	 * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.CompletionContext.Status}
 	 */
+	@Deprecated
 	public enum Status {
 
 		/** Request was handled successfully. */

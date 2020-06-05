@@ -57,12 +57,6 @@ public class CompletionContext {
 	 * Request status state.
 	 */
 	public enum Status {
-
-		/** Request was handled successfully.
-		 * @deprecated in favour of {@link CompletionContext.Status#SUCCESS}
-		 * */
-		@Deprecated
-		SUCCESSS,
 		/** Request was handled successfully. */
 		SUCCESS,
 		/** Request reached the server but failed due to timeout or internal error. */
