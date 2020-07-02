@@ -37,7 +37,7 @@ public class CompletionContext {
 		this.throwable = throwable;
 	}
 
-	public Status getStatus() {
+	public Status status() {
 		return this.status;
 	}
 
@@ -57,6 +57,7 @@ public class CompletionContext {
 	 * Request status state.
 	 */
 	public enum Status {
+
 		/** Request was handled successfully. */
 		SUCCESS,
 		/** Request reached the server but failed due to timeout or internal error. */

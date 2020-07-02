@@ -16,48 +16,44 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import org.springframework.core.style.ToStringCreator;
-
 /**
- * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.CompletionContext}
+ * @deprecated in favour of
+ * {@link org.springframework.cloud.client.loadbalancer.CompletionContext}
  * @author Spencer Gibb
  */
 // TODO: add metrics
 @Deprecated
-public class CompletionContext {
+public class CompletionContext
+		extends org.springframework.cloud.client.loadbalancer.CompletionContext {
 
 	private final Status status;
-
-	private final Throwable throwable;
 
 	public CompletionContext(Status status) {
 		this(status, null);
 	}
 
 	public CompletionContext(Status status, Throwable throwable) {
+		super(resolveStatus(status), throwable);
 		this.status = status;
-		this.throwable = throwable;
 	}
 
 	public Status getStatus() {
 		return this.status;
 	}
 
-	public Throwable getThrowable() {
-		return this.throwable;
-	}
-
-	@Override
-	public String toString() {
-		ToStringCreator to = new ToStringCreator(this);
-		to.append("status", this.status);
-		to.append("throwable", this.throwable);
-		return to.toString();
+	private static org.springframework.cloud.client.loadbalancer.CompletionContext.Status resolveStatus(
+			Status status) {
+		if (Status.SUCCESSS.equals(status)) {
+			return org.springframework.cloud.client.loadbalancer.CompletionContext.Status.SUCCESS;
+		}
+		return org.springframework.cloud.client.loadbalancer.CompletionContext.Status
+				.valueOf(status.name());
 	}
 
 	/**
 	 * Request status state.
-	 * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.CompletionContext.Status}
+	 * @deprecated in favour of
+	 * {@link org.springframework.cloud.client.loadbalancer.CompletionContext.Status}
 	 */
 	@Deprecated
 	public enum Status {

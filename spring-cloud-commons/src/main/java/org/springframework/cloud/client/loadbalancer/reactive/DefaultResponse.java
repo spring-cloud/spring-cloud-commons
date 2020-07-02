@@ -19,26 +19,17 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.DefaultResponse}
+ * @deprecated in favour of
+ * {@link org.springframework.cloud.client.loadbalancer.DefaultResponse}
  * @author Spencer Gibb
  */
 @Deprecated
-public class DefaultResponse implements Response<ServiceInstance> {
-
-	private final ServiceInstance serviceInstance;
+public class DefaultResponse
+		extends org.springframework.cloud.client.loadbalancer.DefaultResponse
+		implements Response<ServiceInstance> {
 
 	public DefaultResponse(ServiceInstance serviceInstance) {
-		this.serviceInstance = serviceInstance;
-	}
-
-	@Override
-	public boolean hasServer() {
-		return this.serviceInstance != null;
-	}
-
-	@Override
-	public ServiceInstance getServer() {
-		return this.serviceInstance;
+		super(serviceInstance);
 	}
 
 	@Override
