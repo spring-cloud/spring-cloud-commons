@@ -14,26 +14,34 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 /**
- * A default implementation of {@link Request}.
+ * Contains information relevant to the request.
  *
- * @deprecated in favour of
- * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-@Deprecated
-public class DefaultRequest<T>
-		extends org.springframework.cloud.client.loadbalancer.DefaultRequest<T>
-		implements Request<T> {
+public class DefaultRequestContext {
 
-	public DefaultRequest() {
-		new DefaultRequestContext();
+	/**
+	 * A {@link String} value of hint that can be used to choose the correct service
+	 * instance.
+	 */
+	private String hint = "default";
+
+	public DefaultRequestContext() {
 	}
 
-	public DefaultRequest(T context) {
-		super(context);
+	public DefaultRequestContext(String hint) {
+		this.hint = hint;
+	}
+
+	public String getHint() {
+		return hint;
+	}
+
+	public void setHint(String hint) {
+		this.hint = hint;
 	}
 
 }

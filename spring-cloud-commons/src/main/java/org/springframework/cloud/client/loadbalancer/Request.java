@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 /**
- * A default implementation of {@link Request}.
+ * Marker interface for a request.
  *
- * @deprecated in favour of
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-@Deprecated
-public class DefaultRequest<T>
-		extends org.springframework.cloud.client.loadbalancer.DefaultRequest<T>
-		implements Request<T> {
+public interface Request<C> {
 
-	public DefaultRequest() {
-		new DefaultRequestContext();
+	// Avoid breaking backward compatibility
+	default C getContext() {
+		return null;
 	}
 
-	public DefaultRequest(T context) {
-		super(context);
-	}
+	// TODO: define contents
 
 }

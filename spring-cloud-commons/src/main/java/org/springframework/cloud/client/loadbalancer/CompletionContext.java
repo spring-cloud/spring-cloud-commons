@@ -14,52 +14,52 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
+
+import org.springframework.core.style.ToStringCreator;
 
 /**
- * @deprecated in favour of
- * {@link org.springframework.cloud.client.loadbalancer.CompletionContext}
  * @author Spencer Gibb
  */
 // TODO: add metrics
-@Deprecated
-public class CompletionContext
-		extends org.springframework.cloud.client.loadbalancer.CompletionContext {
+public class CompletionContext {
 
 	private final Status status;
+
+	private final Throwable throwable;
 
 	public CompletionContext(Status status) {
 		this(status, null);
 	}
 
 	public CompletionContext(Status status, Throwable throwable) {
-		super(resolveStatus(status), throwable);
 		this.status = status;
+		this.throwable = throwable;
 	}
 
-	public Status getStatus() {
+	public Status status() {
 		return this.status;
 	}
 
-	private static org.springframework.cloud.client.loadbalancer.CompletionContext.Status resolveStatus(
-			Status status) {
-		if (Status.SUCCESSS.equals(status)) {
-			return org.springframework.cloud.client.loadbalancer.CompletionContext.Status.SUCCESS;
-		}
-		return org.springframework.cloud.client.loadbalancer.CompletionContext.Status
-				.valueOf(status.name());
+	public Throwable getThrowable() {
+		return this.throwable;
+	}
+
+	@Override
+	public String toString() {
+		ToStringCreator to = new ToStringCreator(this);
+		to.append("status", this.status);
+		to.append("throwable", this.throwable);
+		return to.toString();
 	}
 
 	/**
 	 * Request status state.
-	 * @deprecated in favour of
-	 * {@link org.springframework.cloud.client.loadbalancer.CompletionContext.Status}
 	 */
-	@Deprecated
 	public enum Status {
 
 		/** Request was handled successfully. */
-		SUCCESSS,
+		SUCCESS,
 		/** Request reached the server but failed due to timeout or internal error. */
 		FAILED,
 		/** Request did not go off box and should not be counted for statistics. */

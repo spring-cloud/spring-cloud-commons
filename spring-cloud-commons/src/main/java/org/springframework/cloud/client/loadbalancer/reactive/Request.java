@@ -19,16 +19,12 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 /**
  * Marker interface for a request.
  *
+ * @deprecated in favour of {@link org.springframework.cloud.client.loadbalancer.Request}
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  */
-public interface Request<C> {
-
-	// Avoid breaking backward compatibility
-	default C getContext() {
-		return null;
-	}
-
-	// TODO: define contents
+@Deprecated
+public interface Request<C>
+		extends org.springframework.cloud.client.loadbalancer.Request<C> {
 
 }
