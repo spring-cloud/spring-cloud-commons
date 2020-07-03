@@ -19,29 +19,19 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 /**
  * Contains information relevant to the request.
  *
+ * @deprecated in favour of
+ * {@link org.springframework.cloud.client.loadbalancer.DefaultRequestContext}
  * @author Olga Maciaszek-Sharma
  */
-public class DefaultRequestContext {
-
-	/**
-	 * A {@link String} value of hint that can be used to choose the correct service
-	 * instance.
-	 */
-	private String hint = "default";
+@Deprecated
+public class DefaultRequestContext
+		extends org.springframework.cloud.client.loadbalancer.DefaultRequestContext {
 
 	public DefaultRequestContext() {
 	}
 
 	public DefaultRequestContext(String hint) {
-		this.hint = hint;
-	}
-
-	public String getHint() {
-		return hint;
-	}
-
-	public void setHint(String hint) {
-		this.hint = hint;
+		super(hint);
 	}
 
 }

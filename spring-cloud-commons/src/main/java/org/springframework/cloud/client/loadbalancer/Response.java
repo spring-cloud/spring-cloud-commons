@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 /**
- * A default implementation of {@link Request}.
+ * Response created for each request.
  *
- * @deprecated in favour of
+ * @param <T> type of the server
  * @author Spencer Gibb
- * @author Olga Maciaszek-Sharma
  */
-@Deprecated
-public class DefaultRequest<T>
-		extends org.springframework.cloud.client.loadbalancer.DefaultRequest<T>
-		implements Request<T> {
+public interface Response<T> {
 
-	public DefaultRequest() {
-		new DefaultRequestContext();
-	}
+	boolean hasServer();
 
-	public DefaultRequest(T context) {
-		super(context);
-	}
+	T getServer();
+
+	/**
+	 * Notification that the request completed.
+	 * @deprecated <code>onComplete</code> callbacks for load-balanced calls are being
+	 * moved to a separate interface
+	 * @param completionContext - completion context
+	 */
+	@Deprecated
+	void onComplete(CompletionContext completionContext);
 
 }
