@@ -23,6 +23,9 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.DefaultResponse;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.Response;
 
 /**
  * A sample implementation of {@link ReactiveLoadBalancer} used for tests.

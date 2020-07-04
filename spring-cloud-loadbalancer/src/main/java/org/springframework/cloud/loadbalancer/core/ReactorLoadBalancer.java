@@ -18,9 +18,9 @@ package org.springframework.cloud.loadbalancer.core;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
-import org.springframework.cloud.client.loadbalancer.reactive.Request;
-import org.springframework.cloud.client.loadbalancer.reactive.Response;
 
 /**
  * A Reactor based implementation of {@link ReactiveLoadBalancer}.

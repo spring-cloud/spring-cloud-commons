@@ -18,6 +18,11 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.cloud.client.loadbalancer.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.Response;
+
 /**
  * Reactive load balancer.
  *
@@ -30,7 +35,7 @@ public interface ReactiveLoadBalancer<T> {
 	/**
 	 * Default implementation of a request.
 	 */
-	Request<DefaultRequestContext> REQUEST = new DefaultRequest();
+	Request<DefaultRequestContext> REQUEST = new DefaultRequest<>();
 
 	/**
 	 * Choose the next server based on the load balancing algorithm.

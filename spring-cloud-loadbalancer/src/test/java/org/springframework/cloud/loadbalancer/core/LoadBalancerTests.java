@@ -32,14 +32,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext;
-import org.springframework.cloud.client.loadbalancer.reactive.CompletionContext.Status;
-import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequest;
-import org.springframework.cloud.client.loadbalancer.reactive.DefaultRequestContext;
-import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
+import org.springframework.cloud.client.loadbalancer.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.DefaultResponse;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
-import org.springframework.cloud.client.loadbalancer.reactive.Request;
-import org.springframework.cloud.client.loadbalancer.reactive.Response;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -98,7 +97,8 @@ public class LoadBalancerTests {
 					then(instance.isSecure()).isFalse();
 				}
 
-				response.onComplete(new CompletionContext(Status.SUCCESSS));
+				response.onComplete(
+						new CompletionContext(CompletionContext.Status.SUCCESS));
 			}).verifyComplete();
 		}
 	}
