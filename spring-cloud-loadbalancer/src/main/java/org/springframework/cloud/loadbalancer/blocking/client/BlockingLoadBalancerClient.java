@@ -33,11 +33,14 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
+import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.util.ReflectionUtils;
+
+import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer.REQUEST;
 
 /**
  * The default {@link LoadBalancerClient} implementation.
@@ -67,10 +70,10 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	@Override
 	public <T> T execute(String serviceId, LoadBalancerRequest<T> request)
 			throws IOException {
-		supportedLifecycleProcessors
-				.forEach(lifecycle -> lifecycle.onStart(new DefaultRequest<>(
-						new DefaultRequestContext(request, properties.getHint()))));
-		ServiceInstance serviceInstance = choose(serviceId);
+		DefaultRequest<DefaultRequestContext> lbRequest = new DefaultRequest<>(
+				new DefaultRequestContext(request, properties.getHint()));
+		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
+		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
 			supportedLifecycleProcessors
 					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext<>(
@@ -113,13 +116,18 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	@Override
 	public ServiceInstance choose(String serviceId) {
+		return choose(serviceId, REQUEST);
+	}
+
+	@Override
+	public <T> ServiceInstance choose(String serviceId, Request<T> request) {
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory
 				.getInstance(serviceId);
 		if (loadBalancer == null) {
 			return null;
 		}
-		Response<ServiceInstance> loadBalancerResponse = Mono.from(loadBalancer.choose())
-				.block();
+		Response<ServiceInstance> loadBalancerResponse = Mono
+				.from(loadBalancer.choose(request)).block();
 		if (loadBalancerResponse == null) {
 			return null;
 		}

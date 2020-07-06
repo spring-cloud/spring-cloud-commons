@@ -21,21 +21,23 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -134,12 +136,8 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
+	@Import(NoTransformer.class)
 	static class Transformer {
-
-		@Bean
-		public LoadBalancerClient loadBalancerClient() {
-			return mock(LoadBalancerClient.class);
-		}
 
 		@Bean
 		public LoadBalancerRequestTransformer transformer() {
@@ -149,17 +147,8 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
+	@Import(Transformer.class)
 	static class TransformersAreOrdered {
-
-		@Bean
-		public LoadBalancerClient loadBalancerClient() {
-			return mock(LoadBalancerClient.class);
-		}
-
-		@Bean
-		public LoadBalancerRequestTransformer transformer() {
-			return mock(LoadBalancerRequestTransformer.class);
-		}
 
 		@Bean
 		@Order(LoadBalancerRequestTransformer.DEFAULT_ORDER + 1)
@@ -175,6 +164,11 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 		@Bean
 		public LoadBalancerClient loadBalancerClient() {
 			return mock(LoadBalancerClient.class);
+		}
+
+		@Bean
+		LoadBalancerProperties loadBalancerProperties() {
+			return new LoadBalancerProperties();
 		}
 
 	}

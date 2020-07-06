@@ -19,6 +19,7 @@ package org.springframework.cloud.client.loadbalancer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -28,6 +29,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -126,11 +128,14 @@ public class LoadBalancerAutoConfiguration {
 		@ConditionalOnMissingBean
 		public RetryLoadBalancerInterceptor loadBalancerInterceptor(
 				LoadBalancerClient loadBalancerClient,
-				LoadBalancerRetryProperties properties,
+				LoadBalancerRetryProperties retryProperties,
 				LoadBalancerRequestFactory requestFactory,
-				LoadBalancedRetryFactory loadBalancedRetryFactory) {
-			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties,
-					requestFactory, loadBalancedRetryFactory);
+				LoadBalancedRetryFactory loadBalancedRetryFactory,
+				LoadBalancerProperties properties,
+				Set<LoadBalancerLifecycle> lifecycleProcessors) {
+			return new RetryLoadBalancerInterceptor(loadBalancerClient, retryProperties,
+					requestFactory, loadBalancedRetryFactory, properties,
+					lifecycleProcessors);
 		}
 
 		@Bean

@@ -16,23 +16,23 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.http.HttpRequest;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class ClientRequestContext extends DefaultRequestContext {
+public class HttpRequestContext extends DefaultRequestContext {
 
-	public ClientRequestContext(ClientRequest clientRequest) {
-		this(clientRequest, "default");
+	public HttpRequestContext(HttpRequest httpRequest) {
+		this(httpRequest, "default");
 	}
 
-	public ClientRequestContext(ClientRequest clientRequest, String hint) {
-		super(clientRequest, hint);
+	public HttpRequestContext(HttpRequest httpRequest, String hint) {
+		super(httpRequest, hint);
 	}
 
-	public ClientRequest getClientRequest() {
-		return (ClientRequest) super.getClientRequest();
+	public HttpRequest getClientRequest() {
+		return (HttpRequest) super.getClientRequest();
 	}
 
 }

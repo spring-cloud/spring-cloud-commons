@@ -42,7 +42,7 @@ public class RetryLoadBalancerAutoConfigurationTests
 	}
 
 	@Test
-	public void testDefaultBackOffPolicy() throws Exception {
+	public void testDefaultBackOffPolicy() {
 		ConfigurableApplicationContext context = init(OneRestTemplate.class);
 		LoadBalancedRetryFactory loadBalancedRetryFactory = context
 				.getBean(LoadBalancedRetryFactory.class);

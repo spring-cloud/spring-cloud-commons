@@ -23,13 +23,7 @@ import org.springframework.core.style.ToStringCreator;
  *
  * @author Olga Maciaszek-Sharma
  */
-public class DefaultRequestContext {
-
-	/**
-	 * A {@link String} value of hint that can be used to choose the correct service
-	 * instance.
-	 */
-	private String hint = "default";
+public class DefaultRequestContext extends HintRequestContext {
 
 	private final Object clientRequest;
 
@@ -42,16 +36,8 @@ public class DefaultRequestContext {
 	}
 
 	public DefaultRequestContext(Object clientRequest, String hint) {
+		super(hint);
 		this.clientRequest = clientRequest;
-		this.hint = hint;
-	}
-
-	public String getHint() {
-		return hint;
-	}
-
-	public void setHint(String hint) {
-		this.hint = hint;
 	}
 
 	public Object getClientRequest() {
@@ -62,7 +48,6 @@ public class DefaultRequestContext {
 	public String toString() {
 		ToStringCreator to = new ToStringCreator(this);
 		to.append("clientRequest", clientRequest);
-		to.append("hint", hint);
 		return to.toString();
 	}
 
