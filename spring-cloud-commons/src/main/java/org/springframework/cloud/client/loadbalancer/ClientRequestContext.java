@@ -17,33 +17,28 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.web.reactive.function.client.ClientRequest;
 
 /**
- * Contains information relevant to the request.
- *
  * @author Olga Maciaszek-Sharma
  */
-public class DefaultRequestContext {
+public class ClientRequestContext {
 
-	/**
-	 * A {@link String} value of hint that can be used to choose the correct service
-	 * instance.
-	 */
-	private String hint = "default";
+	private final ClientRequest clientRequest;
 
-	private final Object clientRequest;
+	private String hint;
 
-	public DefaultRequestContext() {
-		clientRequest = null;
+	public ClientRequestContext(ClientRequest clientRequest) {
+		this(clientRequest, "default");
 	}
 
-	public DefaultRequestContext(Object clientRequest) {
-		this.clientRequest = clientRequest;
-	}
-
-	public DefaultRequestContext(Object clientRequest, String hint) {
+	public ClientRequestContext(ClientRequest clientRequest, String hint) {
 		this.clientRequest = clientRequest;
 		this.hint = hint;
+	}
+
+	public ClientRequest getClientRequest() {
+		return clientRequest;
 	}
 
 	public String getHint() {
@@ -52,10 +47,6 @@ public class DefaultRequestContext {
 
 	public void setHint(String hint) {
 		this.hint = hint;
-	}
-
-	public Object getClientRequest() {
-		return clientRequest;
 	}
 
 	@Override

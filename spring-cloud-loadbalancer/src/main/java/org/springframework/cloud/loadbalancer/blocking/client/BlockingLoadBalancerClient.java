@@ -18,14 +18,23 @@ package org.springframework.cloud.loadbalancer.blocking.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.DefaultResponse;
+import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.util.ReflectionUtils;
@@ -40,16 +49,32 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	private final LoadBalancerClientFactory loadBalancerClientFactory;
 
-	public BlockingLoadBalancerClient(
-			LoadBalancerClientFactory loadBalancerClientFactory) {
+	private final Set<LoadBalancerLifecycle> supportedLifecycleProcessors;
+
+	private final LoadBalancerProperties properties;
+
+	public BlockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
+			Set<LoadBalancerLifecycle> lifecycleProcessors,
+			LoadBalancerProperties properties) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
+		this.supportedLifecycleProcessors = lifecycleProcessors.stream()
+				.filter(lifecycle -> lifecycle.supports(DefaultRequestContext.class,
+						Object.class, ServiceInstance.class))
+				.collect(Collectors.toSet());
+		this.properties = properties;
 	}
 
 	@Override
 	public <T> T execute(String serviceId, LoadBalancerRequest<T> request)
 			throws IOException {
+		supportedLifecycleProcessors
+				.forEach(lifecycle -> lifecycle.onStart(new DefaultRequest<>(
+						new DefaultRequestContext(request, properties.getHint()))));
 		ServiceInstance serviceInstance = choose(serviceId);
 		if (serviceInstance == null) {
+			supportedLifecycleProcessors
+					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext<>(
+							CompletionContext.Status.DISCARD, new EmptyResponse())));
 			throw new IllegalStateException("No instances available for " + serviceId);
 		}
 		return execute(serviceId, serviceInstance, request);
@@ -58,13 +83,24 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	@Override
 	public <T> T execute(String serviceId, ServiceInstance serviceInstance,
 			LoadBalancerRequest<T> request) throws IOException {
+		DefaultResponse defaultResponse = new DefaultResponse(serviceInstance);
 		try {
-			return request.apply(serviceInstance);
+			T response = request.apply(serviceInstance);
+			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
+					.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
+							defaultResponse, response)));
+			return response;
 		}
 		catch (IOException iOException) {
+			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
+					.onComplete(new CompletionContext<>(CompletionContext.Status.FAILED,
+							iOException, defaultResponse)));
 			throw iOException;
 		}
 		catch (Exception exception) {
+			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
+					.onComplete(new CompletionContext<>(CompletionContext.Status.FAILED,
+							exception, defaultResponse)));
 			ReflectionUtils.rethrowRuntimeException(exception);
 		}
 		return null;

@@ -67,4 +67,6 @@ public @interface LoadBalancerClient {
 	 */
 	Class<?>[] configuration() default {};
 
+	Class<?>[] processors() default {};
+
 }

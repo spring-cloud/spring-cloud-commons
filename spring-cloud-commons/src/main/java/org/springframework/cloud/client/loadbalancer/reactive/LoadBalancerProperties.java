@@ -36,12 +36,22 @@ public class LoadBalancerProperties {
 	 */
 	private HealthCheck healthCheck = new HealthCheck();
 
+	private String hint = "default";
+
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
 	}
 
 	public void setHealthCheck(HealthCheck healthCheck) {
 		this.healthCheck = healthCheck;
+	}
+
+	public String getHint() {
+		return hint;
+	}
+
+	public void setHint(String hint) {
+		this.hint = hint;
 	}
 
 	public static class HealthCheck {

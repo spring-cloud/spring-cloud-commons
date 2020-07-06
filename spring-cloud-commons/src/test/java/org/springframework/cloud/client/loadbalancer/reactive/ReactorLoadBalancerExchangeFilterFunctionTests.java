@@ -119,6 +119,11 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 					discoveryClient);
 		}
 
+		@Bean
+		LoadBalancerProperties loadBalancerProperties() {
+			return new LoadBalancerProperties();
+		}
+
 	}
 
 }

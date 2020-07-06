@@ -115,6 +115,11 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 			};
 		}
 
+		@Bean
+		LoadBalancerProperties loadBalancerProperties() {
+			return new LoadBalancerProperties();
+		}
+
 	}
 
 	@Configuration
