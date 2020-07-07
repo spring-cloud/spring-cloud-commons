@@ -40,7 +40,7 @@ public static class DemoControllerService {
 The `CircuitBreakerFactory.create` API creates an instance of a class called `CircuitBreaker`.
 The `run` method takes a `Supplier` and a `Function`.
 The `Supplier` is the code that you are going to wrap in a circuit breaker.
-The `Function` is the fallback that is executed if the circuit breaker is tripped.
+The `Function` is the fallback that is run if the circuit breaker is tripped.
 The function is passed the `Throwable` that caused the fallback to be triggered.
 You can optionally exclude the fallback if you do not want to provide one.
 
