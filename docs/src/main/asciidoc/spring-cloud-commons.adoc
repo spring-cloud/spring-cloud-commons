@@ -998,7 +998,7 @@ In order to use it, just add `org.springframework.cloud:spring-cloud-starter-loa
 
 NOTE: Spring Cloud LoadBalancer starter includes
 https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching]
-and https://github.com/stoyanr[Evictor].
+and https://github.com/stoyanr/Evictor[Evictor].
 
 WARNING: If you have both Ribbon and Spring Cloud LoadBalancer int the classpath, in order to maintain backward compatibility, Ribbon-based implementations will be used by default.
 In order to switch to using Spring Cloud LoadBalancer under the hood, make sure you set the property `spring.cloud.loadbalancer.ribbon.enabled` to `false`.
