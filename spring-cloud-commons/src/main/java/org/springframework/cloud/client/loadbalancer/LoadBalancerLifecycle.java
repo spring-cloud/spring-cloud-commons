@@ -19,15 +19,15 @@ package org.springframework.cloud.client.loadbalancer;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public interface LoadBalancerLifecycle {
+public interface LoadBalancerLifecycle<RC, RES, T> {
 
-	default <RC, RES, T> boolean supports(Class<RC> reqClass, Class<RES> responseClass,
+	default boolean supports(Class<RC> reqClass, Class<RES> responseClass,
 			Class<T> serverTypeClass) {
 		return true;
 	}
 
-	<RC> void onStart(Request<RC> request);
+	void onStart(Request<RC> request);
 
-	<RES, T> void onComplete(CompletionContext<RES, T> completionContext);
+	void onComplete(CompletionContext<RES, T> completionContext);
 
 }

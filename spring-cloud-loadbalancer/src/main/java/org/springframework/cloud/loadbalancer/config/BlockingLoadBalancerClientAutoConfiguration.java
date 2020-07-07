@@ -54,10 +54,9 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@ConditionalOnMissingBean
 	public LoadBalancerClient blockingLoadBalancerClient(
 			LoadBalancerClientFactory loadBalancerClientFactory,
-			Set<LoadBalancerLifecycle> lifecycleProcessors,
 			LoadBalancerProperties properties) {
 		return new BlockingLoadBalancerClient(loadBalancerClientFactory,
-				lifecycleProcessors, properties);
+				properties);
 	}
 
 }

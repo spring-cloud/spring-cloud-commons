@@ -19,6 +19,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -115,8 +116,25 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		@Bean
 		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory(
 				DiscoveryClient discoveryClient) {
-			return serviceId -> new DiscoveryClientBasedReactiveLoadBalancer(serviceId,
-					discoveryClient);
+			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
+				@Override
+				public ReactiveLoadBalancer<ServiceInstance> getInstance(
+						String serviceId) {
+					return new DiscoveryClientBasedReactiveLoadBalancer(serviceId,
+							discoveryClient);
+				}
+
+				@Override
+				public <X> Map<String, X> getInstances(String name, Class<X> type) {
+					throw new UnsupportedOperationException("Not implemented");
+				}
+
+				@Override
+				public <X> X getInstance(String name, Class<?> clazz,
+						Class<?>... generics) {
+					throw new UnsupportedOperationException("Not implemented.");
+				}
+			};
 		}
 
 		@Bean

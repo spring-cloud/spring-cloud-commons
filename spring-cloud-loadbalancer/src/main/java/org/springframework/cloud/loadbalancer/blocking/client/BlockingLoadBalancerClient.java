@@ -48,22 +48,16 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoa
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	private final LoadBalancerClientFactory loadBalancerClientFactory;
 
-	private final Set<LoadBalancerLifecycle> supportedLifecycleProcessors;
-
 	private final LoadBalancerProperties properties;
 
 	public BlockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
-			Set<LoadBalancerLifecycle> lifecycleProcessors,
 			LoadBalancerProperties properties) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
-		this.supportedLifecycleProcessors = lifecycleProcessors.stream()
-				.filter(lifecycle -> lifecycle.supports(DefaultRequestContext.class,
-						Object.class, ServiceInstance.class))
-				.collect(Collectors.toSet());
 		this.properties = properties;
 	}
 
@@ -72,6 +66,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 			throws IOException {
 		DefaultRequest<DefaultRequestContext> lbRequest = new DefaultRequest<>(
 				new DefaultRequestContext(request, properties.getHint()));
+		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = supportedLifecycleProcessors(serviceId);
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
@@ -83,10 +78,12 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		return execute(serviceId, serviceInstance, request);
 	}
 
+
 	@Override
 	public <T> T execute(String serviceId, ServiceInstance serviceInstance,
 			LoadBalancerRequest<T> request) throws IOException {
 		DefaultResponse defaultResponse = new DefaultResponse(serviceInstance);
+		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = supportedLifecycleProcessors(serviceId);
 		try {
 			T response = request.apply(serviceInstance);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
@@ -132,6 +129,15 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 			return null;
 		}
 		return loadBalancerResponse.getServer();
+	}
+
+
+	private Set<LoadBalancerLifecycle> supportedLifecycleProcessors(String serviceId) {
+		return loadBalancerClientFactory
+				.getInstances(serviceId, LoadBalancerLifecycle.class).values()
+				.stream()
+				.filter(lifecycle -> lifecycle.supports(DefaultRequestContext.class,
+						Object.class, ServiceInstance.class)).collect(Collectors.toSet());
 	}
 
 }

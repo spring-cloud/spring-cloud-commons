@@ -47,12 +47,11 @@ public class LoadBalancerClientConfigurationRegistrar
 	}
 
 	private static void registerClientConfiguration(BeanDefinitionRegistry registry,
-			Object name, Object configuration, Object lifecycleProcessors) {
+			Object name, Object configuration) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder
 				.genericBeanDefinition(LoadBalancerClientSpecification.class);
 		builder.addConstructorArgValue(name);
 		builder.addConstructorArgValue(configuration);
-		builder.addConstructorArgValue(lifecycleProcessors);
 		registry.registerBeanDefinition(name + ".LoadBalancerClientSpecification",
 				builder.getBeanDefinition());
 	}
@@ -66,10 +65,10 @@ public class LoadBalancerClientConfigurationRegistrar
 			AnnotationAttributes[] clients = (AnnotationAttributes[]) attrs.get("value");
 			for (AnnotationAttributes client : clients) {
 				registerClientConfiguration(registry, getClientName(client),
-						client.get("configuration"), client.get("lifecycleProcessors"));
+						client.get("configuration"));
 			}
 		}
-		if (attrs != null && (attrs.containsKey("defaultConfiguration") || attrs.containsKey("defaultLifecycleProcessors"))) {
+		if (attrs != null && attrs.containsKey("defaultConfiguration")) {
 			String name;
 			if (metadata.hasEnclosingClass()) {
 				name = "default." + metadata.getEnclosingClassName();
@@ -77,17 +76,15 @@ public class LoadBalancerClientConfigurationRegistrar
 			else {
 				name = "default." + metadata.getClassName();
 			}
-			registerClientConfiguration(registry, name, attrs.get("defaultConfiguration"),
-					attrs.get("defaultLifecycleProcessors"));
+			registerClientConfiguration(registry, name,
+					attrs.get("defaultConfiguration"));
 		}
 		Map<String, Object> client = metadata
 				.getAnnotationAttributes(LoadBalancerClient.class.getName(), true);
 		String name = getClientName(client);
 		if (name != null) {
-			registerClientConfiguration(registry, name, client.get("configuration"),
-					client.get("lifecycleProcessors"));
+			registerClientConfiguration(registry, name, client.get("configuration"));
 		}
-
 	}
 
 }

@@ -53,27 +53,18 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	private final Set<LoadBalancerLifecycle> lifecycleProcessors;
-
 	private final LoadBalancerProperties properties;
 
 	public ReactorLoadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
-			Set<LoadBalancerLifecycle> lifecycleProcessors,
 			LoadBalancerProperties properties) {
 		this.loadBalancerFactory = loadBalancerFactory;
-		this.lifecycleProcessors = lifecycleProcessors;
 		this.properties = properties;
 	}
 
 	@Override
 	public Mono<ClientResponse> filter(ClientRequest clientRequest,
 			ExchangeFunction next) {
-		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = lifecycleProcessors
-				.stream()
-				.filter(processor -> processor.supports(ClientRequestContext.class,
-						ClientResponse.class, ServiceInstance.class))
-				.collect(Collectors.toSet());
 		URI originalUrl = clientRequest.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
@@ -86,6 +77,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			return Mono.just(
 					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
+		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = supportedLifecycleProcessors(
+				serviceId);
 		DefaultRequest<ClientRequestContext> lbRequest = new DefaultRequest<>(
 				// TODO: setting hint in more flexible way
 				new ClientRequestContext(clientRequest, properties.getHint()));
@@ -149,6 +142,14 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 				.cookies(cookies -> cookies.addAll(request.cookies()))
 				.attributes(attributes -> attributes.putAll(request.attributes()))
 				.body(request.body()).build();
+	}
+
+	private Set<LoadBalancerLifecycle> supportedLifecycleProcessors(String serviceId) {
+		return loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class)
+				.values().stream()
+				.filter(lifecycle -> lifecycle.supports(ClientRequestContext.class,
+						ClientResponse.class, ServiceInstance.class))
+				.collect(Collectors.toSet());
 	}
 
 }

@@ -112,19 +112,11 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 					.getConfiguration()) {
 				context.register(configuration);
 			}
-			for (Class<?> lifecycleProcessor : configurations.get(name).
-					getLifecycleProcessors()) {
-				context.register(lifecycleProcessor);
-			}
 		}
 		for (Map.Entry<String, C> entry : this.configurations.entrySet()) {
 			if (entry.getKey().startsWith("default.")) {
 				for (Class<?> configuration : entry.getValue().getConfiguration()) {
 					context.register(configuration);
-				}
-				for (Class<?> lifecycleProcessor : entry.getValue()
-						.getLifecycleProcessors()) {
-					context.register(lifecycleProcessor);
 				}
 			}
 		}
@@ -204,8 +196,6 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		String getName();
 
 		Class<?>[] getConfiguration();
-
-		Class<?>[] getLifecycleProcessors();
 
 	}
 

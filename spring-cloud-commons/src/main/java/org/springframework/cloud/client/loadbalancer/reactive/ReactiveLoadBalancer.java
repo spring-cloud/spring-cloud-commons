@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.util.Map;
+
 import org.reactivestreams.Publisher;
 
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
@@ -49,10 +51,13 @@ public interface ReactiveLoadBalancer<T> {
 		return choose(REQUEST);
 	}
 
-	@FunctionalInterface
 	interface Factory<T> {
 
 		ReactiveLoadBalancer<T> getInstance(String serviceId);
+
+		<X> Map<String, X> getInstances(String name, Class<X> type);
+
+		<X> X getInstance(String name, Class<?> clazz, Class<?>... generics);
 
 	}
 

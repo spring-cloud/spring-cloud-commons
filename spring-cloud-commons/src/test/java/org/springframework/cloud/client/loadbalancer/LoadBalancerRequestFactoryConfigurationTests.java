@@ -27,6 +27,7 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -169,6 +170,12 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 		@Bean
 		LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Bean
+		ReactiveLoadBalancer.Factory<ServiceInstance> factory() {
+			return mock(ReactiveLoadBalancer.Factory.class);
 		}
 
 	}

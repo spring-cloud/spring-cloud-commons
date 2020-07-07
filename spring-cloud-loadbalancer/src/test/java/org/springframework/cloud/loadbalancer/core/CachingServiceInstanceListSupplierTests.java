@@ -115,7 +115,7 @@ class CachingServiceInstanceListSupplierTests {
 				LoadBalancerClientFactory loadBalancerClientFactory,
 				LoadBalancerProperties properties) {
 			return new BlockingLoadBalancerClient(loadBalancerClientFactory,
-					new HashSet<>(), properties);
+					properties);
 		}
 
 		@Bean

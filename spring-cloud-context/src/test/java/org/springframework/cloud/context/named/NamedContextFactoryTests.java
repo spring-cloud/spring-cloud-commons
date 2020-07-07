@@ -120,11 +120,6 @@ public class NamedContextFactoryTests {
 			return this.configuration;
 		}
 
-		@Override
-		public Class<?>[] getLifecycleProcessors() {
-			throw new UnsupportedOperationException("Not implemented.");
-		}
-
 		public void setConfiguration(Class<?>[] configuration) {
 			this.configuration = configuration;
 		}
