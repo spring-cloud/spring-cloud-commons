@@ -33,6 +33,8 @@ public class LoadBalancerClientSpecification
 
 	private Class<?>[] configuration;
 
+	private Class<?>[] lifecycleProcessors;
+
 	public LoadBalancerClientSpecification() {
 	}
 
@@ -41,6 +43,13 @@ public class LoadBalancerClientSpecification
 		this.name = name;
 		Assert.notNull(configuration, "configuration must not be null");
 		this.configuration = configuration;
+	}
+
+	public LoadBalancerClientSpecification(String name, Class<?>[] configuration,
+			Class<?>[] lifecycleProcessors) {
+		this(name, configuration);
+		Assert.notNull(lifecycleProcessors, "lifecycleProcessors must not be null");
+		this.lifecycleProcessors = lifecycleProcessors;
 	}
 
 	public String getName() {
@@ -61,11 +70,21 @@ public class LoadBalancerClientSpecification
 		this.configuration = configuration;
 	}
 
+	public Class<?>[] getLifecycleProcessors() {
+		return lifecycleProcessors;
+	}
+
+	public void setLifecycleProcessors(Class<?>[] lifecycleProcessors) {
+		Assert.notNull(lifecycleProcessors, "lifecycleProcessors must not be null");
+		this.lifecycleProcessors = lifecycleProcessors;
+	}
+
 	@Override
 	public String toString() {
 		ToStringCreator to = new ToStringCreator(this);
 		to.append("name", this.name);
 		to.append("configuration", this.configuration);
+		to.append("lifeCycleProcessors", lifecycleProcessors);
 		return to.toString();
 	}
 
@@ -79,12 +98,13 @@ public class LoadBalancerClientSpecification
 		}
 		LoadBalancerClientSpecification that = (LoadBalancerClientSpecification) o;
 		return Objects.equals(this.name, that.name)
-				&& Arrays.equals(this.configuration, that.configuration);
+				&& Arrays.equals(this.configuration, that.configuration)
+				&& Arrays.equals(lifecycleProcessors, that.lifecycleProcessors);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.name, this.configuration);
+		return Objects.hash(this.name, this.configuration, lifecycleProcessors);
 	}
 
 }

@@ -51,4 +51,6 @@ public @interface LoadBalancerClients {
 	 */
 	Class<?>[] defaultConfiguration() default {};
 
+	Class<?>[] defaultLifecycleProcessors() default {};
+
 }
