@@ -956,7 +956,7 @@ In order to use it, just add `org.springframework.cloud:spring-cloud-starter-loa
 
 NOTE: Spring Cloud LoadBalancer starter includes
 https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching]
-and https://github.com/stoyanr[Evictor].
+and https://github.com/stoyanr/Evictor[Evictor].
 
 [[custom-loadbalancer-configuration]]
 === Passing Your Own Spring Cloud LoadBalancer Configuration
