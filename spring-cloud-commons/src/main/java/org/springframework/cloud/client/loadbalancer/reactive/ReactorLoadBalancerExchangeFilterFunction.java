@@ -17,6 +17,8 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,6 +48,7 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
 
 	private static final Log LOG = LogFactory
@@ -145,8 +148,12 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 	}
 
 	private Set<LoadBalancerLifecycle> supportedLifecycleProcessors(String serviceId) {
-		return loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class)
-				.values().stream()
+		Map<String, LoadBalancerLifecycle> lifecycleProcessors = loadBalancerFactory
+				.getInstances(serviceId, LoadBalancerLifecycle.class);
+		if (lifecycleProcessors == null) {
+			return new HashSet<>();
+		}
+		return lifecycleProcessors.values().stream()
 				.filter(lifecycle -> lifecycle.supports(ClientRequestContext.class,
 						ClientResponse.class, ServiceInstance.class))
 				.collect(Collectors.toSet());

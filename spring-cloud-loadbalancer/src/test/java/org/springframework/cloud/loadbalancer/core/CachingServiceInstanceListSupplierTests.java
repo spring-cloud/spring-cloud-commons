@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import java.util.HashSet;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import reactor.core.publisher.Flux;
@@ -114,8 +112,7 @@ class CachingServiceInstanceListSupplierTests {
 		BlockingLoadBalancerClient blockingLoadBalancerClient(
 				LoadBalancerClientFactory loadBalancerClientFactory,
 				LoadBalancerProperties properties) {
-			return new BlockingLoadBalancerClient(loadBalancerClientFactory,
-					properties);
+			return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
 		}
 
 		@Bean

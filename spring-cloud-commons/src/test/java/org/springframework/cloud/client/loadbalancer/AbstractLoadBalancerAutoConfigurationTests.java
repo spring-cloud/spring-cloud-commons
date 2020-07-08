@@ -29,6 +29,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -105,6 +106,11 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 			return new LoadBalancerProperties();
 		}
 
+		@Bean
+		ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory() {
+			return new TestLoadBalancerFactory();
+		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -170,6 +176,26 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		@Override
 		public URI reconstructURI(ServiceInstance instance, URI original) {
 			return DefaultServiceInstance.getUri(instance);
+		}
+
+	}
+
+	private static class TestLoadBalancerFactory
+			implements ReactiveLoadBalancer.Factory<ServiceInstance> {
+
+		@Override
+		public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
+			throw new UnsupportedOperationException("Not implemented.");
+		}
+
+		@Override
+		public Object getInstance(String name, Class clazz, Class[] generics) {
+			throw new UnsupportedOperationException("Not implemented.");
+		}
+
+		@Override
+		public Map getInstances(String name, Class type) {
+			throw new UnsupportedOperationException("Not implemented.");
 		}
 
 	}

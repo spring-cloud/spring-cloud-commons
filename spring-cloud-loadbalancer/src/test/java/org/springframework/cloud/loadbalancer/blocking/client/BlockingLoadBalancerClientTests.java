@@ -164,33 +164,26 @@ class BlockingLoadBalancerClientTests {
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
 				.getInstances("myservice", LoadBalancerLifecycle.class)
-				.get("loadBalancerLifecycle"))
-				.getStartLog()
-				.values();
+				.get("loadBalancerLifecycle")).getStartLog().values();
 		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
 				.getInstances("myservice", LoadBalancerLifecycle.class)
-				.get("anotherLoadBalancerLifecycle"))
-				.getCompleteLog()
-				.values();
+				.get("anotherLoadBalancerLifecycle")).getCompleteLog().values();
 		assertThat(actualResult).isEqualTo(result);
-		assertThat(lifecycleLogRequests)
-				.extracting(request -> ((DefaultRequestContext) request.getContext())
-						.getHint())
+		assertThat(lifecycleLogRequests).extracting(
+				request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains("callbackTestHint");
 		assertThat(anotherLifecycleLogRequests)
 				.extracting(CompletionContext::getClientResponse)
 				.contains("callbackTestResult");
 	}
 
-
 	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	@LoadBalancerClients({
-			@LoadBalancerClient(
-					name = "myservice", configuration = MyServiceConfig.class),
-			@LoadBalancerClient(
-					name = "unknownservice",
-					configuration = UnknownServiceConfig.class)})
+			@LoadBalancerClient(name = "myservice",
+					configuration = MyServiceConfig.class),
+			@LoadBalancerClient(name = "unknownservice",
+					configuration = UnknownServiceConfig.class) })
 	protected static class Config {
 
 	}
@@ -203,7 +196,6 @@ class BlockingLoadBalancerClientTests {
 			return new DiscoveryClientBasedReactiveLoadBalancer("myservice",
 					discoveryClient);
 		}
-
 
 		@Bean
 		LoadBalancerLifecycle<Object, Object, ServiceInstance> loadBalancerLifecycle() {
@@ -228,9 +220,11 @@ class BlockingLoadBalancerClientTests {
 
 	}
 
-	protected static class TestLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
+	protected static class TestLoadBalancerLifecycle
+			implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
 		ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
+
 		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
@@ -239,9 +233,9 @@ class BlockingLoadBalancerClientTests {
 		}
 
 		@Override
-		public void onComplete(CompletionContext<Object, ServiceInstance> completionContext) {
-			completeLog.put(getName() + UUID
-					.randomUUID(), completionContext);
+		public void onComplete(
+				CompletionContext<Object, ServiceInstance> completionContext) {
+			completeLog.put(getName() + UUID.randomUUID(), completionContext);
 		}
 
 		ConcurrentHashMap<String, Request<Object>> getStartLog() {
@@ -255,14 +249,17 @@ class BlockingLoadBalancerClientTests {
 		protected String getName() {
 			return this.getClass().getSimpleName();
 		}
+
 	}
 
-	protected static class AnotherLoadBalancerLifecycle extends TestLoadBalancerLifecycle {
+	protected static class AnotherLoadBalancerLifecycle
+			extends TestLoadBalancerLifecycle {
 
 		@Override
 		protected String getName() {
 			return this.getClass().getSimpleName();
 		}
+
 	}
 
 }

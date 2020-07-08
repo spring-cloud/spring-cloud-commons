@@ -18,6 +18,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -126,7 +127,7 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 
 				@Override
 				public <X> Map<String, X> getInstances(String name, Class<X> type) {
-					throw new UnsupportedOperationException("Not implemented");
+					return new HashMap<>();
 				}
 
 				@Override
