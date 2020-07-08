@@ -25,6 +25,10 @@ import org.springframework.core.style.ToStringCreator;
  */
 public class DefaultRequestContext extends HintRequestContext {
 
+	/**
+	 * The request to be executed against the service instance
+	 * selected by the LoadBalancer.
+	 */
 	private final Object clientRequest;
 
 	public DefaultRequestContext() {

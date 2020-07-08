@@ -42,6 +42,7 @@ import org.springframework.util.StreamUtils;
  * @author Ryan Baxter
  * @author Will Tran
  * @author Gang Li
+ * @author Olga Maciaszek-Sharma
  */
 public class RetryLoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 

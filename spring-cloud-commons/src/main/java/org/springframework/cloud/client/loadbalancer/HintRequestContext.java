@@ -19,6 +19,8 @@ package org.springframework.cloud.client.loadbalancer;
 import org.springframework.core.style.ToStringCreator;
 
 /**
+ * Allows propagating hints to the LoadBalancer.
+ *
  * @author Olga Maciaszek-Sharma
  */
 public class HintRequestContext {

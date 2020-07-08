@@ -21,6 +21,7 @@ import org.springframework.core.style.ToStringCreator;
 
 /**
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 public class DefaultResponse implements Response<ServiceInstance> {
 

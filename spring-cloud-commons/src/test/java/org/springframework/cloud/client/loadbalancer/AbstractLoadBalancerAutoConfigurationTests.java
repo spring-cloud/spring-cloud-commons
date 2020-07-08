@@ -43,6 +43,7 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoa
 /**
  * @author Ryan Baxter
  * @author Tim Ysewyn
+ * @author Olga Maciaszek-Sharma
  */
 public abstract class AbstractLoadBalancerAutoConfigurationTests {
 

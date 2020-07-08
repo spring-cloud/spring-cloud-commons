@@ -55,8 +55,27 @@ public interface ReactiveLoadBalancer<T> {
 
 		ReactiveLoadBalancer<T> getInstance(String serviceId);
 
+		/**
+		 * Allows accessing beans registered within client-specific
+		 * LoadBalancer contexts.
+		 * @param name Name of the beans to be returned
+		 * @param type The class of the beans to be returned
+		 * @param <X> The type of the beans to be returned
+		 * @return a {@link Map} of beans
+		 * @see <code>@LoadBalancerClient</code>
+		 */
 		<X> Map<String, X> getInstances(String name, Class<X> type);
 
+		/**
+		 * Allows accessing a bean registered within client-specific
+		 * LoadBalancer contexts.
+		 * @param name Name of the bean to be returned
+		 * @param clazz The class of the bean to be returned
+		 * @param generics The classes of generic types of the bean to be returned
+		 * @param <X> The type of the bean to be returned
+		 * @return a {@link Map} of beans
+		 * @see <code>@LoadBalancerClient</code>
+		 */
 		<X> X getInstance(String name, Class<?> clazz, Class<?>... generics);
 
 	}

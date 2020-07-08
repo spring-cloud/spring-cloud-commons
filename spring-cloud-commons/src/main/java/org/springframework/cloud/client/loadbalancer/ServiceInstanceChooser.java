@@ -23,6 +23,7 @@ import org.springframework.cloud.client.ServiceInstance;
  * to.
  *
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 public interface ServiceInstanceChooser {
 
