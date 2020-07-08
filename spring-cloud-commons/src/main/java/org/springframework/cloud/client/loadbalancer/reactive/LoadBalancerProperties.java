@@ -36,7 +36,7 @@ public class LoadBalancerProperties {
 	 */
 	private HealthCheck healthCheck = new HealthCheck();
 
-	private String hint = "default";
+	private Map<String, String> hint = new LinkedCaseInsensitiveMap<>();
 
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
@@ -46,11 +46,11 @@ public class LoadBalancerProperties {
 		this.healthCheck = healthCheck;
 	}
 
-	public String getHint() {
+	public Map<String, String> getHint() {
 		return hint;
 	}
 
-	public void setHint(String hint) {
+	public void setHint(Map<String, String> hint) {
 		this.hint = hint;
 	}
 

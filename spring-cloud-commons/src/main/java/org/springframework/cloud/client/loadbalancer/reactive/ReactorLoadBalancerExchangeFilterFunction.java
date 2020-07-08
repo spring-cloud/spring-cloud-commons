@@ -82,9 +82,9 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 		}
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = supportedLifecycleProcessors(
 				serviceId);
+		String hint = getHint(serviceId);
 		DefaultRequest<ClientRequestContext> lbRequest = new DefaultRequest<>(
-				// TODO: setting hint in more flexible way
-				new ClientRequestContext(clientRequest, properties.getHint()));
+				new ClientRequestContext(clientRequest, hint));
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		return choose(serviceId, lbRequest).flatMap(lbResponse -> {
 			ServiceInstance instance = lbResponse.getServer();
@@ -157,6 +157,12 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 				.filter(lifecycle -> lifecycle.supports(ClientRequestContext.class,
 						ClientResponse.class, ServiceInstance.class))
 				.collect(Collectors.toSet());
+	}
+
+	private String getHint(String serviceId) {
+		String defaultHint = properties.getHint().getOrDefault("default", "default");
+		String hintPropertyValue = properties.getHint().get(serviceId);
+		return hintPropertyValue != null ? hintPropertyValue : defaultHint;
 	}
 
 }

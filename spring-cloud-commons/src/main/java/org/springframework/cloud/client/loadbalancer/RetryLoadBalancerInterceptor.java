@@ -89,8 +89,9 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 			}
 			Set<LoadBalancerLifecycle> supportedLifecycleProcessors = supportedLifecycleProcessors(
 					serviceName);
+			String hint = getHint(serviceName);
 			DefaultRequest<HttpRequestContext> lbRequest = new DefaultRequest<>(
-					new HttpRequestContext(request, properties.getHint()));
+					new HttpRequestContext(request, hint));
 			supportedLifecycleProcessors
 					.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 			if (serviceInstance == null) {
@@ -157,6 +158,12 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 				.filter(lifecycle -> lifecycle.supports(HttpRequestContext.class,
 						ClientHttpResponse.class, ServiceInstance.class))
 				.collect(Collectors.toSet());
+	}
+
+	private String getHint(String serviceId) {
+		String defaultHint = properties.getHint().getOrDefault("default", "default");
+		String hintPropertyValue = properties.getHint().get(serviceId);
+		return hintPropertyValue != null ? hintPropertyValue : defaultHint;
 	}
 
 }

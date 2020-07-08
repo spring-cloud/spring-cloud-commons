@@ -166,7 +166,7 @@ class BlockingLoadBalancerClientTests {
 	@Test
 	void loadBalancerLifecycleCallbacksExecuted() throws IOException {
 		String callbackTestHint = "callbackTestHint";
-		loadBalancerProperties.setHint(callbackTestHint);
+		loadBalancerProperties.getHint().put("myservice", "callbackTestHint");
 		final String result = "callbackTestResult";
 		Object actualResult = loadBalancerClient.execute("myservice",
 				(LoadBalancerRequest<Object>) instance -> {

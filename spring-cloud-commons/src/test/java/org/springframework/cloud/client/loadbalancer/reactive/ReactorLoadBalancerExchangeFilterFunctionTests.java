@@ -133,17 +133,17 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 	@Test
 	void loadBalancerLifecycleCallbacksExecuted() {
 		final String callbackTestHint = "callbackTestHint";
-		loadBalancerProperties.setHint(callbackTestHint);
+		loadBalancerProperties.getHint().put("testservice", "callbackTestHint");
 		final String result = "callbackTestResult";
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
 				.filter(this.loadBalancerFunction).build().get().uri("/callback")
 				.exchange().block();
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class)
+				.getInstances("testservice", LoadBalancerLifecycle.class)
 				.get("loadBalancerLifecycle")).getStartLog().values();
 		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class)
+				.getInstances("testservice", LoadBalancerLifecycle.class)
 				.get("anotherLoadBalancerLifecycle")).getCompleteLog().values();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(lifecycleLogRequests).extracting(

@@ -61,13 +61,15 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 			LoadBalancerProperties properties) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 		this.properties = properties;
+
 	}
 
 	@Override
 	public <T> T execute(String serviceId, LoadBalancerRequest<T> request)
 			throws IOException {
+		String hint = getHint(serviceId);
 		DefaultRequest<DefaultRequestContext> lbRequest = new DefaultRequest<>(
-				new DefaultRequestContext(request, properties.getHint()));
+				new DefaultRequestContext(request, hint));
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = supportedLifecycleProcessors(
 				serviceId);
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
@@ -144,6 +146,12 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 				.filter(lifecycle -> lifecycle.supports(DefaultRequestContext.class,
 						Object.class, ServiceInstance.class))
 				.collect(Collectors.toSet());
+	}
+
+	private String getHint(String serviceId) {
+		String defaultHint = properties.getHint().getOrDefault("default", "default");
+		String hintPropertyValue = properties.getHint().get(serviceId);
+		return hintPropertyValue != null ? hintPropertyValue : defaultHint;
 	}
 
 }
