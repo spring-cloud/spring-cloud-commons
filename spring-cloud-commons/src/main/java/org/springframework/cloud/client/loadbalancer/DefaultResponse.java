@@ -45,6 +45,7 @@ public class DefaultResponse implements Response<ServiceInstance> {
 	public void onComplete(CompletionContext completionContext) {
 		// do nothing: deprecated interface method
 	}
+
 	@Override
 	public String toString() {
 		ToStringCreator to = new ToStringCreator(this);

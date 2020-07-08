@@ -30,7 +30,8 @@ public interface Response<T> {
 
 	/**
 	 * Notification that the request completed.
-	 * @deprecated in favour of {@link LoadBalancerLifecycle#onComplete(CompletionContext)}
+	 * @deprecated in favour of
+	 * {@link LoadBalancerLifecycle#onComplete(CompletionContext)}
 	 * @param completionContext - completion context
 	 */
 	@Deprecated
