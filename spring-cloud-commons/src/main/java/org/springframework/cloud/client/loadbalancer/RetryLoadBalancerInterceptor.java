@@ -18,6 +18,8 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,7 +61,6 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 			LoadBalancerRetryProperties retryProperties,
 			LoadBalancerRequestFactory requestFactory,
 			LoadBalancedRetryFactory lbRetryFactory, LoadBalancerProperties properties,
-			// TODO make sure it's provided in config
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
 		this.loadBalancer = loadBalancer;
 		this.retryProperties = retryProperties;
@@ -147,8 +148,12 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 	}
 
 	private Set<LoadBalancerLifecycle> supportedLifecycleProcessors(String serviceId) {
-		return loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class)
-				.values().stream()
+		Map<String, LoadBalancerLifecycle> lifecycleProcessors = loadBalancerFactory
+				.getInstances(serviceId, LoadBalancerLifecycle.class);
+		if (lifecycleProcessors == null) {
+			return new HashSet<>();
+		}
+		return lifecycleProcessors.values().stream()
 				.filter(lifecycle -> lifecycle.supports(HttpRequestContext.class,
 						ClientHttpResponse.class, ServiceInstance.class))
 				.collect(Collectors.toSet());

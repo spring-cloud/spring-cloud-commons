@@ -123,6 +123,7 @@ public class LoadBalancerAutoConfiguration {
 	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(RetryTemplate.class)
+	@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 	public static class RetryInterceptorAutoConfiguration {
 
 		@Bean

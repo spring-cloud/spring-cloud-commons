@@ -53,6 +53,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.fail;
 
 /**
@@ -153,8 +154,19 @@ class BlockingLoadBalancerClientTests {
 	}
 
 	@Test
+	void exceptionNotThrownWhenFactoryReturnsNullLifecycleProcessorsMap() {
+		assertThatCode(
+				() -> loadBalancerClient.execute("serviceWithNoLifecycleProcessors",
+						(LoadBalancerRequest<Object>) instance -> {
+							assertThat(instance.getHost()).isEqualTo("test.example");
+							return "result";
+						})).doesNotThrowAnyException();
+	}
+
+	@Test
 	void loadBalancerLifecycleCallbacksExecuted() throws IOException {
-		loadBalancerProperties.setHint("callbackTestHint");
+		String callbackTestHint = "callbackTestHint";
+		loadBalancerProperties.setHint(callbackTestHint);
 		final String result = "callbackTestResult";
 		Object actualResult = loadBalancerClient.execute("myservice",
 				(LoadBalancerRequest<Object>) instance -> {
@@ -171,10 +183,9 @@ class BlockingLoadBalancerClientTests {
 		assertThat(actualResult).isEqualTo(result);
 		assertThat(lifecycleLogRequests).extracting(
 				request -> ((DefaultRequestContext) request.getContext()).getHint())
-				.contains("callbackTestHint");
+				.contains(callbackTestHint);
 		assertThat(anotherLifecycleLogRequests)
-				.extracting(CompletionContext::getClientResponse)
-				.contains("callbackTestResult");
+				.extracting(CompletionContext::getClientResponse).contains(result);
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -183,8 +194,21 @@ class BlockingLoadBalancerClientTests {
 			@LoadBalancerClient(name = "myservice",
 					configuration = MyServiceConfig.class),
 			@LoadBalancerClient(name = "unknownservice",
-					configuration = UnknownServiceConfig.class) })
+					configuration = UnknownServiceConfig.class),
+			@LoadBalancerClient(name = "serviceWithNoLifecycleProcessors",
+					configuration = NoLifecycleProcessorsConfig.class) })
 	protected static class Config {
+
+	}
+
+	protected static class NoLifecycleProcessorsConfig {
+
+		@Bean
+		ReactorLoadBalancer<ServiceInstance> reactiveLoadBalancer(
+				DiscoveryClient discoveryClient) {
+			return new DiscoveryClientBasedReactiveLoadBalancer("myservice",
+					discoveryClient);
+		}
 
 	}
 

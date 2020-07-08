@@ -17,15 +17,17 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -38,18 +40,22 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
+import org.springframework.cloud.client.loadbalancer.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -58,7 +64,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  *
  * @author Olga Maciaszek-Sharma
  */
-@ExtendWith(SpringExtension.class)
+@SuppressWarnings("ConstantConditions")
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class ReactorLoadBalancerExchangeFilterFunctionTests {
 
@@ -68,6 +74,12 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 	@Autowired
 	private SimpleDiscoveryProperties properties;
 
+	@Autowired
+	private LoadBalancerProperties loadBalancerProperties;
+
+	@Autowired
+	private ReactiveLoadBalancer.Factory<ServiceInstance> factory;
+
 	@LocalServerPort
 	private int port;
 
@@ -76,8 +88,15 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		SimpleDiscoveryProperties.SimpleServiceInstance instance = new SimpleDiscoveryProperties.SimpleServiceInstance();
 		instance.setServiceId("testservice");
 		instance.setUri(URI.create("http://localhost:" + this.port));
+		SimpleDiscoveryProperties.SimpleServiceInstance instanceWithNoLifecycleProcessors = new SimpleDiscoveryProperties.SimpleServiceInstance();
+		instanceWithNoLifecycleProcessors
+				.setServiceId("serviceWithNoLifecycleProcessors");
+		instanceWithNoLifecycleProcessors
+				.setUri(URI.create("http://localhost:" + this.port));
 		this.properties.getInstances().put("testservice",
 				Collections.singletonList(instance));
+		properties.getInstances().put("serviceWithNoLifecycleProcessors",
+				Collections.singletonList(instanceWithNoLifecycleProcessors));
 	}
 
 	@Test
@@ -103,9 +122,43 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
+	@Test
+	void exceptionNotThrownWhenFactoryReturnsNullLifecycleProcessorsMap() {
+		assertThatCode(() -> WebClient.builder()
+				.baseUrl("http://serviceWithNoLifecycleProcessors")
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
+				.block()).doesNotThrowAnyException();
+	}
+
+	@Test
+	void loadBalancerLifecycleCallbacksExecuted() {
+		final String callbackTestHint = "callbackTestHint";
+		loadBalancerProperties.setHint(callbackTestHint);
+		final String result = "callbackTestResult";
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
+				.filter(this.loadBalancerFunction).build().get().uri("/callback")
+				.exchange().block();
+
+		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
+				.getInstances("myservice", LoadBalancerLifecycle.class)
+				.get("loadBalancerLifecycle")).getStartLog().values();
+		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
+				.getInstances("myservice", LoadBalancerLifecycle.class)
+				.get("anotherLoadBalancerLifecycle")).getCompleteLog().values();
+		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(lifecycleLogRequests).extracting(
+				request -> ((DefaultRequestContext) request.getContext()).getHint())
+				.contains(callbackTestHint);
+		assertThat(anotherLifecycleLogRequests)
+				.extracting(completionContext -> ((ClientResponse) completionContext
+						.getClientResponse()).bodyToMono(String.class).block())
+				.contains(result);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@EnableDiscoveryClient
 	@EnableAutoConfiguration
-	@SpringBootConfiguration
+	@SpringBootConfiguration(proxyBeanMethods = false)
 	@RestController
 	static class Config {
 
@@ -114,10 +167,20 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 			return "Hello World";
 		}
 
+		@RequestMapping("/callback")
+		String callbackTestResult() {
+			return "callbackTestResult";
+		}
+
 		@Bean
 		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory(
 				DiscoveryClient discoveryClient) {
 			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
+
+				private final TestLoadBalancerLifecycle testLoadBalancerLifecycle = new TestLoadBalancerLifecycle();
+
+				private final TestLoadBalancerLifecycle anotherLoadBalancerLifecycle = new AnotherLoadBalancerLifecycle();
+
 				@Override
 				public ReactiveLoadBalancer<ServiceInstance> getInstance(
 						String serviceId) {
@@ -127,13 +190,21 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 
 				@Override
 				public <X> Map<String, X> getInstances(String name, Class<X> type) {
-					return new HashMap<>();
+					if (name.equals("serviceWithNoLifecycleProcessors")) {
+						return null;
+					}
+					Map lifecycleProcessors = new HashMap<>();
+					lifecycleProcessors.put("loadBalancerLifecycle",
+							testLoadBalancerLifecycle);
+					lifecycleProcessors.put("anotherLoadBalancerLifecycle",
+							anotherLoadBalancerLifecycle);
+					return lifecycleProcessors;
 				}
 
 				@Override
 				public <X> X getInstance(String name, Class<?> clazz,
 						Class<?>... generics) {
-					throw new UnsupportedOperationException("Not implemented.");
+					return null;
 				}
 			};
 		}
@@ -141,6 +212,48 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		@Bean
 		LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
+		}
+
+	}
+
+	protected static class TestLoadBalancerLifecycle
+			implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
+
+		ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
+
+		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+
+		@Override
+		public void onStart(Request<Object> request) {
+			startLog.put(getName() + UUID.randomUUID(), request);
+		}
+
+		@Override
+		public void onComplete(
+				CompletionContext<Object, ServiceInstance> completionContext) {
+			completeLog.put(getName() + UUID.randomUUID(), completionContext);
+		}
+
+		ConcurrentHashMap<String, Request<Object>> getStartLog() {
+			return startLog;
+		}
+
+		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
+			return completeLog;
+		}
+
+		protected String getName() {
+			return this.getClass().getSimpleName();
+		}
+
+	}
+
+	protected static class AnotherLoadBalancerLifecycle
+			extends TestLoadBalancerLifecycle {
+
+		@Override
+		protected String getName() {
+			return this.getClass().getSimpleName();
 		}
 
 	}

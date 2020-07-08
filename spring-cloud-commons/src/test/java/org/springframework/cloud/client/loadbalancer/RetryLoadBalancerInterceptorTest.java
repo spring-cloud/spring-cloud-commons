@@ -85,7 +85,7 @@ public class RetryLoadBalancerInterceptorTest {
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		this.client = null;
 		this.retryProperties = null;
 	}
