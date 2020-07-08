@@ -35,7 +35,7 @@ public class EmptyResponse implements Response<ServiceInstance> {
 
 	@Override
 	public void onComplete(CompletionContext completionContext) {
-		// TODO: implement
+		// do nothing: deprecated interface method
 	}
 
 }

@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.springframework.core.style.ToStringCreator;
+
 /**
  * A default implementation of {@link Request}.
  *
@@ -41,6 +43,13 @@ public class DefaultRequest<T> implements Request<T> {
 
 	public void setContext(T context) {
 		this.context = context;
+	}
+
+	@Override
+	public String toString() {
+		ToStringCreator to = new ToStringCreator(this);
+		to.append("context", context);
+		return to.toString();
 	}
 
 }
