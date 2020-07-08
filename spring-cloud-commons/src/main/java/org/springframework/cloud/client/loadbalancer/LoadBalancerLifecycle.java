@@ -21,8 +21,8 @@ package org.springframework.cloud.client.loadbalancer;
  */
 public interface LoadBalancerLifecycle<RC, RES, T> {
 
-	default boolean supports(Class<RC> reqClass, Class<RES> responseClass,
-			Class<T> serverTypeClass) {
+	default boolean supports(Class requestContextClass, Class responseClass,
+			Class serverTypeClass) {
 		return true;
 	}
 
