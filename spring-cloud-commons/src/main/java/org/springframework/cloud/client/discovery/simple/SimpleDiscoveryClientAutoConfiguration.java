@@ -44,23 +44,29 @@ import org.springframework.core.annotation.Order;
 public class SimpleDiscoveryClientAutoConfiguration
 		implements ApplicationListener<WebServerInitializedEvent> {
 
-	@Autowired(required = false)
 	private ServerProperties server;
 
-	@Value("${spring.application.name:application}")
-	private String serviceId;
-
-	@Autowired
 	private InetUtils inet;
 
 	private int port = 0;
 
 	private SimpleDiscoveryProperties simple = new SimpleDiscoveryProperties();
 
+	@Autowired(required = false)
+	public void setServer(ServerProperties server) {
+		this.server = server;
+	}
+
+	@Autowired
+	public void setInet(InetUtils inet) {
+		this.inet = inet;
+	}
+
 	@Bean
 	@ConditionalOnMissingBean
-	public SimpleDiscoveryProperties simpleDiscoveryProperties() {
-		simple.getLocal().setServiceId(this.serviceId);
+	public SimpleDiscoveryProperties simpleDiscoveryProperties(
+			@Value("${spring.application.name:application}") String serviceId) {
+		simple.getLocal().setServiceId(serviceId);
 		simple.getLocal()
 				.setUri(URI.create(
 						"http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname()
