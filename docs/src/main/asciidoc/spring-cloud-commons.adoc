@@ -949,7 +949,7 @@ NOTE:: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism ba
 [[spring-cloud-loadbalancer-hints]]
 === Spring Cloud LoadBalancer Hints
 
-Spring Cloud LoadBalancer allows you to set `String` hints that will be passed to the LoadBalancer within the `Request` object and that can later be used in `ReactiveLoadBalancer` implementations that can handle them.
+Spring Cloud LoadBalancer lets you set `String` hints that are passed to the LoadBalancer within the `Request` object and that can later be used in `ReactiveLoadBalancer` implementations that can handle them.
 
 You can set a default hint for all services by setting the value of the `spring.cloud.loadbalancer.hint.default` property. You can also set a specific value
 for any given service by setting the value of the `spring.cloud.loadbalancer.hint.[SERVICE_ID]` property, substituting `[SERVICE_ID]` with the correct ID of your service. If the hint is not set by the user, `default` is used.
@@ -1016,11 +1016,11 @@ public class MyConfiguration {
 [[loadbalancer-lifecycle]]
 === Spring Cloud LoadBalancer Lifecycle
 
-One type of beans that it may be useful to register using <<custom-loadbalancer-configuration,Custom LoadBalancer configuration>> is `LoadBalancerLifecycle`.
+One type of bean that it may be useful to register using <<custom-loadbalancer-configuration,Custom LoadBalancer configuration>> is `LoadBalancerLifecycle`.
 
-The `LoadBalancerLifecycle` beans provide callback `onStart(Request<RC> request)` and `onComplete(CompletionContext<RES, T> completionContext)` methods that you should implement to specify what actions should take place before and after load-balancing.
+The LoadBalancerLifecycle beans provide callback methods, named `onStart(Request<RC> request)` and `onComplete(CompletionContext<RES, T> completionContext)`, that you should implement to specify what actions should take place before and after load-balancing.
 
-`onStart(Request<RC> request)` takes as a `Request` object as a parameter. It contains data that will be used to select an appropriate instance, including the downstream client request and <<spring-cloud-loadbalancer-hints,hint>>. To the `onComplete(CompletionContext<RES, T> completionContext)` method, on the other hand, a `CompletionContext` object is provided that contains the LoadBalancer `Response`, including the selected service instance, the `Status` of the request executed against that service instance and, if available, the response returned to the downstream client and, if an exception has occurred, the corresponding `Throwable`.
+`onStart(Request<RC> request)` takes a `Request` object as a parameter. It contains data that is used to select an appropriate instance, including the downstream client request and <<spring-cloud-loadbalancer-hints,hint>>. On the other hand, a `CompletionContext` object is provided to the `onComplete(CompletionContext<RES, T> completionContext)` method. It contains the LoadBalancer `Response`, including the selected service instance, the `Status` of the request executed against that service instance and (if available) the response returned to the downstream client, and (if an exception has occurred) the corresponding `Throwable`.
 
 The `supports(Class requestContextClass, Class responseClass,
 Class serverTypeClass)` method can be used to determine whether the processor in question handles objects of provided types. If not overridden by the user, it returns `true`.

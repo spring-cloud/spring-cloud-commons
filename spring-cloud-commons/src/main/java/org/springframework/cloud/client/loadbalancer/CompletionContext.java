@@ -19,7 +19,7 @@ package org.springframework.cloud.client.loadbalancer;
 import org.springframework.core.style.ToStringCreator;
 
 /**
- * Allows to propagate data related to load-balanced call completion status.
+ * Allows propagation of data related to load-balanced call completion status.
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
