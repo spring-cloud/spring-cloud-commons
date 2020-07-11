@@ -28,6 +28,8 @@ public class DiscoveryClientHealthIndicatorProperties {
 
 	private boolean includeDescription = false;
 
+	private boolean useServicesQuery = false;
+
 	public boolean isEnabled() {
 		return this.enabled;
 	}
@@ -44,12 +46,21 @@ public class DiscoveryClientHealthIndicatorProperties {
 		this.includeDescription = includeDescription;
 	}
 
+	public boolean isUseServicesQuery() {
+		return useServicesQuery;
+	}
+
+	public void setUseServicesQuery(boolean useServicesQuery) {
+		this.useServicesQuery = useServicesQuery;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer(
 				"DiscoveryClientHealthIndicatorProperties{");
 		sb.append("enabled=").append(this.enabled);
 		sb.append(", includeDescription=").append(this.includeDescription);
+		sb.append(", useServicesQuery=").append(this.useServicesQuery);
 		sb.append('}');
 		return sb.toString();
 	}

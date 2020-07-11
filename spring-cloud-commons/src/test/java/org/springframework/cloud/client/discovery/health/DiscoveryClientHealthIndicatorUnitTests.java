@@ -14,57 +14,54 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.discovery.health.reactive;
+package org.springframework.cloud.client.discovery.health;
 
+import java.util.Collections;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
-import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
-import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicatorProperties;
-import org.springframework.core.Ordered;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 /**
- * @author Tim Ysewyn
+ * Unit tests for {@link DiscoveryClientHealthIndicator}.
+ *
  * @author Chris Bono
  */
 @ExtendWith(MockitoExtension.class)
-class ReactiveDiscoveryClientHealthIndicatorTests {
+class DiscoveryClientHealthIndicatorUnitTests {
 
 	@Mock
-	private ReactiveDiscoveryClient discoveryClient;
+	private ObjectProvider<DiscoveryClient> discoveryClientProvider;
+
+	@Mock
+	private DiscoveryClient discoveryClient;
 
 	@Mock
 	private DiscoveryClientHealthIndicatorProperties properties;
 
 	@InjectMocks
-	private ReactiveDiscoveryClientHealthIndicator indicator;
+	private DiscoveryClientHealthIndicator indicator;
 
-	@Test
-	public void shouldReturnCorrectOrder() {
-		assertThat(indicator.getOrder()).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
-		indicator.setOrder(0);
-		assertThat(indicator.getOrder()).isEqualTo(0);
-	}
-
-	@Test
-	public void shouldUseClientDescriptionForIndicatorName() {
-		when(discoveryClient.description()).thenReturn("Mocked Service Discovery Client");
-		assertThat(indicator.getName()).isEqualTo("Mocked Service Discovery Client");
+	@BeforeEach
+	public void prepareMocks() {
+		lenient().when(discoveryClientProvider.getIfAvailable())
+				.thenReturn(discoveryClient);
 	}
 
 	@Test
@@ -72,20 +69,21 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 		Health expectedHealth = Health.status(
 				new Status(Status.UNKNOWN.getCode(), "Discovery Client not initialized"))
 				.build();
-		Mono<Health> health = indicator.health();
-		StepVerifier.create(health).expectNext(expectedHealth).expectComplete().verify();
+		Health health = indicator.health();
+		assertThat(health).isEqualTo(expectedHealth);
 	}
 
 	@Test
 	public void shouldReturnUpStatusWhenNotUsingServicesQueryAndProbeSucceeds() {
 		when(properties.isUseServicesQuery()).thenReturn(false);
+		when(properties.isIncludeDescription()).thenReturn(false);
 		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), ""))
 				.build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
-		Mono<Health> health = indicator.health();
+		Health health = indicator.health();
 
-		StepVerifier.create(health).expectNext(expectedHealth).expectComplete().verify();
+		assertThat(health).isEqualTo(expectedHealth);
 	}
 
 	@Test
@@ -96,52 +94,53 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 		Health expectedHealth = Health.down(ex).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
-		Mono<Health> health = indicator.health();
+		Health health = indicator.health();
 
-		StepVerifier.create(health).expectNext(expectedHealth).expectComplete().verify();
+		assertThat(health).isEqualTo(expectedHealth);
 	}
 
 	@Test
 	public void shouldReturnUpStatusWhenUsingServicesQueryAndNoServicesReturned() {
 		when(properties.isUseServicesQuery()).thenReturn(true);
-		when(discoveryClient.getServices()).thenReturn(Flux.empty());
+		when(properties.isIncludeDescription()).thenReturn(false);
+		when(discoveryClient.getServices()).thenReturn(Collections.emptyList());
 		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), ""))
 				.withDetail("services", emptyList()).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
-		Mono<Health> health = indicator.health();
+		Health health = indicator.health();
 
-		StepVerifier.create(health).expectNext(expectedHealth).expectComplete().verify();
+		assertThat(health).isEqualTo(expectedHealth);
 	}
 
 	@Test
 	public void shouldReturnUpStatusWhenUsingServicesQueryAndServicesReturned() {
 		when(properties.isUseServicesQuery()).thenReturn(true);
 		when(properties.isIncludeDescription()).thenReturn(true);
-		when(discoveryClient.getServices()).thenReturn(Flux.just("service"));
 		when(discoveryClient.description()).thenReturn("Mocked Service Discovery Client");
+		when(discoveryClient.getServices()).thenReturn(singletonList("service"));
 		Health expectedHealth = Health
 				.status(new Status(Status.UP.getCode(),
 						"Mocked Service Discovery Client"))
 				.withDetail("services", singletonList("service")).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
-		Mono<Health> health = indicator.health();
+		Health health = indicator.health();
 
-		StepVerifier.create(health).expectNext(expectedHealth).expectComplete().verify();
+		assertThat(health).isEqualTo(expectedHealth);
 	}
 
 	@Test
 	public void shouldReturnDownStatusWhenUsingServicesQueryAndCallFails() {
 		when(properties.isUseServicesQuery()).thenReturn(true);
 		RuntimeException ex = new RuntimeException("something went wrong");
-		when(discoveryClient.getServices()).thenReturn(Flux.error(ex));
+		when(discoveryClient.getServices()).thenThrow(ex);
 		Health expectedHealth = Health.down(ex).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
-		Mono<Health> health = indicator.health();
+		Health health = indicator.health();
 
-		StepVerifier.create(health).expectNext(expectedHealth).expectComplete().verify();
+		assertThat(health).isEqualTo(expectedHealth);
 	}
 
 }

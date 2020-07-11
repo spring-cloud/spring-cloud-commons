@@ -8,7 +8,8 @@
 |spring.cloud.config.override-system-properties | true | Flag to indicate that the external properties should override system properties. Default true.
 |spring.cloud.discovery.client.composite-indicator.enabled | true | Enables discovery client composite health indicator.
 |spring.cloud.discovery.client.health-indicator.enabled | true | 
-|spring.cloud.discovery.client.health-indicator.include-description | false | 
+|spring.cloud.discovery.client.health-indicator.include-description | false |
+|spring.cloud.discovery.client.health-indicator.use-services-query | false | Whether the indicator should query for all registered services or use probe method.
 |spring.cloud.discovery.client.simple.instances |  | 
 |spring.cloud.discovery.client.simple.local.instance-id |  | The unique identifier or name for the service instance.
 |spring.cloud.discovery.client.simple.local.metadata |  | Metadata for the service instance. Can be used by discovery clients to modify their behaviour per instance, e.g. when load balancing.
