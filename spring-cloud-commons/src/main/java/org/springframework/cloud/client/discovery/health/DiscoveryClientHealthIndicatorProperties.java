@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.discovery.health;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
  * @author Spencer Gibb
@@ -28,6 +29,12 @@ public class DiscoveryClientHealthIndicatorProperties {
 
 	private boolean includeDescription = false;
 
+	/**
+	 * Whether or not the indicator should use {@link DiscoveryClient#getServices} to
+	 * check its health. When set to {@code false} the indicator instead uses the lighter
+	 * {@link DiscoveryClient#probe()}. This can be helpful in large deployments where the
+	 * number of services returned makes the operation unnecessarily heavy.
+	 */
 	private boolean useServicesQuery = true;
 
 	public boolean isEnabled() {
