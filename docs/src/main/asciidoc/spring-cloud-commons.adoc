@@ -1025,6 +1025,8 @@ The LoadBalancerLifecycle beans provide callback methods, named `onStart(Request
 The `supports(Class requestContextClass, Class responseClass,
 Class serverTypeClass)` method can be used to determine whether the processor in question handles objects of provided types. If not overridden by the user, it returns `true`.
 
+NOTE: In the preceding method calls, `RC` means `RequestContext` type, `RES` means client response type, and `T` means returned server type.
+
 == Spring Cloud Circuit Breaker
 
 include::spring-cloud-circuitbreaker.adoc[leveloffset=+1]
