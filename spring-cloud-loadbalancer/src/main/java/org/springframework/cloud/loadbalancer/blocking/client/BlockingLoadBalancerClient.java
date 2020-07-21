@@ -18,10 +18,7 @@ package org.springframework.cloud.loadbalancer.blocking.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import reactor.core.publisher.Mono;
 
@@ -33,6 +30,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.Request;
@@ -70,8 +68,11 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		String hint = getHint(serviceId);
 		DefaultRequest<DefaultRequestContext> lbRequest = new DefaultRequest<>(
 				new DefaultRequestContext(request, hint));
-		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = supportedLifecycleProcessors(
-				serviceId);
+		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
+				.getSupportedLifecycleProcessors(
+						loadBalancerClientFactory.getInstances(serviceId,
+								LoadBalancerLifecycle.class),
+						DefaultRequestContext.class, Object.class, ServiceInstance.class);
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
@@ -87,8 +88,11 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	public <T> T execute(String serviceId, ServiceInstance serviceInstance,
 			LoadBalancerRequest<T> request) throws IOException {
 		DefaultResponse defaultResponse = new DefaultResponse(serviceInstance);
-		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = supportedLifecycleProcessors(
-				serviceId);
+		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
+				.getSupportedLifecycleProcessors(
+						loadBalancerClientFactory.getInstances(serviceId,
+								LoadBalancerLifecycle.class),
+						DefaultRequestContext.class, Object.class, ServiceInstance.class);
 		try {
 			T response = request.apply(serviceInstance);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
@@ -134,18 +138,6 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 			return null;
 		}
 		return loadBalancerResponse.getServer();
-	}
-
-	private Set<LoadBalancerLifecycle> supportedLifecycleProcessors(String serviceId) {
-		Map<String, LoadBalancerLifecycle> lifecycleProcessors = loadBalancerClientFactory
-				.getInstances(serviceId, LoadBalancerLifecycle.class);
-		if (lifecycleProcessors == null) {
-			return new HashSet<>();
-		}
-		return lifecycleProcessors.values().stream()
-				.filter(lifecycle -> lifecycle.supports(DefaultRequestContext.class,
-						Object.class, ServiceInstance.class))
-				.collect(Collectors.toSet());
 	}
 
 	private String getHint(String serviceId) {

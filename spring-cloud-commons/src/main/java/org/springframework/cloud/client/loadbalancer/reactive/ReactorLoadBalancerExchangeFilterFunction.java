@@ -17,10 +17,7 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +29,7 @@ import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
@@ -80,8 +78,12 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			return Mono.just(
 					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
-		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = supportedLifecycleProcessors(
-				serviceId);
+		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
+				.getSupportedLifecycleProcessors(
+						loadBalancerFactory.getInstances(serviceId,
+								LoadBalancerLifecycle.class),
+						ClientRequestContext.class, ClientResponse.class,
+						ServiceInstance.class);
 		String hint = getHint(serviceId);
 		DefaultRequest<ClientRequestContext> lbRequest = new DefaultRequest<>(
 				new ClientRequestContext(clientRequest, hint));
@@ -145,18 +147,6 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 				.cookies(cookies -> cookies.addAll(request.cookies()))
 				.attributes(attributes -> attributes.putAll(request.attributes()))
 				.body(request.body()).build();
-	}
-
-	private Set<LoadBalancerLifecycle> supportedLifecycleProcessors(String serviceId) {
-		Map<String, LoadBalancerLifecycle> lifecycleProcessors = loadBalancerFactory
-				.getInstances(serviceId, LoadBalancerLifecycle.class);
-		if (lifecycleProcessors == null) {
-			return new HashSet<>();
-		}
-		return lifecycleProcessors.values().stream()
-				.filter(lifecycle -> lifecycle.supports(ClientRequestContext.class,
-						ClientResponse.class, ServiceInstance.class))
-				.collect(Collectors.toSet());
 	}
 
 	private String getHint(String serviceId) {
