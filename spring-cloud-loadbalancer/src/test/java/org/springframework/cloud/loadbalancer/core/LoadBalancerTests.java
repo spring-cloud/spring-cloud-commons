@@ -176,7 +176,7 @@ public class LoadBalancerTests {
 	}
 
 	@EnableAutoConfiguration
-	@SpringBootConfiguration
+	@SpringBootConfiguration(proxyBeanMethods = false)
 	@LoadBalancerClients({
 			@LoadBalancerClient(name = "myservice",
 					configuration = MyServiceConfig.class),

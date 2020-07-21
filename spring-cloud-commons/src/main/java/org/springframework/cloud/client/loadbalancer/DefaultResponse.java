@@ -17,9 +17,11 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.core.style.ToStringCreator;
 
 /**
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 public class DefaultResponse implements Response<ServiceInstance> {
 
@@ -41,7 +43,14 @@ public class DefaultResponse implements Response<ServiceInstance> {
 
 	@Override
 	public void onComplete(CompletionContext completionContext) {
-		// TODO: implement
+		// do nothing: deprecated interface method
+	}
+
+	@Override
+	public String toString() {
+		ToStringCreator to = new ToStringCreator(this);
+		to.append("serviceInstance", serviceInstance);
+		return to.toString();
 	}
 
 }

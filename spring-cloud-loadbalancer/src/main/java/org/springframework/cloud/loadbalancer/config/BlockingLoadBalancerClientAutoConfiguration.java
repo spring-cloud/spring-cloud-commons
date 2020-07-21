@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -49,8 +50,9 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	@ConditionalOnMissingBean
 	public LoadBalancerClient blockingLoadBalancerClient(
-			LoadBalancerClientFactory loadBalancerClientFactory) {
-		return new BlockingLoadBalancerClient(loadBalancerClientFactory);
+			LoadBalancerClientFactory loadBalancerClientFactory,
+			LoadBalancerProperties properties) {
+		return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
 	}
 
 }

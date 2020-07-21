@@ -106,13 +106,35 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 		@Bean
 		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory() {
-			return serviceId -> new TestReactiveLoadBalancer();
+			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
+				@Override
+				public ReactiveLoadBalancer<ServiceInstance> getInstance(
+						String serviceId) {
+					return new TestReactiveLoadBalancer();
+				}
+
+				@Override
+				public <X> Map<String, X> getInstances(String name, Class<X> type) {
+					throw new UnsupportedOperationException("Not implemented");
+				}
+
+				@Override
+				public <X> X getInstance(String name, Class<?> clazz,
+						Class<?>... generics) {
+					throw new UnsupportedOperationException("Not implemented.");
+				}
+			};
 		}
 
 		@Bean
 		LoadBalancedRetryFactory loadBalancedRetryFactory() {
 			return new LoadBalancedRetryFactory() {
 			};
+		}
+
+		@Bean
+		LoadBalancerProperties loadBalancerProperties() {
+			return new LoadBalancerProperties();
 		}
 
 	}

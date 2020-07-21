@@ -16,26 +16,24 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.web.reactive.function.client.ClientRequest;
 
 /**
- * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
-public class EmptyResponse implements Response<ServiceInstance> {
+public class ClientRequestContext extends DefaultRequestContext {
 
-	@Override
-	public boolean hasServer() {
-		return false;
+	public ClientRequestContext(ClientRequest clientRequest) {
+		this(clientRequest, "default");
 	}
 
-	@Override
-	public ServiceInstance getServer() {
-		return null;
+	public ClientRequestContext(ClientRequest clientRequest, String hint) {
+		super(clientRequest, hint);
 	}
 
-	@Override
-	public void onComplete(CompletionContext completionContext) {
-		// do nothing: deprecated interface method
+	public ClientRequest getClientRequest() {
+		return (ClientRequest) super.getClientRequest();
 	}
 
 }

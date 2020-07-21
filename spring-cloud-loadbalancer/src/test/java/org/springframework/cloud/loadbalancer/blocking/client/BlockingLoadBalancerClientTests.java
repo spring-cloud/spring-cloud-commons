@@ -18,35 +18,42 @@ package org.springframework.cloud.loadbalancer.blocking.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
+import org.springframework.cloud.client.loadbalancer.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.fail;
 
 /**
@@ -55,7 +62,6 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Olga Maciaszek-Sharma
  */
 @SpringBootTest
-@ExtendWith(SpringExtension.class)
 class BlockingLoadBalancerClientTests {
 
 	@Autowired
@@ -63,6 +69,12 @@ class BlockingLoadBalancerClientTests {
 
 	@Autowired
 	private SimpleDiscoveryProperties properties;
+
+	@Autowired
+	ReactiveLoadBalancer.Factory<ServiceInstance> factory;
+
+	@Autowired
+	LoadBalancerProperties loadBalancerProperties;
 
 	@BeforeEach
 	void setUp() {
@@ -141,16 +153,62 @@ class BlockingLoadBalancerClientTests {
 		}
 	}
 
+	@Test
+	void exceptionNotThrownWhenFactoryReturnsNullLifecycleProcessorsMap() {
+		assertThatCode(
+				() -> loadBalancerClient.execute("serviceWithNoLifecycleProcessors",
+						(LoadBalancerRequest<Object>) instance -> {
+							assertThat(instance.getHost()).isEqualTo("test.example");
+							return "result";
+						})).doesNotThrowAnyException();
+	}
+
+	@Test
+	void loadBalancerLifecycleCallbacksExecuted() throws IOException {
+		String callbackTestHint = "callbackTestHint";
+		loadBalancerProperties.getHint().put("myservice", "callbackTestHint");
+		final String result = "callbackTestResult";
+		Object actualResult = loadBalancerClient.execute("myservice",
+				(LoadBalancerRequest<Object>) instance -> {
+					assertThat(instance.getHost()).isEqualTo("test.example");
+					return result;
+				});
+
+		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
+				.getInstances("myservice", LoadBalancerLifecycle.class)
+				.get("loadBalancerLifecycle")).getStartLog().values();
+		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
+				.getInstances("myservice", LoadBalancerLifecycle.class)
+				.get("anotherLoadBalancerLifecycle")).getCompleteLog().values();
+		assertThat(actualResult).isEqualTo(result);
+		assertThat(lifecycleLogRequests).extracting(
+				request -> ((DefaultRequestContext) request.getContext()).getHint())
+				.contains(callbackTestHint);
+		assertThat(anotherLifecycleLogRequests)
+				.extracting(CompletionContext::getClientResponse).contains(result);
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
-	@SpringBootConfiguration
 	@LoadBalancerClients({
-			@org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient(
-					name = "myservice", configuration = MyServiceConfig.class),
-			@org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient(
-					name = "unknownservice",
-					configuration = UnknownServiceConfig.class) })
+			@LoadBalancerClient(name = "myservice",
+					configuration = MyServiceConfig.class),
+			@LoadBalancerClient(name = "unknownservice",
+					configuration = UnknownServiceConfig.class),
+			@LoadBalancerClient(name = "serviceWithNoLifecycleProcessors",
+					configuration = NoLifecycleProcessorsConfig.class) })
 	protected static class Config {
+
+	}
+
+	protected static class NoLifecycleProcessorsConfig {
+
+		@Bean
+		ReactorLoadBalancer<ServiceInstance> reactiveLoadBalancer(
+				DiscoveryClient discoveryClient) {
+			return new DiscoveryClientBasedReactiveLoadBalancer("myservice",
+					discoveryClient);
+		}
 
 	}
 
@@ -161,6 +219,16 @@ class BlockingLoadBalancerClientTests {
 				DiscoveryClient discoveryClient) {
 			return new DiscoveryClientBasedReactiveLoadBalancer("myservice",
 					discoveryClient);
+		}
+
+		@Bean
+		LoadBalancerLifecycle<Object, Object, ServiceInstance> loadBalancerLifecycle() {
+			return new TestLoadBalancerLifecycle();
+		}
+
+		@Bean
+		LoadBalancerLifecycle<Object, Object, ServiceInstance> anotherLoadBalancerLifecycle() {
+			return new AnotherLoadBalancerLifecycle();
 		}
 
 	}
@@ -176,8 +244,51 @@ class BlockingLoadBalancerClientTests {
 
 	}
 
+	protected static class TestLoadBalancerLifecycle
+			implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
+
+		final ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
+
+		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+
+		@Override
+		public void onStart(Request<Object> request) {
+			startLog.put(getName() + UUID.randomUUID(), request);
+		}
+
+		@Override
+		public void onComplete(
+				CompletionContext<Object, ServiceInstance> completionContext) {
+			completeLog.put(getName() + UUID.randomUUID(), completionContext);
+		}
+
+		ConcurrentHashMap<String, Request<Object>> getStartLog() {
+			return startLog;
+		}
+
+		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
+			return completeLog;
+		}
+
+		protected String getName() {
+			return this.getClass().getSimpleName();
+		}
+
+	}
+
+	protected static class AnotherLoadBalancerLifecycle
+			extends TestLoadBalancerLifecycle {
+
+		@Override
+		protected String getName() {
+			return this.getClass().getSimpleName();
+		}
+
+	}
+
 }
 
+@SuppressWarnings("rawtypes")
 class DiscoveryClientBasedReactiveLoadBalancer
 		implements ReactorServiceInstanceLoadBalancer {
 

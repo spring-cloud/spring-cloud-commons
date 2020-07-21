@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
@@ -29,17 +28,22 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer.REQUEST;
 
 /**
  * @author Ryan Baxter
  * @author Tim Ysewyn
+ * @author Olga Maciaszek-Sharma
  */
 public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
@@ -98,26 +102,26 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 			return new NoopLoadBalancerClient();
 		}
 
+		@Bean
+		LoadBalancerProperties loadBalancerProperties() {
+			return new LoadBalancerProperties();
+		}
+
+		@Bean
+		ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory() {
+			return new TestLoadBalancerFactory();
+		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
+	@Import(OneRestTemplate.class)
 	protected static class TwoRestTemplates {
 
 		@Primary
 		@Bean
 		RestTemplate restTemplate() {
 			return new RestTemplate();
-		}
-
-		@LoadBalanced
-		@Bean
-		RestTemplate loadBalancedRestTemplate() {
-			return new RestTemplate();
-		}
-
-		@Bean
-		LoadBalancerClient loadBalancerClient() {
-			return new NoopLoadBalancerClient();
 		}
 
 		@Configuration(proxyBeanMethods = false)
@@ -140,6 +144,11 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public ServiceInstance choose(String serviceId) {
+			return choose(serviceId, REQUEST);
+		}
+
+		@Override
+		public <T> ServiceInstance choose(String serviceId, Request<T> request) {
 			return new DefaultServiceInstance(serviceId, serviceId, serviceId,
 					this.random.nextInt(40000), false);
 		}
@@ -147,7 +156,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		@Override
 		public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
 			try {
-				return request.apply(choose(serviceId));
+				return request.apply(choose(serviceId, REQUEST));
 			}
 			catch (Exception e) {
 				throw new RuntimeException(e);
@@ -156,9 +165,9 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-				LoadBalancerRequest<T> request) throws IOException {
+				LoadBalancerRequest<T> request) {
 			try {
-				return request.apply(choose(serviceId));
+				return request.apply(choose(serviceId, REQUEST));
 			}
 			catch (Exception e) {
 				throw new RuntimeException(e);
@@ -168,6 +177,26 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		@Override
 		public URI reconstructURI(ServiceInstance instance, URI original) {
 			return DefaultServiceInstance.getUri(instance);
+		}
+
+	}
+
+	private static class TestLoadBalancerFactory
+			implements ReactiveLoadBalancer.Factory<ServiceInstance> {
+
+		@Override
+		public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
+			throw new UnsupportedOperationException("Not implemented.");
+		}
+
+		@Override
+		public Object getInstance(String name, Class clazz, Class[] generics) {
+			throw new UnsupportedOperationException("Not implemented.");
+		}
+
+		@Override
+		public Map getInstances(String name, Class type) {
+			throw new UnsupportedOperationException("Not implemented.");
 		}
 
 	}

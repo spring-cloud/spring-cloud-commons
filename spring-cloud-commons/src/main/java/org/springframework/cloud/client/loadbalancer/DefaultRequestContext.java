@@ -16,32 +16,43 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.springframework.core.style.ToStringCreator;
+
 /**
  * Contains information relevant to the request.
  *
  * @author Olga Maciaszek-Sharma
  */
-public class DefaultRequestContext {
+public class DefaultRequestContext extends HintRequestContext {
 
 	/**
-	 * A {@link String} value of hint that can be used to choose the correct service
-	 * instance.
+	 * The request to be executed against the service instance selected by the
+	 * LoadBalancer.
 	 */
-	private String hint = "default";
+	private final Object clientRequest;
 
 	public DefaultRequestContext() {
+		clientRequest = null;
 	}
 
-	public DefaultRequestContext(String hint) {
-		this.hint = hint;
+	public DefaultRequestContext(Object clientRequest) {
+		this.clientRequest = clientRequest;
 	}
 
-	public String getHint() {
-		return hint;
+	public DefaultRequestContext(Object clientRequest, String hint) {
+		super(hint);
+		this.clientRequest = clientRequest;
 	}
 
-	public void setHint(String hint) {
-		this.hint = hint;
+	public Object getClientRequest() {
+		return clientRequest;
+	}
+
+	@Override
+	public String toString() {
+		ToStringCreator to = new ToStringCreator(this);
+		to.append("clientRequest", clientRequest);
+		return to.toString();
 	}
 
 }

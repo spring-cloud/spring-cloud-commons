@@ -36,12 +36,27 @@ public class LoadBalancerProperties {
 	 */
 	private HealthCheck healthCheck = new HealthCheck();
 
+	/**
+	 * Allows setting the value of <code>hint</code> that is passed on to the LoadBalancer
+	 * request and can subsequently be used in {@link ReactiveLoadBalancer}
+	 * implementations.
+	 */
+	private Map<String, String> hint = new LinkedCaseInsensitiveMap<>();
+
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
 	}
 
 	public void setHealthCheck(HealthCheck healthCheck) {
 		this.healthCheck = healthCheck;
+	}
+
+	public Map<String, String> getHint() {
+		return hint;
+	}
+
+	public void setHint(Map<String, String> hint) {
+		this.hint = hint;
 	}
 
 	public static class HealthCheck {

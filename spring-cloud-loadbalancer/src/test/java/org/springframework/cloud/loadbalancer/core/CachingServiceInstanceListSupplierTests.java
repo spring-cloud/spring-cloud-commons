@@ -110,8 +110,9 @@ class CachingServiceInstanceListSupplierTests {
 
 		@Bean
 		BlockingLoadBalancerClient blockingLoadBalancerClient(
-				LoadBalancerClientFactory loadBalancerClientFactory) {
-			return new BlockingLoadBalancerClient(loadBalancerClientFactory);
+				LoadBalancerClientFactory loadBalancerClientFactory,
+				LoadBalancerProperties properties) {
+			return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
 		}
 
 		@Bean

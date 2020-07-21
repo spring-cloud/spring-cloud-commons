@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
@@ -38,10 +37,12 @@ import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.web.client.AsyncRestTemplate;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer.REQUEST;
 
 /**
  * @author Rob Worsnop
  * @author Tim Ysewyn
+ * @author Olga Maciaszek-Sharma
  */
 public class AsyncLoadBalancerAutoConfigurationTests {
 
@@ -154,6 +155,11 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public ServiceInstance choose(String serviceId) {
+			return choose(serviceId, REQUEST);
+		}
+
+		@Override
+		public <T> ServiceInstance choose(String serviceId, Request<T> request) {
 			return new DefaultServiceInstance(serviceId, serviceId, serviceId,
 					this.random.nextInt(40000), false);
 		}
@@ -161,7 +167,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 		@Override
 		public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
 			try {
-				return request.apply(choose(serviceId));
+				return request.apply(choose(serviceId, REQUEST));
 			}
 			catch (Exception e) {
 				throw new RuntimeException(e);
@@ -170,9 +176,9 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-				LoadBalancerRequest<T> request) throws IOException {
+				LoadBalancerRequest<T> request) {
 			try {
-				return request.apply(choose(serviceId));
+				return request.apply(choose(serviceId, REQUEST));
 			}
 			catch (Exception e) {
 				throw new RuntimeException(e);

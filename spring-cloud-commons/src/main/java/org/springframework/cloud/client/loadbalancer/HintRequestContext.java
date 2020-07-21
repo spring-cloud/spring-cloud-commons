@@ -16,26 +16,41 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.core.style.ToStringCreator;
 
 /**
- * @author Spencer Gibb
+ * Allows propagating hints to the LoadBalancer.
+ *
+ * @author Olga Maciaszek-Sharma
  */
-public class EmptyResponse implements Response<ServiceInstance> {
+public class HintRequestContext {
 
-	@Override
-	public boolean hasServer() {
-		return false;
+	/**
+	 * A {@link String} value of hint that can be used to choose the correct service
+	 * instance.
+	 */
+	private String hint = "default";
+
+	public HintRequestContext() {
+	}
+
+	public HintRequestContext(String hint) {
+		this.hint = hint;
+	}
+
+	public String getHint() {
+		return hint;
+	}
+
+	public void setHint(String hint) {
+		this.hint = hint;
 	}
 
 	@Override
-	public ServiceInstance getServer() {
-		return null;
-	}
-
-	@Override
-	public void onComplete(CompletionContext completionContext) {
-		// do nothing: deprecated interface method
+	public String toString() {
+		ToStringCreator to = new ToStringCreator(this);
+		to.append("hint", hint);
+		return to.toString();
 	}
 
 }

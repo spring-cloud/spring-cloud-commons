@@ -19,22 +19,46 @@ package org.springframework.cloud.client.loadbalancer;
 import org.springframework.core.style.ToStringCreator;
 
 /**
+ * Allows propagation of data related to load-balanced call completion status.
+ *
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
-// TODO: add metrics
-public class CompletionContext {
+public class CompletionContext<RES, T> {
 
 	private final Status status;
 
 	private final Throwable throwable;
 
+	private final Response<T> loadBalancerResponse;
+
+	private final RES clientResponse;
+
 	public CompletionContext(Status status) {
-		this(status, null);
+		this(status, null, null, null);
 	}
 
-	public CompletionContext(Status status, Throwable throwable) {
+	public CompletionContext(Status status, Response<T> response) {
+		this(status, null, response, null);
+	}
+
+	public CompletionContext(Status status, Throwable throwable,
+			Response<T> loadBalancerResponse) {
+		this(status, throwable, loadBalancerResponse, null);
+	}
+
+	public CompletionContext(Status status, Response<T> loadBalancerResponse,
+			RES clientResponse) {
+		this(status, null, loadBalancerResponse, clientResponse);
+	}
+
+	public CompletionContext(Status status, Throwable throwable,
+			Response<T> loadBalancerResponse, RES clientResponse) {
 		this.status = status;
 		this.throwable = throwable;
+		this.loadBalancerResponse = loadBalancerResponse;
+		this.clientResponse = clientResponse;
 	}
 
 	public Status status() {
@@ -45,11 +69,21 @@ public class CompletionContext {
 		return this.throwable;
 	}
 
+	public Response<T> getLoadBalancerResponse() {
+		return loadBalancerResponse;
+	}
+
+	public RES getClientResponse() {
+		return clientResponse;
+	}
+
 	@Override
 	public String toString() {
 		ToStringCreator to = new ToStringCreator(this);
 		to.append("status", this.status);
 		to.append("throwable", this.throwable);
+		to.append("loadBalancerResponse", loadBalancerResponse);
+		to.append("clientResponse", clientResponse);
 		return to.toString();
 	}
 

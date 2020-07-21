@@ -28,6 +28,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -120,17 +123,21 @@ public class LoadBalancerAutoConfiguration {
 	 */
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(RetryTemplate.class)
+	@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 	public static class RetryInterceptorAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
 		public RetryLoadBalancerInterceptor loadBalancerInterceptor(
 				LoadBalancerClient loadBalancerClient,
-				LoadBalancerRetryProperties properties,
+				LoadBalancerRetryProperties retryProperties,
 				LoadBalancerRequestFactory requestFactory,
-				LoadBalancedRetryFactory loadBalancedRetryFactory) {
-			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties,
-					requestFactory, loadBalancedRetryFactory);
+				LoadBalancedRetryFactory loadBalancedRetryFactory,
+				LoadBalancerProperties properties,
+				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+			return new RetryLoadBalancerInterceptor(loadBalancerClient, retryProperties,
+					requestFactory, loadBalancedRetryFactory, properties,
+					loadBalancerFactory);
 		}
 
 		@Bean
