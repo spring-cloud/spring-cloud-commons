@@ -247,9 +247,9 @@ class BlockingLoadBalancerClientTests {
 	protected static class TestLoadBalancerLifecycle
 			implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
-		ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
+		final ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
 		public void onStart(Request<Object> request) {
@@ -288,6 +288,7 @@ class BlockingLoadBalancerClientTests {
 
 }
 
+@SuppressWarnings("rawtypes")
 class DiscoveryClientBasedReactiveLoadBalancer
 		implements ReactorServiceInstanceLoadBalancer {
 
