@@ -22,7 +22,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * Utility class containing methods that allow to filter out supported {@link LoadBalancerLifecycle} beans.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0
  */
 public final class LoadBalancerLifecycleValidator {
 
