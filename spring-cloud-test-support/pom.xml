@@ -15,7 +15,7 @@
 	<name>spring-cloud-test-support</name>
 	<description>Spring Cloud Test Support</description>
 	<properties>
-		<maven.version>3.5.4</maven.version>
+		<maven.version>3.6.3</maven.version>
 		<maven-resolver.version>1.1.1</maven-resolver.version>
 	</properties>
 	<dependencies>
