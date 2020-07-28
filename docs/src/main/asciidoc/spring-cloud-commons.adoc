@@ -257,14 +257,22 @@ This behavior can be disabled by setting `autoRegister=false` in `@EnableDiscove
 NOTE: `@EnableDiscoveryClient` is no longer required.
 You can put a `DiscoveryClient` implementation on the classpath to cause the Spring Boot application to register with the service discovery server.
 
-==== Health Indicator
+==== Health Indicators
 
-Commons creates a Spring Boot `HealthIndicator` that `DiscoveryClient` implementations can participate in by implementing `DiscoveryHealthIndicator`.
-To disable the composite `HealthIndicator`, set `spring.cloud.discovery.client.composite-indicator.enabled=false`.
-A generic `HealthIndicator` based on `DiscoveryClient` is auto-configured (`DiscoveryClientHealthIndicator`).
-To disable it, set `spring.cloud.discovery.client.health-indicator.enabled=false`.
-To disable the description field of the `DiscoveryClientHealthIndicator`, set `spring.cloud.discovery.client.health-indicator.include-description=false`.
+Commons auto-configures the following Spring Boot health indicators.
+
+===== DiscoveryClientHealthIndicator
+This health indicator is based on the currently registered `DiscoveryClient` implementation.
+
+* To disable entirely, set `spring.cloud.discovery.client.health-indicator.enabled=false`.
+* To disable the description field, set `spring.cloud.discovery.client.health-indicator.include-description=false`.
 Otherwise, it can bubble up as the `description` of the rolled up `HealthIndicator`.
+* To perform a lightweight check using the client's `probe` method, set `spring.cloud.discovery.client.health-indicator.use-services-query=false`.
+Otherwise, the client's `getServices` method will be used.
+
+===== DiscoveryCompositeHealthContributor
+This composite health indicator is based on all registered `DiscoveryHealthIndicator` beans. To disable,
+set `spring.cloud.discovery.client.composite-indicator.enabled=false`.
 
 ==== Ordering `DiscoveryClient` instances
 `DiscoveryClient` interface extends `Ordered`. This is useful when using multiple discovery
