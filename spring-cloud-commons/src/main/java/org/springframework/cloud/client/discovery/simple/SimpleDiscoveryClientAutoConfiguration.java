@@ -69,7 +69,7 @@ public class SimpleDiscoveryClientAutoConfiguration
 		simple.getLocal().setServiceId(serviceId);
 		simple.getLocal()
 				.setUri(URI.create(
-						"http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname()
+						"http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname().replace('\\','/')
 								+ ":" + findPort()));
 		return simple;
 	}
@@ -97,7 +97,7 @@ public class SimpleDiscoveryClientAutoConfiguration
 		if (this.port > 0) {
 			simple.getLocal()
 					.setUri(URI.create("http://"
-							+ this.inet.findFirstNonLoopbackHostInfo().getHostname() + ":"
+							+ this.inet.findFirstNonLoopbackHostInfo().getHostname().replace('\\','/') + ":"
 							+ this.port));
 		}
 	}
