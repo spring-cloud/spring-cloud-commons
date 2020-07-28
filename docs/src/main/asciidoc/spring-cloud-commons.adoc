@@ -267,8 +267,9 @@ This health indicator is based on the currently registered `DiscoveryClient` imp
 * To disable entirely, set `spring.cloud.discovery.client.health-indicator.enabled=false`.
 * To disable the description field, set `spring.cloud.discovery.client.health-indicator.include-description=false`.
 Otherwise, it can bubble up as the `description` of the rolled up `HealthIndicator`.
-* To perform a lightweight check using the client's `probe` method, set `spring.cloud.discovery.client.health-indicator.use-services-query=false`.
-Otherwise, the client's `getServices` method will be used.
+* To disable service retrieval, set `spring.cloud.discovery.client.health-indicator.use-services-query=false`.
+By default, the indicator invokes the client's `getServices` method. In deployments with many registered services it may too
+costly to retrieve all services during every check. This will skip the service retrieval and instead use the client's `probe` method.
 
 ===== DiscoveryCompositeHealthContributor
 This composite health indicator is based on all registered `DiscoveryHealthIndicator` beans. To disable,
