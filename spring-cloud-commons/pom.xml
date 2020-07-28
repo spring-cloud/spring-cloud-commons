@@ -67,7 +67,7 @@
 
 	<properties>
 		<okhttp3.version>3.6.0</okhttp3.version>
-		<apachehttpclient.version>4.5.4</apachehttpclient.version>
+		<apachehttpclient.version>4.5.12</apachehttpclient.version>
 		<evictor.version>1.0.0</evictor.version>
 	</properties>
 	<dependencies>
