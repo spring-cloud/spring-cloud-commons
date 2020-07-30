@@ -16,6 +16,7 @@
 	<description>Spring Cloud Commons Dependencies</description>
 	<properties>
 		<spring-security-rsa.version>1.0.9.RELEASE</spring-security-rsa.version>
+		<bouncycastle.version>1.64</bouncycastle.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -58,6 +59,11 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-loadbalancer</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcpkix-jdk15on</artifactId>
+				<version>${bouncycastle.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
