@@ -35,10 +35,12 @@ public class ConfigDataAccessor {
 	 */
 	public ConfigDataAccessor(ConfigurableEnvironment environment,
 			ResourceLoader resourceLoader, String[] additionalProfiles) {
-		configDataEnvironment = new ConfigDataEnvironment(Supplier::get, environment, resourceLoader, Arrays.asList(additionalProfiles));
+		configDataEnvironment = new ConfigDataEnvironment(Supplier::get, environment,
+				resourceLoader, Arrays.asList(additionalProfiles));
 	}
 
 	public void applyToEnvironment() {
 		configDataEnvironment.processAndApply();
 	}
+
 }
