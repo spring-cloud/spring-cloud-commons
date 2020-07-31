@@ -29,7 +29,6 @@ public class ConfigDataAccessor {
 
 	/**
 	 * Create a new {@link ConfigDataEnvironment} instance.
-	 * @param logFactory the deferred log factory
 	 * @param environment the Spring {@link Environment}.
 	 * @param resourceLoader {@link ResourceLoader} to load resource locations
 	 * @param additionalProfiles any additional profiles to activate
