@@ -23,12 +23,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.boot.context.config.ConfigDataEnvironment;
+import org.springframework.boot.context.config.ConfigDataAccessor;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -107,11 +106,10 @@ public class ContextRefresher {
 		StandardEnvironment environment = copyEnvironment(this.context.getEnvironment());
 		String[] activeProfiles = this.context.getEnvironment().getActiveProfiles();
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		ConfigDataEnvironment configDataEnvironment = new ConfigDataEnvironment(
-				Supplier::get, environment, resourceLoader,
-				Arrays.asList(activeProfiles));
+		ConfigDataAccessor configDataAccessor = new ConfigDataAccessor(environment,
+				resourceLoader, activeProfiles);
 
-		configDataEnvironment.processAndApply();
+		configDataAccessor.applyToEnvironment();
 
 		if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
 			environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
