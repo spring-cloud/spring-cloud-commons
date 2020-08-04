@@ -65,7 +65,7 @@ public class ContextRefresherTests {
 			List<String> names = names(context.getEnvironment().getPropertySources());
 			then(names).doesNotContain(
 					"applicationConfig: [classpath:/bootstrap-refresh.properties]");
-			ContextRefresher refresher = new ContextRefresher(context, this.scope);
+			LegacyContextRefresher refresher = new LegacyContextRefresher(context, this.scope);
 			refresher.refresh();
 			names = names(context.getEnvironment().getPropertySources());
 			then(names).contains(
@@ -82,13 +82,14 @@ public class ContextRefresherTests {
 		// Use spring.cloud.bootstrap.name to switch off the defaults (which would pick up
 		// a bootstrapProperties immediately
 		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
+				"--spring.config.use-legacy-processing=true",
 				"--spring.main.web-application-type=none", "--debug=false",
 				"--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh")) {
 			List<String> names = names(context.getEnvironment().getPropertySources());
 			System.err.println("***** " + context.getEnvironment().getPropertySources());
 			then(names).doesNotContain("bootstrapProperties");
-			ContextRefresher refresher = new ContextRefresher(context, this.scope);
+			ContextRefresher refresher = new LegacyContextRefresher(context, this.scope);
 			TestPropertyValues.of("spring.cloud.bootstrap.sources: "
 					+ "org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
 					.applyTo(context.getEnvironment(), Type.MAP, "defaultProperties");
@@ -106,9 +107,10 @@ public class ContextRefresherTests {
 		// a bootstrapProperties immediately
 		try (ConfigurableApplicationContext context = SpringApplication.run(
 				ContextRefresherTests.class, "--spring.main.web-application-type=none",
+				"--spring.config.use-legacy-processing=true",
 				"--debug=false", "--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh")) {
-			ContextRefresher refresher = new ContextRefresher(context, this.scope);
+			LegacyContextRefresher refresher = new LegacyContextRefresher(context, this.scope);
 			TestPropertyValues.of("spring.cloud.bootstrap.sources: "
 					+ "org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
 					.applyTo(context);
@@ -131,11 +133,12 @@ public class ContextRefresherTests {
 				.get(getClass().getClassLoader());
 		then(system.getCount()).isEqualTo(0);
 		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
+				"--spring.config.use-legacy-processing=true",
 				"--spring.main.web-application-type=none", "--debug=false",
 				"--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh")) {
 			then(system.getCount()).isEqualTo(4);
-			ContextRefresher refresher = new ContextRefresher(context, this.scope);
+			ContextRefresher refresher = new LegacyContextRefresher(context, this.scope);
 			refresher.refresh();
 			then(system.getCount()).isEqualTo(4);
 		}
@@ -148,10 +151,11 @@ public class ContextRefresherTests {
 
 		try (ConfigurableApplicationContext context = SpringApplication.run(
 				ContextRefresherTests.class, "--spring.main.web-application-type=none",
+				"--spring.config.use-legacy-processing=true",
 				"--debug=false", "--spring.main.bannerMode=OFF",
 				"--spring.cloud.bootstrap.name=refresh", "--test.bootstrap.foo=bar")) {
 			context.getEnvironment().setActiveProfiles("refresh");
-			ContextRefresher refresher = new ContextRefresher(context, this.scope);
+			ContextRefresher refresher = new LegacyContextRefresher(context, this.scope);
 			refresher.refresh();
 			then(TestBootstrapConfiguration.fooSightings).containsExactly("bar", "bar");
 		}

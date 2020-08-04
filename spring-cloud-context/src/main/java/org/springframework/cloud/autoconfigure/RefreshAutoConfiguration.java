@@ -39,6 +39,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.cloud.context.refresh.ContextRefresher;
+import org.springframework.cloud.context.refresh.LegacyContextRefresher;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.logging.LoggingRebinder;
@@ -96,9 +97,9 @@ public class RefreshAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public ContextRefresher contextRefresher(ConfigurableApplicationContext context,
+	public LegacyContextRefresher contextRefresher(ConfigurableApplicationContext context,
 			RefreshScope scope) {
-		return new ContextRefresher(context, scope);
+		return new LegacyContextRefresher(context, scope);
 	}
 
 	@Bean
