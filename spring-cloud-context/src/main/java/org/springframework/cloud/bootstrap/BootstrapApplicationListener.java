@@ -94,6 +94,7 @@ public class BootstrapApplicationListener
 	@Override
 	public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
 		ConfigurableEnvironment environment = event.getEnvironment();
+		// TODO: disable bootstrap by default
 		boolean bootstrapEnabled = environment
 				.getProperty("spring.cloud.bootstrap.enabled", Boolean.class, true);
 		boolean legacyConfig = environment
