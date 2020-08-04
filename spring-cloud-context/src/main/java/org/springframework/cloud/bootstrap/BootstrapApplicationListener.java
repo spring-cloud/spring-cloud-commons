@@ -96,7 +96,7 @@ public class BootstrapApplicationListener
 		ConfigurableEnvironment environment = event.getEnvironment();
 		// TODO: disable bootstrap by default
 		boolean bootstrapEnabled = environment
-				.getProperty("spring.cloud.bootstrap.enabled", Boolean.class, true);
+				.getProperty("spring.cloud.bootstrap.enabled", Boolean.class, false);
 		boolean legacyConfig = environment
 				.getProperty("spring.config.use-legacy-processing", Boolean.class, false);
 		if (!bootstrapEnabled && !legacyConfig) {
