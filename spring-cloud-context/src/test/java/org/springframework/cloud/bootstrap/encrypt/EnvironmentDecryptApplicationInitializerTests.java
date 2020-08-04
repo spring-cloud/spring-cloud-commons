@@ -187,6 +187,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 				Collections.singletonMap("key", "{cipher}value2"));
 
 		CompositePropertySource cps = mock(CompositePropertySource.class);
+		when(cps.getName()).thenReturn("mock-composite-source");
 		when(cps.getPropertyNames()).thenReturn(devProfile.getPropertyNames());
 		when(cps.getPropertySources())
 				.thenReturn(Arrays.asList(devProfile, defaultProfile));
