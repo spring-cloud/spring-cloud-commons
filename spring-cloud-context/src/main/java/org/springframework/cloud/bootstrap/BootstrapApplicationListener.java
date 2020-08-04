@@ -94,8 +94,11 @@ public class BootstrapApplicationListener
 	@Override
 	public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
 		ConfigurableEnvironment environment = event.getEnvironment();
-		if (!environment.getProperty("spring.cloud.bootstrap.enabled", Boolean.class,
-				true)) {
+		boolean bootstrapEnabled = environment
+				.getProperty("spring.cloud.bootstrap.enabled", Boolean.class, true);
+		boolean legacyConfig = environment
+				.getProperty("spring.config.use-legacy-processing", Boolean.class, false);
+		if (!bootstrapEnabled && !legacyConfig) {
 			return;
 		}
 		// don't listen to events in a bootstrap context

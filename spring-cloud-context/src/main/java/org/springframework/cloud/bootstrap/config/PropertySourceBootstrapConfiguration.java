@@ -28,18 +28,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.logging.LoggingRebinder;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
@@ -61,8 +61,8 @@ import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMEN
  */
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(PropertySourceBootstrapProperties.class)
-public class PropertySourceBootstrapConfiguration
-		implements EnvironmentPostProcessor, Ordered {
+public class PropertySourceBootstrapConfiguration implements
+		ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
 	/**
 	 * Bootstrap property source name.
@@ -89,11 +89,11 @@ public class PropertySourceBootstrapConfiguration
 	}
 
 	@Override
-	public void postProcessEnvironment(ConfigurableEnvironment environment,
-			SpringApplication application) {
+	public void initialize(ConfigurableApplicationContext applicationContext) {
 		List<PropertySource<?>> composite = new ArrayList<>();
 		AnnotationAwareOrderComparator.sort(this.propertySourceLocators);
 		boolean empty = true;
+		ConfigurableEnvironment environment = applicationContext.getEnvironment();
 		for (PropertySourceLocator locator : this.propertySourceLocators) {
 			Collection<PropertySource<?>> source = locator.locateCollection(environment);
 			if (source == null || source.size() == 0) {
@@ -124,7 +124,7 @@ public class PropertySourceBootstrapConfiguration
 			}
 			insertPropertySources(propertySources, composite);
 			reinitializeLoggingSystem(environment, logConfig, logFile);
-			setLogLevels(environment);
+			setLogLevels(applicationContext, environment);
 			handleIncludedProfiles(environment);
 		}
 	}
@@ -156,13 +156,14 @@ public class PropertySourceBootstrapConfiguration
 		}
 	}
 
-	private void setLogLevels(ConfigurableEnvironment environment) {
+	private void setLogLevels(ConfigurableApplicationContext applicationContext,
+			ConfigurableEnvironment environment) {
 		LoggingRebinder rebinder = new LoggingRebinder();
 		rebinder.setEnvironment(environment);
 		// We can't fire the event in the ApplicationContext here (too early), but we can
 		// create our own listener and poke it (it doesn't need the key changes)
-		rebinder.onApplicationEvent(
-				new EnvironmentChangeEvent(environment, Collections.<String>emptySet()));
+		rebinder.onApplicationEvent(new EnvironmentChangeEvent(applicationContext,
+				Collections.<String>emptySet()));
 	}
 
 	private void insertPropertySources(MutablePropertySources propertySources,

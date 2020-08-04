@@ -47,6 +47,7 @@ public class LoggingSystemShutdownListener
 	}
 
 	private void shutdownLogging() {
+		// TODO: only enable if bootstrap and legacy
 		LoggingSystem loggingSystem = LoggingSystem
 				.get(ClassUtils.getDefaultClassLoader());
 		loggingSystem.cleanUp();
