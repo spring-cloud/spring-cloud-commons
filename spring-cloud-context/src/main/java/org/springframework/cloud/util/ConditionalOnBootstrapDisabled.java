@@ -34,7 +34,7 @@ import static org.springframework.cloud.util.PropertyUtils.USE_LEGACY_PROCESSING
 @Documented
 @Conditional(ConditionalOnBootstrapDisabled.OnBootstrapDisabledCondition.class)
 public @interface ConditionalOnBootstrapDisabled {
-	
+
 	class OnBootstrapDisabledCondition extends NoneNestedConditions {
 
 		OnBootstrapDisabledCondition() {
@@ -52,4 +52,5 @@ public @interface ConditionalOnBootstrapDisabled {
 		}
 
 	}
+
 }

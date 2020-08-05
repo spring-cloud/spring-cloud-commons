@@ -68,7 +68,8 @@ public abstract class ContextRefresher {
 
 	private RefreshScope scope;
 
-	protected ContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
+	protected ContextRefresher(ConfigurableApplicationContext context,
+			RefreshScope scope) {
 		this.context = context;
 		this.scope = scope;
 	}

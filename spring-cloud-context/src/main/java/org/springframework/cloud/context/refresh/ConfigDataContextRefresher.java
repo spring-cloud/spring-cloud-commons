@@ -16,37 +16,13 @@
 
 package org.springframework.cloud.context.refresh;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.boot.Banner;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.config.ConfigDataAccessor;
-import org.springframework.boot.context.config.ConfigFileApplicationListener;
-import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
-import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.CommandLinePropertySource;
-import org.springframework.core.env.CompositePropertySource;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.web.context.support.StandardServletEnvironment;
 
 /**
  * @author Dave Syer
@@ -54,7 +30,8 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  */
 public class ConfigDataContextRefresher extends ContextRefresher {
 
-	public ConfigDataContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
+	public ConfigDataContextRefresher(ConfigurableApplicationContext context,
+			RefreshScope scope) {
 		super(context, scope);
 	}
 

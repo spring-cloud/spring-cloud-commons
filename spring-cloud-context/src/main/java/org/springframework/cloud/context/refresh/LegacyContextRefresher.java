@@ -35,7 +35,8 @@ import org.springframework.core.env.StandardEnvironment;
  */
 public class LegacyContextRefresher extends ContextRefresher {
 
-	public LegacyContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
+	public LegacyContextRefresher(ConfigurableApplicationContext context,
+			RefreshScope scope) {
 		super(context, scope);
 	}
 

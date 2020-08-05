@@ -35,8 +35,7 @@ public abstract class PropertyUtils {
 	}
 
 	public static boolean bootstrapEnabled(Environment environment) {
-		return environment.getProperty(BOOTSTRAP_ENABLED_PROPERTY, Boolean.class,
-				false);
+		return environment.getProperty(BOOTSTRAP_ENABLED_PROPERTY, Boolean.class, false);
 	}
 
 	public static boolean useLegacyProcessing(Environment environment) {
