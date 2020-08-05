@@ -35,7 +35,9 @@ public class RefreshScopeSerializationTests {
 	@Test
 	public void defaultApplicationContextId() throws Exception {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
-				TestConfiguration.class).web(WebApplicationType.NONE).run();
+				TestConfiguration.class)
+						.properties("spring.config.use-legacy-processing=true")
+						.web(WebApplicationType.NONE).run();
 		then(context.getId()).isEqualTo("application-1");
 	}
 

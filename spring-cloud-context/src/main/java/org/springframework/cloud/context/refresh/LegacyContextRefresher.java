@@ -29,6 +29,8 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 
+import static org.springframework.cloud.util.PropertyUtils.BOOTSTRAP_ENABLED_PROPERTY;
+
 /**
  * @author Dave Syer
  * @author Venil Noronha
@@ -51,6 +53,7 @@ public class LegacyContextRefresher extends ContextRefresher {
 			StandardEnvironment environment = copyEnvironment(
 					getContext().getEnvironment());
 			SpringApplicationBuilder builder = new SpringApplicationBuilder(Empty.class)
+					.properties(BOOTSTRAP_ENABLED_PROPERTY + "=true")
 					.bannerMode(Banner.Mode.OFF).web(WebApplicationType.NONE)
 					.environment(environment);
 			// Just the listeners that affect the environment (e.g. excluding logging

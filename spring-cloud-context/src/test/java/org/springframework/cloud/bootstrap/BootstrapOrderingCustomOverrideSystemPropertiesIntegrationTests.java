@@ -42,7 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class,
-		properties = { "spring.cloud.bootstrap.name:ordering" })
+		properties = { "spring.config.use-legacy-processing=true",
+				"spring.cloud.bootstrap.name:ordering" })
 public class BootstrapOrderingCustomOverrideSystemPropertiesIntegrationTests {
 
 	@Autowired

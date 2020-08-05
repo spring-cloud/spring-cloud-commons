@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -28,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bootstrap.BootstrapOrderingCustomPropertySourceIntegrationTests.Application;
-import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.bootstrap.config.PropertySourceLocator;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -42,7 +40,8 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class,
-		properties = { "encrypt.key:deadbeef", "spring.cloud.bootstrap.name:custom" })
+		properties = { "encrypt.key:deadbeef", "spring.cloud.bootstrap.name:custom",
+				"spring.config.use-legacy-processing=true" })
 @ActiveProfiles("encrypt")
 public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 
@@ -50,11 +49,9 @@ public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 	private ConfigurableEnvironment environment;
 
 	@Test
-	@Ignore // FIXME: spring boot 2.0.0
 	public void bootstrapPropertiesExist() {
-		then(this.environment.getPropertySources().contains(
-				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME))
-						.isTrue();
+		then(this.environment.getPropertySources()
+				.contains("applicationConfig: [classpath:/custom.properties]")).isTrue();
 	}
 
 	@Test
