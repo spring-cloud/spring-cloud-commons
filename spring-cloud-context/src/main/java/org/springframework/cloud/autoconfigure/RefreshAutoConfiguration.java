@@ -38,11 +38,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.cloud.context.refresh.ConfigDataContextRefresher;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.refresh.LegacyContextRefresher;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.logging.LoggingRebinder;
+import org.springframework.cloud.util.ConditionalOnBootstrapDisabled;
+import org.springframework.cloud.util.ConditionalOnBootstrapEnabled;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
@@ -63,8 +66,7 @@ import org.springframework.util.StringUtils;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RefreshScope.class)
-@ConditionalOnProperty(name = RefreshAutoConfiguration.REFRESH_SCOPE_ENABLED,
-		matchIfMissing = true)
+@ConditionalOnProperty(name = RefreshAutoConfiguration.REFRESH_SCOPE_ENABLED, matchIfMissing = true)
 @AutoConfigureBefore(HibernateJpaAutoConfiguration.class)
 public class RefreshAutoConfiguration {
 
@@ -97,9 +99,18 @@ public class RefreshAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public LegacyContextRefresher contextRefresher(ConfigurableApplicationContext context,
-			RefreshScope scope) {
+	@ConditionalOnBootstrapEnabled
+	public LegacyContextRefresher legacyContextRefresher(
+			ConfigurableApplicationContext context, RefreshScope scope) {
 		return new LegacyContextRefresher(context, scope);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	@ConditionalOnBootstrapDisabled
+	public ConfigDataContextRefresher configDataContextRefresher(ConfigurableApplicationContext context,
+			RefreshScope scope) {
+		return new ConfigDataContextRefresher(context, scope);
 	}
 
 	@Bean

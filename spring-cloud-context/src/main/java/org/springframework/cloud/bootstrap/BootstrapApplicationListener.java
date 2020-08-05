@@ -60,6 +60,9 @@ import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
+import static org.springframework.cloud.util.PropertyUtils.bootstrapEnabled;
+import static org.springframework.cloud.util.PropertyUtils.useLegacyProcessing;
+
 /**
  * A listener that prepares a SpringApplication (e.g. populating its Environment) by
  * delegating to {@link ApplicationContextInitializer} beans in a separate bootstrap
@@ -94,12 +97,7 @@ public class BootstrapApplicationListener
 	@Override
 	public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
 		ConfigurableEnvironment environment = event.getEnvironment();
-		// TODO: disable bootstrap by default
-		boolean bootstrapEnabled = environment
-				.getProperty("spring.cloud.bootstrap.enabled", Boolean.class, false);
-		boolean legacyConfig = environment
-				.getProperty("spring.config.use-legacy-processing", Boolean.class, false);
-		if (!bootstrapEnabled && !legacyConfig) {
+		if (!bootstrapEnabled(environment) && !useLegacyProcessing(environment)) {
 			return;
 		}
 		// don't listen to events in a bootstrap context
