@@ -21,8 +21,8 @@ import java.util.Arrays;
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
+import org.springframework.cloud.bootstrap.BootstrapConfigFileApplicationListener;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
@@ -60,7 +60,7 @@ public class LegacyContextRefresher extends ContextRefresher {
 			// listener because it has side effects)
 			builder.application()
 					.setListeners(Arrays.asList(new BootstrapApplicationListener(),
-							new ConfigFileApplicationListener()));
+							new BootstrapConfigFileApplicationListener()));
 			capture = builder.run();
 			if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
 				environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
