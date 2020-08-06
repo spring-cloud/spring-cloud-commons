@@ -33,7 +33,7 @@ public class EncryptionIntegrationTests {
 	public void symmetricPropertyValues() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
 				TestConfiguration.class).web(WebApplicationType.NONE).properties(
-						"encrypt.key:pie",
+						"spring.config.use-legacy-processing=true", "encrypt.key:pie",
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
 						.run();
 		then(context.getEnvironment().getProperty("foo.password")).isEqualTo("test");
@@ -43,7 +43,7 @@ public class EncryptionIntegrationTests {
 	public void symmetricConfigurationProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(
 				TestConfiguration.class).web(WebApplicationType.NONE).properties(
-						"encrypt.key:pie",
+						"spring.config.use-legacy-processing=true", "encrypt.key:pie",
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
 						.run();
 		then(context.getBean(PasswordProperties.class).getPassword()).isEqualTo("test");

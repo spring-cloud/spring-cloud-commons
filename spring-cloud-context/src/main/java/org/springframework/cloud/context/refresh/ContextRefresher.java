@@ -24,11 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.boot.Banner.Mode;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.config.ConfigFileApplicationListener;
-import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -47,16 +45,18 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * @author Dave Syer
  * @author Venil Noronha
  */
-public class ContextRefresher {
+public abstract class ContextRefresher {
 
-	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
+	protected final Log logger = LogFactory.getLog(getClass());
 
-	private static final String[] DEFAULT_PROPERTY_SOURCES = new String[] {
+	protected static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
+
+	protected static final String[] DEFAULT_PROPERTY_SOURCES = new String[] {
 			// order matters, if cli args aren't first, things get messy
 			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME,
 			"defaultProperties" };
 
-	private Set<String> standardSources = new HashSet<>(
+	protected Set<String> standardSources = new HashSet<>(
 			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
 					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME,
@@ -68,7 +68,8 @@ public class ContextRefresher {
 
 	private RefreshScope scope;
 
-	public ContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
+	protected ContextRefresher(ConfigurableApplicationContext context,
+			RefreshScope scope) {
 		this.context = context;
 		this.scope = scope;
 	}
@@ -90,80 +91,18 @@ public class ContextRefresher {
 	public synchronized Set<String> refreshEnvironment() {
 		Map<String, Object> before = extract(
 				this.context.getEnvironment().getPropertySources());
-		addConfigFilesToEnvironment();
+		updateEnvironment();
 		Set<String> keys = changes(before,
 				extract(this.context.getEnvironment().getPropertySources())).keySet();
 		this.context.publishEvent(new EnvironmentChangeEvent(this.context, keys));
 		return keys;
 	}
 
-	/* For testing. */ ConfigurableApplicationContext addConfigFilesToEnvironment() {
-		ConfigurableApplicationContext capture = null;
-		try {
-			StandardEnvironment environment = copyEnvironment(
-					this.context.getEnvironment());
-			SpringApplicationBuilder builder = new SpringApplicationBuilder(Empty.class)
-					.bannerMode(Mode.OFF).web(WebApplicationType.NONE)
-					.environment(environment);
-			// Just the listeners that affect the environment (e.g. excluding logging
-			// listener because it has side effects)
-			builder.application()
-					.setListeners(Arrays.asList(new BootstrapApplicationListener(),
-							new ConfigFileApplicationListener()));
-			capture = builder.run();
-			if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
-				environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
-			}
-			MutablePropertySources target = this.context.getEnvironment()
-					.getPropertySources();
-			String targetName = null;
-			for (PropertySource<?> source : environment.getPropertySources()) {
-				String name = source.getName();
-				if (target.contains(name)) {
-					targetName = name;
-				}
-				if (!this.standardSources.contains(name)) {
-					if (target.contains(name)) {
-						target.replace(name, source);
-					}
-					else {
-						if (targetName != null) {
-							target.addAfter(targetName, source);
-							// update targetName to preserve ordering
-							targetName = name;
-						}
-						else {
-							// targetName was null so we are at the start of the list
-							target.addFirst(source);
-							targetName = name;
-						}
-					}
-				}
-			}
-		}
-		finally {
-			ConfigurableApplicationContext closeable = capture;
-			while (closeable != null) {
-				try {
-					closeable.close();
-				}
-				catch (Exception e) {
-					// Ignore;
-				}
-				if (closeable.getParent() instanceof ConfigurableApplicationContext) {
-					closeable = (ConfigurableApplicationContext) closeable.getParent();
-				}
-				else {
-					break;
-				}
-			}
-		}
-		return capture;
-	}
+	protected abstract void updateEnvironment();
 
 	// Don't use ConfigurableEnvironment.merge() in case there are clashes with property
 	// source names
-	private StandardEnvironment copyEnvironment(ConfigurableEnvironment input) {
+	protected StandardEnvironment copyEnvironment(ConfigurableEnvironment input) {
 		StandardEnvironment environment = new StandardEnvironment();
 		MutablePropertySources capturedPropertySources = environment.getPropertySources();
 		// Only copy the default property source(s) and the profiles over from the main

@@ -44,7 +44,7 @@ import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(properties = "spring.config.use-legacy-processing=true")
 @DirtiesContext
 public class ContextRefresherOrderingIntegrationTests {
 

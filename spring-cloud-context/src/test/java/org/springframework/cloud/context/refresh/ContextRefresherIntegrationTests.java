@@ -37,7 +37,8 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class,
-		properties = { "spring.datasource.hikari.read-only=false", "debug=true" })
+		properties = { "spring.datasource.hikari.read-only=false",
+				"spring.config.use-legacy-processing=true" })
 public class ContextRefresherIntegrationTests {
 
 	@Autowired

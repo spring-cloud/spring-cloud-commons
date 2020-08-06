@@ -4,6 +4,3 @@ org.springframework.cloud.bootstrap.TestBootstrapConfiguration,\
 org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration,\
 org.springframework.cloud.util.random.CachedRandomPropertySourceAutoConfiguration
 
-
-org.springframework.boot.env.EnvironmentPostProcessor=\
-org.springframework.cloud.bootstrap.BootstrapEnvironmentPostProcessorIntegrationTests.TestConditionalEnvironmentPostProcessor
