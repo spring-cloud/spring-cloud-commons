@@ -17,6 +17,7 @@
 package org.springframework.cloud.util;
 
 import org.springframework.core.env.Environment;
+import org.springframework.util.ClassUtils;
 
 public abstract class PropertyUtils {
 
@@ -30,12 +31,33 @@ public abstract class PropertyUtils {
 	 */
 	public static final String USE_LEGACY_PROCESSING_PROPERTY = "spring.config.use-legacy-processing";
 
+	/**
+	 * Property name for bootstrap marker class name.
+	 */
+	public static final String MARKER_CLASS = "org.springframework.cloud.bootstrap.marker.Marker";
+
+	/**
+	 * Boolean if bootstrap marker class exists.
+	 */
+	public static final boolean MARKER_CLASS_EXISTS = markerClassExists();
+
+	private static boolean markerClassExists() {
+		try {
+			ClassUtils.forName(MARKER_CLASS, null);
+			return true;
+		}
+		catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
+
 	private PropertyUtils() {
 
 	}
 
 	public static boolean bootstrapEnabled(Environment environment) {
-		return environment.getProperty(BOOTSTRAP_ENABLED_PROPERTY, Boolean.class, false);
+		return environment.getProperty(BOOTSTRAP_ENABLED_PROPERTY, Boolean.class, false)
+				|| MARKER_CLASS_EXISTS;
 	}
 
 	public static boolean useLegacyProcessing(Environment environment) {

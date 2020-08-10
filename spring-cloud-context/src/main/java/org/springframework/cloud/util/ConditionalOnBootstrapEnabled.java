@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Conditional;
 
@@ -39,6 +40,11 @@ public @interface ConditionalOnBootstrapEnabled {
 
 		OnBootstrapEnabledCondition() {
 			super(ConfigurationPhase.REGISTER_BEAN);
+		}
+
+		@ConditionalOnClass(name = PropertyUtils.MARKER_CLASS)
+		static class OnBootstrapMarkerClassPresent {
+
 		}
 
 		@ConditionalOnProperty(name = USE_LEGACY_PROCESSING_PROPERTY)
