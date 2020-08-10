@@ -42,4 +42,5 @@ public class MarkerTests {
 	protected static class TestConfig {
 
 	}
+
 }
