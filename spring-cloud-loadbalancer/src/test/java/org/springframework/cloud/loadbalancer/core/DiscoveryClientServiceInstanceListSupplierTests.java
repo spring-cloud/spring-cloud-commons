@@ -20,7 +20,6 @@ import java.time.Duration;
 
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.answers.AnswersWithDelay;
 import org.mockito.internal.stubbing.answers.Returns;
@@ -173,7 +172,6 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 				.verify(VERIFICATION_TIMEOUT);
 	}
 
-	@Disabled // see https://github.com/spring-cloud/spring-cloud-commons/issues/802
 	@Test
 	void shouldReturnEmptyInstancesListOnTimeoutBlockingClient() {
 		environment.setProperty(SERVICE_DISCOVERY_TIMEOUT, "100ms");
