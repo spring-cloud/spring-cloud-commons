@@ -50,7 +50,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
@@ -140,7 +139,6 @@ public class PropertySourceBootstrapConfiguration implements
 			LoggingSystem system = LoggingSystem
 					.get(LoggingSystem.class.getClassLoader());
 			try {
-				ResourceUtils.getURL(logConfig).openStream().close();
 				// Three step initialization that accounts for the clean up of the logging
 				// context before initialization. Spring Boot doesn't initialize a logging
 				// system that hasn't had this sequence applied (since 1.4.1).
