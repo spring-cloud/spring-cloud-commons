@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.integration.RefreshScopeIntegrationTests.TestConfiguration;
-import org.springframework.cloud.context.scope.GenericScope;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeRefreshedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -119,7 +119,7 @@ public class RefreshScopeIntegrationTests {
 		then(id2).isNotSameAs(id1);
 		then(ExampleService.event).isNotNull();
 		then(ExampleService.event.getName())
-				.isEqualTo(GenericScope.SCOPED_TARGET_PREFIX + "service");
+				.isEqualTo(ScopedProxyUtils.getTargetBeanName("service"));
 	}
 
 	// see gh-349

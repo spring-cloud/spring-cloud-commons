@@ -73,11 +73,6 @@ import org.springframework.util.StringUtils;
 public class GenericScope implements Scope, BeanFactoryPostProcessor,
 		BeanDefinitionRegistryPostProcessor, DisposableBean {
 
-	/**
-	 * Prefix for the scoped target.
-	 */
-	public static final String SCOPED_TARGET_PREFIX = "scopedTarget.";
-
 	private static final Log logger = LogFactory.getLog(GenericScope.class);
 
 	private BeanLifecycleWrapperCache cache = new BeanLifecycleWrapperCache(

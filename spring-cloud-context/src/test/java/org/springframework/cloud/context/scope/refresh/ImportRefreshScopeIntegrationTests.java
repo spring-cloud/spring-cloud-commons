@@ -19,6 +19,7 @@ package org.springframework.cloud.context.scope.refresh;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,7 +48,7 @@ public class ImportRefreshScopeIntegrationTests {
 	@Test
 	public void testSimpleProperties() throws Exception {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
-		then(this.beanFactory.getBeanDefinition("scopedTarget.service").getScope())
+		then(this.beanFactory.getBeanDefinition(ScopedProxyUtils.getTargetBeanName("service")).getScope())
 				.isEqualTo("refresh");
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 	}

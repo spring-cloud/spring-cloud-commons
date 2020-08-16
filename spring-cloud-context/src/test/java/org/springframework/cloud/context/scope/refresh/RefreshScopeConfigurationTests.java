@@ -21,6 +21,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -75,7 +76,7 @@ public class RefreshScopeConfigurationTests {
 				RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);
 		Application application = this.context.getBean(Application.class);
-		then(this.context.getBeanDefinition("scopedTarget.application").getScope())
+		then(this.context.getBeanDefinition(ScopedProxyUtils.getTargetBeanName("application")).getScope())
 				.isEqualTo("refresh");
 		application.hello();
 		refresh();
