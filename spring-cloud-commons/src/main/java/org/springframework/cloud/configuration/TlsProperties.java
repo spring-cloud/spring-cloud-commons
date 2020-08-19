@@ -16,20 +16,11 @@
 
 package org.springframework.cloud.configuration;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.UnrecoverableKeyException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
-import javax.net.ssl.SSLContext;
-
-import org.apache.http.ssl.SSLContextBuilder;
 
 import org.springframework.core.io.Resource;
 
@@ -166,83 +157,6 @@ public class TlsProperties {
 		int index = name.lastIndexOf('.');
 
 		return index < 0 ? "" : name.substring(index + 1).toLowerCase();
-	}
-
-	public SSLContext createSSLContext() throws GeneralSecurityException, IOException {
-		SSLContextBuilder builder = new SSLContextBuilder();
-		char[] keyPassword = keyPassword();
-		KeyStore keyStore = createKeyStore();
-
-		try {
-			builder.loadKeyMaterial(keyStore, keyPassword);
-		}
-		catch (UnrecoverableKeyException e) {
-			if (keyPassword.length == 0) {
-				// Retry if empty password, see
-				// https://rt.openssl.org/Ticket/Display.html?id=1497&user=guest&pass=guest
-				builder.loadKeyMaterial(keyStore, new char[] { '\0' });
-			}
-			else {
-				throw e;
-			}
-		}
-
-		KeyStore trust = createTrustStore();
-		if (trust != null) {
-			builder.loadTrustMaterial(trust, null);
-		}
-
-		return builder.build();
-	}
-
-	private KeyStore createKeyStore() throws GeneralSecurityException, IOException {
-		if (keyStore == null) {
-			throw new KeyStoreException("Keystore not specified.");
-		}
-		if (!keyStore.exists()) {
-			throw new KeyStoreException("Keystore not exists: " + keyStore);
-		}
-
-		KeyStore result = KeyStore.getInstance(keyStoreType);
-		char[] keyStorePassword = keyStorePassword();
-
-		try {
-			loadKeyStore(result, keyStore, keyStorePassword);
-		}
-		catch (IOException e) {
-			// Retry if empty password, see
-			// https://rt.openssl.org/Ticket/Display.html?id=1497&user=guest&pass=guest
-			if (keyStorePassword.length == 0) {
-				loadKeyStore(result, keyStore, new char[] { '\0' });
-			}
-			else {
-				throw e;
-			}
-		}
-
-		return result;
-	}
-
-	private static void loadKeyStore(KeyStore keyStore, Resource keyStoreResource,
-			char[] keyStorePassword) throws IOException, GeneralSecurityException {
-		try (InputStream inputStream = keyStoreResource.getInputStream()) {
-			keyStore.load(inputStream, keyStorePassword);
-		}
-	}
-
-	private KeyStore createTrustStore() throws GeneralSecurityException, IOException {
-		if (trustStore == null) {
-			return null;
-		}
-		if (!trustStore.exists()) {
-			throw new KeyStoreException("KeyStore not exists: " + trustStore);
-		}
-
-		KeyStore result = KeyStore.getInstance(trustStoreType);
-		try (InputStream input = trustStore.getInputStream()) {
-			result.load(input, trustStorePassword());
-		}
-		return result;
 	}
 
 }
