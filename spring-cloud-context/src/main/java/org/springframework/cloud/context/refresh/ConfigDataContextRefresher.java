@@ -17,6 +17,7 @@
 package org.springframework.cloud.context.refresh;
 
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
+import org.springframework.boot.env.DefaultBootstrapRegisty;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
@@ -44,7 +45,7 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 		String[] activeProfiles = getContext().getEnvironment().getActiveProfiles();
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		ConfigDataEnvironmentPostProcessor.applyTo(environment, resourceLoader,
-				activeProfiles);
+				new DefaultBootstrapRegisty(), activeProfiles);
 
 		if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
 			environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
