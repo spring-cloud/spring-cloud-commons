@@ -41,37 +41,35 @@ import static org.assertj.core.api.BDDAssertions.then;
 public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 
 	@Test
-	public void newConnectionManager() throws Exception {
+	public void newConnectionManager() {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
 				.newConnectionManager(false, 2, 6);
 		then(((PoolingHttpClientConnectionManager) connectionManager)
 				.getDefaultMaxPerRoute()).isEqualTo(6);
 		then(((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal())
 				.isEqualTo(2);
-		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
-				"pool");
+		Object pool = getField((connectionManager), "pool");
 		then((Long) getField(pool, "timeToLive")).isEqualTo(new Long(-1));
-		TimeUnit timeUnit = getField(pool, "tunit");
+		TimeUnit timeUnit = getField(pool, "timeUnit");
 		then(timeUnit).isEqualTo(TimeUnit.MILLISECONDS);
 	}
 
 	@Test
-	public void newConnectionManagerWithTTL() throws Exception {
+	public void newConnectionManagerWithTTL() {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
 				.newConnectionManager(false, 2, 6, 56L, TimeUnit.DAYS, null);
 		then(((PoolingHttpClientConnectionManager) connectionManager)
 				.getDefaultMaxPerRoute()).isEqualTo(6);
 		then(((PoolingHttpClientConnectionManager) connectionManager).getMaxTotal())
 				.isEqualTo(2);
-		Object pool = getField(((PoolingHttpClientConnectionManager) connectionManager),
-				"pool");
+		Object pool = getField((connectionManager), "pool");
 		then((Long) getField(pool, "timeToLive")).isEqualTo(new Long(56));
-		TimeUnit timeUnit = getField(pool, "tunit");
+		TimeUnit timeUnit = getField(pool, "timeUnit");
 		then(timeUnit).isEqualTo(TimeUnit.DAYS);
 	}
 
 	@Test
-	public void newConnectionManagerWithSSL() throws Exception {
+	public void newConnectionManagerWithSSL() {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
 				.newConnectionManager(false, 2, 6);
 
@@ -82,7 +80,7 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 	}
 
 	@Test
-	public void newConnectionManagerWithDisabledSSLValidation() throws Exception {
+	public void newConnectionManagerWithDisabledSSLValidation() {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
 				.newConnectionManager(true, 2, 6);
 
@@ -112,6 +110,10 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 	@SuppressWarnings("unchecked")
 	protected <T> T getField(Object target, String name) {
 		Field field = ReflectionUtils.findField(target.getClass(), name);
+		if (field == null) {
+			throw new IllegalArgumentException(
+					"Can not find field " + name + " in " + target.getClass());
+		}
 		ReflectionUtils.makeAccessible(field);
 		Object value = ReflectionUtils.getField(field, target);
 		return (T) value;
