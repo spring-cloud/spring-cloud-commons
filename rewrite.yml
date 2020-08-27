@@ -1,0 +1,19 @@
+---
+type: specs.openrewrite.org/v1beta/style
+name: io.moderne.spring.style
+
+configure:
+  org.openrewrite.java.style.ImportLayoutStyle:
+    layout:
+      classCountToUseStarImport: 999
+      nameCountToUseStarImport: 999
+      blocks:
+        - import java.*
+        - <blank line>
+        - import javax.*
+        - <blank line>
+        - import all other imports
+        - <blank line>
+        - import org.springframework.*
+        - <blank line>
+        - import static all other imports
