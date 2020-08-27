@@ -44,17 +44,17 @@ public class CompositeDiscoveryClientTestsConfig {
 	static final String CUSTOM_SERVICE_ID = "custom";
 
 	@Bean
-	public DiscoveryClient customDiscoveryClient() {
+	DiscoveryClient customDiscoveryClient() {
 		return aDiscoveryClient(-1, CUSTOM_DISCOVERY_CLIENT);
 	}
 
 	@Bean
-	public DiscoveryClient thirdOrderCustomDiscoveryClient() {
+	DiscoveryClient thirdOrderCustomDiscoveryClient() {
 		return aDiscoveryClient(3, FOURTH_DISCOVERY_CLIENT);
 	}
 
 	@Bean
-	public DiscoveryClient defaultOrderDiscoveryClient() {
+	DiscoveryClient defaultOrderDiscoveryClient() {
 		return aDiscoveryClient(null, DEFAULT_ORDER_DISCOVERY_CLIENT);
 	}
 

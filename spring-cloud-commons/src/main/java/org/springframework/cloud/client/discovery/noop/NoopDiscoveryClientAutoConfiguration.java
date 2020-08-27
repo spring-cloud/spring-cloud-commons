@@ -110,7 +110,7 @@ public class NoopDiscoveryClientAutoConfiguration
 	}
 
 	@Bean
-	public DiscoveryClient discoveryClient() {
+	DiscoveryClient discoveryClient() {
 		return new NoopDiscoveryClient(this.serviceInstance);
 	}
 
@@ -127,7 +127,7 @@ public class NoopDiscoveryClientAutoConfiguration
 	protected static class Boot15PortFinderConfiguration {
 
 		@Bean
-		public PortFinder portFinder(final ApplicationContext context) {
+		PortFinder portFinder(final ApplicationContext context) {
 			return new PortFinder() {
 				@Override
 				public Integer findPort() {

@@ -57,7 +57,7 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 	public static class Config {
 
 		@Bean
-		public TestAutoServiceRegistration testAutoServiceRegistration(
+		TestAutoServiceRegistration testAutoServiceRegistration(
 				AutoServiceRegistrationProperties properties) {
 			return new TestAutoServiceRegistration(properties);
 		}

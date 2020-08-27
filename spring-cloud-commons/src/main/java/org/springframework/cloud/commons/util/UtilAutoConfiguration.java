@@ -33,13 +33,13 @@ import org.springframework.context.annotation.Configuration;
 public class UtilAutoConfiguration {
 
 	@Bean
-	public InetUtilsProperties inetUtilsProperties() {
+	InetUtilsProperties inetUtilsProperties() {
 		return new InetUtilsProperties();
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
-	public InetUtils inetUtils(InetUtilsProperties properties) {
+	InetUtils inetUtils(InetUtilsProperties properties) {
 		return new InetUtils(properties);
 	}
 

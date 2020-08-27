@@ -47,13 +47,13 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
-	public static ConfigurationPropertiesBeans configurationPropertiesBeans() {
+	static ConfigurationPropertiesBeans configurationPropertiesBeans() {
 		return new ConfigurationPropertiesBeans();
 	}
 
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
-	public ConfigurationPropertiesRebinder configurationPropertiesRebinder(
+	ConfigurationPropertiesRebinder configurationPropertiesRebinder(
 			ConfigurationPropertiesBeans beans) {
 		ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(
 				beans);

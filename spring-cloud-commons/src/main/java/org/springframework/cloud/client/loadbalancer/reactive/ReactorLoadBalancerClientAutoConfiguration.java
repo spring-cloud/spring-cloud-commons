@@ -39,7 +39,7 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
+	ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory loadBalancerFactory,
 			LoadBalancerProperties properties) {
 		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory,

@@ -52,7 +52,7 @@ public class EncryptionBootstrapConfiguration {
 	private KeyProperties key;
 
 	@Bean
-	public EnvironmentDecryptApplicationInitializer environmentDecryptApplicationListener() {
+	EnvironmentDecryptApplicationInitializer environmentDecryptApplicationListener() {
 		if (this.encryptor == null) {
 			this.encryptor = new FailsafeTextEncryptor();
 		}
@@ -76,7 +76,7 @@ public class EncryptionBootstrapConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean(TextEncryptor.class)
-		public TextEncryptor textEncryptor() {
+		TextEncryptor textEncryptor() {
 			KeyStore keyStore = this.key.getKeyStore();
 			if (keyStore.getLocation() != null) {
 				if (keyStore.getLocation().exists()) {
@@ -107,7 +107,7 @@ public class EncryptionBootstrapConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean(TextEncryptor.class)
-		public TextEncryptor textEncryptor() {
+		TextEncryptor textEncryptor() {
 			return new EncryptorFactory(this.key.getSalt()).create(this.key.getKey());
 		}
 

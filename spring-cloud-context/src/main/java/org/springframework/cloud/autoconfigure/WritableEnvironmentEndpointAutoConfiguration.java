@@ -61,7 +61,7 @@ public class WritableEnvironmentEndpointAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnAvailableEndpoint
-	public WritableEnvironmentEndpoint writableEnvironmentEndpoint(
+	WritableEnvironmentEndpoint writableEnvironmentEndpoint(
 			Environment environment) {
 		WritableEnvironmentEndpoint endpoint = new WritableEnvironmentEndpoint(
 				environment);
@@ -74,7 +74,7 @@ public class WritableEnvironmentEndpointAutoConfiguration {
 
 	@Bean
 	@ConditionalOnAvailableEndpoint
-	public WritableEnvironmentEndpointWebExtension writableEnvironmentEndpointWebExtension(
+	WritableEnvironmentEndpointWebExtension writableEnvironmentEndpointWebExtension(
 			WritableEnvironmentEndpoint endpoint, EnvironmentManager environment) {
 		return new WritableEnvironmentEndpointWebExtension(endpoint, environment);
 	}

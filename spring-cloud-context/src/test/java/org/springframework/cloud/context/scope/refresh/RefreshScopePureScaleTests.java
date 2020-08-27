@@ -165,7 +165,7 @@ public class RefreshScopePureScaleTests {
 
 		@Bean
 		@RefreshScope
-		public ExampleService service() {
+		ExampleService service() {
 			ExampleService service = new ExampleService();
 			service.setMessage("Foo");
 			return service;

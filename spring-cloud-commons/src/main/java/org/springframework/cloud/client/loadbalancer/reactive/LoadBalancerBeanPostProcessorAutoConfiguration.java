@@ -47,7 +47,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
 	@Bean
-	public LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
+	LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
 			DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction,
 			ApplicationContext context) {
 		return new LoadBalancerWebClientBuilderBeanPostProcessor(

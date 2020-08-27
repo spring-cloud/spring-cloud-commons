@@ -69,7 +69,7 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 	private SimpleReactiveDiscoveryProperties simple = new SimpleReactiveDiscoveryProperties();
 
 	@Bean
-	public SimpleReactiveDiscoveryProperties simpleReactiveDiscoveryProperties() {
+	SimpleReactiveDiscoveryProperties simpleReactiveDiscoveryProperties() {
 		simple.getLocal().setServiceId(serviceId);
 		simple.getLocal().setUri(URI.create("http://"
 				+ inet.findFirstNonLoopbackHostInfo().getHostname() + ":" + findPort()));
@@ -78,7 +78,7 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 
 	@Bean
 	@Order
-	public SimpleReactiveDiscoveryClient simpleReactiveDiscoveryClient() {
+	SimpleReactiveDiscoveryClient simpleReactiveDiscoveryClient() {
 		return new SimpleReactiveDiscoveryClient(simpleReactiveDiscoveryProperties());
 	}
 
@@ -107,7 +107,7 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 
 		@Bean
 		@ConditionalOnDiscoveryHealthIndicatorEnabled
-		public ReactiveDiscoveryClientHealthIndicator simpleReactiveDiscoveryClientHealthIndicator(
+		ReactiveDiscoveryClientHealthIndicator simpleReactiveDiscoveryClientHealthIndicator(
 				DiscoveryClientHealthIndicatorProperties properties,
 				SimpleReactiveDiscoveryClient simpleReactiveDiscoveryClient) {
 			return new ReactiveDiscoveryClientHealthIndicator(

@@ -89,7 +89,7 @@ public class ServiceInstanceListSupplierBuilderTests {
 	private static class CacheTestConfig {
 
 		@Bean
-		public LoadBalancerCacheManager cacheManager() {
+		LoadBalancerCacheManager cacheManager() {
 			return mock(LoadBalancerCacheManager.class);
 		}
 
@@ -98,17 +98,17 @@ public class ServiceInstanceListSupplierBuilderTests {
 	private static class BaseTestConfig {
 
 		@Bean
-		public ReactiveDiscoveryClient reactiveDiscoveryClient() {
+		ReactiveDiscoveryClient reactiveDiscoveryClient() {
 			return mock(ReactiveDiscoveryClient.class);
 		}
 
 		@Bean
-		public LoadBalancerProperties loadBalancerProperties() {
+		LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
 		}
 
 		@Bean
-		public WebClient.Builder webClientBuilder() {
+		WebClient.Builder webClientBuilder() {
 			return WebClient.builder();
 		}
 

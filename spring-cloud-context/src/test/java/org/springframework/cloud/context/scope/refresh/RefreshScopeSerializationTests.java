@@ -62,13 +62,13 @@ public class RefreshScopeSerializationTests {
 	protected static class TestConfiguration {
 
 		@Bean
-		public RefreshScope refreshScope() {
+		RefreshScope refreshScope() {
 			return new RefreshScope();
 		}
 
 		@Bean
 		@org.springframework.cloud.context.config.annotation.RefreshScope
-		public TestBean testBean() {
+		TestBean testBean() {
 			return new TestBean();
 		}
 

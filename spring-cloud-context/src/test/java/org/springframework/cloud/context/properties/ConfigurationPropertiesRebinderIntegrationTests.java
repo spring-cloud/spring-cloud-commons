@@ -130,7 +130,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		// exposes https://github.com/spring-cloud/spring-cloud-commons/issues/337
 		@Bean
 		@ConfigurationProperties("some.service")
-		public SomeService someService() {
+		SomeService someService() {
 			return ProxyFactory.getProxy(SomeService.class,
 					(MethodInterceptor) methodInvocation -> null);
 		}

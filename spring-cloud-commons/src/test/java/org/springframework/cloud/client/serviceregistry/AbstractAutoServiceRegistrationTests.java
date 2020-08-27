@@ -97,17 +97,17 @@ public class AbstractAutoServiceRegistrationTests {
 	public static class Config {
 
 		@Bean
-		public TestAutoServiceRegistration testAutoServiceRegistration() {
+		TestAutoServiceRegistration testAutoServiceRegistration() {
 			return new TestAutoServiceRegistration();
 		}
 
 		@Bean
-		public PreEventListener preRegisterListener() {
+		PreEventListener preRegisterListener() {
 			return new PreEventListener();
 		}
 
 		@Bean
-		public PostEventListener postEventListener() {
+		PostEventListener postEventListener() {
 			return new PostEventListener();
 		}
 

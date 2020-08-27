@@ -98,7 +98,7 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	static class ConfigWithRemoteResource {
 
 		@Bean
-		public RemoteResource resource() {
+		RemoteResource resource() {
 
 			ServiceInstanceProvider provider = new StaticServiceInstanceProvider(
 					new DefaultServiceInstance("instance", "service", "localhost", 80,

@@ -48,7 +48,7 @@ public class TestBootstrapConfiguration {
 
 	@Bean
 	@Qualifier("foo-during-bootstrap")
-	public String fooDuringBootstrap(ConfigurableEnvironment environment,
+	String fooDuringBootstrap(ConfigurableEnvironment environment,
 			ApplicationEventPublisher publisher) {
 		String property = environment.getProperty("test.bootstrap.foo", "undefined");
 
@@ -60,7 +60,7 @@ public class TestBootstrapConfiguration {
 	}
 
 	@Bean
-	public ApplicationContextInitializer<ConfigurableApplicationContext> customInitializer() {
+	ApplicationContextInitializer<ConfigurableApplicationContext> customInitializer() {
 		return new ApplicationContextInitializer<ConfigurableApplicationContext>() {
 
 			@Override

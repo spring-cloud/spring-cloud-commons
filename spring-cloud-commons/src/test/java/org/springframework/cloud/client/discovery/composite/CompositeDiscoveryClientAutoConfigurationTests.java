@@ -69,7 +69,7 @@ public class CompositeDiscoveryClientAutoConfigurationTests {
 	public static class Config {
 
 		@Bean
-		public DiscoveryClient customDiscoveryClient1() {
+		DiscoveryClient customDiscoveryClient1() {
 			return new DiscoveryClient() {
 				@Override
 				public String description() {

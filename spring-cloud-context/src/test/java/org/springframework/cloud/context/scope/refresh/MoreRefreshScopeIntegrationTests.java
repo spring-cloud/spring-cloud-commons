@@ -197,7 +197,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 		@Bean
 		@RefreshScope
-		public TestService service() {
+		TestService service() {
 			TestService service = new TestService();
 			service.setMessage(properties().getMessage());
 			service.setDelay(properties().getDelay());

@@ -95,7 +95,7 @@ public class FeaturesEndpointTests {
 		private List<HasFeatures> hasFeatures = new ArrayList<>();
 
 		@Bean
-		public FeaturesEndpoint cloudEndpoint() {
+		FeaturesEndpoint cloudEndpoint() {
 			return new FeaturesEndpoint(this.hasFeatures);
 		}
 

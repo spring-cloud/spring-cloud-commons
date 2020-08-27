@@ -97,7 +97,7 @@ public class BootstrapListenerHierarchyIntegrationTests {
 	static class RootConfiguration {
 
 		@Bean
-		public String rootBean() {
+		String rootBean() {
 			return "rootBean";
 		}
 

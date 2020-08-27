@@ -38,7 +38,7 @@ public class LifecycleMvcEndpointAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public EnvironmentManager environmentManager(ConfigurableEnvironment environment) {
+	EnvironmentManager environmentManager(ConfigurableEnvironment environment) {
 		return new EnvironmentManager(environment);
 	}
 

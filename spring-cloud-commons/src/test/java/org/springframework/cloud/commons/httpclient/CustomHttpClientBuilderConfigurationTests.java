@@ -63,7 +63,7 @@ class CustomHttpClientBuilderApplication {
 	static class MyConfig {
 
 		@Bean
-		public MyHttpClientBuilder builder() {
+		MyHttpClientBuilder builder() {
 			return new MyHttpClientBuilder();
 		}
 

@@ -72,7 +72,7 @@ class CustomOkHttpClientBuilderApplication {
 	static class MyConfig {
 
 		@Bean
-		public OkHttpClient.Builder builder() {
+		OkHttpClient.Builder builder() {
 			return new OkHttpClient.Builder().connectTimeout(1, TimeUnit.MILLISECONDS);
 		}
 

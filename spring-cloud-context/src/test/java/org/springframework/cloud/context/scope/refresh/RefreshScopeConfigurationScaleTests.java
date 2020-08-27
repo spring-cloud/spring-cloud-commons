@@ -177,13 +177,13 @@ public class RefreshScopeConfigurationScaleTests {
 
 		@Bean
 		@RefreshScope
-		public TestProperties properties() {
+		TestProperties properties() {
 			return new TestProperties();
 		}
 
 		@Bean
 		@RefreshScope
-		public ExampleService service(TestProperties properties) {
+		ExampleService service(TestProperties properties) {
 			ExampleService service = new ExampleService();
 			service.setMessage(properties.getMessage());
 			service.setDelay(properties.getDelay());

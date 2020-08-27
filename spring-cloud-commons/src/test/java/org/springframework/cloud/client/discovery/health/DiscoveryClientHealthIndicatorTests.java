@@ -92,7 +92,7 @@ public class DiscoveryClientHealthIndicatorTests {
 	public static class Config {
 
 		@Bean
-		public DiscoveryClient discoveryClient() {
+		DiscoveryClient discoveryClient() {
 			DiscoveryClient mock = mock(DiscoveryClient.class);
 			given(mock.description()).willReturn("TestDiscoveryClient");
 			given(mock.getServices()).willReturn(Arrays.asList("TestService1"));
@@ -100,7 +100,7 @@ public class DiscoveryClientHealthIndicatorTests {
 		}
 
 		@Bean
-		public DiscoveryHealthIndicator discoveryHealthIndicator() {
+		DiscoveryHealthIndicator discoveryHealthIndicator() {
 			return new DiscoveryHealthIndicator() {
 
 				@Override

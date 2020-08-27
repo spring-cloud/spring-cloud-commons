@@ -49,7 +49,7 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	@ConditionalOnMissingBean
-	public LoadBalancerClient blockingLoadBalancerClient(
+	LoadBalancerClient blockingLoadBalancerClient(
 			LoadBalancerClientFactory loadBalancerClientFactory,
 			LoadBalancerProperties properties) {
 		return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);

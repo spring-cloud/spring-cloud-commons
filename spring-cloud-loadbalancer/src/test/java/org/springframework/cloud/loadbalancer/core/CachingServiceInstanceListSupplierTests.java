@@ -77,7 +77,7 @@ class CachingServiceInstanceListSupplierTests {
 	protected static class TestConfig {
 
 		@Bean
-		public ReactiveDiscoveryClient reactiveDiscoveryClient() {
+		ReactiveDiscoveryClient reactiveDiscoveryClient() {
 			return new ReactiveDiscoveryClient() {
 				@Override
 				public String description() {
@@ -116,12 +116,12 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
-		public LoadBalancerProperties loadBalancerProperties() {
+		LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
 		}
 
 		@Bean
-		public WebClient.Builder webClientBuilder() {
+		WebClient.Builder webClientBuilder() {
 			return WebClient.builder();
 		}
 

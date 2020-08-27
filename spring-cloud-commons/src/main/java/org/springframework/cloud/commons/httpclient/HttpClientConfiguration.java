@@ -40,19 +40,19 @@ public class HttpClientConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public ApacheHttpClientConnectionManagerFactory connManFactory() {
+		ApacheHttpClientConnectionManagerFactory connManFactory() {
 			return new DefaultApacheHttpClientConnectionManagerFactory();
 		}
 
 		@Bean
 		@ConditionalOnMissingBean
-		public HttpClientBuilder apacheHttpClientBuilder() {
+		HttpClientBuilder apacheHttpClientBuilder() {
 			return HttpClientBuilder.create();
 		}
 
 		@Bean
 		@ConditionalOnMissingBean
-		public ApacheHttpClientFactory apacheHttpClientFactory(
+		ApacheHttpClientFactory apacheHttpClientFactory(
 				HttpClientBuilder builder) {
 			return new DefaultApacheHttpClientFactory(builder);
 		}
@@ -67,19 +67,19 @@ public class HttpClientConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public OkHttpClientConnectionPoolFactory connPoolFactory() {
+		OkHttpClientConnectionPoolFactory connPoolFactory() {
 			return new DefaultOkHttpClientConnectionPoolFactory();
 		}
 
 		@Bean
 		@ConditionalOnMissingBean
-		public OkHttpClient.Builder okHttpClientBuilder() {
+		OkHttpClient.Builder okHttpClientBuilder() {
 			return new OkHttpClient.Builder();
 		}
 
 		@Bean
 		@ConditionalOnMissingBean
-		public OkHttpClientFactory okHttpClientFactory(OkHttpClient.Builder builder) {
+		OkHttpClientFactory okHttpClientFactory(OkHttpClient.Builder builder) {
 			return new DefaultOkHttpClientFactory(builder);
 		}
 

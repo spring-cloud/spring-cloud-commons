@@ -47,7 +47,7 @@ public class AsyncLoadBalancerAutoConfiguration {
 		private List<AsyncRestTemplate> restTemplates = Collections.emptyList();
 
 		@Bean
-		public SmartInitializingSingleton loadBalancedAsyncRestTemplateInitializer(
+		SmartInitializingSingleton loadBalancedAsyncRestTemplateInitializer(
 				final List<AsyncRestTemplateCustomizer> customizers) {
 			return () -> {
 				for (AsyncRestTemplate restTemplate : AsyncRestTemplateCustomizerConfig.this.restTemplates) {
@@ -64,13 +64,13 @@ public class AsyncLoadBalancerAutoConfiguration {
 	static class LoadBalancerInterceptorConfig {
 
 		@Bean
-		public AsyncLoadBalancerInterceptor asyncLoadBalancerInterceptor(
+		AsyncLoadBalancerInterceptor asyncLoadBalancerInterceptor(
 				LoadBalancerClient loadBalancerClient) {
 			return new AsyncLoadBalancerInterceptor(loadBalancerClient);
 		}
 
 		@Bean
-		public AsyncRestTemplateCustomizer asyncRestTemplateCustomizer(
+		AsyncRestTemplateCustomizer asyncRestTemplateCustomizer(
 				final AsyncLoadBalancerInterceptor loadBalancerInterceptor) {
 			return restTemplate -> {
 				List<AsyncClientHttpRequestInterceptor> list = new ArrayList<>(

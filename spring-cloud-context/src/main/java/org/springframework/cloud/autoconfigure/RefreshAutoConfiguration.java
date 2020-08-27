@@ -88,20 +88,20 @@ public class RefreshAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean(RefreshScope.class)
-	public static RefreshScope refreshScope() {
+	static RefreshScope refreshScope() {
 		return new RefreshScope();
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
-	public static LoggingRebinder loggingRebinder() {
+	static LoggingRebinder loggingRebinder() {
 		return new LoggingRebinder();
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnBootstrapEnabled
-	public LegacyContextRefresher legacyContextRefresher(
+	LegacyContextRefresher legacyContextRefresher(
 			ConfigurableApplicationContext context, RefreshScope scope) {
 		return new LegacyContextRefresher(context, scope);
 	}
@@ -109,13 +109,13 @@ public class RefreshAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnBootstrapDisabled
-	public ConfigDataContextRefresher configDataContextRefresher(
+	ConfigDataContextRefresher configDataContextRefresher(
 			ConfigurableApplicationContext context, RefreshScope scope) {
 		return new ConfigDataContextRefresher(context, scope);
 	}
 
 	@Bean
-	public RefreshEventListener refreshEventListener(ContextRefresher contextRefresher) {
+	RefreshEventListener refreshEventListener(ContextRefresher contextRefresher) {
 		return new RefreshEventListener(contextRefresher);
 	}
 

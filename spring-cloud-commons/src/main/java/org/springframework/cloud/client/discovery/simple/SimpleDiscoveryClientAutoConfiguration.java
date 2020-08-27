@@ -64,7 +64,7 @@ public class SimpleDiscoveryClientAutoConfiguration
 
 	@Bean
 	@ConditionalOnMissingBean
-	public SimpleDiscoveryProperties simpleDiscoveryProperties(
+	SimpleDiscoveryProperties simpleDiscoveryProperties(
 			@Value("${spring.application.name:application}") String serviceId) {
 		simple.getLocal().setServiceId(serviceId);
 		simple.getLocal()
@@ -76,7 +76,7 @@ public class SimpleDiscoveryClientAutoConfiguration
 
 	@Bean
 	@Order
-	public DiscoveryClient simpleDiscoveryClient(SimpleDiscoveryProperties properties) {
+	DiscoveryClient simpleDiscoveryClient(SimpleDiscoveryProperties properties) {
 		return new SimpleDiscoveryClient(properties);
 	}
 

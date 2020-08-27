@@ -71,7 +71,7 @@ public class RefreshScopeNullBeanIntegrationTests {
 
 		@Bean
 		@RefreshScope
-		public OptionalService service() {
+		OptionalService service() {
 			return null;
 		}
 
@@ -86,7 +86,7 @@ public class RefreshScopeNullBeanIntegrationTests {
 		private OptionalService optionalService;
 
 		@Bean
-		public MyCustomComponent myCustomComponent() {
+		MyCustomComponent myCustomComponent() {
 			return new MyCustomComponent(this.optionalService);
 		}
 

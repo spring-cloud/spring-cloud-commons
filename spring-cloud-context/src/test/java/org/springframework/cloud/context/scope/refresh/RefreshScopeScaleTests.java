@@ -164,7 +164,7 @@ public class RefreshScopeScaleTests {
 
 		@Bean
 		@RefreshScope
-		public ExampleService service() {
+		ExampleService service() {
 			ExampleService service = new ExampleService();
 			service.setMessage(this.properties.getMessage());
 			service.setDelay(this.properties.getDelay());

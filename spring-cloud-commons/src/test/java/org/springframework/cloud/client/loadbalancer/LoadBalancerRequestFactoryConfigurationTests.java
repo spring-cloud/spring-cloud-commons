@@ -141,7 +141,7 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 	static class Transformer {
 
 		@Bean
-		public LoadBalancerRequestTransformer transformer() {
+		LoadBalancerRequestTransformer transformer() {
 			return mock(LoadBalancerRequestTransformer.class);
 		}
 
@@ -153,7 +153,7 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 
 		@Bean
 		@Order(LoadBalancerRequestTransformer.DEFAULT_ORDER + 1)
-		public LoadBalancerRequestTransformer transformer2() {
+		LoadBalancerRequestTransformer transformer2() {
 			return mock(LoadBalancerRequestTransformer.class);
 		}
 
@@ -163,7 +163,7 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 	static class NoTransformer {
 
 		@Bean
-		public LoadBalancerClient loadBalancerClient() {
+		LoadBalancerClient loadBalancerClient() {
 			return mock(LoadBalancerClient.class);
 		}
 

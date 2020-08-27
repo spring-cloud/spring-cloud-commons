@@ -68,7 +68,7 @@ public class RefreshEndpointAutoConfiguration {
 		@ConditionalOnBean(ContextRefresher.class)
 		@ConditionalOnAvailableEndpoint
 		@ConditionalOnMissingBean
-		public RefreshEndpoint refreshEndpoint(ContextRefresher contextRefresher) {
+		RefreshEndpoint refreshEndpoint(ContextRefresher contextRefresher) {
 			return new RefreshEndpoint(contextRefresher);
 		}
 
@@ -86,7 +86,7 @@ class RestartEndpointWithIntegrationConfiguration {
 	@Bean
 	@ConditionalOnAvailableEndpoint
 	@ConditionalOnMissingBean
-	public RestartEndpoint restartEndpoint() {
+	RestartEndpoint restartEndpoint() {
 		RestartEndpoint endpoint = new RestartEndpoint();
 		if (this.exporter != null) {
 			endpoint.setIntegrationMBeanExporter(this.exporter);
@@ -103,7 +103,7 @@ class RestartEndpointWithoutIntegrationConfiguration {
 	@Bean
 	@ConditionalOnAvailableEndpoint
 	@ConditionalOnMissingBean
-	public RestartEndpoint restartEndpointWithoutIntegration() {
+	RestartEndpoint restartEndpointWithoutIntegration() {
 		return new RestartEndpoint();
 	}
 
@@ -116,7 +116,7 @@ class PauseResumeEndpointsConfiguration {
 	@ConditionalOnBean(RestartEndpoint.class)
 	@ConditionalOnMissingBean
 	@ConditionalOnAvailableEndpoint
-	public RestartEndpoint.PauseEndpoint pauseEndpoint(RestartEndpoint restartEndpoint) {
+	RestartEndpoint.PauseEndpoint pauseEndpoint(RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getPauseEndpoint();
 	}
 
@@ -124,7 +124,7 @@ class PauseResumeEndpointsConfiguration {
 	@ConditionalOnBean(RestartEndpoint.class)
 	@ConditionalOnMissingBean
 	@ConditionalOnAvailableEndpoint
-	public RestartEndpoint.ResumeEndpoint resumeEndpoint(
+	RestartEndpoint.ResumeEndpoint resumeEndpoint(
 			RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getResumeEndpoint();
 	}

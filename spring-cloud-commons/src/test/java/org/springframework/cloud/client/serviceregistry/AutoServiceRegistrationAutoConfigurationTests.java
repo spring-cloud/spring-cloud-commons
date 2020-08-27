@@ -98,7 +98,7 @@ public class AutoServiceRegistrationAutoConfigurationTests {
 	static class HasAutoServiceRegistrationConfiguration {
 
 		@Bean
-		public AutoServiceRegistration autoServiceRegistration() {
+		AutoServiceRegistration autoServiceRegistration() {
 			return new AutoServiceRegistration() {
 			};
 		}

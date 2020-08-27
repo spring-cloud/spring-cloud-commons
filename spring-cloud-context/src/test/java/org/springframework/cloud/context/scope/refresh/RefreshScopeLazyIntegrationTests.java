@@ -209,7 +209,7 @@ public class RefreshScopeLazyIntegrationTests {
 		private TestProperties properties;
 
 		@Bean
-		public static org.springframework.cloud.context.scope.refresh.RefreshScope refreshScope() {
+		static org.springframework.cloud.context.scope.refresh.RefreshScope refreshScope() {
 			org.springframework.cloud.context.scope.refresh.RefreshScope scope = null;
 			scope = new org.springframework.cloud.context.scope.refresh.RefreshScope();
 			scope.setEager(false);
@@ -218,7 +218,7 @@ public class RefreshScopeLazyIntegrationTests {
 
 		@Bean
 		@RefreshScope
-		public ExampleService service() {
+		ExampleService service() {
 			ExampleService service = new ExampleService();
 			service.setMessage(this.properties.getMessage());
 			service.setDelay(this.properties.getDelay());

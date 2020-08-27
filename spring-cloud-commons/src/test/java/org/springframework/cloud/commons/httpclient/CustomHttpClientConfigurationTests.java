@@ -100,22 +100,22 @@ class CustomApplication {
 	static class MyConfig {
 
 		@Bean
-		public ApacheHttpClientFactory clientFactory() {
+		ApacheHttpClientFactory clientFactory() {
 			return new MyApacheHttpClientFactory();
 		}
 
 		@Bean
-		public ApacheHttpClientConnectionManagerFactory connectionManagerFactory() {
+		ApacheHttpClientConnectionManagerFactory connectionManagerFactory() {
 			return new MyApacheHttpClientConnectionManagerFactory();
 		}
 
 		@Bean
-		public OkHttpClientConnectionPoolFactory connectionPoolFactory() {
+		OkHttpClientConnectionPoolFactory connectionPoolFactory() {
 			return new MyOkHttpConnectionPoolFactory();
 		}
 
 		@Bean
-		public OkHttpClientFactory okHttpClientFactory() {
+		OkHttpClientFactory okHttpClientFactory() {
 			return new MyOkHttpClientFactory();
 		}
 

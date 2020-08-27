@@ -40,7 +40,7 @@ public class ServiceRegistryAutoConfiguration {
 
 		@Bean
 		@ConditionalOnAvailableEndpoint
-		public ServiceRegistryEndpoint serviceRegistryEndpoint(
+		ServiceRegistryEndpoint serviceRegistryEndpoint(
 				ServiceRegistry serviceRegistry) {
 			ServiceRegistryEndpoint endpoint = new ServiceRegistryEndpoint(
 					serviceRegistry);
