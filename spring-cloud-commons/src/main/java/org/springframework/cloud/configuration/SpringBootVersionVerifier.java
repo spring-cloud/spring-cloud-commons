@@ -87,8 +87,11 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		if (log.isDebugEnabled()) {
 			log.debug("Version found in Boot manifest [" + version + "]");
 		}
-		return StringUtils.hasText(version)
-				&& version.startsWith(stripWildCardFromVersion(s));
+		if (!StringUtils.hasText(version)) {
+			log.info("Cannot check Boot version");
+			return true;
+		}
+		return version.startsWith(stripWildCardFromVersion(s));
 	}
 
 	String getVersionFromManifest() {
