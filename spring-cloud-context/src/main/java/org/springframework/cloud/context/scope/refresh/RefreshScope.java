@@ -124,7 +124,7 @@ public class RefreshScope extends GenericScope implements ApplicationContextAwar
 			BeanDefinition definition = this.registry.getBeanDefinition(name);
 			if (this.getName().equals(definition.getScope())
 					&& !definition.isLazyInit()) {
-				Object bean = this.context.getBean(name);
+				 this.context.getBean(name);
 			}
 		}
 	}
