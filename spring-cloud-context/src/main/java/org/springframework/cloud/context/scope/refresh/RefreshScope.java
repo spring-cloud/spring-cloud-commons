@@ -125,9 +125,6 @@ public class RefreshScope extends GenericScope implements ApplicationContextAwar
 			if (this.getName().equals(definition.getScope())
 					&& !definition.isLazyInit()) {
 				Object bean = this.context.getBean(name);
-				if (bean != null) {
-					bean.getClass();
-				}
 			}
 		}
 	}
