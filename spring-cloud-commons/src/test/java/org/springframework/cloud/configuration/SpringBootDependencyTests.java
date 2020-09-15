@@ -132,7 +132,7 @@ public class SpringBootDependencyTests {
 				acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
-				return "";
+				return "2.1";
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
@@ -207,7 +207,7 @@ public class SpringBootDependencyTests {
 				acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
-				return "";
+				return "2.0";
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.remove("2.1");
