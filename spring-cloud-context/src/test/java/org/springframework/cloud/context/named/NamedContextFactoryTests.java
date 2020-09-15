@@ -54,6 +54,18 @@ public class NamedContextFactoryTests {
 		Bar foobar = factory.getInstance("foo", Bar.class);
 		then(foobar).as("bar was not null").isNull();
 
+		Baz fooBaz = factory.getInstance("foo", Baz.class);
+		then(fooBaz).as("fooBaz was null").isNotNull();
+
+		Object fooContainerFoo = factory.getInstance("foo", Container.class, Foo.class);
+		then(fooContainerFoo).as("fooContainerFoo was null").isNotNull();
+
+		Object fooContainerBar = factory.getInstance("foo", Container.class, Bar.class);
+		then(fooContainerBar).as("fooContainerBar was not null").isNull();
+
+		Object barContainerBar = factory.getInstance("bar", Container.class, Bar.class);
+		then(barContainerBar).as("barContainerBar was null").isNotNull();
+
 		Map<String, Baz> fooBazes = factory.getInstances("foo", Baz.class);
 		then(fooBazes).as("fooBazes was null").isNotNull();
 		then(fooBazes.size()).as("fooBazes size was wrong").isEqualTo(1);
@@ -146,6 +158,11 @@ public class NamedContextFactoryTests {
 			return new Foo();
 		}
 
+		@Bean
+		Container<Foo> fooContainer() {
+			return new Container<>(new Foo());
+		}
+
 	}
 
 	static class Foo {
@@ -164,9 +181,28 @@ public class NamedContextFactoryTests {
 			return new Baz();
 		}
 
+		@Bean
+		Container<Bar> barContainer() {
+			return new Container<>(new Bar());
+		}
+
 	}
 
 	static class Bar {
+
+	}
+
+	static class Container<T> {
+
+		private final T item;
+
+		Container(T item) {
+			this.item = item;
+		}
+
+		public T getItem() {
+			return this.item;
+		}
 
 	}
 

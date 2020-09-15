@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.context.ApplicationContext;
@@ -143,9 +144,11 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 
 	public <T> T getInstance(String name, Class<T> type) {
 		AnnotationConfigApplicationContext context = getContext(name);
-		if (BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context,
-				type).length > 0) {
+		try {
 			return context.getBean(type);
+		}
+		catch (NoSuchBeanDefinitionException e) {
+			// ignore
 		}
 		return null;
 	}
@@ -181,11 +184,8 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 
 	public <T> Map<String, T> getInstances(String name, Class<T> type) {
 		AnnotationConfigApplicationContext context = getContext(name);
-		if (BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context,
-				type).length > 0) {
-			return BeanFactoryUtils.beansOfTypeIncludingAncestors(context, type);
-		}
-		return null;
+
+		return BeanFactoryUtils.beansOfTypeIncludingAncestors(context, type);
 	}
 
 	/**
