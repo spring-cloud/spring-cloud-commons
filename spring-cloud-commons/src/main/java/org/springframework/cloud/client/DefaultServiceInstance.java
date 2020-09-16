@@ -175,4 +175,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 				this.secure, this.metadata);
 	}
 
+	@Override
+	public String getScheme() {
+		return this.isSecure() ? "https" : "http";
+	}
+
 }

@@ -177,6 +177,11 @@ public class SimpleDiscoveryProperties {
 			return this.metadata;
 		}
 
+		@Override
+		public String getScheme() {
+			return this.isSecure() ? "https" : "http";
+		}
+
 	}
 
 }
