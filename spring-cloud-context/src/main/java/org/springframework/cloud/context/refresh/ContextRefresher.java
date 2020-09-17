@@ -53,23 +53,20 @@ public abstract class ContextRefresher {
 
 	protected static final String[] DEFAULT_PROPERTY_SOURCES = new String[] {
 			// order matters, if cli args aren't first, things get messy
-			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME,
-			"defaultProperties" };
+			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME, "defaultProperties" };
 
 	protected Set<String> standardSources = new HashSet<>(
 			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
 					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME,
-					StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME,
-					"configurationProperties"));
+					StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, "configurationProperties"));
 
 	private ConfigurableApplicationContext context;
 
 	private RefreshScope scope;
 
-	protected ContextRefresher(ConfigurableApplicationContext context,
-			RefreshScope scope) {
+	protected ContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
 		this.context = context;
 		this.scope = scope;
 	}
@@ -89,11 +86,9 @@ public abstract class ContextRefresher {
 	}
 
 	public synchronized Set<String> refreshEnvironment() {
-		Map<String, Object> before = extract(
-				this.context.getEnvironment().getPropertySources());
+		Map<String, Object> before = extract(this.context.getEnvironment().getPropertySources());
 		updateEnvironment();
-		Set<String> keys = changes(before,
-				extract(this.context.getEnvironment().getPropertySources())).keySet();
+		Set<String> keys = changes(before, extract(this.context.getEnvironment().getPropertySources())).keySet();
 		this.context.publishEvent(new EnvironmentChangeEvent(this.context, keys));
 		return keys;
 	}
@@ -110,8 +105,7 @@ public abstract class ContextRefresher {
 		for (String name : DEFAULT_PROPERTY_SOURCES) {
 			if (input.getPropertySources().contains(name)) {
 				if (capturedPropertySources.contains(name)) {
-					capturedPropertySources.replace(name,
-							input.getPropertySources().get(name));
+					capturedPropertySources.replace(name, input.getPropertySources().get(name));
 				}
 				else {
 					capturedPropertySources.addLast(input.getPropertySources().get(name));
@@ -125,13 +119,11 @@ public abstract class ContextRefresher {
 		map.put("spring.main.sources", "");
 		// gh-678 without this apps with this property set to REACTIVE or SERVLET fail
 		map.put("spring.main.web-application-type", "NONE");
-		capturedPropertySources
-				.addFirst(new MapPropertySource(REFRESH_ARGS_PROPERTY_SOURCE, map));
+		capturedPropertySources.addFirst(new MapPropertySource(REFRESH_ARGS_PROPERTY_SOURCE, map));
 		return environment;
 	}
 
-	private Map<String, Object> changes(Map<String, Object> before,
-			Map<String, Object> after) {
+	private Map<String, Object> changes(Map<String, Object> before, Map<String, Object> after) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		for (String key : before.keySet()) {
 			if (!after.containsKey(key)) {
@@ -177,8 +169,7 @@ public abstract class ContextRefresher {
 		if (parent instanceof CompositePropertySource) {
 			try {
 				List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
-				for (PropertySource<?> source : ((CompositePropertySource) parent)
-						.getPropertySources()) {
+				for (PropertySource<?> source : ((CompositePropertySource) parent).getPropertySources()) {
 					sources.add(0, source);
 				}
 				for (PropertySource<?> source : sources) {

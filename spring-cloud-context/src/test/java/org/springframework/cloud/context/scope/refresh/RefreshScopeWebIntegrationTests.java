@@ -58,8 +58,7 @@ public class RefreshScopeWebIntegrationTests {
 
 	@Test
 	public void scopeOnBeanDefinition() throws Exception {
-		then(this.beanFactory.getBeanDefinition("scopedTarget.application").getScope())
-				.isEqualTo("refresh");
+		then(this.beanFactory.getBeanDefinition("scopedTarget.application").getScope()).isEqualTo("refresh");
 	}
 
 	@Test

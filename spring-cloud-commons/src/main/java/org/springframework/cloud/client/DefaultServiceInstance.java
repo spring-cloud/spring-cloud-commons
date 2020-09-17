@@ -49,8 +49,8 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param secure indicates whether or not the connection needs to be secure.
 	 * @param metadata a map containing metadata.
 	 */
-	public DefaultServiceInstance(String instanceId, String serviceId, String host,
-			int port, boolean secure, Map<String, String> metadata) {
+	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
+			Map<String, String> metadata) {
 		this.instanceId = instanceId;
 		this.serviceId = serviceId;
 		this.host = host;
@@ -66,8 +66,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param port the port on which the service is running.
 	 * @param secure indicates whether or not the connection needs to be secure.
 	 */
-	public DefaultServiceInstance(String instanceId, String serviceId, String host,
-			int port, boolean secure) {
+	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure) {
 		this(instanceId, serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
@@ -93,8 +92,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @deprecated - use other constructors
 	 */
 	@Deprecated
-	public DefaultServiceInstance(String serviceId, String host, int port,
-			boolean secure) {
+	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure) {
 		this(serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
@@ -105,8 +103,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 */
 	public static URI getUri(ServiceInstance instance) {
 		String scheme = (instance.isSecure()) ? "https" : "http";
-		String uri = String.format("%s://%s:%s", scheme, instance.getHost(),
-				instance.getPort());
+		String uri = String.format("%s://%s:%s", scheme, instance.getHost(), instance.getPort());
 		return URI.create(uri);
 	}
 
@@ -147,10 +144,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	@Override
 	public String toString() {
-		return "DefaultServiceInstance{" + "instanceId='" + this.instanceId + '\''
-				+ ", serviceId='" + this.serviceId + '\'' + ", host='" + this.host + '\''
-				+ ", port=" + this.port + ", secure=" + this.secure + ", metadata="
-				+ this.metadata + '}';
+		return "DefaultServiceInstance{" + "instanceId='" + this.instanceId + '\'' + ", serviceId='" + this.serviceId
+				+ '\'' + ", host='" + this.host + '\'' + ", port=" + this.port + ", secure=" + this.secure
+				+ ", metadata=" + this.metadata + '}';
 	}
 
 	@Override
@@ -162,17 +158,14 @@ public class DefaultServiceInstance implements ServiceInstance {
 			return false;
 		}
 		DefaultServiceInstance that = (DefaultServiceInstance) o;
-		return this.port == that.port && this.secure == that.secure
-				&& Objects.equals(this.instanceId, that.instanceId)
-				&& Objects.equals(this.serviceId, that.serviceId)
-				&& Objects.equals(this.host, that.host)
+		return this.port == that.port && this.secure == that.secure && Objects.equals(this.instanceId, that.instanceId)
+				&& Objects.equals(this.serviceId, that.serviceId) && Objects.equals(this.host, that.host)
 				&& Objects.equals(this.metadata, that.metadata);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.instanceId, this.serviceId, this.host, this.port,
-				this.secure, this.metadata);
+		return Objects.hash(this.instanceId, this.serviceId, this.host, this.port, this.secure, this.metadata);
 	}
 
 }

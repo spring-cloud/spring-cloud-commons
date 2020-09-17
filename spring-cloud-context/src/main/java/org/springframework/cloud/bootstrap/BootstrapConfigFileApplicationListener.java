@@ -26,8 +26,7 @@ import org.springframework.context.ApplicationEvent;
  * @since 3.0.0
  */
 @SuppressWarnings("deprecation")
-public class BootstrapConfigFileApplicationListener
-		extends ConfigFileApplicationListener {
+public class BootstrapConfigFileApplicationListener extends ConfigFileApplicationListener {
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {

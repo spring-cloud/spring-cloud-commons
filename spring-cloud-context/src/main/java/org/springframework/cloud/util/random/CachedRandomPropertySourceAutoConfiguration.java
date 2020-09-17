@@ -37,8 +37,7 @@ public class CachedRandomPropertySourceAutoConfiguration {
 	@PostConstruct
 	public void initialize() {
 		MutablePropertySources propertySources = environment.getPropertySources();
-		PropertySource propertySource = propertySources
-				.get(RandomValuePropertySource.RANDOM_PROPERTY_SOURCE_NAME);
+		PropertySource propertySource = propertySources.get(RandomValuePropertySource.RANDOM_PROPERTY_SOURCE_NAME);
 		if (propertySource != null) {
 			propertySources.addLast(new CachedRandomPropertySource(propertySource));
 		}

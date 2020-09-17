@@ -45,8 +45,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class,
-		properties = { "test.messages[0]=one", "test.messages[1]=two" })
+@SpringBootTest(classes = TestConfiguration.class, properties = { "test.messages[0]=one", "test.messages[1]=two" })
 public class RefreshScopeListBindingIntegrationTests {
 
 	@Autowired
@@ -93,8 +92,7 @@ public class RefreshScopeListBindingIntegrationTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
-	@Import({ RefreshAutoConfiguration.class,
-			PropertyPlaceholderAutoConfiguration.class })
+	@Import({ RefreshAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 
 		@Bean

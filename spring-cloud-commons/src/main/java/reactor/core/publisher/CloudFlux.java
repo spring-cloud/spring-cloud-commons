@@ -54,8 +54,7 @@ public abstract class CloudFlux<T> extends Flux<T> {
 	 * @return a new {@link reactor.core.publisher.Flux} behaving like the fastest of its
 	 * sources
 	 */
-	public static <I> Flux<I> firstNonEmpty(
-			Iterable<? extends Publisher<? extends I>> sources) {
+	public static <I> Flux<I> firstNonEmpty(Iterable<? extends Publisher<? extends I>> sources) {
 		return onAssembly(new FluxFirstNonEmptyEmitting<>(sources));
 	}
 

@@ -49,8 +49,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 	@Test
 	public void restTemplateGetsLoadBalancerInterceptor() {
 		ConfigurableApplicationContext context = init(OneRestTemplate.class);
-		final Map<String, AsyncRestTemplate> restTemplates = context
-				.getBeansOfType(AsyncRestTemplate.class);
+		final Map<String, AsyncRestTemplate> restTemplates = context.getBeansOfType(AsyncRestTemplate.class);
 
 		then(restTemplates).isNotNull();
 		then(restTemplates.values()).hasSize(1);
@@ -61,8 +60,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 	}
 
 	private void assertLoadBalanced(AsyncRestTemplate restTemplate) {
-		List<AsyncClientHttpRequestInterceptor> interceptors = restTemplate
-				.getInterceptors();
+		List<AsyncClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
 		then(interceptors).hasSize(1);
 		AsyncClientHttpRequestInterceptor interceptor = interceptors.get(0);
 		then(interceptor).isInstanceOf(AsyncLoadBalancerInterceptor.class);
@@ -71,8 +69,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 	@Test
 	public void multipleRestTemplates() {
 		ConfigurableApplicationContext context = init(TwoRestTemplates.class);
-		final Map<String, AsyncRestTemplate> restTemplates = context
-				.getBeansOfType(AsyncRestTemplate.class);
+		final Map<String, AsyncRestTemplate> restTemplates = context.getBeansOfType(AsyncRestTemplate.class);
 
 		then(restTemplates).isNotNull();
 		Collection<AsyncRestTemplate> templates = restTemplates.values();
@@ -160,8 +157,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public <T> ServiceInstance choose(String serviceId, Request<T> request) {
-			return new DefaultServiceInstance(serviceId, serviceId, serviceId,
-					this.random.nextInt(40000), false);
+			return new DefaultServiceInstance(serviceId, serviceId, serviceId, this.random.nextInt(40000), false);
 		}
 
 		@Override
@@ -175,8 +171,7 @@ public class AsyncLoadBalancerAutoConfigurationTests {
 		}
 
 		@Override
-		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-				LoadBalancerRequest<T> request) {
+		public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) {
 			try {
 				return request.apply(choose(serviceId, REQUEST));
 			}

@@ -71,8 +71,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			public boolean isCompatible() {
 				try {
 					// deprecated 1.5
-					Class.forName(
-							"org.springframework.boot.context.config.ResourceNotFoundException");
+					Class.forName("org.springframework.boot.context.config.ResourceNotFoundException");
 					return true;
 				}
 				catch (ClassNotFoundException e) {
@@ -179,8 +178,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			public boolean isCompatible() {
 				try {
 					// since 2.3
-					Class.forName(
-							"org.springframework.boot.context.propertie.BoundConfigurationProperties");
+					Class.forName("org.springframework.boot.context.propertie.BoundConfigurationProperties");
 					return true;
 				}
 				catch (ClassNotFoundException e) {
@@ -194,20 +192,18 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 	private String errorDescription() {
 		String versionFromManifest = getVersionFromManifest();
 		if (StringUtils.hasText(versionFromManifest)) {
-			return String.format(
-					"Spring Boot [%s] is not compatible with this Spring Cloud release train",
+			return String.format("Spring Boot [%s] is not compatible with this Spring Cloud release train",
 					versionFromManifest);
 		}
 		return "Spring Boot is not compatible with this Spring Cloud release train";
 	}
 
 	private String action() {
-		return String.format(
-				"Change Spring Boot version to one of the following versions %s .\n"
-						+ "You can find the latest Spring Boot versions here [%s]. \n"
-						+ "If you want to learn more about the Spring Cloud Release train compatibility, you "
-						+ "can visit this page [%s] and check the [Release Trains] section.\n"
-						+ "If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]",
+		return String.format("Change Spring Boot version to one of the following versions %s .\n"
+				+ "You can find the latest Spring Boot versions here [%s]. \n"
+				+ "If you want to learn more about the Spring Cloud Release train compatibility, you "
+				+ "can visit this page [%s] and check the [Release Trains] section.\n"
+				+ "If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]",
 				this.acceptedVersions, "https://spring.io/projects/spring-boot#learn",
 				"https://spring.io/projects/spring-cloud#overview");
 	}

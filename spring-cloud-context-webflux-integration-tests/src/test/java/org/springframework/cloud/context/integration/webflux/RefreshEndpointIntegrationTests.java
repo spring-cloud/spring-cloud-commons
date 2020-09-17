@@ -38,8 +38,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = RefreshEndpointIntegrationTests.ClientApp.class,
-		properties = { "management.endpoints.web.exposure.include=*" },
-		webEnvironment = RANDOM_PORT)
+		properties = { "management.endpoints.web.exposure.include=*" }, webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
 
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
@@ -50,9 +49,8 @@ public class RefreshEndpointIntegrationTests {
 	@Test
 	public void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
-		ResponseEntity<String> entity = template.postForEntity(
-				"http://localhost:" + this.port + BASE_PATH + "/refresh", null,
-				String.class);
+		ResponseEntity<String> entity = template.postForEntity("http://localhost:" + this.port + BASE_PATH + "/refresh",
+				null, String.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 

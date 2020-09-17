@@ -37,8 +37,7 @@ import static org.springframework.cloud.util.PropertyUtils.BOOTSTRAP_ENABLED_PRO
  */
 public class LegacyContextRefresher extends ContextRefresher {
 
-	public LegacyContextRefresher(ConfigurableApplicationContext context,
-			RefreshScope scope) {
+	public LegacyContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
 		super(context, scope);
 	}
 
@@ -50,23 +49,19 @@ public class LegacyContextRefresher extends ContextRefresher {
 	/* For testing. */ ConfigurableApplicationContext addConfigFilesToEnvironment() {
 		ConfigurableApplicationContext capture = null;
 		try {
-			StandardEnvironment environment = copyEnvironment(
-					getContext().getEnvironment());
+			StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
 			SpringApplicationBuilder builder = new SpringApplicationBuilder(Empty.class)
-					.properties(BOOTSTRAP_ENABLED_PROPERTY + "=true")
-					.bannerMode(Banner.Mode.OFF).web(WebApplicationType.NONE)
-					.environment(environment);
+					.properties(BOOTSTRAP_ENABLED_PROPERTY + "=true").bannerMode(Banner.Mode.OFF)
+					.web(WebApplicationType.NONE).environment(environment);
 			// Just the listeners that affect the environment (e.g. excluding logging
 			// listener because it has side effects)
-			builder.application()
-					.setListeners(Arrays.asList(new BootstrapApplicationListener(),
-							new BootstrapConfigFileApplicationListener()));
+			builder.application().setListeners(
+					Arrays.asList(new BootstrapApplicationListener(), new BootstrapConfigFileApplicationListener()));
 			capture = builder.run();
 			if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
 				environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
 			}
-			MutablePropertySources target = getContext().getEnvironment()
-					.getPropertySources();
+			MutablePropertySources target = getContext().getEnvironment().getPropertySources();
 			String targetName = null;
 			for (PropertySource<?> source : environment.getPropertySources()) {
 				String name = source.getName();

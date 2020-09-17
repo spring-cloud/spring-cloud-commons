@@ -66,8 +66,7 @@ import org.springframework.util.StringUtils;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RefreshScope.class)
-@ConditionalOnProperty(name = RefreshAutoConfiguration.REFRESH_SCOPE_ENABLED,
-		matchIfMissing = true)
+@ConditionalOnProperty(name = RefreshAutoConfiguration.REFRESH_SCOPE_ENABLED, matchIfMissing = true)
 @AutoConfigureBefore(HibernateJpaAutoConfiguration.class)
 public class RefreshAutoConfiguration {
 
@@ -101,16 +100,15 @@ public class RefreshAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnBootstrapEnabled
-	public LegacyContextRefresher legacyContextRefresher(
-			ConfigurableApplicationContext context, RefreshScope scope) {
+	public LegacyContextRefresher legacyContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
 		return new LegacyContextRefresher(context, scope);
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnBootstrapDisabled
-	public ConfigDataContextRefresher configDataContextRefresher(
-			ConfigurableApplicationContext context, RefreshScope scope) {
+	public ConfigDataContextRefresher configDataContextRefresher(ConfigurableApplicationContext context,
+			RefreshScope scope) {
 		return new ConfigDataContextRefresher(context, scope);
 	}
 
@@ -170,33 +168,27 @@ public class RefreshAutoConfiguration {
 		}
 
 		@Override
-		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-				throws BeansException {
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		}
 
 		@Override
-		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
-				throws BeansException {
+		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 			bindEnvironmentIfNeeded(registry);
 			for (String name : registry.getBeanDefinitionNames()) {
 				BeanDefinition definition = registry.getBeanDefinition(name);
 				if (isApplicable(registry, name, definition)) {
-					BeanDefinitionHolder holder = new BeanDefinitionHolder(definition,
-							name);
-					BeanDefinitionHolder proxy = ScopedProxyUtils
-							.createScopedProxy(holder, registry, true);
+					BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, name);
+					BeanDefinitionHolder proxy = ScopedProxyUtils.createScopedProxy(holder, registry, true);
 					definition.setScope("refresh");
 					if (registry.containsBeanDefinition(proxy.getBeanName())) {
 						registry.removeBeanDefinition(proxy.getBeanName());
 					}
-					registry.registerBeanDefinition(proxy.getBeanName(),
-							proxy.getBeanDefinition());
+					registry.registerBeanDefinition(proxy.getBeanName(), proxy.getBeanDefinition());
 				}
 			}
 		}
 
-		private boolean isApplicable(BeanDefinitionRegistry registry, String name,
-				BeanDefinition definition) {
+		private boolean isApplicable(BeanDefinitionRegistry registry, String name, BeanDefinition definition) {
 			String scope = definition.getScope();
 			if (REFRESH_SCOPE_NAME.equals(scope)) {
 				// Already refresh scoped
@@ -220,8 +212,7 @@ public class RefreshAutoConfiguration {
 				if (this.environment == null) {
 					this.environment = new StandardEnvironment();
 				}
-				Binder.get(this.environment).bind("spring.cloud.refresh",
-						Bindable.ofInstance(this));
+				Binder.get(this.environment).bind("spring.cloud.refresh", Bindable.ofInstance(this));
 				this.bound = true;
 			}
 		}

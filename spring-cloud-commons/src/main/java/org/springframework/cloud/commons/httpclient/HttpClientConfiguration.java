@@ -33,8 +33,7 @@ import org.springframework.context.annotation.Configuration;
 public class HttpClientConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.apache.enabled",
-			matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.apache.enabled", matchIfMissing = true)
 	@ConditionalOnClass(HttpClient.class)
 	static class ApacheHttpClientConfiguration {
 
@@ -52,16 +51,14 @@ public class HttpClientConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public ApacheHttpClientFactory apacheHttpClientFactory(
-				HttpClientBuilder builder) {
+		public ApacheHttpClientFactory apacheHttpClientFactory(HttpClientBuilder builder) {
 			return new DefaultApacheHttpClientFactory(builder);
 		}
 
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.ok.enabled",
-			matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.ok.enabled", matchIfMissing = true)
 	@ConditionalOnClass(OkHttpClient.class)
 	static class OkHttpClientConfiguration {
 

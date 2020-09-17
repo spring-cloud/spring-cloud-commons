@@ -98,8 +98,7 @@ public class RefreshScopeIntegrationTests {
 		then(ExampleService.getDestroyCount()).isEqualTo(1);
 		then(id2).isNotSameAs(id1);
 		then(ExampleService.event).isNotNull();
-		then(ExampleService.event.getName())
-				.isEqualTo(RefreshScopeRefreshedEvent.DEFAULT_NAME);
+		then(ExampleService.event.getName()).isEqualTo(RefreshScopeRefreshedEvent.DEFAULT_NAME);
 	}
 
 	@Test
@@ -118,8 +117,7 @@ public class RefreshScopeIntegrationTests {
 		then(ExampleService.getDestroyCount()).isEqualTo(1);
 		then(id2).isNotSameAs(id1);
 		then(ExampleService.event).isNotNull();
-		then(ExampleService.event.getName())
-				.isEqualTo(GenericScope.SCOPED_TARGET_PREFIX + "service");
+		then(ExampleService.event.getName()).isEqualTo(GenericScope.SCOPED_TARGET_PREFIX + "service");
 	}
 
 	// see gh-349
@@ -137,8 +135,8 @@ public class RefreshScopeIntegrationTests {
 
 	}
 
-	public static class ExampleService implements Service, InitializingBean,
-			DisposableBean, ApplicationListener<RefreshScopeRefreshedEvent> {
+	public static class ExampleService
+			implements Service, InitializingBean, DisposableBean, ApplicationListener<RefreshScopeRefreshedEvent> {
 
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 

@@ -38,8 +38,7 @@ public class RefreshScopeHealthIndicator extends AbstractHealthIndicator {
 
 	private ConfigurationPropertiesRebinder rebinder;
 
-	public RefreshScopeHealthIndicator(ObjectProvider<RefreshScope> scope,
-			ConfigurationPropertiesRebinder rebinder) {
+	public RefreshScopeHealthIndicator(ObjectProvider<RefreshScope> scope, ConfigurationPropertiesRebinder rebinder) {
 		this.scope = scope;
 		this.rebinder = rebinder;
 	}

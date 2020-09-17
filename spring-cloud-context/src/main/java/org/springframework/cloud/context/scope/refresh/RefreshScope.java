@@ -64,8 +64,8 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  *
  */
 @ManagedResource
-public class RefreshScope extends GenericScope implements ApplicationContextAware,
-		ApplicationListener<ContextRefreshedEvent>, Ordered {
+public class RefreshScope extends GenericScope
+		implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, Ordered {
 
 	private ApplicationContext context;
 
@@ -101,8 +101,7 @@ public class RefreshScope extends GenericScope implements ApplicationContextAwar
 	}
 
 	@Override
-	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
-			throws BeansException {
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 		this.registry = registry;
 		super.postProcessBeanDefinitionRegistry(registry);
 	}
@@ -113,8 +112,7 @@ public class RefreshScope extends GenericScope implements ApplicationContextAwar
 	}
 
 	public void start(ContextRefreshedEvent event) {
-		if (event.getApplicationContext() == this.context && this.eager
-				&& this.registry != null) {
+		if (event.getApplicationContext() == this.context && this.eager && this.registry != null) {
 			eagerlyInitialize();
 		}
 	}
@@ -122,8 +120,7 @@ public class RefreshScope extends GenericScope implements ApplicationContextAwar
 	private void eagerlyInitialize() {
 		for (String name : this.context.getBeanDefinitionNames()) {
 			BeanDefinition definition = this.registry.getBeanDefinition(name);
-			if (this.getName().equals(definition.getScope())
-					&& !definition.isLazyInit()) {
+			if (this.getName().equals(definition.getScope()) && !definition.isLazyInit()) {
 				Object bean = this.context.getBean(name);
 				if (bean != null) {
 					bean.getClass();

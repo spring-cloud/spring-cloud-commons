@@ -64,16 +64,14 @@ public class SSHContextFactoryTests {
 	}
 
 	private static File saveKeyAndCert(KeyAndCert keyCert) throws Exception {
-		return saveKeyStore(keyCert.subject(),
-				() -> keyCert.storeKeyAndCert(KEY_PASSWORD));
+		return saveKeyStore(keyCert.subject(), () -> keyCert.storeKeyAndCert(KEY_PASSWORD));
 	}
 
 	private static File saveCert(KeyAndCert keyCert) throws Exception {
 		return saveKeyStore(keyCert.subject(), () -> keyCert.storeCert());
 	}
 
-	private static File saveKeyStore(String prefix, KeyStoreSupplier func)
-			throws Exception {
+	private static File saveKeyStore(String prefix, KeyStoreSupplier func) throws Exception {
 		File result = File.createTempFile(prefix, ".p12");
 		result.deleteOnExit();
 
@@ -103,8 +101,7 @@ public class SSHContextFactoryTests {
 	}
 
 	@Test
-	public void createKeyStoreFromProperties()
-			throws GeneralSecurityException, IOException {
+	public void createKeyStoreFromProperties() throws GeneralSecurityException, IOException {
 		SSLContextFactory factory = new SSLContextFactory(properties);
 		KeyStore store = factory.createKeyStore();
 
@@ -116,8 +113,7 @@ public class SSHContextFactoryTests {
 	}
 
 	@Test
-	public void createTrustStoreFromProperties()
-			throws GeneralSecurityException, IOException {
+	public void createTrustStoreFromProperties() throws GeneralSecurityException, IOException {
 		SSLContextFactory factory = new SSLContextFactory(properties);
 		KeyStore store = factory.createTrustStore();
 
@@ -126,8 +122,7 @@ public class SSHContextFactoryTests {
 	}
 
 	@Test
-	public void createSSLContextFromProperties()
-			throws GeneralSecurityException, IOException {
+	public void createSSLContextFromProperties() throws GeneralSecurityException, IOException {
 		SSLContextFactory factory = new SSLContextFactory(properties);
 		SSLContext context = factory.createSSLContext();
 		assertThat(context).isNotNull();

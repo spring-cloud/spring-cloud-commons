@@ -39,8 +39,7 @@ public class NamedContextFactoryTests {
 		parent.refresh();
 		TestClientFactory factory = new TestClientFactory();
 		factory.setApplicationContext(parent);
-		factory.setConfigurations(Arrays.asList(getSpec("foo", FooConfig.class),
-				getSpec("bar", BarConfig.class)));
+		factory.setConfigurations(Arrays.asList(getSpec("foo", FooConfig.class), getSpec("bar", BarConfig.class)));
 
 		Foo foo = factory.getInstance("foo", Foo.class);
 		then(foo).as("foo was null").isNotNull();
@@ -48,8 +47,7 @@ public class NamedContextFactoryTests {
 		Bar bar = factory.getInstance("bar", Bar.class);
 		then(bar).as("bar was null").isNotNull();
 
-		then(factory.getContextNames()).as("context names not exposed").contains("foo",
-				"bar");
+		then(factory.getContextNames()).as("context names not exposed").contains("foo", "bar");
 
 		Bar foobar = factory.getInstance("foo", Bar.class);
 		then(foobar).as("bar was not null").isNull();
@@ -78,12 +76,10 @@ public class NamedContextFactoryTests {
 		AnnotationConfigApplicationContext fooContext = factory.getContext("foo");
 		AnnotationConfigApplicationContext barContext = factory.getContext("bar");
 
-		then(fooContext.getClassLoader())
-				.as("foo context classloader does not match parent")
+		then(fooContext.getClassLoader()).as("foo context classloader does not match parent")
 				.isSameAs(parent.getClassLoader());
 
-		Assertions.assertThat(fooContext).hasFieldOrPropertyWithValue("customClassLoader",
-				true);
+		Assertions.assertThat(fooContext).hasFieldOrPropertyWithValue("customClassLoader", true);
 
 		factory.destroy();
 

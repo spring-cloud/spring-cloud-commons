@@ -45,18 +45,15 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ EndpointAutoConfiguration.class, Health.class })
-@AutoConfigureAfter({ LifecycleMvcEndpointAutoConfiguration.class,
-		RefreshAutoConfiguration.class })
-@Import({ RestartEndpointWithIntegrationConfiguration.class,
-		RestartEndpointWithoutIntegrationConfiguration.class,
+@AutoConfigureAfter({ LifecycleMvcEndpointAutoConfiguration.class, RefreshAutoConfiguration.class })
+@Import({ RestartEndpointWithIntegrationConfiguration.class, RestartEndpointWithoutIntegrationConfiguration.class,
 		PauseResumeEndpointsConfiguration.class })
 public class RefreshEndpointAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnEnabledHealthIndicator("refresh")
-	RefreshScopeHealthIndicator refreshScopeHealthIndicator(
-			ObjectProvider<RefreshScope> scope,
+	RefreshScopeHealthIndicator refreshScopeHealthIndicator(ObjectProvider<RefreshScope> scope,
 			ConfigurationPropertiesRebinder rebinder) {
 		return new RefreshScopeHealthIndicator(scope, rebinder);
 	}
@@ -124,8 +121,7 @@ class PauseResumeEndpointsConfiguration {
 	@ConditionalOnBean(RestartEndpoint.class)
 	@ConditionalOnMissingBean
 	@ConditionalOnAvailableEndpoint
-	public RestartEndpoint.ResumeEndpoint resumeEndpoint(
-			RestartEndpoint restartEndpoint) {
+	public RestartEndpoint.ResumeEndpoint resumeEndpoint(RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getResumeEndpoint();
 	}
 

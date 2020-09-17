@@ -44,8 +44,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @RunWith(SpringRunner.class)
 // @checkstyle:off
-@SpringBootTest(classes = AbstractAutoServiceRegistrationTests.Config.class,
-		properties = "management.port=0", webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = AbstractAutoServiceRegistrationTests.Config.class, properties = "management.port=0",
+		webEnvironment = RANDOM_PORT)
 // @checkstyle:on
 public class AbstractAutoServiceRegistrationTests {
 
@@ -66,28 +66,22 @@ public class AbstractAutoServiceRegistrationTests {
 
 	@Test
 	public void portsWork() {
-		then(this.autoRegistration.getPort().get()).isNotEqualTo(0)
-				.as("Lifecycle port is zero");
+		then(this.autoRegistration.getPort().get()).isNotEqualTo(0).as("Lifecycle port is zero");
 		then(this.managementPort).isNotEqualTo(this.autoRegistration.getPort().get())
 				.as("Lifecycle port is management port");
-		then(this.port).isEqualTo(this.autoRegistration.getPort().get())
-				.as("Lifecycle port is wrong");
+		then(this.port).isEqualTo(this.autoRegistration.getPort().get()).as("Lifecycle port is wrong");
 		then(this.autoRegistration.isRunning()).isTrue().as("Lifecycle not running");
-		then(this.autoRegistration.getServiceRegistry())
-				.isInstanceOf(TestServiceRegistry.class)
+		then(this.autoRegistration.getServiceRegistry()).isInstanceOf(TestServiceRegistry.class)
 				.as("ServiceRegistry is wrong type");
-		TestServiceRegistry serviceRegistry = (TestServiceRegistry) this.autoRegistration
-				.getServiceRegistry();
+		TestServiceRegistry serviceRegistry = (TestServiceRegistry) this.autoRegistration.getServiceRegistry();
 		then(serviceRegistry.isRegistered()).isTrue().as("Lifecycle not registered");
-		then(this.autoRegistration.getAppName()).as("Lifecycle appName is wrong")
-				.isEqualTo("application");
+		then(this.autoRegistration.getAppName()).as("Lifecycle appName is wrong").isEqualTo("application");
 	}
 
 	@Test
 	public void eventsFireTest() {
 		then(this.preEventListener.wasFired).isTrue();
-		then(this.preEventListener.registration.getServiceId())
-				.isEqualTo("testRegistration2");
+		then(this.preEventListener.registration.getServiceId()).isEqualTo("testRegistration2");
 		then(this.postEventListener.wasFired).isTrue();
 		then(this.postEventListener.config.getServiceId()).isEqualTo("testRegistration2");
 	}
@@ -113,8 +107,7 @@ public class AbstractAutoServiceRegistrationTests {
 
 	}
 
-	public static class PreEventListener
-			implements ApplicationListener<InstancePreRegisteredEvent> {
+	public static class PreEventListener implements ApplicationListener<InstancePreRegisteredEvent> {
 
 		public boolean wasFired = false;
 
@@ -128,8 +121,7 @@ public class AbstractAutoServiceRegistrationTests {
 
 	}
 
-	public static class PostEventListener
-			implements ApplicationListener<InstanceRegisteredEvent> {
+	public static class PostEventListener implements ApplicationListener<InstanceRegisteredEvent> {
 
 		public boolean wasFired = false;
 
@@ -242,8 +234,7 @@ public class AbstractAutoServiceRegistrationTests {
 
 	}
 
-	public static class TestAutoServiceRegistration
-			extends AbstractAutoServiceRegistration<TestRegistration> {
+	public static class TestAutoServiceRegistration extends AbstractAutoServiceRegistration<TestRegistration> {
 
 		private int port = 0;
 

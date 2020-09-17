@@ -86,8 +86,7 @@ class CachingServiceInstanceListSupplierTests {
 
 				@Override
 				public Flux<ServiceInstance> getInstances(String serviceId) {
-					return Flux.just(instance("1host", false),
-							instance("2host-secure", true));
+					return Flux.just(instance("1host", false), instance("2host-secure", true));
 				}
 
 				@Override
@@ -98,8 +97,7 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
-		ReactorLoadBalancer<ServiceInstance> reactorLoadBalancer(
-				ObjectProvider<ServiceInstanceListSupplier> provider) {
+		ReactorLoadBalancer<ServiceInstance> reactorLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> provider) {
 			return new RoundRobinLoadBalancer(provider, SERVICE_ID);
 		}
 
@@ -109,8 +107,7 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
-		BlockingLoadBalancerClient blockingLoadBalancerClient(
-				LoadBalancerClientFactory loadBalancerClientFactory,
+		BlockingLoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
 				LoadBalancerProperties properties) {
 			return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
 		}
@@ -127,26 +124,21 @@ class CachingServiceInstanceListSupplierTests {
 
 		@Bean
 		ServiceInstanceListSupplier supplier(ConfigurableApplicationContext context,
-				ReactiveDiscoveryClient discoveryClient,
-				LoadBalancerProperties loadBalancerProperties,
+				ReactiveDiscoveryClient discoveryClient, LoadBalancerProperties loadBalancerProperties,
 				WebClient.Builder webClientBuilder) {
 			DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
 					discoveryClient, context.getEnvironment());
 			HealthCheckServiceInstanceListSupplier delegate = new TestHealthCheckServiceInstanceListSupplier(
-					firstDelegate, loadBalancerProperties.getHealthCheck(),
-					webClientBuilder.build());
+					firstDelegate, loadBalancerProperties.getHealthCheck(), webClientBuilder.build());
 			delegate.afterPropertiesSet();
 			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
 					.getBeanProvider(LoadBalancerCacheManager.class);
-			return new CachingServiceInstanceListSupplier(delegate,
-					cacheManagerProvider.getIfAvailable());
+			return new CachingServiceInstanceListSupplier(delegate, cacheManagerProvider.getIfAvailable());
 		}
 
-		private static class TestHealthCheckServiceInstanceListSupplier
-				extends HealthCheckServiceInstanceListSupplier {
+		private static class TestHealthCheckServiceInstanceListSupplier extends HealthCheckServiceInstanceListSupplier {
 
-			TestHealthCheckServiceInstanceListSupplier(
-					ServiceInstanceListSupplier delegate,
+			TestHealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 					LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
 				super(delegate, healthCheck, webClient);
 			}

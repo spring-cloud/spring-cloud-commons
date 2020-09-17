@@ -59,12 +59,10 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 			Iterator<? extends Publisher<? extends T>> it;
 
 			try {
-				it = Objects.requireNonNull(iterable.iterator(),
-						"The iterator returned is null");
+				it = Objects.requireNonNull(iterable.iterator(), "The iterator returned is null");
 			}
 			catch (Throwable e) {
-				Operators.error(actual,
-						Operators.onOperatorError(e, actual.currentContext()));
+				Operators.error(actual, Operators.onOperatorError(e, actual.currentContext()));
 				return;
 			}
 
@@ -76,8 +74,7 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 					b = it.hasNext();
 				}
 				catch (Throwable e) {
-					Operators.error(actual,
-							Operators.onOperatorError(e, actual.currentContext()));
+					Operators.error(actual, Operators.onOperatorError(e, actual.currentContext()));
 					return;
 				}
 
@@ -88,12 +85,10 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 				Publisher<? extends T> p;
 
 				try {
-					p = Objects.requireNonNull(it.next(),
-							"The Publisher returned by the iterator is null");
+					p = Objects.requireNonNull(it.next(), "The Publisher returned by the iterator is null");
 				}
 				catch (Throwable e) {
-					Operators.error(actual,
-							Operators.onOperatorError(e, actual.currentContext()));
+					Operators.error(actual, Operators.onOperatorError(e, actual.currentContext()));
 					return;
 				}
 
@@ -118,8 +113,7 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 			Publisher<? extends T> p = a[0];
 
 			if (p == null) {
-				Operators.error(actual,
-						new NullPointerException("The single source Publisher is null"));
+				Operators.error(actual, new NullPointerException("The single source Publisher is null"));
 			}
 			else {
 				p.subscribe(actual);
@@ -176,8 +170,7 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 			return null;
 		}
 
-		void subscribe(Publisher<? extends T>[] sources, int n,
-				CoreSubscriber<? super T> actual) {
+		void subscribe(Publisher<? extends T>[] sources, int n, CoreSubscriber<? super T> actual) {
 			FirstNonEmptyEmittingSubscriber<T>[] a = subscribers;
 
 			for (int i = 0; i < n; i++) {
@@ -195,8 +188,7 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 
 				if (p == null) {
 					if (WIP.compareAndSet(this, Integer.MIN_VALUE, -1)) {
-						actual.onError(new NullPointerException(
-								"The " + i + " th Publisher source is null"));
+						actual.onError(new NullPointerException("The " + i + " th Publisher source is null"));
 					}
 					return;
 				}
@@ -264,8 +256,8 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 
 	}
 
-	static final class FirstNonEmptyEmittingSubscriber<T>
-			extends Operators.DeferredSubscription implements InnerOperator<T, T> {
+	static final class FirstNonEmptyEmittingSubscriber<T> extends Operators.DeferredSubscription
+			implements InnerOperator<T, T> {
 
 		final RaceCoordinator<T> parent;
 
@@ -275,8 +267,7 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 
 		boolean won;
 
-		FirstNonEmptyEmittingSubscriber(CoreSubscriber<? super T> actual,
-				RaceCoordinator<T> parent, int index) {
+		FirstNonEmptyEmittingSubscriber(CoreSubscriber<? super T> actual, RaceCoordinator<T> parent, int index) {
 			this.actual = actual;
 			this.parent = parent;
 			this.index = index;

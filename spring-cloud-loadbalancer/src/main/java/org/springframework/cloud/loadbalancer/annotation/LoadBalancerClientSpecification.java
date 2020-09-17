@@ -26,8 +26,7 @@ import org.springframework.util.Assert;
 /**
  * @author Dave Syer
  */
-public class LoadBalancerClientSpecification
-		implements NamedContextFactory.Specification {
+public class LoadBalancerClientSpecification implements NamedContextFactory.Specification {
 
 	private String name;
 
@@ -78,8 +77,7 @@ public class LoadBalancerClientSpecification
 			return false;
 		}
 		LoadBalancerClientSpecification that = (LoadBalancerClientSpecification) o;
-		return Objects.equals(this.name, that.name)
-				&& Arrays.equals(this.configuration, that.configuration);
+		return Objects.equals(this.name, that.name) && Arrays.equals(this.configuration, that.configuration);
 	}
 
 	@Override

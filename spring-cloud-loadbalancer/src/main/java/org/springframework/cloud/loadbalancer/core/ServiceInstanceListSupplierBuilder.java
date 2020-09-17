@@ -43,8 +43,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 public final class ServiceInstanceListSupplierBuilder {
 
-	private static final Log LOG = LogFactory
-			.getLog(ServiceInstanceListSupplierBuilder.class);
+	private static final Log LOG = LogFactory.getLog(ServiceInstanceListSupplierBuilder.class);
 
 	private Creator baseCreator;
 
@@ -63,14 +62,12 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withBlockingDiscoveryClient() {
 		if (baseCreator != null && LOG.isWarnEnabled()) {
-			LOG.warn(
-					"Overriding a previously set baseCreator with a blocking DiscoveryClient baseCreator.");
+			LOG.warn("Overriding a previously set baseCreator with a blocking DiscoveryClient baseCreator.");
 		}
 		this.baseCreator = context -> {
 			DiscoveryClient discoveryClient = context.getBean(DiscoveryClient.class);
 
-			return new DiscoveryClientServiceInstanceListSupplier(discoveryClient,
-					context.getEnvironment());
+			return new DiscoveryClientServiceInstanceListSupplier(discoveryClient, context.getEnvironment());
 		};
 		return this;
 	}
@@ -83,15 +80,12 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withDiscoveryClient() {
 		if (baseCreator != null && LOG.isWarnEnabled()) {
-			LOG.warn(
-					"Overriding a previously set baseCreator with a ReactiveDiscoveryClient baseCreator.");
+			LOG.warn("Overriding a previously set baseCreator with a ReactiveDiscoveryClient baseCreator.");
 		}
 		this.baseCreator = context -> {
-			ReactiveDiscoveryClient discoveryClient = context
-					.getBean(ReactiveDiscoveryClient.class);
+			ReactiveDiscoveryClient discoveryClient = context.getBean(ReactiveDiscoveryClient.class);
 
-			return new DiscoveryClientServiceInstanceListSupplier(discoveryClient,
-					context.getEnvironment());
+			return new DiscoveryClientServiceInstanceListSupplier(discoveryClient, context.getEnvironment());
 		};
 		return this;
 	}
@@ -102,8 +96,7 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * @param supplier a user-provided {@link ServiceInstanceListSupplier} instance
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
-	public ServiceInstanceListSupplierBuilder withBase(
-			ServiceInstanceListSupplier supplier) {
+	public ServiceInstanceListSupplierBuilder withBase(ServiceInstanceListSupplier supplier) {
 		this.baseCreator = context -> supplier;
 		return this;
 	}
@@ -115,11 +108,9 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withHealthChecks() {
 		DelegateCreator creator = (context, delegate) -> {
-			LoadBalancerProperties properties = context
-					.getBean(LoadBalancerProperties.class);
+			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
 			WebClient.Builder webClient = context.getBean(WebClient.Builder.class);
-			return new HealthCheckServiceInstanceListSupplier(delegate,
-					properties.getHealthCheck(), webClient.build());
+			return new HealthCheckServiceInstanceListSupplier(delegate, properties.getHealthCheck(), webClient.build());
 		};
 		this.creators.add(creator);
 		return this;
@@ -133,10 +124,8 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withHealthChecks(WebClient webClient) {
 		DelegateCreator creator = (context, delegate) -> {
-			LoadBalancerProperties properties = context
-					.getBean(LoadBalancerProperties.class);
-			return new HealthCheckServiceInstanceListSupplier(delegate,
-					properties.getHealthCheck(), webClient);
+			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			return new HealthCheckServiceInstanceListSupplier(delegate, properties.getHealthCheck(), webClient);
 		};
 		this.creators.add(creator);
 		return this;
@@ -149,8 +138,7 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withZonePreference() {
 		DelegateCreator creator = (context, delegate) -> {
-			LoadBalancerZoneConfig zoneConfig = context
-					.getBean(LoadBalancerZoneConfig.class);
+			LoadBalancerZoneConfig zoneConfig = context.getBean(LoadBalancerZoneConfig.class);
 			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig);
 		};
 		this.creators.add(creator);
@@ -174,12 +162,10 @@ public final class ServiceInstanceListSupplierBuilder {
 			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
 					.getBeanProvider(LoadBalancerCacheManager.class);
 			if (cacheManagerProvider.getIfAvailable() != null) {
-				return new CachingServiceInstanceListSupplier(delegate,
-						cacheManagerProvider.getIfAvailable());
+				return new CachingServiceInstanceListSupplier(delegate, cacheManagerProvider.getIfAvailable());
 			}
 			if (LOG.isWarnEnabled()) {
-				LOG.warn(
-						"LoadBalancerCacheManager not available, returning delegate without caching.");
+				LOG.warn("LoadBalancerCacheManager not available, returning delegate without caching.");
 			}
 			return delegate;
 		};
@@ -211,8 +197,7 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * Allows creating a {@link ServiceInstanceListSupplier} instance based on provided
 	 * {@link ConfigurableApplicationContext}.
 	 */
-	public interface Creator extends
-			Function<ConfigurableApplicationContext, ServiceInstanceListSupplier> {
+	public interface Creator extends Function<ConfigurableApplicationContext, ServiceInstanceListSupplier> {
 
 	}
 

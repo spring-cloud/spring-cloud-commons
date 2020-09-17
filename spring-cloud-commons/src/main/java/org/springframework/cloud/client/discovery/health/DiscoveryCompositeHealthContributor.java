@@ -39,11 +39,10 @@ public class DiscoveryCompositeHealthContributor implements CompositeHealthContr
 
 	private Map<String, DiscoveryHealthIndicator> indicators;
 
-	public DiscoveryCompositeHealthContributor(
-			Collection<DiscoveryHealthIndicator> indicators) {
+	public DiscoveryCompositeHealthContributor(Collection<DiscoveryHealthIndicator> indicators) {
 		Assert.notNull(indicators, "'indicators' must not be null");
-		this.indicators = indicators.stream().collect(
-				Collectors.toMap(DiscoveryHealthIndicator::getName, Function.identity()));
+		this.indicators = indicators.stream()
+				.collect(Collectors.toMap(DiscoveryHealthIndicator::getName, Function.identity()));
 	}
 
 	@Override
@@ -56,8 +55,7 @@ public class DiscoveryCompositeHealthContributor implements CompositeHealthContr
 		return this.indicators.values().stream().map(this::asNamedContributor).iterator();
 	}
 
-	private NamedContributor<HealthContributor> asNamedContributor(
-			DiscoveryHealthIndicator indicator) {
+	private NamedContributor<HealthContributor> asNamedContributor(DiscoveryHealthIndicator indicator) {
 		return new NamedContributor<HealthContributor>() {
 
 			@Override

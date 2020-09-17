@@ -176,12 +176,10 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 	}
 
 	private void overrideClassLoaderForRestart() {
-		ClassUtils.overrideThreadContextClassLoader(
-				this.application.getClass().getClassLoader());
+		ClassUtils.overrideThreadContextClassLoader(this.application.getClass().getClassLoader());
 	}
 
-	class PostProcessorInitializer
-			implements ApplicationContextInitializer<GenericApplicationContext> {
+	class PostProcessorInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
 		@Override
 		public void initialize(GenericApplicationContext context) {
@@ -193,8 +191,7 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 	class PostProcessor implements BeanPostProcessor {
 
 		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName)
-				throws BeansException {
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof RestartEndpoint) {
 				return RestartEndpoint.this;
 			}

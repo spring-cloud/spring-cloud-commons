@@ -37,15 +37,13 @@ public class LoadBalancerWebClientBuilderBeanPostProcessor implements BeanPostPr
 	private final ApplicationContext context;
 
 	public LoadBalancerWebClientBuilderBeanPostProcessor(
-			DeferringLoadBalancerExchangeFilterFunction exchangeFilterFunction,
-			ApplicationContext context) {
+			DeferringLoadBalancerExchangeFilterFunction exchangeFilterFunction, ApplicationContext context) {
 		this.exchangeFilterFunction = exchangeFilterFunction;
 		this.context = context;
 	}
 
 	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName)
-			throws BeansException {
+	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		if (bean instanceof WebClient.Builder) {
 			if (context.findAnnotationOnBean(beanName, LoadBalanced.class) == null) {
 				return bean;

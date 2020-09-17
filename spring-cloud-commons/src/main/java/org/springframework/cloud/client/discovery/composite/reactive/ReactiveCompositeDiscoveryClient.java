@@ -36,8 +36,7 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 
 	private final List<ReactiveDiscoveryClient> discoveryClients;
 
-	public ReactiveCompositeDiscoveryClient(
-			List<ReactiveDiscoveryClient> discoveryClients) {
+	public ReactiveCompositeDiscoveryClient(List<ReactiveDiscoveryClient> discoveryClients) {
 		AnnotationAwareOrderComparator.sort(discoveryClients);
 		this.discoveryClients = discoveryClients;
 	}
@@ -64,8 +63,7 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 		if (discoveryClients == null || discoveryClients.isEmpty()) {
 			return Flux.empty();
 		}
-		return Flux.fromIterable(discoveryClients)
-				.flatMap(ReactiveDiscoveryClient::getServices);
+		return Flux.fromIterable(discoveryClients).flatMap(ReactiveDiscoveryClient::getServices);
 	}
 
 	List<ReactiveDiscoveryClient> getDiscoveryClients() {

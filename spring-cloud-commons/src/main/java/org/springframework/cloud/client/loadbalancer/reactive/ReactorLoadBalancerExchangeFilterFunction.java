@@ -49,41 +49,33 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
 
-	private static final Log LOG = LogFactory
-			.getLog(ReactorLoadBalancerExchangeFilterFunction.class);
+	private static final Log LOG = LogFactory.getLog(ReactorLoadBalancerExchangeFilterFunction.class);
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
 	private final LoadBalancerProperties properties;
 
-	public ReactorLoadBalancerExchangeFilterFunction(
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerProperties properties) {
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.properties = properties;
 	}
 
 	@Override
-	public Mono<ClientResponse> filter(ClientRequest clientRequest,
-			ExchangeFunction next) {
+	public Mono<ClientResponse> filter(ClientRequest clientRequest, ExchangeFunction next) {
 		URI originalUrl = clientRequest.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
-			String message = String.format(
-					"Request URI does not contain a valid hostname: %s",
-					originalUrl.toString());
+			String message = String.format("Request URI does not contain a valid hostname: %s", originalUrl.toString());
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(message);
 			}
-			return Mono.just(
-					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
+			return Mono.just(ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
-						loadBalancerFactory.getInstances(serviceId,
-								LoadBalancerLifecycle.class),
-						ClientRequestContext.class, ClientResponse.class,
-						ServiceInstance.class);
+						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
+						ClientRequestContext.class, ClientResponse.class, ServiceInstance.class);
 		String hint = getHint(serviceId);
 		DefaultRequest<ClientRequestContext> lbRequest = new DefaultRequest<>(
 				new ClientRequestContext(clientRequest, hint));
@@ -95,31 +87,24 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(message);
 				}
-				supportedLifecycleProcessors.forEach(
-						lifecycle -> lifecycle.onComplete(new CompletionContext<>(
-								CompletionContext.Status.DISCARD, lbResponse)));
+				supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
+						.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, lbResponse)));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
 			}
 
 			if (LOG.isDebugEnabled()) {
-				LOG.debug(String.format(
-						"Load balancer has retrieved the instance for service %s: %s",
-						serviceId, instance.getUri()));
+				LOG.debug(String.format("Load balancer has retrieved the instance for service %s: %s", serviceId,
+						instance.getUri()));
 			}
-			ClientRequest newRequest = buildClientRequest(clientRequest,
-					reconstructURI(instance, originalUrl));
+			ClientRequest newRequest = buildClientRequest(clientRequest, reconstructURI(instance, originalUrl));
 			return next.exchange(newRequest)
-					.doOnError(throwable -> supportedLifecycleProcessors
-							.forEach(lifecycle -> lifecycle.onComplete(
-									new CompletionContext<ClientResponse, ServiceInstance>(
-											CompletionContext.Status.FAILED, throwable,
-											lbResponse))))
-					.doOnSuccess(clientResponse -> supportedLifecycleProcessors
-							.forEach(lifecycle -> lifecycle.onComplete(
-									new CompletionContext<ClientResponse, ServiceInstance>(
-											CompletionContext.Status.SUCCESS, lbResponse,
-											clientResponse))));
+					.doOnError(throwable -> supportedLifecycleProcessors.forEach(
+							lifecycle -> lifecycle.onComplete(new CompletionContext<ClientResponse, ServiceInstance>(
+									CompletionContext.Status.FAILED, throwable, lbResponse))))
+					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
+							lifecycle -> lifecycle.onComplete(new CompletionContext<ClientResponse, ServiceInstance>(
+									CompletionContext.Status.SUCCESS, lbResponse, clientResponse))));
 		});
 	}
 
@@ -127,10 +112,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 		return LoadBalancerUriTools.reconstructURI(instance, original);
 	}
 
-	protected Mono<Response<ServiceInstance>> choose(String serviceId,
-			Request<ClientRequestContext> request) {
-		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory
-				.getInstance(serviceId);
+	protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<ClientRequestContext> request) {
+		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory.getInstance(serviceId);
 		if (loadBalancer == null) {
 			return Mono.just(new EmptyResponse());
 		}
@@ -142,11 +125,9 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 	}
 
 	private ClientRequest buildClientRequest(ClientRequest request, URI uri) {
-		return ClientRequest.create(request.method(), uri)
-				.headers(headers -> headers.addAll(request.headers()))
+		return ClientRequest.create(request.method(), uri).headers(headers -> headers.addAll(request.headers()))
 				.cookies(cookies -> cookies.addAll(request.cookies()))
-				.attributes(attributes -> attributes.putAll(request.attributes()))
-				.body(request.body()).build();
+				.attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
 	}
 
 	private String getHint(String serviceId) {

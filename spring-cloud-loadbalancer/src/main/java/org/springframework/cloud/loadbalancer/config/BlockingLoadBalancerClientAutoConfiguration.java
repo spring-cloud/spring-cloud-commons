@@ -40,8 +40,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration(proxyBeanMethods = false)
 @LoadBalancerClients
 @AutoConfigureAfter(LoadBalancerAutoConfiguration.class)
-@AutoConfigureBefore({
-		org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration.class,
+@AutoConfigureBefore({ org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration.class,
 		AsyncLoadBalancerAutoConfiguration.class })
 @ConditionalOnClass(RestTemplate.class)
 public class BlockingLoadBalancerClientAutoConfiguration {
@@ -49,8 +48,7 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	@ConditionalOnMissingBean
-	public LoadBalancerClient blockingLoadBalancerClient(
-			LoadBalancerClientFactory loadBalancerClientFactory,
+	public LoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
 			LoadBalancerProperties properties) {
 		return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
 	}

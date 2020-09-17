@@ -49,8 +49,7 @@ public interface ApacheHttpClientConnectionManagerFactory {
 	 * manager.
 	 * @return A new {@link HttpClientConnectionManager}.
 	 */
-	HttpClientConnectionManager newConnectionManager(boolean disableSslValidation,
-			int maxTotalConnections, int maxConnectionsPerRoute, long timeToLive,
-			TimeUnit timeUnit, RegistryBuilder registryBuilder);
+	HttpClientConnectionManager newConnectionManager(boolean disableSslValidation, int maxTotalConnections,
+			int maxConnectionsPerRoute, long timeToLive, TimeUnit timeUnit, RegistryBuilder registryBuilder);
 
 }

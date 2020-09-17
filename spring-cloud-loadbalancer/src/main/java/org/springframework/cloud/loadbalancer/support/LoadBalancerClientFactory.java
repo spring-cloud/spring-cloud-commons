@@ -33,8 +33,7 @@ import org.springframework.core.env.Environment;
  * @author Dave Syer
  * @author Olga Maciaszek-Sharma
  */
-public class LoadBalancerClientFactory
-		extends NamedContextFactory<LoadBalancerClientSpecification>
+public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerClientSpecification>
 		implements ReactiveLoadBalancer.Factory<ServiceInstance> {
 
 	/**
