@@ -63,9 +63,8 @@ public class LoadBalancerTests {
 
 	@Test
 	public void roundRobbinLoadbalancerWorks() {
-		ReactiveLoadBalancer<ServiceInstance> reactiveLoadBalancer = this.clientFactory
-				.getInstance("myservice", ReactiveLoadBalancer.class,
-						ServiceInstance.class);
+		ReactiveLoadBalancer<ServiceInstance> reactiveLoadBalancer = this.clientFactory.getInstance("myservice",
+				ReactiveLoadBalancer.class, ServiceInstance.class);
 
 		then(reactiveLoadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
 		then(reactiveLoadBalancer).isInstanceOf(ReactorLoadBalancer.class);
@@ -77,8 +76,7 @@ public class LoadBalancerTests {
 		assertLoadBalancer(loadBalancer, hosts);
 	}
 
-	private void assertLoadBalancer(ReactorLoadBalancer<ServiceInstance> loadBalancer,
-			List<String> hosts) {
+	private void assertLoadBalancer(ReactorLoadBalancer<ServiceInstance> loadBalancer, List<String> hosts) {
 		for (String host : hosts) {
 			Mono<Response<ServiceInstance>> source = loadBalancer.choose();
 			StepVerifier.create(source).consumeNextWith(response -> {
@@ -87,8 +85,7 @@ public class LoadBalancerTests {
 
 				ServiceInstance instance = response.getServer();
 				then(instance).isNotNull();
-				then(instance.getHost()).as("instance host is incorrent %s", host)
-						.isEqualTo(host);
+				then(instance.getHost()).as("instance host is incorrent %s", host).isEqualTo(host);
 
 				if (host.contains("secure")) {
 					then(instance.isSecure()).isTrue();
@@ -97,18 +94,15 @@ public class LoadBalancerTests {
 					then(instance.isSecure()).isFalse();
 				}
 
-				response.onComplete(
-						new CompletionContext(CompletionContext.Status.SUCCESS));
+				response.onComplete(new CompletionContext(CompletionContext.Status.SUCCESS));
 			}).verifyComplete();
 		}
 	}
 
 	@Test
 	public void emptyHosts() {
-		ResolvableType type = ResolvableType
-				.forClassWithGenerics(ReactorLoadBalancer.class, ServiceInstance.class);
-		ReactorLoadBalancer<ServiceInstance> loadBalancer = this.clientFactory
-				.getInstance("unknownservice", type);
+		ResolvableType type = ResolvableType.forClassWithGenerics(ReactorLoadBalancer.class, ServiceInstance.class);
+		ReactorLoadBalancer<ServiceInstance> loadBalancer = this.clientFactory.getInstance("unknownservice", type);
 
 		then(loadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
 
@@ -122,16 +116,13 @@ public class LoadBalancerTests {
 	@Test
 	public void staticConfigurationWorks() {
 		String serviceId = "test1";
-		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(
-				ServiceInstanceListSuppliers.toProvider(serviceId,
-						instance(serviceId, "1host", false),
-						instance(serviceId, "2host-secure", true)),
+		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(ServiceInstanceListSuppliers
+				.toProvider(serviceId, instance(serviceId, "1host", false), instance(serviceId, "2host-secure", true)),
 				serviceId, -1);
 		assertLoadBalancer(loadBalancer, Arrays.asList("1host", "2host-secure"));
 	}
 
-	private static DefaultServiceInstance instance(String serviceId, String host,
-			boolean secure) {
+	private static DefaultServiceInstance instance(String serviceId, String host, boolean secure) {
 		return new DefaultServiceInstance(serviceId, serviceId, host, 80, secure);
 	}
 
@@ -139,24 +130,18 @@ public class LoadBalancerTests {
 	@Test
 	public void canPassHintViaRequest() {
 		String serviceId = "test1";
-		RoundRobinLoadBalancer loadBalancer = new TestHintLoadBalancer(
-				ServiceInstanceListSuppliers.toProvider(serviceId,
-						instance(serviceId, "1host", false),
-						instance(serviceId, "2host-secure", true)),
-				serviceId);
-		Request<DefaultRequestContext> request = new DefaultRequest<>(
-				new DefaultRequestContext("test2"));
+		RoundRobinLoadBalancer loadBalancer = new TestHintLoadBalancer(ServiceInstanceListSuppliers.toProvider(
+				serviceId, instance(serviceId, "1host", false), instance(serviceId, "2host-secure", true)), serviceId);
+		Request<DefaultRequestContext> request = new DefaultRequest<>(new DefaultRequestContext("test2"));
 
-		ServiceInstance serviceInstance = loadBalancer.choose(request).block()
-				.getServer();
+		ServiceInstance serviceInstance = loadBalancer.choose(request).block().getServer();
 
 		assertThat(serviceInstance.getServiceId()).isEqualTo("test2");
 	}
 
 	private static class TestHintLoadBalancer extends RoundRobinLoadBalancer {
 
-		TestHintLoadBalancer(
-				ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+		TestHintLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 				String serviceId) {
 			super(serviceInstanceListSupplierProvider, serviceId);
 		}
@@ -165,10 +150,8 @@ public class LoadBalancerTests {
 		@Override
 		public Mono<Response<ServiceInstance>> choose(Request request) {
 			if (request.getContext() instanceof DefaultRequestContext) {
-				DefaultRequestContext requestContext = (DefaultRequestContext) request
-						.getContext();
-				return Mono.just(new DefaultResponse(
-						instance(requestContext.getHint(), "host", false)));
+				DefaultRequestContext requestContext = (DefaultRequestContext) request.getContext();
+				return Mono.just(new DefaultResponse(instance(requestContext.getHint(), "host", false)));
 			}
 			return Mono.empty();
 		}
@@ -177,11 +160,8 @@ public class LoadBalancerTests {
 
 	@EnableAutoConfiguration
 	@SpringBootConfiguration(proxyBeanMethods = false)
-	@LoadBalancerClients({
-			@LoadBalancerClient(name = "myservice",
-					configuration = MyServiceConfig.class),
-			@LoadBalancerClient(name = "unknownservice",
-					configuration = MyServiceConfig.class) })
+	@LoadBalancerClients({ @LoadBalancerClient(name = "myservice", configuration = MyServiceConfig.class),
+			@LoadBalancerClient(name = "unknownservice", configuration = MyServiceConfig.class) })
 	@EnableCaching
 	protected static class Config {
 
@@ -190,11 +170,11 @@ public class LoadBalancerTests {
 	protected static class MyServiceConfig {
 
 		@Bean
-		public RoundRobinLoadBalancer roundRobinContextLoadBalancer(
-				LoadBalancerClientFactory clientFactory, Environment env) {
+		public RoundRobinLoadBalancer roundRobinContextLoadBalancer(LoadBalancerClientFactory clientFactory,
+				Environment env) {
 			String serviceId = clientFactory.getName(env);
-			return new RoundRobinLoadBalancer(clientFactory.getLazyProvider(serviceId,
-					ServiceInstanceListSupplier.class), serviceId, -1);
+			return new RoundRobinLoadBalancer(
+					clientFactory.getLazyProvider(serviceId, ServiceInstanceListSupplier.class), serviceId, -1);
 		}
 
 	}

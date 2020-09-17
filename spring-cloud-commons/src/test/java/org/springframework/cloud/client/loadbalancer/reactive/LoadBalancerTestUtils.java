@@ -43,32 +43,26 @@ final class LoadBalancerTestUtils {
 
 	static ConfigurableApplicationContext init(Class<?>... configClasses) {
 		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.sources(ArrayUtils.add(configClasses, WebClientAutoConfiguration.class))
-				.run();
+				.sources(ArrayUtils.add(configClasses, WebClientAutoConfiguration.class)).run();
 	}
 
 	@SuppressWarnings("unchecked")
 	static List<ExchangeFilterFunction> getFilters(WebClient.Builder builder) {
-		return (List<ExchangeFilterFunction>) ReflectionTestUtils.getField(builder,
-				"filters");
+		return (List<ExchangeFilterFunction>) ReflectionTestUtils.getField(builder, "filters");
 	}
 
-	static void assertLoadBalanced(WebClient.Builder webClientBuilder,
-			Class<?> exchangeFilterFunctionClass) {
+	static void assertLoadBalanced(WebClient.Builder webClientBuilder, Class<?> exchangeFilterFunctionClass) {
 		List<ExchangeFilterFunction> filters = getFilters(webClientBuilder);
 		then(filters).hasSize(1);
-		then(filters.get(0))
-				.isInstanceOf(DeferringLoadBalancerExchangeFilterFunction.class);
+		then(filters.get(0)).isInstanceOf(DeferringLoadBalancerExchangeFilterFunction.class);
 		DeferringLoadBalancerExchangeFilterFunction interceptor = (DeferringLoadBalancerExchangeFilterFunction) filters
 				.get(0);
 		interceptor.tryResolveDelegate();
 		then(interceptor.getDelegate()).isInstanceOf(exchangeFilterFunctionClass);
 	}
 
-	static void assertLoadBalanced(WebClient webClient,
-			Class<?> exchangeFilterFunctionClass) {
-		assertLoadBalanced(
-				(WebClient.Builder) ReflectionTestUtils.getField(webClient, "builder"),
+	static void assertLoadBalanced(WebClient webClient, Class<?> exchangeFilterFunctionClass) {
+		assertLoadBalanced((WebClient.Builder) ReflectionTestUtils.getField(webClient, "builder"),
 				exchangeFilterFunctionClass);
 	}
 

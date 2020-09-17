@@ -67,10 +67,8 @@ public class CachedRandomPropertySourceTests {
 		then(cachedRandomPropertySource.getProperty("foo.app.long")).isNull();
 		then(cachedRandomPropertySource.getProperty("cachedrandom.app")).isNull();
 
-		then(cachedRandomPropertySource.getProperty("cachedrandom.app.long"))
-				.isEqualTo(1234L);
-		then(cachedRandomPropertySource.getProperty("cachedrandom.foo.long"))
-				.isEqualTo(5678L);
+		then(cachedRandomPropertySource.getProperty("cachedrandom.app.long")).isEqualTo(1234L);
+		then(cachedRandomPropertySource.getProperty("cachedrandom.foo.long")).isEqualTo(5678L);
 		verify(spyedCache, times(1)).computeIfAbsent(eq("app"), isA(Function.class));
 		verify(spyedTypeCache, times(1)).computeIfAbsent(eq("long"), isA(Function.class));
 	}

@@ -53,10 +53,8 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
-	public ConfigurationPropertiesRebinder configurationPropertiesRebinder(
-			ConfigurationPropertiesBeans beans) {
-		ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(
-				beans);
+	public ConfigurationPropertiesRebinder configurationPropertiesRebinder(ConfigurationPropertiesBeans beans) {
+		ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(beans);
 		return rebinder;
 	}
 
@@ -70,8 +68,7 @@ public class ConfigurationPropertiesRebinderAutoConfiguration
 		if (this.context.getParent() != null) {
 			// TODO: make this optional? (E.g. when creating child contexts that prefer to
 			// be isolated.)
-			ConfigurationPropertiesRebinder rebinder = this.context
-					.getBean(ConfigurationPropertiesRebinder.class);
+			ConfigurationPropertiesRebinder rebinder = this.context.getBean(ConfigurationPropertiesRebinder.class);
 			for (String name : this.context.getParent().getBeanDefinitionNames()) {
 				rebinder.rebind(name);
 			}

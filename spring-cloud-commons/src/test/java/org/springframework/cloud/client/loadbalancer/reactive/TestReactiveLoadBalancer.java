@@ -40,8 +40,8 @@ class TestReactiveLoadBalancer implements ReactiveLoadBalancer<ServiceInstance> 
 
 	@Override
 	public Publisher<Response<ServiceInstance>> choose() {
-		return Mono.just(new DefaultResponse(new DefaultServiceInstance(TEST_SERVICE_ID,
-				TEST_SERVICE_ID, TEST_SERVICE_ID, random.nextInt(40000), false)));
+		return Mono.just(new DefaultResponse(new DefaultServiceInstance(TEST_SERVICE_ID, TEST_SERVICE_ID,
+				TEST_SERVICE_ID, random.nextInt(40000), false)));
 	}
 
 	@Override

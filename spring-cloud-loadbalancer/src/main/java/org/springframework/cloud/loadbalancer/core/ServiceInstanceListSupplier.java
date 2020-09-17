@@ -34,8 +34,7 @@ import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientF
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-public interface ServiceInstanceListSupplier
-		extends Supplier<Flux<List<ServiceInstance>>> {
+public interface ServiceInstanceListSupplier extends Supplier<Flux<List<ServiceInstance>>> {
 
 	String getServiceId();
 
@@ -62,8 +61,7 @@ public interface ServiceInstanceListSupplier
 			return new Builder(env);
 		}
 
-		private FixedServiceInstanceListSupplier(String serviceId,
-				List<ServiceInstance> instances) {
+		private FixedServiceInstanceListSupplier(String serviceId, List<ServiceInstance> instances) {
 			this.serviceId = serviceId;
 			this.instances = instances;
 		}
@@ -99,8 +97,8 @@ public interface ServiceInstanceListSupplier
 			}
 
 			public SimpleBuilder instance(String host, int port) {
-				DefaultServiceInstance instance = new DefaultServiceInstance(
-						instanceId(serviceId, host, port), serviceId, host, port, false);
+				DefaultServiceInstance instance = new DefaultServiceInstance(instanceId(serviceId, host, port),
+						serviceId, host, port, false);
 				return instance(instance);
 			}
 
@@ -135,8 +133,8 @@ public interface ServiceInstanceListSupplier
 			}
 
 			public Builder instance(String host, int port, String serviceId) {
-				DefaultServiceInstance instance = new DefaultServiceInstance(
-						instanceId(serviceId, host, port), serviceId, host, port, false);
+				DefaultServiceInstance instance = new DefaultServiceInstance(instanceId(serviceId, host, port),
+						serviceId, host, port, false);
 				return instance(instance);
 			}
 
@@ -145,8 +143,7 @@ public interface ServiceInstanceListSupplier
 			}
 
 			public FixedServiceInstanceListSupplier build() {
-				return new FixedServiceInstanceListSupplier(
-						env.getProperty(PROPERTY_NAME), instances);
+				return new FixedServiceInstanceListSupplier(env.getProperty(PROPERTY_NAME), instances);
 			}
 
 		}

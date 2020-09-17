@@ -56,12 +56,10 @@ public class RefreshScopeConfigurationTests {
 	}
 
 	private void refresh() {
-		EnvironmentManager environmentManager = this.context
-				.getBean(EnvironmentManager.class);
+		EnvironmentManager environmentManager = this.context.getBean(EnvironmentManager.class);
 		environmentManager.setProperty("message", "Hello Dave!");
 		org.springframework.cloud.context.scope.refresh.RefreshScope scope = this.context
-				.getBean(
-						org.springframework.cloud.context.scope.refresh.RefreshScope.class);
+				.getBean(org.springframework.cloud.context.scope.refresh.RefreshScope.class);
 		scope.refreshAll();
 	}
 
@@ -71,12 +69,10 @@ public class RefreshScopeConfigurationTests {
 	@Test
 	public void configurationWithRefreshScope() throws Exception {
 		this.context = new AnnotationConfigApplicationContext(Application.class,
-				PropertyPlaceholderAutoConfiguration.class,
-				RefreshAutoConfiguration.class,
+				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);
 		Application application = this.context.getBean(Application.class);
-		then(this.context.getBeanDefinition("scopedTarget.application").getScope())
-				.isEqualTo("refresh");
+		then(this.context.getBeanDefinition("scopedTarget.application").getScope()).isEqualTo("refresh");
 		application.hello();
 		refresh();
 		String message = application.hello();
@@ -86,8 +82,7 @@ public class RefreshScopeConfigurationTests {
 	@Test
 	public void refreshScopeOnBean() throws Exception {
 		this.context = new AnnotationConfigApplicationContext(ClientApp.class,
-				PropertyPlaceholderAutoConfiguration.class,
-				RefreshAutoConfiguration.class,
+				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);
 		Controller application = this.context.getBean(Controller.class);
 		application.hello();
@@ -99,8 +94,7 @@ public class RefreshScopeConfigurationTests {
 	@Test
 	public void refreshScopeOnNested() throws Exception {
 		this.context = new AnnotationConfigApplicationContext(NestedApp.class,
-				PropertyPlaceholderAutoConfiguration.class,
-				RefreshAutoConfiguration.class,
+				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);
 		NestedController application = this.context.getBean(NestedController.class);
 		application.hello();

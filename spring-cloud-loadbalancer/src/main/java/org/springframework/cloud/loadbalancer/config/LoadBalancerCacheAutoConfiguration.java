@@ -54,8 +54,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ CacheManager.class, CacheAutoConfiguration.class })
 @AutoConfigureAfter(CacheAutoConfiguration.class)
-@ConditionalOnProperty(value = "spring.cloud.loadbalancer.cache.enabled",
-		matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.cloud.loadbalancer.cache.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(LoadBalancerCacheProperties.class)
 public class LoadBalancerCacheAutoConfiguration {
 
@@ -72,15 +71,13 @@ public class LoadBalancerCacheAutoConfiguration {
 
 	static class LoadBalancerCaffeineWarnLogger {
 
-		private static final Log LOG = LogFactory
-				.getLog(LoadBalancerCaffeineWarnLogger.class);
+		private static final Log LOG = LogFactory.getLog(LoadBalancerCaffeineWarnLogger.class);
 
 		@PostConstruct
 		void logWarning() {
 			if (LOG.isWarnEnabled()) {
-				LOG.warn(
-						"Spring Cloud LoadBalancer is currently working with the default cache. "
-								+ "You can switch to using Caffeine cache, by adding it to the classpath.");
+				LOG.warn("Spring Cloud LoadBalancer is currently working with the default cache. "
+						+ "You can switch to using Caffeine cache, by adding it to the classpath.");
 			}
 		}
 
@@ -92,8 +89,7 @@ public class LoadBalancerCacheAutoConfiguration {
 
 		@Bean(autowireCandidate = false)
 		@ConditionalOnMissingBean
-		LoadBalancerCacheManager caffeineLoadBalancerCacheManager(
-				LoadBalancerCacheProperties cacheProperties) {
+		LoadBalancerCacheManager caffeineLoadBalancerCacheManager(LoadBalancerCacheProperties cacheProperties) {
 			return new CaffeineBasedLoadBalancerCacheManager(cacheProperties);
 		}
 
@@ -106,8 +102,7 @@ public class LoadBalancerCacheAutoConfiguration {
 
 		@Bean(autowireCandidate = false)
 		@ConditionalOnMissingBean
-		LoadBalancerCacheManager defaultLoadBalancerCacheManager(
-				LoadBalancerCacheProperties cacheProperties) {
+		LoadBalancerCacheManager defaultLoadBalancerCacheManager(LoadBalancerCacheProperties cacheProperties) {
 			return new DefaultLoadBalancerCacheManager(cacheProperties);
 		}
 

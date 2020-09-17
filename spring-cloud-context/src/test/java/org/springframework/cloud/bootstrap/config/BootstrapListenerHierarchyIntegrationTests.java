@@ -37,8 +37,8 @@ public class BootstrapListenerHierarchyIntegrationTests {
 	@Test
 	public void shouldAddInABootstrapContext() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.properties("spring.config.use-legacy-processing=true")
-				.sources(BasicConfiguration.class).web(NONE).run();
+				.properties("spring.config.use-legacy-processing=true").sources(BasicConfiguration.class).web(NONE)
+				.run();
 
 		then(context.getParent()).isNotNull();
 	}
@@ -46,20 +46,17 @@ public class BootstrapListenerHierarchyIntegrationTests {
 	@Test
 	public void shouldAddInOneBootstrapForABasicParentChildHierarchy() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.properties("spring.config.use-legacy-processing=true")
-				.sources(RootConfiguration.class).web(NONE)
+				.properties("spring.config.use-legacy-processing=true").sources(RootConfiguration.class).web(NONE)
 				.child(BasicConfiguration.class).web(NONE).run();
 
 		// Should be RootConfiguration based context
-		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) context
-				.getParent();
+		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) context.getParent();
 		then(parent.getBean("rootBean", String.class)).isEqualTo("rootBean");
 
 		// Parent should have the bootstrap context as parent
 		then(parent.getParent()).isNotNull();
 
-		ConfigurableApplicationContext bootstrapContext = (ConfigurableApplicationContext) parent
-				.getParent();
+		ConfigurableApplicationContext bootstrapContext = (ConfigurableApplicationContext) parent.getParent();
 
 		// Bootstrap should be the root, there should be no other parent
 		then(bootstrapContext.getParent()).isNull();
@@ -68,21 +65,17 @@ public class BootstrapListenerHierarchyIntegrationTests {
 	@Test
 	public void shouldAddInOneBootstrapForSiblingsBasedHierarchy() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
-				.properties("spring.config.use-legacy-processing=true")
-				.sources(RootConfiguration.class).web(NONE)
-				.child(BasicConfiguration.class).web(NONE)
-				.sibling(BasicConfiguration.class).web(NONE).run();
+				.properties("spring.config.use-legacy-processing=true").sources(RootConfiguration.class).web(NONE)
+				.child(BasicConfiguration.class).web(NONE).sibling(BasicConfiguration.class).web(NONE).run();
 
 		// Should be RootConfiguration based context
-		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) context
-				.getParent();
+		ConfigurableApplicationContext parent = (ConfigurableApplicationContext) context.getParent();
 		then(parent.getBean("rootBean", String.class)).isEqualTo("rootBean");
 
 		// Parent should have the bootstrap context as parent
 		then(parent.getParent()).isNotNull();
 
-		ConfigurableApplicationContext bootstrapContext = (ConfigurableApplicationContext) parent
-				.getParent();
+		ConfigurableApplicationContext bootstrapContext = (ConfigurableApplicationContext) parent.getParent();
 
 		// Bootstrap should be the root, there should be no other parent
 		then(bootstrapContext.getParent()).isNull();

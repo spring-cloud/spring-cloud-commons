@@ -34,24 +34,19 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Spencer Gibb
  */
 @RunWith(ModifiedClassPathRunner.class)
-@ClassPathExclusions({ "spring-boot-actuator-*.jar",
-		"spring-boot-starter-actuator-*.jar" })
+@ClassPathExclusions({ "spring-boot-actuator-*.jar", "spring-boot-starter-actuator-*.jar" })
 public class RefreshAutoConfigurationClassPathTests {
 
-	private static ConfigurableApplicationContext getApplicationContext(
-			Class<?> configuration, String... properties) {
-		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE)
-				.properties(properties).run();
+	private static ConfigurableApplicationContext getApplicationContext(Class<?> configuration, String... properties) {
+		return new SpringApplicationBuilder(configuration).web(WebApplicationType.NONE).properties(properties).run();
 	}
 
 	@Test
 	public void refreshEventListenerCreated() {
-		try (ConfigurableApplicationContext context = getApplicationContext(
-				Config.class)) {
-			then(context.getBeansOfType(RefreshEventListener.class))
-					.as("RefreshEventListeners not created").isNotEmpty();
-			then(context.containsBean("refreshEndpoint")).as("refreshEndpoint created")
-					.isFalse();
+		try (ConfigurableApplicationContext context = getApplicationContext(Config.class)) {
+			then(context.getBeansOfType(RefreshEventListener.class)).as("RefreshEventListeners not created")
+					.isNotEmpty();
+			then(context.containsBean("refreshEndpoint")).as("refreshEndpoint created").isFalse();
 		}
 	}
 

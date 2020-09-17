@@ -28,18 +28,17 @@ import org.springframework.boot.diagnostics.FailureAnalysis;
  * @author Marcin Grzejszczak
  * @since 1.3.6
  */
-public final class CompatibilityNotMetFailureAnalyzer
-		extends AbstractFailureAnalyzer<CompatibilityNotMetException> {
+public final class CompatibilityNotMetFailureAnalyzer extends AbstractFailureAnalyzer<CompatibilityNotMetException> {
 
 	@Override
-	protected FailureAnalysis analyze(Throwable rootFailure,
-			CompatibilityNotMetException cause) {
+	protected FailureAnalysis analyze(Throwable rootFailure, CompatibilityNotMetException cause) {
 		return new FailureAnalysis(getDescription(cause), getAction(cause), cause);
 	}
 
 	private String getDescription(CompatibilityNotMetException ex) {
-		return String.format("Your project setup is incompatible with our requirements "
-				+ "due to following reasons:%s", descriptions(ex.results));
+		return String.format(
+				"Your project setup is incompatible with our requirements " + "due to following reasons:%s",
+				descriptions(ex.results));
 	}
 
 	private String descriptions(List<VerificationResult> results) {
@@ -51,8 +50,7 @@ public final class CompatibilityNotMetFailureAnalyzer
 	}
 
 	private String getAction(CompatibilityNotMetException ex) {
-		return String.format("Consider applying the following actions:%s",
-				actions(ex.results));
+		return String.format("Consider applying the following actions:%s", actions(ex.results));
 	}
 
 	private String actions(List<VerificationResult> results) {

@@ -53,15 +53,13 @@ public class LoadBalancedRetryContextTest {
 
 	@Test
 	public void getRequest() throws Exception {
-		LoadBalancedRetryContext lbContext = new LoadBalancedRetryContext(this.context,
-				this.request);
+		LoadBalancedRetryContext lbContext = new LoadBalancedRetryContext(this.context, this.request);
 		then(lbContext.getRequest()).isEqualTo(this.request);
 	}
 
 	@Test
 	public void setRequest() throws Exception {
-		LoadBalancedRetryContext lbContext = new LoadBalancedRetryContext(this.context,
-				this.request);
+		LoadBalancedRetryContext lbContext = new LoadBalancedRetryContext(this.context, this.request);
 		HttpRequest newRequest = mock(HttpRequest.class);
 		lbContext.setRequest(newRequest);
 		then(lbContext.getRequest()).isEqualTo(newRequest);
@@ -69,8 +67,7 @@ public class LoadBalancedRetryContextTest {
 
 	@Test
 	public void getServiceInstance() throws Exception {
-		LoadBalancedRetryContext lbContext = new LoadBalancedRetryContext(this.context,
-				this.request);
+		LoadBalancedRetryContext lbContext = new LoadBalancedRetryContext(this.context, this.request);
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		lbContext.setServiceInstance(serviceInstance);
 		then(lbContext.getServiceInstance()).isEqualTo(serviceInstance);

@@ -39,9 +39,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class,
-		properties = { "encrypt.key:deadbeef", "spring.cloud.bootstrap.name:custom",
-				"spring.config.use-legacy-processing=true" })
+@SpringBootTest(classes = Application.class, properties = { "encrypt.key:deadbeef",
+		"spring.cloud.bootstrap.name:custom", "spring.config.use-legacy-processing=true" })
 @ActiveProfiles("encrypt")
 public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 
@@ -50,8 +49,8 @@ public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 
 	@Test
 	public void bootstrapPropertiesExist() {
-		then(this.environment.getPropertySources()
-				.contains("applicationConfig: [classpath:/custom.properties]")).isTrue();
+		then(this.environment.getPropertySources().contains("applicationConfig: [classpath:/custom.properties]"))
+				.isTrue();
 	}
 
 	@Test
@@ -69,9 +68,8 @@ public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 	// This is added to bootstrap context as a source in bootstrap.properties
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 
-		public static Map<String, Object> MAP = new HashMap<String, Object>(
-				Collections.<String, Object>singletonMap("custom.foo",
-						"{cipher}6154ca04d4bb6144d672c4e3d750b5147116dd381946d51fa44f8bc25dc256f4"));
+		public static Map<String, Object> MAP = new HashMap<String, Object>(Collections.<String, Object>singletonMap(
+				"custom.foo", "{cipher}6154ca04d4bb6144d672c4e3d750b5147116dd381946d51fa44f8bc25dc256f4"));
 
 		@Override
 		public PropertySource<?> locate(Environment environment) {

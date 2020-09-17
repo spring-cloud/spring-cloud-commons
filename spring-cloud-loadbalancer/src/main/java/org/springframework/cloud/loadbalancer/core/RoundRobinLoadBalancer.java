@@ -52,8 +52,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
 	 * @param serviceId id of the service for which to choose an instance
 	 */
-	public RoundRobinLoadBalancer(
-			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+	public RoundRobinLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId) {
 		this(serviceInstanceListSupplierProvider, serviceId, new Random().nextInt(1000));
 	}
@@ -64,8 +63,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param seedPosition Round Robin element position marker
 	 */
-	public RoundRobinLoadBalancer(
-			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+	public RoundRobinLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId, int seedPosition) {
 		this.serviceId = serviceId;
 		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
@@ -83,8 +81,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 		return supplier.get().next().map(this::getInstanceResponse);
 	}
 
-	private Response<ServiceInstance> getInstanceResponse(
-			List<ServiceInstance> instances) {
+	private Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances) {
 		if (instances.isEmpty()) {
 			log.warn("No servers available for service: " + this.serviceId);
 			return new EmptyResponse();

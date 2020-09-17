@@ -42,8 +42,7 @@ public class CompatibilityVerifierTests {
 
 		verifier.verifyDependencies();
 
-		then(this.outputCapture.toString())
-				.doesNotContain("SPRING CLOUD VERIFICATION FAILED");
+		then(this.outputCapture.toString()).doesNotContain("SPRING CLOUD VERIFICATION FAILED");
 	}
 
 	@Test
@@ -52,19 +51,16 @@ public class CompatibilityVerifierTests {
 		list.add(new CompatibilityVerifier() {
 			@Override
 			public VerificationResult verify() {
-				return VerificationResult.notCompatible("Wrong Boot version",
-						"Use Boot version 1.2");
+				return VerificationResult.notCompatible("Wrong Boot version", "Use Boot version 1.2");
 			}
 		});
 		list.add(new CompatibilityVerifier() {
 			@Override
 			public VerificationResult verify() {
-				return VerificationResult.notCompatible("Wrong JDK version",
-						"Use JDK 25");
+				return VerificationResult.notCompatible("Wrong JDK version", "Use JDK 25");
 			}
 		});
-		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(
-				list);
+		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(list);
 
 		try {
 			verifier.verifyDependencies();

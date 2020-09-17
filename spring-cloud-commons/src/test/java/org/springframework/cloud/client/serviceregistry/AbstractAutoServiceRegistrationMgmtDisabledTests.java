@@ -57,8 +57,7 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 	public static class Config {
 
 		@Bean
-		public TestAutoServiceRegistration testAutoServiceRegistration(
-				AutoServiceRegistrationProperties properties) {
+		public TestAutoServiceRegistration testAutoServiceRegistration(AutoServiceRegistrationProperties properties) {
 			return new TestAutoServiceRegistration(properties);
 		}
 
@@ -163,8 +162,7 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 
 	}
 
-	public static class TestAutoServiceRegistration
-			extends AbstractAutoServiceRegistration<TestRegistration> {
+	public static class TestAutoServiceRegistration extends AbstractAutoServiceRegistration<TestRegistration> {
 
 		private int port = 0;
 

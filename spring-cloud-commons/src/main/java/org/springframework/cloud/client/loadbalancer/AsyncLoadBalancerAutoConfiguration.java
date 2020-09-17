@@ -64,8 +64,7 @@ public class AsyncLoadBalancerAutoConfiguration {
 	static class LoadBalancerInterceptorConfig {
 
 		@Bean
-		public AsyncLoadBalancerInterceptor asyncLoadBalancerInterceptor(
-				LoadBalancerClient loadBalancerClient) {
+		public AsyncLoadBalancerInterceptor asyncLoadBalancerInterceptor(LoadBalancerClient loadBalancerClient) {
 			return new AsyncLoadBalancerInterceptor(loadBalancerClient);
 		}
 
@@ -73,8 +72,7 @@ public class AsyncLoadBalancerAutoConfiguration {
 		public AsyncRestTemplateCustomizer asyncRestTemplateCustomizer(
 				final AsyncLoadBalancerInterceptor loadBalancerInterceptor) {
 			return restTemplate -> {
-				List<AsyncClientHttpRequestInterceptor> list = new ArrayList<>(
-						restTemplate.getInterceptors());
+				List<AsyncClientHttpRequestInterceptor> list = new ArrayList<>(restTemplate.getInterceptors());
 				list.add(loadBalancerInterceptor);
 				restTemplate.setInterceptors(list);
 			};

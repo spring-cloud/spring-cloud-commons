@@ -37,8 +37,7 @@ public final class ServiceInstanceListSuppliers {
 		throw new IllegalStateException("Can't instantiate a utility class");
 	}
 
-	public static ServiceInstanceListSupplier from(String serviceId,
-			ServiceInstance... instances) {
+	public static ServiceInstanceListSupplier from(String serviceId, ServiceInstance... instances) {
 		return new ServiceInstanceListSupplier() {
 			@Override
 			public Flux<List<ServiceInstance>> get() {

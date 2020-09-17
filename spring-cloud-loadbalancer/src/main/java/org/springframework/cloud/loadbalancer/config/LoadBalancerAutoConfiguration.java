@@ -46,24 +46,21 @@ public class LoadBalancerAutoConfiguration {
 
 	private final ObjectProvider<List<LoadBalancerClientSpecification>> configurations;
 
-	public LoadBalancerAutoConfiguration(
-			ObjectProvider<List<LoadBalancerClientSpecification>> configurations) {
+	public LoadBalancerAutoConfiguration(ObjectProvider<List<LoadBalancerClientSpecification>> configurations) {
 		this.configurations = configurations;
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
 	public LoadBalancerZoneConfig zoneConfig(Environment environment) {
-		return new LoadBalancerZoneConfig(
-				environment.getProperty("spring.cloud.loadbalancer.zone"));
+		return new LoadBalancerZoneConfig(environment.getProperty("spring.cloud.loadbalancer.zone"));
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
 	public LoadBalancerClientFactory loadBalancerClientFactory() {
 		LoadBalancerClientFactory clientFactory = new LoadBalancerClientFactory();
-		clientFactory.setConfigurations(
-				this.configurations.getIfAvailable(Collections::emptyList));
+		clientFactory.setConfigurations(this.configurations.getIfAvailable(Collections::emptyList));
 		return clientFactory;
 	}
 

@@ -55,8 +55,7 @@ public class CompositeDiscoveryClientOrderTest {
 
 		// then:
 		then(discoveryClients.get(0).description()).isEqualTo(CUSTOM_DISCOVERY_CLIENT);
-		then(discoveryClients.get(1).description())
-				.isEqualTo(DEFAULT_ORDER_DISCOVERY_CLIENT);
+		then(discoveryClients.get(1).description()).isEqualTo(DEFAULT_ORDER_DISCOVERY_CLIENT);
 		then(discoveryClients.get(2).description()).isEqualTo("Simple Discovery Client");
 		then(discoveryClients.get(3).description()).isEqualTo(FOURTH_DISCOVERY_CLIENT);
 	}
@@ -64,8 +63,7 @@ public class CompositeDiscoveryClientOrderTest {
 	@Test
 	public void shouldOnlyReturnServiceInstancesForTheHighestPrecedenceDiscoveryClient() {
 		// when:
-		List<ServiceInstance> serviceInstances = this.discoveryClient
-				.getInstances(CUSTOM_SERVICE_ID);
+		List<ServiceInstance> serviceInstances = this.discoveryClient.getInstances(CUSTOM_SERVICE_ID);
 
 		// then:
 		then(serviceInstances).hasSize(1);

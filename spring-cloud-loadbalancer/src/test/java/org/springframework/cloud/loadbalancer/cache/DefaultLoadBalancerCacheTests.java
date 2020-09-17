@@ -48,8 +48,7 @@ class DefaultLoadBalancerCacheTests {
 		DefaultLoadBalancerCache cache = new DefaultLoadBalancerCache("test", false);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> cache.put("testKey", null))
-				.withMessageContaining(
-						"Cache 'test' is configured to not allow null values but null was provided");
+				.withMessageContaining("Cache 'test' is configured to not allow null values but null was provided");
 	}
 
 	@Test
@@ -62,10 +61,8 @@ class DefaultLoadBalancerCacheTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	void assertThatTtlApplied() {
-		ConcurrentHashMapWithTimedEviction nativeCache = mock(
-				ConcurrentHashMapWithTimedEviction.class);
-		DefaultLoadBalancerCache cache = new DefaultLoadBalancerCache("test", nativeCache,
-				50, true);
+		ConcurrentHashMapWithTimedEviction nativeCache = mock(ConcurrentHashMapWithTimedEviction.class);
+		DefaultLoadBalancerCache cache = new DefaultLoadBalancerCache("test", nativeCache, 50, true);
 
 		cache.put("testKey", "testValue");
 

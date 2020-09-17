@@ -63,8 +63,7 @@ public class RestartListener implements SmartApplicationListener {
 			}
 		}
 		else if (input instanceof ContextRefreshedEvent) {
-			if (this.context != null && input.getSource().equals(this.context)
-					&& this.event != null) {
+			if (this.context != null && input.getSource().equals(this.context) && this.event != null) {
 				this.context.publishEvent(this.event);
 			}
 		}

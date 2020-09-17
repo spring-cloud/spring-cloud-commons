@@ -56,13 +56,11 @@ public abstract class PropertyUtils {
 	}
 
 	public static boolean bootstrapEnabled(Environment environment) {
-		return environment.getProperty(BOOTSTRAP_ENABLED_PROPERTY, Boolean.class, false)
-				|| MARKER_CLASS_EXISTS;
+		return environment.getProperty(BOOTSTRAP_ENABLED_PROPERTY, Boolean.class, false) || MARKER_CLASS_EXISTS;
 	}
 
 	public static boolean useLegacyProcessing(Environment environment) {
-		return environment.getProperty(USE_LEGACY_PROCESSING_PROPERTY, Boolean.class,
-				false);
+		return environment.getProperty(USE_LEGACY_PROCESSING_PROPERTY, Boolean.class, false);
 	}
 
 }

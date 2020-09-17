@@ -39,12 +39,11 @@ public class DefaultApacheHttpClientFactoryTests {
 
 	@Test
 	public void createClient() throws Exception {
-		final RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(100)
-				.setConnectTimeout(200).setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
-		CloseableHttpClient httpClient = new DefaultApacheHttpClientFactory(
-				HttpClientBuilder.create()).createBuilder()
-						.setConnectionManager(mock(HttpClientConnectionManager.class))
-						.setDefaultRequestConfig(requestConfig).build();
+		final RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(100).setConnectTimeout(200)
+				.setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
+		CloseableHttpClient httpClient = new DefaultApacheHttpClientFactory(HttpClientBuilder.create()).createBuilder()
+				.setConnectionManager(mock(HttpClientConnectionManager.class)).setDefaultRequestConfig(requestConfig)
+				.build();
 		BDDAssertions.then(httpClient).isInstanceOf(Configurable.class);
 		RequestConfig config = ((Configurable) httpClient).getConfig();
 		then(config.getSocketTimeout()).isEqualTo(100);

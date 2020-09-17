@@ -52,8 +52,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ClientApp.class,
-		properties = { "management.endpoints.web.exposure.include=*",
-				"management.endpoint.env.post.enabled=true" },
+		properties = { "management.endpoints.web.exposure.include=*", "management.endpoint.env.post.enabled=true" },
 		webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
 
@@ -66,25 +65,21 @@ public class RefreshEndpointIntegrationTests {
 	public void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
 		template.exchange(
-				getUrlEncodedEntity("http://localhost:" + this.port + BASE_PATH + "/env",
-						"message", "Hello Dave!"),
+				getUrlEncodedEntity("http://localhost:" + this.port + BASE_PATH + "/env", "message", "Hello Dave!"),
 				String.class);
-		template.postForObject("http://localhost:" + this.port + BASE_PATH + "/refresh",
-				null, String.class);
-		String message = template.getForObject("http://localhost:" + this.port + "/",
-				String.class);
+		template.postForObject("http://localhost:" + this.port + BASE_PATH + "/refresh", null, String.class);
+		String message = template.getForObject("http://localhost:" + this.port + "/", String.class);
 		then(message).isEqualTo("Hello Dave!");
 	}
 
-	private RequestEntity<?> getUrlEncodedEntity(String uri, String key, String value)
-			throws URISyntaxException {
+	private RequestEntity<?> getUrlEncodedEntity(String uri, String key, String value) throws URISyntaxException {
 		Map<String, String> property = new HashMap<>();
 		property.put("name", key);
 		property.put("value", value);
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		RequestEntity<Map<String, String>> entity = new RequestEntity<>(property, headers,
-				HttpMethod.POST, new URI(uri));
+		RequestEntity<Map<String, String>> entity = new RequestEntity<>(property, headers, HttpMethod.POST,
+				new URI(uri));
 		return entity;
 	}
 

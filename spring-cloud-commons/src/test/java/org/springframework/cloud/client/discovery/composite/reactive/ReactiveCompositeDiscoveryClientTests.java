@@ -47,8 +47,7 @@ class ReactiveCompositeDiscoveryClientTests {
 
 	@Test
 	public void shouldReturnEmptyFluxOfServices() {
-		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
-				emptyList());
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(emptyList());
 
 		Flux<String> services = client.getServices();
 
@@ -76,15 +75,13 @@ class ReactiveCompositeDiscoveryClientTests {
 
 		Flux<String> services = client.getServices();
 
-		StepVerifier.create(services).expectNext("serviceAFromClient1")
-				.expectNext("serviceBFromClient1").expectNext("serviceCFromClient2")
-				.expectComplete().verify();
+		StepVerifier.create(services).expectNext("serviceAFromClient1").expectNext("serviceBFromClient1")
+				.expectNext("serviceCFromClient2").expectComplete().verify();
 	}
 
 	@Test
 	public void shouldReturnEmptyFluxOfServiceInstances() {
-		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
-				emptyList());
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(emptyList());
 
 		Flux<ServiceInstance> instances = client.getInstances("service");
 
@@ -93,32 +90,28 @@ class ReactiveCompositeDiscoveryClientTests {
 
 	@Test
 	public void shouldReturnFluxOfServiceInstances() {
-		DefaultServiceInstance serviceInstance1 = new DefaultServiceInstance("instance",
-				"service", "localhost", 8080, false);
-		DefaultServiceInstance serviceInstance2 = new DefaultServiceInstance("instance2",
-				"service", "localhost", 8080, false);
-		TestPublisher<ServiceInstance> discoveryClient1Publisher = TestPublisher
-				.createCold();
+		DefaultServiceInstance serviceInstance1 = new DefaultServiceInstance("instance", "service", "localhost", 8080,
+				false);
+		DefaultServiceInstance serviceInstance2 = new DefaultServiceInstance("instance2", "service", "localhost", 8080,
+				false);
+		TestPublisher<ServiceInstance> discoveryClient1Publisher = TestPublisher.createCold();
 		discoveryClient1Publisher.emit(serviceInstance1);
 		discoveryClient1Publisher.emit(serviceInstance2);
 		discoveryClient1Publisher.complete();
 
-		TestPublisher<ServiceInstance> discoveryClient2Publisher = TestPublisher
-				.createCold();
+		TestPublisher<ServiceInstance> discoveryClient2Publisher = TestPublisher.createCold();
 		discoveryClient2Publisher.complete();
 
-		when(discoveryClient1.getInstances("service"))
-				.thenReturn(discoveryClient1Publisher.flux());
-		when(discoveryClient2.getInstances("service"))
-				.thenReturn(discoveryClient2Publisher.flux());
+		when(discoveryClient1.getInstances("service")).thenReturn(discoveryClient1Publisher.flux());
+		when(discoveryClient2.getInstances("service")).thenReturn(discoveryClient2Publisher.flux());
 
 		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
 				asList(discoveryClient1, discoveryClient2));
 
 		Flux<ServiceInstance> instances = client.getInstances("service");
 
-		StepVerifier.create(instances).expectNext(serviceInstance1)
-				.expectNext(serviceInstance2).expectComplete().verify();
+		StepVerifier.create(instances).expectNext(serviceInstance1).expectNext(serviceInstance2).expectComplete()
+				.verify();
 	}
 
 }

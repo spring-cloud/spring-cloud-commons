@@ -81,12 +81,10 @@ public class EncryptionBootstrapConfiguration {
 			if (keyStore.getLocation() != null) {
 				if (keyStore.getLocation().exists()) {
 					return new RsaSecretEncryptor(
-							new KeyStoreKeyFactory(keyStore.getLocation(),
-									keyStore.getPassword().toCharArray()).getKeyPair(
-											keyStore.getAlias(),
-											keyStore.getSecret().toCharArray()),
-							this.rsaProperties.getAlgorithm(),
-							this.rsaProperties.getSalt(), this.rsaProperties.isStrong());
+							new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray())
+									.getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
+							this.rsaProperties.getAlgorithm(), this.rsaProperties.getSalt(),
+							this.rsaProperties.isStrong());
 				}
 
 				throw new IllegalStateException("Invalid keystore location");
@@ -119,15 +117,13 @@ public class EncryptionBootstrapConfiguration {
 	public static class KeyCondition extends SpringBootCondition {
 
 		@Override
-		public ConditionOutcome getMatchOutcome(ConditionContext context,
-				AnnotatedTypeMetadata metadata) {
+		public ConditionOutcome getMatchOutcome(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			Environment environment = context.getEnvironment();
 			if (hasProperty(environment, "encrypt.key-store.location")) {
 				if (hasProperty(environment, "encrypt.key-store.password")) {
 					return ConditionOutcome.match("Keystore found in Environment");
 				}
-				return ConditionOutcome
-						.noMatch("Keystore found but no password in Environment");
+				return ConditionOutcome.noMatch("Keystore found but no password in Environment");
 			}
 			else if (hasProperty(environment, "encrypt.key")) {
 				return ConditionOutcome.match("Key found in Environment");

@@ -33,16 +33,14 @@ import org.springframework.util.Assert;
  *
  * @author Tim Ysewyn
  */
-public class ReactiveDiscoveryCompositeHealthContributor
-		implements CompositeReactiveHealthContributor {
+public class ReactiveDiscoveryCompositeHealthContributor implements CompositeReactiveHealthContributor {
 
 	private Map<String, ReactiveDiscoveryHealthIndicator> indicators;
 
-	public ReactiveDiscoveryCompositeHealthContributor(
-			Collection<ReactiveDiscoveryHealthIndicator> indicators) {
+	public ReactiveDiscoveryCompositeHealthContributor(Collection<ReactiveDiscoveryHealthIndicator> indicators) {
 		Assert.notNull(indicators, "'indicators' must not be null");
-		this.indicators = indicators.stream().collect(Collectors
-				.toMap(ReactiveDiscoveryHealthIndicator::getName, Function.identity()));
+		this.indicators = indicators.stream()
+				.collect(Collectors.toMap(ReactiveDiscoveryHealthIndicator::getName, Function.identity()));
 	}
 
 	@Override
@@ -55,8 +53,7 @@ public class ReactiveDiscoveryCompositeHealthContributor
 		return indicators.values().stream().map(this::asNamedContributor).iterator();
 	}
 
-	private NamedContributor<ReactiveHealthContributor> asNamedContributor(
-			ReactiveDiscoveryHealthIndicator indicator) {
+	private NamedContributor<ReactiveHealthContributor> asNamedContributor(ReactiveDiscoveryHealthIndicator indicator) {
 		return new NamedContributor<ReactiveHealthContributor>() {
 
 			@Override
@@ -72,8 +69,7 @@ public class ReactiveDiscoveryCompositeHealthContributor
 		};
 	}
 
-	private ReactiveHealthIndicator asHealthIndicator(
-			ReactiveDiscoveryHealthIndicator indicator) {
+	private ReactiveHealthIndicator asHealthIndicator(ReactiveDiscoveryHealthIndicator indicator) {
 		return (indicator != null) ? indicator::health : null;
 	}
 

@@ -38,8 +38,7 @@ public class DefaultApacheHttpClientFactory implements ApacheHttpClientFactory {
 	 */
 	@Override
 	public HttpClientBuilder createBuilder() {
-		return this.builder.disableContentCompression().disableCookieManagement()
-				.useSystemProperties();
+		return this.builder.disableContentCompression().disableCookieManagement().useSystemProperties();
 	}
 
 }

@@ -50,8 +50,8 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
  * @author Dave Syer
  * @author Tim Ysewyn
  */
-public class EnvironmentDecryptApplicationInitializer implements
-		ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
+public class EnvironmentDecryptApplicationInitializer
+		implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
 	/**
 	 * Name of the decrypted property source.
@@ -68,11 +68,9 @@ public class EnvironmentDecryptApplicationInitializer implements
 	 */
 	public static final String ENCRYPTED_PROPERTY_PREFIX = "{cipher}";
 
-	private static final Pattern COLLECTION_PROPERTY = Pattern
-			.compile("(\\S+)?\\[(\\d+)\\](\\.\\S+)?");
+	private static final Pattern COLLECTION_PROPERTY = Pattern.compile("(\\S+)?\\[(\\d+)\\](\\.\\S+)?");
 
-	private static Log logger = LogFactory
-			.getLog(EnvironmentDecryptApplicationInitializer.class);
+	private static Log logger = LogFactory.getLog(EnvironmentDecryptApplicationInitializer.class);
 
 	private int order = Ordered.HIGHEST_PRECEDENCE + 15;
 
@@ -115,8 +113,8 @@ public class EnvironmentDecryptApplicationInitializer implements
 				Map<String, Object> map = decrypt(bootstrap);
 				if (!map.isEmpty()) {
 					found.addAll(map.keySet());
-					insert(applicationContext, new SystemEnvironmentPropertySource(
-							DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME, map));
+					insert(applicationContext,
+							new SystemEnvironmentPropertySource(DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME, map));
 				}
 			}
 		}
@@ -125,8 +123,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 		if (!map.isEmpty()) {
 			// We have some decrypted properties
 			found.addAll(map.keySet());
-			insert(applicationContext, new SystemEnvironmentPropertySource(
-					DECRYPTED_PROPERTY_SOURCE_NAME, map));
+			insert(applicationContext, new SystemEnvironmentPropertySource(DECRYPTED_PROPERTY_SOURCE_NAME, map));
 		}
 		if (!found.isEmpty()) {
 			ApplicationContext parent = applicationContext.getParent();
@@ -140,33 +137,24 @@ public class EnvironmentDecryptApplicationInitializer implements
 		}
 	}
 
-	private void insert(ApplicationContext applicationContext,
-			PropertySource<?> propertySource) {
+	private void insert(ApplicationContext applicationContext, PropertySource<?> propertySource) {
 		ApplicationContext parent = applicationContext;
 		while (parent != null) {
 			if (parent.getEnvironment() instanceof ConfigurableEnvironment) {
-				ConfigurableEnvironment mutable = (ConfigurableEnvironment) parent
-						.getEnvironment();
+				ConfigurableEnvironment mutable = (ConfigurableEnvironment) parent.getEnvironment();
 				insert(mutable.getPropertySources(), propertySource);
 			}
 			parent = parent.getParent();
 		}
 	}
 
-	private void insert(MutablePropertySources propertySources,
-			PropertySource<?> propertySource) {
-		if (propertySources
-				.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
-			if (DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME
-					.equals(propertySource.getName())) {
-				propertySources.addBefore(
-						BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME,
-						propertySource);
+	private void insert(MutablePropertySources propertySources, PropertySource<?> propertySource) {
+		if (propertySources.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+			if (DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME.equals(propertySource.getName())) {
+				propertySources.addBefore(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME, propertySource);
 			}
 			else {
-				propertySources.addAfter(
-						BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME,
-						propertySource);
+				propertySources.addAfter(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME, propertySource);
 			}
 		}
 		else {
@@ -218,8 +206,7 @@ public class EnvironmentDecryptApplicationInitializer implements
 	private void merge(PropertySource<?> source, Map<String, Object> properties) {
 		if (source instanceof CompositePropertySource) {
 
-			List<PropertySource<?>> sources = new ArrayList<>(
-					((CompositePropertySource) source).getPropertySources());
+			List<PropertySource<?>> sources = new ArrayList<>(((CompositePropertySource) source).getPropertySources());
 			Collections.reverse(sources);
 
 			for (PropertySource<?> nested : sources) {

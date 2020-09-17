@@ -45,8 +45,7 @@ public class JdbcConfigurationTests {
 	protected static class BrokenApplication {
 
 		public static void main(String[] args) {
-			new SpringApplicationBuilder(BrokenApplication.class)
-					.web(WebApplicationType.NONE).run(args);
+			new SpringApplicationBuilder(BrokenApplication.class).web(WebApplicationType.NONE).run(args);
 		}
 
 	}

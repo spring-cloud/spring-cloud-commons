@@ -39,10 +39,8 @@ import org.springframework.core.annotation.Order;
  * @author Biju Kunjummen
  */
 @Configuration(proxyBeanMethods = false)
-@AutoConfigureBefore({ NoopDiscoveryClientAutoConfiguration.class,
-		CommonsClientAutoConfiguration.class })
-public class SimpleDiscoveryClientAutoConfiguration
-		implements ApplicationListener<WebServerInitializedEvent> {
+@AutoConfigureBefore({ NoopDiscoveryClientAutoConfiguration.class, CommonsClientAutoConfiguration.class })
+public class SimpleDiscoveryClientAutoConfiguration implements ApplicationListener<WebServerInitializedEvent> {
 
 	private ServerProperties server;
 
@@ -67,10 +65,8 @@ public class SimpleDiscoveryClientAutoConfiguration
 	public SimpleDiscoveryProperties simpleDiscoveryProperties(
 			@Value("${spring.application.name:application}") String serviceId) {
 		simple.getLocal().setServiceId(serviceId);
-		simple.getLocal()
-				.setUri(URI.create(
-						"http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname()
-								+ ":" + findPort()));
+		simple.getLocal().setUri(
+				URI.create("http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname() + ":" + findPort()));
 		return simple;
 	}
 
@@ -84,8 +80,7 @@ public class SimpleDiscoveryClientAutoConfiguration
 		if (port > 0) {
 			return port;
 		}
-		if (this.server != null && this.server.getPort() != null
-				&& this.server.getPort() > 0) {
+		if (this.server != null && this.server.getPort() != null && this.server.getPort() > 0) {
 			return this.server.getPort();
 		}
 		return 8080;
@@ -95,10 +90,8 @@ public class SimpleDiscoveryClientAutoConfiguration
 	public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
 		this.port = webServerInitializedEvent.getWebServer().getPort();
 		if (this.port > 0) {
-			simple.getLocal()
-					.setUri(URI.create("http://"
-							+ this.inet.findFirstNonLoopbackHostInfo().getHostname() + ":"
-							+ this.port));
+			simple.getLocal().setUri(
+					URI.create("http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname() + ":" + this.port));
 		}
 	}
 
