@@ -24,8 +24,9 @@ import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalanc
 import org.springframework.http.HttpMethod;
 
 /**
- * A {@link LoadBalancedRetryPolicy} implementation for {@link BlockingLoadBalancerClient}.
- * Based on `RibbonLoadBalancedRetryPolicy` to achieve feature-parity.
+ * A {@link LoadBalancedRetryPolicy} implementation for
+ * {@link BlockingLoadBalancerClient}. Based on `RibbonLoadBalancedRetryPolicy` to achieve
+ * feature-parity.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.6
@@ -33,9 +34,13 @@ import org.springframework.http.HttpMethod;
 public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy {
 
 	private final LoadBalancerRetryProperties retryProperties;
+
 	private final ServiceInstanceChooser loadBalancerClient;
+
 	private final String serviceId;
+
 	private int sameServerCount = 0;
+
 	private int nextServerCount = 0;
 
 	public BlockingLoadBalancedRetryPolicy(String serviceId,
@@ -89,4 +94,5 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 	public boolean retryableStatusCode(int statusCode) {
 		return retryProperties.getRetryableStatusCodes().contains(statusCode);
 	}
+
 }

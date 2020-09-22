@@ -32,7 +32,8 @@ public class LoadBalancerRetryProperties {
 	private boolean enabled = true;
 
 	/**
-	 * Indicates retries should be attempted on operations other than {@link HttpMethod#GET}.
+	 * Indicates retries should be attempted on operations other than
+	 * {@link HttpMethod#GET}.
 	 */
 	private boolean retryOnAllOperations = false;
 
@@ -42,8 +43,8 @@ public class LoadBalancerRetryProperties {
 	private int maxRetriesOnSameServiceInstance = 0;
 
 	/**
-	 * Number of retries to be executed on the next <code>ServiceInstance</code>.
-	 * A <code>ServiceInstance</code> is chosen before each retry call.
+	 * Number of retries to be executed on the next <code>ServiceInstance</code>. A
+	 * <code>ServiceInstance</code> is chosen before each retry call.
 	 */
 	private int maxRetriesOnNextServiceInstance = 1;
 

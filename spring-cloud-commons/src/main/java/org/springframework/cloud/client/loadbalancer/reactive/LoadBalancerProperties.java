@@ -18,11 +18,8 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
@@ -86,4 +83,5 @@ public class LoadBalancerProperties {
 		}
 
 	}
+
 }
