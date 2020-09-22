@@ -18,8 +18,11 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
@@ -42,6 +45,19 @@ public class LoadBalancerProperties {
 
 	public void setHealthCheck(HealthCheck healthCheck) {
 		this.healthCheck = healthCheck;
+	}
+
+	/**
+	 * Properties for LoadBalancer retries.
+	 */
+	private Retry retry = new Retry();
+
+	public Retry getRetry() {
+		return retry;
+	}
+
+	public void setRetry(Retry retry) {
+		this.retry = retry;
 	}
 
 	public static class HealthCheck {
@@ -84,4 +100,56 @@ public class LoadBalancerProperties {
 
 	}
 
+	public static class Retry {
+
+		/**
+		 * Indicates retries should be attempted on operations other than {@link HttpMethod#GET}.
+		 */
+		private boolean retryOnAllOperations = false;
+
+		/**
+		 * Number of retries to be executed on the same {@link ServiceInstance}.
+		 */
+		private int maxRetriesOnSameServiceInstance = 0;
+
+		/**
+		 * Number of retries to be executed on the next {@link ServiceInstance}.
+		 * A {@link ServiceInstance is chosen before each retry call}.
+		 */
+		private int maxRetriesOnNextServiceInstance = 1;
+
+		private Set<Integer> retryableStatusCodes;
+
+		public boolean isRetryOnAllOperations() {
+			return retryOnAllOperations;
+		}
+
+		public void setRetryOnAllOperations(boolean retryOnAllOperations) {
+			this.retryOnAllOperations = retryOnAllOperations;
+		}
+
+		public int getMaxRetriesOnSameServiceInstance() {
+			return maxRetriesOnSameServiceInstance;
+		}
+
+		public void setMaxRetriesOnSameServiceInstance(int maxRetriesOnSameServiceInstance) {
+			this.maxRetriesOnSameServiceInstance = maxRetriesOnSameServiceInstance;
+		}
+
+		public int getMaxRetriesOnNextServiceInstance() {
+			return maxRetriesOnNextServiceInstance;
+		}
+
+		public void setMaxRetriesOnNextServiceInstance(int maxRetriesOnNextServiceInstance) {
+			this.maxRetriesOnNextServiceInstance = maxRetriesOnNextServiceInstance;
+		}
+
+		public Set<Integer> getRetryableStatusCodes() {
+			return retryableStatusCodes;
+		}
+
+		public void setRetryableStatusCodes(Set<Integer> retryableStatusCodes) {
+			this.retryableStatusCodes = retryableStatusCodes;
+		}
+	}
 }
