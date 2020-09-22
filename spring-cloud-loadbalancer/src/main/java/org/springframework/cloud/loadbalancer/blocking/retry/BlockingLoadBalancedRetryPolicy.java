@@ -18,8 +18,8 @@ package org.springframework.cloud.loadbalancer.blocking.retry;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryPolicy;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerRetryProperties;
 import org.springframework.cloud.client.loadbalancer.ServiceInstanceChooser;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.http.HttpMethod;
 
@@ -32,7 +32,7 @@ import org.springframework.http.HttpMethod;
  */
 public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy {
 
-	private final LoadBalancerProperties.Retry retryProperties;
+	private final LoadBalancerRetryProperties retryProperties;
 	private final ServiceInstanceChooser loadBalancerClient;
 	private final String serviceId;
 	private int sameServerCount = 0;
@@ -40,7 +40,7 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 
 	public BlockingLoadBalancedRetryPolicy(String serviceId,
 			ServiceInstanceChooser loadBalancerClient,
-			LoadBalancerProperties.Retry retryProperties) {
+			LoadBalancerRetryProperties retryProperties) {
 		this.serviceId = serviceId;
 		this.loadBalancerClient = loadBalancerClient;
 		this.retryProperties = retryProperties;
