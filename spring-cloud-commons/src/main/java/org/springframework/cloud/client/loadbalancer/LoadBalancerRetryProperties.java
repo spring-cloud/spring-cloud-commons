@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -51,7 +52,7 @@ public class LoadBalancerRetryProperties {
 	/**
 	 * A {@link Set} of status codes that should trigger a retry.
 	 */
-	private Set<Integer> retryableStatusCodes;
+	private Set<Integer> retryableStatusCodes = new HashSet<>();
 
 	/**
 	 * Returns true if the load balancer should retry failed requests.

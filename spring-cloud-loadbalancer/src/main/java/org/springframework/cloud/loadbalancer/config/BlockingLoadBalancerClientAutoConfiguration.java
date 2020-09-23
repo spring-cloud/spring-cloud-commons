@@ -26,15 +26,21 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
+import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerRetryProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.OnNoRibbonDefaultCondition;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
+import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.annotation.Order;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -71,6 +77,22 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 		public BlockingLoadBalancerClient blockingLoadBalancerClient(
 				LoadBalancerClientFactory loadBalancerClientFactory) {
 			return new BlockingLoadBalancerClient(loadBalancerClientFactory);
+		}
+
+		@Configuration
+		@ConditionalOnClass(RetryTemplate.class)
+		@EnableConfigurationProperties(LoadBalancerRetryProperties.class)
+		protected static class BlockingLoadBalancerRetryConfig {
+
+			@Bean
+			// Allow users to override the factory while avoiding loading
+			// RibbonLoadBalancedRetryFactory.
+			@Order(1000)
+			LoadBalancedRetryFactory loadBalancedRetryFactory(
+					LoadBalancerRetryProperties retryProperties) {
+				return new BlockingLoadBalancedRetryFactory(retryProperties);
+			}
+
 		}
 
 	}

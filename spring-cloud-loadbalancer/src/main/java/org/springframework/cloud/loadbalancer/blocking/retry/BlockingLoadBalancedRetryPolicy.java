@@ -25,8 +25,8 @@ import org.springframework.http.HttpMethod;
 
 /**
  * A {@link LoadBalancedRetryPolicy} implementation for
- * {@link BlockingLoadBalancerClient}. Based on `RibbonLoadBalancedRetryPolicy` to achieve
- * feature-parity.
+ * {@link BlockingLoadBalancerClient}. Based on <code>RibbonLoadBalancedRetryPolicy</code>
+ * to achieve feature-parity.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.6
