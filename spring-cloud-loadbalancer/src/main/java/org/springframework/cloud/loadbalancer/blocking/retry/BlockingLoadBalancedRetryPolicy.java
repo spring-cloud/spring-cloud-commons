@@ -64,6 +64,7 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 
 	@Override
 	public boolean canRetryNextServer(LoadBalancedRetryContext context) {
+		// After the failure, we increment first and then check, hence the equality check
 		return nextServerCount <= retryProperties.getMaxRetriesOnNextServiceInstance()
 				&& canRetry(context);
 	}
@@ -76,6 +77,7 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 	@Override
 	public void registerThrowable(LoadBalancedRetryContext context, Throwable throwable) {
 		if (!canRetrySameServer(context) && canRetry(context)) {
+			// Reset same server since we are moving to a new ServiceInstance
 			sameServerCount = 0;
 			nextServerCount++;
 			if (!canRetryNextServer(context)) {
