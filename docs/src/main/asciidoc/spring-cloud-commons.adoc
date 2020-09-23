@@ -453,12 +453,27 @@ set the `spring.cloud.loadbalancer.ribbon.enabled` property to `false`.
 A load-balanced `RestTemplate` can be configured to retry failed requests.
 By default, this logic is disabled.
 You can enable it by adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath.
-The load-balanced `RestTemplate` honors some of the Ribbon configuration values related to retrying failed requests.
-You can use `client.ribbon.MaxAutoRetries`, `client.ribbon.MaxAutoRetriesNextServer`, and `client.ribbon.OkToRetryOnAllOperations` properties.
+
 If you would like to disable the retry logic with Spring Retry on the classpath, you can set `spring.cloud.loadbalancer.retry.enabled=false`.
+
+If you would like to implement a `BackOffPolicy` in your retries, you need to create a bean of type `LoadBalancedRetryFactory` and override the `createBackOffPolicy()` method.
+
+===== Ribbon-based retries
+
+For the Ribbon-backed implementation, the load-balanced `RestTemplate` honors some of the Ribbon configuration values related to retrying failed requests.
+You can use `client.ribbon.MaxAutoRetries`, `client.ribbon.MaxAutoRetriesNextServer`, and `client.ribbon.OkToRetryOnAllOperations` properties.
+
 See the https://github.com/Netflix/ribbon/wiki/Getting-Started#the-properties-file-sample-clientproperties[Ribbon documentation] for a description of what these properties do.
 
-If you would like to implement a `BackOffPolicy` in your retries, you need to create a bean of type `LoadBalancedRetryFactory` and override the `createBackOffPolicy` method:
+===== Spring Cloud LoadBalancer-based retries
+
+For the Spring Cloud LoadBalancer-backed implementation, you can set:
+
+- `spring.cloud.loadbalancer.retry.maxRetriesOnSameServiceInstance` - indicates how many times a request should be retried on the same ServiceInstance (counted separately for every selected instance)
+- `spring.cloud.loadbalancer.retry.maxRetriesOnNextServiceInstance` - indicates how many times a request should be retried a newly selected ServiceInstance
+- `spring.cloud.loadbalancer.retry.retryableStatusCodes` - the status codes on which to always retry a failed request.
+
+WARN:: If you chose to override the `LoadBalancedRetryFactory` while using the Spring Cloud LoadBalancer-backed approach, make sure you annotate your bean with `@Order` and set it to a higher precedence than `1000`, which is the order set on the `BlockingLoadBalancedRetryFactory`.
 
 ====
 [source,java,indent=0]
