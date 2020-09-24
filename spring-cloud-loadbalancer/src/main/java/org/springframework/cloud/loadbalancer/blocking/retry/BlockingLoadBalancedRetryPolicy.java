@@ -35,7 +35,7 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 
 	private final LoadBalancerRetryProperties retryProperties;
 
-	private final ServiceInstanceChooser loadBalancerClient;
+	private final ServiceInstanceChooser serviceInstanceChooser;
 
 	private final String serviceId;
 
@@ -44,10 +44,10 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 	private int nextServerCount = 0;
 
 	public BlockingLoadBalancedRetryPolicy(String serviceId,
-			ServiceInstanceChooser loadBalancerClient,
+			ServiceInstanceChooser serviceInstanceChooser,
 			LoadBalancerRetryProperties retryProperties) {
 		this.serviceId = serviceId;
-		this.loadBalancerClient = loadBalancerClient;
+		this.serviceInstanceChooser = serviceInstanceChooser;
 		this.retryProperties = retryProperties;
 	}
 
@@ -84,7 +84,7 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 				context.setExhaustedOnly();
 			}
 			else {
-				context.setServiceInstance(loadBalancerClient.choose(serviceId));
+				context.setServiceInstance(serviceInstanceChooser.choose(serviceId));
 			}
 		}
 		else {
