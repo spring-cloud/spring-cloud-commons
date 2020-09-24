@@ -39,7 +39,7 @@ public class BlockingLoadBalancedRetryFactory implements LoadBalancedRetryFactor
 
 	@Override
 	public LoadBalancedRetryPolicy createRetryPolicy(String serviceId, ServiceInstanceChooser serviceInstanceChooser) {
-		return new BlockingLoadBalancedRetryPolicy(serviceId, serviceInstanceChooser, loadBalancerProperties);
+		return new BlockingLoadBalancedRetryPolicy(loadBalancerProperties);
 	}
 
 }

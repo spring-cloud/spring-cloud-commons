@@ -118,7 +118,7 @@ class BlockingLoadBalancedRetryPolicyTests {
 	}
 
 	private BlockingLoadBalancedRetryPolicy getRetryPolicy(LoadBalancerProperties properties) {
-		return new BlockingLoadBalancedRetryPolicy("test", loadBalancerClient, properties);
+		return new BlockingLoadBalancedRetryPolicy(properties);
 	}
 
 }

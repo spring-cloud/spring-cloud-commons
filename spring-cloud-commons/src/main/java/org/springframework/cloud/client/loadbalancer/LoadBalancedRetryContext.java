@@ -32,6 +32,8 @@ public class LoadBalancedRetryContext extends RetryContextSupport {
 
 	private ServiceInstance serviceInstance;
 
+	private ServiceInstance previousServiceInstance;
+
 	/**
 	 * Creates a new load-balanced context.
 	 * @param parent The parent context.
@@ -71,7 +73,16 @@ public class LoadBalancedRetryContext extends RetryContextSupport {
 	 * @param serviceInstance The service instance to use during the retry.
 	 */
 	public void setServiceInstance(ServiceInstance serviceInstance) {
+		previousServiceInstance = this.serviceInstance;
 		this.serviceInstance = serviceInstance;
+	}
+
+	public ServiceInstance getPreviousServiceInstance() {
+		return previousServiceInstance;
+	}
+
+	void setPreviousServiceInstance(ServiceInstance previousServiceInstance) {
+		this.previousServiceInstance = previousServiceInstance;
 	}
 
 }

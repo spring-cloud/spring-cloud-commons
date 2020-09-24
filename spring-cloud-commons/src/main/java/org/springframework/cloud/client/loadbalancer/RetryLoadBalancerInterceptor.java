@@ -82,11 +82,21 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 					.getSupportedLifecycleProcessors(
 							loadBalancerFactory.getInstances(serviceName, LoadBalancerLifecycle.class),
 							HttpRequestContext.class, ClientHttpResponse.class, ServiceInstance.class);
-			String hint = getHint(serviceName);
-			DefaultRequest<HttpRequestContext> lbRequest = new DefaultRequest<>(new HttpRequestContext(request, hint));
-			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 			if (serviceInstance == null) {
+				ServiceInstance previousServiceInstance = null;
+				if (context instanceof LoadBalancedRetryContext) {
+					LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
+					previousServiceInstance = lbContext.getPreviousServiceInstance();
+				}
+				String hint = getHint(serviceName);
+				DefaultRequest<RetryableRequestContext> lbRequest = new DefaultRequest<>(
+						new RetryableRequestContext(previousServiceInstance, request, hint));
+				supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 				serviceInstance = loadBalancer.choose(serviceName, lbRequest);
+				if (context instanceof LoadBalancedRetryContext) {
+					LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
+					lbContext.setServiceInstance(serviceInstance);
+				}
 			}
 			Response<ServiceInstance> lbResponse = new DefaultResponse(serviceInstance);
 			if (serviceInstance == null) {
