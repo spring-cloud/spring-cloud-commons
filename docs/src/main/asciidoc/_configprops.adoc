@@ -35,6 +35,10 @@
 |spring.cloud.loadbalancer.health-check.interval | 25s | Interval for rerunning the HealthCheck scheduler.
 |spring.cloud.loadbalancer.health-check.path |  | 
 |spring.cloud.loadbalancer.retry.enabled | true | 
+|spring.cloud.loadbalancer.retry.max-retries-on-next-service-instance | 1 | Number of retries to be executed on the next <code>ServiceInstance</code>. A <code>ServiceInstance</code> is chosen before each retry call.
+|spring.cloud.loadbalancer.retry.max-retries-on-same-service-instance | 0 | Number of retries to be executed on the same <code>ServiceInstance</code>.
+|spring.cloud.loadbalancer.retry.retry-on-all-operations | false | Indicates retries should be attempted on operations other than {@link HttpMethod#GET}.
+|spring.cloud.loadbalancer.retry.retryable-status-codes |  | A {@link Set} of status codes that should trigger a retry.
 |spring.cloud.loadbalancer.ribbon.enabled | true | Causes `RibbonLoadBalancerClient` to be used by default.
 |spring.cloud.loadbalancer.service-discovery.timeout |  | String representation of Duration of the timeout for calls to service discovery.
 |spring.cloud.loadbalancer.zone |  | Spring Cloud LoadBalancer zone.
