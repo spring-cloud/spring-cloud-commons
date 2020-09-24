@@ -18,8 +18,8 @@ package org.springframework.cloud.loadbalancer.blocking.retry;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryPolicy;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerRetryProperties;
 import org.springframework.cloud.client.loadbalancer.ServiceInstanceChooser;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.http.HttpMethod;
 
@@ -33,9 +33,9 @@ import org.springframework.http.HttpMethod;
  */
 public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy {
 
-	private final LoadBalancerRetryProperties retryProperties;
-
 	private final ServiceInstanceChooser serviceInstanceChooser;
+
+	private final LoadBalancerProperties loadBalancerProperties;
 
 	private final String serviceId;
 
@@ -44,26 +44,28 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 	private int nextServerCount = 0;
 
 	public BlockingLoadBalancedRetryPolicy(String serviceId, ServiceInstanceChooser serviceInstanceChooser,
-			LoadBalancerRetryProperties retryProperties) {
+			LoadBalancerProperties loadBalancerProperties) {
 		this.serviceId = serviceId;
 		this.serviceInstanceChooser = serviceInstanceChooser;
-		this.retryProperties = retryProperties;
+		this.loadBalancerProperties = loadBalancerProperties;
 	}
 
 	public boolean canRetry(LoadBalancedRetryContext context) {
 		HttpMethod method = context.getRequest().getMethod();
-		return HttpMethod.GET.equals(method) || retryProperties.isRetryOnAllOperations();
+		return HttpMethod.GET.equals(method) || loadBalancerProperties.getRetry().isRetryOnAllOperations();
 	}
 
 	@Override
 	public boolean canRetrySameServer(LoadBalancedRetryContext context) {
-		return sameServerCount < retryProperties.getMaxRetriesOnSameServiceInstance() && canRetry(context);
+		return sameServerCount < loadBalancerProperties.getRetry().getMaxRetriesOnSameServiceInstance()
+				&& canRetry(context);
 	}
 
 	@Override
 	public boolean canRetryNextServer(LoadBalancedRetryContext context) {
 		// After the failure, we increment first and then check, hence the equality check
-		return nextServerCount <= retryProperties.getMaxRetriesOnNextServiceInstance() && canRetry(context);
+		return nextServerCount <= loadBalancerProperties.getRetry().getMaxRetriesOnNextServiceInstance()
+				&& canRetry(context);
 	}
 
 	@Override
@@ -91,7 +93,7 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 
 	@Override
 	public boolean retryableStatusCode(int statusCode) {
-		return retryProperties.getRetryableStatusCodes().contains(statusCode);
+		return loadBalancerProperties.getRetry().getRetryableStatusCodes().contains(statusCode);
 	}
 
 }

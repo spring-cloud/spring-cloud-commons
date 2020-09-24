@@ -28,7 +28,6 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -98,11 +97,6 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		@Bean
 		LoadBalancerClient loadBalancerClient() {
 			return new NoopLoadBalancerClient();
-		}
-
-		@Bean
-		LoadBalancerProperties loadBalancerProperties() {
-			return new LoadBalancerProperties();
 		}
 
 		@Bean

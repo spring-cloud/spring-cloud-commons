@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryContext;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerRetryProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -47,7 +47,7 @@ class BlockingLoadBalancedRetryPolicyTests {
 
 	private final LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
 
-	private final LoadBalancerRetryProperties retryProperties = new LoadBalancerRetryProperties();
+	private final LoadBalancerProperties properties = new LoadBalancerProperties();
 
 	private final UnsupportedOperationException exception = new UnsupportedOperationException();
 
@@ -59,8 +59,8 @@ class BlockingLoadBalancedRetryPolicyTests {
 
 	@Test
 	void shouldExecuteIndicatedNumberOfSameAndNextInstanceRetriesAndCloseRetryContext() {
-		retryProperties.setMaxRetriesOnSameServiceInstance(1);
-		BlockingLoadBalancedRetryPolicy retryPolicy = getRetryPolicy(retryProperties);
+		properties.getRetry().setMaxRetriesOnSameServiceInstance(1);
+		BlockingLoadBalancedRetryPolicy retryPolicy = getRetryPolicy(properties);
 
 		assertThat(retryPolicy.canRetrySameServer(context)).isTrue();
 		assertThat(retryPolicy.canRetryNextServer(context)).isTrue();
@@ -88,7 +88,7 @@ class BlockingLoadBalancedRetryPolicyTests {
 	void shouldNotRetryWhenMethodNotGet() {
 		when(httpRequest.getMethod()).thenReturn(HttpMethod.POST);
 		when(context.getRequest()).thenReturn(httpRequest);
-		BlockingLoadBalancedRetryPolicy retryPolicy = getRetryPolicy(retryProperties);
+		BlockingLoadBalancedRetryPolicy retryPolicy = getRetryPolicy(properties);
 
 		boolean canRetry = retryPolicy.canRetry(context);
 
@@ -99,8 +99,8 @@ class BlockingLoadBalancedRetryPolicyTests {
 	void shouldRetryOnPostWhenEnabled() {
 		when(httpRequest.getMethod()).thenReturn(HttpMethod.POST);
 		when(context.getRequest()).thenReturn(httpRequest);
-		retryProperties.setRetryOnAllOperations(true);
-		BlockingLoadBalancedRetryPolicy retryPolicy = getRetryPolicy(retryProperties);
+		properties.getRetry().setRetryOnAllOperations(true);
+		BlockingLoadBalancedRetryPolicy retryPolicy = getRetryPolicy(properties);
 
 		boolean canRetry = retryPolicy.canRetry(context);
 
@@ -109,16 +109,16 @@ class BlockingLoadBalancedRetryPolicyTests {
 
 	@Test
 	void shouldResolveRetryableStatusCode() {
-		retryProperties.setRetryableStatusCodes(new HashSet<>(Arrays.asList(404, 502)));
-		BlockingLoadBalancedRetryPolicy retryPolicy = getRetryPolicy(retryProperties);
+		properties.getRetry().setRetryableStatusCodes(new HashSet<>(Arrays.asList(404, 502)));
+		BlockingLoadBalancedRetryPolicy retryPolicy = getRetryPolicy(properties);
 
 		boolean retryableStatusCode = retryPolicy.retryableStatusCode(404);
 
 		assertThat(retryableStatusCode).isTrue();
 	}
 
-	private BlockingLoadBalancedRetryPolicy getRetryPolicy(LoadBalancerRetryProperties retryProperties) {
-		return new BlockingLoadBalancedRetryPolicy("test", loadBalancerClient, retryProperties);
+	private BlockingLoadBalancedRetryPolicy getRetryPolicy(LoadBalancerProperties properties) {
+		return new BlockingLoadBalancedRetryPolicy("test", loadBalancerClient, properties);
 	}
 
 }

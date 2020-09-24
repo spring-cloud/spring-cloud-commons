@@ -52,18 +52,15 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 
 	private final LoadBalancedRetryFactory lbRetryFactory;
 
-	private final LoadBalancerRetryProperties retryProperties;
-
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRetryProperties retryProperties,
+	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerProperties properties,
 			LoadBalancerRequestFactory requestFactory, LoadBalancedRetryFactory lbRetryFactory,
-			LoadBalancerProperties properties, ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
 		this.loadBalancer = loadBalancer;
-		this.retryProperties = retryProperties;
+		this.properties = properties;
 		this.requestFactory = requestFactory;
 		this.lbRetryFactory = lbRetryFactory;
-		this.properties = properties;
 		this.loadBalancerFactory = loadBalancerFactory;
 	}
 
@@ -127,7 +124,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		if (retryListeners != null && retryListeners.length != 0) {
 			template.setListeners(retryListeners);
 		}
-		template.setRetryPolicy(!retryProperties.isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
+		template.setRetryPolicy(!properties.getRetry().isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
 				: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer, serviceName));
 		return template;
 	}
