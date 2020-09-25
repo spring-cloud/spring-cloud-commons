@@ -17,8 +17,6 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,64 +28,66 @@ import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.client.loadbalancer.RetryLoadBalancerInterceptor;
+import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
 
 /**
- * A Round-Robin-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
+ * A modified {@link RoundRobinLoadBalancer} implementation that avoids picking the same
+ * service instance while retrying requests.
  *
- * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
+ * @see RetryLoadBalancerInterceptor
  */
-public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalancer {
+public class AvoidPreviousInstanceRoundRobinLoadBalancer extends RoundRobinLoadBalancer {
 
-	private static final Log log = LogFactory.getLog(RoundRobinLoadBalancer.class);
+	private static final Log LOG = LogFactory.getLog(AvoidPreviousInstanceRoundRobinLoadBalancer.class);
 
-	final AtomicInteger position;
-
-	final String serviceId;
-
-	ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
-
-	/**
-	 * @param serviceInstanceListSupplierProvider a provider of
-	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
-	 * @param serviceId id of the service for which to choose an instance
-	 */
-	public RoundRobinLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
-			String serviceId) {
-		this(serviceInstanceListSupplierProvider, serviceId, new Random().nextInt(1000));
+	public AvoidPreviousInstanceRoundRobinLoadBalancer(
+			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider, String serviceId) {
+		super(serviceInstanceListSupplierProvider, serviceId);
 	}
 
-	/**
-	 * @param serviceInstanceListSupplierProvider a provider of
-	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
-	 * @param serviceId id of the service for which to choose an instance
-	 * @param seedPosition Round Robin element position marker
-	 */
-	public RoundRobinLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
-			String serviceId, int seedPosition) {
-		this.serviceId = serviceId;
-		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
-		this.position = new AtomicInteger(seedPosition);
+	public AvoidPreviousInstanceRoundRobinLoadBalancer(
+			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider, String serviceId,
+			int seedPosition) {
+		super(serviceInstanceListSupplierProvider, serviceId, seedPosition);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	// see original
 	// https://github.com/Netflix/ocelli/blob/master/ocelli-core/
 	// src/main/java/netflix/ocelli/loadbalancer/RoundRobinLoadBalancer.java
 	public Mono<Response<ServiceInstance>> choose(Request request) {
+		if (!(request.getContext() instanceof RetryableRequestContext)) {
+			return super.choose(request);
+		}
+		RetryableRequestContext context = (RetryableRequestContext) request.getContext();
+
 		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
 				.getIfAvailable(NoopServiceInstanceListSupplier::new);
-		return supplier.get().next().map(this::getInstanceResponse);
+		return supplier.get().next()
+				.map(instances -> getInstanceResponse(instances, context.getPreviousServiceInstance()));
 	}
 
-	Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances) {
+	Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances,
+			ServiceInstance previousServiceInstance) {
+		if (previousServiceInstance == null) {
+			return super.getInstanceResponse(instances);
+		}
 		if (instances.isEmpty()) {
-			if (log.isWarnEnabled()) {
-				log.warn("No servers available for service: " + serviceId);
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("No servers available for service: " + serviceId);
 			}
 			return new EmptyResponse();
 		}
+		instances.remove(previousServiceInstance);
+		if (instances.isEmpty()) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("No other instance available, returning previous instance: " + previousServiceInstance);
+			}
+			return new DefaultResponse(previousServiceInstance);
+		}
+
 		// TODO: enforce order?
 		int pos = Math.abs(this.position.incrementAndGet());
 
