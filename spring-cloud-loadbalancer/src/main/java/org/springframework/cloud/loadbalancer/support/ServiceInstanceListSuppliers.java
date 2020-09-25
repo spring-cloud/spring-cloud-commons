@@ -26,7 +26,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 
 /**
- * Utility class for service instances.
+ * Utility class for service instance list suppliers.
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma

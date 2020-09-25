@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -80,8 +81,9 @@ public class AvoidPreviousInstanceRoundRobinLoadBalancer extends RoundRobinLoadB
 			}
 			return new EmptyResponse();
 		}
-		instances.remove(previousServiceInstance);
-		if (instances.isEmpty()) {
+		List<ServiceInstance> finalInstances = new ArrayList<>(instances);
+		finalInstances.remove(previousServiceInstance);
+		if (finalInstances.isEmpty()) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("No other instance available, returning previous instance: " + previousServiceInstance);
 			}
@@ -91,7 +93,7 @@ public class AvoidPreviousInstanceRoundRobinLoadBalancer extends RoundRobinLoadB
 		// TODO: enforce order?
 		int pos = Math.abs(this.position.incrementAndGet());
 
-		ServiceInstance instance = instances.get(pos % instances.size());
+		ServiceInstance instance = finalInstances.get(pos % finalInstances.size());
 
 		return new DefaultResponse(instance);
 	}
