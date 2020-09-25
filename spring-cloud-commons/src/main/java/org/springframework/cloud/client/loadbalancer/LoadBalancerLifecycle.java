@@ -34,8 +34,7 @@ public interface LoadBalancerLifecycle<RC, RES, T> {
 	 * @param serverTypeClass The type of Server that the LoadBalancer retrieves
 	 * @return <code>true</code> if the lifecycle should be used to process given classes
 	 */
-	default boolean supports(Class requestContextClass, Class responseClass,
-			Class serverTypeClass) {
+	default boolean supports(Class requestContextClass, Class responseClass, Class serverTypeClass) {
 		return true;
 	}
 

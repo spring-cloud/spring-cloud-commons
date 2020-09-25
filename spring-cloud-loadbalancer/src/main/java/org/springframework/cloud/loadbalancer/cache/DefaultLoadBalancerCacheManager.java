@@ -49,16 +49,13 @@ public class DefaultLoadBalancerCacheManager implements LoadBalancerCacheManager
 
 	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<>(16);
 
-	public DefaultLoadBalancerCacheManager(
-			LoadBalancerCacheProperties loadBalancerCacheProperties,
+	public DefaultLoadBalancerCacheManager(LoadBalancerCacheProperties loadBalancerCacheProperties,
 			String... cacheNames) {
 		cacheMap.putAll(createCaches(cacheNames, loadBalancerCacheProperties).stream()
-				.collect(Collectors.toMap(DefaultLoadBalancerCache::getName,
-						cache -> cache)));
+				.collect(Collectors.toMap(DefaultLoadBalancerCache::getName, cache -> cache)));
 	}
 
-	public DefaultLoadBalancerCacheManager(
-			LoadBalancerCacheProperties loadBalancerCacheProperties) {
+	public DefaultLoadBalancerCacheManager(LoadBalancerCacheProperties loadBalancerCacheProperties) {
 		this(loadBalancerCacheProperties, SERVICE_INSTANCE_CACHE_NAME);
 	}
 
@@ -66,8 +63,7 @@ public class DefaultLoadBalancerCacheManager implements LoadBalancerCacheManager
 			LoadBalancerCacheProperties loadBalancerCacheProperties) {
 		return Arrays.stream(cacheNames).distinct()
 				.map(name -> new DefaultLoadBalancerCache(name,
-						new ConcurrentHashMapWithTimedEviction<>(
-								loadBalancerCacheProperties.getCapacity(),
+						new ConcurrentHashMapWithTimedEviction<>(loadBalancerCacheProperties.getCapacity(),
 								new DelayedTaskEvictionScheduler<>()),
 						loadBalancerCacheProperties.getTtl().toMillis(), false))
 				.collect(Collectors.toSet());

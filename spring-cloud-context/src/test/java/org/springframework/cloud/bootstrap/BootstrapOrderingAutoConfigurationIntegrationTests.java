@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.bootstrap;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -24,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bootstrap.BootstrapOrderingAutoConfigurationIntegrationTests.Application;
-import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,7 +31,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class, properties = "encrypt.key:deadbeef")
+@SpringBootTest(classes = Application.class,
+		properties = { "encrypt.key:deadbeef", "spring.config.use-legacy-processing=true" })
 @ActiveProfiles("encrypt")
 public class BootstrapOrderingAutoConfigurationIntegrationTests {
 
@@ -41,11 +40,9 @@ public class BootstrapOrderingAutoConfigurationIntegrationTests {
 	private ConfigurableEnvironment environment;
 
 	@Test
-	@Ignore // FIXME: spring boot 2.0.0
 	public void bootstrapPropertiesExist() {
-		then(this.environment.getPropertySources().contains(
-				PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME))
-						.isTrue();
+		then(this.environment.getPropertySources().contains("applicationConfig: [classpath:/bootstrap.properties]"))
+				.isTrue();
 	}
 
 	@Test

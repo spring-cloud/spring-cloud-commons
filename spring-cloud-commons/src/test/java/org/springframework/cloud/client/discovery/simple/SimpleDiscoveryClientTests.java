@@ -42,10 +42,8 @@ public class SimpleDiscoveryClientTests {
 		SimpleDiscoveryProperties simpleDiscoveryProperties = new SimpleDiscoveryProperties();
 
 		Map<String, List<SimpleServiceInstance>> map = new HashMap<>();
-		SimpleServiceInstance service1Inst1 = new SimpleServiceInstance(
-				URI.create("http://host1:8080"));
-		SimpleServiceInstance service1Inst2 = new SimpleServiceInstance(
-				URI.create("https://host2:8443"));
+		SimpleServiceInstance service1Inst1 = new SimpleServiceInstance(URI.create("http://host1:8080"));
+		SimpleServiceInstance service1Inst2 = new SimpleServiceInstance(URI.create("https://host2:8443"));
 		map.put("service1", Arrays.asList(service1Inst1, service1Inst2));
 		simpleDiscoveryProperties.setInstances(map);
 		simpleDiscoveryProperties.init();
@@ -54,8 +52,7 @@ public class SimpleDiscoveryClientTests {
 
 	@Test
 	public void shouldBeAbleToRetrieveServiceDetailsByName() {
-		List<ServiceInstance> instances = this.simpleDiscoveryClient
-				.getInstances("service1");
+		List<ServiceInstance> instances = this.simpleDiscoveryClient.getInstances("service1");
 		then(instances.size()).isEqualTo(2);
 		then(instances.get(0).getServiceId()).isEqualTo("service1");
 		then(instances.get(0).getHost()).isEqualTo("host1");

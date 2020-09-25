@@ -64,8 +64,7 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
 
@@ -102,10 +101,8 @@ public class ConfigurationPropertiesRebinder
 					if (getNeverRefreshable().contains(bean.getClass().getName())) {
 						return false; // ignore
 					}
-					this.applicationContext.getAutowireCapableBeanFactory()
-							.destroyBean(bean);
-					this.applicationContext.getAutowireCapableBeanFactory()
-							.initializeBean(bean, name);
+					this.applicationContext.getAutowireCapableBeanFactory().destroyBean(bean);
+					this.applicationContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
 					return true;
 				}
 			}
@@ -123,9 +120,8 @@ public class ConfigurationPropertiesRebinder
 
 	@ManagedAttribute
 	public Set<String> getNeverRefreshable() {
-		String neverRefresh = this.applicationContext.getEnvironment().getProperty(
-				"spring.cloud.refresh.never-refreshable",
-				"com.zaxxer.hikari.HikariDataSource");
+		String neverRefresh = this.applicationContext.getEnvironment()
+				.getProperty("spring.cloud.refresh.never-refreshable", "com.zaxxer.hikari.HikariDataSource");
 		return StringUtils.commaDelimitedListToSet(neverRefresh);
 	}
 

@@ -39,6 +39,7 @@ public interface ServiceInstanceChooser {
 	 * LoadBalancer request.
 	 * @param serviceId The service ID to look up the LoadBalancer.
 	 * @param request The request to pass on to the LoadBalancer
+	 * @param <T> The type of the request context.
 	 * @return A ServiceInstance that matches the serviceId.
 	 */
 	<T> ServiceInstance choose(String serviceId, Request<T> request);

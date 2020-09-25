@@ -60,8 +60,7 @@ public class CompositeDiscoveryClientAutoConfigurationTests {
 		CompositeDiscoveryClient compositeDiscoveryClient = (CompositeDiscoveryClient) this.discoveryClient;
 		then(compositeDiscoveryClient.getDiscoveryClients().get(0).description())
 				.isEqualTo("A custom discovery client");
-		then(compositeDiscoveryClient.getDiscoveryClients().get(1))
-				.isInstanceOf(SimpleDiscoveryClient.class);
+		then(compositeDiscoveryClient.getDiscoveryClients().get(1)).isInstanceOf(SimpleDiscoveryClient.class);
 	}
 
 	@EnableAutoConfiguration

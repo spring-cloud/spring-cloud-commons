@@ -39,8 +39,7 @@ public class NamedContextFactoryTests {
 		parent.refresh();
 		TestClientFactory factory = new TestClientFactory();
 		factory.setApplicationContext(parent);
-		factory.setConfigurations(Arrays.asList(getSpec("foo", FooConfig.class),
-				getSpec("bar", BarConfig.class)));
+		factory.setConfigurations(Arrays.asList(getSpec("foo", FooConfig.class), getSpec("bar", BarConfig.class)));
 
 		Foo foo = factory.getInstance("foo", Foo.class);
 		then(foo).as("foo was null").isNotNull();
@@ -48,11 +47,22 @@ public class NamedContextFactoryTests {
 		Bar bar = factory.getInstance("bar", Bar.class);
 		then(bar).as("bar was null").isNotNull();
 
-		then(factory.getContextNames()).as("context names not exposed").contains("foo",
-				"bar");
+		then(factory.getContextNames()).as("context names not exposed").contains("foo", "bar");
 
 		Bar foobar = factory.getInstance("foo", Bar.class);
 		then(foobar).as("bar was not null").isNull();
+
+		Baz fooBaz = factory.getInstance("foo", Baz.class);
+		then(fooBaz).as("fooBaz was null").isNotNull();
+
+		Object fooContainerFoo = factory.getInstance("foo", Container.class, Foo.class);
+		then(fooContainerFoo).as("fooContainerFoo was null").isNotNull();
+
+		Object fooContainerBar = factory.getInstance("foo", Container.class, Bar.class);
+		then(fooContainerBar).as("fooContainerBar was not null").isNull();
+
+		Object barContainerBar = factory.getInstance("bar", Container.class, Bar.class);
+		then(barContainerBar).as("barContainerBar was null").isNotNull();
 
 		Map<String, Baz> fooBazes = factory.getInstances("foo", Baz.class);
 		then(fooBazes).as("fooBazes was null").isNotNull();
@@ -66,12 +76,10 @@ public class NamedContextFactoryTests {
 		AnnotationConfigApplicationContext fooContext = factory.getContext("foo");
 		AnnotationConfigApplicationContext barContext = factory.getContext("bar");
 
-		then(fooContext.getClassLoader())
-				.as("foo context classloader does not match parent")
+		then(fooContext.getClassLoader()).as("foo context classloader does not match parent")
 				.isSameAs(parent.getClassLoader());
 
-		Assertions.assertThat(fooContext).hasFieldOrPropertyWithValue("customClassLoader",
-				true);
+		Assertions.assertThat(fooContext).hasFieldOrPropertyWithValue("customClassLoader", true);
 
 		factory.destroy();
 
@@ -146,6 +154,11 @@ public class NamedContextFactoryTests {
 			return new Foo();
 		}
 
+		@Bean
+		Container<Foo> fooContainer() {
+			return new Container<>(new Foo());
+		}
+
 	}
 
 	static class Foo {
@@ -164,9 +177,28 @@ public class NamedContextFactoryTests {
 			return new Baz();
 		}
 
+		@Bean
+		Container<Bar> barContainer() {
+			return new Container<>(new Bar());
+		}
+
 	}
 
 	static class Bar {
+
+	}
+
+	static class Container<T> {
+
+		private final T item;
+
+		Container(T item) {
+			this.item = item;
+		}
+
+		public T getItem() {
+			return this.item;
+		}
 
 	}
 

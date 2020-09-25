@@ -44,7 +44,7 @@ import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(properties = "spring.config.use-legacy-processing=true")
 @DirtiesContext
 public class ContextRefresherOrderingIntegrationTests {
 
@@ -77,12 +77,9 @@ public class ContextRefresherOrderingIntegrationTests {
 	public void orderingIsCorrect() {
 		refresher.refresh();
 		MutablePropertySources propertySources = environment.getPropertySources();
-		PropertySource<?> test1 = propertySources
-				.get("bootstrapProperties-testContextRefresherOrdering1");
-		PropertySource<?> test2 = propertySources
-				.get("bootstrapProperties-testContextRefresherOrdering2");
-		PropertySource<?> test3 = propertySources
-				.get("bootstrapProperties-testContextRefresherOrdering3");
+		PropertySource<?> test1 = propertySources.get("bootstrapProperties-testContextRefresherOrdering1");
+		PropertySource<?> test2 = propertySources.get("bootstrapProperties-testContextRefresherOrdering2");
+		PropertySource<?> test3 = propertySources.get("bootstrapProperties-testContextRefresherOrdering3");
 		int index1 = propertySources.precedenceOf(test1);
 		int index2 = propertySources.precedenceOf(test2);
 		int index3 = propertySources.precedenceOf(test3);
@@ -114,12 +111,9 @@ public class ContextRefresherOrderingIntegrationTests {
 				return Collections.emptyList();
 			}
 			ArrayList<PropertySource<?>> sources = new ArrayList<>();
-			sources.add(new MapPropertySource("testContextRefresherOrdering1",
-					singletonMap("key1", "value1")));
-			sources.add(new MapPropertySource("testContextRefresherOrdering2",
-					singletonMap("key2", "value2")));
-			sources.add(new MapPropertySource("testContextRefresherOrdering3",
-					singletonMap("key3", "value3")));
+			sources.add(new MapPropertySource("testContextRefresherOrdering1", singletonMap("key1", "value1")));
+			sources.add(new MapPropertySource("testContextRefresherOrdering2", singletonMap("key2", "value2")));
+			sources.add(new MapPropertySource("testContextRefresherOrdering3", singletonMap("key3", "value3")));
 			return sources;
 		}
 

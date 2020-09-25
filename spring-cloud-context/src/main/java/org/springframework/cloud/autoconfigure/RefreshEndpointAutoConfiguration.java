@@ -27,7 +27,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.restart.RestartEndpoint;
@@ -46,24 +45,20 @@ import org.springframework.integration.monitor.IntegrationMBeanExporter;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ EndpointAutoConfiguration.class, Health.class })
-@AutoConfigureAfter({ LifecycleMvcEndpointAutoConfiguration.class,
-		RefreshAutoConfiguration.class })
-@Import({ RestartEndpointWithIntegrationConfiguration.class,
-		RestartEndpointWithoutIntegrationConfiguration.class,
+@AutoConfigureAfter({ LifecycleMvcEndpointAutoConfiguration.class, RefreshAutoConfiguration.class })
+@Import({ RestartEndpointWithIntegrationConfiguration.class, RestartEndpointWithoutIntegrationConfiguration.class,
 		PauseResumeEndpointsConfiguration.class })
 public class RefreshEndpointAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnEnabledHealthIndicator("refresh")
-	RefreshScopeHealthIndicator refreshScopeHealthIndicator(
-			ObjectProvider<RefreshScope> scope,
+	RefreshScopeHealthIndicator refreshScopeHealthIndicator(ObjectProvider<RefreshScope> scope,
 			ConfigurationPropertiesRebinder rebinder) {
 		return new RefreshScopeHealthIndicator(scope, rebinder);
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnBean(PropertySourceBootstrapConfiguration.class)
 	protected static class RefreshEndpointConfiguration {
 
 		@Bean
@@ -126,8 +121,7 @@ class PauseResumeEndpointsConfiguration {
 	@ConditionalOnBean(RestartEndpoint.class)
 	@ConditionalOnMissingBean
 	@ConditionalOnAvailableEndpoint
-	public RestartEndpoint.ResumeEndpoint resumeEndpoint(
-			RestartEndpoint restartEndpoint) {
+	public RestartEndpoint.ResumeEndpoint resumeEndpoint(RestartEndpoint restartEndpoint) {
 		return restartEndpoint.getResumeEndpoint();
 	}
 

@@ -39,8 +39,7 @@ public interface Customizer<TOCUSTOMIZE> {
 	 * @param <K> the type of the identifier of the target
 	 * @return a wrapped customizer
 	 */
-	static <T, K> Customizer<T> once(Customizer<T> customizer,
-			Function<? super T, ? extends K> keyMapper) {
+	static <T, K> Customizer<T> once(Customizer<T> customizer, Function<? super T, ? extends K> keyMapper) {
 		final ConcurrentMap<K, Boolean> customized = new ConcurrentHashMap<>();
 		return t -> {
 			final K key = keyMapper.apply(t);

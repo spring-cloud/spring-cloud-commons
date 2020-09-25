@@ -36,8 +36,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@ConditionalOnProperty(value = "spring.cloud.discovery.blocking.enabled",
-		matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.cloud.discovery.blocking.enabled", matchIfMissing = true)
 public @interface ConditionalOnBlockingDiscoveryEnabled {
 
 }

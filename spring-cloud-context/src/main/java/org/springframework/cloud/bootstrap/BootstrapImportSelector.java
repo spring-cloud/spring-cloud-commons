@@ -61,16 +61,15 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 	public String[] selectImports(AnnotationMetadata annotationMetadata) {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		// Use names and ensure unique to protect against duplicates
-		List<String> names = new ArrayList<>(SpringFactoriesLoader
-				.loadFactoryNames(BootstrapConfiguration.class, classLoader));
-		names.addAll(Arrays.asList(StringUtils.commaDelimitedListToStringArray(
-				this.environment.getProperty("spring.cloud.bootstrap.sources", ""))));
+		List<String> names = new ArrayList<>(
+				SpringFactoriesLoader.loadFactoryNames(BootstrapConfiguration.class, classLoader));
+		names.addAll(Arrays.asList(StringUtils
+				.commaDelimitedListToStringArray(this.environment.getProperty("spring.cloud.bootstrap.sources", ""))));
 
 		List<OrderedAnnotatedElement> elements = new ArrayList<>();
 		for (String name : names) {
 			try {
-				elements.add(
-						new OrderedAnnotatedElement(this.metadataReaderFactory, name));
+				elements.add(new OrderedAnnotatedElement(this.metadataReaderFactory, name));
 			}
 			catch (IOException e) {
 				continue;
@@ -91,12 +90,10 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 
 		private Integer value;
 
-		OrderedAnnotatedElement(MetadataReaderFactory metadataReaderFactory, String name)
-				throws IOException {
+		OrderedAnnotatedElement(MetadataReaderFactory metadataReaderFactory, String name) throws IOException {
 			MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(name);
 			AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-			Map<String, Object> attributes = metadata
-					.getAnnotationAttributes(Order.class.getName());
+			Map<String, Object> attributes = metadata.getAnnotationAttributes(Order.class.getName());
 			this.name = name;
 			if (attributes != null && attributes.containsKey("value")) {
 				this.value = (Integer) attributes.get("value");
@@ -125,8 +122,7 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 
 		@Override
 		public Annotation[] getAnnotations() {
-			return this.order == null ? new Annotation[0]
-					: new Annotation[] { this.order };
+			return this.order == null ? new Annotation[0] : new Annotation[] { this.order };
 		}
 
 		@Override
@@ -136,8 +132,7 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 
 		@Override
 		public String toString() {
-			return new ToStringCreator(this).append("name", this.name)
-					.append("value", this.value).toString();
+			return new ToStringCreator(this).append("name", this.name).append("value", this.value).toString();
 		}
 
 	}

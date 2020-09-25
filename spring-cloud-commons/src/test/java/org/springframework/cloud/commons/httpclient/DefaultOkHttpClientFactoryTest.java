@@ -36,13 +36,11 @@ public class DefaultOkHttpClientFactoryTest {
 
 	@Test
 	public void create() throws Exception {
-		DefaultOkHttpClientFactory okHttpClientFactory = new DefaultOkHttpClientFactory(
-				new OkHttpClient.Builder());
+		DefaultOkHttpClientFactory okHttpClientFactory = new DefaultOkHttpClientFactory(new OkHttpClient.Builder());
 		DefaultOkHttpClientConnectionPoolFactory poolFactory = new DefaultOkHttpClientConnectionPoolFactory();
 		ConnectionPool pool = poolFactory.create(4, 5, TimeUnit.DAYS);
-		OkHttpClient httpClient = okHttpClientFactory.createBuilder(true)
-				.connectTimeout(2, TimeUnit.MILLISECONDS).readTimeout(3, TimeUnit.HOURS)
-				.followRedirects(true).connectionPool(pool).build();
+		OkHttpClient httpClient = okHttpClientFactory.createBuilder(true).connectTimeout(2, TimeUnit.MILLISECONDS)
+				.readTimeout(3, TimeUnit.HOURS).followRedirects(true).connectionPool(pool).build();
 		int connectTimeout = getField(httpClient, "connectTimeout");
 		then(connectTimeout).isEqualTo(2);
 		int readTimeout = getField(httpClient, "readTimeout");
@@ -52,8 +50,7 @@ public class DefaultOkHttpClientFactoryTest {
 		ConnectionPool poolFromClient = getField(httpClient, "connectionPool");
 		then(poolFromClient).isEqualTo(pool);
 		HostnameVerifier hostnameVerifier = getField(httpClient, "hostnameVerifier");
-		then(OkHttpClientFactory.TrustAllHostnames.class.isInstance(hostnameVerifier))
-				.isTrue();
+		then(OkHttpClientFactory.TrustAllHostnames.class.isInstance(hostnameVerifier)).isTrue();
 	}
 
 	protected <T> T getField(Object target, String name) {

@@ -26,13 +26,11 @@ import org.springframework.core.annotation.Order;
  * @author Spencer Gibb
  */
 @Order(Ordered.LOWEST_PRECEDENCE - 100)
-public class EnableCircuitBreakerImportSelector
-		extends SpringFactoryImportSelector<EnableCircuitBreaker> {
+public class EnableCircuitBreakerImportSelector extends SpringFactoryImportSelector<EnableCircuitBreaker> {
 
 	@Override
 	protected boolean isEnabled() {
-		return getEnvironment().getProperty("spring.cloud.circuit.breaker.enabled",
-				Boolean.class, Boolean.TRUE);
+		return getEnvironment().getProperty("spring.cloud.circuit.breaker.enabled", Boolean.class, Boolean.TRUE);
 	}
 
 }

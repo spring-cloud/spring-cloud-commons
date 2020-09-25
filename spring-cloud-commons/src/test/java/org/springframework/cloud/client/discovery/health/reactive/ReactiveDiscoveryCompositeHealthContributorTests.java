@@ -54,8 +54,7 @@ class ReactiveDiscoveryCompositeHealthContributorTests {
 
 	@Test
 	void shouldReturnKnownContributor() {
-		ReactiveDiscoveryHealthIndicator indicator = mock(
-				ReactiveDiscoveryHealthIndicator.class);
+		ReactiveDiscoveryHealthIndicator indicator = mock(ReactiveDiscoveryHealthIndicator.class);
 		Health health = Health.up().build();
 		when(indicator.getName()).thenReturn("known");
 		when(indicator.health()).thenReturn(Mono.just(health));
@@ -64,19 +63,15 @@ class ReactiveDiscoveryCompositeHealthContributorTests {
 				singletonList(indicator));
 
 		assertThat(healthContributor.getContributor("known")).isNotNull();
-		Iterator<NamedContributor<ReactiveHealthContributor>> iterator = healthContributor
-				.iterator();
+		Iterator<NamedContributor<ReactiveHealthContributor>> iterator = healthContributor.iterator();
 		assertThat(iterator.hasNext()).isTrue();
 		NamedContributor<ReactiveHealthContributor> contributor = iterator.next();
 		assertThat(contributor).isNotNull();
 		assertThat(contributor.getName()).isEqualTo("known");
 		assertThat(contributor.getContributor()).isNotNull();
-		assertThat(contributor.getContributor())
-				.isInstanceOf(ReactiveHealthIndicator.class);
-		ReactiveHealthIndicator healthIndicator = (ReactiveHealthIndicator) contributor
-				.getContributor();
-		StepVerifier.create(healthIndicator.getHealth(true)).expectNext(health)
-				.expectComplete().verify();
+		assertThat(contributor.getContributor()).isInstanceOf(ReactiveHealthIndicator.class);
+		ReactiveHealthIndicator healthIndicator = (ReactiveHealthIndicator) contributor.getContributor();
+		StepVerifier.create(healthIndicator.getHealth(true)).expectNext(health).expectComplete().verify();
 	}
 
 }

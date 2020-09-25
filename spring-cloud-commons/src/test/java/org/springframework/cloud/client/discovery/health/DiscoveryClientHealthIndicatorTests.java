@@ -45,9 +45,7 @@ import static org.mockito.Mockito.mock;
  */
 @RunWith(SpringRunner.class)
 // @checkstyle:off
-@SpringBootTest(
-		classes = { DiscoveryClientHealthIndicatorTests.Config.class,
-				CommonsClientAutoConfiguration.class },
+@SpringBootTest(classes = { DiscoveryClientHealthIndicatorTests.Config.class, CommonsClientAutoConfiguration.class },
 		properties = "spring.cloud.discovery.client.health-indicator.include-description:true")
 // @checkstyle:on
 public class DiscoveryClientHealthIndicatorTests {
@@ -64,18 +62,15 @@ public class DiscoveryClientHealthIndicatorTests {
 		assertHealth(getHealth("testDiscoveryHealthIndicator"), Status.UNKNOWN);
 		assertHealth(getHealth("discoveryClient"), Status.UNKNOWN);
 
-		this.clientHealthIndicator
-				.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
+		this.clientHealthIndicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
 
 		assertHealth(getHealth("testDiscoveryHealthIndicator"), Status.UNKNOWN);
 		Status status = assertHealth(getHealth("discoveryClient"), Status.UP);
-		then(status.getDescription()).as("status description was wrong")
-				.isEqualTo("TestDiscoveryClient");
+		then(status.getDescription()).as("status description was wrong").isEqualTo("TestDiscoveryClient");
 	}
 
 	private Health getHealth(String name) {
-		HealthContributor delegate = ((CompositeHealthContributor) this.healthContributor)
-				.getContributor(name);
+		HealthContributor delegate = ((CompositeHealthContributor) this.healthContributor).getContributor(name);
 		return ((HealthIndicator) delegate).health();
 	}
 

@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.context.ApplicationContext;
@@ -61,8 +62,7 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 
 	private Class<?> defaultConfigType;
 
-	public NamedContextFactory(Class<?> defaultConfigType, String propertySourceName,
-			String propertyName) {
+	public NamedContextFactory(Class<?> defaultConfigType, String propertySourceName, String propertyName) {
 		this.defaultConfigType = defaultConfigType;
 		this.propertySourceName = propertySourceName;
 		this.propertyName = propertyName;
@@ -108,8 +108,7 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	protected AnnotationConfigApplicationContext createContext(String name) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		if (this.configurations.containsKey(name)) {
-			for (Class<?> configuration : this.configurations.get(name)
-					.getConfiguration()) {
+			for (Class<?> configuration : this.configurations.get(name).getConfiguration()) {
 				context.register(configuration);
 			}
 		}
@@ -120,10 +119,8 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 				}
 			}
 		}
-		context.register(PropertyPlaceholderAutoConfiguration.class,
-				this.defaultConfigType);
-		context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
-				this.propertySourceName,
+		context.register(PropertyPlaceholderAutoConfiguration.class, this.defaultConfigType);
+		context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(this.propertySourceName,
 				Collections.<String, Object>singletonMap(this.propertyName, name)));
 		if (this.parent != null) {
 			// Uses Environment from parent as well as beans
@@ -143,9 +140,11 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 
 	public <T> T getInstance(String name, Class<T> type) {
 		AnnotationConfigApplicationContext context = getContext(name);
-		if (BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context,
-				type).length > 0) {
+		try {
 			return context.getBean(type);
+		}
+		catch (NoSuchBeanDefinitionException e) {
+			// ignore
 		}
 		return null;
 	}
@@ -167,8 +166,7 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	@SuppressWarnings("unchecked")
 	public <T> T getInstance(String name, ResolvableType type) {
 		AnnotationConfigApplicationContext context = getContext(name);
-		String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context,
-				type);
+		String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, type);
 		if (beanNames.length > 0) {
 			for (String beanName : beanNames) {
 				if (context.isTypeMatch(beanName, type)) {
@@ -181,11 +179,8 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 
 	public <T> Map<String, T> getInstances(String name, Class<T> type) {
 		AnnotationConfigApplicationContext context = getContext(name);
-		if (BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context,
-				type).length > 0) {
-			return BeanFactoryUtils.beansOfTypeIncludingAncestors(context, type);
-		}
-		return null;
+
+		return BeanFactoryUtils.beansOfTypeIncludingAncestors(context, type);
 	}
 
 	/**

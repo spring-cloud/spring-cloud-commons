@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.ConnectionPool;
+import okhttp3.internal.connection.RealConnectionPool;
 import org.junit.Test;
 
 import org.springframework.util.ReflectionUtils;
@@ -32,18 +33,21 @@ import static org.assertj.core.api.BDDAssertions.then;
 public class DefaultOkHttpClientConnectionPoolFactoryTest {
 
 	@Test
-	public void create() throws Exception {
+	public void create() {
 		DefaultOkHttpClientConnectionPoolFactory connectionPoolFactory = new DefaultOkHttpClientConnectionPoolFactory();
-		ConnectionPool connectionPool = connectionPoolFactory.create(2, 3,
-				TimeUnit.MILLISECONDS);
-		int idleConnections = getField(connectionPool, "maxIdleConnections");
-		long keepAliveDuration = getField(connectionPool, "keepAliveDurationNs");
+		ConnectionPool connectionPool = connectionPoolFactory.create(2, 3, TimeUnit.MILLISECONDS);
+		RealConnectionPool delegate = getField(connectionPool, "delegate");
+		int idleConnections = getField(delegate, "maxIdleConnections");
+		long keepAliveDuration = getField(delegate, "keepAliveDurationNs");
 		then(idleConnections).isEqualTo(2);
 		then(keepAliveDuration).isEqualTo(TimeUnit.MILLISECONDS.toNanos(3));
 	}
 
 	protected <T> T getField(Object target, String name) {
 		Field field = ReflectionUtils.findField(target.getClass(), name);
+		if (field == null) {
+			throw new IllegalArgumentException("Can not find field " + name + " in " + target.getClass());
+		}
 		ReflectionUtils.makeAccessible(field);
 		Object value = ReflectionUtils.getField(field, target);
 		return (T) value;

@@ -34,8 +34,7 @@ public class EncryptorFactoryTests {
 
 	@Test
 	public void testWithRsaPrivateKey() throws Exception {
-		String key = StreamUtils.copyToString(
-				new ClassPathResource("/example-test-rsa-private-key").getInputStream(),
+		String key = StreamUtils.copyToString(new ClassPathResource("/example-test-rsa-private-key").getInputStream(),
 				Charset.forName("ASCII"));
 
 		TextEncryptor encryptor = new EncryptorFactory().create(key);

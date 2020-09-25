@@ -61,8 +61,7 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 
 	@Test
 	public void shouldReturnUnknownStatusWhenNotInitialized() {
-		Health expectedHealth = Health.status(
-				new Status(Status.UNKNOWN.getCode(), "Discovery Client not initialized"))
+		Health expectedHealth = Health.status(new Status(Status.UNKNOWN.getCode(), "Discovery Client not initialized"))
 				.build();
 		Mono<Health> health = indicator.health();
 		StepVerifier.create(health).expectNext(expectedHealth).expectComplete().verify();
@@ -72,8 +71,8 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 	public void shouldReturnUpStatusWithoutServices() {
 		when(discoveryClient.description()).thenReturn("Mocked Service Discovery Client");
 		when(discoveryClient.getServices()).thenReturn(Flux.empty());
-		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), ""))
-				.withDetail("services", emptyList()).build();
+		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), "")).withDetail("services", emptyList())
+				.build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
 		Mono<Health> health = indicator.health();
@@ -87,9 +86,7 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 		when(discoveryClient.getServices()).thenReturn(Flux.just("service"));
 		when(properties.isIncludeDescription()).thenReturn(true);
 		when(discoveryClient.description()).thenReturn("Mocked Service Discovery Client");
-		Health expectedHealth = Health
-				.status(new Status(Status.UP.getCode(),
-						"Mocked Service Discovery Client"))
+		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), "Mocked Service Discovery Client"))
 				.withDetail("services", singletonList("service")).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
@@ -108,8 +105,7 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
 		Mono<Health> health = indicator.health();
 
-		StepVerifier.create(health).expectNext(expectedHealth).expectComplete()
-				.verifyThenAssertThat();
+		StepVerifier.create(health).expectNext(expectedHealth).expectComplete().verifyThenAssertThat();
 	}
 
 }

@@ -53,12 +53,9 @@ public final class LoadBalancerUriTools {
 	// https://github.com/spring-cloud/spring-cloud-gateway/blob/master/spring-cloud-gateway-core/
 	// src/main/java/org/springframework/cloud/gateway/support/ServerWebExchangeUtils.java
 	private static boolean containsEncodedParts(URI uri) {
-		boolean encoded = (uri.getRawQuery() != null
-				&& uri.getRawQuery().contains(PERCENTAGE_SIGN))
-				|| (uri.getRawPath() != null
-						&& uri.getRawPath().contains(PERCENTAGE_SIGN))
-				|| (uri.getRawFragment() != null
-						&& uri.getRawFragment().contains(PERCENTAGE_SIGN));
+		boolean encoded = (uri.getRawQuery() != null && uri.getRawQuery().contains(PERCENTAGE_SIGN))
+				|| (uri.getRawPath() != null && uri.getRawPath().contains(PERCENTAGE_SIGN))
+				|| (uri.getRawFragment() != null && uri.getRawFragment().contains(PERCENTAGE_SIGN));
 		// Verify if it is really fully encoded. Treat partial encoded as unencoded.
 		if (encoded) {
 			try {
@@ -107,15 +104,12 @@ public final class LoadBalancerUriTools {
 		}
 
 		boolean encoded = containsEncodedParts(original);
-		return UriComponentsBuilder.fromUri(original).scheme(scheme).host(host).port(port)
-				.build(encoded).toUri();
+		return UriComponentsBuilder.fromUri(original).scheme(scheme).host(host).port(port).build(encoded).toUri();
 	}
 
 	private static String computeScheme(URI original, ServiceInstance serviceInstance) {
-		String originalOrDefault = Optional.ofNullable(original.getScheme())
-				.orElse(DEFAULT_SCHEME);
-		if (serviceInstance.isSecure()
-				&& INSECURE_SCHEME_MAPPINGS.containsKey(originalOrDefault)) {
+		String originalOrDefault = Optional.ofNullable(original.getScheme()).orElse(DEFAULT_SCHEME);
+		if (serviceInstance.isSecure() && INSECURE_SCHEME_MAPPINGS.containsKey(originalOrDefault)) {
 			return INSECURE_SCHEME_MAPPINGS.get(originalOrDefault);
 		}
 		return originalOrDefault;

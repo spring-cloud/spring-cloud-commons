@@ -45,8 +45,7 @@ public class MessageSourceConfigurationTests {
 
 	@Test
 	public void loadsMessage() {
-		then(this.messageSource.getMessage("hello.message", null, Locale.getDefault()))
-				.isEqualTo("Hello World!");
+		then(this.messageSource.getMessage("hello.message", null, Locale.getDefault())).isEqualTo("Hello World!");
 	}
 
 	@Configuration(proxyBeanMethods = false)

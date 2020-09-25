@@ -31,7 +31,6 @@ import org.junit.runners.Suite.SuiteClasses;
 		org.springframework.cloud.logging.LoggingRebinderTests.class,
 		org.springframework.cloud.bootstrap.BootstrapSourcesOrderingTests.class,
 		org.springframework.cloud.bootstrap.BootstrapDisabledAutoConfigurationIntegrationTests.class,
-		org.springframework.cloud.bootstrap.BootstrapEnvironmentPostProcessorIntegrationTests.class,
 		org.springframework.cloud.bootstrap.encrypt.RsaDisabledTests.class,
 		org.springframework.cloud.bootstrap.encrypt.EncryptorFactoryTests.class,
 		org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptApplicationInitializerTests.class,

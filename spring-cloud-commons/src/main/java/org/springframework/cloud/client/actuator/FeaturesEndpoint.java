@@ -82,10 +82,8 @@ public class FeaturesEndpoint implements ApplicationContextAware {
 
 	private void addFeature(Features features, NamedFeature feature) {
 		Class<?> type = feature.getType();
-		features.getEnabled()
-				.add(new Feature(feature.getName(), type.getCanonicalName(),
-						type.getPackage().getImplementationVersion(),
-						type.getPackage().getImplementationVendor()));
+		features.getEnabled().add(new Feature(feature.getName(), type.getCanonicalName(),
+				type.getPackage().getImplementationVersion(), type.getPackage().getImplementationVendor()));
 	}
 
 	static class Features {
@@ -139,9 +137,8 @@ public class FeaturesEndpoint implements ApplicationContextAware {
 
 		@Override
 		public String toString() {
-			return "Feature{" + "type='" + this.type + '\'' + ", name='" + this.name
-					+ '\'' + ", version='" + this.version + '\'' + ", vendor='"
-					+ this.vendor + '\'' + '}';
+			return "Feature{" + "type='" + this.type + '\'' + ", name='" + this.name + '\'' + ", version='"
+					+ this.version + '\'' + ", vendor='" + this.vendor + '\'' + '}';
 		}
 
 		@Override
@@ -155,20 +152,16 @@ public class FeaturesEndpoint implements ApplicationContextAware {
 
 			Feature feature = (Feature) o;
 
-			if (this.type != null ? !this.type.equals(feature.type)
-					: feature.type != null) {
+			if (this.type != null ? !this.type.equals(feature.type) : feature.type != null) {
 				return false;
 			}
-			if (this.name != null ? !this.name.equals(feature.name)
-					: feature.name != null) {
+			if (this.name != null ? !this.name.equals(feature.name) : feature.name != null) {
 				return false;
 			}
-			if (this.version != null ? !this.version.equals(feature.version)
-					: feature.version != null) {
+			if (this.version != null ? !this.version.equals(feature.version) : feature.version != null) {
 				return false;
 			}
-			return this.vendor != null ? this.vendor.equals(feature.vendor)
-					: feature.vendor == null;
+			return this.vendor != null ? this.vendor.equals(feature.vendor) : feature.vendor == null;
 		}
 
 		@Override

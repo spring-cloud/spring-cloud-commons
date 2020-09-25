@@ -63,53 +63,46 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	}
 
 	@Override
-	public <T> T execute(String serviceId, LoadBalancerRequest<T> request)
-			throws IOException {
+	public <T> T execute(String serviceId, LoadBalancerRequest<T> request) throws IOException {
 		String hint = getHint(serviceId);
 		DefaultRequest<DefaultRequestContext> lbRequest = new DefaultRequest<>(
 				new DefaultRequestContext(request, hint));
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
-						loadBalancerClientFactory.getInstances(serviceId,
-								LoadBalancerLifecycle.class),
+						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
 						DefaultRequestContext.class, Object.class, ServiceInstance.class);
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
-			supportedLifecycleProcessors
-					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext<>(
-							CompletionContext.Status.DISCARD, new EmptyResponse())));
+			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
+					.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, new EmptyResponse())));
 			throw new IllegalStateException("No instances available for " + serviceId);
 		}
 		return execute(serviceId, serviceInstance, request);
 	}
 
 	@Override
-	public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-			LoadBalancerRequest<T> request) throws IOException {
+	public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request)
+			throws IOException {
 		DefaultResponse defaultResponse = new DefaultResponse(serviceInstance);
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
-						loadBalancerClientFactory.getInstances(serviceId,
-								LoadBalancerLifecycle.class),
+						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
 						DefaultRequestContext.class, Object.class, ServiceInstance.class);
 		try {
 			T response = request.apply(serviceInstance);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-					.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-							defaultResponse, response)));
+					.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, defaultResponse, response)));
 			return response;
 		}
 		catch (IOException iOException) {
-			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-					.onComplete(new CompletionContext<>(CompletionContext.Status.FAILED,
-							iOException, defaultResponse)));
+			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(
+					new CompletionContext<>(CompletionContext.Status.FAILED, iOException, defaultResponse)));
 			throw iOException;
 		}
 		catch (Exception exception) {
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-					.onComplete(new CompletionContext<>(CompletionContext.Status.FAILED,
-							exception, defaultResponse)));
+					.onComplete(new CompletionContext<>(CompletionContext.Status.FAILED, exception, defaultResponse)));
 			ReflectionUtils.rethrowRuntimeException(exception);
 		}
 		return null;
@@ -127,13 +120,11 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	@Override
 	public <T> ServiceInstance choose(String serviceId, Request<T> request) {
-		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory
-				.getInstance(serviceId);
+		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory.getInstance(serviceId);
 		if (loadBalancer == null) {
 			return null;
 		}
-		Response<ServiceInstance> loadBalancerResponse = Mono
-				.from(loadBalancer.choose(request)).block();
+		Response<ServiceInstance> loadBalancerResponse = Mono.from(loadBalancer.choose(request)).block();
 		if (loadBalancerResponse == null) {
 			return null;
 		}

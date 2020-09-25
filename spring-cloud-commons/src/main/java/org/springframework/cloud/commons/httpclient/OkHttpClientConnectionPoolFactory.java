@@ -34,7 +34,6 @@ public interface OkHttpClientConnectionPoolFactory {
 	 * @param timeUnit The time unit for the keep-alive duration.
 	 * @return A new {@link ConnectionPool}.
 	 */
-	ConnectionPool create(int maxIdleConnections, long keepAliveDuration,
-			TimeUnit timeUnit);
+	ConnectionPool create(int maxIdleConnections, long keepAliveDuration, TimeUnit timeUnit);
 
 }

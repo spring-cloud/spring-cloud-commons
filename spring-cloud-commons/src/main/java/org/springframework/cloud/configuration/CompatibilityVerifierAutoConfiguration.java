@@ -33,24 +33,20 @@ import org.springframework.context.annotation.Configuration;
  * @since 1.3.6
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(value = "spring.cloud.compatibility-verifier.enabled",
-		matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.cloud.compatibility-verifier.enabled", matchIfMissing = true)
 @AutoConfigureOrder(0)
 @EnableConfigurationProperties(CompatibilityVerifierProperties.class)
 public class CompatibilityVerifierAutoConfiguration {
 
 	@Bean
-	CompositeCompatibilityVerifier compositeCompatibilityVerifier(
-			List<CompatibilityVerifier> verifiers) {
-		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(
-				verifiers);
+	CompositeCompatibilityVerifier compositeCompatibilityVerifier(List<CompatibilityVerifier> verifiers) {
+		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(verifiers);
 		verifier.verifyDependencies();
 		return verifier;
 	}
 
 	@Bean
-	SpringBootVersionVerifier springBootVersionVerifier(
-			CompatibilityVerifierProperties properties) {
+	SpringBootVersionVerifier springBootVersionVerifier(CompatibilityVerifierProperties properties) {
 		return new SpringBootVersionVerifier(properties.getCompatibleBootVersions());
 	}
 
