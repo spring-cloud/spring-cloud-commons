@@ -25,6 +25,7 @@ import org.springframework.retry.RetryPolicy;
  * requests.
  *
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 public class InterceptorRetryPolicy implements RetryPolicy {
 

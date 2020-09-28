@@ -37,6 +37,7 @@ import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
  * service instance while retrying requests.
  *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  * @see RetryLoadBalancerInterceptor
  */
 public class AvoidPreviousInstanceRoundRobinLoadBalancer extends RoundRobinLoadBalancer {

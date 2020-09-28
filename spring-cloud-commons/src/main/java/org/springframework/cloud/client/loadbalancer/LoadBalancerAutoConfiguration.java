@@ -44,6 +44,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Dave Syer
  * @author Will Tran
  * @author Gang Li
+ * @author Olga Maciaszek-Sharma
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RestTemplate.class)

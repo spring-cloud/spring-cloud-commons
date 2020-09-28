@@ -19,6 +19,9 @@ package org.springframework.cloud.client.loadbalancer;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * A request context object that allows storing information on previously used service
+ * instances.
+ *
  * @author Olga Maciaszek-Sharma
  */
 public class RetryableRequestContext extends DefaultRequestContext {

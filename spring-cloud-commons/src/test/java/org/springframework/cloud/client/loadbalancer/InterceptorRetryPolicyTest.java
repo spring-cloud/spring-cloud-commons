@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 @RunWith(MockitoJUnitRunner.class)
 public class InterceptorRetryPolicyTest {

@@ -29,6 +29,8 @@ import org.springframework.cloud.loadbalancer.support.ServiceInstanceListSupplie
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Tests for {@link AvoidPreviousInstanceRoundRobinLoadBalancer}.
+ *
  * @author Olga Maciaszek-Sharma
  */
 class AvoidPreviousInstanceRoundRobinLoadBalancerTests {

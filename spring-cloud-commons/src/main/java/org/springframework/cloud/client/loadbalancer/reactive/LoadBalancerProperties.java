@@ -46,6 +46,9 @@ public class LoadBalancerProperties {
 	 */
 	private Map<String, String> hint = new LinkedCaseInsensitiveMap<>();
 
+	/**
+	 * Properties for Spring-Retry support in Spring Cloud LoadBalancer.
+	 */
 	private Retry retry = new Retry();
 
 	public HealthCheck getHealthCheck() {
