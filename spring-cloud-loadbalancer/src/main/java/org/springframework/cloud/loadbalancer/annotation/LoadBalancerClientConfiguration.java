@@ -17,6 +17,7 @@
 package org.springframework.cloud.loadbalancer.annotation;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.ConditionalOnBlockingDiscoveryEnabled;
@@ -25,6 +26,7 @@ import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.loadbalancer.core.AvoidPreviousInstanceRoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
@@ -32,6 +34,7 @@ import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 
@@ -52,6 +55,18 @@ public class LoadBalancerClientConfiguration {
 			LoadBalancerClientFactory loadBalancerClientFactory) {
 		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
 		return new RoundRobinLoadBalancer(
+				loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name);
+	}
+
+	@Bean
+	@ConditionalOnClass(name = "org.springframework.retry.support.RetryTemplate")
+	@ConditionalOnProperty(name = "org.springframework.cloud.loadbalancer.retry.avoidPreviousInstance.enabled",
+			havingValue = "true", matchIfMissing = true)
+	@Primary
+	public ReactorLoadBalancer<ServiceInstance> avoidRetryingOnSameServiceInstanceLoadBalancer(Environment environment,
+			LoadBalancerClientFactory loadBalancerClientFactory) {
+		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
+		return new AvoidPreviousInstanceRoundRobinLoadBalancer(
 				loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name);
 	}
 
