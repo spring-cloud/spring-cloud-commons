@@ -166,7 +166,7 @@ public class LoadBalancerClientConfiguration {
 
 		}
 
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.avoidPreviousInstance", havingValue = "true",
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.avoid-previous-instance", havingValue = "true",
 				matchIfMissing = true)
 		static class AvoidPreviousInstanceEnabled {
 

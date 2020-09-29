@@ -24,7 +24,7 @@
 		},
 		{
 			"defaultValue": true,
-			"name": "spring.cloud.loadbalancer.retry.avoidPreviousInstance",
+			"name": "spring.cloud.loadbalancer.retry.avoid-previous-instance",
 			"description": "Enables wrapping ServiceInstanceListSupplier beans with `RetryAwareServiceInstanceListSupplier` if Spring-Retry is in the classpath.",
 			"type": "java.lang.Boolean"
 		}
