@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
 import org.springframework.retry.RetryContext;
 
@@ -35,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 @RunWith(MockitoJUnitRunner.class)
 public class InterceptorRetryPolicyTest {
@@ -69,10 +69,8 @@ public class InterceptorRetryPolicyTest {
 				serviceInstanceChooser, serviceName);
 		LoadBalancedRetryContext context = mock(LoadBalancedRetryContext.class);
 		when(context.getRetryCount()).thenReturn(0);
-		ServiceInstance serviceInstance = mock(ServiceInstance.class);
-		when(serviceInstanceChooser.choose(eq(serviceName))).thenReturn(serviceInstance);
 		then(interceptorRetryPolicy.canRetry(context)).isTrue();
-		verify(context, times(1)).setServiceInstance(eq(serviceInstance));
+		verify(context, times(1)).setServiceInstance(eq(null));
 
 	}
 

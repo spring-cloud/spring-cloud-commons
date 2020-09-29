@@ -52,18 +52,15 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 
 	private final LoadBalancedRetryFactory lbRetryFactory;
 
-	private final LoadBalancerRetryProperties retryProperties;
-
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRetryProperties retryProperties,
+	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerProperties properties,
 			LoadBalancerRequestFactory requestFactory, LoadBalancedRetryFactory lbRetryFactory,
-			LoadBalancerProperties properties, ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
 		this.loadBalancer = loadBalancer;
-		this.retryProperties = retryProperties;
+		this.properties = properties;
 		this.requestFactory = requestFactory;
 		this.lbRetryFactory = lbRetryFactory;
-		this.properties = properties;
 		this.loadBalancerFactory = loadBalancerFactory;
 	}
 
@@ -85,11 +82,21 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 					.getSupportedLifecycleProcessors(
 							loadBalancerFactory.getInstances(serviceName, LoadBalancerLifecycle.class),
 							HttpRequestContext.class, ClientHttpResponse.class, ServiceInstance.class);
-			String hint = getHint(serviceName);
-			DefaultRequest<HttpRequestContext> lbRequest = new DefaultRequest<>(new HttpRequestContext(request, hint));
-			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 			if (serviceInstance == null) {
+				ServiceInstance previousServiceInstance = null;
+				if (context instanceof LoadBalancedRetryContext) {
+					LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
+					previousServiceInstance = lbContext.getPreviousServiceInstance();
+				}
+				String hint = getHint(serviceName);
+				DefaultRequest<RetryableRequestContext> lbRequest = new DefaultRequest<>(
+						new RetryableRequestContext(previousServiceInstance, request, hint));
+				supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 				serviceInstance = loadBalancer.choose(serviceName, lbRequest);
+				if (context instanceof LoadBalancedRetryContext) {
+					LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
+					lbContext.setServiceInstance(serviceInstance);
+				}
 			}
 			Response<ServiceInstance> lbResponse = new DefaultResponse(serviceInstance);
 			if (serviceInstance == null) {
@@ -127,7 +134,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		if (retryListeners != null && retryListeners.length != 0) {
 			template.setListeners(retryListeners);
 		}
-		template.setRetryPolicy(!retryProperties.isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
+		template.setRetryPolicy(!properties.getRetry().isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
 				: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer, serviceName));
 		return template;
 	}

@@ -44,11 +44,12 @@ import org.springframework.web.client.RestTemplate;
  * @author Dave Syer
  * @author Will Tran
  * @author Gang Li
+ * @author Olga Maciaszek-Sharma
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RestTemplate.class)
 @ConditionalOnBean(LoadBalancerClient.class)
-@EnableConfigurationProperties(LoadBalancerRetryProperties.class)
+@EnableConfigurationProperties(LoadBalancerProperties.class)
 public class LoadBalancerAutoConfiguration {
 
 	@LoadBalanced
@@ -125,11 +126,11 @@ public class LoadBalancerAutoConfiguration {
 		@Bean
 		@ConditionalOnMissingBean
 		public RetryLoadBalancerInterceptor loadBalancerInterceptor(LoadBalancerClient loadBalancerClient,
-				LoadBalancerRetryProperties retryProperties, LoadBalancerRequestFactory requestFactory,
-				LoadBalancedRetryFactory loadBalancedRetryFactory, LoadBalancerProperties properties,
+				LoadBalancerProperties properties, LoadBalancerRequestFactory requestFactory,
+				LoadBalancedRetryFactory loadBalancedRetryFactory,
 				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
-			return new RetryLoadBalancerInterceptor(loadBalancerClient, retryProperties, requestFactory,
-					loadBalancedRetryFactory, properties, loadBalancerFactory);
+			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties, requestFactory,
+					loadBalancedRetryFactory, loadBalancerFactory);
 		}
 
 		@Bean

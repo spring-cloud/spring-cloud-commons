@@ -41,11 +41,11 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	private static final Log log = LogFactory.getLog(RoundRobinLoadBalancer.class);
 
-	private final AtomicInteger position;
+	final AtomicInteger position;
 
-	private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
+	final String serviceId;
 
-	private final String serviceId;
+	ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
@@ -78,12 +78,14 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
 				.getIfAvailable(NoopServiceInstanceListSupplier::new);
-		return supplier.get().next().map(this::getInstanceResponse);
+		return supplier.get(request).next().map(this::getInstanceResponse);
 	}
 
-	private Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances) {
+	Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances) {
 		if (instances.isEmpty()) {
-			log.warn("No servers available for service: " + this.serviceId);
+			if (log.isWarnEnabled()) {
+				log.warn("No servers available for service: " + serviceId);
+			}
 			return new EmptyResponse();
 		}
 		// TODO: enforce order?

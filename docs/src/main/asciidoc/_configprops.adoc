@@ -35,6 +35,7 @@
 |spring.cloud.loadbalancer.health-check.interval | 25s | Interval for rerunning the HealthCheck scheduler.
 |spring.cloud.loadbalancer.health-check.path |  | 
 |spring.cloud.loadbalancer.hint |  | Allows setting the value of <code>hint</code> that is passed on to the LoadBalancer request and can subsequently be used in {@link ReactiveLoadBalancer} implementations.
+|spring.cloud.loadbalancer.retry.avoid-previous-instance | true | Enables wrapping ServiceInstanceListSupplier beans with `RetryAwareServiceInstanceListSupplier` if Spring-Retry is in the classpath.
 |spring.cloud.loadbalancer.retry.enabled | true | 
 |spring.cloud.loadbalancer.retry.max-retries-on-next-service-instance | 1 | Number of retries to be executed on the next <code>ServiceInstance</code>. A <code>ServiceInstance</code> is chosen before each retry call.
 |spring.cloud.loadbalancer.retry.max-retries-on-same-service-instance | 0 | Number of retries to be executed on the same <code>ServiceInstance</code>.

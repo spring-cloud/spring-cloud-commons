@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.core.env.Environment;
 
 import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory.PROPERTY_NAME;
@@ -37,6 +38,10 @@ import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientF
 public interface ServiceInstanceListSupplier extends Supplier<Flux<List<ServiceInstance>>> {
 
 	String getServiceId();
+
+	default Flux<List<ServiceInstance>> get(Request request) {
+		return get();
+	}
 
 	static ServiceInstanceListSupplierBuilder builder() {
 		return new ServiceInstanceListSupplierBuilder();

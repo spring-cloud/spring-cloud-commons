@@ -25,6 +25,7 @@ import org.springframework.retry.RetryPolicy;
  * requests.
  *
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 public class InterceptorRetryPolicy implements RetryPolicy {
 
@@ -56,7 +57,7 @@ public class InterceptorRetryPolicy implements RetryPolicy {
 		LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
 		if (lbContext.getRetryCount() == 0 && lbContext.getServiceInstance() == null) {
 			// We haven't even tried to make the request yet so return true so we do
-			lbContext.setServiceInstance(serviceInstanceChooser.choose(serviceName));
+			lbContext.setServiceInstance(null);
 			return true;
 		}
 		return policy.canRetryNextServer(lbContext);

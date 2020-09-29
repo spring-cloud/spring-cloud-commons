@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.annotation;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.composite.reactive.ReactiveCompositeDiscoveryClientAutoConfiguration;
@@ -29,10 +30,12 @@ import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSup
 import org.springframework.cloud.loadbalancer.core.DelegatingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.HealthCheckServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ZonePreferenceServiceInstanceListSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -50,6 +53,12 @@ class LoadBalancerClientConfigurationTests {
 					LoadBalancerClientConfiguration.class));
 
 	ApplicationContextRunner blockingDiscoveryClientRunner = new ApplicationContextRunner()
+			.withClassLoader(new FilteredClassLoader(RetryTemplate.class))
+			.withConfiguration(AutoConfigurations.of(CompositeDiscoveryClientAutoConfiguration.class,
+					LoadBalancerCacheAutoConfiguration.class, LoadBalancerAutoConfiguration.class,
+					LoadBalancerClientConfiguration.class));
+
+	ApplicationContextRunner blockingDiscoveryClientRunnerWithRetry = new ApplicationContextRunner()
 			.withConfiguration(AutoConfigurations.of(CompositeDiscoveryClientAutoConfiguration.class,
 					LoadBalancerCacheAutoConfiguration.class, LoadBalancerAutoConfiguration.class,
 					LoadBalancerClientConfiguration.class));
@@ -124,6 +133,30 @@ class LoadBalancerClientConfigurationTests {
 					then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
 							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
 				});
+	}
+
+	@Test
+	void shouldWrapWithRetryAwareSupplierWhenRetryTemplateOnClasspath() {
+		blockingDiscoveryClientRunnerWithRetry.run(context -> {
+			ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+			then(supplier).isInstanceOf(RetryAwareServiceInstanceListSupplier.class);
+			then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
+					.isInstanceOf(CachingServiceInstanceListSupplier.class);
+			then(((DelegatingServiceInstanceListSupplier) ((DelegatingServiceInstanceListSupplier) supplier)
+					.getDelegate()).getDelegate()).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+		});
+	}
+
+	@Test
+	void shouldNotWrapWithRetryAwareSupplierWhenRetryTemplateOnClasspath() {
+		blockingDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.retry.avoidPreviousInstance=false")
+				.run(context -> {
+					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+					then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+					then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
+							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+				});
+
 	}
 
 	@Configuration

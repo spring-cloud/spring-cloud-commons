@@ -26,7 +26,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -161,11 +160,6 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 		@Bean
 		public LoadBalancerClient loadBalancerClient() {
 			return mock(LoadBalancerClient.class);
-		}
-
-		@Bean
-		LoadBalancerProperties loadBalancerProperties() {
-			return new LoadBalancerProperties();
 		}
 
 		@SuppressWarnings("unchecked")
