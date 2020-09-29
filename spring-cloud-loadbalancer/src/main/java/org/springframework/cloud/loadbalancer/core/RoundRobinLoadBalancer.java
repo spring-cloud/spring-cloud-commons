@@ -78,7 +78,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
 				.getIfAvailable(NoopServiceInstanceListSupplier::new);
-		return supplier.get().next().map(this::getInstanceResponse);
+		return supplier.get(request).next().map(this::getInstanceResponse);
 	}
 
 	Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances) {

@@ -61,7 +61,7 @@ import static org.assertj.core.api.Assertions.fail;
  *
  * @author Olga Maciaszek-Sharma
  */
-@SpringBootTest(properties = "spring.cloud.loadbalancer.retry.avoidPreviousInstance.enabled")
+@SpringBootTest
 class BlockingLoadBalancerClientTests {
 
 	@Autowired

@@ -172,6 +172,12 @@ public final class ServiceInstanceListSupplierBuilder {
 		return this;
 	}
 
+	public ServiceInstanceListSupplierBuilder withRetryAwareness() {
+		DelegateCreator creator = (context, delegate) -> new RetryAwareServiceInstanceListSupplier(delegate);
+		creators.add(creator);
+		return this;
+	}
+
 	/**
 	 * Builds the {@link ServiceInstanceListSupplier} hierarchy.
 	 * @param context application context
