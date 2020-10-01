@@ -37,9 +37,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private int port;
 
-	private boolean secure;
+	private boolean secure = false;
 
-	private final Map<String, String> metadata;
+	private Map<String, String> metadata = new LinkedHashMap<>();
 
 	private URI uri;
 
@@ -98,6 +98,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 	public DefaultServiceInstance(String serviceId, String host, int port,
 			boolean secure) {
 		this(serviceId, host, port, secure, new LinkedHashMap<>());
+	}
+
+	public DefaultServiceInstance() {
 	}
 
 	/**

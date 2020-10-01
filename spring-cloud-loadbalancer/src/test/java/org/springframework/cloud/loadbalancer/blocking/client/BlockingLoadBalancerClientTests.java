@@ -17,7 +17,6 @@
 package org.springframework.cloud.loadbalancer.blocking.client;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -31,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
@@ -66,10 +66,10 @@ class BlockingLoadBalancerClientTests {
 
 	@BeforeEach
 	void setUp() {
+		DefaultServiceInstance serviceInstance = new DefaultServiceInstance(null, null,
+				"test.example", 9999, true);
 		properties.getInstances().put("myservice",
-				Collections.singletonList(
-						new SimpleDiscoveryProperties.SimpleServiceInstance(
-								URI.create("https://test.example:9999"))));
+				Collections.singletonList(serviceInstance));
 	}
 
 	@Test
