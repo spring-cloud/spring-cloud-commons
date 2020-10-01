@@ -19,6 +19,9 @@ package org.springframework.cloud.client.loadbalancer;
 import java.io.IOException;
 import java.net.URI;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -36,8 +39,11 @@ import org.springframework.util.StreamUtils;
  * @author Ryan Baxter
  * @author Will Tran
  * @author Gang Li
+ * @author Olga Maciaszek-Sharma
  */
 public class RetryLoadBalancerInterceptor implements ClientHttpRequestInterceptor {
+
+	private static final Log LOG = LogFactory.getLog(RetryLoadBalancerInterceptor.class);
 
 	private final LoadBalancerClient loadBalancer;
 
@@ -73,15 +79,32 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 			if (context instanceof LoadBalancedRetryContext) {
 				LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
 				serviceInstance = lbContext.getServiceInstance();
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(String.format(
+							"Retrieved service instance from LoadBalancedRetryContext: %s",
+							serviceInstance));
+				}
 			}
 			if (serviceInstance == null) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(
+							"Service instance retrieved from LoadBalancedRetryContext: was null. "
+									+ "Reattempting service instance selection");
+				}
 				serviceInstance = loadBalancer.choose(serviceName);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(String.format("Selected service instance: %s",
+							serviceInstance));
+				}
 			}
 			ClientHttpResponse response = loadBalancer.execute(serviceName,
 					serviceInstance,
 					requestFactory.createRequest(request, body, execution));
 			int statusCode = response.getRawStatusCode();
 			if (retryPolicy != null && retryPolicy.retryableStatusCode(statusCode)) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(String.format("Retrying on status code: %d", statusCode));
+				}
 				byte[] bodyCopy = StreamUtils.copyToByteArray(response.getBody());
 				response.close();
 				throw new ClientHttpResponseStatusCodeException(serviceName, response,
