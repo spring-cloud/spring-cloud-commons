@@ -37,9 +37,11 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private int port;
 
-	private final boolean secure;
+	private boolean secure;
 
 	private final Map<String, String> metadata;
+
+	private URI uri;
 
 	/**
 	 * @param instanceId the id of the instance.
@@ -159,6 +161,16 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	public void setUri(URI uri) {
+		this.uri = uri;
+		this.host = this.uri.getHost();
+		this.port = this.uri.getPort();
+		String scheme = this.uri.getScheme();
+		if ("https".equals(scheme)) {
+			this.secure = true;
+		}
 	}
 
 	@Override
