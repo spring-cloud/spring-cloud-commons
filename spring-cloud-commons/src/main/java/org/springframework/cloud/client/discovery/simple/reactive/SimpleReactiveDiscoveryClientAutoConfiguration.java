@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.client.discovery.simple.reactive;
 
-import java.net.URI;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
@@ -71,8 +69,8 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 	@Bean
 	public SimpleReactiveDiscoveryProperties simpleReactiveDiscoveryProperties() {
 		simple.getLocal().setServiceId(serviceId);
-		simple.getLocal().setUri(URI.create("http://"
-				+ inet.findFirstNonLoopbackHostInfo().getHostname() + ":" + findPort()));
+		simple.getLocal().setHost(inet.findFirstNonLoopbackHostInfo().getHostname());
+		simple.getLocal().setPort(findPort());
 		return simple;
 	}
 
@@ -96,8 +94,7 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 	public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
 		port = webServerInitializedEvent.getWebServer().getPort();
 		if (port > 0) {
-			simple.getLocal().setUri(URI.create("http://"
-					+ inet.findFirstNonLoopbackHostInfo().getHostname() + ":" + port));
+			simple.getLocal().setPort(port);
 		}
 	}
 

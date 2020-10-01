@@ -29,13 +29,13 @@ import java.util.Objects;
  */
 public class DefaultServiceInstance implements ServiceInstance {
 
-	private final String instanceId;
+	private String instanceId;
 
-	private final String serviceId;
+	private String serviceId;
 
-	private final String host;
+	private String host;
 
-	private final int port;
+	private int port;
 
 	private final boolean secure;
 
@@ -143,6 +143,22 @@ public class DefaultServiceInstance implements ServiceInstance {
 	@Override
 	public boolean isSecure() {
 		return this.secure;
+	}
+
+	public void setInstanceId(String instanceId) {
+		this.instanceId = instanceId;
+	}
+
+	public void setServiceId(String serviceId) {
+		this.serviceId = serviceId;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
 	}
 
 	@Override

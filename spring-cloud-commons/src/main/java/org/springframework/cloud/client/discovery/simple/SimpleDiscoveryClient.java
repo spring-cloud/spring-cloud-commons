@@ -19,9 +19,9 @@ package org.springframework.cloud.client.discovery.simple;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties.SimpleServiceInstance;
 
 /**
  * A {@link org.springframework.cloud.client.discovery.DiscoveryClient} that will use the
@@ -46,7 +46,7 @@ public class SimpleDiscoveryClient implements DiscoveryClient {
 	@Override
 	public List<ServiceInstance> getInstances(String serviceId) {
 		List<ServiceInstance> serviceInstances = new ArrayList<>();
-		List<SimpleServiceInstance> serviceInstanceForService = this.simpleDiscoveryProperties
+		List<DefaultServiceInstance> serviceInstanceForService = this.simpleDiscoveryProperties
 				.getInstances().get(serviceId);
 
 		if (serviceInstanceForService != null) {
