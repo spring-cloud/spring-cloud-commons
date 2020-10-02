@@ -28,7 +28,6 @@
 	<properties>
 		<bintray.package>commons</bintray.package>
 		<evictor.version>1.0.0</evictor.version>
-		<reactor-bom.version>2020.0.0-SNAPSHOT</reactor-bom.version>
 	</properties>
 	<build>
 		<plugins>
@@ -145,14 +144,6 @@
 				<version>${project.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
-			</dependency>
-			<!-- TODO: Remove me once Hateoas will not override Reactor BOM -->
-			<dependency>
-				<groupId>io.projectreactor</groupId>
-				<artifactId>reactor-bom</artifactId>
-				<version>${reactor-bom.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
