@@ -16,7 +16,10 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.util.Objects;
+
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.core.style.ToStringCreator;
 
 /**
  * A request context object that allows storing information on previously used service
@@ -44,6 +47,33 @@ public class RetryableRequestContext extends DefaultRequestContext {
 
 	public ServiceInstance getPreviousServiceInstance() {
 		return previousServiceInstance;
+	}
+
+	@Override
+	public String toString() {
+		ToStringCreator to = new ToStringCreator(this);
+		to.append("previousServiceInstance", previousServiceInstance);
+		return to.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof RetryableRequestContext)) {
+			return false;
+		}
+		if (!super.equals(o)) {
+			return false;
+		}
+		RetryableRequestContext context = (RetryableRequestContext) o;
+		return Objects.equals(previousServiceInstance, context.previousServiceInstance);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(super.hashCode(), previousServiceInstance);
 	}
 
 }
