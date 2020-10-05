@@ -55,12 +55,14 @@ public class LatencyPercentileHedgerPolicyTests {
 
 	@Test
 	public void testNumberOfHedgedRequests() {
+		ClientRequest request = mock(ClientRequest.class);
 		int numberOfHedgedRequests = 23;
+		when(predicate.test(request)).thenReturn(true);
 		LatencyPercentileHedgerPolicy client = new LatencyPercentileHedgerPolicy(
 				predicate, 23, 0.0, clock
 		);
 
-		then(client.getMaximumHedgedRequests(mock(ClientRequest.class))).isEqualTo(numberOfHedgedRequests);
+		then(client.getMaximumHedgedRequests(request)).isEqualTo(numberOfHedgedRequests);
 	}
 
 	@Test

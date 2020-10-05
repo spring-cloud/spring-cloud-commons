@@ -59,7 +59,7 @@ public class ReactiveHedgerAutoConfigurationTests {
 		HedgerExchangeFilterFunction filter =
 				(HedgerExchangeFilterFunction) filters.get(0);
 
-		HedgerPolicyFactory actualHedgerPolicyFactory = (HedgerPolicyFactory) ReflectionTestUtils.getField(filter, "hedgingPolicyFactory");
+		HedgerPolicyFactory actualHedgerPolicyFactory = (HedgerPolicyFactory) ReflectionTestUtils.getField(filter, "hedgerPolicyFactory");
 		then(actualHedgerPolicyFactory).isEqualTo(hedgerPolicyFactory);
 	}
 
