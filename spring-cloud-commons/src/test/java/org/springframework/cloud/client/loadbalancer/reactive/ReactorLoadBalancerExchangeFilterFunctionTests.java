@@ -51,6 +51,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * Tests for {@link ReactorLoadBalancerExchangeFilterFunction}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Charu Covindane
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -67,8 +68,7 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 
 	@BeforeEach
 	void setUp() {
-		DefaultServiceInstance instance = new DefaultServiceInstance(null, null, null, 0,
-				false);
+		DefaultServiceInstance instance = new DefaultServiceInstance();
 		instance.setServiceId("testservice");
 		instance.setHost("localhost");
 		instance.setPort(this.port);

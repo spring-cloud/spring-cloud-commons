@@ -53,6 +53,7 @@ import static org.assertj.core.api.Assertions.fail;
  * Tests for {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Charu Covindane
  */
 @SpringBootTest
 @ExtendWith(SpringExtension.class)

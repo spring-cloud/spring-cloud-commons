@@ -32,6 +32,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Biju Kunjummen
+ * @author Charu Covindane
  */
 public class SimpleDiscoveryClientTests {
 

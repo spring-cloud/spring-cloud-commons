@@ -39,6 +39,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
+ * @author Charu Covindane
  */
 
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
@@ -91,6 +92,8 @@ public class SimpleDiscoveryProperties {
 
 	/**
 	 * Basic implementation of {@link ServiceInstance}.
+	 *
+	 * @deprecated in favor of {@link DefaultServiceInstance}
 	 */
 	@Deprecated
 	public static class SimpleServiceInstance implements ServiceInstance {

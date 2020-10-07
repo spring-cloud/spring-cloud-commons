@@ -53,6 +53,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 /**
  * @author Spencer Gibb
  * @author Ryan Baxter
+ * @author Charu Covindane
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -69,8 +70,7 @@ public class LoadBalancerExchangeFilterFunctionTests {
 
 	@Before
 	public void before() {
-		DefaultServiceInstance instance = new DefaultServiceInstance(null, null, null, 0,
-				false);
+		DefaultServiceInstance instance = new DefaultServiceInstance();
 		instance.setServiceId("testservice");
 		instance.setHost("localhost");
 		instance.setPort(this.port);
