@@ -26,6 +26,7 @@ import java.util.Objects;
  *
  * @author Spencer Gibb
  * @author Tim Ysewyn
+ * @author Charu Covindane
  */
 public class DefaultServiceInstance implements ServiceInstance {
 
@@ -37,7 +38,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private int port;
 
-	private boolean secure = false;
+	private boolean secure;
 
 	private Map<String, String> metadata = new LinkedHashMap<>();
 

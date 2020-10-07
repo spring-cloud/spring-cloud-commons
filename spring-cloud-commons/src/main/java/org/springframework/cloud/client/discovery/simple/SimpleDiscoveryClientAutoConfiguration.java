@@ -35,6 +35,7 @@ import org.springframework.core.annotation.Order;
  * Spring Boot auto-configuration for simple properties-based discovery client.
  *
  * @author Biju Kunjummen
+ * @author Charu Covindane
  */
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore({ NoopDiscoveryClientAutoConfiguration.class,

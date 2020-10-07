@@ -42,6 +42,7 @@ import org.springframework.core.annotation.Order;
  * Spring Boot auto-configuration for simple properties-based reactive discovery client.
  *
  * @author Tim Ysewyn
+ * @author Charu Covindane
  * @since 2.2.0
  */
 @Configuration(proxyBeanMethods = false)

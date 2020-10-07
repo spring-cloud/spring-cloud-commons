@@ -29,6 +29,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  *
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma
+ * @author Charu Covindane
  */
 public class SimpleDiscoveryClient implements DiscoveryClient {
 

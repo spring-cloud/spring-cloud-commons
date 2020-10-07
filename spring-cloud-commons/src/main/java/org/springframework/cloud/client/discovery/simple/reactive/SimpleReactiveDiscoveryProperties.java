@@ -41,6 +41,7 @@ import static java.util.Collections.emptyList;
  * {@link org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClient}.
  *
  * @author Tim Ysewyn
+ * @author Charu Covindane
  * @since 2.2.0
  */
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
@@ -53,8 +54,7 @@ public class SimpleReactiveDiscoveryProperties {
 	 * properties explicitly if they are exporting data (e.g. metrics) that need to be
 	 * identified by the service instance.
 	 */
-	private DefaultServiceInstance local = new DefaultServiceInstance(null, null, null, 0,
-			false);
+	private DefaultServiceInstance local = new DefaultServiceInstance();
 
 	private int order = DiscoveryClient.DEFAULT_ORDER;
 

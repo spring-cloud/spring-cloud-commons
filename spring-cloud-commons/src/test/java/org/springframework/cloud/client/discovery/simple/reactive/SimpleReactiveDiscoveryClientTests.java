@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Tim Ysewyn
+ * @author Charu Covindane
  */
 public class SimpleReactiveDiscoveryClientTests {
 
