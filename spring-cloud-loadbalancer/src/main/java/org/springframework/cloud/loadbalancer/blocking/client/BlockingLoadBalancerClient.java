@@ -71,7 +71,6 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 				.getSupportedLifecycleProcessors(
 						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
 						DefaultRequestContext.class, Object.class, ServiceInstance.class);
-		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
@@ -120,6 +119,11 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	@Override
 	public <T> ServiceInstance choose(String serviceId, Request<T> request) {
+		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
+				.getSupportedLifecycleProcessors(
+						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
+						DefaultRequestContext.class, Object.class, ServiceInstance.class);
+		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(request));
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory.getInstance(serviceId);
 		if (loadBalancer == null) {
 			return null;

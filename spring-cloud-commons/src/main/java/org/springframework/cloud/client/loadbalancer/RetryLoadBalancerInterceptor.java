@@ -87,10 +87,6 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 							serviceInstance));
 				}
 			}
-			Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
-					.getSupportedLifecycleProcessors(
-							loadBalancerFactory.getInstances(serviceName, LoadBalancerLifecycle.class),
-							HttpRequestContext.class, ClientHttpResponse.class, ServiceInstance.class);
 			if (serviceInstance == null) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("Service instance retrieved from LoadBalancedRetryContext: was null. "
@@ -104,7 +100,6 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 				String hint = getHint(serviceName);
 				DefaultRequest<RetryableRequestContext> lbRequest = new DefaultRequest<>(
 						new RetryableRequestContext(previousServiceInstance, request, hint));
-				supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 				serviceInstance = loadBalancer.choose(serviceName, lbRequest);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format("Selected service instance: %s", serviceInstance));
@@ -115,6 +110,10 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 				}
 			}
 			Response<ServiceInstance> lbResponse = new DefaultResponse(serviceInstance);
+			Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
+					.getSupportedLifecycleProcessors(
+							loadBalancerFactory.getInstances(serviceName, LoadBalancerLifecycle.class),
+							HttpRequestContext.class, ClientHttpResponse.class, ServiceInstance.class);
 			if (serviceInstance == null) {
 				supportedLifecycleProcessors.forEach(
 						lifecycle -> lifecycle.onComplete(new CompletionContext<ClientHttpResponse, ServiceInstance>(

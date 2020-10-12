@@ -373,17 +373,17 @@ public class RetryLoadBalancerInterceptorTests {
 
 		interceptor.intercept(request, new byte[] {}, mock(ClientHttpRequestExecution.class));
 
-		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("testLifecycle")).getStartLog()).hasSize(1);
+		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("testLifecycle")).getStartLog()).hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("testLifecycle")).getCompleteLog()).hasSize(0);
-		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("anotherLifecycle")).getStartLog()).hasSize(1);
+		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("anotherLifecycle")).getStartLog()).hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("anotherLifecycle")).getCompleteLog())
 				.hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("testLifecycle")).getStartLog())
-				.hasSize(0);
+				.hasSize(1);
 		assertThat(((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("testLifecycle")).getCompleteLog())
 				.hasSize(1);
 		assertThat(((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("anotherLifecycle")).getStartLog())
-				.hasSize(0);
+				.hasSize(1);
 		assertThat(
 				((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("anotherLifecycle")).getCompleteLog())
 						.hasSize(1);
@@ -520,6 +520,10 @@ public class RetryLoadBalancerInterceptorTests {
 
 		@Override
 		public <T> ServiceInstance choose(String serviceId, Request<T> request) {
+			Set<LoadBalancerLifecycle> supportedLoadBalancerProcessors = LoadBalancerLifecycleValidator
+					.getSupportedLifecycleProcessors(lifecycleProcessors, DefaultRequestContext.class, Object.class,
+							ServiceInstance.class);
+			supportedLoadBalancerProcessors.forEach(lifecycle -> lifecycle.onStart(request));
 			return defaultServiceInstance();
 		}
 
