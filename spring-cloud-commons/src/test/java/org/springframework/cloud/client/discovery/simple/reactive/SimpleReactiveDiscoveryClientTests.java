@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.client.discovery.simple.reactive;
 
-import java.net.URI;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,23 +23,24 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.discovery.simple.reactive.SimpleReactiveDiscoveryProperties.SimpleServiceInstance;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Tim Ysewyn
+ * @author Charu Covindane
  */
 public class SimpleReactiveDiscoveryClientTests {
 
-	private final SimpleServiceInstance service1Inst1 = new SimpleServiceInstance(
-			URI.create("http://host1:8080"));
+	private final DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null,
+			null, "host1", 8080, false);
 
-	private final SimpleServiceInstance service1Inst2 = new SimpleServiceInstance(
-			URI.create("https://host2:8443"));
+	private final DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null,
+			null, "host2", 8443, true);
 
 	private SimpleReactiveDiscoveryClient client;
 

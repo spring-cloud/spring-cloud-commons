@@ -31,11 +31,11 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties.SimpleServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.context.annotation.Bean;
@@ -53,6 +53,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 /**
  * @author Spencer Gibb
  * @author Ryan Baxter
+ * @author Charu Covindane
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -69,9 +70,10 @@ public class LoadBalancerExchangeFilterFunctionTests {
 
 	@Before
 	public void before() {
-		SimpleServiceInstance instance = new SimpleServiceInstance();
+		DefaultServiceInstance instance = new DefaultServiceInstance();
 		instance.setServiceId("testservice");
-		instance.setUri(URI.create("http://localhost:" + this.port));
+		instance.setHost("localhost");
+		instance.setPort(this.port);
 		this.properties.getInstances().put("testservice", Arrays.asList(instance));
 	}
 

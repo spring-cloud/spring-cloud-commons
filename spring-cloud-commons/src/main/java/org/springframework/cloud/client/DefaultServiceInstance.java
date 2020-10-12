@@ -26,20 +26,23 @@ import java.util.Objects;
  *
  * @author Spencer Gibb
  * @author Tim Ysewyn
+ * @author Charu Covindane
  */
 public class DefaultServiceInstance implements ServiceInstance {
 
-	private final String instanceId;
+	private String instanceId;
 
-	private final String serviceId;
+	private String serviceId;
 
-	private final String host;
+	private String host;
 
-	private final int port;
+	private int port;
 
-	private final boolean secure;
+	private boolean secure;
 
-	private final Map<String, String> metadata;
+	private Map<String, String> metadata = new LinkedHashMap<>();
+
+	private URI uri;
 
 	/**
 	 * @param instanceId the id of the instance.
@@ -98,6 +101,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 		this(serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
+	public DefaultServiceInstance() {
+	}
+
 	/**
 	 * Creates a URI from the given ServiceInstance's host:port.
 	 * @param instance the ServiceInstance.
@@ -143,6 +149,32 @@ public class DefaultServiceInstance implements ServiceInstance {
 	@Override
 	public boolean isSecure() {
 		return this.secure;
+	}
+
+	public void setInstanceId(String instanceId) {
+		this.instanceId = instanceId;
+	}
+
+	public void setServiceId(String serviceId) {
+		this.serviceId = serviceId;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public void setUri(URI uri) {
+		this.uri = uri;
+		this.host = this.uri.getHost();
+		this.port = this.uri.getPort();
+		String scheme = this.uri.getScheme();
+		if ("https".equals(scheme)) {
+			this.secure = true;
+		}
 	}
 
 	@Override

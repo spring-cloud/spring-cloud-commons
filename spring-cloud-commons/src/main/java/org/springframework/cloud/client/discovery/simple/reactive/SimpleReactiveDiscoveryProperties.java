@@ -27,6 +27,7 @@ import javax.annotation.PostConstruct;
 import reactor.core.publisher.Flux;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
@@ -40,19 +41,20 @@ import static java.util.Collections.emptyList;
  * {@link org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClient}.
  *
  * @author Tim Ysewyn
+ * @author Charu Covindane
  * @since 2.2.0
  */
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
 public class SimpleReactiveDiscoveryProperties {
 
-	private Map<String, List<SimpleServiceInstance>> instances = new HashMap<>();
+	private Map<String, List<DefaultServiceInstance>> instances = new HashMap<>();
 
 	/**
 	 * The properties of the local instance (if it exists). Users should set these
 	 * properties explicitly if they are exporting data (e.g. metrics) that need to be
 	 * identified by the service instance.
 	 */
-	private SimpleServiceInstance local = new SimpleServiceInstance();
+	private DefaultServiceInstance local = new DefaultServiceInstance();
 
 	private int order = DiscoveryClient.DEFAULT_ORDER;
 
@@ -60,15 +62,15 @@ public class SimpleReactiveDiscoveryProperties {
 		return Flux.fromIterable(instances.getOrDefault(service, emptyList()));
 	}
 
-	Map<String, List<SimpleServiceInstance>> getInstances() {
+	Map<String, List<DefaultServiceInstance>> getInstances() {
 		return instances;
 	}
 
-	public void setInstances(Map<String, List<SimpleServiceInstance>> instances) {
+	public void setInstances(Map<String, List<DefaultServiceInstance>> instances) {
 		this.instances = instances;
 	}
 
-	public SimpleServiceInstance getLocal() {
+	public DefaultServiceInstance getLocal() {
 		return this.local;
 	}
 
@@ -83,7 +85,7 @@ public class SimpleReactiveDiscoveryProperties {
 	@PostConstruct
 	public void init() {
 		for (String key : this.instances.keySet()) {
-			for (SimpleServiceInstance instance : this.instances.get(key)) {
+			for (DefaultServiceInstance instance : this.instances.get(key)) {
 				instance.setServiceId(key);
 			}
 		}
@@ -92,6 +94,7 @@ public class SimpleReactiveDiscoveryProperties {
 	/**
 	 * Basic implementation of {@link ServiceInstance}.
 	 */
+	@Deprecated
 	public static class SimpleServiceInstance implements ServiceInstance {
 
 		/**

@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
@@ -38,31 +39,33 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
+ * @author Charu Covindane
  */
 
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
 public class SimpleDiscoveryProperties {
 
-	private Map<String, List<SimpleServiceInstance>> instances = new HashMap<>();
+	private Map<String, List<DefaultServiceInstance>> instances = new HashMap<>();
 
 	/**
 	 * The properties of the local instance (if it exists). Users should set these
 	 * properties explicitly if they are exporting data (e.g. metrics) that need to be
 	 * identified by the service instance.
 	 */
-	private SimpleServiceInstance local = new SimpleServiceInstance();
+	private DefaultServiceInstance local = new DefaultServiceInstance(null, null, null, 0,
+			false);
 
 	private int order = DiscoveryClient.DEFAULT_ORDER;
 
-	public Map<String, List<SimpleServiceInstance>> getInstances() {
+	public Map<String, List<DefaultServiceInstance>> getInstances() {
 		return this.instances;
 	}
 
-	public void setInstances(Map<String, List<SimpleServiceInstance>> instances) {
+	public void setInstances(Map<String, List<DefaultServiceInstance>> instances) {
 		this.instances = instances;
 	}
 
-	public SimpleServiceInstance getLocal() {
+	public DefaultServiceInstance getLocal() {
 		return this.local;
 	}
 
@@ -77,15 +80,22 @@ public class SimpleDiscoveryProperties {
 	@PostConstruct
 	public void init() {
 		for (String key : this.instances.keySet()) {
-			for (SimpleServiceInstance instance : this.instances.get(key)) {
+			for (DefaultServiceInstance instance : this.instances.get(key)) {
 				instance.setServiceId(key);
 			}
 		}
 	}
 
+	public void setInstance(String serviceId, String host, int port) {
+		local = new DefaultServiceInstance(null, serviceId, host, port, false);
+	}
+
 	/**
 	 * Basic implementation of {@link ServiceInstance}.
+	 *
+	 * @deprecated in favor of {@link DefaultServiceInstance}
 	 */
+	@Deprecated
 	public static class SimpleServiceInstance implements ServiceInstance {
 
 		/**

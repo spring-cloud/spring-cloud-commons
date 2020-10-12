@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.client.discovery.simple;
 
-import java.net.URI;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -37,6 +35,7 @@ import org.springframework.core.annotation.Order;
  * Spring Boot auto-configuration for simple properties-based discovery client.
  *
  * @author Biju Kunjummen
+ * @author Charu Covindane
  */
 @Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore({ NoopDiscoveryClientAutoConfiguration.class,
@@ -67,10 +66,9 @@ public class SimpleDiscoveryClientAutoConfiguration
 	public SimpleDiscoveryProperties simpleDiscoveryProperties(
 			@Value("${spring.application.name:application}") String serviceId) {
 		simple.getLocal().setServiceId(serviceId);
-		simple.getLocal()
-				.setUri(URI.create(
-						"http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname()
-								+ ":" + findPort()));
+		simple.getLocal().setHost(this.inet.findFirstNonLoopbackHostInfo().getHostname());
+		simple.getLocal().setPort(findPort());
+
 		return simple;
 	}
 
@@ -95,10 +93,7 @@ public class SimpleDiscoveryClientAutoConfiguration
 	public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
 		this.port = webServerInitializedEvent.getWebServer().getPort();
 		if (this.port > 0) {
-			simple.getLocal()
-					.setUri(URI.create("http://"
-							+ this.inet.findFirstNonLoopbackHostInfo().getHostname() + ":"
-							+ this.port));
+			simple.getLocal().setPort(this.port);
 		}
 	}
 
