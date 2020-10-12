@@ -21,7 +21,7 @@ import org.springframework.http.HttpRequest;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class HttpRequestContext extends DefaultRequestContext {
+public class HttpRequestContext extends DefaultClientRequestContext {
 
 	public HttpRequestContext(HttpRequest httpRequest) {
 		this(httpRequest, "default");

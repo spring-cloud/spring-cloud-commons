@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.DefaultClientRequestContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;
@@ -66,11 +67,11 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	public <T> T execute(String serviceId, LoadBalancerRequest<T> request) throws IOException {
 		String hint = getHint(serviceId);
 		DefaultRequest<DefaultRequestContext> lbRequest = new DefaultRequest<>(
-				new DefaultRequestContext(request, hint));
+				new DefaultClientRequestContext(request, hint));
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
 						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
-						DefaultRequestContext.class, Object.class, ServiceInstance.class);
+						DefaultClientRequestContext.class, Object.class, ServiceInstance.class);
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
@@ -119,10 +120,11 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	@Override
 	public <T> ServiceInstance choose(String serviceId, Request<T> request) {
+		Class requestContextClass = request.getContext() != null ? request.getContext().getClass() : Object.class;
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
 						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
-						DefaultRequestContext.class, Object.class, ServiceInstance.class);
+						requestContextClass, Object.class, ServiceInstance.class);
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(request));
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory.getInstance(serviceId);
 		if (loadBalancer == null) {

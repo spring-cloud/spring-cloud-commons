@@ -27,7 +27,7 @@ import org.springframework.core.style.ToStringCreator;
  *
  * @author Olga Maciaszek-Sharma
  */
-public class RetryableRequestContext extends DefaultRequestContext {
+public class RetryableRequestContext extends DefaultClientRequestContext {
 
 	private final ServiceInstance previousServiceInstance;
 

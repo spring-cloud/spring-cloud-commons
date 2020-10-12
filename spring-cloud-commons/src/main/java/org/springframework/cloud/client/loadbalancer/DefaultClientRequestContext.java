@@ -21,37 +21,39 @@ import java.util.Objects;
 import org.springframework.core.style.ToStringCreator;
 
 /**
- * Allows propagating hints to the LoadBalancer.
+ * Contains information relevant to the request.
  *
  * @author Olga Maciaszek-Sharma
  */
-public class HintRequestContext {
+public class DefaultClientRequestContext extends DefaultRequestContext {
 
 	/**
-	 * A {@link String} value of hint that can be used to choose the correct service
-	 * instance.
+	 * The request to be executed against the service instance selected by the
+	 * LoadBalancer.
 	 */
-	private String hint = "default";
+	private final Object clientRequest;
 
-	public HintRequestContext() {
+	public DefaultClientRequestContext() {
+		clientRequest = null;
 	}
 
-	public HintRequestContext(String hint) {
-		this.hint = hint;
+	public DefaultClientRequestContext(Object clientRequest) {
+		this.clientRequest = clientRequest;
 	}
 
-	public String getHint() {
-		return hint;
+	public DefaultClientRequestContext(Object clientRequest, String hint) {
+		super(hint);
+		this.clientRequest = clientRequest;
 	}
 
-	public void setHint(String hint) {
-		this.hint = hint;
+	public Object getClientRequest() {
+		return clientRequest;
 	}
 
 	@Override
 	public String toString() {
 		ToStringCreator to = new ToStringCreator(this);
-		to.append("hint", hint);
+		to.append("clientRequest", clientRequest);
 		return to.toString();
 	}
 
@@ -60,16 +62,16 @@ public class HintRequestContext {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof HintRequestContext)) {
+		if (!(o instanceof DefaultClientRequestContext)) {
 			return false;
 		}
-		HintRequestContext that = (HintRequestContext) o;
-		return Objects.equals(hint, that.hint);
+		DefaultClientRequestContext that = (DefaultClientRequestContext) o;
+		return Objects.equals(clientRequest, that.clientRequest);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(hint);
+		return Objects.hash(clientRequest);
 	}
 
 }

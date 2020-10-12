@@ -22,7 +22,7 @@ import org.springframework.web.reactive.function.client.ClientRequest;
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
  */
-public class ClientRequestContext extends DefaultRequestContext {
+public class ClientRequestContext extends DefaultClientRequestContext {
 
 	public ClientRequestContext(ClientRequest clientRequest) {
 		this(clientRequest, "default");
