@@ -95,6 +95,7 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 	public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
 		port = webServerInitializedEvent.getWebServer().getPort();
 		if (port > 0) {
+			simple.getLocal().setHost(inet.findFirstNonLoopbackHostInfo().getHostname());
 			simple.getLocal().setPort(port);
 		}
 	}

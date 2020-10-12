@@ -66,9 +66,8 @@ public class SimpleDiscoveryClientAutoConfiguration
 	public SimpleDiscoveryProperties simpleDiscoveryProperties(
 			@Value("${spring.application.name:application}") String serviceId) {
 		simple.getLocal().setServiceId(serviceId);
-		simple.getLocal().setHost(this.inet.findFirstNonLoopbackHostInfo().getHostname());
+		simple.getLocal().setHost(inet.findFirstNonLoopbackHostInfo().getHostname());
 		simple.getLocal().setPort(findPort());
-
 		return simple;
 	}
 
@@ -82,18 +81,18 @@ public class SimpleDiscoveryClientAutoConfiguration
 		if (port > 0) {
 			return port;
 		}
-		if (this.server != null && this.server.getPort() != null
-				&& this.server.getPort() > 0) {
-			return this.server.getPort();
+		if (server != null && server.getPort() != null && server.getPort() > 0) {
+			return server.getPort();
 		}
 		return 8080;
 	}
 
 	@Override
 	public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
-		this.port = webServerInitializedEvent.getWebServer().getPort();
-		if (this.port > 0) {
-			simple.getLocal().setPort(this.port);
+		port = webServerInitializedEvent.getWebServer().getPort();
+		if (port > 0) {
+			simple.getLocal().setHost(inet.findFirstNonLoopbackHostInfo().getHostname());
+			simple.getLocal().setPort(port);
 		}
 	}
 
