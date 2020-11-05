@@ -12,6 +12,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
 
 /**
  * @author Olga Maciaszek-Sharma
@@ -41,7 +42,25 @@ class DiscoveryClientBasedReactiveLoadBalancer implements ReactiveLoadBalancer<S
 
 	@Override
 	public Publisher<Response<ServiceInstance>> choose(Request request) {
-		return choose();
+
+		List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
+		if (request.getContext() instanceof RetryableRequestContext) {
+			RetryableRequestContext context = (RetryableRequestContext) request
+					.getContext();
+			if (context.getPreviousServiceInstance() != null) {
+				List<ServiceInstance> instancesCopy = discoveryClient
+						.getInstances(serviceId);
+				instancesCopy.remove(context.getPreviousServiceInstance());
+				if (!instancesCopy.isEmpty()) {
+					instances = instancesCopy;
+				}
+			}
+		}
+		if (instances.size() == 0) {
+			return Mono.just(new EmptyResponse());
+		}
+		int instanceIdx = this.random.nextInt(instances.size());
+		return Mono.just(new DefaultResponse(instances.get(instanceIdx)));
 	}
 
 }

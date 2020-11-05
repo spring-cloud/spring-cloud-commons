@@ -244,6 +244,7 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 			};
 		}
 
+
 		@Bean
 		LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
@@ -295,7 +296,6 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 		}
 
 	}
-
 }
 
 

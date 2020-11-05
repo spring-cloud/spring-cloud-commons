@@ -45,7 +45,6 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 	private final LoadBalancerProperties properties;
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	// TODO: move backoff config up to Policy? // user factory and create policy here instead?
 	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
 			LoadBalancerProperties properties, ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
 		this.retryPolicy = retryPolicy;
@@ -141,7 +140,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 									return clientResponse;
 
 								}
-						).onErrorMap(throwable -> new RetryableErrorException())
+						)
 						.retryWhen(exchangeRetry)
 		)
 				.retryWhen(filterRetry);
@@ -193,7 +192,9 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 		return exceptions.stream()
 				.anyMatch(exception -> exception
 						.isInstance(throwable) || throwable != null && exception
-						.isInstance(throwable.getCause()));
+						.isInstance(throwable.getCause())
+						|| throwable.getClass().getName()
+						.contains("RetryExhaustedException"));
 	}
 
 	protected URI reconstructURI(ServiceInstance instance, URI original) {
