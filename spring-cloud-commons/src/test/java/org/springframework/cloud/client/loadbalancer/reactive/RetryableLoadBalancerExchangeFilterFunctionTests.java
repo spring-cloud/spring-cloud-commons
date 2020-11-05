@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
@@ -67,21 +83,41 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 		instance.setServiceId("testservice");
 		instance.setUri(URI.create("http://localhost:" + port));
 		DefaultServiceInstance instanceWithNoLifecycleProcessors = new DefaultServiceInstance();
-		instanceWithNoLifecycleProcessors
-				.setServiceId("serviceWithNoLifecycleProcessors");
-		instanceWithNoLifecycleProcessors
-				.setUri(URI.create("http://localhost:" + port));
+		instanceWithNoLifecycleProcessors.setServiceId("serviceWithNoLifecycleProcessors");
+		instanceWithNoLifecycleProcessors.setUri(URI.create("http://localhost:" + port));
 		properties.getInstances().put("testservice", Collections.singletonList(instance));
 		properties.getInstances().put("serviceWithNoLifecycleProcessors",
 				Collections.singletonList(instanceWithNoLifecycleProcessors));
 	}
 
 	@Test
+	void loadBalancerLifecycleCallbacksExecuted() {
+		final String callbackTestHint = "callbackTestHint";
+		loadBalancerProperties.getHint().put("testservice", "callbackTestHint");
+		final String result = "callbackTestResult";
+
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
+				.filter(this.loadBalancerFunction).build().get().uri("/callback").exchange().block();
+
+		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
+				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
+				.values();
+		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
+				.getInstances("testservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
+				.getCompleteLog().values();
+		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
+				.contains(callbackTestHint);
+		assertThat(anotherLifecycleLogRequests)
+				.extracting(completionContext -> ((ClientResponse) completionContext.getClientResponse())
+						.bodyToMono(String.class).block())
+				.contains(result);
+	}
+
+	@Test
 	void correctResponseReturnedForExistingHostAndInstancePresent() {
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello")
-				.exchange()
-				.block();
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
@@ -93,9 +129,7 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 		loadBalancerProperties.getRetry().getRetryableStatusCodes().add(500);
 
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/exception")
-				.exchange()
-				.block();
+				.filter(this.loadBalancerFunction).build().get().uri("/exception").exchange().block();
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World!");
@@ -110,32 +144,25 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 		DefaultServiceInstance badRetryTestInstance = new DefaultServiceInstance();
 		badRetryTestInstance.setServiceId("retrytest");
 		badRetryTestInstance.setUri(URI.create("http://localhost:" + 8080));
-		properties.getInstances().put("retrytest",
-				Arrays.asList(badRetryTestInstance, goodRetryTestInstance));
+		properties.getInstances().put("retrytest", Arrays.asList(badRetryTestInstance, goodRetryTestInstance));
 		loadBalancerProperties.getRetry().getRetryableStatusCodes().add(500);
 
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://retrytest")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello")
-				.exchange()
-				.block();
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
 
 		ClientResponse secondClientResponse = WebClient.builder().baseUrl("http://retrytest")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello")
-				.exchange()
-				.block();
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
 
 		then(secondClientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(secondClientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
 	}
 
-
 	@Test
 	void serviceUnavailableReturnedWhenNoInstancePresent() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://xxx")
-				.filter(this.loadBalancerFunction)
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http://xxx").filter(this.loadBalancerFunction)
 				.build().get().exchange().block();
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
@@ -143,10 +170,9 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 	@Test
 	@Disabled
-		// FIXME 3.0.0
+	// FIXME 3.0.0
 	void badRequestReturnedForIncorrectHost() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///xxx")
-				.filter(this.loadBalancerFunction)
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///xxx").filter(this.loadBalancerFunction)
 				.build().get().exchange().block();
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -154,44 +180,14 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 	@Test
 	void exceptionNotThrownWhenFactoryReturnsNullLifecycleProcessorsMap() {
-		assertThatCode(() -> WebClient.builder()
-				.baseUrl("http://serviceWithNoLifecycleProcessors")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
-				.block())
-				.doesNotThrowAnyException();
+		assertThatCode(() -> WebClient.builder().baseUrl("http://serviceWithNoLifecycleProcessors")
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block())
+						.doesNotThrowAnyException();
 	}
 
-	@Test
-	void loadBalancerLifecycleCallbacksExecuted() {
-		final String callbackTestHint = "callbackTestHint";
-		loadBalancerProperties.getHint().put("testservice", "callbackTestHint");
-		final String result = "callbackTestResult";
 
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/callback")
-				.exchange().block();
 
-		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("testservice", LoadBalancerLifecycle.class)
-				.get("loadBalancerLifecycle")).getStartLog()
-				.values();
-		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
-				.getInstances("testservice", LoadBalancerLifecycle.class)
-				.get("anotherLoadBalancerLifecycle"))
-				.getCompleteLog().values();
-		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(lifecycleLogRequests)
-				.extracting(request -> ((DefaultRequestContext) request.getContext())
-						.getHint())
-				.contains(callbackTestHint);
-		assertThat(anotherLifecycleLogRequests)
-				.extracting(completionContext -> ((ClientResponse) completionContext
-						.getClientResponse())
-						.bodyToMono(String.class).block())
-				.contains(result);
-	}
-
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@EnableDiscoveryClient
 	@EnableAutoConfiguration
 	@SpringBootConfiguration(proxyBeanMethods = false)
@@ -229,7 +225,8 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 				@Override
 				public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
-					return new org.springframework.cloud.client.loadbalancer.reactive.DiscoveryClientBasedReactiveLoadBalancer(serviceId, discoveryClient);
+					return new org.springframework.cloud.client.loadbalancer.reactive.DiscoveryClientBasedReactiveLoadBalancer(
+							serviceId, discoveryClient);
 				}
 
 				@Override
@@ -238,10 +235,8 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 						return null;
 					}
 					Map lifecycleProcessors = new HashMap<>();
-					lifecycleProcessors
-							.put("loadBalancerLifecycle", testLoadBalancerLifecycle);
-					lifecycleProcessors
-							.put("anotherLoadBalancerLifecycle", anotherLoadBalancerLifecycle);
+					lifecycleProcessors.put("loadBalancerLifecycle", testLoadBalancerLifecycle);
+					lifecycleProcessors.put("anotherLoadBalancerLifecycle", anotherLoadBalancerLifecycle);
 					return lifecycleProcessors;
 				}
 
@@ -252,7 +247,6 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 			};
 		}
 
-
 		@Bean
 		LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
@@ -261,9 +255,10 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 		@Bean
 		RetryableLoadBalancerExchangeFilterFunction exchangeFilterFunction(LoadBalancerProperties properties,
 				ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
-			return new RetryableLoadBalancerExchangeFilterFunction(new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties),
-					properties, factory);
+			return new RetryableLoadBalancerExchangeFilterFunction(
+					new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties), properties, factory);
 		}
+
 	}
 
 	protected static class TestLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
@@ -304,6 +299,5 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 		}
 
 	}
+
 }
-
-

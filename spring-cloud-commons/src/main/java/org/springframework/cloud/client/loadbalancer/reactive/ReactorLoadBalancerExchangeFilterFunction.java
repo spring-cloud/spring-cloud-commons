@@ -30,7 +30,6 @@ import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.http.HttpStatus;
@@ -38,6 +37,11 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
+
+import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.reconstructURI;
+import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionTools.buildClientRequest;
+import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionTools.getHint;
+import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionTools.serviceInstanceUnavailableMessage;
 
 /**
  * An {@link ExchangeFilterFunction} that uses {@link ReactiveLoadBalancer} to execute
@@ -76,7 +80,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 				.getSupportedLifecycleProcessors(
 						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
 						ClientRequestContext.class, ClientResponse.class, ServiceInstance.class);
-		String hint = getHint(serviceId);
+		String hint = getHint(serviceId, properties.getHint());
 		DefaultRequest<ClientRequestContext> lbRequest = new DefaultRequest<>(
 				new ClientRequestContext(clientRequest, hint));
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
@@ -108,32 +112,12 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 		});
 	}
 
-	protected URI reconstructURI(ServiceInstance instance, URI original) {
-		return LoadBalancerUriTools.reconstructURI(instance, original);
-	}
-
 	protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<ClientRequestContext> request) {
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory.getInstance(serviceId);
 		if (loadBalancer == null) {
 			return Mono.just(new EmptyResponse());
 		}
 		return Mono.from(loadBalancer.choose(request));
-	}
-
-	private String serviceInstanceUnavailableMessage(String serviceId) {
-		return "LoadBalancer does not contain an instance for the service " + serviceId;
-	}
-
-	private ClientRequest buildClientRequest(ClientRequest request, URI uri) {
-		return ClientRequest.create(request.method(), uri).headers(headers -> headers.addAll(request.headers()))
-				.cookies(cookies -> cookies.addAll(request.cookies()))
-				.attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
-	}
-
-	private String getHint(String serviceId) {
-		String defaultHint = properties.getHint().getOrDefault("default", "default");
-		String hintPropertyValue = properties.getHint().get(serviceId);
-		return hintPropertyValue != null ? hintPropertyValue : defaultHint;
 	}
 
 }
