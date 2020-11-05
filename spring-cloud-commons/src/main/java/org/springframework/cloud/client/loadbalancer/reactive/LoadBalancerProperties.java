@@ -141,6 +141,8 @@ public class LoadBalancerProperties {
 		 */
 		private Set<Integer> retryableStatusCodes = new HashSet<>();
 
+		private Backoff backoff = new Backoff();
+
 		/**
 		 * Returns true if the load balancer should retry failed requests.
 		 * @return True if the load balancer should retry failed requests; false
@@ -190,6 +192,66 @@ public class LoadBalancerProperties {
 			this.retryableStatusCodes = retryableStatusCodes;
 		}
 
+		public Backoff getBackoff() {
+			return backoff;
+		}
+
+		public void setBackoff(Backoff backoff) {
+			this.backoff = backoff;
+		}
+
+		public static class Backoff {
+
+			private boolean enabled = false;
+
+			private Duration minBackoff = Duration.ofMillis(5);
+
+			private Duration maxBackoff = Duration.ofMillis(Long.MAX_VALUE);
+
+			private double jitter = 0.5d;
+
+			private boolean basedOnPreviousValue = true;
+
+			public Duration getMinBackoff() {
+				return minBackoff;
+			}
+
+			public void setMinBackoff(Duration minBackoff) {
+				this.minBackoff = minBackoff;
+			}
+
+			public Duration getMaxBackoff() {
+				return maxBackoff;
+			}
+
+			public void setMaxBackoff(Duration maxBackoff) {
+				this.maxBackoff = maxBackoff;
+			}
+
+			public double getJitter() {
+				return jitter;
+			}
+
+			public void setJitter(double jitter) {
+				this.jitter = jitter;
+			}
+
+			public boolean isBasedOnPreviousValue() {
+				return basedOnPreviousValue;
+			}
+
+			public void setBasedOnPreviousValue(boolean basedOnPreviousValue) {
+				this.basedOnPreviousValue = basedOnPreviousValue;
+			}
+
+			public boolean isEnabled() {
+				return enabled;
+			}
+
+			public void setEnabled(boolean enabled) {
+				this.enabled = enabled;
+			}
+		}
 	}
 
 }

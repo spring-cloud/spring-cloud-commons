@@ -94,7 +94,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 			}
 
 			if (LOG.isDebugEnabled()) {
-				LOG.debug(String.format("Load balancer has retrieved the instance for service %s: %s", serviceId,
+				LOG.debug(String.format("LoadBalancer has retrieved the instance for service %s: %s", serviceId,
 						instance.getUri()));
 			}
 			ClientRequest newRequest = buildClientRequest(clientRequest, reconstructURI(instance, originalUrl));
@@ -121,7 +121,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 	}
 
 	private String serviceInstanceUnavailableMessage(String serviceId) {
-		return "Load balancer does not contain an instance for the service " + serviceId;
+		return "LoadBalancer does not contain an instance for the service " + serviceId;
 	}
 
 	private ClientRequest buildClientRequest(ClientRequest request, URI uri) {

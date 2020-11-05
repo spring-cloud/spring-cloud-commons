@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
 /**
@@ -34,6 +35,10 @@ public class ClientRequestContext extends DefaultRequestContext {
 
 	public ClientRequest getClientRequest() {
 		return (ClientRequest) super.getClientRequest();
+	}
+
+	public HttpMethod method() {
+		return ((ClientRequest) super.getClientRequest()).method();
 	}
 
 }
