@@ -80,9 +80,12 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	}
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
-		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.aop.proxyTargetClass=true").sources(config, LoadBalancerAutoConfiguration.class)
-				.run();
+		return init(config, "spring.aop.proxyTargetClass=true");
+	}
+
+	protected ConfigurableApplicationContext init(Class<?> config, String... props) {
+		return new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(props)
+				.sources(config, LoadBalancerAutoConfiguration.class).run();
 	}
 
 	@Configuration(proxyBeanMethods = false)

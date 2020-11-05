@@ -41,6 +41,16 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 	}
 
 	@Test
+	public void testRetryDisabled() {
+		ConfigurableApplicationContext context = init(OneRestTemplate.class, "spring.aop.proxyTargetClass=true",
+				"spring.cloud.loadbalancer.retry.enabled=false");
+		List<ClientHttpRequestInterceptor> interceptors = context.getBean(RestTemplate.class).getInterceptors();
+		then(interceptors).hasSize(1);
+		ClientHttpRequestInterceptor interceptor = interceptors.get(0);
+		then(interceptor).isInstanceOf(LoadBalancerInterceptor.class);
+	}
+
+	@Test
 	public void testDefaultBackOffPolicy() {
 		ConfigurableApplicationContext context = init(OneRestTemplate.class);
 		LoadBalancedRetryFactory loadBalancedRetryFactory = context.getBean(LoadBalancedRetryFactory.class);
