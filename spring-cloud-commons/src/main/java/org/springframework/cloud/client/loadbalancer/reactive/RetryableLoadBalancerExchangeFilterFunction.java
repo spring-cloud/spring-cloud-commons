@@ -10,6 +10,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jetbrains.annotations.NotNull;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 import reactor.util.retry.RetrySpec;
@@ -193,8 +194,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 				.anyMatch(exception -> exception
 						.isInstance(throwable) || throwable != null && exception
 						.isInstance(throwable.getCause())
-						|| throwable.getClass().getName()
-						.equals("reactor.core.Exceptions$RetryExhaustedException"));
+						|| Exceptions.isRetryExhausted(throwable));
 	}
 
 	protected URI reconstructURI(ServiceInstance instance, URI original) {
