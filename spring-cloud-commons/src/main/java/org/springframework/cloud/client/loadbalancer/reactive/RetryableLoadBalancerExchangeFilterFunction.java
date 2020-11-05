@@ -194,7 +194,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 						.isInstance(throwable) || throwable != null && exception
 						.isInstance(throwable.getCause())
 						|| throwable.getClass().getName()
-						.contains("RetryExhaustedException"));
+						.equals("reactor.core.Exceptions$RetryExhaustedException"));
 	}
 
 	protected URI reconstructURI(ServiceInstance instance, URI original) {

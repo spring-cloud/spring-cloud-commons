@@ -121,6 +121,14 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
+
+		ClientResponse secondClientResponse = WebClient.builder().baseUrl("http://retrytest")
+				.filter(this.loadBalancerFunction).build().get().uri("/hello")
+				.exchange()
+				.block();
+
+		then(secondClientResponse.statusCode()).isEqualTo(HttpStatus.OK);
+		then(secondClientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
 	}
 
 
