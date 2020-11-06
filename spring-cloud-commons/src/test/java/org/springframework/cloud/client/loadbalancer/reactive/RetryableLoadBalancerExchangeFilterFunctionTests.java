@@ -16,288 +16,124 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
-import org.springframework.cloud.client.loadbalancer.CompletionContext;
-import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
-import org.springframework.cloud.client.loadbalancer.Request;
-import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.ExchangeFunction;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.BDDAssertions.then;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-public class RetryableLoadBalancerExchangeFilterFunctionTests {
+@SuppressWarnings("unchecked")
+class RetryableLoadBalancerExchangeFilterFunctionTests {
 
-	@Autowired
-	private RetryableLoadBalancerExchangeFilterFunction loadBalancerFunction;
+	private final LoadBalancerProperties properties = new LoadBalancerProperties();
 
-	@Autowired
-	private SimpleDiscoveryProperties properties;
+	private final LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
+			properties);
 
-	@Autowired
-	private LoadBalancerProperties loadBalancerProperties;
+	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
 
-	@Autowired
-	private ReactiveLoadBalancer.Factory<ServiceInstance> factory;
+	private final RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
+			policy, properties, factory);
 
-	@LocalServerPort
-	private int port;
+	private final ClientRequest clientRequest = mock(ClientRequest.class);
+
+	private final ExchangeFunction next = mock(ExchangeFunction.class);
+
+	private final ClientResponse clientResponse = mock(ClientResponse.class);
 
 	@BeforeEach
 	void setUp() {
-		DefaultServiceInstance instance = new DefaultServiceInstance();
-		instance.setServiceId("testservice");
-		instance.setUri(URI.create("http://localhost:" + port));
-		DefaultServiceInstance instanceWithNoLifecycleProcessors = new DefaultServiceInstance();
-		instanceWithNoLifecycleProcessors.setServiceId("serviceWithNoLifecycleProcessors");
-		instanceWithNoLifecycleProcessors.setUri(URI.create("http://localhost:" + port));
-		properties.getInstances().put("testservice", Collections.singletonList(instance));
-		properties.getInstances().put("serviceWithNoLifecycleProcessors",
-				Collections.singletonList(instanceWithNoLifecycleProcessors));
+		properties.getRetry().setMaxRetriesOnSameServiceInstance(1);
+		properties.getRetry().getRetryableStatusCodes().add(404);
+		when(clientRequest.url()).thenReturn(URI.create("http://test"));
+		when(factory.getInstance("test")).thenReturn(new TestReactiveLoadBalancer());
+		when(clientRequest.headers()).thenReturn(new HttpHeaders());
+		when(clientRequest.cookies()).thenReturn(new HttpHeaders());
+
 	}
 
 	@Test
-	void loadBalancerLifecycleCallbacksExecuted() {
-		final String callbackTestHint = "callbackTestHint";
-		loadBalancerProperties.getHint().put("testservice", "callbackTestHint");
-		final String result = "callbackTestResult";
+	void shouldRetryOnSameAndNextServiceInstanceOnException() {
+		when(clientRequest.method()).thenReturn(HttpMethod.GET);
+		when(next.exchange(any())).thenThrow(new IllegalStateException(new IOException()));
 
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/callback").exchange().block();
+		filterFunction.filter(clientRequest, next).subscribe();
 
-		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
-						.values();
-		List<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = new ArrayList<>(
-				((AnotherLoadBalancerLifecycle) factory.getInstances("testservice", LoadBalancerLifecycle.class)
-						.get("anotherLoadBalancerLifecycle")).getCompleteLog().values());
-		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
-				.contains(callbackTestHint);
-		assertThat(anotherLifecycleLogRequests.get(anotherLifecycleLogRequests.size() - 1))
-				.extracting(completionContext -> ((ClientResponse) completionContext.getClientResponse())
-						.bodyToMono(String.class).block())
-				.isEqualTo(result);
+		verify(next, times(4)).exchange(any());
+		verify(factory, times(2)).getInstance(any());
 	}
 
 	@Test
-	void correctResponseReturnedForExistingHostAndInstancePresent() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
+	void shouldRetryOnSameAndNextServiceInstanceOnRetryableStatusCode() {
+		when(clientRequest.method()).thenReturn(HttpMethod.GET);
+		when(clientResponse.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+		when(next.exchange(any())).thenReturn(Mono.just(clientResponse));
 
-		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
-		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
+		filterFunction.filter(clientRequest, next).subscribe();
+
+		verify(next, times(4)).exchange(any());
+		verify(factory, times(2)).getInstance(any());
 	}
 
 	@Test
-	void correctResponseReturnedAfterRetryingOnSameServiceInstance() {
-		loadBalancerProperties.getRetry().setMaxRetriesOnSameServiceInstance(1);
-		loadBalancerProperties.getRetry().getRetryableStatusCodes().add(500);
+	void shouldNotRetryWhenNoRetryableExceptionOrStatusCode() {
+		when(clientRequest.method()).thenReturn(HttpMethod.GET);
+		when(clientResponse.statusCode()).thenReturn(HttpStatus.OK);
+		when(next.exchange(any())).thenReturn(Mono.just(clientResponse));
 
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/exception").exchange().block();
+		filterFunction.filter(clientRequest, next).subscribe();
 
-		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
-		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World!");
+		verify(next, times(1)).exchange(any());
+		verify(factory, times(1)).getInstance(any());
 	}
 
 	@Test
-	void correctResponseReturnedAfterRetryingOnNextServiceInstance() {
-		loadBalancerProperties.getRetry().setMaxRetriesOnSameServiceInstance(1);
-		DefaultServiceInstance goodRetryTestInstance = new DefaultServiceInstance();
-		goodRetryTestInstance.setServiceId("retrytest");
-		goodRetryTestInstance.setUri(URI.create("http://localhost:" + port));
-		DefaultServiceInstance badRetryTestInstance = new DefaultServiceInstance();
-		badRetryTestInstance.setServiceId("retrytest");
-		badRetryTestInstance.setUri(URI.create("http://localhost:" + 8080));
-		properties.getInstances().put("retrytest", Arrays.asList(badRetryTestInstance, goodRetryTestInstance));
-		loadBalancerProperties.getRetry().getRetryableStatusCodes().add(500);
+	void shouldNotRetryOnMethodOtherThanGet() {
+		when(clientRequest.method()).thenReturn(HttpMethod.POST);
+		when(clientResponse.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+		when(next.exchange(any())).thenReturn(Mono.just(clientResponse));
 
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://retrytest")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
+		filterFunction.filter(clientRequest, next).subscribe();
 
-		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
-		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
-
-		ClientResponse secondClientResponse = WebClient.builder().baseUrl("http://retrytest")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
-
-		then(secondClientResponse.statusCode()).isEqualTo(HttpStatus.OK);
-		then(secondClientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
+		verify(next, times(1)).exchange(any());
+		verify(factory, times(1)).getInstance(any());
 	}
 
 	@Test
-	void serviceUnavailableReturnedWhenNoInstancePresent() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://xxx").filter(this.loadBalancerFunction)
-				.build().get().exchange().block();
+	void shouldRetryOnMethodOtherThanGetWhenEnabled() {
+		LoadBalancerProperties properties = new LoadBalancerProperties();
+		properties.getRetry().setRetryOnAllOperations(true);
+		properties.getRetry().setMaxRetriesOnSameServiceInstance(1);
+		properties.getRetry().getRetryableStatusCodes().add(404);
+		LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties);
+		RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
+				policy, properties, factory);
+		when(clientRequest.method()).thenReturn(HttpMethod.POST);
+		when(clientResponse.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+		when(next.exchange(any())).thenReturn(Mono.just(clientResponse));
 
-		then(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
-	}
+		filterFunction.filter(clientRequest, next).subscribe();
 
-	@Test
-	@Disabled
-	// FIXME 3.0.0
-	void badRequestReturnedForIncorrectHost() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///xxx").filter(this.loadBalancerFunction)
-				.build().get().exchange().block();
-
-		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-	}
-
-	@Test
-	void exceptionNotThrownWhenFactoryReturnsNullLifecycleProcessorsMap() {
-		assertThatCode(() -> WebClient.builder().baseUrl("http://serviceWithNoLifecycleProcessors")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block())
-						.doesNotThrowAnyException();
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@EnableDiscoveryClient
-	@EnableAutoConfiguration
-	@SpringBootConfiguration(proxyBeanMethods = false)
-	@RestController
-	static class Config {
-
-		AtomicInteger exceptionCallsCount = new AtomicInteger();
-
-		@GetMapping("/hello")
-		public String hello() {
-			return "Hello World";
-		}
-
-		@GetMapping("/callback")
-		String callbackTestResult() {
-			return "callbackTestResult";
-		}
-
-		@GetMapping("/exception")
-		String exception() {
-			int callCount = exceptionCallsCount.incrementAndGet();
-			if (callCount % 2 != 0) {
-				throw new IllegalStateException("Test!");
-			}
-			return "Hello World!";
-		}
-
-		@Bean
-		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory(DiscoveryClient discoveryClient) {
-			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
-
-				private final TestLoadBalancerLifecycle testLoadBalancerLifecycle = new TestLoadBalancerLifecycle();
-
-				private final TestLoadBalancerLifecycle anotherLoadBalancerLifecycle = new AnotherLoadBalancerLifecycle();
-
-				@Override
-				public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
-					return new org.springframework.cloud.client.loadbalancer.reactive.DiscoveryClientBasedReactiveLoadBalancer(
-							serviceId, discoveryClient);
-				}
-
-				@Override
-				public <X> Map<String, X> getInstances(String name, Class<X> type) {
-					if (name.equals("serviceWithNoLifecycleProcessors")) {
-						return null;
-					}
-					Map lifecycleProcessors = new HashMap<>();
-					lifecycleProcessors.put("loadBalancerLifecycle", testLoadBalancerLifecycle);
-					lifecycleProcessors.put("anotherLoadBalancerLifecycle", anotherLoadBalancerLifecycle);
-					return lifecycleProcessors;
-				}
-
-				@Override
-				public <X> X getInstance(String name, Class<?> clazz, Class<?>... generics) {
-					return null;
-				}
-			};
-		}
-
-		@Bean
-		LoadBalancerProperties loadBalancerProperties() {
-			return new LoadBalancerProperties();
-		}
-
-		@Bean
-		RetryableLoadBalancerExchangeFilterFunction exchangeFilterFunction(LoadBalancerProperties properties,
-				ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
-			return new RetryableLoadBalancerExchangeFilterFunction(
-					new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties), properties, factory);
-		}
-
-	}
-
-	protected static class TestLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
-
-		Map<String, Request<Object>> startLog = new ConcurrentSkipListMap<>();
-
-		Map<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentSkipListMap<>();
-
-		@Override
-		public void onStart(Request<Object> request) {
-			startLog.put(getName() + UUID.randomUUID(), request);
-		}
-
-		@Override
-		public void onComplete(CompletionContext<Object, ServiceInstance> completionContext) {
-			completeLog.put(getName() + UUID.randomUUID(), completionContext);
-		}
-
-		Map<String, Request<Object>> getStartLog() {
-			return startLog;
-		}
-
-		Map<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
-			return completeLog;
-		}
-
-		protected String getName() {
-			return this.getClass().getSimpleName();
-		}
-
-	}
-
-	protected static class AnotherLoadBalancerLifecycle extends TestLoadBalancerLifecycle {
-
-		@Override
-		protected String getName() {
-			return this.getClass().getSimpleName();
-		}
-
+		verify(next, times(4)).exchange(any());
+		verify(factory, times(2)).getInstance(any());
 	}
 
 }
