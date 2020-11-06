@@ -17,13 +17,15 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -101,17 +103,17 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
 				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
-				.values();
-		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
-				.getInstances("testservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
-				.getCompleteLog().values();
+						.values();
+		List<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = new ArrayList<>(
+				((AnotherLoadBalancerLifecycle) factory.getInstances("testservice", LoadBalancerLifecycle.class)
+						.get("anotherLoadBalancerLifecycle")).getCompleteLog().values());
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains(callbackTestHint);
-		assertThat(anotherLifecycleLogRequests)
+		assertThat(anotherLifecycleLogRequests.get(anotherLifecycleLogRequests.size() - 1))
 				.extracting(completionContext -> ((ClientResponse) completionContext.getClientResponse())
 						.bodyToMono(String.class).block())
-				.contains(result);
+				.isEqualTo(result);
 	}
 
 	@Test
@@ -184,8 +186,6 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block())
 						.doesNotThrowAnyException();
 	}
-
-
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@EnableDiscoveryClient
@@ -263,9 +263,9 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 	protected static class TestLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
-		ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
+		Map<String, Request<Object>> startLog = new ConcurrentSkipListMap<>();
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+		Map<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentSkipListMap<>();
 
 		@Override
 		public void onStart(Request<Object> request) {
@@ -277,11 +277,11 @@ public class RetryableLoadBalancerExchangeFilterFunctionTests {
 			completeLog.put(getName() + UUID.randomUUID(), completionContext);
 		}
 
-		ConcurrentHashMap<String, Request<Object>> getStartLog() {
+		Map<String, Request<Object>> getStartLog() {
 			return startLog;
 		}
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
+		Map<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
 			return completeLog;
 		}
 
