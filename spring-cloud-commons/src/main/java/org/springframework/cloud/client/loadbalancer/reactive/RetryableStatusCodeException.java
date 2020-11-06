@@ -17,8 +17,12 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 /**
+ * An {@link IllegalStateException} used to trigger retries based on the returned HTTP
+ * status code.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
-public class RetryableStatusCodeException extends IllegalStateException {
+class RetryableStatusCodeException extends IllegalStateException {
 
 }

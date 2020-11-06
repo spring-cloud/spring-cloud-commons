@@ -43,6 +43,7 @@ import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 
 import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.reconstructURI;
@@ -51,17 +52,21 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFil
 import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionTools.serviceInstanceUnavailableMessage;
 
 /**
+ * An {@link ExchangeFilterFunction} that uses {@link ReactiveLoadBalancer} to execute
+ * requests against a correct {@link ServiceInstance} and Reactor Retries to retry the
+ * call both against the same and the next service instance, based on the provided
+ * {@link LoadBalancerRetryPolicy}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalancedExchangeFilterFunction {
 
-	private static final Log LOG = LogFactory
-			.getLog(RetryableLoadBalancerExchangeFilterFunction.class);
+	private static final Log LOG = LogFactory.getLog(RetryableLoadBalancerExchangeFilterFunction.class);
 
-	private static final List<Class<? extends Throwable>> exceptions = Arrays
-			.asList(IOException.class,
-					TimeoutException.class,
-					org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
+	private static final List<Class<? extends Throwable>> exceptions = Arrays.asList(IOException.class,
+			TimeoutException.class,
+			org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
 
 	private final LoadBalancerRetryPolicy retryPolicy;
 

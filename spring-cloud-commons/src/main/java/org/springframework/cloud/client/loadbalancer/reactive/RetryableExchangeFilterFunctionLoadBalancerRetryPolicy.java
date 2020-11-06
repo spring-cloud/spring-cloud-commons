@@ -19,7 +19,10 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.http.HttpMethod;
 
 /**
+ * The default implementation of {@link LoadBalancerRetryPolicy}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 public class RetryableExchangeFilterFunctionLoadBalancerRetryPolicy implements LoadBalancerRetryPolicy {
 

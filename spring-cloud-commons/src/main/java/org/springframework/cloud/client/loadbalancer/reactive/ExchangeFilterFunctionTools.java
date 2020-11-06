@@ -20,9 +20,13 @@ import java.net.URI;
 import java.util.Map;
 
 import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 
 /**
+ * A utility class for load-balanced {@link ExchangeFilterFunction} instances.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 public final class ExchangeFilterFunctionTools {
 

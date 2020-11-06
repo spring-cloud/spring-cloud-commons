@@ -19,7 +19,10 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 
 /**
+ * A marker interface for load-balanced {@link ExchangeFilterFunction} instances.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 public interface LoadBalancedExchangeFilterFunction extends ExchangeFilterFunction {
 

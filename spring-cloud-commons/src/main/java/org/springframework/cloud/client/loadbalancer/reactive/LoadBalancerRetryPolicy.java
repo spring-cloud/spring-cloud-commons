@@ -19,39 +19,40 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.http.HttpMethod;
 
 /**
+ * Pluggable policy used to establish whether a given load-balanced call should be
+ * retried.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 public interface LoadBalancerRetryPolicy {
 
 	/**
-	 * Return true to retry the failed request on the same server. This method may be
-	 * called more than once when executing a single operation.
-	 * @param context The context for the retry operation.
-	 * @return True to retry the failed request on the same server; false otherwise.
+	 * Return <code>true</code> to retry on the same service instance.
+	 * @param context the context for the retry operation
+	 * @return true to retry on the same service instance
 	 */
 	boolean canRetrySameServiceInstance(LoadBalancerRetryContext context);
 
 	/**
-	 * Return true to retry the failed request on the next server from the load balancer.
-	 * This method may be called more than once when executing a single operation.
-	 * @param context The context for the retry operation.
-	 * @return True to retry the failed request on the next server from the load balancer;
-	 * false otherwise.
+	 * Return <code>true</code> to retry on the next service instance.
+	 * @param context the context for the retry operation
+	 * @return true to retry on the same service instance
 	 */
 	boolean canRetryNextServiceInstance(LoadBalancerRetryContext context);
 
 	/**
-	 * If an exception is not thrown when making a request, this method will be called to
-	 * see if the client would like to retry the request based on the status code
-	 * returned. For example, in Cloud Foundry, the router will return a <code>404</code>
-	 * when an app is not available. Since HTTP clients do not throw an exception when a
-	 * <code>404</code> is returned, <code>retryableStatusCode</code> allows clients to
-	 * force a retry.
-	 * @param statusCode The HTTP status code.
-	 * @return True if a retry should be attempted; false to just return the response.
+	 * Return <code>true</code> to retry on the provided HTTP status code.
+	 * @param statusCode the HTTP status code
+	 * @return true to retry on the provided HTTP status code
 	 */
 	boolean retryableStatusCode(int statusCode);
 
+	/**
+	 * Return <code>true</code> to retry on the provided HTTP method.
+	 * @param method the HTTP request method
+	 * @return true to retry on the provided HTTP method
+	 */
 	boolean canRetryOnMethod(HttpMethod method);
 
 }

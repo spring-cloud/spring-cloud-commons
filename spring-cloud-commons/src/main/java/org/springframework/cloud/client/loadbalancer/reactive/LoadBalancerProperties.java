@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import reactor.util.retry.RetryBackoffSpec;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -47,7 +49,7 @@ public class LoadBalancerProperties {
 	private Map<String, String> hint = new LinkedCaseInsensitiveMap<>();
 
 	/**
-	 * Properties for Spring-Retry support in Spring Cloud LoadBalancer.
+	 * Properties for Spring-Retry and Reactor Retry support in Spring Cloud LoadBalancer.
 	 */
 	private Retry retry = new Retry();
 
@@ -141,6 +143,9 @@ public class LoadBalancerProperties {
 		 */
 		private Set<Integer> retryableStatusCodes = new HashSet<>();
 
+		/**
+		 * Properties for Reactor Retry backoffs in Spring Cloud LoadBalancer.
+		 */
 		private Backoff backoff = new Backoff();
 
 		/**
@@ -202,15 +207,25 @@ public class LoadBalancerProperties {
 
 		public static class Backoff {
 
+			/**
+			 * Indicates whether Reactor Retry backoffs should be applied.
+			 */
 			private boolean enabled = false;
 
+			/**
+			 * Used to set {@link RetryBackoffSpec#minBackoff}.
+			 */
 			private Duration minBackoff = Duration.ofMillis(5);
 
+			/**
+			 * Used to set {@link RetryBackoffSpec#maxBackoff}.
+			 */
 			private Duration maxBackoff = Duration.ofMillis(Long.MAX_VALUE);
 
+			/**
+			 * Used to set {@link RetryBackoffSpec#jitter}.
+			 */
 			private double jitter = 0.5d;
-
-			private boolean basedOnPreviousValue = true;
 
 			public Duration getMinBackoff() {
 				return minBackoff;
@@ -234,14 +249,6 @@ public class LoadBalancerProperties {
 
 			public void setJitter(double jitter) {
 				this.jitter = jitter;
-			}
-
-			public boolean isBasedOnPreviousValue() {
-				return basedOnPreviousValue;
-			}
-
-			public void setBasedOnPreviousValue(boolean basedOnPreviousValue) {
-				this.basedOnPreviousValue = basedOnPreviousValue;
 			}
 
 			public boolean isEnabled() {

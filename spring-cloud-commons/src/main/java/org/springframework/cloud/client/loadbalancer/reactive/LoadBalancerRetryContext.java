@@ -21,9 +21,12 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
+ * Stores the data for a load-balanced call that is being retried.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
-public class LoadBalancerRetryContext {
+class LoadBalancerRetryContext {
 
 	private final ClientRequest request;
 

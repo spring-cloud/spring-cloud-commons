@@ -38,7 +38,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
+ * Tests for {@link RetryableLoadBalancerExchangeFilterFunction}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 @SuppressWarnings("unchecked")
 class RetryableLoadBalancerExchangeFilterFunctionTests {

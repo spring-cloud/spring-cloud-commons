@@ -57,7 +57,10 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
+ * Integration tests for {@link RetryableLoadBalancerExchangeFilterFunction}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {

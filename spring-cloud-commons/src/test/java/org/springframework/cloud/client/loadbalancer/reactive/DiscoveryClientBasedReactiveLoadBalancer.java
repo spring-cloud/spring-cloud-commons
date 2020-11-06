@@ -31,7 +31,10 @@ import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
 
 /**
+ * A {@link ReactiveLoadBalancer} implementation used for tests.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 class DiscoveryClientBasedReactiveLoadBalancer implements ReactiveLoadBalancer<ServiceInstance> {
 
