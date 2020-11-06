@@ -51,7 +51,7 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
 
 	private final RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-			policy, properties, factory);
+			policy, factory, properties);
 
 	private final ClientRequest clientRequest = mock(ClientRequest.class);
 
@@ -125,7 +125,7 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 		properties.getRetry().getRetryableStatusCodes().add(404);
 		LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties);
 		RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-				policy, properties, factory);
+				policy, factory, properties);
 		when(clientRequest.method()).thenReturn(HttpMethod.POST);
 		when(clientResponse.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
 		when(next.exchange(any())).thenReturn(Mono.just(clientResponse));

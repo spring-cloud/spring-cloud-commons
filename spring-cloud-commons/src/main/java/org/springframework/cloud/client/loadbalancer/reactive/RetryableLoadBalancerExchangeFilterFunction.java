@@ -25,7 +25,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
@@ -44,7 +43,6 @@ import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 
 import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.reconstructURI;
@@ -55,13 +53,15 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFil
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
+public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalancedExchangeFilterFunction {
 
-	private static final Log LOG = LogFactory.getLog(RetryableLoadBalancerExchangeFilterFunction.class);
+	private static final Log LOG = LogFactory
+			.getLog(RetryableLoadBalancerExchangeFilterFunction.class);
 
-	private static final List<Class<? extends Throwable>> exceptions = Arrays.asList(IOException.class,
-			TimeoutException.class,
-			org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
+	private static final List<Class<? extends Throwable>> exceptions = Arrays
+			.asList(IOException.class,
+					TimeoutException.class,
+					org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
 
 	private final LoadBalancerRetryPolicy retryPolicy;
 
@@ -70,10 +70,10 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
 	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
-			LoadBalancerProperties properties, ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties) {
 		this.retryPolicy = retryPolicy;
-		this.properties = properties;
 		this.loadBalancerFactory = loadBalancerFactory;
+		this.properties = properties;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -151,7 +151,6 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 		}).retryWhen(exchangeRetry)).retryWhen(filterRetry);
 	}
 
-	@NotNull
 	private Retry buildRetrySpec(int max, boolean transientErrors) {
 		LoadBalancerProperties.Retry.Backoff backoffProperties = properties.getRetry().getBackoff();
 		if (backoffProperties.isEnabled()) {

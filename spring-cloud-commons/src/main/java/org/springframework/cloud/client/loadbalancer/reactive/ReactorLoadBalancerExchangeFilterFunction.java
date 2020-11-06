@@ -51,7 +51,7 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFil
  * @since 2.2.0
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
+public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedExchangeFilterFunction {
 
 	private static final Log LOG = LogFactory.getLog(ReactorLoadBalancerExchangeFilterFunction.class);
 

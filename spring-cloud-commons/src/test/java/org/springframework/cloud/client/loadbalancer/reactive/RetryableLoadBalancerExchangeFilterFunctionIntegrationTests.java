@@ -83,8 +83,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		instance.setServiceId("testservice");
 		instance.setUri(URI.create("http://localhost:" + port));
 		DefaultServiceInstance instanceWithNoLifecycleProcessors = new DefaultServiceInstance();
-		instanceWithNoLifecycleProcessors
-				.setServiceId("serviceWithNoLifecycleProcessors");
+		instanceWithNoLifecycleProcessors.setServiceId("serviceWithNoLifecycleProcessors");
 		instanceWithNoLifecycleProcessors.setUri(URI.create("http://localhost:" + port));
 		properties.getInstances().put("testservice", Collections.singletonList(instance));
 		properties.getInstances().put("serviceWithNoLifecycleProcessors",
@@ -98,25 +97,19 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		final String result = "callbackTestResult";
 
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/callback")
-				.exchange().block();
+				.filter(this.loadBalancerFunction).build().get().uri("/callback").exchange().block();
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("testservice", LoadBalancerLifecycle.class)
-				.get("loadBalancerLifecycle")).getStartLog()
-				.values();
+				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
+						.values();
 		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
-				.getInstances("testservice", LoadBalancerLifecycle.class)
-				.get("anotherLoadBalancerLifecycle"))
-				.getCompleteLog().values();
+				.getInstances("testservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
+						.getCompleteLog().values();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
-		assertThat(lifecycleLogRequests)
-				.extracting(request -> ((DefaultRequestContext) request.getContext())
-						.getHint())
+		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains(callbackTestHint);
 		assertThat(anotherLifecycleLogRequests)
-				.extracting(completionContext -> ((ClientResponse) completionContext
-						.getClientResponse())
+				.extracting(completionContext -> ((ClientResponse) completionContext.getClientResponse())
 						.bodyToMono(String.class).block())
 				.contains(result);
 	}
@@ -124,8 +117,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 	@Test
 	void correctResponseReturnedForExistingHostAndInstancePresent() {
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
-				.block();
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
@@ -137,8 +129,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		loadBalancerProperties.getRetry().getRetryableStatusCodes().add(500);
 
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/exception")
-				.exchange().block();
+				.filter(this.loadBalancerFunction).build().get().uri("/exception").exchange().block();
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World!");
@@ -154,31 +145,25 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		DefaultServiceInstance badRetryTestInstance = new DefaultServiceInstance();
 		badRetryTestInstance.setServiceId("retrytest");
 		badRetryTestInstance.setUri(URI.create("http://localhost:" + 8080));
-		properties.getInstances().put("retrytest", Arrays
-				.asList(badRetryTestInstance, goodRetryTestInstance));
+		properties.getInstances().put("retrytest", Arrays.asList(badRetryTestInstance, goodRetryTestInstance));
 		loadBalancerProperties.getRetry().getRetryableStatusCodes().add(500);
 
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://retrytest")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
-				.block();
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
 
-		ClientResponse secondClientResponse = WebClient.builder()
-				.baseUrl("http://retrytest")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
-				.block();
+		ClientResponse secondClientResponse = WebClient.builder().baseUrl("http://retrytest")
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
 
 		then(secondClientResponse.statusCode()).isEqualTo(HttpStatus.OK);
-		then(secondClientResponse.bodyToMono(String.class).block())
-				.isEqualTo("Hello World");
+		then(secondClientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
 	}
 
 	@Test
 	void serviceUnavailableReturnedWhenNoInstancePresent() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://xxx")
-				.filter(this.loadBalancerFunction)
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http://xxx").filter(this.loadBalancerFunction)
 				.build().get().exchange().block();
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
@@ -186,10 +171,9 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 
 	@Test
 	@Disabled
-		// FIXME 3.0.0
+	// FIXME 3.0.0
 	void badRequestReturnedForIncorrectHost() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///xxx")
-				.filter(this.loadBalancerFunction)
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///xxx").filter(this.loadBalancerFunction)
 				.build().get().exchange().block();
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -197,14 +181,12 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 
 	@Test
 	void exceptionNotThrownWhenFactoryReturnsNullLifecycleProcessorsMap() {
-		assertThatCode(() -> WebClient.builder()
-				.baseUrl("http://serviceWithNoLifecycleProcessors")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
-				.block())
-				.doesNotThrowAnyException();
+		assertThatCode(() -> WebClient.builder().baseUrl("http://serviceWithNoLifecycleProcessors")
+				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block())
+						.doesNotThrowAnyException();
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@EnableDiscoveryClient
 	@EnableAutoConfiguration
 	@SpringBootConfiguration(proxyBeanMethods = false)
@@ -252,10 +234,8 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 						return null;
 					}
 					Map lifecycleProcessors = new HashMap<>();
-					lifecycleProcessors
-							.put("loadBalancerLifecycle", testLoadBalancerLifecycle);
-					lifecycleProcessors
-							.put("anotherLoadBalancerLifecycle", anotherLoadBalancerLifecycle);
+					lifecycleProcessors.put("loadBalancerLifecycle", testLoadBalancerLifecycle);
+					lifecycleProcessors.put("anotherLoadBalancerLifecycle", anotherLoadBalancerLifecycle);
 					return lifecycleProcessors;
 				}
 
@@ -275,7 +255,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		RetryableLoadBalancerExchangeFilterFunction exchangeFilterFunction(LoadBalancerProperties properties,
 				ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
 			return new RetryableLoadBalancerExchangeFilterFunction(
-					new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties), properties, factory);
+					new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties), factory, properties);
 		}
 
 	}

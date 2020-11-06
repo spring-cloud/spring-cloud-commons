@@ -43,7 +43,7 @@ final class LoadBalancerTestUtils {
 
 	static ConfigurableApplicationContext init(Class<?>... configClasses) {
 		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.sources(ArrayUtils.add(configClasses, WebClientAutoConfiguration.class)).run();
+				.sources(ArrayUtils.add(configClasses, WebClientAutoConfiguration.class)).properties().run();
 	}
 
 	@SuppressWarnings("unchecked")
