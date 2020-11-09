@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-commons-parent</artifactId>
-	<version>2.2.6.BUILD-SNAPSHOT</version>
+	<version>2.2.6.RELEASE</version>
 	<packaging>pom</packaging>
 	<name>Spring Cloud Commons Parent</name>
 	<description>Spring Cloud Commons Parent</description>
