@@ -21,6 +21,7 @@ import java.net.URI;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -32,6 +33,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,6 +64,8 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 	private final ClientResponse clientResponse = mock(ClientResponse.class);
 
+	private final InOrder inOrder = inOrder(next, factory);
+
 	@BeforeEach
 	void setUp() {
 		properties.getRetry().setMaxRetriesOnSameServiceInstance(1);
@@ -80,8 +84,10 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 		filterFunction.filter(clientRequest, next).subscribe();
 
-		verify(next, times(4)).exchange(any());
-		verify(factory, times(2)).getInstance(any());
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
 	}
 
 	@Test
@@ -92,8 +98,10 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 		filterFunction.filter(clientRequest, next).subscribe();
 
-		verify(next, times(4)).exchange(any());
-		verify(factory, times(2)).getInstance(any());
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
 	}
 
 	@Test
@@ -135,8 +143,10 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 		filterFunction.filter(clientRequest, next).subscribe();
 
-		verify(next, times(4)).exchange(any());
-		verify(factory, times(2)).getInstance(any());
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
 	}
 
 }
