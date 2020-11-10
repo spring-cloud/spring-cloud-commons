@@ -452,11 +452,11 @@ You can set:
 - `spring.cloud.loadbalancer.retry.retryableStatusCodes` - the status codes on which to always retry a failed request.
 
 For the reactive implementation, you can additionally set:
- - `spring.cloud.loadbalancer.retry.backoff.minBackoff` - sets minimum backoff duration (by default, 5 milliseconds)
- - `spring.cloud.loadbalancer.retry.backoff.maxBackoff` - sets maximum backoff duration (by default, max long value of milliseconds)
- - `spring.cloud.loadbalancer.retry.backoff.jitter` - sets the jitter used for calculationg the actual backoff duration for each call (by default, 0.5).
+ - `spring.cloud.loadbalancer.retry.backoff.minBackoff` - Sets the minimum backoff duration (by default, 5 milliseconds)
+ - `spring.cloud.loadbalancer.retry.backoff.maxBackoff` - Sets the maximum backoff duration (by default, max long value of milliseconds)
+ - `spring.cloud.loadbalancer.retry.backoff.jitter` - Sets the jitter used for calculationg the actual backoff duration for each call (by default, 0.5).
 
-For the reactive implementation, you can also implement your own `LoadBalancerRetryPolicy` to have a more detailed control over the load-balanced call retries.
+For the reactive implementation, you can also implement your own `LoadBalancerRetryPolicy` to have more detailed control over the load-balanced call retries.
 
 NOTE: For load-balanced retries, by default, we wrap the `ServiceInstanceListSupplier` bean with `RetryAwareServiceInstanceListSupplier` to select a different instance from the one previously chosen, if available. You can disable this behavior by setting the value of `spring.cloud.loadbalancer.retry.avoidPreviousInstance` to `false`.
 
