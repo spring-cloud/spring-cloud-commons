@@ -28,9 +28,9 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
  */
-public final class ExchangeFilterFunctionTools {
+public final class ExchangeFilterFunctionUtils {
 
-	private ExchangeFilterFunctionTools() {
+	private ExchangeFilterFunctionUtils() {
 		throw new IllegalStateException("Can't instantiate a utility class.");
 	}
 

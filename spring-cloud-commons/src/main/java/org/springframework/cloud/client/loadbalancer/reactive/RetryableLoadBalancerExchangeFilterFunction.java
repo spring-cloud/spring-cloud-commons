@@ -47,9 +47,9 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 
 import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.reconstructURI;
-import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionTools.buildClientRequest;
-import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionTools.getHint;
-import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionTools.serviceInstanceUnavailableMessage;
+import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionUtils.buildClientRequest;
+import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionUtils.getHint;
+import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionUtils.serviceInstanceUnavailableMessage;
 
 /**
  * An {@link ExchangeFilterFunction} that uses {@link ReactiveLoadBalancer} to execute
