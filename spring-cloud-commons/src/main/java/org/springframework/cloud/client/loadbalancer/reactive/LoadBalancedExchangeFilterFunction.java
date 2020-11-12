@@ -14,31 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer;
+package org.springframework.cloud.client.loadbalancer.reactive;
 
-import org.springframework.http.HttpMethod;
-import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 
 /**
+ * A marker interface for load-balanced {@link ExchangeFilterFunction} instances.
+ *
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
  */
-public class ClientRequestContext extends DefaultRequestContext {
-
-	public ClientRequestContext(ClientRequest clientRequest) {
-		this(clientRequest, "default");
-	}
-
-	public ClientRequestContext(ClientRequest clientRequest, String hint) {
-		super(clientRequest, hint);
-	}
-
-	public ClientRequest getClientRequest() {
-		return (ClientRequest) super.getClientRequest();
-	}
-
-	public HttpMethod method() {
-		return ((ClientRequest) super.getClientRequest()).method();
-	}
+public interface LoadBalancedExchangeFilterFunction extends ExchangeFilterFunction {
 
 }

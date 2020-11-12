@@ -58,8 +58,8 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
 		@Bean
 		@Primary
-		DeferringLoadBalancerExchangeFilterFunction<ReactorLoadBalancerExchangeFilterFunction> reactorDeferringLoadBalancerExchangeFilterFunction(
-				ObjectProvider<ReactorLoadBalancerExchangeFilterFunction> exchangeFilterFunctionProvider) {
+		DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> reactorDeferringLoadBalancerExchangeFilterFunction(
+				ObjectProvider<LoadBalancedExchangeFilterFunction> exchangeFilterFunctionProvider) {
 			return new DeferringLoadBalancerExchangeFilterFunction<>(exchangeFilterFunctionProvider);
 		}
 

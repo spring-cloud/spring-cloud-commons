@@ -14,31 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer;
-
-import org.springframework.http.HttpMethod;
-import org.springframework.web.reactive.function.client.ClientRequest;
+package org.springframework.cloud.client.loadbalancer.reactive;
 
 /**
+ * An {@link IllegalStateException} used to trigger retries based on the returned HTTP
+ * status code.
+ *
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
  */
-public class ClientRequestContext extends DefaultRequestContext {
-
-	public ClientRequestContext(ClientRequest clientRequest) {
-		this(clientRequest, "default");
-	}
-
-	public ClientRequestContext(ClientRequest clientRequest, String hint) {
-		super(clientRequest, hint);
-	}
-
-	public ClientRequest getClientRequest() {
-		return (ClientRequest) super.getClientRequest();
-	}
-
-	public HttpMethod method() {
-		return ((ClientRequest) super.getClientRequest()).method();
-	}
+class RetryableStatusCodeException extends IllegalStateException {
 
 }

@@ -60,6 +60,27 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	}
 
 	@Test
+	void loadBalancerFilterAddedToWebClientBuilderWithRetryEnabled() {
+		System.setProperty("spring.cloud.loadbalancer.retry.enabled", "true");
+		ConfigurableApplicationContext context = init(OneWebClientBuilder.class);
+		final Map<String, WebClient.Builder> webClientBuilders = context.getBeansOfType(WebClient.Builder.class);
+
+		then(webClientBuilders).isNotNull().hasSize(1);
+		WebClient.Builder webClientBuilder = webClientBuilders.values().iterator().next();
+		then(webClientBuilder).isNotNull();
+
+		assertLoadBalanced(webClientBuilder, RetryableLoadBalancerExchangeFilterFunction.class);
+
+		final Map<String, OneWebClientBuilder.TestService> testServiceMap = context
+				.getBeansOfType(OneWebClientBuilder.TestService.class);
+		then(testServiceMap).isNotNull().hasSize(1);
+		OneWebClientBuilder.TestService testService = testServiceMap.values().stream().findFirst().get();
+		assertLoadBalanced(testService.webClient, RetryableLoadBalancerExchangeFilterFunction.class);
+
+		System.clearProperty("spring.cloud.loadbalancer.retry.enabled");
+	}
+
+	@Test
 	void loadBalancerFilterAddedOnlyToLoadBalancedWebClientBuilder() {
 		ConfigurableApplicationContext context = init(TwoWebClientBuilders.class);
 		final Map<String, WebClient.Builder> webClientBuilders = context.getBeansOfType(WebClient.Builder.class);
@@ -73,6 +94,24 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 		then(two.nonLoadBalanced).isNotNull();
 		then(getFilters(two.nonLoadBalanced)).isNullOrEmpty();
+	}
+
+	@Test
+	void loadBalancerFilterAddedOnlyToLoadBalancedWebClientBuilderWithRetryEnabled() {
+		System.setProperty("spring.cloud.loadbalancer.retry.enabled", "true");
+		ConfigurableApplicationContext context = init(TwoWebClientBuilders.class);
+		final Map<String, WebClient.Builder> webClientBuilders = context.getBeansOfType(WebClient.Builder.class);
+
+		then(webClientBuilders).hasSize(2);
+
+		TwoWebClientBuilders.Two two = context.getBean(TwoWebClientBuilders.Two.class);
+
+		then(two.loadBalanced).isNotNull();
+		assertLoadBalanced(two.loadBalanced, RetryableLoadBalancerExchangeFilterFunction.class);
+
+		then(two.nonLoadBalanced).isNotNull();
+		then(getFilters(two.nonLoadBalanced)).isNullOrEmpty();
+		System.clearProperty("spring.cloud.loadbalancer.retry.enabled");
 	}
 
 	@Test

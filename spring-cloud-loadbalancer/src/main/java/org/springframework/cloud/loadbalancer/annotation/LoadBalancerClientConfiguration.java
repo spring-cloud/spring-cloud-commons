@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.loadbalancer.annotation;
 
+import reactor.util.retry.RetrySpec;
+
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -139,7 +141,7 @@ public class LoadBalancerClientConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnBlockingDiscoveryEnabled
 	@ConditionalOnClass(RetryTemplate.class)
-	@Conditional(OnAvoidPreviousInstanceAndRetryEnabledCondition.class)
+	@Conditional(BlockingOnAvoidPreviousInstanceAndRetryEnabledCondition.class)
 	@AutoConfigureAfter(BlockingSupportConfiguration.class)
 	@ConditionalOnBean(ServiceInstanceListSupplier.class)
 	public static class BlockingRetryConfiguration {
@@ -154,14 +156,51 @@ public class LoadBalancerClientConfiguration {
 
 	}
 
-	static final class OnAvoidPreviousInstanceAndRetryEnabledCondition extends AllNestedConditions {
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnBlockingDiscoveryEnabled
+	@Conditional(ReactiveOnAvoidPreviousInstanceAndRetryEnabledCondition.class)
+	@AutoConfigureAfter(ReactiveSupportConfiguration.class)
+	@ConditionalOnBean(ServiceInstanceListSupplier.class)
+	@ConditionalOnClass(RetrySpec.class)
+	public static class ReactiveRetryConfiguration {
 
-		private OnAvoidPreviousInstanceAndRetryEnabledCondition() {
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@Primary
+		public ServiceInstanceListSupplier retryAwareDiscoveryClientServiceInstanceListSupplier(
+				ServiceInstanceListSupplier delegate) {
+			return new RetryAwareServiceInstanceListSupplier(delegate);
+		}
+
+	}
+
+	static final class BlockingOnAvoidPreviousInstanceAndRetryEnabledCondition extends AllNestedConditions {
+
+		private BlockingOnAvoidPreviousInstanceAndRetryEnabledCondition() {
 			super(ConfigurationPhase.REGISTER_BEAN);
 		}
 
 		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true",
 				matchIfMissing = true)
+		static class LoadBalancerRetryEnabled {
+
+		}
+
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.avoid-previous-instance", havingValue = "true",
+				matchIfMissing = true)
+		static class AvoidPreviousInstanceEnabled {
+
+		}
+
+	}
+
+	static final class ReactiveOnAvoidPreviousInstanceAndRetryEnabledCondition extends AllNestedConditions {
+
+		private ReactiveOnAvoidPreviousInstanceAndRetryEnabledCondition() {
+			super(ConfigurationPhase.REGISTER_BEAN);
+		}
+
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true")
 		static class LoadBalancerRetryEnabled {
 
 		}
