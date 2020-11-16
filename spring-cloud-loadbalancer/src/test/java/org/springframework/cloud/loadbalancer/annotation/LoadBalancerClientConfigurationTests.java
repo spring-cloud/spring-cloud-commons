@@ -104,13 +104,10 @@ class LoadBalancerClientConfigurationTests {
 		reactiveDiscoveryClientRunner.withUserConfiguration(TestConfig.class)
 				.withPropertyValues("spring.cloud.loadbalancer.configurations=health-check").run(context -> {
 					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+					then(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
 							.getDelegate();
-					then(delegate).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
-					ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
-							.getDelegate();
-					then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+					then(delegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
 				});
 	}
 

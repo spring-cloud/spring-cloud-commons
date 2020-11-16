@@ -95,8 +95,7 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations", havingValue = "health-check")
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withHealthChecks().withCaching()
-					.build(context);
+			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withHealthChecks().build(context);
 		}
 
 	}
@@ -132,7 +131,7 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations", havingValue = "health-check")
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withHealthChecks().withCaching()
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withHealthChecks()
 					.build(context);
 		}
 
