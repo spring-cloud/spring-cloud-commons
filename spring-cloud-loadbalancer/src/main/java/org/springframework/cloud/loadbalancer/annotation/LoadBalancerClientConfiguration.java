@@ -97,7 +97,7 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withDiscoveryClient()
-					.withHealthChecks().withCaching().build(context);
+					.withHealthChecks().build(context);
 		}
 
 		@Bean
@@ -154,7 +154,7 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient()
-					.withHealthChecks().withCaching().build(context);
+					.withHealthChecks().build(context);
 		}
 
 		@Bean
