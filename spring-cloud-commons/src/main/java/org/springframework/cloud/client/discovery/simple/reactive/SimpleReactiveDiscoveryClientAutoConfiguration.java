@@ -76,8 +76,7 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration implements Applicati
 
 	@Bean
 	@Order
-	public SimpleReactiveDiscoveryClient simpleReactiveDiscoveryClient(
-			SimpleReactiveDiscoveryProperties properties) {
+	public SimpleReactiveDiscoveryClient simpleReactiveDiscoveryClient(SimpleReactiveDiscoveryProperties properties) {
 		return new SimpleReactiveDiscoveryClient(properties);
 	}
 
