@@ -56,7 +56,29 @@ public class LoadBalancerProperties {
 		 */
 		private Duration interval = Duration.ofSeconds(25);
 
+		private Duration refetchInstancesInterval = Duration.ofSeconds(25);
+
 		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
+
+		private boolean refetchInstances = false;
+
+		private boolean repeatHealthCheck = true;
+
+		public boolean getRefetchInstances() {
+			return refetchInstances;
+		}
+
+		public void setRefetchInstances(boolean refetchInstances) {
+			this.refetchInstances = refetchInstances;
+		}
+
+		public boolean getRepeatHealthCheck() {
+			return repeatHealthCheck;
+		}
+
+		public void setRepeatHealthCheck(boolean repeatHealthCheck) {
+			this.repeatHealthCheck = repeatHealthCheck;
+		}
 
 		public int getInitialDelay() {
 			return initialDelay;
@@ -64,6 +86,14 @@ public class LoadBalancerProperties {
 
 		public void setInitialDelay(int initialDelay) {
 			this.initialDelay = initialDelay;
+		}
+
+		public Duration getRefetchInstancesInterval() {
+			return refetchInstancesInterval;
+		}
+
+		public void setRefetchInstancesInterval(Duration refetchInstancesInterval) {
+			this.refetchInstancesInterval = refetchInstancesInterval;
 		}
 
 		public Map<String, String> getPath() {
