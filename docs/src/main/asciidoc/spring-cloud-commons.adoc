@@ -953,8 +953,14 @@ TIP: This mechanism is particularly helpful while using the `SimpleDiscoveryClie
 clients backed by an actual Service Registry, it's not necessary to use, as we already get
 healthy instances after querying the external ServiceDiscovery.
 
-TIP:: This supplier is also recommended for setups with a small number of instances per service
+TIP: This supplier is also recommended for setups with a small number of instances per service
 in order to avoid retrying calls on a failing instance.
+
+WARNING: If using any of the Service Discovery-backed suppliers, adding this health-check mechanism is usually not necessary, as we retrieve the health state of the instances directly
+from the Service Registry.
+
+TIP: The `HealthCheckServiceInstanceListSupplier` relies on having updated instances provided by a delegate flux. In the rare cases when you want to use a delegate that does not refresh the instances, even though the list of instances may change (such as the `ReactiveDiscoveryClientServiceInstanceListSupplier` provided by us), you can set `spring.cloud.loadbalancer.health-check.refetch-instances` to `true` to have the instance list refreshed by the `HealthCheckServiceInstanceListSupplier`. You can then also adjust the refretch intervals by modifying the value of `spring.cloud.loadbalancer.health-check.refetch-instances-interval` and opt to disable the additional healthcheck repetitions by setting `spring.cloud.loadbalancer.repeat-health-check` to `fasle` as every instances refetch
+  will also trigger a healthcheck.
 
 `HealthCheckServiceInstanceListSupplier` uses properties prefixed with
 `spring.cloud.loadbalancer.health-check`. You can set the `initialDelay` and `interval`
@@ -962,7 +968,7 @@ for the scheduler. You can set the default path for the healthcheck URL by setti
 the value of the `spring.cloud.loadbalancer.health-check.path.default`. You can also set a specific value
 for any given service by setting the value of the `spring.cloud.loadbalancer.health-check.path.[SERVICE_ID]`, substituting the `[SERVICE_ID]` with the correct ID of your service. If the path is not set, `/actuator/health` is used by default.
 
-TIP:: If you rely on the default path (`/actuator/health`), make sure you add `spring-boot-starter-actuator` to your collaborator's dependencies, unless you are planning to add such an endpoint on your own.
+TIP: If you rely on the default path (`/actuator/health`), make sure you add `spring-boot-starter-actuator` to your collaborator's dependencies, unless you are planning to add such an endpoint on your own.
 
 In order to use the health-check scheduler approach, you will have to instantiate a `HealthCheckServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.
 
@@ -987,7 +993,7 @@ public class CustomLoadBalancerConfiguration {
 	}
 ----
 
-NOTE:: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`, therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
+WARNING: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`, therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
 
 
 [[spring-cloud-loadbalancer-starter]]
