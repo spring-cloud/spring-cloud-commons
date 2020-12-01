@@ -107,8 +107,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 							lifecycle -> lifecycle.onComplete(new CompletionContext<ClientResponse, ServiceInstance>(
 									CompletionContext.Status.FAILED, throwable, lbResponse))))
 					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle.onComplete(new CompletionContext<ClientResponse, ServiceInstance>(
-									CompletionContext.Status.SUCCESS, lbResponse, clientResponse))));
+							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
+									lbResponse, clientResponse))));
 		});
 	}
 
