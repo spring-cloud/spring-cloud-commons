@@ -25,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.retry.Repeat;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -61,13 +62,18 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
 		super(delegate);
-		this.healthCheck = healthCheck;
 		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default", "/actuator/health");
 		this.webClient = webClient;
-		aliveInstancesReplay = Flux.defer(delegate).delaySubscription(healthCheck.getInitialDelay())
+		this.healthCheck = healthCheck;
+		Repeat<Object> aliveInstancesReplayRepeat = Repeat
+				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
+				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
+		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate)
 				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
 						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))))
-				.replay(1).refCount(1);
+				.repeatWhen(aliveInstancesReplayRepeat);
+		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
+				.refCount(1);
 	}
 
 	@Override
@@ -80,6 +86,8 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 	}
 
 	protected Flux<List<ServiceInstance>> healthCheckFlux(List<ServiceInstance> instances) {
+		Repeat<Object> healthCheckFluxRepeat = Repeat.onlyIf(repeatContext -> healthCheck.getRepeatHealthCheck())
+				.fixedBackoff(healthCheck.getInterval());
 		return Flux.defer(() -> {
 			List<Mono<ServiceInstance>> checks = new ArrayList<>(instances.size());
 			for (ServiceInstance instance : instances) {
@@ -110,7 +118,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 				result.add(alive);
 				return result;
 			}).defaultIfEmpty(result);
-		}).repeatWhen(restart -> restart.delayElements(healthCheck.getInterval()));
+		}).repeatWhen(healthCheckFluxRepeat);
 	}
 
 	@Override

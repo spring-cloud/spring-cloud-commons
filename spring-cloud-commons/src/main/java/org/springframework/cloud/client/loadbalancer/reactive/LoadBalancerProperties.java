@@ -89,7 +89,43 @@ public class LoadBalancerProperties {
 		 */
 		private Duration interval = Duration.ofSeconds(25);
 
+		/**
+		 * Interval for refetching available service instances.
+		 */
+		private Duration refetchInstancesInterval = Duration.ofSeconds(25);
+
 		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
+
+		/**
+		 * Indicates whether the instances should be refetched by the
+		 * <code>HealthCheckServiceInstanceListSupplier</code>. This can be used if the
+		 * instances can be updated and the underlying delegate does not provide an
+		 * ongoing flux.
+		 */
+		private boolean refetchInstances = false;
+
+		/**
+		 * Indicates whether health checks should keep repeating. It might be useful to
+		 * set it to <code>false</code> if periodically refetching the instances, as every
+		 * refetch will also trigger a healthcheck.
+		 */
+		private boolean repeatHealthCheck = true;
+
+		public boolean getRefetchInstances() {
+			return refetchInstances;
+		}
+
+		public void setRefetchInstances(boolean refetchInstances) {
+			this.refetchInstances = refetchInstances;
+		}
+
+		public boolean getRepeatHealthCheck() {
+			return repeatHealthCheck;
+		}
+
+		public void setRepeatHealthCheck(boolean repeatHealthCheck) {
+			this.repeatHealthCheck = repeatHealthCheck;
+		}
 
 		public Duration getInitialDelay() {
 			return initialDelay;
@@ -97,6 +133,14 @@ public class LoadBalancerProperties {
 
 		public void setInitialDelay(Duration initialDelay) {
 			this.initialDelay = initialDelay;
+		}
+
+		public Duration getRefetchInstancesInterval() {
+			return refetchInstancesInterval;
+		}
+
+		public void setRefetchInstancesInterval(Duration refetchInstancesInterval) {
+			this.refetchInstancesInterval = refetchInstancesInterval;
 		}
 
 		public Map<String, String> getPath() {
