@@ -1,0 +1,120 @@
+/*
+ * Copyright 2012-2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.springframework.cloud.loadbalancer.core;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
+
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.ClientRequestContext;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.ServerHttpRequestContext;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.http.HttpCookie;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.reactive.function.client.ClientRequest;
+
+/**
+ * A session cookie based implementation of {@link ReactorServiceInstanceLoadBalancer}
+ * that ensures requests from the same client are routed to the same server.
+ *
+ * @author Olga Maciaszek-Sharma
+ */
+public class RequestBasedStickySessionServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
+
+	private static final Log LOG = LogFactory.getLog(RequestBasedStickySessionServiceInstanceListSupplier.class);
+
+	private final LoadBalancerProperties properties;
+
+	public RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			LoadBalancerProperties properties) {
+		super(delegate);
+		this.properties = properties;
+	}
+
+	@Override
+	public String getServiceId() {
+		return delegate.getServiceId();
+	}
+
+	@Override
+	public Flux<List<ServiceInstance>> get() {
+		return delegate.get();
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Flux<List<ServiceInstance>> get(Request request) {
+		String instanceIdCookieName = properties.getInstanceIdCookieName();
+		Object context = request.getContext();
+		if ((context instanceof ClientRequestContext)) {
+			ClientRequest originalRequest = ((ClientRequestContext) context).getClientRequest();
+			// We expect there to be one value in this cookie
+			String cookie = originalRequest.cookies().getFirst(instanceIdCookieName);
+			if (cookie != null) {
+				return get().map(serviceInstances -> selectInstance(serviceInstances, cookie));
+			}
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Cookie not found. Returning all instances returned by delegate.");
+			}
+			return get();
+		}
+		if ((context instanceof ServerHttpRequestContext)) {
+			ServerHttpRequest originalRequest = ((ServerHttpRequestContext) context).getClientRequest();
+			HttpCookie cookie = originalRequest.getCookies().getFirst(instanceIdCookieName);
+			if (cookie != null) {
+				return get().map(serviceInstances -> selectInstance(serviceInstances, cookie.getValue()));
+			}
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Cookie not found. Returning all instances returned by delegate.");
+			}
+			return get();
+		}
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Searching for instances based on cookie not supported for ClientRequestContext type."
+					+ " Returning all instances returned by delegate.");
+		}
+		// If no cookie is available, we return all the instances provided by the
+		// delegate.
+		return get();
+	}
+
+	private List<ServiceInstance> selectInstance(List<ServiceInstance> serviceInstances, String cookie) {
+		for (ServiceInstance serviceInstance : serviceInstances) {
+			if (cookie.equals(serviceInstance.getInstanceId())) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(String.format("Returning the service instance: %s. Found for cookie: %s",
+							serviceInstance.toString(), cookie));
+				}
+				return Collections.singletonList(serviceInstance);
+			}
+		}
+		// If the instances cannot be found based on the cookie,
+		// we return all the instances provided by the delegate.
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(String.format(
+					"Service instance for cookie: %s not found. Returning all instances returned by delegate.",
+					cookie));
+		}
+		return serviceInstances;
+	}
+
+}

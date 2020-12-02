@@ -53,6 +53,8 @@ public class LoadBalancerProperties {
 	 */
 	private Retry retry = new Retry();
 
+	private String instanceIdCookieName = "sc-lb-instance-id";
+
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
 	}
@@ -75,6 +77,14 @@ public class LoadBalancerProperties {
 
 	public void setRetry(Retry retry) {
 		this.retry = retry;
+	}
+
+	public String getInstanceIdCookieName() {
+		return instanceIdCookieName;
+	}
+
+	public void setInstanceIdCookieName(String instanceIdCookieName) {
+		this.instanceIdCookieName = instanceIdCookieName;
 	}
 
 	public static class HealthCheck {

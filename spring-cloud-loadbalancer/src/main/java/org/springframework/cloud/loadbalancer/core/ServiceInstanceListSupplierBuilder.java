@@ -146,6 +146,20 @@ public final class ServiceInstanceListSupplierBuilder {
 	}
 
 	/**
+	 * Adds a {@link ZonePreferenceServiceInstanceListSupplier} to the
+	 * {@link ServiceInstanceListSupplier} hierarchy.
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withRequestBasedStickySession() {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			return new RequestBasedStickySessionServiceInstanceListSupplier(delegate, properties);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
 	 * If {@link LoadBalancerCacheManager} is available in the context, wraps created
 	 * {@link ServiceInstanceListSupplier} hierarchy with a
 	 * {@link CachingServiceInstanceListSupplier} instance to provide a caching mechanism
