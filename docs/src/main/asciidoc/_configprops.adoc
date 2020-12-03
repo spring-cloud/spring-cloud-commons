@@ -46,6 +46,8 @@
 |spring.cloud.loadbalancer.retry.retryable-status-codes |  | A {@link Set} of status codes that should trigger a retry.
 |spring.cloud.loadbalancer.ribbon.enabled | `true` | Causes `RibbonLoadBalancerClient` to be used by default.
 |spring.cloud.loadbalancer.service-discovery.timeout |  | String representation of Duration of the timeout for calls to service discovery.
+|spring.cloud.loadbalancer.sticky-session.add-service-instance-cookie | `false` | Indicates whether a cookie with the newly selected instance should be added by SC LoadBalancer.
+|spring.cloud.loadbalancer.sticky-session.instance-id-cookie-name | `sc-lb-instance-id` | The name of the cookie holding the preferred instance id.
 |spring.cloud.loadbalancer.zone |  | Spring Cloud LoadBalancer zone.
 |spring.cloud.refresh.enabled | `true` | Enables autoconfiguration for the refresh scope and associated features.
 |spring.cloud.refresh.extra-refreshable | `true` | Additional class names for beans to post process into refresh scope.

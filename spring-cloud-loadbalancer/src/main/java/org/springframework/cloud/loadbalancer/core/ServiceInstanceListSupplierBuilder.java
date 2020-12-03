@@ -146,7 +146,7 @@ public final class ServiceInstanceListSupplierBuilder {
 	}
 
 	/**
-	 * Adds a {@link ZonePreferenceServiceInstanceListSupplier} to the
+	 * Adds a {@link RequestBasedStickySessionServiceInstanceListSupplier} to the
 	 * {@link ServiceInstanceListSupplier} hierarchy.
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */

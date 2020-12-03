@@ -33,10 +33,11 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
 /**
- * A session cookie based implementation of {@link ReactorServiceInstanceLoadBalancer}
- * that ensures requests from the same client are routed to the same server.
+ * A session cookie based implementation of {@link ServiceInstanceListSupplier} that gives
+ * preference to the instance with an id specified in a request cookie.
  *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 public class RequestBasedStickySessionServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 

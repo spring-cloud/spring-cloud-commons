@@ -52,8 +52,7 @@ public final class ExchangeFilterFunctionUtils {
 							&& addServiceInstanceCookie) {
 						cookies.add(instanceIdCookieName, serviceInstance.getInstanceId());
 					}
-				})
-				.attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
+				}).attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
 	}
 
 	static String serviceInstanceUnavailableMessage(String serviceId) {
