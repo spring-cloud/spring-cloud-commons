@@ -48,8 +48,11 @@ public final class ExchangeFilterFunctionUtils {
 		return ClientRequest.create(request.method(), LoadBalancerUriTools.reconstructURI(serviceInstance, originalUrl))
 				.headers(headers -> headers.addAll(request.headers())).cookies(cookies -> {
 					cookies.addAll(request.cookies());
-					// TODO: make opt-in
-					cookies.add(instanceIdCookieName, serviceInstance.getInstanceId());
+					if (!(instanceIdCookieName == null || instanceIdCookieName
+							.length() == 0)) {
+						cookies.add(instanceIdCookieName, serviceInstance
+								.getInstanceId());
+					}
 				}).attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
 	}
 
