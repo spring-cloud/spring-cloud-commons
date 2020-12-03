@@ -30,6 +30,7 @@ import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSup
 import org.springframework.cloud.loadbalancer.core.DelegatingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.HealthCheckServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.RequestBasedStickySessionServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ZonePreferenceServiceInstanceListSupplier;
@@ -105,6 +106,19 @@ class LoadBalancerClientConfigurationTests {
 				.withPropertyValues("spring.cloud.loadbalancer.configurations=health-check").run(context -> {
 					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 					then(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
+					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
+							.getDelegate();
+					then(delegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+				});
+	}
+
+	@Test
+	void shouldInstantiateRequestBasedStickySessionServiceInstanceListSupplierTests() {
+		reactiveDiscoveryClientRunner.withUserConfiguration(TestConfig.class)
+				.withPropertyValues("spring.cloud.loadbalancer.configurations=request-based-sticky-session")
+				.run(context -> {
+					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+					then(supplier).isInstanceOf(RequestBasedStickySessionServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
 							.getDelegate();
 					then(delegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
