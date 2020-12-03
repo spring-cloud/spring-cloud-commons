@@ -53,7 +53,7 @@ public class LoadBalancerProperties {
 	 */
 	private Retry retry = new Retry();
 
-	private String instanceIdCookieName = "sc-lb-instance-id";
+	private StickySession stickySession = new StickySession();
 
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
@@ -79,12 +79,36 @@ public class LoadBalancerProperties {
 		this.retry = retry;
 	}
 
-	public String getInstanceIdCookieName() {
-		return instanceIdCookieName;
+	public StickySession getStickySession() {
+		return stickySession;
 	}
 
-	public void setInstanceIdCookieName(String instanceIdCookieName) {
-		this.instanceIdCookieName = instanceIdCookieName;
+	public void setStickySession(StickySession stickySession) {
+		this.stickySession = stickySession;
+	}
+
+	public static class StickySession {
+
+		private String instanceIdCookieName = "sc-lb-instance-id";
+
+		private boolean addServiceInstanceCookie = false;
+
+		public String getInstanceIdCookieName() {
+			return instanceIdCookieName;
+		}
+
+		public void setInstanceIdCookieName(String instanceIdCookieName) {
+			this.instanceIdCookieName = instanceIdCookieName;
+		}
+
+		public boolean isAddServiceInstanceCookie() {
+			return addServiceInstanceCookie;
+		}
+
+		public void setAddServiceInstanceCookie(boolean addServiceInstanceCookie) {
+			this.addServiceInstanceCookie = addServiceInstanceCookie;
+		}
+
 	}
 
 	public static class HealthCheck {

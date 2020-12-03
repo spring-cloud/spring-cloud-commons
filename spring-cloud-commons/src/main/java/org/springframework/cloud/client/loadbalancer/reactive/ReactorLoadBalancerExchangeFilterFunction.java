@@ -100,8 +100,10 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 				LOG.debug(String.format("LoadBalancer has retrieved the instance for service %s: %s", serviceId,
 						instance.getUri()));
 			}
+			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
-					properties.getInstanceIdCookieName());
+					stickySessionProperties.getInstanceIdCookieName(),
+					stickySessionProperties.isAddServiceInstanceCookie());
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(
 							lifecycle -> lifecycle.onComplete(new CompletionContext<ClientResponse, ServiceInstance>(

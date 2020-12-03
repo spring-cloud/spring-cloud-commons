@@ -73,7 +73,7 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 	@Test
 	void shouldReturnInstanceBasedOnCookieFromClientRequest() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add(properties.getInstanceIdCookieName(), "test-1");
+		headers.add(properties.getStickySession().getInstanceIdCookieName(), "test-1");
 		when(clientRequest.cookies()).thenReturn(headers);
 		Request<ClientRequestContext> request = new DefaultRequest<>(new ClientRequestContext(clientRequest));
 
@@ -86,7 +86,7 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 	@Test
 	void shouldReturnAllDelegateInstancesIfInstanceBasedOnCookieFromClientRequestNotFound() {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add(properties.getInstanceIdCookieName(), "test-4");
+		headers.add(properties.getStickySession().getInstanceIdCookieName(), "test-4");
 		when(clientRequest.cookies()).thenReturn(headers);
 		Request<ClientRequestContext> request = new DefaultRequest<>(new ClientRequestContext(clientRequest));
 
@@ -108,8 +108,8 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 	@Test
 	void shouldReturnInstanceBasedOnCookieFromServerHttpRequest() {
 		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
-		cookies.add(properties.getInstanceIdCookieName(),
-				new HttpCookie(properties.getInstanceIdCookieName(), "test-1"));
+		cookies.add(properties.getStickySession().getInstanceIdCookieName(),
+				new HttpCookie(properties.getStickySession().getInstanceIdCookieName(), "test-1"));
 		when(serverHttpRequest.getCookies()).thenReturn(cookies);
 		Request<ServerHttpRequestContext> request = new DefaultRequest<>(
 				new ServerHttpRequestContext(serverHttpRequest));
@@ -123,8 +123,8 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 	@Test
 	void shouldReturnAllDelegateInstancesIfInstanceBasedOnCookieFromServerHttpRequestNotFound() {
 		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
-		cookies.add(properties.getInstanceIdCookieName(),
-				new HttpCookie(properties.getInstanceIdCookieName(), "test-4"));
+		cookies.add(properties.getStickySession().getInstanceIdCookieName(),
+				new HttpCookie(properties.getStickySession().getInstanceIdCookieName(), "test-4"));
 		when(serverHttpRequest.getCookies()).thenReturn(cookies);
 		Request<ServerHttpRequestContext> request = new DefaultRequest<>(
 				new ServerHttpRequestContext(serverHttpRequest));

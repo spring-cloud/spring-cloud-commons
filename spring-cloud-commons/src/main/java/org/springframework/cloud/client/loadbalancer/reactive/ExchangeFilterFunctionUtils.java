@@ -43,15 +43,17 @@ public final class ExchangeFilterFunctionUtils {
 	}
 
 	static ClientRequest buildClientRequest(ClientRequest request, ServiceInstance serviceInstance,
-			String instanceIdCookieName) {
+			String instanceIdCookieName, boolean addServiceInstanceCookie) {
 		URI originalUrl = request.url();
 		return ClientRequest.create(request.method(), LoadBalancerUriTools.reconstructURI(serviceInstance, originalUrl))
 				.headers(headers -> headers.addAll(request.headers())).cookies(cookies -> {
 					cookies.addAll(request.cookies());
-					if (!(instanceIdCookieName == null || instanceIdCookieName.length() == 0)) {
+					if (!(instanceIdCookieName == null || instanceIdCookieName.length() == 0)
+							&& addServiceInstanceCookie) {
 						cookies.add(instanceIdCookieName, serviceInstance.getInstanceId());
 					}
-				}).attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
+				})
+				.attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
 	}
 
 	static String serviceInstanceUnavailableMessage(String serviceId) {

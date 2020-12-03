@@ -63,7 +63,7 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Flux<List<ServiceInstance>> get(Request request) {
-		String instanceIdCookieName = properties.getInstanceIdCookieName();
+		String instanceIdCookieName = properties.getStickySession().getInstanceIdCookieName();
 		Object context = request.getContext();
 		if ((context instanceof ClientRequestContext)) {
 			ClientRequest originalRequest = ((ClientRequestContext) context).getClientRequest();
