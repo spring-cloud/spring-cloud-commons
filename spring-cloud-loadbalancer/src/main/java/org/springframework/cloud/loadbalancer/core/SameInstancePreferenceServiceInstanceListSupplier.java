@@ -73,7 +73,8 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends
 
 	@Override
 	public void selectedServiceInstance(ServiceInstance serviceInstance) {
-		if (!previouslyReturnedInstance.equals(serviceInstance)) {
+		if (previouslyReturnedInstance == null
+				|| !previouslyReturnedInstance.equals(serviceInstance)) {
 			previouslyReturnedInstance = serviceInstance;
 		}
 	}
