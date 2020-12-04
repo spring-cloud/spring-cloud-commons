@@ -30,6 +30,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
+ * Tests for {@link SameInstancePreferenceServiceInstanceListSupplier}.
+ *
  * @author Olga Maciaszek-Sharma
  */
 class SameInstancePreferenceServiceInstanceListSupplierTests {

@@ -26,7 +26,11 @@ import reactor.core.publisher.Flux;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * An implementation of {@link ServiceInstanceListSupplier} that selects the previously
+ * chosen instance if it's available.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 public class SameInstancePreferenceServiceInstanceListSupplier extends
 		DelegatingServiceInstanceListSupplier implements SelectedInstanceCallback {
