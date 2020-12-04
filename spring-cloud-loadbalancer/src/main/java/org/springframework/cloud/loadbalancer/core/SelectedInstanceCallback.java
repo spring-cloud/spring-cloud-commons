@@ -23,6 +23,7 @@ import org.springframework.cloud.client.ServiceInstance;
  * LoadBalancer.
  *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.7
  */
 public interface SelectedInstanceCallback {
 
