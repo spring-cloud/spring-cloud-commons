@@ -146,6 +146,17 @@ public class LoadBalancerClientConfiguration {
 					.build(context);
 		}
 
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "request-based-sticky-session")
+		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withRequestBasedStickySession()
+					.build(context);
+		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
