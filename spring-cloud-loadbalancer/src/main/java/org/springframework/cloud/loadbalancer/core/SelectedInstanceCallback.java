@@ -19,7 +19,8 @@ package org.springframework.cloud.loadbalancer.core;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A callback interface that allows to pass the selected service instance data from the LoadBalancer.
+ * A callback interface that allows to pass the selected service instance data from the
+ * LoadBalancer.
  *
  * @author Olga Maciaszek-Sharma
  */

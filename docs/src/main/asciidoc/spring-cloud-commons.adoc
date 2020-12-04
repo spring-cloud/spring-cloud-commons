@@ -997,9 +997,9 @@ WARNING: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism 
 
 === Same instance preference for LoadBalancer
 
-It is possible to set up the LoadBalancer in such a way that it will prefer the instance that was previously selected, if that instance is available.
+You can set up the LoadBalancer in such a way that it prefers the instance that was previously selected, if that instance is available.
 
-For that, you will need to use the `SameInstancePreferenceServiceInstanceListSupplier`. It can be configured either by setting the value of `spring.cloud.loadbalancer.configurations` to `same-instance-preference` or by providing your own `ServiceInstanceListSupplier` bean, for example:
+For that, you need to use `SameInstancePreferenceServiceInstanceListSupplier`. You can configure it either by setting the value of `spring.cloud.loadbalancer.configurations` to `same-instance-preference` or by providing your own `ServiceInstanceListSupplier` bean -- for example:
 
 [source,java,indent=0]
 ----
@@ -1016,7 +1016,7 @@ public class CustomLoadBalancerConfiguration {
 	}
 ----
 
-TIP: This is also a replacement for Zookeeper StickyRule.
+TIP: This is also a replacement for Zookeeper `StickyRule`.
 
 [[spring-cloud-loadbalancer-starter]]
 === Spring Cloud LoadBalancer Starter
