@@ -115,11 +115,26 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 		if (serviceInstanceListSupplierProvider != null) {
 			ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
 					.getIfAvailable(NoopServiceInstanceListSupplier::new);
-			return supplier.get().next().map(this::getInstanceResponse);
+			return supplier.get().next()
+					.map(serviceInstances -> processInstanceResponse(supplier,
+							serviceInstances));
 		}
 		ServiceInstanceSupplier supplier = this.serviceInstanceSupplier
 				.getIfAvailable(NoopServiceInstanceSupplier::new);
 		return supplier.get().collectList().map(this::getInstanceResponse);
+	}
+
+	private Response<ServiceInstance> processInstanceResponse(
+			ServiceInstanceListSupplier supplier,
+			List<ServiceInstance> serviceInstances) {
+		Response<ServiceInstance> serviceInstanceResponse = getInstanceResponse(
+				serviceInstances);
+		if (supplier instanceof SelectedInstanceCallback
+				&& serviceInstanceResponse.hasServer()) {
+			((SelectedInstanceCallback) supplier)
+					.selectedServiceInstance(serviceInstanceResponse.getServer());
+		}
+		return serviceInstanceResponse;
 	}
 
 	private Response<ServiceInstance> getInstanceResponse(

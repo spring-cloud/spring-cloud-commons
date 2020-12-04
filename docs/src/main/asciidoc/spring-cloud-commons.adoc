@@ -995,6 +995,28 @@ public class CustomLoadBalancerConfiguration {
 
 WARNING: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`. Therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
 
+=== Same instance preference for LoadBalancer
+
+You can set up the LoadBalancer in such a way that it prefers the instance that was previously selected, if that instance is available.
+
+For that, you need to use `SameInstancePreferenceServiceInstanceListSupplier`. You can configure it either by setting the value of `spring.cloud.loadbalancer.configurations` to `same-instance-preference` or by providing your own `ServiceInstanceListSupplier` bean -- for example:
+
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withSameInstancePreference()
+					.build(context);
+	    }
+	}
+----
+
+TIP: This is also a replacement for Zookeeper `StickyRule`.
 
 [[spring-cloud-loadbalancer-starter]]
 === Spring Cloud LoadBalancer Starter
