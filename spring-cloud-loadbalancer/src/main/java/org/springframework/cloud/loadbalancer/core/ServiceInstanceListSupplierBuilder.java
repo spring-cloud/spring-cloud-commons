@@ -131,7 +131,9 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withSameInstancePreference() {
-		DelegateCreator creator = (context, delegate) -> new SameInstancePreferenceServiceInstanceListSupplier(delegate);
+		DelegateCreator creator = (context,
+				delegate) -> new SameInstancePreferenceServiceInstanceListSupplier(
+						delegate);
 		this.creators.add(creator);
 		return this;
 	}

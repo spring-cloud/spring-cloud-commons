@@ -104,8 +104,8 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
 		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
-				havingValue = "prefer-same-instance")
-		public ServiceInstanceListSupplier preferSameInstanceServiceInstanceListSupplier(
+				havingValue = "same-instance-preference")
+		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withDiscoveryClient()
 					.withSameInstancePreference().build(context);
@@ -172,7 +172,7 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnBean(DiscoveryClient.class)
 		@ConditionalOnMissingBean
 		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
-				havingValue = "prefer-same-instance")
+				havingValue = "same-instance-preference")
 		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient()
