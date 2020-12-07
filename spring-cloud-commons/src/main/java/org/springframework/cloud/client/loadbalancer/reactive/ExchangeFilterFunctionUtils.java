@@ -19,6 +19,8 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.net.URI;
 import java.util.Map;
 
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 
@@ -40,10 +42,17 @@ public final class ExchangeFilterFunctionUtils {
 		return hintPropertyValue != null ? hintPropertyValue : defaultHint;
 	}
 
-	static ClientRequest buildClientRequest(ClientRequest request, URI uri) {
-		return ClientRequest.create(request.method(), uri).headers(headers -> headers.addAll(request.headers()))
-				.cookies(cookies -> cookies.addAll(request.cookies()))
-				.attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
+	static ClientRequest buildClientRequest(ClientRequest request, ServiceInstance serviceInstance,
+			String instanceIdCookieName, boolean addServiceInstanceCookie) {
+		URI originalUrl = request.url();
+		return ClientRequest.create(request.method(), LoadBalancerUriTools.reconstructURI(serviceInstance, originalUrl))
+				.headers(headers -> headers.addAll(request.headers())).cookies(cookies -> {
+					cookies.addAll(request.cookies());
+					if (!(instanceIdCookieName == null || instanceIdCookieName.length() == 0)
+							&& addServiceInstanceCookie) {
+						cookies.add(instanceIdCookieName, serviceInstance.getInstanceId());
+					}
+				}).attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
 	}
 
 	static String serviceInstanceUnavailableMessage(String serviceId) {

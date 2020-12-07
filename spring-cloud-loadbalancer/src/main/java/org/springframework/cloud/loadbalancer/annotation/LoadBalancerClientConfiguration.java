@@ -102,6 +102,17 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
 		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "request-based-sticky-session")
+		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withRequestBasedStickySession()
+					.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
 				havingValue = "same-instance-preference")
 		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
@@ -143,6 +154,17 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withHealthChecks()
+					.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "request-based-sticky-session")
+		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withRequestBasedStickySession()
 					.build(context);
 		}
 

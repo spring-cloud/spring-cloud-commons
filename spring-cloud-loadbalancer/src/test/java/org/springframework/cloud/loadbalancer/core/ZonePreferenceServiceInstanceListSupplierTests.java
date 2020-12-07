@@ -41,23 +41,23 @@ import static org.mockito.Mockito.when;
  */
 class ZonePreferenceServiceInstanceListSupplierTests {
 
-	private DiscoveryClientServiceInstanceListSupplier delegate = mock(
+	private final DiscoveryClientServiceInstanceListSupplier delegate = mock(
 			DiscoveryClientServiceInstanceListSupplier.class);
 
-	private LoadBalancerZoneConfig zoneConfig = new LoadBalancerZoneConfig(null);
+	private final LoadBalancerZoneConfig zoneConfig = new LoadBalancerZoneConfig(null);
 
-	private ZonePreferenceServiceInstanceListSupplier supplier = new ZonePreferenceServiceInstanceListSupplier(delegate,
-			zoneConfig);
+	private final ZonePreferenceServiceInstanceListSupplier supplier = new ZonePreferenceServiceInstanceListSupplier(
+			delegate, zoneConfig);
 
-	private ServiceInstance first = serviceInstance("test-1", buildZoneMetadata("zone1"));
+	private final ServiceInstance first = serviceInstance("test-1", buildZoneMetadata("zone1"));
 
-	private ServiceInstance second = serviceInstance("test-2", buildZoneMetadata("zone1"));
+	private final ServiceInstance second = serviceInstance("test-2", buildZoneMetadata("zone1"));
 
-	private ServiceInstance third = serviceInstance("test-3", buildZoneMetadata("zone2"));
+	private final ServiceInstance third = serviceInstance("test-3", buildZoneMetadata("zone2"));
 
-	private ServiceInstance fourth = serviceInstance("test-4", buildZoneMetadata("zone3"));
+	private final ServiceInstance fourth = serviceInstance("test-4", buildZoneMetadata("zone3"));
 
-	private ServiceInstance fifth = serviceInstance("test-5", buildZoneMetadata(null));
+	private final ServiceInstance fifth = serviceInstance("test-5", buildZoneMetadata(null));
 
 	@Test
 	void shouldFilterInstancesByZone() {
@@ -103,7 +103,7 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 	}
 
 	private DefaultServiceInstance serviceInstance(String instanceId, Map<String, String> metadata) {
-		return new DefaultServiceInstance("test", instanceId, "http://test.test", 9080, false, metadata);
+		return new DefaultServiceInstance(instanceId, "test", "http://test.test", 9080, false, metadata);
 	}
 
 	private Map<String, String> buildZoneMetadata(String zone) {

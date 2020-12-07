@@ -46,7 +46,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 
-import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.reconstructURI;
 import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionUtils.buildClientRequest;
 import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionUtils.getHint;
 import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionUtils.serviceInstanceUnavailableMessage;
@@ -123,14 +122,17 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 				LOG.debug(String.format("LoadBalancer has retrieved the instance for service %s: %s", serviceId,
 						instance.getUri()));
 			}
-			ClientRequest newRequest = buildClientRequest(clientRequest, reconstructURI(instance, originalUrl));
+			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
+			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
+					stickySessionProperties.getInstanceIdCookieName(),
+					stickySessionProperties.isAddServiceInstanceCookie());
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(
 							lifecycle -> lifecycle.onComplete(new CompletionContext<ClientResponse, ServiceInstance>(
 									CompletionContext.Status.FAILED, throwable, lbResponse))))
 					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle.onComplete(new CompletionContext<ClientResponse, ServiceInstance>(
-									CompletionContext.Status.SUCCESS, lbResponse, clientResponse))))
+							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
+									lbResponse, clientResponse))))
 					.map(clientResponse -> {
 						loadBalancerRetryContext.setClientResponse(clientResponse);
 						if (shouldRetrySameServiceInstance(loadBalancerRetryContext)) {

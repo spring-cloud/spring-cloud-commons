@@ -993,6 +993,32 @@ public class CustomLoadBalancerConfiguration {
 
 TIP: This is also a replacement for Zookeeper `StickyRule`.
 
+=== Request-based Sticky Session for LoadBalancer
+
+You can set up the LoadBalancer in such a way that it prefers the instance with `instanceId` provided in a request cookie. We currently support this if the request is being passed to the LoadBalancer through either `ClientRequestContext` or `ServerHttpRequestContext`, which are used by the SC LoadBalancer exchange filter functions and filters.
+
+For that, you need to use the `RequestBasedStickySessionServiceInstanceListSupplier`. You can configure it either by setting the value of `spring.cloud.loadbalancer.configurations` to `request-based-sticky-session` or by providing your own `ServiceInstanceListSupplier` bean -- for example:
+
+[[health-check-based-custom-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withRequestBasedStickySession()
+					.build(context);
+	    }
+	}
+----
+
+For that functionality, it is useful to have the selected service instance (which can be different from the one in the original request cookie if that one is not available) to be updated before sending the request forward. To do that, set the value of `spring.cloud.loadbalancer.sticky-session.add-service-instance-cookie` to `true`.
+
+By default, the name of the cookie is `sc-lb-instance-id`. You can modify it by changing the value of the `spring.cloud.loadbalancer.instance-id-cookie-name` property.
+
 [[spring-cloud-loadbalancer-hints]]
 === Spring Cloud LoadBalancer Hints
 
