@@ -109,6 +109,17 @@ public class LoadBalancerClientConfiguration {
 					.build(context);
 		}
 
+		@Bean
+		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "same-instance-preference")
+		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withSameInstancePreference()
+					.build(context);
+		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -154,6 +165,17 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withRequestBasedStickySession()
+					.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
+				havingValue = "same-instance-preference")
+		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withSameInstancePreference()
 					.build(context);
 		}
 
