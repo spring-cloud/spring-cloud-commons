@@ -24,13 +24,10 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.ClientRequestContext;
 import org.springframework.cloud.client.loadbalancer.Request;
-import org.springframework.cloud.client.loadbalancer.ServerHttpRequestContext;
+import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.util.MultiValueMap;
 
 /**
  * A session cookie based implementation of {@link ServiceInstanceListSupplier} that gives
@@ -66,10 +63,13 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 	public Flux<List<ServiceInstance>> get(Request request) {
 		String instanceIdCookieName = properties.getStickySession().getInstanceIdCookieName();
 		Object context = request.getContext();
-		if ((context instanceof ClientRequestContext)) {
-			ClientRequest originalRequest = ((ClientRequestContext) context).getClientRequest();
+		if ((context instanceof RequestDataContext)) {
+			MultiValueMap<String, String> cookies = ((RequestDataContext) context).getClientRequest().getCookies();
+			if (cookies == null) {
+				return get();
+			}
 			// We expect there to be one value in this cookie
-			String cookie = originalRequest.cookies().getFirst(instanceIdCookieName);
+			String cookie = cookies.getFirst(instanceIdCookieName);
 			if (cookie != null) {
 				return get().map(serviceInstances -> selectInstance(serviceInstances, cookie));
 			}
@@ -78,23 +78,8 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 			}
 			return get();
 		}
-		if ((context instanceof ServerHttpRequestContext)) {
-			ServerHttpRequest originalRequest = ((ServerHttpRequestContext) context).getClientRequest();
-			HttpCookie cookie = originalRequest.getCookies().getFirst(instanceIdCookieName);
-			if (cookie != null) {
-				return get().map(serviceInstances -> selectInstance(serviceInstances, cookie.getValue()));
-			}
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Cookie not found. Returning all instances returned by delegate.");
-			}
-			return get();
-		}
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Searching for instances based on cookie not supported for ClientRequestContext type."
-					+ " Returning all instances returned by delegate.");
-		}
-		// If no cookie is available, we return all the instances provided by the
-		// delegate.
+		// If the object type is not RequestData, we return all the instances provided by
+		// the delegate.
 		return get();
 	}
 

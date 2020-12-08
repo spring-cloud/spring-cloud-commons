@@ -24,14 +24,16 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.ClientRequestContext;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
 import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.RequestData;
+import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -78,10 +80,10 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
 						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
-						ClientRequestContext.class, ClientResponse.class, ServiceInstance.class);
+						RequestDataContext.class, ResponseData.class, ServiceInstance.class);
 		String hint = getHint(serviceId, properties.getHint());
-		DefaultRequest<ClientRequestContext> lbRequest = new DefaultRequest<>(
-				new ClientRequestContext(clientRequest, hint));
+		RequestData requestData = new RequestData(clientRequest);
+		DefaultRequest<RequestDataContext> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData, hint));
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		return choose(serviceId, lbRequest).flatMap(lbResponse -> {
 			ServiceInstance instance = lbResponse.getServer();
@@ -106,15 +108,15 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 					stickySessionProperties.isAddServiceInstanceCookie());
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle.onComplete(new CompletionContext<ClientResponse, ServiceInstance>(
+							lifecycle -> lifecycle.onComplete(new CompletionContext<ResponseData, ServiceInstance>(
 									CompletionContext.Status.FAILED, throwable, lbResponse))))
 					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
 							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-									lbResponse, clientResponse))));
+									lbResponse, new ResponseData(clientResponse, requestData)))));
 		});
 	}
 
-	protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<ClientRequestContext> request) {
+	protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<RequestDataContext> request) {
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory.getInstance(serviceId);
 		if (loadBalancer == null) {
 			return Mono.just(new EmptyResponse());

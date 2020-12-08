@@ -25,17 +25,14 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.ClientRequestContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.Request;
-import org.springframework.cloud.client.loadbalancer.ServerHttpRequestContext;
+import org.springframework.cloud.client.loadbalancer.RequestData;
+import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,7 +74,8 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(properties.getStickySession().getInstanceIdCookieName(), "test-1");
 		when(clientRequest.cookies()).thenReturn(headers);
-		Request<ClientRequestContext> request = new DefaultRequest<>(new ClientRequestContext(clientRequest));
+		Request<RequestDataContext> request = new DefaultRequest<>(
+				new RequestDataContext(new RequestData(clientRequest)));
 
 		List<ServiceInstance> serviceInstances = supplier.get(request).blockFirst();
 
@@ -90,7 +88,8 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(properties.getStickySession().getInstanceIdCookieName(), "test-4");
 		when(clientRequest.cookies()).thenReturn(headers);
-		Request<ClientRequestContext> request = new DefaultRequest<>(new ClientRequestContext(clientRequest));
+		Request<RequestDataContext> request = new DefaultRequest<>(
+				new RequestDataContext(new RequestData(clientRequest)));
 
 		List<ServiceInstance> serviceInstances = supplier.get(request).blockFirst();
 
@@ -100,48 +99,8 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 	@Test
 	void shouldReturnAllInstancesFromDelegateIfClientRequestHasNoCookie() {
 		when(clientRequest.cookies()).thenReturn(new HttpHeaders());
-		Request<ClientRequestContext> request = new DefaultRequest<>(new ClientRequestContext(clientRequest));
-
-		List<ServiceInstance> serviceInstances = supplier.get(request).blockFirst();
-
-		assertThat(serviceInstances).hasSize(3);
-	}
-
-	@Test
-	void shouldReturnInstanceBasedOnCookieFromServerHttpRequest() {
-		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
-		cookies.add(properties.getStickySession().getInstanceIdCookieName(),
-				new HttpCookie(properties.getStickySession().getInstanceIdCookieName(), "test-1"));
-		when(serverHttpRequest.getCookies()).thenReturn(cookies);
-		Request<ServerHttpRequestContext> request = new DefaultRequest<>(
-				new ServerHttpRequestContext(serverHttpRequest));
-
-		List<ServiceInstance> serviceInstances = supplier.get(request).blockFirst();
-
-		assertThat(serviceInstances).hasSize(1);
-		assertThat(serviceInstances.get(0).getInstanceId()).isEqualTo("test-1");
-	}
-
-	@Test
-	void shouldReturnAllDelegateInstancesIfInstanceBasedOnCookieFromServerHttpRequestNotFound() {
-		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
-		cookies.add(properties.getStickySession().getInstanceIdCookieName(),
-				new HttpCookie(properties.getStickySession().getInstanceIdCookieName(), "test-4"));
-		when(serverHttpRequest.getCookies()).thenReturn(cookies);
-		Request<ServerHttpRequestContext> request = new DefaultRequest<>(
-				new ServerHttpRequestContext(serverHttpRequest));
-
-		List<ServiceInstance> serviceInstances = supplier.get(request).blockFirst();
-
-		assertThat(serviceInstances).hasSize(3);
-	}
-
-	@Test
-	void shouldReturnAllInstancesFromDelegateIfServerHttpRequestHasNoCookie() {
-		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
-		when(serverHttpRequest.getCookies()).thenReturn(cookies);
-		Request<ServerHttpRequestContext> request = new DefaultRequest<>(
-				new ServerHttpRequestContext(serverHttpRequest));
+		Request<RequestDataContext> request = new DefaultRequest<>(
+				new RequestDataContext(new RequestData(clientRequest)));
 
 		List<ServiceInstance> serviceInstances = supplier.get(request).blockFirst();
 
