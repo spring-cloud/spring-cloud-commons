@@ -87,7 +87,7 @@ public class RequestData {
 				if (splitCookie.length < 2) {
 					return;
 				}
-				newCookies.add(splitCookie[0], splitCookie[1]);
+				newCookies.put(splitCookie[0], Collections.singletonList(splitCookie[1]));
 			});
 		}
 		return newCookies;
