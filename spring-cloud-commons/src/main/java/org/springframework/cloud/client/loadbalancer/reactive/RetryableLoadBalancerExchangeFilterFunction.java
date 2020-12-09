@@ -31,14 +31,16 @@ import reactor.util.retry.Retry;
 import reactor.util.retry.RetrySpec;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.ClientRequestContext;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
 import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.RequestData;
+import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -99,10 +101,11 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
 						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
-						ClientRequestContext.class, ClientResponse.class, ServiceInstance.class);
+						RequestDataContext.class, ResponseData.class, ServiceInstance.class);
 		String hint = getHint(serviceId, properties.getHint());
+		RequestData requestData = new RequestData(clientRequest);
 		DefaultRequest<RetryableRequestContext> lbRequest = new DefaultRequest<>(
-				new RetryableRequestContext(null, clientRequest, hint));
+				new RetryableRequestContext(null, requestData, hint));
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		return Mono.defer(() -> choose(serviceId, lbRequest).flatMap(lbResponse -> {
 			ServiceInstance instance = lbResponse.getServer();
@@ -132,7 +135,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 									CompletionContext.Status.FAILED, throwable, lbResponse))))
 					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
 							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-									lbResponse, clientResponse))))
+									lbResponse, new ResponseData(clientResponse, requestData)))))
 					.map(clientResponse -> {
 						loadBalancerRetryContext.setClientResponse(clientResponse);
 						if (shouldRetrySameServiceInstance(loadBalancerRetryContext)) {

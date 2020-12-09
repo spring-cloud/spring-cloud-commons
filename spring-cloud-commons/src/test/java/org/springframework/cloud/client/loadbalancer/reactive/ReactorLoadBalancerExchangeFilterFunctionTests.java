@@ -42,6 +42,7 @@ import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -94,8 +95,8 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 
 	@Test
 	void correctResponseReturnedForExistingHostAndInstancePresent() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice").filter(loadBalancerFunction)
+				.build().get().uri("/hello").exchange().block();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
 	}
@@ -118,7 +119,7 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 	@Test
 	void exceptionNotThrownWhenFactoryReturnsNullLifecycleProcessorsMap() {
 		assertThatCode(() -> WebClient.builder().baseUrl("http://serviceWithNoLifecycleProcessors")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block())
+				.filter(loadBalancerFunction).build().get().uri("/hello").exchange().block())
 						.doesNotThrowAnyException();
 	}
 
@@ -127,8 +128,8 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		final String callbackTestHint = "callbackTestHint";
 		loadBalancerProperties.getHint().put("testservice", "callbackTestHint");
 		final String result = "callbackTestResult";
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
-				.filter(this.loadBalancerFunction).build().get().uri("/callback").exchange().block();
+		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice").filter(loadBalancerFunction)
+				.build().get().uri("/callback").exchange().block();
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
 				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
@@ -140,9 +141,9 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains(callbackTestHint);
 		assertThat(anotherLifecycleLogRequests)
-				.extracting(completionContext -> ((ClientResponse) completionContext.getClientResponse())
-						.bodyToMono(String.class).block())
-				.contains(result);
+				.extracting(completionContext -> ((ResponseData) completionContext.getClientResponse()).getRequestData()
+						.getUrl().toString())
+				.contains("http://testservice/callback");
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

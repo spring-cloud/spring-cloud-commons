@@ -44,7 +44,9 @@ import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -112,9 +114,9 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains(callbackTestHint);
 		assertThat(anotherLifecycleLogRequests)
-				.extracting(completionContext -> ((ClientResponse) completionContext.getClientResponse())
-						.bodyToMono(String.class).block())
-				.contains(result);
+				.extracting(completionContext -> ((ResponseData) completionContext.getClientResponse()).getRequestData()
+						.getHttpMethod())
+				.contains(HttpMethod.GET);
 	}
 
 	@Test

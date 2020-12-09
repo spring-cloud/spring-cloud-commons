@@ -16,23 +16,30 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpMethod;
 
 /**
+ * A {@link RequestData}-based {@link DefaultRequestContext}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
-public class HttpRequestContext extends DefaultRequestContext {
+public class RequestDataContext extends DefaultRequestContext {
 
-	public HttpRequestContext(HttpRequest httpRequest) {
-		this(httpRequest, "default");
+	public RequestDataContext(RequestData requestData) {
+		this(requestData, "default");
 	}
 
-	public HttpRequestContext(HttpRequest httpRequest, String hint) {
-		super(httpRequest, hint);
+	public RequestDataContext(RequestData requestData, String hint) {
+		super(requestData, hint);
 	}
 
-	public HttpRequest getClientRequest() {
-		return (HttpRequest) super.getClientRequest();
+	public RequestData getClientRequest() {
+		return (RequestData) super.getClientRequest();
+	}
+
+	public HttpMethod method() {
+		return ((RequestData) super.getClientRequest()).getHttpMethod();
 	}
 
 }
