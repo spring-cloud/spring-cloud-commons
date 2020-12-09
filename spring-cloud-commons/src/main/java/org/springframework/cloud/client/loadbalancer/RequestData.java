@@ -17,14 +17,18 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
@@ -62,6 +66,31 @@ public class RequestData {
 
 	public RequestData(HttpRequest request) {
 		this(request.getMethod(), request.getURI(), request.getHeaders(), null, new HashMap<>());
+	}
+
+	public RequestData(ServerHttpRequest request) {
+		this(request.getMethod(), request.getURI(), request.getHeaders(),
+				buildCookies(request.getCookies(), request.getHeaders()), new HashMap<>());
+	}
+
+	private static MultiValueMap<String, String> buildCookies(MultiValueMap<String, HttpCookie> cookies,
+			HttpHeaders headers) {
+		HttpHeaders newCookies = new HttpHeaders();
+		if (cookies != null) {
+			cookies.forEach((key, value) -> value
+					.forEach(cookie -> newCookies.put(cookie.getName(), Collections.singletonList(cookie.getValue()))));
+		}
+		List<String> cookiesFromHeaders = headers.get("cookie");
+		if (cookiesFromHeaders != null) {
+			cookiesFromHeaders.forEach(cookie -> {
+				String[] splitCookie = cookie.split("=");
+				if (splitCookie.length < 2) {
+					return;
+				}
+				newCookies.put(splitCookie[0], Collections.singletonList(splitCookie[1]));
+			});
+		}
+		return newCookies;
 	}
 
 	public HttpMethod getHttpMethod() {
