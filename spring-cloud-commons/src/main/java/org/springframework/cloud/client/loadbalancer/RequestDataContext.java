@@ -26,12 +26,12 @@ import org.springframework.http.HttpMethod;
  */
 public class RequestDataContext extends DefaultRequestContext {
 
-	public RequestDataContext(RequestData clientRequest) {
-		this(clientRequest, "default");
+	public RequestDataContext(RequestData requestData) {
+		this(requestData, "default");
 	}
 
-	public RequestDataContext(RequestData clientRequest, String hint) {
-		super(clientRequest, hint);
+	public RequestDataContext(RequestData requestData, String hint) {
+		super(requestData, hint);
 	}
 
 	public RequestData getClientRequest() {
