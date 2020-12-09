@@ -17,14 +17,17 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
@@ -57,11 +60,26 @@ public class RequestData {
 	}
 
 	public RequestData(ClientRequest request) {
-		this(request.method(), request.url(), request.headers(), request.cookies(), request.attributes());
+		this(request.method(), request.url(), request.headers(), request
+				.cookies(), request.attributes());
 	}
 
 	public RequestData(HttpRequest request) {
-		this(request.getMethod(), request.getURI(), request.getHeaders(), null, new HashMap<>());
+		this(request.getMethod(), request.getURI(), request
+				.getHeaders(), null, new HashMap<>());
+	}
+
+	public RequestData(ServerHttpRequest request) {
+		this(request.getMethod(), request.getURI(), request
+				.getHeaders(), buildCookies(request.getCookies()), new HashMap<>());
+	}
+
+	private static MultiValueMap<String, String> buildCookies(MultiValueMap<String, HttpCookie> cookies) {
+		HttpHeaders newCookies = new HttpHeaders();
+		cookies.forEach((key, value) -> value
+				.forEach(cookie -> newCookies.put(cookie.getName(),
+						Collections.singletonList(cookie.getValue()))));
+		return newCookies;
 	}
 
 	public HttpMethod getHttpMethod() {

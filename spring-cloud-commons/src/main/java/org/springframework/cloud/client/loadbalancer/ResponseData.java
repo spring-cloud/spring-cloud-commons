@@ -22,6 +22,7 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
@@ -51,10 +52,13 @@ public class ResponseData {
 	}
 
 	public ResponseData(ClientResponse response, RequestData requestData) {
-		httpStatus = response.statusCode();
-		headers = response.headers().asHttpHeaders();
-		cookies = response.cookies();
-		this.requestData = requestData;
+		this(response.statusCode(), response.headers().asHttpHeaders(), response
+				.cookies(), requestData);
+	}
+
+	public ResponseData(ServerHttpResponse response, RequestData requestData) {
+		this(response.getStatusCode(), response.getHeaders(), response
+				.getCookies(), requestData);
 	}
 
 	public HttpStatus getHttpStatus() {
