@@ -52,13 +52,11 @@ public class ResponseData {
 	}
 
 	public ResponseData(ClientResponse response, RequestData requestData) {
-		this(response.statusCode(), response.headers().asHttpHeaders(), response
-				.cookies(), requestData);
+		this(response.statusCode(), response.headers().asHttpHeaders(), response.cookies(), requestData);
 	}
 
 	public ResponseData(ServerHttpResponse response, RequestData requestData) {
-		this(response.getStatusCode(), response.getHeaders(), response
-				.getCookies(), requestData);
+		this(response.getStatusCode(), response.getHeaders(), response.getCookies(), requestData);
 	}
 
 	public HttpStatus getHttpStatus() {
