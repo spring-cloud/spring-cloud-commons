@@ -131,7 +131,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 					stickySessionProperties.isAddServiceInstanceCookie());
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle.onComplete(new CompletionContext<ClientResponse, ServiceInstance>(
+							lifecycle -> lifecycle.onComplete(new CompletionContext<ResponseData, ServiceInstance>(
 									CompletionContext.Status.FAILED, throwable, lbResponse))))
 					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
 							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,

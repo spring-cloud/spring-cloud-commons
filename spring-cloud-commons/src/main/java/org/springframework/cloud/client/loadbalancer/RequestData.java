@@ -29,7 +29,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
 /**
- * Represents the data of the request that can be safely read (without passing request reactive stream values).
+ * Represents the data of the request that can be safely read (without passing request
+ * reactive stream values).
  *
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
