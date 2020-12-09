@@ -65,22 +65,30 @@ public class RequestData {
 	}
 
 	public RequestData(HttpRequest request) {
-		this(request.getMethod(), request.getURI(), request.getHeaders(), null, new HashMap<>());
+		this(request.getMethod(), request.getURI(), request.getHeaders(), buildCookiesFromHeaders(request.getHeaders()),
+				new HashMap<>());
 	}
 
 	public RequestData(ServerHttpRequest request) {
-		this(request.getMethod(), request.getURI(), request.getHeaders(),
-				buildCookies(request.getCookies(), request.getHeaders()), new HashMap<>());
+		this(request.getMethod(), request.getURI(), request.getHeaders(), buildCookies(request.getCookies()),
+				new HashMap<>());
 	}
 
-	private static MultiValueMap<String, String> buildCookies(MultiValueMap<String, HttpCookie> cookies,
-			HttpHeaders headers) {
+	private static MultiValueMap<String, String> buildCookies(MultiValueMap<String, HttpCookie> cookies) {
 		HttpHeaders newCookies = new HttpHeaders();
 		if (cookies != null) {
 			cookies.forEach((key, value) -> value
 					.forEach(cookie -> newCookies.put(cookie.getName(), Collections.singletonList(cookie.getValue()))));
 		}
-		List<String> cookiesFromHeaders = headers.get("cookie");
+		return newCookies;
+	}
+
+	private static MultiValueMap<String, String> buildCookiesFromHeaders(HttpHeaders headers) {
+		HttpHeaders newCookies = new HttpHeaders();
+		if (headers == null) {
+			return newCookies;
+		}
+		List<String> cookiesFromHeaders = headers.get(HttpHeaders.COOKIE);
 		if (cookiesFromHeaders != null) {
 			cookiesFromHeaders.forEach(cookie -> {
 				String[] splitCookie = cookie.split("=");
