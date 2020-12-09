@@ -84,6 +84,9 @@ public class RequestData {
 		if (cookiesFromHeaders != null) {
 			cookiesFromHeaders.forEach(cookie -> {
 				String[] splitCookie = cookie.split("=");
+				if (splitCookie.length < 2) {
+					return;
+				}
 				newCookies.add(splitCookie[0], splitCookie[1]);
 			});
 		}
