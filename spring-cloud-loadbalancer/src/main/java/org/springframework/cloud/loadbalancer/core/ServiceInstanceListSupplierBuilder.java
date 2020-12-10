@@ -27,7 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
 import org.springframework.context.ConfigurableApplicationContext;

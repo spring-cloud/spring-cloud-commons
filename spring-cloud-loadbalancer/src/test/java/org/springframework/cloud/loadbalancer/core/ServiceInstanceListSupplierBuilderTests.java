@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;

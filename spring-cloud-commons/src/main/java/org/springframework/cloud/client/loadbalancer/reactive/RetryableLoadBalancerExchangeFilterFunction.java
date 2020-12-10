@@ -36,6 +36,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;

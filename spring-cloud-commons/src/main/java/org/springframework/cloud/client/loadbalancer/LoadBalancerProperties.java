@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer.reactive;
+package org.springframework.cloud.client.loadbalancer;
 
 import java.time.Duration;
 import java.util.HashSet;
@@ -24,6 +24,7 @@ import java.util.Set;
 import reactor.util.retry.RetryBackoffSpec;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 

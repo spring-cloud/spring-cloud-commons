@@ -43,6 +43,7 @@ import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperti
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.context.annotation.Bean;

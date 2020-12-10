@@ -24,9 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.util.MultiValueMap;
 
 /**

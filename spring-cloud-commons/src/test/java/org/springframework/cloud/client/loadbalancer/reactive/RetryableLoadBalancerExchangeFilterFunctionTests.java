@@ -25,6 +25,7 @@ import org.mockito.InOrder;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;

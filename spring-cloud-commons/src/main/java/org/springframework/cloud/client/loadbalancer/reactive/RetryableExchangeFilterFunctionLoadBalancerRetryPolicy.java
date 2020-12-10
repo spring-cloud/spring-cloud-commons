@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.http.HttpMethod;
 
 /**

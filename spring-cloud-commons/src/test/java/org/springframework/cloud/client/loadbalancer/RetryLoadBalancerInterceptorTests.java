@@ -36,7 +36,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
