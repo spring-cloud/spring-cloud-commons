@@ -41,6 +41,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.loadbalancer.support.ServiceInstanceListSuppliers;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -91,11 +92,12 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@SuppressWarnings("ConstantConditions")
 	@Test
 	void shouldCheckInstanceWithProvidedHealthCheckPath() {
+		String serviceId = "ignored-service";
 		healthCheck.getPath().put("ignored-service", "/health");
+		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
+				false);
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSupplier.fixed("ignored-service").build(), healthCheck, webClient);
-		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", "ignored-service",
-				"127.0.0.1", port, false);
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck, webClient);
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -105,10 +107,11 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@SuppressWarnings("ConstantConditions")
 	@Test
 	void shouldCheckInstanceWithDefaultHealthCheckPath() {
+		String serviceId = "ignored-service";
+		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
+				false);
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSupplier.fixed("ignored-service").build(), healthCheck, webClient);
-		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", "ignored-service",
-				"127.0.0.1", port, false);
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck, webClient);
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -118,11 +121,12 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@SuppressWarnings("ConstantConditions")
 	@Test
 	void shouldReturnFalseIfEndpointNotFound() {
-		healthCheck.getPath().put("ignored-service", "/test");
+		String serviceId = "ignored-service";
+		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
+				false);
+		healthCheck.getPath().put(serviceId, "/test");
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSupplier.fixed("ignored-service").build(), healthCheck, webClient);
-		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", "ignored-service",
-				"127.0.0.1", port, false);
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck, webClient);
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 

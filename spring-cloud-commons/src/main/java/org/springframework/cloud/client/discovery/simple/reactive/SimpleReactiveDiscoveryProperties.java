@@ -16,9 +16,7 @@
 
 package org.springframework.cloud.client.discovery.simple.reactive;
 
-import java.net.URI;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -89,103 +87,6 @@ public class SimpleReactiveDiscoveryProperties {
 				instance.setServiceId(key);
 			}
 		}
-	}
-
-	/**
-	 * Basic implementation of {@link ServiceInstance}.
-	 */
-	@Deprecated
-	public static class SimpleServiceInstance implements ServiceInstance {
-
-		/**
-		 * The URI of the service instance. Will be parsed to extract the scheme, host,
-		 * and port.
-		 */
-		private URI uri;
-
-		private String host;
-
-		private int port;
-
-		private boolean secure;
-
-		/**
-		 * Metadata for the service instance. Can be used by discovery clients to modify
-		 * their behaviour per instance, e.g. when load balancing.
-		 */
-		private Map<String, String> metadata = new LinkedHashMap<>();
-
-		/**
-		 * The unique identifier or name for the service instance.
-		 */
-		private String instanceId;
-
-		/**
-		 * The identifier or name for the service. Multiple instances might share the same
-		 * service ID.
-		 */
-		private String serviceId;
-
-		public SimpleServiceInstance() {
-		}
-
-		public SimpleServiceInstance(URI uri) {
-			setUri(uri);
-		}
-
-		@Override
-		public String getInstanceId() {
-			return this.instanceId;
-		}
-
-		public void setInstanceId(String id) {
-			this.instanceId = id;
-		}
-
-		@Override
-		public String getServiceId() {
-			return this.serviceId;
-		}
-
-		public void setServiceId(String id) {
-			this.serviceId = id;
-		}
-
-		@Override
-		public String getHost() {
-			return this.host;
-		}
-
-		@Override
-		public int getPort() {
-			return this.port;
-		}
-
-		@Override
-		public boolean isSecure() {
-			return this.secure;
-		}
-
-		@Override
-		public URI getUri() {
-			return this.uri;
-		}
-
-		public void setUri(URI uri) {
-			this.uri = uri;
-			this.host = this.uri.getHost();
-			this.port = this.uri.getPort();
-			String scheme = this.uri.getScheme();
-			if ("https".equals(scheme)) {
-				this.secure = true;
-			}
-		}
-
-		@Override
-		public Map<String, String> getMetadata() {
-			return this.metadata;
-		}
-
 	}
 
 }

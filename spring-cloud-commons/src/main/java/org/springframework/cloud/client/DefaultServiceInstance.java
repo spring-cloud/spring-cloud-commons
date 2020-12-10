@@ -73,32 +73,6 @@ public class DefaultServiceInstance implements ServiceInstance {
 		this(instanceId, serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
-	/**
-	 * @param serviceId the id of the service.
-	 * @param host the host where the service instance can be found.
-	 * @param port the port on which the service is running.
-	 * @param secure indicates whether or not the connection needs to be secure.
-	 * @param metadata a map containing metadata.
-	 * @deprecated - use other constructors
-	 */
-	@Deprecated
-	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure,
-			Map<String, String> metadata) {
-		this(null, serviceId, host, port, secure, metadata);
-	}
-
-	/**
-	 * @param serviceId the id of the service.
-	 * @param host the host where the service instance can be found.
-	 * @param port the port on which the service is running.
-	 * @param secure indicates whether or not the connection needs to be secure.
-	 * @deprecated - use other constructors
-	 */
-	@Deprecated
-	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure) {
-		this(serviceId, host, port, secure, new LinkedHashMap<>());
-	}
-
 	public DefaultServiceInstance() {
 	}
 

@@ -24,7 +24,6 @@ import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.client.CommonsClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +37,7 @@ import org.springframework.core.annotation.Order;
  * @author Charu Covindane
  */
 @Configuration(proxyBeanMethods = false)
-@AutoConfigureBefore({ NoopDiscoveryClientAutoConfiguration.class, CommonsClientAutoConfiguration.class })
+@AutoConfigureBefore({ CommonsClientAutoConfiguration.class })
 public class SimpleDiscoveryClientAutoConfiguration implements ApplicationListener<WebServerInitializedEvent> {
 
 	private ServerProperties server;
