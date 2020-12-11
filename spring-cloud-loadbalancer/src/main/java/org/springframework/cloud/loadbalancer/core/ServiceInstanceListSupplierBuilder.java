@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -23,6 +24,7 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -31,8 +33,11 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * A Builder for creating a {@link ServiceInstanceListSupplier} hierarchy to be used in
@@ -110,7 +115,22 @@ public final class ServiceInstanceListSupplierBuilder {
 		DelegateCreator creator = (context, delegate) -> {
 			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
 			WebClient.Builder webClient = context.getBean(WebClient.Builder.class);
-			return new HealthCheckServiceInstanceListSupplier(delegate, properties.getHealthCheck(), webClient.build());
+			return healthCheckServiceInstanceListSupplier(webClient.build(), delegate, properties);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
+	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
+	 * {@link WebClient} instance to the {@link ServiceInstanceListSupplier} hierarchy.
+	 * @param webClient a user-provided {@link WebClient} instance
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withHealthChecks(WebClient webClient) {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			return healthCheckServiceInstanceListSupplier(webClient, delegate, properties);
 		};
 		this.creators.add(creator);
 		return this;
@@ -130,14 +150,29 @@ public final class ServiceInstanceListSupplierBuilder {
 
 	/**
 	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
-	 * {@link WebClient} instance to the {@link ServiceInstanceListSupplier} hierarchy.
-	 * @param webClient a user-provided {@link WebClient} instance
+	 * {@link RestTemplate} instance to the {@link ServiceInstanceListSupplier} hierarchy.
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
-	public ServiceInstanceListSupplierBuilder withHealthChecks(WebClient webClient) {
+	public ServiceInstanceListSupplierBuilder withBlockingHealthChecks() {
+		DelegateCreator creator = (context, delegate) -> {
+			RestTemplate restTemplate = context.getBean(RestTemplate.class);
+			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			return blockingHealthCheckServiceInstanceListSupplier(restTemplate, delegate, properties);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
+	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
+	 * {@link RestTemplate} instance to the {@link ServiceInstanceListSupplier} hierarchy.
+	 * @param restTemplate a user-provided {@link RestTemplate} instance
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withBlockingHealthChecks(RestTemplate restTemplate) {
 		DelegateCreator creator = (context, delegate) -> {
 			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
-			return new HealthCheckServiceInstanceListSupplier(delegate, properties.getHealthCheck(), webClient);
+			return blockingHealthCheckServiceInstanceListSupplier(restTemplate, delegate, properties);
 		};
 		this.creators.add(creator);
 		return this;
@@ -223,6 +258,33 @@ public final class ServiceInstanceListSupplierBuilder {
 			supplier = this.cachingCreator.apply(context, supplier);
 		}
 		return supplier;
+	}
+
+	private ServiceInstanceListSupplier healthCheckServiceInstanceListSupplier(WebClient webClient,
+			ServiceInstanceListSupplier delegate, LoadBalancerProperties properties) {
+		return new HealthCheckServiceInstanceListSupplier(delegate, properties.getHealthCheck(),
+				(serviceInstance, healthCheckPath) -> webClient.get()
+						.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri()).path(healthCheckPath).build()
+								.toUri())
+						.exchange().flatMap(clientResponse -> clientResponse.releaseBody()
+								.thenReturn(HttpStatus.OK.value() == clientResponse.rawStatusCode())));
+	}
+
+
+	private ServiceInstanceListSupplier blockingHealthCheckServiceInstanceListSupplier(RestTemplate restTemplate,
+			ServiceInstanceListSupplier delegate, LoadBalancerProperties properties) {
+		return new HealthCheckServiceInstanceListSupplier(delegate, properties.getHealthCheck(),
+				(serviceInstance, healthCheckPath) -> Mono.defer(() -> {
+					URI uri = UriComponentsBuilder.fromUri(serviceInstance.getUri()).path(healthCheckPath).build()
+							.toUri();
+					try {
+						return Mono.just(HttpStatus.OK
+								.equals(restTemplate.getForEntity(uri, Void.class)
+										.getStatusCode()));
+					} catch (Exception ignored){
+						return Mono.just(false);
+					}
+				}));
 	}
 
 	/**

@@ -46,11 +46,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSuppliersTestUtils.healthCheckFunction;
 
 /**
  * Tests for {@link HealthCheckServiceInstanceListSupplier}.
@@ -71,6 +73,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 	private int port;
 
 	private final WebClient webClient = WebClient.create();
+
+	private final RestTemplate restTemplate = new RestTemplate();
 
 	private LoadBalancerProperties.HealthCheck healthCheck;
 
@@ -97,7 +101,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
 				false);
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck, webClient);
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
+				healthCheckFunction(webClient));
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -106,12 +111,30 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	@SuppressWarnings("ConstantConditions")
 	@Test
+	void shouldCheckInstanceWithProvidedHealthCheckPathWithRestTemplate() {
+		String serviceId = "ignored-service";
+		healthCheck.getPath().put("ignored-service", "/health");
+		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
+				false);
+		listSupplier = new HealthCheckServiceInstanceListSupplier(
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
+				healthCheckFunction(restTemplate));
+
+		boolean alive = listSupplier.isAlive(serviceInstance).block();
+
+		assertThat(alive).isTrue();
+	}
+
+
+	@SuppressWarnings("ConstantConditions")
+	@Test
 	void shouldCheckInstanceWithDefaultHealthCheckPath() {
 		String serviceId = "ignored-service";
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
 				false);
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck, webClient);
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
+				healthCheckFunction(webClient));
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -126,7 +149,24 @@ class HealthCheckServiceInstanceListSupplierTests {
 				false);
 		healthCheck.getPath().put(serviceId, "/test");
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck, webClient);
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
+				healthCheckFunction(webClient));
+
+		boolean alive = listSupplier.isAlive(serviceInstance).block();
+
+		assertThat(alive).isFalse();
+	}
+
+	@SuppressWarnings("ConstantConditions")
+	@Test
+	void shouldReturnFalseIfEndpointNotFoundWithRestTemplate() {
+		String serviceId = "ignored-service";
+		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
+				false);
+		healthCheck.getPath().put(serviceId, "/test");
+		listSupplier = new HealthCheckServiceInstanceListSupplier(
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
+				healthCheckFunction(restTemplate));
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -151,7 +191,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.doReturn(Mono.just(true)).when(mock).isAlive(serviceInstance1);
 			Mockito.doReturn(Mono.just(false)).when(mock).isAlive(serviceInstance2);
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+					healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return mock.isAlive(serviceInstance);
@@ -180,7 +221,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.doReturn(Mono.just(true)).when(mock).isAlive(serviceInstance1);
 			Mockito.doReturn(Mono.just(true)).when(mock).isAlive(serviceInstance2);
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+					healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return mock.isAlive(serviceInstance);
@@ -210,7 +252,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.doReturn(Mono.just(true)).when(mock).isAlive(serviceInstance1);
 			Mockito.doReturn(Mono.error(new RuntimeException("boom"))).when(mock).isAlive(serviceInstance2);
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+					healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return mock.isAlive(serviceInstance);
@@ -234,7 +277,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
 			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			Mockito.when(delegate.get()).thenReturn(Flux.just(Lists.list(serviceInstance1, serviceInstance2)));
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+					healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					if (serviceInstance == serviceInstance1) {
@@ -261,7 +305,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
 			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			Mockito.when(delegate.get()).thenReturn(Flux.just(Lists.list(serviceInstance1)));
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+					healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return Mono.just(true);
@@ -292,7 +337,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.doReturn(Mono.just(false), Mono.just(true)).when(mock).isAlive(serviceInstance1);
 			Mockito.doReturn(Mono.error(new RuntimeException("boom"))).when(mock).isAlive(serviceInstance2);
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+					healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return mock.isAlive(serviceInstance);
@@ -320,7 +366,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			HealthCheckServiceInstanceListSupplier mock = mock(HealthCheckServiceInstanceListSupplier.class);
 			Mockito.when(mock.isAlive(serviceInstance1)).thenReturn(Mono.never(), Mono.just(true));
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+					healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return mock.isAlive(serviceInstance);
@@ -350,7 +397,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 							.delayElements(healthCheck.getInterval().dividedBy(2)));
 			Mockito.when(delegate.get()).thenReturn(instances);
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+					healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return Mono.just(true);
@@ -380,7 +428,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
 			when(delegate.get()).thenReturn(Flux.just(Collections.singletonList(serviceInstance1)))
 					.thenReturn(Flux.just(Collections.singletonList(serviceInstance2)));
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+					healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return Mono.just(true);
@@ -405,7 +454,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			Mockito.when(delegate.get()).thenReturn(Flux.just(Lists.list(serviceInstance1)));
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+					healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return Mono.just(true);
@@ -435,7 +485,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 		Mockito.when(delegate.get()).thenReturn(Flux.<List<ServiceInstance>>never()
 				.doOnSubscribe(subscription -> subscribed.set(true)).doOnCancel(instancesCanceled::incrementAndGet));
 
-		listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, webClient);
+		listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
+				healthCheckFunction(webClient));
 
 		listSupplier.afterPropertiesSet();
 
