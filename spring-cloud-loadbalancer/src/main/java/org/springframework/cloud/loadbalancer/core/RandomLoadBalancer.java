@@ -25,10 +25,10 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.DefaultResponse;
-import org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse;
-import org.springframework.cloud.client.loadbalancer.reactive.Request;
-import org.springframework.cloud.client.loadbalancer.reactive.Response;
+import org.springframework.cloud.client.loadbalancer.DefaultResponse;
+import org.springframework.cloud.client.loadbalancer.EmptyResponse;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.Response;
 
 /**
  * A random-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
@@ -42,9 +42,6 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
 	private final String serviceId;
 
-	@Deprecated
-	private ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier;
-
 	private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
 
 	/**
@@ -52,59 +49,31 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
 	 * @param serviceId id of the service for which to choose an instance
 	 */
-	public RandomLoadBalancer(
-			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+	public RandomLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId) {
 		this.serviceId = serviceId;
 		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
 	}
 
-	/**
-	 * @param serviceId id of the service for which to choose an instance
-	 * @param serviceInstanceSupplier a provider of {@link ServiceInstanceSupplier} that
-	 * will be used to get available instances
-	 * @deprecated Use {@link #RandomLoadBalancer(ObjectProvider, String)}} instead.
-	 */
-	@Deprecated
-	public RandomLoadBalancer(String serviceId,
-			ObjectProvider<ServiceInstanceSupplier> serviceInstanceSupplier) {
-		this.serviceId = serviceId;
-		this.serviceInstanceSupplier = serviceInstanceSupplier;
-	}
-
 	@SuppressWarnings("rawtypes")
 	@Override
-	public Mono<org.springframework.cloud.client.loadbalancer.reactive.Response<ServiceInstance>> choose(
-			Request request) {
-		// TODO: move supplier to Request?
-		// Temporary conditional logic till deprecated members are removed.
-		if (serviceInstanceListSupplierProvider != null) {
-			ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
-					.getIfAvailable(NoopServiceInstanceListSupplier::new);
-			return supplier.get().next()
-					.map(serviceInstances -> processInstanceResponse(supplier,
-							serviceInstances));
-		}
-		ServiceInstanceSupplier supplier = this.serviceInstanceSupplier
-				.getIfAvailable(NoopServiceInstanceSupplier::new);
-		return supplier.get().collectList().map(this::getInstanceResponse);
+	public Mono<Response<ServiceInstance>> choose(Request request) {
+		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
+				.getIfAvailable(NoopServiceInstanceListSupplier::new);
+		return supplier.get(request).next()
+				.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
 
-	private org.springframework.cloud.client.loadbalancer.reactive.Response<ServiceInstance> processInstanceResponse(
-			ServiceInstanceListSupplier supplier,
+	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,
 			List<ServiceInstance> serviceInstances) {
-		org.springframework.cloud.client.loadbalancer.reactive.Response<ServiceInstance> serviceInstanceResponse = getInstanceResponse(
-				serviceInstances);
-		if (supplier instanceof SelectedInstanceCallback
-				&& serviceInstanceResponse.hasServer()) {
-			((SelectedInstanceCallback) supplier)
-					.selectedServiceInstance(serviceInstanceResponse.getServer());
+		Response<ServiceInstance> serviceInstanceResponse = getInstanceResponse(serviceInstances);
+		if (supplier instanceof SelectedInstanceCallback && serviceInstanceResponse.hasServer()) {
+			((SelectedInstanceCallback) supplier).selectedServiceInstance(serviceInstanceResponse.getServer());
 		}
 		return serviceInstanceResponse;
 	}
 
-	private Response<ServiceInstance> getInstanceResponse(
-			List<ServiceInstance> instances) {
+	private Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances) {
 		if (instances.isEmpty()) {
 			if (log.isWarnEnabled()) {
 				log.warn("No servers available for service: " + serviceId);

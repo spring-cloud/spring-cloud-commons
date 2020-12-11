@@ -91,7 +91,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 		return serviceInstanceResponse;
 	}
 
-	Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances) {
+	private Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances) {
 		if (instances.isEmpty()) {
 			if (log.isWarnEnabled()) {
 				log.warn("No servers available for service: " + serviceId);

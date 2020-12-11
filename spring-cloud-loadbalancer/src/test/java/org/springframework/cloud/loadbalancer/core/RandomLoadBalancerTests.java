@@ -28,7 +28,9 @@ import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.loadbalancer.support.SimpleObjectProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -44,12 +46,9 @@ class RandomLoadBalancerTests {
 
 	@Test
 	void shouldReturnOneServiceInstance() {
-		DiscoveryClientServiceInstanceListSupplier supplier = mock(
-				DiscoveryClientServiceInstanceListSupplier.class);
-		when(supplier.get()).thenReturn(
-				Flux.just(Arrays.asList(serviceInstance, new DefaultServiceInstance())));
-		loadBalancer = new RandomLoadBalancer(new SimpleObjectProvider<>(supplier),
-				"test");
+		DiscoveryClientServiceInstanceListSupplier supplier = mock(DiscoveryClientServiceInstanceListSupplier.class);
+		when(supplier.get(any())).thenReturn(Flux.just(Arrays.asList(serviceInstance, new DefaultServiceInstance())));
+		loadBalancer = new RandomLoadBalancer(new SimpleObjectProvider<>(supplier), "test");
 
 		Response<ServiceInstance> response = loadBalancer.choose().block();
 
@@ -67,15 +66,27 @@ class RandomLoadBalancerTests {
 
 	@Test
 	void shouldReturnEmptyResponseWhenNoInstancesAvailable() {
-		DiscoveryClientServiceInstanceListSupplier supplier = mock(
-				DiscoveryClientServiceInstanceListSupplier.class);
-		when(supplier.get()).thenReturn(Flux.just(Collections.emptyList()));
-		loadBalancer = new RandomLoadBalancer(new SimpleObjectProvider<>(supplier),
-				"test");
+		DiscoveryClientServiceInstanceListSupplier supplier = mock(DiscoveryClientServiceInstanceListSupplier.class);
+		when(supplier.get(any())).thenReturn(Flux.just(Collections.emptyList()));
+		loadBalancer = new RandomLoadBalancer(new SimpleObjectProvider<>(supplier), "test");
 
 		Response<ServiceInstance> response = loadBalancer.choose().block();
 
 		assertThat(response.hasServer()).isFalse();
+	}
+
+	@Test
+	void shouldTriggerSelectedInstanceCallback() {
+		SameInstancePreferenceServiceInstanceListSupplier supplier = mock(
+				SameInstancePreferenceServiceInstanceListSupplier.class);
+		when(supplier.get(any())).thenReturn(Flux.just(Collections.singletonList(serviceInstance)));
+		loadBalancer = new RandomLoadBalancer(new SimpleObjectProvider<>(supplier), "test");
+
+		Response<ServiceInstance> response = loadBalancer.choose().block();
+
+		assertThat(response.hasServer()).isTrue();
+		assertThat(response.getServer()).isEqualTo(serviceInstance);
+		verify((SelectedInstanceCallback) supplier).selectedServiceInstance(serviceInstance);
 	}
 
 }
