@@ -854,10 +854,32 @@ of compatible Spring Boot versions.
 == Spring Cloud LoadBalancer
 
 Spring Cloud provides its own client-side load-balancer abstraction and implementation. For the load-balancing
-mechanism, `ReactiveLoadBalancer` interface has been added and a Round-Robin-based implementation
-has been provided for it. In order to get instances to select from reactive `ServiceInstanceListSupplier`
+mechanism, `ReactiveLoadBalancer` interface has been added and a *Round-Robin-based* and *Random* implementations
+have been provided for it. In order to get instances to select from reactive `ServiceInstanceListSupplier`
 is used. Currently we support a service-discovery-based implementation of `ServiceInstanceListSupplier`
 that retrieves available instances from Service Discovery using a <<discovery-client, Discovery Client>> available in the classpath.
+
+=== Switching between the load-balancing algorithms
+
+The `ReactiveLoadBalancer` implementation that is used by default is `RoundRobinLoadBalancer`. To switch to a different implementation, either for selected services or all of them, you can use the <<custom-loadbalancer-configuration, custom LoadBalancer configurations mechanism>>.
+
+For example, the following configuration can be passed via `@LoadBalancerClient` annotation to switch to using the `RandomLoadBalancer`:
+
+[[random-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	ReactorLoadBalancer<ServiceInstance> randomLoadBalancer(Environment environment,
+			LoadBalancerClientFactory loadBalancerClientFactory) {
+		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
+		return new RandomLoadBalancer(loadBalancerClientFactory
+				.getLazyProvider(name, ServiceInstanceListSupplier.class),
+				name);
+	}
+}
+----
 
 === Spring Cloud LoadBalancer integrations
 
