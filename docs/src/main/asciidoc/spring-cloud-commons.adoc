@@ -968,6 +968,9 @@ public class CustomLoadBalancerConfiguration {
 	}
 ----
 
+TIP: For the non-reactive stack, create this supplier with the `withBlockingHealthChecks()`.
+You can also pass your own `WebClient` or `RestTemplate` instance to be used for the checks.
+
 WARNING: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`. Therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
 
 === Same instance preference for LoadBalancer

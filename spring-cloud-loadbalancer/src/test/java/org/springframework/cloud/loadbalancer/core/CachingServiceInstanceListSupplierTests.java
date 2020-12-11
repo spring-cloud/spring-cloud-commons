@@ -41,6 +41,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import static java.time.Duration.ofMillis;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSuppliersTestUtils.healthCheckFunction;
 
 /**
  * Tests for {@link CachingServiceInstanceListSupplier}.
@@ -140,7 +141,7 @@ class CachingServiceInstanceListSupplierTests {
 
 			TestHealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 					LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
-				super(delegate, healthCheck, webClient);
+				super(delegate, healthCheck, healthCheckFunction(webClient));
 			}
 
 			@Override
