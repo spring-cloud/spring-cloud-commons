@@ -41,23 +41,18 @@ final class ServiceInstanceListSuppliersTestUtils {
 
 	static BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunction(WebClient webClient) {
 		return (serviceInstance, healthCheckPath) -> webClient.get()
-				.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri())
-						.path(healthCheckPath).build().toUri())
+				.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri()).path(healthCheckPath).build().toUri())
 				.exchange().flatMap(clientResponse -> clientResponse.releaseBody()
-						.thenReturn(HttpStatus.OK.value() == clientResponse
-								.rawStatusCode()));
+						.thenReturn(HttpStatus.OK.value() == clientResponse.rawStatusCode()));
 	}
 
 	static BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunction(RestTemplate restTemplate) {
 		return (serviceInstance, healthCheckPath) -> Mono.defer(() -> {
-			URI uri = UriComponentsBuilder.fromUri(serviceInstance.getUri())
-					.path(healthCheckPath).build()
-					.toUri();
+			URI uri = UriComponentsBuilder.fromUri(serviceInstance.getUri()).path(healthCheckPath).build().toUri();
 			try {
-				return Mono.just(HttpStatus.OK
-						.equals(restTemplate.getForEntity(uri, Void.class)
-								.getStatusCode()));
-			} catch (Exception ignored){
+				return Mono.just(HttpStatus.OK.equals(restTemplate.getForEntity(uri, Void.class).getStatusCode()));
+			}
+			catch (Exception ignored) {
 				return Mono.just(false);
 			}
 		});

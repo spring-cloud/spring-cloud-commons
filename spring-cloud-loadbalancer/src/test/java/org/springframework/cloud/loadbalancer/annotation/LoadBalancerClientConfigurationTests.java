@@ -37,6 +37,7 @@ import org.springframework.cloud.loadbalancer.core.ZonePreferenceServiceInstance
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -170,6 +171,17 @@ class LoadBalancerClientConfigurationTests {
 
 	}
 
+	@Test
+	void shouldInstantiateBlockingHealthCheckServiceInstanceListSupplier() {
+		blockingDiscoveryClientRunner.withUserConfiguration(RestTemplateTestConfig.class)
+				.withPropertyValues("spring.cloud.loadbalancer.configurations=health-check").run(context -> {
+					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+					then(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
+					then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
+							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+				});
+	}
+
 	@Configuration
 	protected static class TestConfig {
 
@@ -177,6 +189,16 @@ class LoadBalancerClientConfigurationTests {
 		@LoadBalanced
 		WebClient.Builder webClientBuilder() {
 			return WebClient.builder();
+		}
+
+	}
+
+	@Configuration
+	protected static class RestTemplateTestConfig {
+
+		@Bean
+		RestTemplate restTemplate() {
+			return new RestTemplate();
 		}
 
 	}

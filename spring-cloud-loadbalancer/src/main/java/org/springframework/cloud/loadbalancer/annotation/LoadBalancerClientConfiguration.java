@@ -43,6 +43,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * @author Spencer Gibb
@@ -90,7 +92,7 @@ public class LoadBalancerClientConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnBean({ ReactiveDiscoveryClient.class, WebClient.Builder.class })
 		@ConditionalOnMissingBean
 		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations", havingValue = "health-check")
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
@@ -148,12 +150,12 @@ public class LoadBalancerClientConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnBean({ DiscoveryClient.class, RestTemplate.class })
 		@ConditionalOnMissingBean
 		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations", havingValue = "health-check")
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withHealthChecks()
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withBlockingHealthChecks()
 					.build(context);
 		}
 

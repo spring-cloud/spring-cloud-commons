@@ -125,7 +125,6 @@ class HealthCheckServiceInstanceListSupplierTests {
 		assertThat(alive).isTrue();
 	}
 
-
 	@SuppressWarnings("ConstantConditions")
 	@Test
 	void shouldCheckInstanceWithDefaultHealthCheckPath() {

@@ -270,7 +270,6 @@ public final class ServiceInstanceListSupplierBuilder {
 								.thenReturn(HttpStatus.OK.value() == clientResponse.rawStatusCode())));
 	}
 
-
 	private ServiceInstanceListSupplier blockingHealthCheckServiceInstanceListSupplier(RestTemplate restTemplate,
 			ServiceInstanceListSupplier delegate, LoadBalancerProperties properties) {
 		return new HealthCheckServiceInstanceListSupplier(delegate, properties.getHealthCheck(),
@@ -278,10 +277,10 @@ public final class ServiceInstanceListSupplierBuilder {
 					URI uri = UriComponentsBuilder.fromUri(serviceInstance.getUri()).path(healthCheckPath).build()
 							.toUri();
 					try {
-						return Mono.just(HttpStatus.OK
-								.equals(restTemplate.getForEntity(uri, Void.class)
-										.getStatusCode()));
-					} catch (Exception ignored){
+						return Mono
+								.just(HttpStatus.OK.equals(restTemplate.getForEntity(uri, Void.class).getStatusCode()));
+					}
+					catch (Exception ignored) {
 						return Mono.just(false);
 					}
 				}));

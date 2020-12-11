@@ -35,8 +35,8 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 
 /**
  * A {@link ServiceInstanceListSupplier} implementation that verifies whether the
- * instances are alive and only returns the healthy one, unless there are none. Uses
- * a user-provided function to ping the <code>health</code> endpoint of the instances.
+ * instances are alive and only returns the healthy one, unless there are none. Uses a
+ * user-provided function to ping the <code>health</code> endpoint of the instances.
  *
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko
@@ -45,8 +45,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier
 		implements InitializingBean, DisposableBean {
 
-	private static final Log LOG = LogFactory
-			.getLog(HealthCheckServiceInstanceListSupplier.class);
+	private static final Log LOG = LogFactory.getLog(HealthCheckServiceInstanceListSupplier.class);
 
 	private final LoadBalancerProperties.HealthCheck healthCheck;
 
@@ -62,8 +61,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 			LoadBalancerProperties.HealthCheck healthCheck,
 			BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction) {
 		super(delegate);
-		defaultHealthCheckPath = healthCheck.getPath()
-				.getOrDefault("default", "/actuator/health");
+		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default", "/actuator/health");
 		this.aliveFunction = aliveFunction;
 		this.healthCheck = healthCheck;
 		Repeat<Object> aliveInstancesReplayRepeat = Repeat
@@ -71,11 +69,9 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
 		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate)
 				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
-						.map(alive -> Collections
-								.unmodifiableList(new ArrayList<>(alive))))
+						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))))
 				.repeatWhen(aliveInstancesReplayRepeat);
-		aliveInstancesReplay = aliveInstancesFlux
-				.delaySubscription(healthCheck.getInitialDelay()).replay(1)
+		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
 				.refCount(1);
 	}
 
@@ -130,8 +126,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 	}
 
 	protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
-		String healthCheckPropertyValue = healthCheck.getPath()
-				.get(serviceInstance.getServiceId());
+		String healthCheckPropertyValue = healthCheck.getPath().get(serviceInstance.getServiceId());
 		String healthCheckPath = healthCheckPropertyValue != null ? healthCheckPropertyValue : defaultHealthCheckPath;
 		return aliveFunction.apply(serviceInstance, healthCheckPath);
 	}
