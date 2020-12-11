@@ -17,8 +17,7 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,16 +31,14 @@ import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
 
 /**
- * A Round-Robin-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
+ * A random-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
  *
- * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
-public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalancer {
+public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
 	private static final Log log = LogFactory.getLog(RoundRobinLoadBalancer.class);
-
-	final AtomicInteger position;
 
 	final String serviceId;
 
@@ -52,29 +49,14 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
 	 * @param serviceId id of the service for which to choose an instance
 	 */
-	public RoundRobinLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+	public RandomLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId) {
-		this(serviceInstanceListSupplierProvider, serviceId, new Random().nextInt(1000));
-	}
-
-	/**
-	 * @param serviceInstanceListSupplierProvider a provider of
-	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
-	 * @param serviceId id of the service for which to choose an instance
-	 * @param seedPosition Round Robin element position marker
-	 */
-	public RoundRobinLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
-			String serviceId, int seedPosition) {
 		this.serviceId = serviceId;
 		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
-		this.position = new AtomicInteger(seedPosition);
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
-	// see original
-	// https://github.com/Netflix/ocelli/blob/master/ocelli-core/
-	// src/main/java/netflix/ocelli/loadbalancer/RoundRobinLoadBalancer.java
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
 				.getIfAvailable(NoopServiceInstanceListSupplier::new);
@@ -98,10 +80,9 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 			}
 			return new EmptyResponse();
 		}
-		// TODO: enforce order?
-		int pos = Math.abs(this.position.incrementAndGet());
+		int index = ThreadLocalRandom.current().nextInt(instances.size());
 
-		ServiceInstance instance = instances.get(pos % instances.size());
+		ServiceInstance instance = instances.get(index);
 
 		return new DefaultResponse(instance);
 	}
