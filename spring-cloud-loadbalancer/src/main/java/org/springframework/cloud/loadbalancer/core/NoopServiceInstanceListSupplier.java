@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.Collections;
 import java.util.List;
 
 import reactor.core.publisher.Flux;
@@ -36,7 +37,7 @@ public class NoopServiceInstanceListSupplier implements ServiceInstanceListSuppl
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		return Flux.empty();
+		return Flux.defer(() -> Flux.just(Collections.emptyList()));
 	}
 
 }
