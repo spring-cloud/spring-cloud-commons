@@ -70,10 +70,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		String hint = getHint(serviceId);
 		LoadBalancerRequestAdapter<T, DefaultRequestContext> lbRequest = new LoadBalancerRequestAdapter<>(request,
 				new DefaultRequestContext(request, hint));
-		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
-				.getSupportedLifecycleProcessors(
-						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
-						DefaultRequestContext.class, Object.class, ServiceInstance.class);
+		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = getSupportedLifecycleProcessors(serviceId);
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
@@ -88,10 +85,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request)
 			throws IOException {
 		DefaultResponse defaultResponse = new DefaultResponse(serviceInstance);
-		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
-				.getSupportedLifecycleProcessors(
-						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
-						DefaultRequestContext.class, Object.class, ServiceInstance.class);
+		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = getSupportedLifecycleProcessors(serviceId);
 		Request lbRequest = request instanceof Request ? (Request) request : new DefaultRequest<>();
 		supportedLifecycleProcessors
 				.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, new DefaultResponse(serviceInstance)));
@@ -129,6 +123,12 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 			}
 		}
 		return response;
+	}
+
+	private Set<LoadBalancerLifecycle> getSupportedLifecycleProcessors(String serviceId) {
+		return LoadBalancerLifecycleValidator.getSupportedLifecycleProcessors(
+				loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
+				DefaultRequestContext.class, Object.class, ServiceInstance.class);
 	}
 
 	@Override
