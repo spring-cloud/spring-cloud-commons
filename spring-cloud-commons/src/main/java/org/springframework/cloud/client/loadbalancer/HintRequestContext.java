@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import org.springframework.core.style.ToStringCreator;
 
@@ -33,6 +34,8 @@ public class HintRequestContext {
 	 */
 	private String hint = "default";
 
+	private long requestStartTime;
+
 	public HintRequestContext() {
 	}
 
@@ -46,6 +49,14 @@ public class HintRequestContext {
 
 	public void setHint(String hint) {
 		this.hint = hint;
+	}
+
+	public void setRequestStartTime(long requestStartTime) {
+		this.requestStartTime = requestStartTime;
+	}
+
+	public long getRequestStartTimestamp() {
+		return requestStartTime;
 	}
 
 	@Override

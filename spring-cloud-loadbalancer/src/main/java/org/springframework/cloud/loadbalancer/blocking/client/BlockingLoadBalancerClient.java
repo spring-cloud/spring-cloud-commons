@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.blocking.client;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import reactor.core.publisher.Mono;
 
@@ -75,7 +76,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-					.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, new EmptyResponse())));
+					.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, new EmptyResponse(), lbRequest)));
 			throw new IllegalStateException("No instances available for " + serviceId);
 		}
 		return execute(serviceId, serviceInstance, request);
@@ -89,20 +90,23 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 				.getSupportedLifecycleProcessors(
 						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
 						DefaultRequestContext.class, Object.class, ServiceInstance.class);
+		// TODO: maybe better just pass start time?
+		Request<DefaultRequestContext> fakeLbRequest = new DefaultRequest<>();
+		fakeLbRequest.getContext().setRequestStartTime(System.nanoTime());
 		try {
 			T response = request.apply(serviceInstance);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-					.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, defaultResponse, response)));
+					.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, defaultResponse, response, fakeLbRequest)));
 			return response;
 		}
 		catch (IOException iOException) {
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(
-					new CompletionContext<>(CompletionContext.Status.FAILED, iOException, defaultResponse)));
+					new CompletionContext<>(CompletionContext.Status.FAILED, iOException, defaultResponse, fakeLbRequest )));
 			throw iOException;
 		}
 		catch (Exception exception) {
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-					.onComplete(new CompletionContext<>(CompletionContext.Status.FAILED, exception, defaultResponse)));
+					.onComplete(new CompletionContext<>(CompletionContext.Status.FAILED, exception, defaultResponse, fakeLbRequest)));
 			ReflectionUtils.rethrowRuntimeException(exception);
 		}
 		return null;
