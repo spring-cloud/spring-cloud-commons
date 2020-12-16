@@ -110,14 +110,16 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		return Mono.defer(() -> choose(serviceId, lbRequest).flatMap(lbResponse -> {
 			ServiceInstance instance = lbResponse.getServer();
-			lbRequest.setContext(new RetryableRequestContext(instance, clientRequest, hint));
+			lbRequest
+					.setContext(new RetryableRequestContext(instance, requestData, hint));
 			if (instance == null) {
 				String message = serviceInstanceUnavailableMessage(serviceId);
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(message);
 				}
 				supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-						.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, lbResponse)));
+						.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(CompletionContext.Status.DISCARD,
+								lbResponse, lbRequest)));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
 			}
@@ -132,11 +134,13 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 					stickySessionProperties.isAddServiceInstanceCookie());
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle.onComplete(new CompletionContext<ResponseData, ServiceInstance>(
-									CompletionContext.Status.FAILED, throwable, lbResponse))))
+							lifecycle -> lifecycle
+									.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
+											CompletionContext.Status.FAILED, throwable, lbResponse, lbRequest))))
 					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-									lbResponse, new ResponseData(clientResponse, requestData)))))
+							lifecycle -> lifecycle
+									.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
+											lbResponse, new ResponseData(clientResponse, requestData), lbRequest))))
 					.map(clientResponse -> {
 						loadBalancerRetryContext.setClientResponse(clientResponse);
 						if (shouldRetrySameServiceInstance(loadBalancerRetryContext)) {

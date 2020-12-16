@@ -19,7 +19,6 @@ package org.springframework.cloud.loadbalancer.blocking.client;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import reactor.core.publisher.Mono;
 

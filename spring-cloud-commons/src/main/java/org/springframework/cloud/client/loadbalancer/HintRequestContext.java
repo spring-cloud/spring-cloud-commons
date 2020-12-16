@@ -17,7 +17,6 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import java.util.Objects;
-import java.util.UUID;
 
 import org.springframework.core.style.ToStringCreator;
 
@@ -26,7 +25,7 @@ import org.springframework.core.style.ToStringCreator;
  *
  * @author Olga Maciaszek-Sharma
  */
-public class HintRequestContext {
+public class HintRequestContext implements TimedRequestContext {
 
 	/**
 	 * A {@link String} value of hint that can be used to choose the correct service
@@ -51,12 +50,14 @@ public class HintRequestContext {
 		this.hint = hint;
 	}
 
-	public void setRequestStartTime(long requestStartTime) {
-		this.requestStartTime = requestStartTime;
+	@Override
+	public long getRequestStartTime() {
+		return requestStartTime;
 	}
 
-	public long getRequestStartTimestamp() {
-		return requestStartTime;
+	@Override
+	public void setRequestStartTime(long requestStartTime) {
+		this.requestStartTime = requestStartTime;
 	}
 
 	@Override

@@ -165,21 +165,27 @@ class BlockingLoadBalancerClientTests {
 		String callbackTestHint = "callbackTestHint";
 		loadBalancerProperties.getHint().put("myservice", "callbackTestHint");
 		final String result = "callbackTestResult";
-		Object actualResult = loadBalancerClient.execute("myservice", (LoadBalancerRequest<Object>) instance -> {
-			assertThat(instance.getHost()).isEqualTo("test.example");
-			return result;
-		});
+		Object actualResult = loadBalancerClient
+				.execute("myservice", (LoadBalancerRequest<Object>) instance -> {
+					assertThat(instance.getHost()).isEqualTo("test.example");
+					return result;
+				});
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
-						.values();
-		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
-						.getCompleteLog().values();
+				.getInstances("myservice", LoadBalancerLifecycle.class)
+				.get("loadBalancerLifecycle")).getStartLog()
+				.values();
+		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
+				.getInstances("myservice", LoadBalancerLifecycle.class)
+				.get("anotherLoadBalancerLifecycle"))
+				.getCompleteLog().values();
 		assertThat(actualResult).isEqualTo(result);
-		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
+		assertThat(lifecycleLogRequests)
+				.extracting(request -> ((DefaultRequestContext) request.getContext())
+						.getHint())
 				.contains(callbackTestHint);
-		assertThat(anotherLifecycleLogRequests).extracting(CompletionContext::getClientResponse).contains(result);
+		assertThat(anotherLifecycleLogRequests)
+				.extracting(CompletionContext::getClientResponse).contains(result);
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -233,7 +239,7 @@ class BlockingLoadBalancerClientTests {
 
 		final ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
-		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
 		public void onStart(Request<Object> request) {
@@ -241,7 +247,12 @@ class BlockingLoadBalancerClientTests {
 		}
 
 		@Override
-		public void onComplete(CompletionContext<Object, ServiceInstance> completionContext) {
+		public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
+
+		}
+
+		@Override
+		public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 			completeLog.put(getName() + UUID.randomUUID(), completionContext);
 		}
 
@@ -249,7 +260,7 @@ class BlockingLoadBalancerClientTests {
 			return startLog;
 		}
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
+		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
 		}
 
