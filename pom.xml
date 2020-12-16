@@ -28,6 +28,7 @@
 	<properties>
 		<bintray.package>commons</bintray.package>
 		<evictor.version>1.0.0</evictor.version>
+		<spring-security-oauth2-autoconfigure.version>2.1.2.RELEASE</spring-security-oauth2-autoconfigure.version>
 	</properties>
 	<build>
 		<plugins>
@@ -149,6 +150,11 @@
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-test-support</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.security.oauth.boot</groupId>
+				<artifactId>spring-security-oauth2-autoconfigure</artifactId>
+				<version>${spring-security-oauth2-autoconfigure.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
