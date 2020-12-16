@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.loadbalancer.stats;
 
 import java.util.function.Function;
@@ -10,16 +26,17 @@ import org.springframework.boot.actuate.metrics.http.Outcome;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.RequestData;
+import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class LoadBalancerTags {
+final class LoadBalancerTags {
 
 	private static final String UNKNOWN = "UNKNOWN";
+
 	private static final Pattern PATTERN_BEFORE_PATH = Pattern
 			.compile("^https?://[^/]+/");
 
@@ -27,28 +44,78 @@ public class LoadBalancerTags {
 		throw new UnsupportedOperationException("Cannot instantiate utility class");
 	}
 
-	static Iterable<Tag> buildLoadBalancedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		Tags tags = Tags.of(Tag.of("lbCompletionStatus", completionContext.status()
-				.toString()), exception(completionContext.getThrowable()));
-		if (completionContext.getLoadBalancerResponse().hasServer()) {
-			ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse()
-					.getServer();
-			tags = tags.and(buildServiceInstanceTags(serviceInstance));
-		}
+	static Iterable<Tag> buildSuccessRequestTags(
+			CompletionContext<Object, ServiceInstance, Object> completionContext) {
+		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse()
+				.getServer();
+		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance));
 		Object clientResponse = completionContext.getClientResponse();
 		if (clientResponse instanceof ResponseData) {
 			ResponseData responseData = (ResponseData) clientResponse;
 			RequestData requestData = responseData.getRequestData();
 			if (requestData != null) {
 				tags = tags.and(valueOrUnknown("method", requestData.getHttpMethod()),
-						valueOrUnknown("uri", requestData.getUrl().getPath()));
+						valueOrUnknown("uri", getPath(requestData)));
 			}
-			tags = tags.and(Outcome.forStatus(responseData.getHttpStatus().value())
-							.asTag(),
-					status(responseData.getHttpStatus()));
+			else {
+				tags = tags.and(Tag.of("method", UNKNOWN), Tag.of("uri", UNKNOWN));
+			}
+
+			tags = tags
+					.and(Outcome.forStatus(responseData.getHttpStatus().value()).asTag(),
+							valueOrUnknown("status", responseData.getHttpStatus()));
+		}
+		else {
+			tags = tags.and(Tag.of("method", UNKNOWN), Tag.of("uri", UNKNOWN),
+					Tag.of("outcome", UNKNOWN), Tag.of("status", UNKNOWN));
 		}
 		return tags;
 	}
+
+	private static String getPath(RequestData requestData) {
+		return requestData.getUrl() != null ? requestData.getUrl().getPath() : UNKNOWN;
+	}
+
+	static Iterable<Tag> buildDiscardedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
+		if (completionContext.getLoadBalancerRequest()
+				.getContext() instanceof RequestDataContext) {
+			RequestData requestData = ((RequestDataContext) completionContext
+					.getLoadBalancerRequest().getContext()).getClientRequest();
+			if (requestData != null) {
+				return Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
+						valueOrUnknown("uri", getPath(requestData)),
+						valueOrUnknown("serviceId", getHost(requestData)));
+			}
+		}
+		return Tags.of(valueOrUnknown("method", UNKNOWN),
+				valueOrUnknown("uri", UNKNOWN),
+				valueOrUnknown("serviceId", UNKNOWN));
+
+	}
+
+	private static String getHost(RequestData requestData) {
+		return requestData.getUrl() != null ? requestData.getUrl().getHost() : UNKNOWN;
+	}
+
+	static Iterable<Tag> buildFailedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
+		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse()
+				.getServer();
+		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance))
+				.and(exception(completionContext.getThrowable()));
+		if (completionContext.getLoadBalancerRequest()
+				.getContext() instanceof RequestDataContext) {
+			RequestData requestData = ((RequestDataContext) completionContext
+					.getLoadBalancerRequest().getContext()).getClientRequest();
+			if (requestData != null) {
+				return tags.and(Tags
+						.of(valueOrUnknown("method", requestData.getHttpMethod()),
+								valueOrUnknown("uri", getPath(requestData))));
+			}
+		}
+		return tags.and(Tags.of(valueOrUnknown("method", UNKNOWN),
+				valueOrUnknown("uri", UNKNOWN)));
+	}
+
 
 	static Iterable<Tag> buildServiceInstanceTags(ServiceInstance serviceInstance) {
 		return Tags.of(valueOrUnknown("serviceId", serviceInstance.getServiceId()),
@@ -84,20 +151,11 @@ public class LoadBalancerTags {
 		return Tag.of(key, UNKNOWN);
 	}
 
-
 	private static Function<String, String> extractPath() {
 		return url -> {
 			String path = PATTERN_BEFORE_PATH.matcher(url).replaceFirst("");
 			return (path.startsWith("/") ? path : "/" + path);
 		};
-	}
-
-
-	private static Tag status(HttpStatus status) {
-		if (status == null) {
-			status = HttpStatus.OK;
-		}
-		return Tag.of("status", String.valueOf(status.value()));
 	}
 
 	private static Tag exception(Throwable exception) {
@@ -108,4 +166,5 @@ public class LoadBalancerTags {
 		}
 		return Tag.of("exception", "None");
 	}
+
 }

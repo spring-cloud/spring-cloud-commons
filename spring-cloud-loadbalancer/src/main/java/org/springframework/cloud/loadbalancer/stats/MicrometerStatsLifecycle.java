@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.loadbalancer.stats;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,8 +32,10 @@ import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.TimedRequestContext;
 
-import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buildLoadBalancedRequestTags;
+import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buildDiscardedRequestTags;
+import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buildFailedRequestTags;
 import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buildServiceInstanceTags;
+import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buildSuccessRequestTags;
 
 /**
  * @author Olga Maciaszek-Sharma
@@ -25,6 +43,7 @@ import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buil
 public class MicrometerStatsLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
 	private final MeterRegistry meterRegistry;
+
 	private final ConcurrentHashMap<ServiceInstance, AtomicLong> activeRequestsPerInstance = new ConcurrentHashMap<>();
 
 	public MicrometerStatsLifecycle(MeterRegistry meterRegistry) {
@@ -52,15 +71,14 @@ public class MicrometerStatsLifecycle implements LoadBalancerLifecycle<Object, O
 		}
 		ServiceInstance serviceInstance = lbResponse.getServer();
 		AtomicLong activeRequestsCounter = activeRequestsPerInstance
-				.computeIfAbsent(serviceInstance,
-						instance -> {
-							AtomicLong createdCounter = activeRequestsPerInstance
-									.get(serviceInstance);
-							Gauge.builder("loadbalanced.requests.active", () -> createdCounter)
-									.tags(buildServiceInstanceTags(serviceInstance))
-									.register(meterRegistry);
-							return createdCounter;
-						});
+				.computeIfAbsent(serviceInstance, instance -> {
+					AtomicLong createdCounter = activeRequestsPerInstance
+							.get(serviceInstance);
+					Gauge.builder("loadbalanced.requests.active", () -> createdCounter)
+							.tags(buildServiceInstanceTags(serviceInstance))
+							.register(meterRegistry);
+					return createdCounter;
+				});
 		activeRequestsCounter.incrementAndGet();
 	}
 
@@ -69,9 +87,8 @@ public class MicrometerStatsLifecycle implements LoadBalancerLifecycle<Object, O
 		long requestFinishedTimestamp = System.nanoTime();
 		if (CompletionContext.Status.DISCARD.equals(completionContext.status())) {
 			Counter.builder("loadbalanced.requests.discarded")
-					.tags(buildLoadBalancedRequestTags(completionContext))
-					.register(meterRegistry)
-					.increment();
+					.tags(buildDiscardedRequestTags(completionContext))
+					.register(meterRegistry).increment();
 			return;
 		}
 		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse()
@@ -83,12 +100,22 @@ public class MicrometerStatsLifecycle implements LoadBalancerLifecycle<Object, O
 		Object loadBalancerRequestContext = completionContext.getLoadBalancerRequest()
 				.getContext();
 		if (loadBalancerRequestContext instanceof TimedRequestContext) {
-			Timer.builder("loadbalanced.requests.executed")
-					.tags(buildLoadBalancedRequestTags(completionContext)
-					)
+			if (CompletionContext.Status.FAILED.equals(completionContext.status())) {
+				Timer.builder("loadbalanced.requests.failed")
+						.tags(buildFailedRequestTags(completionContext))
+						.register(meterRegistry)
+						.record(requestFinishedTimestamp
+										- ((TimedRequestContext) loadBalancerRequestContext)
+										.getRequestStartTime(),
+								TimeUnit.NANOSECONDS);
+			}
+			Timer.builder("loadbalanced.requests.success")
+					.tags(buildSuccessRequestTags(completionContext))
 					.register(meterRegistry)
-					.record(requestFinishedTimestamp - ((TimedRequestContext) loadBalancerRequestContext)
-							.getRequestStartTime(), TimeUnit.NANOSECONDS);
+					.record(requestFinishedTimestamp
+									- ((TimedRequestContext) loadBalancerRequestContext)
+									.getRequestStartTime(),
+							TimeUnit.NANOSECONDS);
 		}
 	}
 
