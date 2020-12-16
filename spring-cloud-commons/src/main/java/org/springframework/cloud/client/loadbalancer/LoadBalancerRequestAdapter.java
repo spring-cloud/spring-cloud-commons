@@ -16,13 +16,23 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.springframework.cloud.client.ServiceInstance;
+
 /**
  * @author Olga Maciaszek-Sharma
  */
-public interface TimedRequestContext {
+public class LoadBalancerRequestAdapter<T> extends DefaultRequest<DefaultRequestContext>
+		implements LoadBalancerRequest<T> {
 
-	long getRequestStartTime();
+	private final LoadBalancerRequest<T> delegate;
 
-	void setRequestStartTime(long requestStartTime);
+	public LoadBalancerRequestAdapter(LoadBalancerRequest<T> delegate) {
+		this.delegate = delegate;
+	}
+
+	@Override
+	public T apply(ServiceInstance instance) throws Exception {
+		return delegate.apply(instance);
+	}
 
 }

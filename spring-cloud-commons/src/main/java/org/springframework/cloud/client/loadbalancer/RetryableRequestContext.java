@@ -40,7 +40,8 @@ public class RetryableRequestContext extends RequestDataContext {
 		this.previousServiceInstance = previousServiceInstance;
 	}
 
-	public RetryableRequestContext(ServiceInstance previousServiceInstance, RequestData clientRequestData, String hint) {
+	public RetryableRequestContext(ServiceInstance previousServiceInstance, RequestData clientRequestData,
+			String hint) {
 		super(clientRequestData, hint);
 		this.previousServiceInstance = previousServiceInstance;
 	}

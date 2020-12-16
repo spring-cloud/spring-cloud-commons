@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import java.util.UUID;
-
 import org.springframework.core.style.ToStringCreator;
 
 /**
@@ -47,11 +45,13 @@ public class CompletionContext<RES, T, C> {
 		this(status, null, response, null, loadBalancerRequest);
 	}
 
-	public CompletionContext(Status status, Throwable throwable, Response<T> loadBalancerResponse, Request<C> loadBalancerRequest) {
+	public CompletionContext(Status status, Throwable throwable, Response<T> loadBalancerResponse,
+			Request<C> loadBalancerRequest) {
 		this(status, throwable, loadBalancerResponse, null, loadBalancerRequest);
 	}
 
-	public CompletionContext(Status status, Response<T> loadBalancerResponse, RES clientResponse,Request<C> loadBalancerRequest) {
+	public CompletionContext(Status status, Response<T> loadBalancerResponse, RES clientResponse,
+			Request<C> loadBalancerRequest) {
 		this(status, null, loadBalancerResponse, clientResponse, loadBalancerRequest);
 	}
 

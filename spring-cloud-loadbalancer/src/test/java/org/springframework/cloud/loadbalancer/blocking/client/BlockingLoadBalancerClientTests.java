@@ -165,27 +165,21 @@ class BlockingLoadBalancerClientTests {
 		String callbackTestHint = "callbackTestHint";
 		loadBalancerProperties.getHint().put("myservice", "callbackTestHint");
 		final String result = "callbackTestResult";
-		Object actualResult = loadBalancerClient
-				.execute("myservice", (LoadBalancerRequest<Object>) instance -> {
-					assertThat(instance.getHost()).isEqualTo("test.example");
-					return result;
-				});
+		Object actualResult = loadBalancerClient.execute("myservice", (LoadBalancerRequest<Object>) instance -> {
+			assertThat(instance.getHost()).isEqualTo("test.example");
+			return result;
+		});
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class)
-				.get("loadBalancerLifecycle")).getStartLog()
-				.values();
+				.getInstances("myservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
+						.values();
 		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class)
-				.get("anotherLoadBalancerLifecycle"))
-				.getCompleteLog().values();
+				.getInstances("myservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
+						.getCompleteLog().values();
 		assertThat(actualResult).isEqualTo(result);
-		assertThat(lifecycleLogRequests)
-				.extracting(request -> ((DefaultRequestContext) request.getContext())
-						.getHint())
+		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains(callbackTestHint);
-		assertThat(anotherLifecycleLogRequests)
-				.extracting(CompletionContext::getClientResponse).contains(result);
+		assertThat(anotherLifecycleLogRequests).extracting(CompletionContext::getClientResponse).contains(result);
 	}
 
 	@Configuration(proxyBeanMethods = false)

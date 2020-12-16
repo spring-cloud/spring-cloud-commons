@@ -63,22 +63,18 @@ public class MicrometerStatsLifecycle implements LoadBalancerLifecycle<Object, O
 	@Override
 	public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
 		if (request.getContext() instanceof TimedRequestContext) {
-			((TimedRequestContext) request.getContext())
-					.setRequestStartTime(System.nanoTime());
+			((TimedRequestContext) request.getContext()).setRequestStartTime(System.nanoTime());
 		}
 		if (!lbResponse.hasServer()) {
 			return;
 		}
 		ServiceInstance serviceInstance = lbResponse.getServer();
-		AtomicLong activeRequestsCounter = activeRequestsPerInstance
-				.computeIfAbsent(serviceInstance, instance -> {
-					AtomicLong createdCounter = activeRequestsPerInstance
-							.get(serviceInstance);
-					Gauge.builder("loadbalanced.requests.active", () -> createdCounter)
-							.tags(buildServiceInstanceTags(serviceInstance))
-							.register(meterRegistry);
-					return createdCounter;
-				});
+		AtomicLong activeRequestsCounter = activeRequestsPerInstance.computeIfAbsent(serviceInstance, instance -> {
+			AtomicLong createdCounter = new AtomicLong();
+			Gauge.builder("loadbalancer.requests.active", () -> createdCounter)
+					.tags(buildServiceInstanceTags(serviceInstance)).register(meterRegistry);
+			return createdCounter;
+		});
 		activeRequestsCounter.incrementAndGet();
 	}
 
@@ -86,35 +82,28 @@ public class MicrometerStatsLifecycle implements LoadBalancerLifecycle<Object, O
 	public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 		long requestFinishedTimestamp = System.nanoTime();
 		if (CompletionContext.Status.DISCARD.equals(completionContext.status())) {
-			Counter.builder("loadbalanced.requests.discarded")
-					.tags(buildDiscardedRequestTags(completionContext))
+			Counter.builder("loadbalancer.requests.discarded").tags(buildDiscardedRequestTags(completionContext))
 					.register(meterRegistry).increment();
 			return;
 		}
-		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse()
-				.getServer();
+		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
 		AtomicLong activeRequestsCounter = activeRequestsPerInstance.get(serviceInstance);
 		if (activeRequestsCounter != null) {
 			activeRequestsCounter.decrementAndGet();
 		}
-		Object loadBalancerRequestContext = completionContext.getLoadBalancerRequest()
-				.getContext();
+		Object loadBalancerRequestContext = completionContext.getLoadBalancerRequest().getContext();
 		if (loadBalancerRequestContext instanceof TimedRequestContext) {
 			if (CompletionContext.Status.FAILED.equals(completionContext.status())) {
-				Timer.builder("loadbalanced.requests.failed")
-						.tags(buildFailedRequestTags(completionContext))
+				Timer.builder("loadbalancer.requests.failed").tags(buildFailedRequestTags(completionContext))
 						.register(meterRegistry)
 						.record(requestFinishedTimestamp
-										- ((TimedRequestContext) loadBalancerRequestContext)
-										.getRequestStartTime(),
+								- ((TimedRequestContext) loadBalancerRequestContext).getRequestStartTime(),
 								TimeUnit.NANOSECONDS);
 			}
-			Timer.builder("loadbalanced.requests.success")
-					.tags(buildSuccessRequestTags(completionContext))
+			Timer.builder("loadbalancer.requests.success").tags(buildSuccessRequestTags(completionContext))
 					.register(meterRegistry)
 					.record(requestFinishedTimestamp
-									- ((TimedRequestContext) loadBalancerRequestContext)
-									.getRequestStartTime(),
+							- ((TimedRequestContext) loadBalancerRequestContext).getRequestStartTime(),
 							TimeUnit.NANOSECONDS);
 		}
 	}

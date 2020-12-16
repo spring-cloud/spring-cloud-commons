@@ -33,9 +33,11 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerRequestAdapter;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.client.loadbalancer.TimedRequestContext;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.util.ReflectionUtils;
@@ -74,11 +76,11 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
-			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-					.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, new EmptyResponse(), lbRequest)));
+			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(
+					new CompletionContext<>(CompletionContext.Status.DISCARD, new EmptyResponse(), lbRequest)));
 			throw new IllegalStateException("No instances available for " + serviceId);
 		}
-		return execute(serviceId, serviceInstance, request);
+		return execute(serviceId, serviceInstance, new LoadBalancerRequestAdapter<>(request));
 	}
 
 	@Override
@@ -89,23 +91,24 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 				.getSupportedLifecycleProcessors(
 						loadBalancerClientFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
 						DefaultRequestContext.class, Object.class, ServiceInstance.class);
-		// TODO: maybe better just pass start time?
-		Request<DefaultRequestContext> fakeLbRequest = new DefaultRequest<>();
-		fakeLbRequest.getContext().setRequestStartTime(System.nanoTime());
+		Request lbRequest = request instanceof Request ? (Request) request : new DefaultRequest<>();
+		if (lbRequest.getContext() instanceof TimedRequestContext) {
+			((TimedRequestContext) lbRequest.getContext()).setRequestStartTime(System.nanoTime());
+		}
 		try {
 			T response = request.apply(serviceInstance);
-			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-					.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, defaultResponse, response, fakeLbRequest)));
+			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(
+					new CompletionContext<>(CompletionContext.Status.SUCCESS, defaultResponse, response, lbRequest)));
 			return response;
 		}
 		catch (IOException iOException) {
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(
-					new CompletionContext<>(CompletionContext.Status.FAILED, iOException, defaultResponse, fakeLbRequest )));
+					new CompletionContext<>(CompletionContext.Status.FAILED, iOException, defaultResponse, lbRequest)));
 			throw iOException;
 		}
 		catch (Exception exception) {
-			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-					.onComplete(new CompletionContext<>(CompletionContext.Status.FAILED, exception, defaultResponse, fakeLbRequest)));
+			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(
+					new CompletionContext<>(CompletionContext.Status.FAILED, exception, defaultResponse, lbRequest)));
 			ReflectionUtils.rethrowRuntimeException(exception);
 		}
 		return null;

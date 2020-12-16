@@ -100,27 +100,21 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 			}
 
 			if (LOG.isDebugEnabled()) {
-				LOG.debug(String
-						.format("LoadBalancer has retrieved the instance for service %s: %s", serviceId,
-								instance.getUri()));
+				LOG.debug(String.format("LoadBalancer has retrieved the instance for service %s: %s", serviceId,
+						instance.getUri()));
 			}
-			LoadBalancerProperties.StickySession stickySessionProperties = properties
-					.getStickySession();
+			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
 					stickySessionProperties.getInstanceIdCookieName(),
 					stickySessionProperties.isAddServiceInstanceCookie());
-			supportedLifecycleProcessors
-					.forEach(lifecycle -> lifecycle.onStartRequest(
-							lbRequest, lbResponse));
+			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, lbResponse));
 			return next.exchange(newRequest)
-					.doOnError(throwable -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle
-									.onComplete(new CompletionContext<ResponseData, ServiceInstance, RequestDataContext>(
-											CompletionContext.Status.FAILED, throwable, lbResponse, lbRequest))))
+					.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
+							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RequestDataContext>(
+									CompletionContext.Status.FAILED, throwable, lbResponse, lbRequest))))
 					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle
-									.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-											lbResponse, new ResponseData(clientResponse, requestData), lbRequest))));
+							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
+									lbResponse, new ResponseData(clientResponse, requestData), lbRequest))));
 		});
 	}
 

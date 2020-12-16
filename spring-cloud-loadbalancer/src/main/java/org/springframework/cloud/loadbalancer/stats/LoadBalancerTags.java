@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.loadbalancer.stats;
 
-import java.util.function.Function;
-import java.util.regex.Pattern;
-
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
 
@@ -37,17 +34,12 @@ final class LoadBalancerTags {
 
 	private static final String UNKNOWN = "UNKNOWN";
 
-	private static final Pattern PATTERN_BEFORE_PATH = Pattern
-			.compile("^https?://[^/]+/");
-
 	private LoadBalancerTags() {
 		throw new UnsupportedOperationException("Cannot instantiate utility class");
 	}
 
-	static Iterable<Tag> buildSuccessRequestTags(
-			CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse()
-				.getServer();
+	static Iterable<Tag> buildSuccessRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
+		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
 		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance));
 		Object clientResponse = completionContext.getClientResponse();
 		if (clientResponse instanceof ResponseData) {
@@ -61,13 +53,12 @@ final class LoadBalancerTags {
 				tags = tags.and(Tag.of("method", UNKNOWN), Tag.of("uri", UNKNOWN));
 			}
 
-			tags = tags
-					.and(Outcome.forStatus(responseData.getHttpStatus().value()).asTag(),
-							valueOrUnknown("status", responseData.getHttpStatus()));
+			tags = tags.and(Outcome.forStatus(responseData.getHttpStatus().value()).asTag(),
+					valueOrUnknown("status", responseData.getHttpStatus()));
 		}
 		else {
-			tags = tags.and(Tag.of("method", UNKNOWN), Tag.of("uri", UNKNOWN),
-					Tag.of("outcome", UNKNOWN), Tag.of("status", UNKNOWN));
+			tags = tags.and(Tag.of("method", UNKNOWN), Tag.of("uri", UNKNOWN), Tag.of("outcome", UNKNOWN),
+					Tag.of("status", UNKNOWN));
 		}
 		return tags;
 	}
@@ -76,19 +67,17 @@ final class LoadBalancerTags {
 		return requestData.getUrl() != null ? requestData.getUrl().getPath() : UNKNOWN;
 	}
 
-	static Iterable<Tag> buildDiscardedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		if (completionContext.getLoadBalancerRequest()
-				.getContext() instanceof RequestDataContext) {
-			RequestData requestData = ((RequestDataContext) completionContext
-					.getLoadBalancerRequest().getContext()).getClientRequest();
+	static Iterable<Tag> buildDiscardedRequestTags(
+			CompletionContext<Object, ServiceInstance, Object> completionContext) {
+		if (completionContext.getLoadBalancerRequest().getContext() instanceof RequestDataContext) {
+			RequestData requestData = ((RequestDataContext) completionContext.getLoadBalancerRequest().getContext())
+					.getClientRequest();
 			if (requestData != null) {
 				return Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
-						valueOrUnknown("uri", getPath(requestData)),
-						valueOrUnknown("serviceId", getHost(requestData)));
+						valueOrUnknown("uri", getPath(requestData)), valueOrUnknown("serviceId", getHost(requestData)));
 			}
 		}
-		return Tags.of(valueOrUnknown("method", UNKNOWN),
-				valueOrUnknown("uri", UNKNOWN),
+		return Tags.of(valueOrUnknown("method", UNKNOWN), valueOrUnknown("uri", UNKNOWN),
 				valueOrUnknown("serviceId", UNKNOWN));
 
 	}
@@ -98,36 +87,24 @@ final class LoadBalancerTags {
 	}
 
 	static Iterable<Tag> buildFailedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse()
-				.getServer();
-		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance))
-				.and(exception(completionContext.getThrowable()));
-		if (completionContext.getLoadBalancerRequest()
-				.getContext() instanceof RequestDataContext) {
-			RequestData requestData = ((RequestDataContext) completionContext
-					.getLoadBalancerRequest().getContext()).getClientRequest();
+		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
+		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance)).and(exception(completionContext.getThrowable()));
+		if (completionContext.getLoadBalancerRequest().getContext() instanceof RequestDataContext) {
+			RequestData requestData = ((RequestDataContext) completionContext.getLoadBalancerRequest().getContext())
+					.getClientRequest();
 			if (requestData != null) {
-				return tags.and(Tags
-						.of(valueOrUnknown("method", requestData.getHttpMethod()),
-								valueOrUnknown("uri", getPath(requestData))));
+				return tags.and(Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
+						valueOrUnknown("uri", getPath(requestData))));
 			}
 		}
-		return tags.and(Tags.of(valueOrUnknown("method", UNKNOWN),
-				valueOrUnknown("uri", UNKNOWN)));
+		return tags.and(Tags.of(valueOrUnknown("method", UNKNOWN), valueOrUnknown("uri", UNKNOWN)));
 	}
-
 
 	static Iterable<Tag> buildServiceInstanceTags(ServiceInstance serviceInstance) {
 		return Tags.of(valueOrUnknown("serviceId", serviceInstance.getServiceId()),
-				valueOrUnknown("serviceInstance.instanceId", serviceInstance
-						.getInstanceId()),
+				valueOrUnknown("serviceInstance.instanceId", serviceInstance.getInstanceId()),
 				valueOrUnknown("serviceInstance.host", serviceInstance.getHost()),
-				valueOrUnknown("serviceInstance.port", String
-						.valueOf(serviceInstance.getPort())),
-				valueOrUnknown("serviceInstance.uri", serviceInstance
-						.getUri(), extractPath()),
-				valueOrUnknown("serviceInstance.secure", String
-						.valueOf(serviceInstance.isSecure())));
+				valueOrUnknown("serviceInstance.port", String.valueOf(serviceInstance.getPort())));
 	}
 
 	private static Tag valueOrUnknown(String key, String value) {
@@ -144,25 +121,10 @@ final class LoadBalancerTags {
 		return Tag.of(key, UNKNOWN);
 	}
 
-	private static Tag valueOrUnknown(String key, Object value, Function<String, String> supplier) {
-		if (value != null) {
-			return Tag.of(key, supplier.apply(value.toString()));
-		}
-		return Tag.of(key, UNKNOWN);
-	}
-
-	private static Function<String, String> extractPath() {
-		return url -> {
-			String path = PATTERN_BEFORE_PATH.matcher(url).replaceFirst("");
-			return (path.startsWith("/") ? path : "/" + path);
-		};
-	}
-
 	private static Tag exception(Throwable exception) {
 		if (exception != null) {
 			String simpleName = exception.getClass().getSimpleName();
-			return Tag.of("exception", StringUtils
-					.hasText(simpleName) ? simpleName : exception.getClass().getName());
+			return Tag.of("exception", StringUtils.hasText(simpleName) ? simpleName : exception.getClass().getName());
 		}
 		return Tag.of("exception", "None");
 	}

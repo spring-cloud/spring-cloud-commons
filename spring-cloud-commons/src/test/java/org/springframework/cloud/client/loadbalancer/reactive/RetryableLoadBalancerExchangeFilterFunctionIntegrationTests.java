@@ -45,6 +45,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -108,7 +109,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
 				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
 						.values();
-		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
+		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
 				.getInstances("testservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
 						.getCompleteLog().values();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
@@ -270,7 +271,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 
 		Map<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
-		Map<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+		Map<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
 		public void onStart(Request<Object> request) {
@@ -278,7 +279,12 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		}
 
 		@Override
-		public void onComplete(CompletionContext<Object, ServiceInstance> completionContext) {
+		public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
+
+		}
+
+		@Override
+		public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 			completeLog.clear();
 			completeLog.put(getName() + UUID.randomUUID(), completionContext);
 		}
@@ -287,7 +293,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 			return startLog;
 		}
 
-		Map<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
+		Map<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
 		}
 

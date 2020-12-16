@@ -503,7 +503,7 @@ public class RetryLoadBalancerInterceptorTests {
 			T response = (T) new MockClientHttpResponse(new byte[] {}, HttpStatus.OK);
 			supportedLoadBalancerProcessors
 					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext(CompletionContext.Status.SUCCESS,
-							new DefaultResponse(defaultServiceInstance()))));
+							new DefaultResponse(defaultServiceInstance()), new DefaultRequest<>())));
 			return response;
 		}
 
@@ -532,7 +532,7 @@ public class RetryLoadBalancerInterceptorTests {
 
 		final ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
-		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
 		public boolean supports(Class requestContextClass, Class responseClass, Class serverTypeClass) {
@@ -547,7 +547,12 @@ public class RetryLoadBalancerInterceptorTests {
 		}
 
 		@Override
-		public void onComplete(CompletionContext<Object, ServiceInstance> completionContext) {
+		public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
+
+		}
+
+		@Override
+		public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 			completeLog.put(getName() + UUID.randomUUID(), completionContext);
 		}
 
@@ -555,7 +560,7 @@ public class RetryLoadBalancerInterceptorTests {
 			return startLog;
 		}
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
+		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
 		}
 

@@ -43,6 +43,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
@@ -135,7 +136,7 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
 				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
 						.values();
-		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
+		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
 				.getInstances("testservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
 						.getCompleteLog().values();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
@@ -206,7 +207,7 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 
 		ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
 		public void onStart(Request<Object> request) {
@@ -214,7 +215,12 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		}
 
 		@Override
-		public void onComplete(CompletionContext<Object, ServiceInstance> completionContext) {
+		public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
+
+		}
+
+		@Override
+		public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 			completeLog.put(getName() + UUID.randomUUID(), completionContext);
 		}
 
@@ -222,7 +228,7 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 			return startLog;
 		}
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
+		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
 		}
 
