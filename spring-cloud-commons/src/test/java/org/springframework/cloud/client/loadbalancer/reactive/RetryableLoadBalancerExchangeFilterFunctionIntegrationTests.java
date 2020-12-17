@@ -109,11 +109,17 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
 				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
 						.values();
+		Collection<Request<Object>> lifecycleLogStartRequests = ((TestLoadBalancerLifecycle) factory
+				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle"))
+						.getStartRequestLog().values();
 		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
 				.getInstances("testservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
 						.getCompleteLog().values();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
+				.contains(callbackTestHint);
+		assertThat(lifecycleLogStartRequests)
+				.extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains(callbackTestHint);
 		assertThat(anotherLifecycleLogRequests)
 				.extracting(completionContext -> ((ResponseData) completionContext.getClientResponse()).getRequestData()
@@ -271,6 +277,8 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 
 		Map<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
+		Map<String, Request<Object>> startRequestLog = new ConcurrentHashMap<>();
+
 		Map<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
@@ -280,7 +288,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 
 		@Override
 		public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
-
+			startRequestLog.put(getName() + UUID.randomUUID(), request);
 		}
 
 		@Override
@@ -295,6 +303,10 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 
 		Map<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
+		}
+
+		Map<String, Request<Object>> getStartRequestLog() {
+			return startRequestLog;
 		}
 
 		protected String getName() {

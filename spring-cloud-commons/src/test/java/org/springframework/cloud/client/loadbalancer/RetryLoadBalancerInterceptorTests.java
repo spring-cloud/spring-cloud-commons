@@ -373,16 +373,26 @@ public class RetryLoadBalancerInterceptorTests {
 		interceptor.intercept(request, new byte[] {}, mock(ClientHttpRequestExecution.class));
 
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("testLifecycle")).getStartLog()).hasSize(1);
+		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("testLifecycle")).getStartRequestLog())
+				.hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("testLifecycle")).getCompleteLog()).hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("anotherLifecycle")).getStartLog()).hasSize(1);
+		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("anotherLifecycle")).getStartRequestLog())
+				.hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("anotherLifecycle")).getCompleteLog())
 				.hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("testLifecycle")).getStartLog())
 				.hasSize(0);
+		assertThat(
+				((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("testLifecycle")).getStartRequestLog())
+						.hasSize(1);
 		assertThat(((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("testLifecycle")).getCompleteLog())
 				.hasSize(1);
 		assertThat(((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("anotherLifecycle")).getStartLog())
 				.hasSize(0);
+		assertThat(
+				((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("testLifecycle")).getStartRequestLog())
+						.hasSize(1);
 		assertThat(
 				((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("anotherLifecycle")).getCompleteLog())
 						.hasSize(1);
@@ -499,7 +509,8 @@ public class RetryLoadBalancerInterceptorTests {
 			Set<LoadBalancerLifecycle> supportedLoadBalancerProcessors = LoadBalancerLifecycleValidator
 					.getSupportedLifecycleProcessors(lifecycleProcessors, DefaultRequestContext.class, Object.class,
 							ServiceInstance.class);
-
+			supportedLoadBalancerProcessors.forEach(lifecycle -> lifecycle.onStartRequest(new DefaultRequest<>(),
+					new DefaultResponse(serviceInstance)));
 			T response = (T) new MockClientHttpResponse(new byte[] {}, HttpStatus.OK);
 			supportedLoadBalancerProcessors
 					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext(CompletionContext.Status.SUCCESS,
@@ -532,6 +543,8 @@ public class RetryLoadBalancerInterceptorTests {
 
 		final ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
+		final ConcurrentHashMap<String, Request<Object>> startRequestLog = new ConcurrentHashMap<>();
+
 		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
@@ -548,7 +561,7 @@ public class RetryLoadBalancerInterceptorTests {
 
 		@Override
 		public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
-
+			startRequestLog.put(getName() + UUID.randomUUID(), request);
 		}
 
 		@Override
@@ -562,6 +575,10 @@ public class RetryLoadBalancerInterceptorTests {
 
 		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
+		}
+
+		ConcurrentHashMap<String, Request<Object>> getStartRequestLog() {
+			return startRequestLog;
 		}
 
 		protected String getName() {

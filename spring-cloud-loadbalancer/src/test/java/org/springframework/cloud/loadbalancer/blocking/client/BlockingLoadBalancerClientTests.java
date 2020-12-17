@@ -173,11 +173,17 @@ class BlockingLoadBalancerClientTests {
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
 				.getInstances("myservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
 						.values();
+		Collection<Request<Object>> lifecycleLogStartedRequests = ((TestLoadBalancerLifecycle) factory
+				.getInstances("myservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle"))
+						.getStartRequestLog().values();
 		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
 				.getInstances("myservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
 						.getCompleteLog().values();
 		assertThat(actualResult).isEqualTo(result);
 		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
+				.contains(callbackTestHint);
+		assertThat(lifecycleLogStartedRequests)
+				.extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains(callbackTestHint);
 		assertThat(anotherLifecycleLogRequests).extracting(CompletionContext::getClientResponse).contains(result);
 	}
@@ -233,6 +239,8 @@ class BlockingLoadBalancerClientTests {
 
 		final ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
+		final ConcurrentHashMap<String, Request<Object>> startRequestLog = new ConcurrentHashMap<>();
+
 		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
@@ -242,7 +250,7 @@ class BlockingLoadBalancerClientTests {
 
 		@Override
 		public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
-
+			startRequestLog.put(getName() + UUID.randomUUID(), request);
 		}
 
 		@Override
@@ -256,6 +264,10 @@ class BlockingLoadBalancerClientTests {
 
 		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
+		}
+
+		ConcurrentHashMap<String, Request<Object>> getStartRequestLog() {
+			return startRequestLog;
 		}
 
 		protected String getName() {
