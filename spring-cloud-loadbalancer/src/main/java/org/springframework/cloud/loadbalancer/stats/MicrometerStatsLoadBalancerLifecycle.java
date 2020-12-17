@@ -109,8 +109,8 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 	}
 
 	private boolean requestHasBeenTimed(Object loadBalancerRequestContext) {
-		return loadBalancerRequestContext instanceof TimedRequestContext && (((TimedRequestContext) loadBalancerRequestContext)
-				.getRequestStartTime() != 0L);
+		return loadBalancerRequestContext instanceof TimedRequestContext
+				&& (((TimedRequestContext) loadBalancerRequestContext).getRequestStartTime() != 0L);
 	}
 
 }

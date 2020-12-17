@@ -67,7 +67,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	@Override
 	public <T> T execute(String serviceId, LoadBalancerRequest<T> request) throws IOException {
 		String hint = getHint(serviceId);
-		DefaultRequest<DefaultRequestContext> lbRequest = new DefaultRequest<>(
+		LoadBalancerRequestAdapter<T, DefaultRequestContext> lbRequest = new LoadBalancerRequestAdapter<>(request,
 				new DefaultRequestContext(request, hint));
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
@@ -80,7 +80,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 					new CompletionContext<>(CompletionContext.Status.DISCARD, new EmptyResponse(), lbRequest)));
 			throw new IllegalStateException("No instances available for " + serviceId);
 		}
-		return execute(serviceId, serviceInstance, new LoadBalancerRequestAdapter<>(request));
+		return execute(serviceId, serviceInstance, lbRequest);
 	}
 
 	@Override
@@ -95,6 +95,8 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		if (lbRequest.getContext() instanceof TimedRequestContext) {
 			((TimedRequestContext) lbRequest.getContext()).setRequestStartTime(System.nanoTime());
 		}
+		supportedLifecycleProcessors
+				.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, new DefaultResponse(serviceInstance)));
 		try {
 			T response = request.apply(serviceInstance);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(

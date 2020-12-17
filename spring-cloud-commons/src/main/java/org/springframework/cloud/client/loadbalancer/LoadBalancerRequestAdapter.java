@@ -21,12 +21,16 @@ import org.springframework.cloud.client.ServiceInstance;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class LoadBalancerRequestAdapter<T> extends DefaultRequest<DefaultRequestContext>
-		implements LoadBalancerRequest<T> {
+public class LoadBalancerRequestAdapter<T, RC> extends DefaultRequest<RC> implements LoadBalancerRequest<T> {
 
 	private final LoadBalancerRequest<T> delegate;
 
 	public LoadBalancerRequestAdapter(LoadBalancerRequest<T> delegate) {
+		this.delegate = delegate;
+	}
+
+	public LoadBalancerRequestAdapter(LoadBalancerRequest<T> delegate, RC context) {
+		super(context);
 		this.delegate = delegate;
 	}
 
