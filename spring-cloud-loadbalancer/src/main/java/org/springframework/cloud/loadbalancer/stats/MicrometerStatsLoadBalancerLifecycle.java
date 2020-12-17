@@ -82,7 +82,7 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 	public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 		long requestFinishedTimestamp = System.nanoTime();
 		if (CompletionContext.Status.DISCARD.equals(completionContext.status())) {
-			Counter.builder("loadbalancer.requests.discarded").tags(buildDiscardedRequestTags(completionContext))
+			Counter.builder("loadbalancer.requests.discard").tags(buildDiscardedRequestTags(completionContext))
 					.register(meterRegistry).increment();
 			return;
 		}
@@ -99,6 +99,7 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 						.record(requestFinishedTimestamp
 								- ((TimedRequestContext) loadBalancerRequestContext).getRequestStartTime(),
 								TimeUnit.NANOSECONDS);
+				return;
 			}
 			Timer.builder("loadbalancer.requests.success").tags(buildSuccessRequestTags(completionContext))
 					.register(meterRegistry)

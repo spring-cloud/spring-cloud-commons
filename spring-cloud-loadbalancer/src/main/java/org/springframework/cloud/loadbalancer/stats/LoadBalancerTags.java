@@ -54,7 +54,7 @@ final class LoadBalancerTags {
 			}
 
 			tags = tags.and(Outcome.forStatus(responseData.getHttpStatus().value()).asTag(),
-					valueOrUnknown("status", responseData.getHttpStatus()));
+					valueOrUnknown("status", responseData.getHttpStatus().value()));
 		}
 		else {
 			tags = tags.and(Tag.of("method", UNKNOWN), Tag.of("uri", UNKNOWN), Tag.of("outcome", UNKNOWN),
