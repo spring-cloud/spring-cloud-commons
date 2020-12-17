@@ -39,7 +39,6 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValida
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
-import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
@@ -102,7 +101,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
 						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
-						RequestDataContext.class, ResponseData.class, ServiceInstance.class);
+						RetryableRequestContext.class, ResponseData.class, ServiceInstance.class);
 		String hint = getHint(serviceId, properties.getHint());
 		RequestData requestData = new RequestData(clientRequest);
 		DefaultRequest<RetryableRequestContext> lbRequest = new DefaultRequest<>(
