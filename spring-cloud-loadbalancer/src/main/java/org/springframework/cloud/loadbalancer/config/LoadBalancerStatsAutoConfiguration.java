@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.config;
 import io.micrometer.core.instrument.MeterRegistry;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.loadbalancer.stats.MicrometerStatsLifecycle;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Olga Maciaszek-Sharma
  */
 @Configuration(proxyBeanMethods = false)
+@ConditionalOnClass(MeterRegistry.class)
 @ConditionalOnProperty(value = "spring.cloud.loadbalancer.stats.micrometer.enabled", havingValue = "true")
 public class LoadBalancerStatsAutoConfiguration {
 
