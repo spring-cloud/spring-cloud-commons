@@ -37,9 +37,11 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerRequestAdapter;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.cloud.client.loadbalancer.TimedRequestContext;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.ReflectionUtils;
 
 import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer.REQUEST;
@@ -99,8 +101,10 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 				.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, new DefaultResponse(serviceInstance)));
 		try {
 			T response = request.apply(serviceInstance);
-			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(
-					new CompletionContext<>(CompletionContext.Status.SUCCESS, defaultResponse, response, lbRequest)));
+			Object clientResponse = getClientResponse(response);
+			supportedLifecycleProcessors
+					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
+							defaultResponse, clientResponse, lbRequest)));
 			return response;
 		}
 		catch (IOException iOException) {
@@ -114,6 +118,21 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 			ReflectionUtils.rethrowRuntimeException(exception);
 		}
 		return null;
+	}
+
+	private <T> Object getClientResponse(T response) {
+		ClientHttpResponse clientHttpResponse = null;
+		if (response instanceof ClientHttpResponse) {
+			clientHttpResponse = (ClientHttpResponse) response;
+		}
+		if (clientHttpResponse != null) {
+			try {
+				return new ResponseData(clientHttpResponse, null);
+			}
+			catch (IOException ignored) {
+			}
+		}
+		return response;
 	}
 
 	@Override
