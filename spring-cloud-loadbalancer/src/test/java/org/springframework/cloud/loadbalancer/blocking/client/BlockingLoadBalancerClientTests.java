@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -237,11 +238,11 @@ class BlockingLoadBalancerClientTests {
 
 	protected static class TestLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
-		final ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
+		final Map<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
-		final ConcurrentHashMap<String, Request<Object>> startRequestLog = new ConcurrentHashMap<>();
+		final Map<String, Request<Object>> startRequestLog = new ConcurrentHashMap<>();
 
-		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
+		final Map<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
 		public void onStart(Request<Object> request) {
@@ -258,15 +259,15 @@ class BlockingLoadBalancerClientTests {
 			completeLog.put(getName() + UUID.randomUUID(), completionContext);
 		}
 
-		ConcurrentHashMap<String, Request<Object>> getStartLog() {
+		Map<String, Request<Object>> getStartLog() {
 			return startLog;
 		}
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
+		Map<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
 		}
 
-		ConcurrentHashMap<String, Request<Object>> getStartRequestLog() {
+		Map<String, Request<Object>> getStartRequestLog() {
 			return startRequestLog;
 		}
 

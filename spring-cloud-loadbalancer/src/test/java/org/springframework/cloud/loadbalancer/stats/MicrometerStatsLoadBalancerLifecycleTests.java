@@ -45,6 +45,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.UNKNOWN;
 
 /**
+ * Tests for {@link MicrometerStatsLoadBalancerLifecycle}.
+ *
  * @author Olga Maciaszek-Sharma
  */
 class MicrometerStatsLoadBalancerLifecycleTests {

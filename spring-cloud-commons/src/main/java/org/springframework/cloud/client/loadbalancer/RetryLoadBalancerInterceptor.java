@@ -89,7 +89,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 			Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 					.getSupportedLifecycleProcessors(
 							loadBalancerFactory.getInstances(serviceName, LoadBalancerLifecycle.class),
-							RequestDataContext.class, ResponseData.class, ServiceInstance.class);
+							RetryableRequestContext.class, ResponseData.class, ServiceInstance.class);
 			String hint = getHint(serviceName);
 			if (serviceInstance == null) {
 				if (LOG.isDebugEnabled()) {
@@ -115,7 +115,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 				Response<ServiceInstance> lbResponse = new DefaultResponse(serviceInstance);
 				if (serviceInstance == null) {
 					supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RequestDataContext>(
+							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
 									CompletionContext.Status.DISCARD, lbResponse, new DefaultRequest<>(
 											new RetryableRequestContext(null, new RequestData(request), hint)))));
 				}

@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import org.springframework.cloud.client.ServiceInstance;
-
 /**
  * Allows to define actions that should be carried out before and after load-balancing.
  *
@@ -54,7 +52,7 @@ public interface LoadBalancerLifecycle<RC, RES, T> {
 	 * a service instance
 	 * @param lbResponse the {@link Response} returned by the LoadBalancer
 	 */
-	void onStartRequest(Request<RC> request, Response<ServiceInstance> lbResponse);
+	void onStartRequest(Request<RC> request, Response<T> lbResponse);
 
 	/**
 	 * A callback method executed after load-balancing.

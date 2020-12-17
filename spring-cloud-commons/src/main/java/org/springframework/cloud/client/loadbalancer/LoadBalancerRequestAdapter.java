@@ -19,7 +19,11 @@ package org.springframework.cloud.client.loadbalancer;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * An adapter class that allows creating {@link Request} objects from previously
+ * {@link LoadBalancerRequest} objects.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 public class LoadBalancerRequestAdapter<T, RC> extends DefaultRequest<RC> implements LoadBalancerRequest<T> {
 

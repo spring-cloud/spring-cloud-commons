@@ -26,7 +26,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * Autoconfiguration that provides a {@link MicrometerStatsLoadBalancerLifecycle} bean.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(MeterRegistry.class)

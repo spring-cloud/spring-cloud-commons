@@ -38,7 +38,11 @@ import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buil
 import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buildSuccessRequestTags;
 
 /**
+ * An implementation of {@link LoadBalancerLifecycle} that records metrics for
+ * load-balanced calls.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 

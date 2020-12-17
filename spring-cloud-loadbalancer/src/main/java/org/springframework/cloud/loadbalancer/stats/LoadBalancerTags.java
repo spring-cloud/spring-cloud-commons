@@ -19,7 +19,6 @@ package org.springframework.cloud.loadbalancer.stats;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
 
-import org.springframework.boot.actuate.metrics.http.Outcome;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.RequestData;
@@ -28,7 +27,10 @@ import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.util.StringUtils;
 
 /**
+ * Utility class for building metrics tags for load-balanced calls.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 final class LoadBalancerTags {
 
@@ -53,7 +55,7 @@ final class LoadBalancerTags {
 				tags = tags.and(Tag.of("method", UNKNOWN), Tag.of("uri", UNKNOWN));
 			}
 
-			tags = tags.and(Outcome.forStatus(statusValue(responseData)).asTag(),
+			tags = tags.and(Tag.of("outcome", forStatus(statusValue(responseData))),
 					valueOrUnknown("status", statusValue(responseData)));
 		}
 		else {
@@ -129,9 +131,30 @@ final class LoadBalancerTags {
 	private static Tag exception(Throwable exception) {
 		if (exception != null) {
 			String simpleName = exception.getClass().getSimpleName();
-			return Tag.of("exception", StringUtils.hasText(simpleName) ? simpleName : exception.getClass().getName());
+			return Tag.of("exception", StringUtils
+					.hasText(simpleName) ? simpleName : exception.getClass().getName());
 		}
 		return Tag.of("exception", "None");
+	}
+
+	// Logic from Actuator's `Outcome` class. Copied in here to avoid adding Actuator dependency.
+	public static String forStatus(int status) {
+		if (status >= 100 && status < 200) {
+			return "INFORMATIONAL";
+		}
+		else if (status >= 200 && status < 300) {
+			return "SUCCESS";
+		}
+		else if (status >= 300 && status < 400) {
+			return "REDIRECTION";
+		}
+		else if (status >= 400 && status < 500) {
+			return "CLIENT_ERROR";
+		}
+		else if (status >= 500 && status < 600) {
+			return "SERVER_ERROR";
+		}
+		return UNKNOWN;
 	}
 
 }

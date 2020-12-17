@@ -17,7 +17,10 @@
 package org.springframework.cloud.client.loadbalancer;
 
 /**
+ * Allows setting and retrieving request start time.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.0.0
  */
 public interface TimedRequestContext {
 
