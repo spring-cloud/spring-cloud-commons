@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  */
 final class LoadBalancerTags {
 
-	private static final String UNKNOWN = "UNKNOWN";
+	static final String UNKNOWN = "UNKNOWN";
 
 	private LoadBalancerTags() {
 		throw new UnsupportedOperationException("Cannot instantiate utility class");
@@ -53,14 +53,20 @@ final class LoadBalancerTags {
 				tags = tags.and(Tag.of("method", UNKNOWN), Tag.of("uri", UNKNOWN));
 			}
 
-			tags = tags.and(Outcome.forStatus(responseData.getHttpStatus().value()).asTag(),
-					valueOrUnknown("status", responseData.getHttpStatus().value()));
+			tags = tags.and(Outcome.forStatus(statusValue(responseData)).asTag(),
+					valueOrUnknown("status", statusValue(responseData)));
 		}
 		else {
 			tags = tags.and(Tag.of("method", UNKNOWN), Tag.of("uri", UNKNOWN), Tag.of("outcome", UNKNOWN),
 					Tag.of("status", UNKNOWN));
 		}
 		return tags;
+	}
+
+	// In keeping with the way null HttpStatus is handled in Actuator
+	private static int statusValue(ResponseData responseData) {
+		return responseData.getHttpStatus() != null ? responseData.getHttpStatus()
+				.value() : 200;
 	}
 
 	private static String getPath(RequestData requestData) {
