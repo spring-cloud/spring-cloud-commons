@@ -120,13 +120,12 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 											new RetryableRequestContext(null, new RequestData(request), hint)))));
 				}
 			}
+			LoadBalancerRequestAdapter<ClientHttpResponse, RetryableRequestContext> lbRequest = new LoadBalancerRequestAdapter<>(
+					requestFactory.createRequest(request, body, execution),
+					new RetryableRequestContext(null, new RequestData(request), hint));
 			ServiceInstance finalServiceInstance = serviceInstance;
-			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStartRequest(
-					new DefaultRequest<>(new RetryableRequestContext(null, new RequestData(request), hint)),
-					new DefaultResponse(finalServiceInstance)));
 			ClientHttpResponse response = RetryLoadBalancerInterceptor.this.loadBalancer.execute(serviceName,
-					finalServiceInstance,
-					new LoadBalancerRequestAdapter<>(requestFactory.createRequest(request, body, execution)));
+					finalServiceInstance, lbRequest);
 			int statusCode = response.getRawStatusCode();
 			if (retryPolicy != null && retryPolicy.retryableStatusCode(statusCode)) {
 				if (LOG.isDebugEnabled()) {
