@@ -40,13 +40,13 @@ import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buil
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class MicrometerStatsLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
+public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
 	private final MeterRegistry meterRegistry;
 
 	private final ConcurrentHashMap<ServiceInstance, AtomicLong> activeRequestsPerInstance = new ConcurrentHashMap<>();
 
-	public MicrometerStatsLifecycle(MeterRegistry meterRegistry) {
+	public MicrometerStatsLoadBalancerLifecycle(MeterRegistry meterRegistry) {
 		this.meterRegistry = meterRegistry;
 	}
 
@@ -92,7 +92,7 @@ public class MicrometerStatsLifecycle implements LoadBalancerLifecycle<Object, O
 			activeRequestsCounter.decrementAndGet();
 		}
 		Object loadBalancerRequestContext = completionContext.getLoadBalancerRequest().getContext();
-		if (loadBalancerRequestContext instanceof TimedRequestContext) {
+		if (requestHasBeenTimed(loadBalancerRequestContext)) {
 			if (CompletionContext.Status.FAILED.equals(completionContext.status())) {
 				Timer.builder("loadbalancer.requests.failed").tags(buildFailedRequestTags(completionContext))
 						.register(meterRegistry)
@@ -106,6 +106,11 @@ public class MicrometerStatsLifecycle implements LoadBalancerLifecycle<Object, O
 							- ((TimedRequestContext) loadBalancerRequestContext).getRequestStartTime(),
 							TimeUnit.NANOSECONDS);
 		}
+	}
+
+	private boolean requestHasBeenTimed(Object loadBalancerRequestContext) {
+		return loadBalancerRequestContext instanceof TimedRequestContext && (((TimedRequestContext) loadBalancerRequestContext)
+				.getRequestStartTime() != 0L);
 	}
 
 }
