@@ -38,7 +38,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(OAuth2RestTemplate.class)
-@ConditionalOnProperty("security.oauth2.resource.loadBalanced")
+@ConditionalOnProperty("spring.cloud.oauth2.load-balanced.enabled=true")
 @AutoConfigureAfter(OAuth2AutoConfiguration.class)
 public class OAuth2LoadBalancerClientAutoConfiguration {
 
