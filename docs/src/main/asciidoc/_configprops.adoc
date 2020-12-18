@@ -27,6 +27,7 @@
 |spring.cloud.loadbalancer.cache.capacity | `256` | Initial cache capacity expressed as int.
 |spring.cloud.loadbalancer.cache.enabled | `true` | Enables Spring Cloud LoadBalancer caching mechanism.
 |spring.cloud.loadbalancer.cache.ttl | `35s` | Time To Live - time counted from writing of the record, after which cache entries are expired, expressed as a {@link Duration}. The property {@link String} has to be in keeping with the appropriate syntax as specified in Spring Boot <code>StringToDurationConverter</code>. @see <a href= "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java">StringToDurationConverter.java</a>
+|spring.cloud.loadbalancer.configurations | `default` | Enables a predefined LoadBalancer configuration.
 |spring.cloud.loadbalancer.health-check.initial-delay | `0` | Initial delay value for the HealthCheck scheduler.
 |spring.cloud.loadbalancer.health-check.interval | `25s` | Interval for rerunning the HealthCheck scheduler.
 |spring.cloud.loadbalancer.health-check.path |  | 
@@ -39,7 +40,7 @@
 |spring.cloud.loadbalancer.retry.backoff.jitter | `0.5` | Used to set {@link RetryBackoffSpec#jitter}.
 |spring.cloud.loadbalancer.retry.backoff.max-backoff |  | Used to set {@link RetryBackoffSpec#maxBackoff}.
 |spring.cloud.loadbalancer.retry.backoff.min-backoff | `5ms` | Used to set {@link RetryBackoffSpec#minBackoff}.
-|spring.cloud.loadbalancer.retry.enabled | `true` | 
+|spring.cloud.loadbalancer.retry.enabled | `true` | Enables LoadBalancer retries.
 |spring.cloud.loadbalancer.retry.max-retries-on-next-service-instance | `1` | Number of retries to be executed on the next <code>ServiceInstance</code>. A <code>ServiceInstance</code> is chosen before each retry call.
 |spring.cloud.loadbalancer.retry.max-retries-on-same-service-instance | `0` | Number of retries to be executed on the same <code>ServiceInstance</code>.
 |spring.cloud.loadbalancer.retry.retry-on-all-operations | `false` | Indicates retries should be attempted on operations other than {@link HttpMethod#GET}.
