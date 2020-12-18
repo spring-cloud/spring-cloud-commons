@@ -94,7 +94,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 					LOG.warn(message);
 				}
 				supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-						.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, lbResponse, lbRequest)));
+						.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, lbRequest, lbResponse)));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
 			}
@@ -111,10 +111,10 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
 							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RequestDataContext>(
-									CompletionContext.Status.FAILED, throwable, lbResponse, lbRequest))))
+									CompletionContext.Status.FAILED, throwable, lbRequest, lbResponse))))
 					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
 							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-									lbResponse, new ResponseData(clientResponse, requestData), lbRequest))));
+									lbRequest, lbResponse, new ResponseData(clientResponse, requestData)))));
 		});
 	}
 

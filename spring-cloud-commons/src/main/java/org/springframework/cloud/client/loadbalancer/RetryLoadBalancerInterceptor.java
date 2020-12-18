@@ -116,8 +116,10 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 				if (serviceInstance == null) {
 					supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
 							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
-									CompletionContext.Status.DISCARD, lbResponse, new DefaultRequest<>(
-											new RetryableRequestContext(null, new RequestData(request), hint)))));
+									CompletionContext.Status.DISCARD,
+									new DefaultRequest<>(
+											new RetryableRequestContext(null, new RequestData(request), hint)),
+									lbResponse)));
 				}
 			}
 			LoadBalancerRequestAdapter<ClientHttpResponse, RetryableRequestContext> lbRequest = new LoadBalancerRequestAdapter<>(

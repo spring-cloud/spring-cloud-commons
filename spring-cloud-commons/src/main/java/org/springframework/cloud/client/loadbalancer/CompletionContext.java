@@ -38,30 +38,30 @@ public class CompletionContext<RES, T, C> {
 	private final Request<C> loadBalancerRequest;
 
 	public CompletionContext(Status status, Request<C> loadBalancerRequest) {
-		this(status, null, null, null, loadBalancerRequest);
+		this(status, null, loadBalancerRequest, null, null);
 	}
 
-	public CompletionContext(Status status, Response<T> response, Request<C> loadBalancerRequest) {
-		this(status, null, response, null, loadBalancerRequest);
+	public CompletionContext(Status status, Request<C> loadBalancerRequest, Response<T> response) {
+		this(status, null, loadBalancerRequest, response, null);
 	}
 
-	public CompletionContext(Status status, Throwable throwable, Response<T> loadBalancerResponse,
-			Request<C> loadBalancerRequest) {
-		this(status, throwable, loadBalancerResponse, null, loadBalancerRequest);
+	public CompletionContext(Status status, Throwable throwable, Request<C> loadBalancerRequest,
+			Response<T> loadBalancerResponse) {
+		this(status, throwable, loadBalancerRequest, loadBalancerResponse, null);
 	}
 
-	public CompletionContext(Status status, Response<T> loadBalancerResponse, RES clientResponse,
-			Request<C> loadBalancerRequest) {
-		this(status, null, loadBalancerResponse, clientResponse, loadBalancerRequest);
+	public CompletionContext(Status status, Request<C> loadBalancerRequest, Response<T> loadBalancerResponse,
+			RES clientResponse) {
+		this(status, null, loadBalancerRequest, loadBalancerResponse, clientResponse);
 	}
 
-	public CompletionContext(Status status, Throwable throwable, Response<T> loadBalancerResponse, RES clientResponse,
-			Request<C> loadBalancerRequest) {
+	public CompletionContext(Status status, Throwable throwable, Request<C> loadBalancerRequest,
+			Response<T> loadBalancerResponse, RES clientResponse) {
 		this.status = status;
 		this.throwable = throwable;
+		this.loadBalancerRequest = loadBalancerRequest;
 		this.loadBalancerResponse = loadBalancerResponse;
 		this.clientResponse = clientResponse;
-		this.loadBalancerRequest = loadBalancerRequest;
 	}
 
 	public Status status() {

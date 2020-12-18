@@ -514,7 +514,7 @@ public class RetryLoadBalancerInterceptorTests {
 			T response = (T) new MockClientHttpResponse(new byte[] {}, HttpStatus.OK);
 			supportedLoadBalancerProcessors
 					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext(CompletionContext.Status.SUCCESS,
-							new DefaultResponse(defaultServiceInstance()), new DefaultRequest<>())));
+							new DefaultRequest<>(), new DefaultResponse(defaultServiceInstance()))));
 			return response;
 		}
 

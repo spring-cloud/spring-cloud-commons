@@ -117,7 +117,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 				}
 				supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
 						.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
-								CompletionContext.Status.DISCARD, lbResponse, lbRequest)));
+								CompletionContext.Status.DISCARD, lbRequest, lbResponse)));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(serviceInstanceUnavailableMessage(serviceId)).build());
 			}
@@ -134,10 +134,10 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
 							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
-									CompletionContext.Status.FAILED, throwable, lbResponse, lbRequest))))
+									CompletionContext.Status.FAILED, throwable, lbRequest, lbResponse))))
 					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
 							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-									lbResponse, new ResponseData(clientResponse, requestData), lbRequest))))
+									lbRequest, lbResponse, new ResponseData(clientResponse, requestData)))))
 					.map(clientResponse -> {
 						loadBalancerRetryContext.setClientResponse(clientResponse);
 						if (shouldRetrySameServiceInstance(loadBalancerRetryContext)) {
