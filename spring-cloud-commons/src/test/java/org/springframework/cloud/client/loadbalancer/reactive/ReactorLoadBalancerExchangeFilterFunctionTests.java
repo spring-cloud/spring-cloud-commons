@@ -43,6 +43,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
@@ -128,18 +129,23 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 	void loadBalancerLifecycleCallbacksExecuted() {
 		final String callbackTestHint = "callbackTestHint";
 		loadBalancerProperties.getHint().put("testservice", "callbackTestHint");
-		final String result = "callbackTestResult";
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice").filter(loadBalancerFunction)
 				.build().get().uri("/callback").exchange().block();
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
 				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
 						.values();
-		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
+		Collection<Request<Object>> lifecycleStartedLogRequests = ((TestLoadBalancerLifecycle) factory
+				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle"))
+						.getStartRequestLog().values();
+		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
 				.getInstances("testservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
 						.getCompleteLog().values();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
+				.contains(callbackTestHint);
+		assertThat(lifecycleStartedLogRequests)
+				.extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains(callbackTestHint);
 		assertThat(anotherLifecycleLogRequests)
 				.extracting(completionContext -> ((ResponseData) completionContext.getClientResponse()).getRequestData()
@@ -204,9 +210,11 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 
 	protected static class TestLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
-		ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
+		final Map<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+		final Map<String, Request<Object>> startRequestLog = new ConcurrentHashMap<>();
+
+		final Map<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
 		public void onStart(Request<Object> request) {
@@ -214,16 +222,25 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		}
 
 		@Override
-		public void onComplete(CompletionContext<Object, ServiceInstance> completionContext) {
+		public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
+			startRequestLog.put(getName() + UUID.randomUUID(), request);
+		}
+
+		@Override
+		public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 			completeLog.put(getName() + UUID.randomUUID(), completionContext);
 		}
 
-		ConcurrentHashMap<String, Request<Object>> getStartLog() {
+		Map<String, Request<Object>> getStartLog() {
 			return startLog;
 		}
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
+		Map<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
+		}
+
+		Map<String, Request<Object>> getStartRequestLog() {
+			return startRequestLog;
 		}
 
 		protected String getName() {

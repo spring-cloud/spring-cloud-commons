@@ -16,13 +16,18 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientResponse;
 
@@ -59,6 +64,11 @@ public class ResponseData {
 		this(response.getStatusCode(), response.getHeaders(), response.getCookies(), requestData);
 	}
 
+	public ResponseData(ClientHttpResponse clientHttpResponse, RequestData requestData) throws IOException {
+		this(clientHttpResponse.getStatusCode(), clientHttpResponse.getHeaders(),
+				buildCookiesFromHeaders(clientHttpResponse.getHeaders()), requestData);
+	}
+
 	public HttpStatus getHttpStatus() {
 		return httpStatus;
 	}
@@ -82,6 +92,30 @@ public class ResponseData {
 		return to.toString();
 	}
 
+	static MultiValueMap<String, ResponseCookie> buildCookiesFromHeaders(HttpHeaders headers) {
+		LinkedMultiValueMap<String, ResponseCookie> newCookies = new LinkedMultiValueMap<>();
+		if (headers == null) {
+			return newCookies;
+		}
+		List<String> cookiesFromHeaders = headers.get(HttpHeaders.COOKIE);
+		if (cookiesFromHeaders != null) {
+			cookiesFromHeaders.forEach(cookie -> {
+				String[] splitCookie = cookie.split("=");
+				if (splitCookie.length < 2) {
+					return;
+				}
+				newCookies.put(splitCookie[0],
+						Collections.singletonList(ResponseCookie.from(splitCookie[0], splitCookie[1]).build()));
+			});
+		}
+		return newCookies;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(httpStatus, headers, cookies, requestData);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -93,11 +127,6 @@ public class ResponseData {
 		ResponseData that = (ResponseData) o;
 		return httpStatus == that.httpStatus && Objects.equals(headers, that.headers)
 				&& Objects.equals(cookies, that.cookies) && Objects.equals(requestData, that.requestData);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(httpStatus, headers, cookies, requestData);
 	}
 
 }
