@@ -1118,9 +1118,9 @@ public class MyConfiguration {
 
 One type of bean that it may be useful to register using <<custom-loadbalancer-configuration,Custom LoadBalancer configuration>> is `LoadBalancerLifecycle`.
 
-The LoadBalancerLifecycle beans provide callback methods, named `onStart(Request<RC> request)`, `onStartRequest(Request<RC> request, Response<T> lbResponse)` and `onComplete(CompletionContext<RES, T, RC> completionContext)`, that you should implement to specify what actions should take place before and after load-balancing.
+The `LoadBalancerLifecycle` beans provide callback methods, named `onStart(Request<RC> request)`, `onStartRequest(Request<RC> request, Response<T> lbResponse)` and `onComplete(CompletionContext<RES, T, RC> completionContext)`, that you should implement to specify what actions should take place before and after load-balancing.
 
-`onStart(Request<RC> request)` takes a `Request` object as a parameter. It contains data that is used to select an appropriate instance, including the downstream client request and <<spring-cloud-loadbalancer-hints,hint>>. `onStartRequest` also takes the `Request` object, and additionally the `Response<T>` object as parameters.  On the other hand, a `CompletionContext` object is provided to the `onComplete(CompletionContext<RES, T, RC> completionContext)` method. It contains the LoadBalancer `Response`, including the selected service instance, the `Status` of the request executed against that service instance and (if available) the response returned to the downstream client, and (if an exception has occurred) the corresponding `Throwable`.
+`onStart(Request<RC> request)` takes a `Request` object as a parameter. It contains data that is used to select an appropriate instance, including the downstream client request and <<spring-cloud-loadbalancer-hints,hint>>. `onStartRequest` also takes the `Request` object and, additionally, the `Response<T>` object as parameters.  On the other hand, a `CompletionContext` object is provided to the `onComplete(CompletionContext<RES, T, RC> completionContext)` method. It contains the LoadBalancer `Response`, including the selected service instance, the `Status` of the request executed against that service instance and (if available) the response returned to the downstream client, and (if an exception has occurred) the corresponding `Throwable`.
 
 The `supports(Class requestContextClass, Class responseClass,
 Class serverTypeClass)` method can be used to determine whether the processor in question handles objects of provided types. If not overridden by the user, it returns `true`.
@@ -1130,25 +1130,25 @@ NOTE: In the preceding method calls, `RC` means `RequestContext` type, `RES` mea
 [[loadbalancer-micrometer-stats-lifecycle]]
 === Spring Cloud LoadBalancer Statistics
 
-A `LoadBalancerLifecycle` bean that we provide out of the box is `MicrometerStatsLoadBalancerLifecycle` that uses Micrometer to provide statistics for load-balanced calls.
+We provide a `LoadBalancerLifecycle` bean called `MicrometerStatsLoadBalancerLifecycle`, which uses Micrometer to provide statistics for load-balanced calls.
 
 In order to get this bean added to your application context,
 set the value of the `spring.cloud.loadbalancer.stats.micrometer.enabled` to `true` and have a `MeterRegistry` available (for example, by adding https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html[Spring Boot Actuator] to your project).
 
 `MicrometerStatsLoadBalancerLifecycle` registers the following meters in `MeterRegistry`:
 
-* `loadbalancer.requests.active` gauge that allows you to monitor the number of currently active requests for any service instance (service instance data available via tags);
-* `loadbalancer.requests.success` timer that measures the time of execution of any load-balanced requests that have ended in passing a response on to the underlying client;
-* `loadbalancer.requests.failed` timer that measures the time of execution of any load-balanced requests that have ended with an exception;
-* `loadbalancer.requests.discard` counter that measures the number of discarded load-balanced requests, i.e. requests where a service instance to run the request on has not been retrieved by the LoadBalancer.
+* `loadbalancer.requests.active`: A gauge that allows you to monitor the number of currently active requests for any service instance (service instance data available via tags);
+* `loadbalancer.requests.success`: A timer that measures the time of execution of any load-balanced requests that have ended in passing a response on to the underlying client;
+* `loadbalancer.requests.failed`: A timer that measures the time of execution of any load-balanced requests that have ended with an exception;
+* `loadbalancer.requests.discard`: A counter that measures the number of discarded load-balanced requests, i.e. requests where a service instance to run the request on has not been retrieved by the LoadBalancer.
 
-Additional information regarding the service instances, request data and response data is added to metrics via tags whenever available.
+Additional information regarding the service instances, request data, and response data is added to metrics via tags whenever available.
 
-NOTE: For some implementations, such as `BlockingLoadBalancerClient` request and response data might not be available, as we establish generic types from arguments and might not be able to determine the types and read the data.
+NOTE: For some implementations, such as `BlockingLoadBalancerClient`, request and response data might not be available, as we establish generic types from arguments and might not be able to determine the types and read the data.
 
-NOTE: The meters will be registered in the registry when at least one record is added for a given meter.
+NOTE: The meters are registered in the registry when at least one record is added for a given meter.
 
-TIP: You can further configure the behaviour of those metrics (for example, add response[publishing percentiles and histograms]) by https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-metrics-per-meter-properties[adding `MeterFilters`].
+TIP: You can further configure the behavior of those metrics (for example, add https://micrometer.io/docs/concepts#_histograms_and_percentiles[publishing percentiles and histograms]) by https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-metrics-per-meter-properties[adding `MeterFilters`].
 
 == Spring Cloud Circuit Breaker
 
