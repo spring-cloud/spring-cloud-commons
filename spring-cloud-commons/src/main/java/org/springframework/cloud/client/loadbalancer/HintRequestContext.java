@@ -25,13 +25,15 @@ import org.springframework.core.style.ToStringCreator;
  *
  * @author Olga Maciaszek-Sharma
  */
-public class HintRequestContext {
+public class HintRequestContext implements TimedRequestContext {
 
 	/**
 	 * A {@link String} value of hint that can be used to choose the correct service
 	 * instance.
 	 */
 	private String hint = "default";
+
+	private long requestStartTime;
 
 	public HintRequestContext() {
 	}
@@ -46,6 +48,16 @@ public class HintRequestContext {
 
 	public void setHint(String hint) {
 		this.hint = hint;
+	}
+
+	@Override
+	public long getRequestStartTime() {
+		return requestStartTime;
+	}
+
+	@Override
+	public void setRequestStartTime(long requestStartTime) {
+		this.requestStartTime = requestStartTime;
 	}
 
 	@Override

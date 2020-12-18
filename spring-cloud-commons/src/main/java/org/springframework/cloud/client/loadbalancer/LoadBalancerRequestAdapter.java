@@ -16,34 +16,31 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import org.springframework.http.HttpMethod;
+import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A {@link RequestData}-based {@link DefaultRequestContext}.
+ * An adapter class that allows creating {@link Request} objects from previously
+ * {@link LoadBalancerRequest} objects.
  *
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
  */
-public class RequestDataContext extends DefaultRequestContext {
+public class LoadBalancerRequestAdapter<T, RC> extends DefaultRequest<RC> implements LoadBalancerRequest<T> {
 
-	public RequestDataContext() {
-		super();
+	private final LoadBalancerRequest<T> delegate;
+
+	public LoadBalancerRequestAdapter(LoadBalancerRequest<T> delegate) {
+		this.delegate = delegate;
 	}
 
-	public RequestDataContext(RequestData requestData) {
-		this(requestData, "default");
+	public LoadBalancerRequestAdapter(LoadBalancerRequest<T> delegate, RC context) {
+		super(context);
+		this.delegate = delegate;
 	}
 
-	public RequestDataContext(RequestData requestData, String hint) {
-		super(requestData, hint);
-	}
-
-	public RequestData getClientRequest() {
-		return (RequestData) super.getClientRequest();
-	}
-
-	public HttpMethod method() {
-		return ((RequestData) super.getClientRequest()).getHttpMethod();
+	@Override
+	public T apply(ServiceInstance instance) throws Exception {
+		return delegate.apply(instance);
 	}
 
 }

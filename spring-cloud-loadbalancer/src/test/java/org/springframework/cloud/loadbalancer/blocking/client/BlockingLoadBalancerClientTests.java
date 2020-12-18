@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -173,11 +174,17 @@ class BlockingLoadBalancerClientTests {
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
 				.getInstances("myservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
 						.values();
-		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
+		Collection<Request<Object>> lifecycleLogStartedRequests = ((TestLoadBalancerLifecycle) factory
+				.getInstances("myservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle"))
+						.getStartRequestLog().values();
+		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
 				.getInstances("myservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
 						.getCompleteLog().values();
 		assertThat(actualResult).isEqualTo(result);
 		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
+				.contains(callbackTestHint);
+		assertThat(lifecycleLogStartedRequests)
+				.extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains(callbackTestHint);
 		assertThat(anotherLifecycleLogRequests).extracting(CompletionContext::getClientResponse).contains(result);
 	}
@@ -231,9 +238,11 @@ class BlockingLoadBalancerClientTests {
 
 	protected static class TestLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
-		final ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
+		final Map<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
-		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+		final Map<String, Request<Object>> startRequestLog = new ConcurrentHashMap<>();
+
+		final Map<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
 		public void onStart(Request<Object> request) {
@@ -241,16 +250,25 @@ class BlockingLoadBalancerClientTests {
 		}
 
 		@Override
-		public void onComplete(CompletionContext<Object, ServiceInstance> completionContext) {
+		public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
+			startRequestLog.put(getName() + UUID.randomUUID(), request);
+		}
+
+		@Override
+		public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 			completeLog.put(getName() + UUID.randomUUID(), completionContext);
 		}
 
-		ConcurrentHashMap<String, Request<Object>> getStartLog() {
+		Map<String, Request<Object>> getStartLog() {
 			return startLog;
 		}
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
+		Map<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
+		}
+
+		Map<String, Request<Object>> getStartRequestLog() {
+			return startRequestLog;
 		}
 
 		protected String getName() {

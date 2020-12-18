@@ -16,34 +16,16 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import org.springframework.http.HttpMethod;
-
 /**
- * A {@link RequestData}-based {@link DefaultRequestContext}.
+ * Allows setting and retrieving request start time.
  *
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
  */
-public class RequestDataContext extends DefaultRequestContext {
+public interface TimedRequestContext {
 
-	public RequestDataContext() {
-		super();
-	}
+	long getRequestStartTime();
 
-	public RequestDataContext(RequestData requestData) {
-		this(requestData, "default");
-	}
-
-	public RequestDataContext(RequestData requestData, String hint) {
-		super(requestData, hint);
-	}
-
-	public RequestData getClientRequest() {
-		return (RequestData) super.getClientRequest();
-	}
-
-	public HttpMethod method() {
-		return ((RequestData) super.getClientRequest()).getHttpMethod();
-	}
+	void setRequestStartTime(long requestStartTime);
 
 }
