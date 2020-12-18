@@ -24,8 +24,13 @@ import org.springframework.security.rsa.crypto.RsaAlgorithm;
  * @author Ryan Baxter
  */
 @ConditionalOnClass(RsaAlgorithm.class)
-@ConfigurationProperties("encrypt.rsa")
+@ConfigurationProperties(RsaProperties.PREFIX)
 public class RsaProperties {
+
+	/**
+	 * ConfigurationProperties prefix for RsaProperties.
+	 */
+	public static final String PREFIX = "encrypt.rsa";
 
 	/**
 	 * The RSA algorithm to use (DEFAULT or OEAP). Once it is set, do not change it (or

@@ -87,7 +87,7 @@ public class EncryptionBootstrapConfigurationTests {
 			then(false).as("Should not create an application context with invalid keystore location").isTrue();
 		}
 		catch (Exception e) {
-			then(e).hasRootCauseInstanceOf(IllegalStateException.class);
+			then(e).isInstanceOf(IllegalStateException.class);
 		}
 	}
 

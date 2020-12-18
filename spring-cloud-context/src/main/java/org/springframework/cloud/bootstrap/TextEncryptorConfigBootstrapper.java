@@ -16,22 +16,32 @@
 
 package org.springframework.cloud.bootstrap;
 
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.BootstrapContext;
 import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.Bootstrapper;
+import org.springframework.boot.context.properties.bind.BindHandler;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.cloud.bootstrap.encrypt.KeyProperties;
 import org.springframework.cloud.bootstrap.encrypt.RsaProperties;
+import org.springframework.cloud.context.encrypt.EncryptorFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
+import org.springframework.security.rsa.crypto.KeyStoreKeyFactory;
+import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * Bootstrapper
+ * Bootstrapper.
  *
  * @author Marcin Grzejszczak
  * @since 3.0.0
  */
 public class TextEncryptorConfigBootstrapper implements Bootstrapper {
+
+	private static final boolean RSA_IS_PRESENT = ClassUtils
+			.isPresent("org.springframework.security.rsa.crypto.RsaSecretEncryptor", null);
 
 	@Override
 	public void intitialize(BootstrapRegistry registry) {
@@ -39,47 +49,97 @@ public class TextEncryptorConfigBootstrapper implements Bootstrapper {
 			return;
 		}
 
-		registry.registerIfAbsent(KeyProperties.class,
-				context -> context.get(Binder.class)
-						.bind("encrypt", KeyProperties.class)
-						.orElseGet(KeyProperties::new));
-		registry.registerIfAbsent(RsaProperties.class,
-				context -> context.get(Binder.class)
-						.bind("encrypt.rsa", RsaProperties.class)
-						.orElseGet(RsaProperties::new));
-
-
-		/*registry.registerIfAbsent(TextEncryptorConfigurationPropertiesBindHandlerAdvisor.class, context -> {
-			if (isLegacyProcessingEnabled(context.get(Binder.class))) {
-				return null;
+		registry.registerIfAbsent(KeyProperties.class, context -> context.get(Binder.class)
+				.bind(KeyProperties.PREFIX, KeyProperties.class).orElseGet(KeyProperties::new));
+		if (RSA_IS_PRESENT) {
+			registry.registerIfAbsent(RsaProperties.class, context -> context.get(Binder.class)
+					.bind(RsaProperties.PREFIX, RsaProperties.class).orElseGet(RsaProperties::new));
+		}
+		registry.registerIfAbsent(TextEncryptor.class, context -> {
+			KeyProperties keyProperties = context.get(KeyProperties.class);
+			if (keysConfigured(keyProperties)) {
+				if (RSA_IS_PRESENT) {
+					RsaProperties rsaProperties = context.get(RsaProperties.class);
+					return rsaTextEncryptor(keyProperties, rsaProperties);
+				}
+				return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
 			}
-			return new TextEncryptorConfigurationPropertiesBindHandlerAdvisor(context.get(TextEncryptor.class));
-		});*/
+			// no keys configured
+			return new FailsafeTextEncryptor();
+		});
+		registry.registerIfAbsent(BindHandler.class, context -> {
+			TextEncryptor textEncryptor = context.get(TextEncryptor.class);
+			if (textEncryptor != null) {
+				KeyProperties keyProperties = context.get(KeyProperties.class);
+				return new TextEncryptorBindHandler(textEncryptor, keyProperties);
+			}
+			return null;
+		});
 
 		// promote beans to context
 		registry.addCloseListener(event -> {
-			if (isLegacyProcessingEnabled(event.getApplicationContext().getEnvironment())) {
+			if (isLegacyBootstrap(event.getApplicationContext().getEnvironment())) {
 				return;
 			}
-			KeyProperties keyProperties = event.getBootstrapContext().get(KeyProperties.class);
+			BootstrapContext bootstrapContext = event.getBootstrapContext();
+			KeyProperties keyProperties = bootstrapContext.get(KeyProperties.class);
+			ConfigurableListableBeanFactory beanFactory = event.getApplicationContext().getBeanFactory();
 			if (keyProperties != null) {
-				event.getApplicationContext().getBeanFactory().registerSingleton("keyProperties",
-						keyProperties);
+				beanFactory.registerSingleton("keyProperties", keyProperties);
 			}
-			RsaProperties rsaProperties = event.getBootstrapContext().get(RsaProperties.class);
-			if (rsaProperties != null) {
-				event.getApplicationContext().getBeanFactory().registerSingleton("rsaProperties",
-						rsaProperties);
+			if (RSA_IS_PRESENT) {
+				RsaProperties rsaProperties = bootstrapContext.get(RsaProperties.class);
+				if (rsaProperties != null) {
+					beanFactory.registerSingleton("rsaProperties", rsaProperties);
+				}
+			}
+			TextEncryptor textEncryptor = bootstrapContext.get(TextEncryptor.class);
+			if (textEncryptor != null) {
+				beanFactory.registerSingleton("textEncryptor", textEncryptor);
 			}
 		});
 	}
 
-	private boolean isLegacyProcessingEnabled(Binder binder) {
-		return binder.bind("spring.config.use-legacy-processing", Boolean.class).orElse(false);
+	public static TextEncryptor rsaTextEncryptor(KeyProperties keyProperties, RsaProperties rsaProperties) {
+		KeyProperties.KeyStore keyStore = keyProperties.getKeyStore();
+		if (keyStore.getLocation() != null) {
+			if (keyStore.getLocation().exists()) {
+				return new RsaSecretEncryptor(
+						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray())
+								.getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
+						rsaProperties.getAlgorithm(), rsaProperties.getSalt(), rsaProperties.isStrong());
+			}
+
+			throw new IllegalStateException("Invalid keystore location");
+		}
+
+		return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
 	}
 
-	private boolean isLegacyProcessingEnabled(Environment environment) {
-		return environment.getProperty("spring.config.use-legacy-processing", Boolean.class, false);
+	public static boolean keysConfigured(KeyProperties properties) {
+		if (hasProperty(properties.getKeyStore().getLocation())) {
+			if (hasProperty(properties.getKeyStore().getPassword())) {
+				return true;
+			}
+			return false;
+		}
+		else if (hasProperty(properties.getKey())) {
+			return true;
+		}
+		return false;
+	}
+
+	static boolean hasProperty(Object value) {
+		if (value instanceof String) {
+			return StringUtils.hasText((String) value);
+		}
+		return value != null;
+	}
+
+	static boolean isLegacyBootstrap(Environment environment) {
+		boolean isLegacy = environment.getProperty("spring.config.use-legacy-processing", Boolean.class, false);
+		boolean isBootstrapEnabled = environment.getProperty("spring.cloud.bootstrap.enabled", Boolean.class, false);
+		return isLegacy || isBootstrapEnabled;
 	}
 
 	/**
@@ -89,7 +149,7 @@ public class TextEncryptorConfigBootstrapper implements Bootstrapper {
 	 * @author Dave Syer
 	 *
 	 */
-	protected static class FailsafeTextEncryptor implements TextEncryptor {
+	public static class FailsafeTextEncryptor implements TextEncryptor {
 
 		@Override
 		public String encrypt(String text) {
@@ -104,4 +164,5 @@ public class TextEncryptorConfigBootstrapper implements Bootstrapper {
 		}
 
 	}
+
 }
