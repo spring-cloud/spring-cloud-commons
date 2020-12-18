@@ -29,7 +29,7 @@ import org.springframework.core.style.ToStringCreator;
  */
 public class RetryableRequestContext extends RequestDataContext {
 
-	private final ServiceInstance previousServiceInstance;
+	private ServiceInstance previousServiceInstance;
 
 	public RetryableRequestContext(ServiceInstance previousServiceInstance) {
 		this.previousServiceInstance = previousServiceInstance;
@@ -48,6 +48,10 @@ public class RetryableRequestContext extends RequestDataContext {
 
 	public ServiceInstance getPreviousServiceInstance() {
 		return previousServiceInstance;
+	}
+
+	public void setPreviousServiceInstance(ServiceInstance previousServiceInstance) {
+		this.previousServiceInstance = previousServiceInstance;
 	}
 
 	@Override
