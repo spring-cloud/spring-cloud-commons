@@ -66,7 +66,7 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 		return Flux.fromIterable(discoveryClients).flatMap(ReactiveDiscoveryClient::getServices);
 	}
 
-	List<ReactiveDiscoveryClient> getDiscoveryClients() {
+	public List<ReactiveDiscoveryClient> getDiscoveryClients() {
 		return discoveryClients;
 	}
 
