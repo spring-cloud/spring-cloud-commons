@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -45,8 +49,10 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 			matchIfMissing = true)
 	@Bean
 	public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties) {
-		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory, properties);
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
+			ObjectProvider<List<LoadBalancerClientRequestTransformer>> transformers) {
+		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory, properties,
+				transformers.getIfAvailable(Collections::emptyList));
 	}
 
 	@ConditionalOnMissingBean
@@ -54,8 +60,10 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 	@Bean
 	public RetryableLoadBalancerExchangeFilterFunction retryableLoadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
-			LoadBalancerRetryPolicy retryPolicy) {
-		return new RetryableLoadBalancerExchangeFilterFunction(retryPolicy, loadBalancerFactory, properties);
+			LoadBalancerRetryPolicy retryPolicy,
+			ObjectProvider<List<LoadBalancerClientRequestTransformer>> transformers) {
+		return new RetryableLoadBalancerExchangeFilterFunction(retryPolicy, loadBalancerFactory, properties,
+				transformers.getIfAvailable(Collections::emptyList));
 	}
 
 	@ConditionalOnMissingBean

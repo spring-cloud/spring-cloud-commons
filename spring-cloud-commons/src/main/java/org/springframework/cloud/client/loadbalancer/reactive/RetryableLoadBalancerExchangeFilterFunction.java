@@ -66,8 +66,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 	private static final Log LOG = LogFactory.getLog(RetryableLoadBalancerExchangeFilterFunction.class);
 
 	private static final List<Class<? extends Throwable>> exceptions = Arrays.asList(IOException.class,
-			TimeoutException.class,
-			org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
+			TimeoutException.class, RetryableStatusCodeException.class);
 
 	private final LoadBalancerRetryPolicy retryPolicy;
 
@@ -75,11 +74,15 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
+	private final List<LoadBalancerClientRequestTransformer> transformers;
+
 	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties) {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
+			List<LoadBalancerClientRequestTransformer> transformers) {
 		this.retryPolicy = retryPolicy;
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.properties = properties;
+		this.transformers = transformers;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -129,7 +132,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
 					stickySessionProperties.getInstanceIdCookieName(),
-					stickySessionProperties.isAddServiceInstanceCookie());
+					stickySessionProperties.isAddServiceInstanceCookie(), transformers);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, lbResponse));
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle

@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -61,10 +62,13 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 
 	private final LoadBalancerProperties properties;
 
+	private final List<LoadBalancerClientRequestTransformer> transformers;
+
 	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
-			LoadBalancerProperties properties) {
+			LoadBalancerProperties properties, List<LoadBalancerClientRequestTransformer> transformers) {
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.properties = properties;
+		this.transformers = transformers;
 	}
 
 	@Override
@@ -106,7 +110,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
 					stickySessionProperties.getInstanceIdCookieName(),
-					stickySessionProperties.isAddServiceInstanceCookie());
+					stickySessionProperties.isAddServiceInstanceCookie(), transformers);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, lbResponse));
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle

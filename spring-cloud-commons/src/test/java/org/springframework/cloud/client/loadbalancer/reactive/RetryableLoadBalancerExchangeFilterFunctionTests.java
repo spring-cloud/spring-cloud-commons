@@ -18,6 +18,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
 
 	private final RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-			policy, factory, properties);
+			policy, factory, properties, Collections.emptyList());
 
 	private final ClientRequest clientRequest = mock(ClientRequest.class);
 
@@ -137,7 +138,7 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 		properties.getRetry().getRetryableStatusCodes().add(404);
 		LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties);
 		RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-				policy, factory, properties);
+				policy, factory, properties, Collections.emptyList());
 		when(clientRequest.method()).thenReturn(HttpMethod.POST);
 		when(clientResponse.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
 		when(next.exchange(any())).thenReturn(Mono.just(clientResponse));
