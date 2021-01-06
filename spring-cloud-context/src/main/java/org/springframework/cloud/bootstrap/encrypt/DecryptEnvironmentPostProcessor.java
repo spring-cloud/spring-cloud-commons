@@ -21,7 +21,6 @@ import java.util.Map;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.env.EnvironmentPostProcessor;
-import org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper;
 import org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper.FailsafeTextEncryptor;
 import org.springframework.cloud.context.encrypt.EncryptorFactory;
 import org.springframework.core.Ordered;
@@ -85,7 +84,7 @@ public class DecryptEnvironmentPostProcessor extends AbstractEnvironmentDecrypt
 			if (ClassUtils.isPresent("org.springframework.security.rsa.crypto.RsaSecretEncryptor", null)) {
 				RsaProperties rsaProperties = binder.bind(RsaProperties.PREFIX, RsaProperties.class)
 						.orElseGet(RsaProperties::new);
-				return TextEncryptorConfigBootstrapper.rsaTextEncryptor(keyProperties, rsaProperties);
+				return EncryptionBootstrapConfiguration.createTextEncryptor(keyProperties, rsaProperties);
 			}
 			return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
 		}

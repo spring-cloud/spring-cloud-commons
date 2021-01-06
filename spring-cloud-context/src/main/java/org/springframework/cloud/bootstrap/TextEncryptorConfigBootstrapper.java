@@ -22,13 +22,13 @@ import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.Bootstrapper;
 import org.springframework.boot.context.properties.bind.BindHandler;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfiguration;
 import org.springframework.cloud.bootstrap.encrypt.KeyProperties;
 import org.springframework.cloud.bootstrap.encrypt.RsaProperties;
 import org.springframework.cloud.context.encrypt.EncryptorFactory;
+import org.springframework.cloud.util.PropertyUtils;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.security.rsa.crypto.KeyStoreKeyFactory;
-import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
@@ -60,7 +60,7 @@ public class TextEncryptorConfigBootstrapper implements Bootstrapper {
 			if (keysConfigured(keyProperties)) {
 				if (RSA_IS_PRESENT) {
 					RsaProperties rsaProperties = context.get(RsaProperties.class);
-					return rsaTextEncryptor(keyProperties, rsaProperties);
+					return EncryptionBootstrapConfiguration.createTextEncryptor(keyProperties, rsaProperties);
 				}
 				return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
 			}
@@ -100,22 +100,6 @@ public class TextEncryptorConfigBootstrapper implements Bootstrapper {
 		});
 	}
 
-	public static TextEncryptor rsaTextEncryptor(KeyProperties keyProperties, RsaProperties rsaProperties) {
-		KeyProperties.KeyStore keyStore = keyProperties.getKeyStore();
-		if (keyStore.getLocation() != null) {
-			if (keyStore.getLocation().exists()) {
-				return new RsaSecretEncryptor(
-						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray())
-								.getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
-						rsaProperties.getAlgorithm(), rsaProperties.getSalt(), rsaProperties.isStrong());
-			}
-
-			throw new IllegalStateException("Invalid keystore location");
-		}
-
-		return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
-	}
-
 	public static boolean keysConfigured(KeyProperties properties) {
 		if (hasProperty(properties.getKeyStore().getLocation())) {
 			if (hasProperty(properties.getKeyStore().getPassword())) {
@@ -137,8 +121,8 @@ public class TextEncryptorConfigBootstrapper implements Bootstrapper {
 	}
 
 	static boolean isLegacyBootstrap(Environment environment) {
-		boolean isLegacy = environment.getProperty("spring.config.use-legacy-processing", Boolean.class, false);
-		boolean isBootstrapEnabled = environment.getProperty("spring.cloud.bootstrap.enabled", Boolean.class, false);
+		boolean isLegacy = PropertyUtils.useLegacyProcessing(environment);
+		boolean isBootstrapEnabled = PropertyUtils.bootstrapEnabled(environment);
 		return isLegacy || isBootstrapEnabled;
 	}
 

@@ -68,6 +68,22 @@ public class EncryptionBootstrapConfiguration {
 		return listener;
 	}
 
+	public static TextEncryptor createTextEncryptor(KeyProperties keyProperties, RsaProperties rsaProperties) {
+		KeyStore keyStore = keyProperties.getKeyStore();
+		if (keyStore.getLocation() != null) {
+			if (keyStore.getLocation().exists()) {
+				return new RsaSecretEncryptor(
+						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray())
+								.getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
+						rsaProperties.getAlgorithm(), rsaProperties.getSalt(), rsaProperties.isStrong());
+			}
+
+			throw new IllegalStateException("Invalid keystore location");
+		}
+
+		return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@Conditional(KeyCondition.class)
 	@ConditionalOnClass(RsaSecretEncryptor.class)
@@ -82,20 +98,8 @@ public class EncryptionBootstrapConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean(TextEncryptor.class)
-		public TextEncryptor textEncryptor(RsaProperties rsaProperties, KeyProperties keyProperties) {
-			KeyStore keyStore = keyProperties.getKeyStore();
-			if (keyStore.getLocation() != null) {
-				if (keyStore.getLocation().exists()) {
-					return new RsaSecretEncryptor(
-							new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray())
-									.getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
-							rsaProperties.getAlgorithm(), rsaProperties.getSalt(), rsaProperties.isStrong());
-				}
-
-				throw new IllegalStateException("Invalid keystore location");
-			}
-
-			return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
+		public TextEncryptor textEncryptor(KeyProperties keyProperties, RsaProperties rsaProperties) {
+			return createTextEncryptor(keyProperties, rsaProperties);
 		}
 
 	}
