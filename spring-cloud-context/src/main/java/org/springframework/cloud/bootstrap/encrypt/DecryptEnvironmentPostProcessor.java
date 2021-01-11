@@ -80,7 +80,7 @@ public class DecryptEnvironmentPostProcessor extends AbstractEnvironmentDecrypt
 		KeyProperties keyProperties = binder.bind(KeyProperties.PREFIX, KeyProperties.class)
 				.orElseGet(KeyProperties::new);
 		if (keysConfigured(keyProperties)) {
-
+			setFailOnError(keyProperties.isFailOnError());
 			if (ClassUtils.isPresent("org.springframework.security.rsa.crypto.RsaSecretEncryptor", null)) {
 				RsaProperties rsaProperties = binder.bind(RsaProperties.PREFIX, RsaProperties.class)
 						.orElseGet(RsaProperties::new);

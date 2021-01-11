@@ -26,6 +26,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.BDDAssertions.then;
 
 public class EncryptionIntegrationTests {
@@ -64,6 +65,28 @@ public class EncryptionIntegrationTests {
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
 				.run();
 		then(context.getBean(PasswordProperties.class).getPassword()).isEqualTo("test");
+	}
+
+	@Test
+	public void symmetricPropertyValuesFailOnError() {
+		assertThatThrownBy(() -> {
+			ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
+					.web(WebApplicationType.NONE)
+					.properties("spring.config.use-legacy-processing=false", "encrypt.key:pie",
+							"foo.password:{cipher}ZZZbf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
+					.run();
+		}).isInstanceOf(IllegalStateException.class).hasMessageContaining("Cannot decrypt");
+	}
+
+	@Test
+	public void symmetricPropertyValuesFailOnErrorFalse() {
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
+				.web(WebApplicationType.NONE)
+				.properties("encrypt.fail-on-error=false", "spring.config.use-legacy-processing=false",
+						"encrypt.key:pie",
+						"foo.password:{cipher}ZZZbf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
+				.run();
+		then(context.getEnvironment().getProperty("foo.password")).isEmpty();
 	}
 
 	@Test
