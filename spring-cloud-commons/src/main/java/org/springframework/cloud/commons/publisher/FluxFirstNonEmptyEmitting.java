@@ -35,8 +35,7 @@ import org.springframework.util.ReflectionUtils;
 /**
  * @author Tim Ysewyn
  */
-public final class FluxFirstNonEmptyEmitting<T> extends Flux<T>
-		implements Scannable, Publisher<T> {
+final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements Scannable, Publisher<T> {
 
 	final Publisher<? extends T>[] array;
 
@@ -267,12 +266,11 @@ public final class FluxFirstNonEmptyEmitting<T> extends Flux<T>
 
 	}
 
-	static final class FirstNonEmptyEmittingSubscriber<T>
-			extends Operators.DeferredSubscription
+	static final class FirstNonEmptyEmittingSubscriber<T> extends Operators.DeferredSubscription
 			implements CoreSubscriber<T>, Scannable, Subscription {
 
-		private static final Field s = ReflectionUtils
-				.findField(Operators.DeferredSubscription.class, "s", Subscription.class);
+		private static final Field s = ReflectionUtils.findField(Operators.DeferredSubscription.class, "s",
+				Subscription.class);
 		static {
 			ReflectionUtils.makeAccessible(s);
 		}
@@ -361,11 +359,9 @@ public final class FluxFirstNonEmptyEmitting<T> extends Flux<T>
 			 */
 			String name = getClass().getSimpleName();
 			if (name.contains("@") && name.contains("$")) {
-				name = name.substring(0, name.indexOf('$'))
-						.substring(name.lastIndexOf('.') + 1);
+				name = name.substring(0, name.indexOf('$')).substring(name.lastIndexOf('.') + 1);
 			}
-			String stripped = OPERATOR_NAME_UNRELATED_WORDS_PATTERN.matcher(name)
-					.replaceAll("");
+			String stripped = OPERATOR_NAME_UNRELATED_WORDS_PATTERN.matcher(name).replaceAll("");
 
 			if (!stripped.isEmpty()) {
 				return stripped.substring(0, 1).toLowerCase() + stripped.substring(1);
