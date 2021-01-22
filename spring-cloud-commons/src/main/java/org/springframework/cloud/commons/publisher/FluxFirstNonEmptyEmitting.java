@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2013-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package reactor.core.publisher;
+package org.springframework.cloud.commons.publisher;
 
+import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
@@ -25,12 +26,17 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Operators;
 import reactor.util.annotation.Nullable;
+
+import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Tim Ysewyn
  */
-final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProducer<T> {
+public final class FluxFirstNonEmptyEmitting<T> extends Flux<T>
+		implements Scannable, Publisher<T> {
 
 	final Publisher<? extends T>[] array;
 
@@ -129,6 +135,11 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 	@Override
 	public Object scanUnsafe(Attr key) {
 		return null; // no particular key to be represented, still useful in hooks
+	}
+
+	@Override
+	public String stepName() {
+		return "source(" + getClass().getSimpleName() + ")";
 	}
 
 	static final class RaceCoordinator<T> implements Subscription, Scannable {
@@ -256,8 +267,15 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 
 	}
 
-	static final class FirstNonEmptyEmittingSubscriber<T> extends Operators.DeferredSubscription
-			implements InnerOperator<T, T> {
+	static final class FirstNonEmptyEmittingSubscriber<T>
+			extends Operators.DeferredSubscription
+			implements CoreSubscriber<T>, Scannable, Subscription {
+
+		private static final Field s = ReflectionUtils
+				.findField(Operators.DeferredSubscription.class, "s", Subscription.class);
+		static {
+			ReflectionUtils.makeAccessible(s);
+		}
 
 		final RaceCoordinator<T> parent;
 
@@ -277,23 +295,26 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 		@Nullable
 		public Object scanUnsafe(Attr key) {
 			if (key == Attr.PARENT) {
-				return s;
+				return ReflectionUtils.getField(s, this);
 			}
 			if (key == Attr.CANCELLED) {
 				return parent.cancelled;
 			}
 
-			return InnerOperator.super.scanUnsafe(key);
+			return doScanUnsafe(key);
+		}
+
+		@Nullable
+		Object doScanUnsafe(Attr key) {
+			if (key == Attr.ACTUAL) {
+				return actual;
+			}
+			return null;
 		}
 
 		@Override
 		public void onSubscribe(Subscription s) {
 			set(s);
-		}
-
-		@Override
-		public CoreSubscriber<? super T> actual() {
-			return actual;
 		}
 
 		@Override
@@ -323,6 +344,33 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 			if (won || parent.resignFromRace() == 0) {
 				actual.onComplete();
 			}
+		}
+
+		@Override
+		public String stepName() {
+			// /!\ this code is duplicated in `Scannable#stepName` in order to use
+			// toString instead of simple class name
+
+			/*
+			 * Strip an operator name of various prefixes and suffixes.
+			 *
+			 * @param name the operator name, usually simpleClassName or fully-qualified
+			 * classname.
+			 *
+			 * @return the stripped operator name
+			 */
+			String name = getClass().getSimpleName();
+			if (name.contains("@") && name.contains("$")) {
+				name = name.substring(0, name.indexOf('$'))
+						.substring(name.lastIndexOf('.') + 1);
+			}
+			String stripped = OPERATOR_NAME_UNRELATED_WORDS_PATTERN.matcher(name)
+					.replaceAll("");
+
+			if (!stripped.isEmpty()) {
+				return stripped.substring(0, 1).toLowerCase() + stripped.substring(1);
+			}
+			return stripped;
 		}
 
 	}
