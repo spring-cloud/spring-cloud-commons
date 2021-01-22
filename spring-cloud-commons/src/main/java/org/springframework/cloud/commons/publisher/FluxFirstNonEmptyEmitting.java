@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2013-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package reactor.core.publisher;
+package org.springframework.cloud.commons.publisher;
 
+import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
@@ -25,12 +26,16 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Operators;
 import reactor.util.annotation.Nullable;
+
+import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Tim Ysewyn
  */
-final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProducer<T> {
+final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements Scannable, Publisher<T> {
 
 	final Publisher<? extends T>[] array;
 
@@ -135,6 +140,11 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 	@Override
 	public Object scanUnsafe(Attr key) {
 		return null; // no particular key to be represented, still useful in hooks
+	}
+
+	@Override
+	public String stepName() {
+		return "source(" + getClass().getSimpleName() + ")";
 	}
 
 	static final class RaceCoordinator<T> implements Subscription, Scannable {
@@ -264,8 +274,8 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 
 	}
 
-	static final class FirstNonEmptyEmittingSubscriber<T>
-			extends Operators.DeferredSubscription implements InnerOperator<T, T> {
+	static final class FirstNonEmptyEmittingSubscriber<T> extends Operators.DeferredSubscription
+			implements CoreSubscriber<T>, Scannable, Subscription {
 
 		final RaceCoordinator<T> parent;
 
@@ -285,24 +295,18 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 		@Override
 		@Nullable
 		public Object scanUnsafe(Attr key) {
-			if (key == Attr.PARENT) {
-				return s;
+			if (key == Attr.ACTUAL) {
+				return actual;
 			}
 			if (key == Attr.CANCELLED) {
 				return parent.cancelled;
 			}
-
-			return InnerOperator.super.scanUnsafe(key);
+			return super.scanUnsafe(key);
 		}
 
 		@Override
 		public void onSubscribe(Subscription s) {
 			set(s);
-		}
-
-		@Override
-		public CoreSubscriber<? super T> actual() {
-			return actual;
 		}
 
 		@Override
@@ -332,6 +336,11 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements SourceProduc
 			if (won || parent.resignFromRace() == 0) {
 				actual.onComplete();
 			}
+		}
+
+		@Override
+		public String stepName() {
+			return "CloudFlux.firstNonEmpty";
 		}
 
 	}
