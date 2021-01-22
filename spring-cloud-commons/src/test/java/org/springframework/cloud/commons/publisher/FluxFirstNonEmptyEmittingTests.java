@@ -211,17 +211,14 @@ public class FluxFirstNonEmptyEmittingTests {
 		 * @param initialContext A {@link Context} for this subscriber, or null to use the
 		 * default of an {@link Context#empty() empty Context}.
 		 */
-		LambdaSubscriber(@Nullable Consumer<? super T> consumer,
-				@Nullable Consumer<? super Throwable> errorConsumer,
-				@Nullable Runnable completeConsumer,
-				@Nullable Consumer<? super Subscription> subscriptionConsumer,
+		LambdaSubscriber(@Nullable Consumer<? super T> consumer, @Nullable Consumer<? super Throwable> errorConsumer,
+				@Nullable Runnable completeConsumer, @Nullable Consumer<? super Subscription> subscriptionConsumer,
 				@Nullable Context initialContext) {
 			this.consumer = consumer;
 			this.errorConsumer = errorConsumer;
 			this.completeConsumer = completeConsumer;
 			this.subscriptionConsumer = subscriptionConsumer;
-			this.initialContext = initialContext == null ? Context.empty()
-					: initialContext;
+			this.initialContext = initialContext == null ? Context.empty() : initialContext;
 		}
 
 		/**
@@ -236,10 +233,8 @@ public class FluxFirstNonEmptyEmittingTests {
 		 * @param subscriptionConsumer A {@link Consumer} called with the
 		 * {@link Subscription} to perform initial request, or null to request max
 		 */ // left mainly for the benefit of tests
-		LambdaSubscriber(@Nullable Consumer<? super T> consumer,
-				@Nullable Consumer<? super Throwable> errorConsumer,
-				@Nullable Runnable completeConsumer,
-				@Nullable Consumer<? super Subscription> subscriptionConsumer) {
+		LambdaSubscriber(@Nullable Consumer<? super T> consumer, @Nullable Consumer<? super Throwable> errorConsumer,
+				@Nullable Runnable completeConsumer, @Nullable Consumer<? super Subscription> subscriptionConsumer) {
 			this(consumer, errorConsumer, completeConsumer, subscriptionConsumer, null);
 		}
 
@@ -258,11 +253,9 @@ public class FluxFirstNonEmptyEmittingTests {
 			 */
 			String name = getClass().getSimpleName();
 			if (name.contains("@") && name.contains("$")) {
-				name = name.substring(0, name.indexOf('$'))
-						.substring(name.lastIndexOf('.') + 1);
+				name = name.substring(0, name.indexOf('$')).substring(name.lastIndexOf('.') + 1);
 			}
-			String stripped = OPERATOR_NAME_UNRELATED_WORDS_PATTERN.matcher(name)
-					.replaceAll("");
+			String stripped = OPERATOR_NAME_UNRELATED_WORDS_PATTERN.matcher(name).replaceAll("");
 
 			if (!stripped.isEmpty()) {
 				return stripped.substring(0, 1).toLowerCase() + stripped.substring(1);
@@ -323,8 +316,7 @@ public class FluxFirstNonEmptyEmittingTests {
 				errorConsumer.accept(t);
 			}
 			else {
-				Operators.onErrorDropped(Exceptions.errorCallbackNotImplemented(t),
-						this.initialContext);
+				Operators.onErrorDropped(Exceptions.errorCallbackNotImplemented(t), this.initialContext);
 			}
 		}
 
