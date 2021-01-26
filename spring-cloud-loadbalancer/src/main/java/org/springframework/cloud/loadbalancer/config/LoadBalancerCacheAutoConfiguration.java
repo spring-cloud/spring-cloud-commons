@@ -25,18 +25,21 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.interceptor.CacheAspectSupport;
 import org.springframework.cloud.loadbalancer.cache.CaffeineBasedLoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -59,7 +62,7 @@ import org.springframework.context.annotation.Configuration;
 public class LoadBalancerCacheAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnMissingClass("com.github.benmanes.caffeine.cache.Caffeine")
+	@Conditional(OnCaffeineCacheMissingCondition.class)
 	protected static class LoadBalancerCacheManagerWarnConfiguration {
 
 		@Bean
@@ -77,14 +80,14 @@ public class LoadBalancerCacheAutoConfiguration {
 		void logWarning() {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("Spring Cloud LoadBalancer is currently working with the default cache. "
-						+ "You can switch to using Caffeine cache, by adding it to the classpath.");
+						+ "You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.");
 			}
 		}
 
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass(Caffeine.class)
+	@ConditionalOnClass({ Caffeine.class, CaffeineCacheManager.class })
 	protected static class CaffeineLoadBalancerCacheManagerConfiguration {
 
 		@Bean(autowireCandidate = false)
@@ -96,7 +99,7 @@ public class LoadBalancerCacheAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnMissingClass("com.github.benmanes.caffeine.cache.Caffeine")
+	@Conditional(OnCaffeineCacheMissingCondition.class)
 	@ConditionalOnClass(ConcurrentMapWithTimedEviction.class)
 	protected static class DefaultLoadBalancerCacheManagerConfiguration {
 
@@ -104,6 +107,24 @@ public class LoadBalancerCacheAutoConfiguration {
 		@ConditionalOnMissingBean
 		LoadBalancerCacheManager defaultLoadBalancerCacheManager(LoadBalancerCacheProperties cacheProperties) {
 			return new DefaultLoadBalancerCacheManager(cacheProperties);
+		}
+
+	}
+
+	static final class OnCaffeineCacheMissingCondition extends AnyNestedCondition {
+
+		private OnCaffeineCacheMissingCondition() {
+			super(ConfigurationPhase.REGISTER_BEAN);
+		}
+
+		@ConditionalOnMissingClass("com.github.benmanes.caffeine.cache.Caffeine")
+		static class CaffeineClassMissing {
+
+		}
+
+		@ConditionalOnMissingClass("org.springframework.cache.caffeine.CaffeineCacheManager")
+		static class CaffeineCacheManagerClassMissing {
+
 		}
 
 	}

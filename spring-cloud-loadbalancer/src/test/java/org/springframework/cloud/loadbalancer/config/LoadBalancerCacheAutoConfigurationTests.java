@@ -113,6 +113,22 @@ class LoadBalancerCacheAutoConfigurationTests {
 	}
 
 	@Test
+	void shouldUseDefaultCacheIfCaffeineCacheManagerNotInClasspath() {
+		ApplicationContextRunner contextRunner = noCaffeineCacheManagerRunner();
+
+		contextRunner.run(context -> {
+			assertThat(context.getBean(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
+					.isNotNull();
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
+			assertThat(context.getBean("defaultLoadBalancerCacheManager"))
+					.isInstanceOf(DefaultLoadBalancerCacheManager.class);
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames())
+					.contains("CachingServiceInstanceListSupplierCache");
+		});
+	}
+
+	@Test
 	void defaultLoadBalancerCacheShouldNotOverrideCacheTypeSetting() {
 		ApplicationContextRunner contextRunner = noCaffeineRunner().withUserConfiguration(TestConfiguration.class)
 				.withPropertyValues("spring.cache.type=none");
@@ -162,6 +178,10 @@ class LoadBalancerCacheAutoConfigurationTests {
 
 	private ApplicationContextRunner noCaffeineRunner() {
 		return baseApplicationRunner().withClassLoader(new FilteredClassLoader(Caffeine.class));
+	}
+
+	private ApplicationContextRunner noCaffeineCacheManagerRunner() {
+		return baseApplicationRunner().withClassLoader(new FilteredClassLoader(CaffeineCacheManager.class));
 	}
 
 	@Configuration(proxyBeanMethods = false)
