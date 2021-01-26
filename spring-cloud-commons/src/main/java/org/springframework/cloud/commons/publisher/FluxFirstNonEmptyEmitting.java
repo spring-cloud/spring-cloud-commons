@@ -32,8 +32,7 @@ import reactor.util.annotation.Nullable;
 /**
  * @author Tim Ysewyn
  */
-final class FluxFirstNonEmptyEmitting<T> extends Flux<T>
-		implements Scannable, Publisher<T> {
+final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements Scannable, Publisher<T> {
 
 	final Publisher<? extends T>[] array;
 
@@ -264,8 +263,7 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T>
 
 	}
 
-	static final class FirstNonEmptyEmittingSubscriber<T>
-			extends Operators.DeferredSubscription
+	static final class FirstNonEmptyEmittingSubscriber<T> extends Operators.DeferredSubscription
 			implements CoreSubscriber<T>, Scannable, Subscription {
 
 		final RaceCoordinator<T> parent;
