@@ -144,7 +144,8 @@ public class FluxFirstNonEmptyEmittingTests {
 	@Test
 	public void scanSubscriber() {
 		CoreSubscriber<String> actual = new TestSubscriber<>();
-		FluxFirstNonEmptyEmitting.RaceCoordinator<String> parent = new FluxFirstNonEmptyEmitting.RaceCoordinator<>(1);
+		FluxFirstNonEmptyEmitting.RaceCoordinator<String> parent = new FluxFirstNonEmptyEmitting.RaceCoordinator<>(
+				1);
 		FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<String> test = new FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<>(
 				actual, parent, 1);
 		Subscription sub = Operators.emptySubscription();
@@ -160,7 +161,8 @@ public class FluxFirstNonEmptyEmittingTests {
 	@Test
 	public void scanRaceCoordinator() {
 		CoreSubscriber<String> actual = new TestSubscriber<>();
-		FluxFirstNonEmptyEmitting.RaceCoordinator<String> parent = new FluxFirstNonEmptyEmitting.RaceCoordinator<>(1);
+		FluxFirstNonEmptyEmitting.RaceCoordinator<String> parent = new FluxFirstNonEmptyEmitting.RaceCoordinator<>(
+				1);
 		FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<String> test = new FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<>(
 				actual, parent, 1);
 		Subscription sub = Operators.emptySubscription();
