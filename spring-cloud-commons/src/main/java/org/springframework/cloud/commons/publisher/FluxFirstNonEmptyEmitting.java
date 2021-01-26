@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.commons.publisher;
 
-import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
@@ -30,12 +29,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Operators;
 import reactor.util.annotation.Nullable;
 
-import org.springframework.util.ReflectionUtils;
-
 /**
  * @author Tim Ysewyn
  */
-final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements Scannable, Publisher<T> {
+final class FluxFirstNonEmptyEmitting<T> extends Flux<T>
+		implements Scannable, Publisher<T> {
 
 	final Publisher<? extends T>[] array;
 
@@ -274,7 +272,8 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements Scannable, P
 
 	}
 
-	static final class FirstNonEmptyEmittingSubscriber<T> extends Operators.DeferredSubscription
+	static final class FirstNonEmptyEmittingSubscriber<T>
+			extends Operators.DeferredSubscription
 			implements CoreSubscriber<T>, Scannable, Subscription {
 
 		final RaceCoordinator<T> parent;
