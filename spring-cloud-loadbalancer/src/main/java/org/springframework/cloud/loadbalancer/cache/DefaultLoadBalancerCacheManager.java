@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
 
 import com.stoyanr.evictor.map.ConcurrentHashMapWithTimedEviction;
@@ -68,9 +70,18 @@ public class DefaultLoadBalancerCacheManager implements LoadBalancerCacheManager
 				.map(name -> new DefaultLoadBalancerCache(name,
 						new ConcurrentHashMapWithTimedEviction<>(
 								loadBalancerCacheProperties.getCapacity(),
-								new DelayedTaskEvictionScheduler<>()),
+								new DelayedTaskEvictionScheduler<>(
+										aScheduledDaemonThreadExecutor())),
 						loadBalancerCacheProperties.getTtl().toMillis(), false))
 				.collect(Collectors.toSet());
+	}
+
+	private ScheduledExecutorService aScheduledDaemonThreadExecutor() {
+		return Executors.newSingleThreadScheduledExecutor(runnable -> {
+			Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+			thread.setDaemon(true);
+			return thread;
+		});
 	}
 
 	@Override
