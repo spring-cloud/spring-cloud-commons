@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2013-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package reactor.core.publisher;
+package org.springframework.cloud.commons.publisher;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -24,6 +24,9 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.core.CoreSubscriber;
 import reactor.core.Scannable;
+import reactor.core.publisher.BaseSubscriber;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Operators;
 import reactor.test.StepVerifier;
 
 import static java.util.Collections.singletonList;
@@ -140,8 +143,7 @@ public class FluxFirstNonEmptyEmittingTests {
 
 	@Test
 	public void scanSubscriber() {
-		CoreSubscriber<String> actual = new LambdaSubscriber<>(null, e -> {
-		}, null, null);
+		CoreSubscriber<String> actual = new TestSubscriber<>();
 		FluxFirstNonEmptyEmitting.RaceCoordinator<String> parent = new FluxFirstNonEmptyEmitting.RaceCoordinator<>(1);
 		FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<String> test = new FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<>(
 				actual, parent, 1);
@@ -157,8 +159,7 @@ public class FluxFirstNonEmptyEmittingTests {
 
 	@Test
 	public void scanRaceCoordinator() {
-		CoreSubscriber<String> actual = new LambdaSubscriber<>(null, e -> {
-		}, null, null);
+		CoreSubscriber<String> actual = new TestSubscriber<>();
 		FluxFirstNonEmptyEmitting.RaceCoordinator<String> parent = new FluxFirstNonEmptyEmitting.RaceCoordinator<>(1);
 		FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<String> test = new FluxFirstNonEmptyEmitting.FirstNonEmptyEmittingSubscriber<>(
 				actual, parent, 1);
@@ -170,6 +171,15 @@ public class FluxFirstNonEmptyEmittingTests {
 		assertThat(parent.scan(Scannable.Attr.CANCELLED)).isFalse();
 		parent.cancelled = true;
 		assertThat(parent.scan(Scannable.Attr.CANCELLED)).isTrue();
+	}
+
+	static class TestSubscriber<T> extends BaseSubscriber<T> implements Scannable {
+
+		@Override
+		public Object scanUnsafe(Attr key) {
+			return null;
+		}
+
 	}
 
 }

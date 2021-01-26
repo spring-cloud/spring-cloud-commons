@@ -19,11 +19,11 @@ package org.springframework.cloud.client.discovery.composite.reactive;
 import java.util.ArrayList;
 import java.util.List;
 
-import reactor.core.publisher.CloudFlux;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.commons.publisher.CloudFlux;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
