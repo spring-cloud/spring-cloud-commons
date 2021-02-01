@@ -16,8 +16,10 @@
 
 package org.springframework.cloud.configuration;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -135,6 +137,50 @@ public class SpringBootDependencyTests {
 
 		then(verificationResult.description).isNotEmpty();
 		then(verificationResult.action).isNotEmpty();
+	}
+
+	@Test
+	public void should_not_match_when_manifest_has_version_and_not_compatible() {
+		List<String> acceptedVersions = Collections.singletonList("2.5");
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
+				acceptedVersions) {
+			@Override
+			String getVersionFromManifest() {
+				return "2.1";
+			}
+		};
+		versionVerifier.ACCEPTED_VERSIONS.clear();
+		AtomicBoolean verifierRun = new AtomicBoolean(false);
+		versionVerifier.ACCEPTED_VERSIONS.put("2.5",
+				() -> verifierRun.compareAndSet(false, true));
+
+		VerificationResult verificationResult = versionVerifier.verify();
+
+		then(verifierRun).isFalse();
+		then(verificationResult.description).isNotEmpty();
+		then(verificationResult.action).isNotEmpty();
+	}
+
+	@Test
+	public void should_match_when_manifest_has_version_and_compatible_list() {
+		List<String> acceptedVersions = Arrays.asList("2.0", "2.1");
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
+				acceptedVersions) {
+			@Override
+			String getVersionFromManifest() {
+				return "2.1";
+			}
+		};
+		versionVerifier.ACCEPTED_VERSIONS.clear();
+		AtomicBoolean verifierRun = new AtomicBoolean(false);
+		versionVerifier.ACCEPTED_VERSIONS.put("2.5",
+				() -> verifierRun.compareAndSet(false, true));
+
+		VerificationResult verificationResult = versionVerifier.verify();
+
+		then(verifierRun).isFalse();
+		then(verificationResult.description).isEmpty();
+		then(verificationResult.action).isEmpty();
 	}
 
 	@Ignore // FIXME: https://github.com/spring-cloud/spring-cloud-commons/issues/717

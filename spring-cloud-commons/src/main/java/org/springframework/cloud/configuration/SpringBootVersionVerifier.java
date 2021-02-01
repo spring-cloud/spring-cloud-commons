@@ -81,14 +81,14 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		};
 	}
 
-	private boolean bootVersionFromManifest(String s) {
+	private Boolean bootVersionFromManifest(String s) {
 		String version = getVersionFromManifest();
 		if (log.isDebugEnabled()) {
 			log.debug("Version found in Boot manifest [" + version + "]");
 		}
 		if (!StringUtils.hasText(version)) {
-			log.info("Cannot check Boot version");
-			return true;
+			log.info("Cannot check Boot version from manifest");
+			return null;
 		}
 		return version.startsWith(stripWildCardFromVersion(s));
 	}
@@ -210,11 +210,17 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	private boolean springBootVersionMatches() {
 		for (String acceptedVersion : this.acceptedVersions) {
-			if (bootVersionFromManifest(acceptedVersion)) {
+			Boolean versionFromManifest = bootVersionFromManifest(acceptedVersion);
+			// if manifest has version and matches, return
+			// otherwise need to check other versions in list
+			// if all return false, then the return false at end will apply
+			if (versionFromManifest != null && versionFromManifest) {
 				return true;
 			}
-			else {
-				// 2.0, 2.1
+			else if (versionFromManifest == null) {
+				// only check these if the manifest does not have a version.
+				// otherwise this could lead to false positives for future
+				// versions of boot
 				CompatibilityPredicate predicate = this.ACCEPTED_VERSIONS
 						.get(stripWildCardFromVersion(acceptedVersion));
 				if (predicate != null && predicate.isCompatible()) {
