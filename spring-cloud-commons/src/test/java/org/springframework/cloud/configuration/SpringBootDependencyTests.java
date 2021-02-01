@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -109,12 +108,7 @@ public class SpringBootDependencyTests {
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("2.5", new CompatibilityPredicate() {
-			@Override
-			public boolean isCompatible() {
-				return true;
-			}
-		});
+		versionVerifier.ACCEPTED_VERSIONS.put("2.5", () -> true);
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
@@ -183,11 +177,11 @@ public class SpringBootDependencyTests {
 		then(verificationResult.action).isEmpty();
 	}
 
-	@Ignore // FIXME: https://github.com/spring-cloud/spring-cloud-commons/issues/717
+	//@Ignore // FIXME: https://github.com/spring-cloud/spring-cloud-commons/issues/717
 	@Test
 	public void should_match_against_current_manifest() {
-		verifyCurrentVersionFromManifest("2.3");
-		verifyCurrentVersionFromManifest("2.3.x");
+		verifyCurrentVersionFromManifest("2.4");
+		verifyCurrentVersionFromManifest("2.4.x");
 	}
 
 	private void verifyCurrentVersionFromManifest(String version) {

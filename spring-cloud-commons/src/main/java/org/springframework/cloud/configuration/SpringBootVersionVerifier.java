@@ -41,6 +41,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			this.put("2.1", is2_1());
 			this.put("2.2", is2_2());
 			this.put("2.3", is2_3());
+			this.put("2.4", is2_4());
 		}
 	};
 
@@ -179,6 +180,29 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 				try {
 					// since 2.3
 					Class.forName("org.springframework.boot.context.propertie.BoundConfigurationProperties");
+					return true;
+				}
+				catch (ClassNotFoundException e) {
+					return false;
+				}
+
+			}
+		};
+	}
+
+	CompatibilityPredicate is2_4() {
+		return new CompatibilityPredicate() {
+
+			@Override
+			public String toString() {
+				return "Predicate for Boot 2.4";
+			}
+
+			@Override
+			public boolean isCompatible() {
+				try {
+					// since 2.4
+					Class.forName("org.springframework.boot.Bootstrapper");
 					return true;
 				}
 				catch (ClassNotFoundException e) {
