@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.SpringBootVersion;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.util.StringUtils;
 
 /**
@@ -36,12 +35,8 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<String, CompatibilityPredicate>() {
 		{
-			this.put("1.5", is1_5());
-			this.put("2.0", is2_0());
-			this.put("2.1", is2_1());
-			this.put("2.2", is2_2());
-			this.put("2.3", is2_3());
 			this.put("2.4", is2_4());
+			this.put("2.5", is2_5());
 		}
 	};
 
@@ -60,28 +55,6 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		return VerificationResult.notCompatible(errorDescription(), action());
 	}
 
-	CompatibilityPredicate is1_5() {
-		return new CompatibilityPredicate() {
-
-			@Override
-			public String toString() {
-				return "Predicate for Boot 1.5";
-			}
-
-			@Override
-			public boolean isCompatible() {
-				try {
-					// deprecated 1.5
-					Class.forName("org.springframework.boot.context.config.ResourceNotFoundException");
-					return true;
-				}
-				catch (ClassNotFoundException e) {
-					return false;
-				}
-			}
-		};
-	}
-
 	private Boolean bootVersionFromManifest(String s) {
 		String version = getVersionFromManifest();
 		if (log.isDebugEnabled()) {
@@ -98,98 +71,6 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		return SpringBootVersion.getVersion();
 	}
 
-	CompatibilityPredicate is2_0() {
-		return new CompatibilityPredicate() {
-			@Override
-			public String toString() {
-				return "Predicate for Boot 2.0";
-			}
-
-			@Override
-			public boolean isCompatible() {
-
-				try {
-					// present in 2.0, 1.5 missing in 2.1
-					SpringApplicationBuilder.class.getMethod("web", boolean.class);
-					return !is1_5().isCompatible();
-				}
-				catch (NoSuchMethodException e) {
-					return false;
-				}
-			}
-		};
-	}
-
-	CompatibilityPredicate is2_1() {
-		return new CompatibilityPredicate() {
-
-			@Override
-			public String toString() {
-				return "Predicate for Boot 2.1";
-			}
-
-			@Override
-			public boolean isCompatible() {
-				try {
-					// since 2.1
-					Class.forName("org.springframework.boot.task.TaskExecutorCustomizer");
-					return true;
-				}
-				catch (ClassNotFoundException e) {
-					return false;
-				}
-
-			}
-		};
-	}
-
-	CompatibilityPredicate is2_2() {
-		return new CompatibilityPredicate() {
-
-			@Override
-			public String toString() {
-				return "Predicate for Boot 2.2";
-			}
-
-			@Override
-			public boolean isCompatible() {
-				try {
-					// since 2.1
-					Class.forName(
-							"org.springframework.boot.autoconfigure.flyway.FlywayMigrationScriptMissingException");
-					return true;
-				}
-				catch (ClassNotFoundException e) {
-					return false;
-				}
-
-			}
-		};
-	}
-
-	CompatibilityPredicate is2_3() {
-		return new CompatibilityPredicate() {
-
-			@Override
-			public String toString() {
-				return "Predicate for Boot 2.3";
-			}
-
-			@Override
-			public boolean isCompatible() {
-				try {
-					// since 2.3
-					Class.forName("org.springframework.boot.context.propertie.BoundConfigurationProperties");
-					return true;
-				}
-				catch (ClassNotFoundException e) {
-					return false;
-				}
-
-			}
-		};
-	}
-
 	CompatibilityPredicate is2_4() {
 		return new CompatibilityPredicate() {
 
@@ -203,6 +84,29 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 				try {
 					// since 2.4
 					Class.forName("org.springframework.boot.Bootstrapper");
+					return true;
+				}
+				catch (ClassNotFoundException e) {
+					return false;
+				}
+
+			}
+		};
+	}
+
+	CompatibilityPredicate is2_5() {
+		return new CompatibilityPredicate() {
+
+			@Override
+			public String toString() {
+				return "Predicate for Boot 2.5";
+			}
+
+			@Override
+			public boolean isCompatible() {
+				try {
+					// since 2.4
+					Class.forName("org.springframework.boot.context.properties.bind.Bindable.BindRestriction");
 					return true;
 				}
 				catch (ClassNotFoundException e) {
