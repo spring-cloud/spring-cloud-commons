@@ -43,6 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko
+ * @author Roman Chigvintsev
  * @since 2.2.0
  */
 public class HealthCheckServiceInstanceListSupplier
@@ -73,9 +74,9 @@ public class HealthCheckServiceInstanceListSupplier
 				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
 				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
 		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate)
+				.repeatWhen(aliveInstancesReplayRepeat)
 				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(
-						alive -> Collections.unmodifiableList(new ArrayList<>(alive))))
-				.repeatWhen(aliveInstancesReplayRepeat);
+						alive -> Collections.unmodifiableList(new ArrayList<>(alive))));
 		aliveInstancesReplay = aliveInstancesFlux
 				.delaySubscription(Duration.ofMillis(healthCheck.getInitialDelay()))
 				.replay(1).refCount(1);
