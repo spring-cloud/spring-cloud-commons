@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
@@ -59,6 +60,7 @@ import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSup
  *
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko
+ * @author Roman Chigvintsev
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = HealthCheckServiceInstanceListSupplierTests.TestApplication.class,
@@ -429,6 +431,34 @@ class HealthCheckServiceInstanceListSupplierTests {
 					.thenReturn(Flux.just(Collections.singletonList(serviceInstance2)));
 			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
 					healthCheckFunction(webClient)) {
+				@Override
+				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
+					return Mono.just(true);
+				}
+			};
+			return listSupplier.get();
+		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list(serviceInstance1))
+				.thenAwait(healthCheck.getRefetchInstancesInterval()).expectNext(Lists.list(serviceInstance2))
+				.thenCancel().verify(VERIFY_TIMEOUT);
+	}
+
+	@Test
+	void shouldRefetchInstancesWithRepeatingHealthCheck() {
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		healthCheck.setRepeatHealthCheck(true);
+		healthCheck.setRefetchInstancesInterval(Duration.ofSeconds(1));
+		healthCheck.setRefetchInstances(true);
+		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
+				port, false);
+		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
+				port, false);
+
+		StepVerifier.withVirtualTime(() -> {
+			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
+			when(delegate.get()).thenReturn(Flux.just(Collections.singletonList(serviceInstance1)))
+					.thenReturn(Flux.just(Collections.singletonList(serviceInstance2)));
+			BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunc = healthCheckFunction(webClient);
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, healthCheckFunc) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return Mono.just(true);
