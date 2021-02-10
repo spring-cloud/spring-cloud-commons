@@ -30,6 +30,8 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 
+import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionUtils.buildClientRequest;
+
 /**
  * An {@link ExchangeFilterFunction} that uses {@link ReactiveLoadBalancer} to execute
  * requests against a correct {@link ServiceInstance}.
@@ -100,14 +102,6 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 
 	private String serviceInstanceUnavailableMessage(String serviceId) {
 		return "Load balancer does not contain an instance for the service " + serviceId;
-	}
-
-	private ClientRequest buildClientRequest(ClientRequest request, URI uri) {
-		return ClientRequest.create(request.method(), uri)
-				.headers(headers -> headers.addAll(request.headers()))
-				.cookies(cookies -> cookies.addAll(request.cookies()))
-				.attributes(attributes -> attributes.putAll(request.attributes()))
-				.body(request.body()).build();
 	}
 
 }
