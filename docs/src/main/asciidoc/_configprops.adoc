@@ -33,6 +33,10 @@
 |spring.cloud.loadbalancer.health-check.refetch-instances | false | Indicates whether the instances should be refetched by the <code>HealthCheckServiceInstanceListSupplier</code>. This can be used if the instances can be updated and the underlying delegate does not provide an ongoing flux.
 |spring.cloud.loadbalancer.health-check.refetch-instances-interval | 25s | Interval for refetching available service instances.
 |spring.cloud.loadbalancer.health-check.repeat-health-check | true | Indicates whether health checks should keep repeating. It might be useful to set it to <code>false</code> if periodically refetching the instances, as every refetch will also trigger a healthcheck.
+|spring.cloud.loadbalancer.retry.backoff.enabled | false | Indicates whether Reactor Retry backoffs should be applied.
+|spring.cloud.loadbalancer.retry.backoff.jitter | 0.5 | Used to set {@link RetryBackoffSpec#jitter}.
+|spring.cloud.loadbalancer.retry.backoff.max-backoff |  | Used to set {@link RetryBackoffSpec#maxBackoff}.
+|spring.cloud.loadbalancer.retry.backoff.min-backoff | 5ms | Used to set {@link RetryBackoffSpec#minBackoff}.
 |spring.cloud.loadbalancer.retry.enabled | true | 
 |spring.cloud.loadbalancer.retry.max-retries-on-next-service-instance | 1 | Number of retries to be executed on the next <code>ServiceInstance</code>. A <code>ServiceInstance</code> is chosen before each retry call.
 |spring.cloud.loadbalancer.retry.max-retries-on-same-service-instance | 0 | Number of retries to be executed on the same <code>ServiceInstance</code>.

@@ -48,7 +48,7 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFil
  * {@link LoadBalancerRetryPolicy}.
  *
  * @author Olga Maciaszek-Sharma
- * @since 3.0.0
+ * @since 2.2.7
  */
 public class RetryableLoadBalancerExchangeFilterFunction
 		implements ExchangeFilterFunction {
@@ -71,6 +71,15 @@ public class RetryableLoadBalancerExchangeFilterFunction
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerRetryProperties retryProperties) {
 		this.retryPolicy = retryPolicy;
+		this.loadBalancerFactory = loadBalancerFactory;
+		this.retryProperties = retryProperties;
+	}
+
+	public RetryableLoadBalancerExchangeFilterFunction(
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			LoadBalancerRetryProperties retryProperties) {
+		this.retryPolicy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
+				retryProperties);
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.retryProperties = retryProperties;
 	}
@@ -148,8 +157,8 @@ public class RetryableLoadBalancerExchangeFilterFunction
 	}
 
 	private Retry buildRetrySpec(int max, boolean transientErrors) {
-		LoadBalancerRetryProperties.Reactive.Backoff backoffProperties = retryProperties
-				.getReactive().getBackoff();
+		LoadBalancerRetryProperties.Backoff backoffProperties = retryProperties
+				.getBackoff();
 		if (backoffProperties.isEnabled()) {
 			return RetrySpec.backoff(max, backoffProperties.getMinBackoff())
 					.filter(this::isRetryException)

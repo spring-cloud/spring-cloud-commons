@@ -58,10 +58,9 @@ public class LoadBalancerRetryProperties {
 	private Set<Integer> retryableStatusCodes = new HashSet<>();
 
 	/**
-	 * Properties for retries with reactive load-balancing. Functionality not available
-	 * for the blocking implementation.
+	 * Properties for Reactor Retry backoffs in Spring Cloud LoadBalancer.
 	 */
-	private Reactive reactive = new Reactive();
+	private Backoff backoff = new Backoff();
 
 	/**
 	 * Returns true if the load balancer should retry failed requests.
@@ -111,80 +110,66 @@ public class LoadBalancerRetryProperties {
 		this.retryableStatusCodes = retryableStatusCodes;
 	}
 
-	public Reactive getReactive() {
-		return reactive;
+	public Backoff getBackoff() {
+		return backoff;
 	}
 
-	public void setReactive(Reactive reactive) {
-		this.reactive = reactive;
+	public void setBackoff(Backoff backoff) {
+		this.backoff = backoff;
 	}
 
-	public static class Reactive {
+	public static class Backoff {
 
-		private Backoff backoff = new Backoff();
+		/**
+		 * Indicates whether Reactor Retry backoffs should be applied.
+		 */
+		private boolean enabled = false;
 
-		public Backoff getBackoff() {
-			return backoff;
+		/**
+		 * Used to set {@link RetryBackoffSpec#minBackoff}.
+		 */
+		private Duration minBackoff = Duration.ofMillis(5);
+
+		/**
+		 * Used to set {@link RetryBackoffSpec#maxBackoff}.
+		 */
+		private Duration maxBackoff = Duration.ofMillis(Long.MAX_VALUE);
+
+		/**
+		 * Used to set {@link RetryBackoffSpec#jitter}.
+		 */
+		private double jitter = 0.5d;
+
+		public Duration getMinBackoff() {
+			return minBackoff;
 		}
 
-		public void setBackoff(Backoff backoff) {
-			this.backoff = backoff;
+		public void setMinBackoff(Duration minBackoff) {
+			this.minBackoff = minBackoff;
 		}
 
-		public static class Backoff {
+		public Duration getMaxBackoff() {
+			return maxBackoff;
+		}
 
-			/**
-			 * Indicates whether Reactor Retry backoffs should be applied.
-			 */
-			private boolean enabled = false;
+		public void setMaxBackoff(Duration maxBackoff) {
+			this.maxBackoff = maxBackoff;
+		}
 
-			/**
-			 * Used to set {@link RetryBackoffSpec#minBackoff}.
-			 */
-			private Duration minBackoff = Duration.ofMillis(5);
+		public double getJitter() {
+			return jitter;
+		}
 
-			/**
-			 * Used to set {@link RetryBackoffSpec#maxBackoff}.
-			 */
-			private Duration maxBackoff = Duration.ofMillis(Long.MAX_VALUE);
+		public void setJitter(double jitter) {
+			this.jitter = jitter;
+		}
 
-			/**
-			 * Used to set {@link RetryBackoffSpec#jitter}.
-			 */
-			private double jitter = 0.5d;
+		public boolean isEnabled() {
+			return enabled;
+		}
 
-			public Duration getMinBackoff() {
-				return minBackoff;
-			}
-
-			public void setMinBackoff(Duration minBackoff) {
-				this.minBackoff = minBackoff;
-			}
-
-			public Duration getMaxBackoff() {
-				return maxBackoff;
-			}
-
-			public void setMaxBackoff(Duration maxBackoff) {
-				this.maxBackoff = maxBackoff;
-			}
-
-			public double getJitter() {
-				return jitter;
-			}
-
-			public void setJitter(double jitter) {
-				this.jitter = jitter;
-			}
-
-			public boolean isEnabled() {
-				return enabled;
-			}
-
-			public void setEnabled(boolean enabled) {
-				this.enabled = enabled;
-			}
-
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
 		}
 
 	}

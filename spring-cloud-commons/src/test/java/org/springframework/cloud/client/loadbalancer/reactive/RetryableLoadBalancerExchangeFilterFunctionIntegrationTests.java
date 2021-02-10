@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * Integration tests for {@link RetryableLoadBalancerExchangeFilterFunction}.
  *
  * @author Olga Maciaszek-Sharma
- * @since 2.7.7
+ * @since 2.2.7
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
@@ -107,7 +107,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 
 	@Test
 	void correctResponseReturnedAfterRetryingOnNextServiceInstanceWithBackoff() {
-		retryProperties.getReactive().getBackoff().setEnabled(true);
+		retryProperties.getBackoff().setEnabled(true);
 		retryProperties.setMaxRetriesOnSameServiceInstance(1);
 		DefaultServiceInstance goodRetryTestInstance = new DefaultServiceInstance();
 		goodRetryTestInstance.setServiceId("retrytest");
