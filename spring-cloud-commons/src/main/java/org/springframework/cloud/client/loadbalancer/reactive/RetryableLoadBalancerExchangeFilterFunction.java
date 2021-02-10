@@ -50,15 +50,15 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFil
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
  */
-public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilterFunction {
+public class RetryableLoadBalancerExchangeFilterFunction
+		implements ExchangeFilterFunction {
 
 	private static final Log LOG = LogFactory
 			.getLog(RetryableLoadBalancerExchangeFilterFunction.class);
 
-	private static final List<Class<? extends Throwable>> exceptions = Arrays
-			.asList(IOException.class,
-					TimeoutException.class,
-					RetryableStatusCodeException.class);
+	private static final List<Class<? extends Throwable>> exceptions = Arrays.asList(
+			IOException.class, TimeoutException.class,
+			RetryableStatusCodeException.class);
 
 	private final LoadBalancerRetryPolicy retryPolicy;
 
@@ -66,33 +66,37 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerRetryProperties retryProperties) {
+	public RetryableLoadBalancerExchangeFilterFunction(
+			LoadBalancerRetryPolicy retryPolicy,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			LoadBalancerRetryProperties retryProperties) {
 		this.retryPolicy = retryPolicy;
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.retryProperties = retryProperties;
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public Mono<ClientResponse> filter(ClientRequest clientRequest, ExchangeFunction next) {
-		LoadBalancerRetryContext loadBalancerRetryContext = new LoadBalancerRetryContext(clientRequest);
-		Retry exchangeRetry = buildRetrySpec(retryProperties
-				.getMaxRetriesOnSameServiceInstance(), true);
-		Retry filterRetry = buildRetrySpec(retryProperties
-				.getMaxRetriesOnNextServiceInstance(), false);
+	public Mono<ClientResponse> filter(ClientRequest clientRequest,
+			ExchangeFunction next) {
+		LoadBalancerRetryContext loadBalancerRetryContext = new LoadBalancerRetryContext(
+				clientRequest);
+		Retry exchangeRetry = buildRetrySpec(
+				retryProperties.getMaxRetriesOnSameServiceInstance(), true);
+		Retry filterRetry = buildRetrySpec(
+				retryProperties.getMaxRetriesOnNextServiceInstance(), false);
 
 		URI originalUrl = clientRequest.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
-			String message = String
-					.format("Request URI does not contain a valid hostname: %s", originalUrl
-							.toString());
+			String message = String.format(
+					"Request URI does not contain a valid hostname: %s",
+					originalUrl.toString());
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(message);
 			}
-			return Mono.just(ClientResponse.create(HttpStatus.BAD_REQUEST).body(message)
-					.build());
+			return Mono.just(
+					ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
 		DefaultRequest<RetryableRequestContext> lbRequest = new DefaultRequest<>(
 				new RetryableRequestContext(null));
@@ -100,40 +104,41 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 			ServiceInstance instance = lbResponse.getServer();
 			lbRequest.setContext(new RetryableRequestContext(instance));
 			if (instance == null) {
-				String message = "LoadBalancer does not contain an instance for the service " + serviceId;
+				String message = "LoadBalancer does not contain an instance for the service "
+						+ serviceId;
 				if (LOG.isWarnEnabled()) {
-					LOG.warn("LoadBalancer does not contain an instance for the service " + serviceId);
+					LOG.warn("LoadBalancer does not contain an instance for the service "
+							+ serviceId);
 				}
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
 						.body(message).build());
 			}
 
 			if (LOG.isDebugEnabled()) {
-				LOG.debug(String
-						.format("LoadBalancer has retrieved the instance for service %s: %s", serviceId,
-								instance.getUri()));
+				LOG.debug(String.format(
+						"LoadBalancer has retrieved the instance for service %s: %s",
+						serviceId, instance.getUri()));
 			}
 			ClientRequest newRequest = buildClientRequest(clientRequest,
 					reconstructURI(instance, originalUrl));
-			return next.exchange(newRequest)
-					.map(clientResponse -> {
-						loadBalancerRetryContext.setClientResponse(clientResponse);
-						if (shouldRetrySameServiceInstance(loadBalancerRetryContext)) {
-							if (LOG.isDebugEnabled()) {
-								LOG.debug(String.format("Retrying on status code: %d",
-										clientResponse.statusCode().value()));
-							}
-							throw new RetryableStatusCodeException();
-						}
-						return clientResponse;
+			return next.exchange(newRequest).map(clientResponse -> {
+				loadBalancerRetryContext.setClientResponse(clientResponse);
+				if (shouldRetrySameServiceInstance(loadBalancerRetryContext)) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(String.format("Retrying on status code: %d",
+								clientResponse.statusCode().value()));
+					}
+					throw new RetryableStatusCodeException();
+				}
+				return clientResponse;
 
-					});
+			});
 		}).map(clientResponse -> {
 			loadBalancerRetryContext.setClientResponse(clientResponse);
 			if (shouldRetryNextServiceInstance(loadBalancerRetryContext)) {
 				if (LOG.isDebugEnabled()) {
-					LOG.debug(String.format("Retrying on status code: %d", clientResponse
-							.statusCode().value()));
+					LOG.debug(String.format("Retrying on status code: %d",
+							clientResponse.statusCode().value()));
 				}
 				throw new RetryableStatusCodeException();
 			}
@@ -144,8 +149,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 
 	private Retry buildRetrySpec(int max, boolean transientErrors) {
 		LoadBalancerRetryProperties.Reactive.Backoff backoffProperties = retryProperties
-				.getReactive()
-				.getBackoff();
+				.getReactive().getBackoff();
 		if (backoffProperties.isEnabled()) {
 			return RetrySpec.backoff(max, backoffProperties.getMinBackoff())
 					.filter(this::isRetryException)
@@ -157,11 +161,12 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 				.transientErrors(transientErrors);
 	}
 
-	private boolean shouldRetrySameServiceInstance(LoadBalancerRetryContext loadBalancerRetryContext) {
+	private boolean shouldRetrySameServiceInstance(
+			LoadBalancerRetryContext loadBalancerRetryContext) {
 		boolean shouldRetry = retryPolicy
 				.retryableStatusCode(loadBalancerRetryContext.getResponseStatusCode())
 				&& retryPolicy
-				.canRetryOnMethod(loadBalancerRetryContext.getRequestMethod())
+						.canRetryOnMethod(loadBalancerRetryContext.getRequestMethod())
 				&& retryPolicy.canRetrySameServiceInstance(loadBalancerRetryContext);
 		if (shouldRetry) {
 			loadBalancerRetryContext.incrementRetriesSameServiceInstance();
@@ -169,11 +174,12 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 		return shouldRetry;
 	}
 
-	private boolean shouldRetryNextServiceInstance(LoadBalancerRetryContext loadBalancerRetryContext) {
+	private boolean shouldRetryNextServiceInstance(
+			LoadBalancerRetryContext loadBalancerRetryContext) {
 		boolean shouldRetry = retryPolicy
 				.retryableStatusCode(loadBalancerRetryContext.getResponseStatusCode())
 				&& retryPolicy
-				.canRetryOnMethod(loadBalancerRetryContext.getRequestMethod())
+						.canRetryOnMethod(loadBalancerRetryContext.getRequestMethod())
 				&& retryPolicy.canRetryNextServiceInstance(loadBalancerRetryContext);
 		if (shouldRetry) {
 			loadBalancerRetryContext.incrementRetriesNextServiceInstance();
@@ -189,12 +195,13 @@ public class RetryableLoadBalancerExchangeFilterFunction implements ExchangeFilt
 						|| Exceptions.isRetryExhausted(throwable));
 	}
 
-	protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<RetryableRequestContext> request) {
+	protected Mono<Response<ServiceInstance>> choose(String serviceId,
+			Request<RetryableRequestContext> request) {
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerFactory
 				.getInstance(serviceId);
 		if (loadBalancer == null) {
-			return Mono
-					.just(new org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse());
+			return Mono.just(
+					new org.springframework.cloud.client.loadbalancer.reactive.EmptyResponse());
 		}
 		return Mono.from(loadBalancer.choose(request));
 	}

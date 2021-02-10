@@ -54,7 +54,8 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 	private final LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
 			properties);
 
-	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
+	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(
+			ReactiveLoadBalancer.Factory.class);
 
 	private final RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
 			policy, factory, properties);
@@ -81,10 +82,15 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 	@Test
 	void shouldRetryOnSameAndNextServiceInstanceOnException() {
 		when(clientRequest.method()).thenReturn(HttpMethod.GET);
+		when(clientResponse.statusCode()).thenReturn(HttpStatus.OK);
 		when(next.exchange(any()))
 				.thenThrow(new IllegalStateException(new IOException()));
 
-		filterFunction.filter(clientRequest, next).subscribe();
+		try {
+			filterFunction.filter(clientRequest, next).subscribe();
+		}
+		catch (Exception ignored) {
+		}
 
 		inOrder.verify(factory, times(1)).getInstance(any());
 		inOrder.verify(next, times(2)).exchange(any());
@@ -136,7 +142,8 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 		properties.setRetryOnAllOperations(true);
 		properties.setMaxRetriesOnSameServiceInstance(1);
 		properties.getRetryableStatusCodes().add(404);
-		LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties);
+		LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
+				properties);
 		RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
 				policy, factory, properties);
 		when(clientRequest.method()).thenReturn(HttpMethod.POST);

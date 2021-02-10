@@ -17,10 +17,7 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
-import java.util.Map;
 
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 

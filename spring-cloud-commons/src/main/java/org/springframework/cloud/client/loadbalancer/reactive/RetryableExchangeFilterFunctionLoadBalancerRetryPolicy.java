@@ -25,11 +25,13 @@ import org.springframework.http.HttpMethod;
  * @author Olga Maciaszek-Sharma
  * @since 2.7.7
  */
-public class RetryableExchangeFilterFunctionLoadBalancerRetryPolicy implements LoadBalancerRetryPolicy {
+public class RetryableExchangeFilterFunctionLoadBalancerRetryPolicy
+		implements LoadBalancerRetryPolicy {
 
 	private final LoadBalancerRetryProperties properties;
 
-	public RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(LoadBalancerRetryProperties properties) {
+	public RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
+			LoadBalancerRetryProperties properties) {
 		this.properties = properties;
 	}
 

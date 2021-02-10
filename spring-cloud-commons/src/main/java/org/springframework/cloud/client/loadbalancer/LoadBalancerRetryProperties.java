@@ -58,7 +58,8 @@ public class LoadBalancerRetryProperties {
 	private Set<Integer> retryableStatusCodes = new HashSet<>();
 
 	/**
-	 * Properties for retries with reactive load-balancing. Functionality not available for the blocking implementation.
+	 * Properties for retries with reactive load-balancing. Functionality not available
+	 * for the blocking implementation.
 	 */
 	private Reactive reactive = new Reactive();
 
@@ -119,6 +120,7 @@ public class LoadBalancerRetryProperties {
 	}
 
 	public static class Reactive {
+
 		private Backoff backoff = new Backoff();
 
 		public Backoff getBackoff() {
@@ -184,6 +186,7 @@ public class LoadBalancerRetryProperties {
 			}
 
 		}
+
 	}
 
 }
