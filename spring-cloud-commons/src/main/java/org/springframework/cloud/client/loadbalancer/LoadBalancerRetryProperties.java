@@ -16,8 +16,11 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
+
+import reactor.util.retry.RetryBackoffSpec;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.http.HttpMethod;
@@ -53,6 +56,11 @@ public class LoadBalancerRetryProperties {
 	 * A {@link Set} of status codes that should trigger a retry.
 	 */
 	private Set<Integer> retryableStatusCodes = new HashSet<>();
+
+	/**
+	 * Properties for Reactor Retry backoffs in Spring Cloud LoadBalancer.
+	 */
+	private Backoff backoff = new Backoff();
 
 	/**
 	 * Returns true if the load balancer should retry failed requests.
@@ -100,6 +108,70 @@ public class LoadBalancerRetryProperties {
 
 	public void setRetryableStatusCodes(Set<Integer> retryableStatusCodes) {
 		this.retryableStatusCodes = retryableStatusCodes;
+	}
+
+	public Backoff getBackoff() {
+		return backoff;
+	}
+
+	public void setBackoff(Backoff backoff) {
+		this.backoff = backoff;
+	}
+
+	public static class Backoff {
+
+		/**
+		 * Indicates whether Reactor Retry backoffs should be applied.
+		 */
+		private boolean enabled = false;
+
+		/**
+		 * Used to set {@link RetryBackoffSpec#minBackoff}.
+		 */
+		private Duration minBackoff = Duration.ofMillis(5);
+
+		/**
+		 * Used to set {@link RetryBackoffSpec#maxBackoff}.
+		 */
+		private Duration maxBackoff = Duration.ofMillis(Long.MAX_VALUE);
+
+		/**
+		 * Used to set {@link RetryBackoffSpec#jitter}.
+		 */
+		private double jitter = 0.5d;
+
+		public Duration getMinBackoff() {
+			return minBackoff;
+		}
+
+		public void setMinBackoff(Duration minBackoff) {
+			this.minBackoff = minBackoff;
+		}
+
+		public Duration getMaxBackoff() {
+			return maxBackoff;
+		}
+
+		public void setMaxBackoff(Duration maxBackoff) {
+			this.maxBackoff = maxBackoff;
+		}
+
+		public double getJitter() {
+			return jitter;
+		}
+
+		public void setJitter(double jitter) {
+			this.jitter = jitter;
+		}
+
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
 	}
 
 }
