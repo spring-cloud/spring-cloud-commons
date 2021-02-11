@@ -118,17 +118,28 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		properties.getInstances().put("retrytest",
 				Arrays.asList(badRetryTestInstance, goodRetryTestInstance));
 		retryProperties.getRetryableStatusCodes().add(500);
-
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://retrytest")
-				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange()
-				.block();
+		ClientResponse clientResponse = null;
+		try {
+			clientResponse = WebClient.builder()
+					.baseUrl("http://retrytest")
+					.filter(this.loadBalancerFunction).build().get().uri("/hello")
+					.exchange()
+					.block();
+		}
+		catch (Exception ignored) {
+		}
 
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
 
-		ClientResponse secondClientResponse = WebClient.builder()
-				.baseUrl("http://retrytest").filter(this.loadBalancerFunction).build()
-				.get().uri("/hello").exchange().block();
+		ClientResponse secondClientResponse = null;
+		try {
+			secondClientResponse = WebClient.builder()
+					.baseUrl("http://retrytest").filter(this.loadBalancerFunction).build()
+					.get().uri("/hello").exchange().block();
+		}
+		catch (Exception ignored) {
+		}
 
 		then(secondClientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(secondClientResponse.bodyToMono(String.class).block())
