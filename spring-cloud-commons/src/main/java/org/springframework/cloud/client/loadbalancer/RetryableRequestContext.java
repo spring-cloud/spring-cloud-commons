@@ -26,6 +26,7 @@ import org.springframework.core.style.ToStringCreator;
  * instances.
  *
  * @author Olga Maciaszek-Sharma
+ * @since 2.2.7
  */
 public class RetryableRequestContext extends DefaultRequestContext {
 
