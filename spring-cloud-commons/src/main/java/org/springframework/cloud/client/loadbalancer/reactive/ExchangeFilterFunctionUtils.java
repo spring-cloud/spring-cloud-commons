@@ -41,8 +41,4 @@ public final class ExchangeFilterFunctionUtils {
 				.body(request.body()).build();
 	}
 
-	static String serviceInstanceUnavailableMessage(String serviceId) {
-		return "LoadBalancer does not contain an instance for the service " + serviceId;
-	}
-
 }
