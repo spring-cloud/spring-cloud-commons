@@ -36,14 +36,13 @@ public final class LoadBalancerLifecycleValidator {
 
 	@SuppressWarnings("rawtypes")
 	public static Set<LoadBalancerLifecycle> getSupportedLifecycleProcessors(
-			Map<String, LoadBalancerLifecycle> lifecycleProcessors,
-			Class requestContextClass, Class clientResponseClass, Class serverTypeClass) {
+			Map<String, LoadBalancerLifecycle> lifecycleProcessors, Class requestContextClass,
+			Class clientResponseClass, Class serverTypeClass) {
 		if (lifecycleProcessors == null) {
 			return new HashSet<>();
 		}
 		return lifecycleProcessors.values().stream()
-				.filter(lifecycle -> lifecycle.supports(requestContextClass,
-						clientResponseClass, serverTypeClass))
+				.filter(lifecycle -> lifecycle.supports(requestContextClass, clientResponseClass, serverTypeClass))
 				.collect(Collectors.toSet());
 	}
 

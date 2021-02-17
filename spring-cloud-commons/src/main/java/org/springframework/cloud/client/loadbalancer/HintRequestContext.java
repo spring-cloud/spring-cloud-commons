@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.util.Objects;
+
 import org.springframework.core.style.ToStringCreator;
 
 /**
@@ -23,13 +25,15 @@ import org.springframework.core.style.ToStringCreator;
  *
  * @author Olga Maciaszek-Sharma
  */
-public class HintRequestContext {
+public class HintRequestContext implements TimedRequestContext {
 
 	/**
 	 * A {@link String} value of hint that can be used to choose the correct service
 	 * instance.
 	 */
 	private String hint = "default";
+
+	private long requestStartTime;
 
 	public HintRequestContext() {
 	}
@@ -47,10 +51,37 @@ public class HintRequestContext {
 	}
 
 	@Override
+	public long getRequestStartTime() {
+		return requestStartTime;
+	}
+
+	@Override
+	public void setRequestStartTime(long requestStartTime) {
+		this.requestStartTime = requestStartTime;
+	}
+
+	@Override
 	public String toString() {
 		ToStringCreator to = new ToStringCreator(this);
 		to.append("hint", hint);
 		return to.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof HintRequestContext)) {
+			return false;
+		}
+		HintRequestContext that = (HintRequestContext) o;
+		return Objects.equals(hint, that.hint);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(hint);
 	}
 
 }

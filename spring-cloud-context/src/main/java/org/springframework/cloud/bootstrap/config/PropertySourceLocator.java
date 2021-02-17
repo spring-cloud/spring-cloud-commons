@@ -47,15 +47,13 @@ public interface PropertySourceLocator {
 		return locateCollection(this, environment);
 	}
 
-	static Collection<PropertySource<?>> locateCollection(PropertySourceLocator locator,
-			Environment environment) {
+	static Collection<PropertySource<?>> locateCollection(PropertySourceLocator locator, Environment environment) {
 		PropertySource<?> propertySource = locator.locate(environment);
 		if (propertySource == null) {
 			return Collections.emptyList();
 		}
 		if (CompositePropertySource.class.isInstance(propertySource)) {
-			Collection<PropertySource<?>> sources = ((CompositePropertySource) propertySource)
-					.getPropertySources();
+			Collection<PropertySource<?>> sources = ((CompositePropertySource) propertySource).getPropertySources();
 			List<PropertySource<?>> filteredSources = new ArrayList<>();
 			for (PropertySource<?> p : sources) {
 				if (p != null) {

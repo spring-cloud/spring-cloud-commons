@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.util.Objects;
+
 import org.springframework.core.style.ToStringCreator;
 
 /**
@@ -53,6 +55,23 @@ public class DefaultRequestContext extends HintRequestContext {
 		ToStringCreator to = new ToStringCreator(this);
 		to.append("clientRequest", clientRequest);
 		return to.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof DefaultRequestContext)) {
+			return false;
+		}
+		DefaultRequestContext that = (DefaultRequestContext) o;
+		return Objects.equals(clientRequest, that.clientRequest);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(clientRequest);
 	}
 
 }

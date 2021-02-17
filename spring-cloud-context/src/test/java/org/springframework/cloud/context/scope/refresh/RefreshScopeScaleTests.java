@@ -107,8 +107,7 @@ public class RefreshScopeScaleTests {
 
 	}
 
-	public static class ExampleService
-			implements Service, InitializingBean, DisposableBean {
+	public static class ExampleService implements Service, InitializingBean, DisposableBean {
 
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 
@@ -155,8 +154,7 @@ public class RefreshScopeScaleTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(TestProperties.class)
-	@Import({ RefreshAutoConfiguration.class,
-			PropertyPlaceholderAutoConfiguration.class })
+	@Import({ RefreshAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 
 		@Autowired

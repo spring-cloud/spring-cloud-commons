@@ -36,8 +36,7 @@ public class RemoteResourceRefresher extends ContextLifecycleScheduledTaskRegist
 
 	private final int initialDelay;
 
-	public RemoteResourceRefresher(List<RemoteResource> discoveredResources,
-			int fixedDelay, int initialDelay) {
+	public RemoteResourceRefresher(List<RemoteResource> discoveredResources, int fixedDelay, int initialDelay) {
 		this.discoveredResources = discoveredResources;
 		this.fixedDelay = fixedDelay;
 		this.initialDelay = initialDelay;

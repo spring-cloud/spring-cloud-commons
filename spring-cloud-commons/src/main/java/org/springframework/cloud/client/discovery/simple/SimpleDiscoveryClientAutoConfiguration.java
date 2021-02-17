@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.client.discovery.simple;
 
-import java.net.URI;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -26,7 +24,6 @@ import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.client.CommonsClientAutoConfiguration;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.discovery.noop.NoopDiscoveryClientAutoConfiguration;
 import org.springframework.cloud.commons.util.InetUtils;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -37,12 +34,11 @@ import org.springframework.core.annotation.Order;
  * Spring Boot auto-configuration for simple properties-based discovery client.
  *
  * @author Biju Kunjummen
+ * @author Charu Covindane
  */
 @Configuration(proxyBeanMethods = false)
-@AutoConfigureBefore({ NoopDiscoveryClientAutoConfiguration.class,
-		CommonsClientAutoConfiguration.class })
-public class SimpleDiscoveryClientAutoConfiguration
-		implements ApplicationListener<WebServerInitializedEvent> {
+@AutoConfigureBefore({ CommonsClientAutoConfiguration.class })
+public class SimpleDiscoveryClientAutoConfiguration implements ApplicationListener<WebServerInitializedEvent> {
 
 	private ServerProperties server;
 
@@ -67,10 +63,8 @@ public class SimpleDiscoveryClientAutoConfiguration
 	public SimpleDiscoveryProperties simpleDiscoveryProperties(
 			@Value("${spring.application.name:application}") String serviceId) {
 		simple.getLocal().setServiceId(serviceId);
-		simple.getLocal()
-				.setUri(URI.create(
-						"http://" + this.inet.findFirstNonLoopbackHostInfo().getHostname()
-								+ ":" + findPort()));
+		simple.getLocal().setHost(inet.findFirstNonLoopbackHostInfo().getHostname());
+		simple.getLocal().setPort(findPort());
 		return simple;
 	}
 
@@ -84,21 +78,18 @@ public class SimpleDiscoveryClientAutoConfiguration
 		if (port > 0) {
 			return port;
 		}
-		if (this.server != null && this.server.getPort() != null
-				&& this.server.getPort() > 0) {
-			return this.server.getPort();
+		if (server != null && server.getPort() != null && server.getPort() > 0) {
+			return server.getPort();
 		}
 		return 8080;
 	}
 
 	@Override
 	public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
-		this.port = webServerInitializedEvent.getWebServer().getPort();
-		if (this.port > 0) {
-			simple.getLocal()
-					.setUri(URI.create("http://"
-							+ this.inet.findFirstNonLoopbackHostInfo().getHostname() + ":"
-							+ this.port));
+		port = webServerInitializedEvent.getWebServer().getPort();
+		if (port > 0) {
+			simple.getLocal().setHost(inet.findFirstNonLoopbackHostInfo().getHostname());
+			simple.getLocal().setPort(port);
 		}
 	}
 

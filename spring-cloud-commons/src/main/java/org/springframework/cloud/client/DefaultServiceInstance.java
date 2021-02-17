@@ -26,20 +26,23 @@ import java.util.Objects;
  *
  * @author Spencer Gibb
  * @author Tim Ysewyn
+ * @author Charu Covindane
  */
 public class DefaultServiceInstance implements ServiceInstance {
 
-	private final String instanceId;
+	private String instanceId;
 
-	private final String serviceId;
+	private String serviceId;
 
-	private final String host;
+	private String host;
 
-	private final int port;
+	private int port;
 
-	private final boolean secure;
+	private boolean secure;
 
-	private final Map<String, String> metadata;
+	private Map<String, String> metadata = new LinkedHashMap<>();
+
+	private URI uri;
 
 	/**
 	 * @param instanceId the id of the instance.
@@ -49,8 +52,8 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param secure indicates whether or not the connection needs to be secure.
 	 * @param metadata a map containing metadata.
 	 */
-	public DefaultServiceInstance(String instanceId, String serviceId, String host,
-			int port, boolean secure, Map<String, String> metadata) {
+	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
+			Map<String, String> metadata) {
 		this.instanceId = instanceId;
 		this.serviceId = serviceId;
 		this.host = host;
@@ -66,36 +69,11 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param port the port on which the service is running.
 	 * @param secure indicates whether or not the connection needs to be secure.
 	 */
-	public DefaultServiceInstance(String instanceId, String serviceId, String host,
-			int port, boolean secure) {
+	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure) {
 		this(instanceId, serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
-	/**
-	 * @param serviceId the id of the service.
-	 * @param host the host where the service instance can be found.
-	 * @param port the port on which the service is running.
-	 * @param secure indicates whether or not the connection needs to be secure.
-	 * @param metadata a map containing metadata.
-	 * @deprecated - use other constructors
-	 */
-	@Deprecated
-	public DefaultServiceInstance(String serviceId, String host, int port, boolean secure,
-			Map<String, String> metadata) {
-		this(null, serviceId, host, port, secure, metadata);
-	}
-
-	/**
-	 * @param serviceId the id of the service.
-	 * @param host the host where the service instance can be found.
-	 * @param port the port on which the service is running.
-	 * @param secure indicates whether or not the connection needs to be secure.
-	 * @deprecated - use other constructors
-	 */
-	@Deprecated
-	public DefaultServiceInstance(String serviceId, String host, int port,
-			boolean secure) {
-		this(serviceId, host, port, secure, new LinkedHashMap<>());
+	public DefaultServiceInstance() {
 	}
 
 	/**
@@ -105,8 +83,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 */
 	public static URI getUri(ServiceInstance instance) {
 		String scheme = (instance.isSecure()) ? "https" : "http";
-		String uri = String.format("%s://%s:%s", scheme, instance.getHost(),
-				instance.getPort());
+		String uri = String.format("%s://%s:%s", scheme, instance.getHost(), instance.getPort());
 		return URI.create(uri);
 	}
 
@@ -117,40 +94,64 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	@Override
 	public Map<String, String> getMetadata() {
-		return this.metadata;
+		return metadata;
 	}
 
 	@Override
 	public String getInstanceId() {
-		return this.instanceId;
+		return instanceId;
 	}
 
 	@Override
 	public String getServiceId() {
-		return this.serviceId;
+		return serviceId;
 	}
 
 	@Override
 	public String getHost() {
-		return this.host;
+		return host;
 	}
 
 	@Override
 	public int getPort() {
-		return this.port;
+		return port;
 	}
 
 	@Override
 	public boolean isSecure() {
-		return this.secure;
+		return secure;
+	}
+
+	public void setInstanceId(String instanceId) {
+		this.instanceId = instanceId;
+	}
+
+	public void setServiceId(String serviceId) {
+		this.serviceId = serviceId;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public void setUri(URI uri) {
+		this.uri = uri;
+		this.host = this.uri.getHost();
+		this.port = this.uri.getPort();
+		String scheme = this.uri.getScheme();
+		if ("https".equals(scheme)) {
+			this.secure = true;
+		}
 	}
 
 	@Override
 	public String toString() {
-		return "DefaultServiceInstance{" + "instanceId='" + this.instanceId + '\''
-				+ ", serviceId='" + this.serviceId + '\'' + ", host='" + this.host + '\''
-				+ ", port=" + this.port + ", secure=" + this.secure + ", metadata="
-				+ this.metadata + '}';
+		return "DefaultServiceInstance{" + "instanceId='" + instanceId + '\'' + ", serviceId='" + serviceId + '\''
+				+ ", host='" + host + '\'' + ", port=" + port + ", secure=" + secure + ", metadata=" + metadata + '}';
 	}
 
 	@Override
@@ -162,17 +163,14 @@ public class DefaultServiceInstance implements ServiceInstance {
 			return false;
 		}
 		DefaultServiceInstance that = (DefaultServiceInstance) o;
-		return this.port == that.port && this.secure == that.secure
-				&& Objects.equals(this.instanceId, that.instanceId)
-				&& Objects.equals(this.serviceId, that.serviceId)
-				&& Objects.equals(this.host, that.host)
-				&& Objects.equals(this.metadata, that.metadata);
+		return port == that.port && secure == that.secure && Objects.equals(instanceId, that.instanceId)
+				&& Objects.equals(serviceId, that.serviceId) && Objects.equals(host, that.host)
+				&& Objects.equals(metadata, that.metadata);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.instanceId, this.serviceId, this.host, this.port,
-				this.secure, this.metadata);
+		return Objects.hash(instanceId, serviceId, host, port, secure, metadata);
 	}
 
 }

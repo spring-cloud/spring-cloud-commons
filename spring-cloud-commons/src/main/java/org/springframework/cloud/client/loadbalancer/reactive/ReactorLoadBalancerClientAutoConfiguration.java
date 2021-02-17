@@ -19,7 +19,10 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -38,12 +41,28 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class ReactorLoadBalancerClientAutoConfiguration {
 
 	@ConditionalOnMissingBean
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "false",
+			matchIfMissing = true)
 	@Bean
 	public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
-			ReactiveLoadBalancer.Factory loadBalancerFactory,
-			LoadBalancerProperties properties) {
-		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory,
-				properties);
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties) {
+		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory, properties);
+	}
+
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true")
+	@Bean
+	public RetryableLoadBalancerExchangeFilterFunction retryableLoadBalancerExchangeFilterFunction(
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
+			LoadBalancerRetryPolicy retryPolicy) {
+		return new RetryableLoadBalancerExchangeFilterFunction(retryPolicy, loadBalancerFactory, properties);
+	}
+
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true")
+	@Bean
+	public LoadBalancerRetryPolicy loadBalancerRetryPolicy(LoadBalancerProperties properties) {
+		return new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties);
 	}
 
 }

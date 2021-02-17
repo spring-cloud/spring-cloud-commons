@@ -25,16 +25,17 @@ import org.springframework.retry.RetryPolicy;
  * requests.
  *
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 public class InterceptorRetryPolicy implements RetryPolicy {
 
-	private HttpRequest request;
+	private final HttpRequest request;
 
-	private LoadBalancedRetryPolicy policy;
+	private final LoadBalancedRetryPolicy policy;
 
-	private ServiceInstanceChooser serviceInstanceChooser;
+	private final ServiceInstanceChooser serviceInstanceChooser;
 
-	private String serviceName;
+	private final String serviceName;
 
 	/**
 	 * Creates a new retry policy.
@@ -56,21 +57,20 @@ public class InterceptorRetryPolicy implements RetryPolicy {
 		LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
 		if (lbContext.getRetryCount() == 0 && lbContext.getServiceInstance() == null) {
 			// We haven't even tried to make the request yet so return true so we do
-			lbContext.setServiceInstance(
-					this.serviceInstanceChooser.choose(this.serviceName));
+			lbContext.setServiceInstance(null);
 			return true;
 		}
-		return this.policy.canRetryNextServer(lbContext);
+		return policy.canRetryNextServer(lbContext);
 	}
 
 	@Override
 	public RetryContext open(RetryContext parent) {
-		return new LoadBalancedRetryContext(parent, this.request);
+		return new LoadBalancedRetryContext(parent, request);
 	}
 
 	@Override
 	public void close(RetryContext context) {
-		this.policy.close((LoadBalancedRetryContext) context);
+		policy.close((LoadBalancedRetryContext) context);
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class InterceptorRetryPolicy implements RetryPolicy {
 		// increases the retry count
 		lbContext.registerThrowable(throwable);
 		// let the policy know about the exception as well
-		this.policy.registerThrowable(lbContext, throwable);
+		policy.registerThrowable(lbContext, throwable);
 	}
 
 	@Override
@@ -94,25 +94,25 @@ public class InterceptorRetryPolicy implements RetryPolicy {
 
 		InterceptorRetryPolicy that = (InterceptorRetryPolicy) o;
 
-		if (!this.request.equals(that.request)) {
+		if (!request.equals(that.request)) {
 			return false;
 		}
-		if (!this.policy.equals(that.policy)) {
+		if (!policy.equals(that.policy)) {
 			return false;
 		}
-		if (!this.serviceInstanceChooser.equals(that.serviceInstanceChooser)) {
+		if (!serviceInstanceChooser.equals(that.serviceInstanceChooser)) {
 			return false;
 		}
-		return this.serviceName.equals(that.serviceName);
+		return serviceName.equals(that.serviceName);
 
 	}
 
 	@Override
 	public int hashCode() {
-		int result = this.request.hashCode();
-		result = 31 * result + this.policy.hashCode();
-		result = 31 * result + this.serviceInstanceChooser.hashCode();
-		result = 31 * result + this.serviceName.hashCode();
+		int result = request.hashCode();
+		result = 31 * result + policy.hashCode();
+		result = 31 * result + serviceInstanceChooser.hashCode();
+		result = 31 * result + serviceName.hashCode();
 		return result;
 	}
 

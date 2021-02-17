@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,48 +45,80 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	@Test
 	void loadBalancerFilterAddedToWebClientBuilder() {
 		ConfigurableApplicationContext context = init(OneWebClientBuilder.class);
-		final Map<String, WebClient.Builder> webClientBuilders = context
-				.getBeansOfType(WebClient.Builder.class);
+		final Map<String, WebClient.Builder> webClientBuilders = context.getBeansOfType(WebClient.Builder.class);
 
 		then(webClientBuilders).isNotNull().hasSize(1);
 		WebClient.Builder webClientBuilder = webClientBuilders.values().iterator().next();
 		then(webClientBuilder).isNotNull();
 
-		assertLoadBalanced(webClientBuilder,
-				ReactorLoadBalancerExchangeFilterFunction.class);
+		assertLoadBalanced(webClientBuilder, ReactorLoadBalancerExchangeFilterFunction.class);
 
 		final Map<String, OneWebClientBuilder.TestService> testServiceMap = context
 				.getBeansOfType(OneWebClientBuilder.TestService.class);
 		then(testServiceMap).isNotNull().hasSize(1);
-		OneWebClientBuilder.TestService testService = testServiceMap.values().stream()
-				.findFirst().get();
-		assertLoadBalanced(testService.webClient,
-				ReactorLoadBalancerExchangeFilterFunction.class);
+		OneWebClientBuilder.TestService testService = testServiceMap.values().stream().findFirst().get();
+		assertLoadBalanced(testService.webClient, ReactorLoadBalancerExchangeFilterFunction.class);
+	}
+
+	@Test
+	void loadBalancerFilterAddedToWebClientBuilderWithRetryEnabled() {
+		System.setProperty("spring.cloud.loadbalancer.retry.enabled", "true");
+		ConfigurableApplicationContext context = init(OneWebClientBuilder.class);
+		final Map<String, WebClient.Builder> webClientBuilders = context.getBeansOfType(WebClient.Builder.class);
+
+		then(webClientBuilders).isNotNull().hasSize(1);
+		WebClient.Builder webClientBuilder = webClientBuilders.values().iterator().next();
+		then(webClientBuilder).isNotNull();
+
+		assertLoadBalanced(webClientBuilder, RetryableLoadBalancerExchangeFilterFunction.class);
+
+		final Map<String, OneWebClientBuilder.TestService> testServiceMap = context
+				.getBeansOfType(OneWebClientBuilder.TestService.class);
+		then(testServiceMap).isNotNull().hasSize(1);
+		OneWebClientBuilder.TestService testService = testServiceMap.values().stream().findFirst().get();
+		assertLoadBalanced(testService.webClient, RetryableLoadBalancerExchangeFilterFunction.class);
+
+		System.clearProperty("spring.cloud.loadbalancer.retry.enabled");
 	}
 
 	@Test
 	void loadBalancerFilterAddedOnlyToLoadBalancedWebClientBuilder() {
 		ConfigurableApplicationContext context = init(TwoWebClientBuilders.class);
-		final Map<String, WebClient.Builder> webClientBuilders = context
-				.getBeansOfType(WebClient.Builder.class);
+		final Map<String, WebClient.Builder> webClientBuilders = context.getBeansOfType(WebClient.Builder.class);
 
 		then(webClientBuilders).hasSize(2);
 
 		TwoWebClientBuilders.Two two = context.getBean(TwoWebClientBuilders.Two.class);
 
 		then(two.loadBalanced).isNotNull();
-		assertLoadBalanced(two.loadBalanced,
-				ReactorLoadBalancerExchangeFilterFunction.class);
+		assertLoadBalanced(two.loadBalanced, ReactorLoadBalancerExchangeFilterFunction.class);
 
 		then(two.nonLoadBalanced).isNotNull();
 		then(getFilters(two.nonLoadBalanced)).isNullOrEmpty();
 	}
 
 	@Test
+	void loadBalancerFilterAddedOnlyToLoadBalancedWebClientBuilderWithRetryEnabled() {
+		System.setProperty("spring.cloud.loadbalancer.retry.enabled", "true");
+		ConfigurableApplicationContext context = init(TwoWebClientBuilders.class);
+		final Map<String, WebClient.Builder> webClientBuilders = context.getBeansOfType(WebClient.Builder.class);
+
+		then(webClientBuilders).hasSize(2);
+
+		TwoWebClientBuilders.Two two = context.getBean(TwoWebClientBuilders.Two.class);
+
+		then(two.loadBalanced).isNotNull();
+		assertLoadBalanced(two.loadBalanced, RetryableLoadBalancerExchangeFilterFunction.class);
+
+		then(two.nonLoadBalanced).isNotNull();
+		then(getFilters(two.nonLoadBalanced)).isNullOrEmpty();
+		System.clearProperty("spring.cloud.loadbalancer.retry.enabled");
+	}
+
+	@Test
 	void noCustomWebClientBuilders() {
 		ConfigurableApplicationContext context = init(NoWebClientBuilder.class);
-		final Map<String, WebClient.Builder> webClientBuilders = context
-				.getBeansOfType(WebClient.Builder.class);
+		final Map<String, WebClient.Builder> webClientBuilders = context.getBeansOfType(WebClient.Builder.class);
 
 		then(webClientBuilders).hasSize(1);
 
@@ -96,8 +129,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	}
 
 	private ConfigurableApplicationContext init(Class<?> config) {
-		return LoadBalancerTestUtils.init(config,
-				ReactorLoadBalancerClientAutoConfiguration.class,
+		return LoadBalancerTestUtils.init(config, ReactorLoadBalancerClientAutoConfiguration.class,
 				LoadBalancerBeanPostProcessorAutoConfiguration.class);
 	}
 
@@ -108,8 +140,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory() {
 			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
 				@Override
-				public ReactiveLoadBalancer<ServiceInstance> getInstance(
-						String serviceId) {
+				public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
 					return new TestReactiveLoadBalancer();
 				}
 
@@ -119,8 +150,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 				}
 
 				@Override
-				public <X> X getInstance(String name, Class<?> clazz,
-						Class<?>... generics) {
+				public <X> X getInstance(String name, Class<?> clazz, Class<?>... generics) {
 					throw new UnsupportedOperationException("Not implemented.");
 				}
 			};

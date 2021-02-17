@@ -36,8 +36,7 @@ public class LoggingSystemShutdownListener
 	/**
 	 * Default order for the listener.
 	 */
-	public static final int DEFAULT_ORDER = BootstrapApplicationListener.DEFAULT_ORDER
-			+ 1;
+	public static final int DEFAULT_ORDER = BootstrapApplicationListener.DEFAULT_ORDER + 1;
 
 	private int order = DEFAULT_ORDER;
 
@@ -48,8 +47,7 @@ public class LoggingSystemShutdownListener
 
 	private void shutdownLogging() {
 		// TODO: only enable if bootstrap and legacy
-		LoggingSystem loggingSystem = LoggingSystem
-				.get(ClassUtils.getDefaultClassLoader());
+		LoggingSystem loggingSystem = LoggingSystem.get(ClassUtils.getDefaultClassLoader());
 		loggingSystem.cleanUp();
 		loggingSystem.beforeInitialize();
 	}

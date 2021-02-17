@@ -75,8 +75,7 @@ public class IdUtilsTests {
 		this.env.setProperty("spring.application.name", DEFAULT_ID);
 		this.env.setProperty("spring.cloud.client.hostname", DEFAULT_ID + "2");
 		String instanceId = IdUtils.getDefaultInstanceId(this.env);
-		then(instanceId).as("instanceId was wrong")
-				.isEqualTo(DEFAULT_ID + "2" + ":" + DEFAULT_ID);
+		then(instanceId).as("instanceId was wrong").isEqualTo(DEFAULT_ID + "2" + ":" + DEFAULT_ID);
 	}
 
 	@Test
@@ -107,14 +106,12 @@ public class IdUtilsTests {
 		this.env.setProperty("spring.application.name", DEFAULT_ID);
 		this.env.setProperty("server.port", "80");
 		String instanceId = IdUtils.getDefaultInstanceId(this.env);
-		then("myhost:" + DEFAULT_ID + ":80").isEqualTo(instanceId)
-				.as("instanceId was wrong");
+		then("myhost:" + DEFAULT_ID + ":80").isEqualTo(instanceId).as("instanceId was wrong");
 	}
 
 	@Test
 	public void testUnresolvedServiceId() {
-		then(IdUtils.DEFAULT_SERVICE_ID_STRING)
-				.isEqualTo(IdUtils.getUnresolvedServiceId());
+		then(IdUtils.DEFAULT_SERVICE_ID_STRING).isEqualTo(IdUtils.getUnresolvedServiceId());
 	}
 
 	@Test
@@ -136,8 +133,7 @@ public class IdUtilsTests {
 		env.setProperty("spring.application.name", "springname");
 		env.setProperty("spring.application.index", "springindex");
 		env.setProperty("cachedrandom.springname.value", "123abc");
-		then("springname:springindex:123abc")
-				.isEqualTo(IdUtils.getResolvedServiceId(env));
+		then("springname:springindex:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
 	}
 
 	@Test

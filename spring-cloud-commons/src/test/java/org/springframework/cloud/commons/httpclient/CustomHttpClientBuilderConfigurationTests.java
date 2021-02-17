@@ -44,8 +44,7 @@ public class CustomHttpClientBuilderConfigurationTests {
 	@Test
 	public void testCustomBuilder() {
 		HttpClientBuilder builder = this.apacheHttpClientFactory.createBuilder();
-		then(CustomHttpClientBuilderApplication.MyHttpClientBuilder.class
-				.isInstance(builder)).isTrue();
+		then(CustomHttpClientBuilderApplication.MyHttpClientBuilder.class.isInstance(builder)).isTrue();
 	}
 
 }

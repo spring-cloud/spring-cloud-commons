@@ -27,7 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerCacheAutoConfiguration;
@@ -41,6 +41,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import static java.time.Duration.ofMillis;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSuppliersTestUtils.healthCheckFunction;
 
 /**
  * Tests for {@link CachingServiceInstanceListSupplier}.
@@ -86,8 +87,7 @@ class CachingServiceInstanceListSupplierTests {
 
 				@Override
 				public Flux<ServiceInstance> getInstances(String serviceId) {
-					return Flux.just(instance("1host", false),
-							instance("2host-secure", true));
+					return Flux.just(instance("1host", false), instance("2host-secure", true));
 				}
 
 				@Override
@@ -98,8 +98,7 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
-		ReactorLoadBalancer<ServiceInstance> reactorLoadBalancer(
-				ObjectProvider<ServiceInstanceListSupplier> provider) {
+		ReactorLoadBalancer<ServiceInstance> reactorLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> provider) {
 			return new RoundRobinLoadBalancer(provider, SERVICE_ID);
 		}
 
@@ -109,8 +108,7 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
-		BlockingLoadBalancerClient blockingLoadBalancerClient(
-				LoadBalancerClientFactory loadBalancerClientFactory,
+		BlockingLoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
 				LoadBalancerProperties properties) {
 			return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
 		}
@@ -127,28 +125,23 @@ class CachingServiceInstanceListSupplierTests {
 
 		@Bean
 		ServiceInstanceListSupplier supplier(ConfigurableApplicationContext context,
-				ReactiveDiscoveryClient discoveryClient,
-				LoadBalancerProperties loadBalancerProperties,
+				ReactiveDiscoveryClient discoveryClient, LoadBalancerProperties loadBalancerProperties,
 				WebClient.Builder webClientBuilder) {
 			DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
 					discoveryClient, context.getEnvironment());
 			HealthCheckServiceInstanceListSupplier delegate = new TestHealthCheckServiceInstanceListSupplier(
-					firstDelegate, loadBalancerProperties.getHealthCheck(),
-					webClientBuilder.build());
+					firstDelegate, loadBalancerProperties.getHealthCheck(), webClientBuilder.build());
 			delegate.afterPropertiesSet();
 			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
 					.getBeanProvider(LoadBalancerCacheManager.class);
-			return new CachingServiceInstanceListSupplier(delegate,
-					cacheManagerProvider.getIfAvailable());
+			return new CachingServiceInstanceListSupplier(delegate, cacheManagerProvider.getIfAvailable());
 		}
 
-		private static class TestHealthCheckServiceInstanceListSupplier
-				extends HealthCheckServiceInstanceListSupplier {
+		private static class TestHealthCheckServiceInstanceListSupplier extends HealthCheckServiceInstanceListSupplier {
 
-			TestHealthCheckServiceInstanceListSupplier(
-					ServiceInstanceListSupplier delegate,
+			TestHealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 					LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
-				super(delegate, healthCheck, webClient);
+				super(delegate, healthCheck, healthCheckFunction(webClient));
 			}
 
 			@Override

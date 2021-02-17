@@ -34,10 +34,8 @@ public class RefreshScopeSerializationTests {
 
 	@Test
 	public void defaultApplicationContextId() throws Exception {
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(
-				TestConfiguration.class)
-						.properties("spring.config.use-legacy-processing=true")
-						.web(WebApplicationType.NONE).run();
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfiguration.class)
+				.properties("spring.config.use-legacy-processing=true").web(WebApplicationType.NONE).run();
 		then(context.getId()).isEqualTo("application-1");
 	}
 
@@ -51,10 +49,9 @@ public class RefreshScopeSerializationTests {
 	}
 
 	private DefaultListableBeanFactory getBeanFactory() {
-		ConfigurableApplicationContext context = new SpringApplicationBuilder(
-				TestConfiguration.class).web(WebApplicationType.NONE).run();
-		DefaultListableBeanFactory factory = (DefaultListableBeanFactory) context
-				.getAutowireCapableBeanFactory();
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfiguration.class)
+				.web(WebApplicationType.NONE).run();
+		DefaultListableBeanFactory factory = (DefaultListableBeanFactory) context.getAutowireCapableBeanFactory();
 		return factory;
 	}
 

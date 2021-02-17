@@ -16,16 +16,14 @@
 
 package org.springframework.cloud.client.discovery.simple;
 
-import java.net.URI;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
 /**
@@ -38,31 +36,32 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  * @author Biju Kunjummen
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
+ * @author Charu Covindane
  */
 
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
 public class SimpleDiscoveryProperties {
 
-	private Map<String, List<SimpleServiceInstance>> instances = new HashMap<>();
+	private Map<String, List<DefaultServiceInstance>> instances = new HashMap<>();
 
 	/**
 	 * The properties of the local instance (if it exists). Users should set these
 	 * properties explicitly if they are exporting data (e.g. metrics) that need to be
 	 * identified by the service instance.
 	 */
-	private SimpleServiceInstance local = new SimpleServiceInstance();
+	private DefaultServiceInstance local = new DefaultServiceInstance(null, null, null, 0, false);
 
 	private int order = DiscoveryClient.DEFAULT_ORDER;
 
-	public Map<String, List<SimpleServiceInstance>> getInstances() {
+	public Map<String, List<DefaultServiceInstance>> getInstances() {
 		return this.instances;
 	}
 
-	public void setInstances(Map<String, List<SimpleServiceInstance>> instances) {
+	public void setInstances(Map<String, List<DefaultServiceInstance>> instances) {
 		this.instances = instances;
 	}
 
-	public SimpleServiceInstance getLocal() {
+	public DefaultServiceInstance getLocal() {
 		return this.local;
 	}
 
@@ -77,106 +76,14 @@ public class SimpleDiscoveryProperties {
 	@PostConstruct
 	public void init() {
 		for (String key : this.instances.keySet()) {
-			for (SimpleServiceInstance instance : this.instances.get(key)) {
+			for (DefaultServiceInstance instance : this.instances.get(key)) {
 				instance.setServiceId(key);
 			}
 		}
 	}
 
-	/**
-	 * Basic implementation of {@link ServiceInstance}.
-	 */
-	public static class SimpleServiceInstance implements ServiceInstance {
-
-		/**
-		 * The URI of the service instance. Will be parsed to extract the scheme, host,
-		 * and port.
-		 */
-		private URI uri;
-
-		private String host;
-
-		private int port;
-
-		private boolean secure;
-
-		/**
-		 * Metadata for the service instance. Can be used by discovery clients to modify
-		 * their behaviour per instance, e.g. when load balancing.
-		 */
-		private Map<String, String> metadata = new LinkedHashMap<>();
-
-		/**
-		 * The unique identifier or name for the service instance.
-		 */
-		private String instanceId;
-
-		/**
-		 * The identifier or name for the service. Multiple instances might share the same
-		 * service ID.
-		 */
-		private String serviceId;
-
-		public SimpleServiceInstance() {
-		}
-
-		public SimpleServiceInstance(URI uri) {
-			setUri(uri);
-		}
-
-		@Override
-		public String getInstanceId() {
-			return this.instanceId;
-		}
-
-		public void setInstanceId(String id) {
-			this.instanceId = id;
-		}
-
-		@Override
-		public String getServiceId() {
-			return this.serviceId;
-		}
-
-		public void setServiceId(String id) {
-			this.serviceId = id;
-		}
-
-		@Override
-		public String getHost() {
-			return this.host;
-		}
-
-		@Override
-		public int getPort() {
-			return this.port;
-		}
-
-		@Override
-		public boolean isSecure() {
-			return this.secure;
-		}
-
-		@Override
-		public URI getUri() {
-			return this.uri;
-		}
-
-		public void setUri(URI uri) {
-			this.uri = uri;
-			this.host = this.uri.getHost();
-			this.port = this.uri.getPort();
-			String scheme = this.uri.getScheme();
-			if ("https".equals(scheme)) {
-				this.secure = true;
-			}
-		}
-
-		@Override
-		public Map<String, String> getMetadata() {
-			return this.metadata;
-		}
-
+	public void setInstance(String serviceId, String host, int port) {
+		local = new DefaultServiceInstance(null, serviceId, host, port, false);
 	}
 
 }

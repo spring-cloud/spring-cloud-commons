@@ -28,6 +28,7 @@ import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
 import org.springframework.context.annotation.Conditional;
 
 import static org.springframework.cloud.util.PropertyUtils.BOOTSTRAP_ENABLED_PROPERTY;
+import static org.springframework.cloud.util.PropertyUtils.MARKER_CLASS;
 import static org.springframework.cloud.util.PropertyUtils.USE_LEGACY_PROCESSING_PROPERTY;
 
 @Target({ ElementType.TYPE, ElementType.METHOD })
@@ -42,7 +43,7 @@ public @interface ConditionalOnBootstrapDisabled {
 			super(ConfigurationPhase.REGISTER_BEAN);
 		}
 
-		@ConditionalOnClass(name = "org.springframework.cloud.bootstrap.marker.Marker")
+		@ConditionalOnClass(name = MARKER_CLASS)
 		static class OnBootstrapMarkerClassPresent {
 
 		}

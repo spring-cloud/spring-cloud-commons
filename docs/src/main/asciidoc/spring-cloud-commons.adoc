@@ -437,10 +437,28 @@ Then, `ReactiveLoadBalancer` is used underneath.
 
 A load-balanced `RestTemplate` can be configured to retry failed requests.
 By default, this logic is disabled.
-You can enable it by adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath.
-If you would like to disable the retry logic with Spring Retry on the classpath, you can set `spring.cloud.loadbalancer.retry.enabled=false`.
+For the non-reactive version (with `RestTemplate`), you can enable it by adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath. For the reactive version (with `WebTestClient), you need to set `spring.cloud.loadbalancer.retry.enabled=true`.
 
-If you would like to implement a `BackOffPolicy` in your retries, you need to create a bean of type `LoadBalancedRetryFactory` and override the `createBackOffPolicy` method:
+If you would like to disable the retry logic with Spring Retry or Reactive Retry on the classpath, you can set `spring.cloud.loadbalancer.retry.enabled=false`.
+
+For the non-reactive implementation, if you would like to implement a `BackOffPolicy` in your retries, you need to create a bean of type `LoadBalancedRetryFactory` and override the `createBackOffPolicy()` method.
+
+For the reactive implementation, you just need to enable it by setting `spring.cloud.loadbalancer.retry.backoff.enabled` to `false`.
+
+You can set:
+
+- `spring.cloud.loadbalancer.retry.maxRetriesOnSameServiceInstance` - indicates how many times a request should be retried on the same `ServiceInstance` (counted separately for every selected instance)
+- `spring.cloud.loadbalancer.retry.maxRetriesOnNextServiceInstance` - indicates how many times a request should be retried a newly selected `ServiceInstance`
+- `spring.cloud.loadbalancer.retry.retryableStatusCodes` - the status codes on which to always retry a failed request.
+
+For the reactive implementation, you can additionally set:
+ - `spring.cloud.loadbalancer.retry.backoff.minBackoff` - Sets the minimum backoff duration (by default, 5 milliseconds)
+ - `spring.cloud.loadbalancer.retry.backoff.maxBackoff` - Sets the maximum backoff duration (by default, max long value of milliseconds)
+ - `spring.cloud.loadbalancer.retry.backoff.jitter` - Sets the jitter used for calculationg the actual backoff duration for each call (by default, 0.5).
+
+For the reactive implementation, you can also implement your own `LoadBalancerRetryPolicy` to have more detailed control over the load-balanced call retries.
+
+NOTE: For load-balanced retries, by default, we wrap the `ServiceInstanceListSupplier` bean with `RetryAwareServiceInstanceListSupplier` to select a different instance from the one previously chosen, if available. You can disable this behavior by setting the value of `spring.cloud.loadbalancer.retry.avoidPreviousInstance` to `false`.
 
 ====
 [source,java,indent=0]
@@ -812,10 +830,32 @@ of compatible Spring Boot versions.
 == Spring Cloud LoadBalancer
 
 Spring Cloud provides its own client-side load-balancer abstraction and implementation. For the load-balancing
-mechanism, `ReactiveLoadBalancer` interface has been added and a Round-Robin-based implementation
-has been provided for it. In order to get instances to select from reactive `ServiceInstanceListSupplier`
+mechanism, `ReactiveLoadBalancer` interface has been added and a *Round-Robin-based* and *Random* implementations
+have been provided for it. In order to get instances to select from reactive `ServiceInstanceListSupplier`
 is used. Currently we support a service-discovery-based implementation of `ServiceInstanceListSupplier`
 that retrieves available instances from Service Discovery using a <<discovery-client, Discovery Client>> available in the classpath.
+
+=== Switching between the load-balancing algorithms
+
+The `ReactiveLoadBalancer` implementation that is used by default is `RoundRobinLoadBalancer`. To switch to a different implementation, either for selected services or all of them, you can use the <<custom-loadbalancer-configuration, custom LoadBalancer configurations mechanism>>.
+
+For example, the following configuration can be passed via `@LoadBalancerClient` annotation to switch to using the `RandomLoadBalancer`:
+
+[[random-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	ReactorLoadBalancer<ServiceInstance> randomLoadBalancer(Environment environment,
+			LoadBalancerClientFactory loadBalancerClientFactory) {
+		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
+		return new RandomLoadBalancer(loadBalancerClientFactory
+				.getLazyProvider(name, ServiceInstanceListSupplier.class),
+				name);
+	}
+}
+----
 
 === Spring Cloud LoadBalancer integrations
 
@@ -911,15 +951,21 @@ TIP: This mechanism is particularly helpful while using the `SimpleDiscoveryClie
 clients backed by an actual Service Registry, it's not necessary to use, as we already get
 healthy instances after querying the external ServiceDiscovery.
 
-TIP:: This supplier is also recommended for setups with a small number of instances per service
+TIP: This supplier is also recommended for setups with a small number of instances per service
 in order to avoid retrying calls on a failing instance.
+
+WARNING: If using any of the Service Discovery-backed suppliers, adding this health-check mechanism is usually not necessary, as we retrieve the health state of the instances directly
+from the Service Registry.
+
+TIP: The `HealthCheckServiceInstanceListSupplier` relies on having updated instances provided by a delegate flux. In the rare cases when you want to use a delegate that does not refresh the instances, even though the list of instances may change (such as the `ReactiveDiscoveryClientServiceInstanceListSupplier` provided by us), you can set `spring.cloud.loadbalancer.health-check.refetch-instances` to `true` to have the instance list refreshed by the `HealthCheckServiceInstanceListSupplier`. You can then also adjust the refretch intervals by modifying the value of `spring.cloud.loadbalancer.health-check.refetch-instances-interval` and opt to disable the additional healthcheck repetitions by setting `spring.cloud.loadbalancer.repeat-health-check` to `fasle` as every instances refetch
+  will also trigger a healthcheck.
 
 `HealthCheckServiceInstanceListSupplier` uses properties prefixed with
 `spring.cloud.loadbalancer.health-check`. You can set the `initialDelay` and `interval`
 for the scheduler. You can set the default path for the healthcheck URL by setting
 the value of the `spring.cloud.loadbalancer.health-check.path.default` property. You can also set a specific value for any given service by setting the value of the `spring.cloud.loadbalancer.health-check.path.[SERVICE_ID]` property, substituting `[SERVICE_ID]` with the correct ID of your service. If the path is not set, `/actuator/health` is used by default.
 
-TIP:: If you rely on the default path (`/actuator/health`), make sure you add `spring-boot-starter-actuator` to your collaborator's dependencies, unless you are planning to add such an endpoint on your own.
+TIP: If you rely on the default path (`/actuator/health`), make sure you add `spring-boot-starter-actuator` to your collaborator's dependencies, unless you are planning to add such an endpoint on your own.
 
 In order to use the health-check scheduler approach, you will have to instantiate a `HealthCheckServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.
 
@@ -944,7 +990,61 @@ public class CustomLoadBalancerConfiguration {
 	}
 ----
 
-NOTE:: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`, therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
+TIP: For the non-reactive stack, create this supplier with the `withBlockingHealthChecks()`.
+You can also pass your own `WebClient` or `RestTemplate` instance to be used for the checks.
+
+WARNING: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`. Therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
+
+=== Same instance preference for LoadBalancer
+
+You can set up the LoadBalancer in such a way that it prefers the instance that was previously selected, if that instance is available.
+
+For that, you need to use `SameInstancePreferenceServiceInstanceListSupplier`. You can configure it either by setting the value of `spring.cloud.loadbalancer.configurations` to `same-instance-preference` or by providing your own `ServiceInstanceListSupplier` bean -- for example:
+
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withSameInstancePreference()
+					.build(context);
+	    }
+	}
+----
+
+TIP: This is also a replacement for Zookeeper `StickyRule`.
+
+=== Request-based Sticky Session for LoadBalancer
+
+You can set up the LoadBalancer in such a way that it prefers the instance with `instanceId` provided in a request cookie. We currently support this if the request is being passed to the LoadBalancer through either `ClientRequestContext` or `ServerHttpRequestContext`, which are used by the SC LoadBalancer exchange filter functions and filters.
+
+For that, you need to use the `RequestBasedStickySessionServiceInstanceListSupplier`. You can configure it either by setting the value of `spring.cloud.loadbalancer.configurations` to `request-based-sticky-session` or by providing your own `ServiceInstanceListSupplier` bean -- for example:
+
+[[health-check-based-custom-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withRequestBasedStickySession()
+					.build(context);
+	    }
+	}
+----
+
+For that functionality, it is useful to have the selected service instance (which can be different from the one in the original request cookie if that one is not available) to be updated before sending the request forward. To do that, set the value of `spring.cloud.loadbalancer.sticky-session.add-service-instance-cookie` to `true`.
+
+By default, the name of the cookie is `sc-lb-instance-id`. You can modify it by changing the value of the `spring.cloud.loadbalancer.instance-id-cookie-name` property.
+
+WARNING: Passing the selected service instance id as a cookie is currently only supported for the reactive `@LoadBalanced Webclient`, `ReactorLoadBalancerExchangeFilterFunction` and `RetryableLoadBalancerExchangeFilterFunction`.
 
 [[spring-cloud-loadbalancer-hints]]
 === Spring Cloud LoadBalancer Hints
@@ -962,7 +1062,7 @@ In order to use it, just add `org.springframework.cloud:spring-cloud-starter-loa
 
 NOTE: Spring Cloud LoadBalancer starter includes
 https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching]
-and https://github.com/stoyanr[Evictor].
+and https://github.com/stoyanr/Evictor[Evictor].
 
 [[custom-loadbalancer-configuration]]
 === Passing Your Own Spring Cloud LoadBalancer Configuration
@@ -1018,14 +1118,37 @@ public class MyConfiguration {
 
 One type of bean that it may be useful to register using <<custom-loadbalancer-configuration,Custom LoadBalancer configuration>> is `LoadBalancerLifecycle`.
 
-The LoadBalancerLifecycle beans provide callback methods, named `onStart(Request<RC> request)` and `onComplete(CompletionContext<RES, T> completionContext)`, that you should implement to specify what actions should take place before and after load-balancing.
+The `LoadBalancerLifecycle` beans provide callback methods, named `onStart(Request<RC> request)`, `onStartRequest(Request<RC> request, Response<T> lbResponse)` and `onComplete(CompletionContext<RES, T, RC> completionContext)`, that you should implement to specify what actions should take place before and after load-balancing.
 
-`onStart(Request<RC> request)` takes a `Request` object as a parameter. It contains data that is used to select an appropriate instance, including the downstream client request and <<spring-cloud-loadbalancer-hints,hint>>. On the other hand, a `CompletionContext` object is provided to the `onComplete(CompletionContext<RES, T> completionContext)` method. It contains the LoadBalancer `Response`, including the selected service instance, the `Status` of the request executed against that service instance and (if available) the response returned to the downstream client, and (if an exception has occurred) the corresponding `Throwable`.
+`onStart(Request<RC> request)` takes a `Request` object as a parameter. It contains data that is used to select an appropriate instance, including the downstream client request and <<spring-cloud-loadbalancer-hints,hint>>. `onStartRequest` also takes the `Request` object and, additionally, the `Response<T>` object as parameters.  On the other hand, a `CompletionContext` object is provided to the `onComplete(CompletionContext<RES, T, RC> completionContext)` method. It contains the LoadBalancer `Response`, including the selected service instance, the `Status` of the request executed against that service instance and (if available) the response returned to the downstream client, and (if an exception has occurred) the corresponding `Throwable`.
 
 The `supports(Class requestContextClass, Class responseClass,
 Class serverTypeClass)` method can be used to determine whether the processor in question handles objects of provided types. If not overridden by the user, it returns `true`.
 
 NOTE: In the preceding method calls, `RC` means `RequestContext` type, `RES` means client response type, and `T` means returned server type.
+
+[[loadbalancer-micrometer-stats-lifecycle]]
+=== Spring Cloud LoadBalancer Statistics
+
+We provide a `LoadBalancerLifecycle` bean called `MicrometerStatsLoadBalancerLifecycle`, which uses Micrometer to provide statistics for load-balanced calls.
+
+In order to get this bean added to your application context,
+set the value of the `spring.cloud.loadbalancer.stats.micrometer.enabled` to `true` and have a `MeterRegistry` available (for example, by adding https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html[Spring Boot Actuator] to your project).
+
+`MicrometerStatsLoadBalancerLifecycle` registers the following meters in `MeterRegistry`:
+
+* `loadbalancer.requests.active`: A gauge that allows you to monitor the number of currently active requests for any service instance (service instance data available via tags);
+* `loadbalancer.requests.success`: A timer that measures the time of execution of any load-balanced requests that have ended in passing a response on to the underlying client;
+* `loadbalancer.requests.failed`: A timer that measures the time of execution of any load-balanced requests that have ended with an exception;
+* `loadbalancer.requests.discard`: A counter that measures the number of discarded load-balanced requests, i.e. requests where a service instance to run the request on has not been retrieved by the LoadBalancer.
+
+Additional information regarding the service instances, request data, and response data is added to metrics via tags whenever available.
+
+NOTE: For some implementations, such as `BlockingLoadBalancerClient`, request and response data might not be available, as we establish generic types from arguments and might not be able to determine the types and read the data.
+
+NOTE: The meters are registered in the registry when at least one record is added for a given meter.
+
+TIP: You can further configure the behavior of those metrics (for example, add https://micrometer.io/docs/concepts#_histograms_and_percentiles[publishing percentiles and histograms]) by https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-metrics-per-meter-properties[adding `MeterFilters`].
 
 == Spring Cloud Circuit Breaker
 
@@ -1045,6 +1168,95 @@ be any type supported by Spring Boot's `RandomValuePropertySource`.
 myrandom=${cachedrandom.appname.value}
 ----
 ====
+
+[[spring-cloud-security]]
+== Security
+
+[[spring-cloud-security-single-sign-on]]
+=== Single Sign On
+
+NOTE: All of the OAuth2 SSO and resource server features moved to Spring Boot
+in version 1.3. You can find documentation in the
+https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/[Spring Boot user guide].
+
+[[spring-cloud-security-client-token-relay]]
+==== Client Token Relay
+
+If your app is a user facing OAuth2 client (i.e. has declared
+`@EnableOAuth2Sso` or `@EnableOAuth2Client`) then it has an
+`OAuth2ClientContext` in request scope from Spring Boot. You can
+create your own `OAuth2RestTemplate` from this context and an
+autowired `OAuth2ProtectedResourceDetails`, and then the context will
+always forward the access token downstream, also refreshing the access
+token automatically if it expires. (These are features of Spring
+Security and Spring Boot.)
+
+[[spring-cloud-security-resource-server-token-relay]]
+==== Resource Server Token Relay
+
+If your app has `@EnableResourceServer` you might want to relay the
+incoming token downstream to other services. If you use a
+`RestTemplate` to contact the downstream services then this is just a
+matter of how to create the template with the right context.
+
+If your service uses `UserInfoTokenServices` to authenticate incoming
+tokens (i.e. it is using the `security.oauth2.user-info-uri`
+configuration), then you can simply create an `OAuth2RestTemplate`
+using an autowired `OAuth2ClientContext` (it will be populated by the
+authentication process before it hits the backend code). Equivalently
+(with Spring Boot 1.4), you could inject a
+`UserInfoRestTemplateFactory` and grab its `OAuth2RestTemplate` in
+your configuration. For example:
+
+.MyConfiguration.java
+[source,java]
+----
+@Bean
+public OAuth2RestTemplate restTemplate(UserInfoRestTemplateFactory factory) {
+    return factory.getUserInfoRestTemplate();
+}
+----
+
+This rest template will then have the same `OAuth2ClientContext`
+(request-scoped) that is used by the authentication filter, so you can
+use it to send requests with the same access token.
+
+If your app is not using `UserInfoTokenServices` but is still a client
+(i.e. it declares `@EnableOAuth2Client` or `@EnableOAuth2Sso`), then
+with Spring Security Cloud any `OAuth2RestOperations` that the user
+creates from an `@Autowired` `OAuth2Context` will also forward
+tokens. This feature is implemented by default as an MVC handler
+interceptor, so it only works in Spring MVC. If you are not using MVC
+you could use a custom filter or AOP interceptor wrapping an
+`AccessTokenContextRelay` to provide the same feature.
+
+Here's a basic
+example showing the use of an autowired rest template created
+elsewhere ("foo.com" is a Resource Server accepting the same tokens as
+the surrounding app):
+
+.MyController.java
+[source,java]
+----
+@Autowired
+private OAuth2RestOperations restTemplate;
+
+@RequestMapping("/relay")
+public String relay() {
+    ResponseEntity<String> response =
+      restTemplate.getForEntity("https://foo.com/bar", String.class);
+    return "Success! (" + response.getBody() + ")";
+}
+----
+
+If you don't want to forward tokens (and that is a valid
+choice, since you might want to act as yourself, rather than the
+client that sent you the token), then you only need to create your own
+`OAuth2Context` instead of autowiring the default one.
+
+Feign clients will also pick up an interceptor that uses the
+`OAuth2ClientContext` if it is available, so they should also do a
+token relay anywhere where a `RestTemplate` would.
 
 == Configuration Properties
 

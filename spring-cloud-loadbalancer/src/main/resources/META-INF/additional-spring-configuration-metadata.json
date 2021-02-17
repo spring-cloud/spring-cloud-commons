@@ -21,6 +21,18 @@
 			"name": "spring.cloud.loadbalancer.cache.enabled",
 			"description": "Enables Spring Cloud LoadBalancer caching mechanism.",
 			"type": "java.lang.Boolean"
+		},
+		{
+			"defaultValue": true,
+			"name": "spring.cloud.loadbalancer.retry.avoid-previous-instance",
+			"description": "Enables wrapping ServiceInstanceListSupplier beans with `RetryAwareServiceInstanceListSupplier` if Spring-Retry is in the classpath.",
+			"type": "java.lang.Boolean"
+		},
+		{
+			"defaultValue": "default",
+			"name": "spring.cloud.loadbalancer.configurations",
+			"description": "Enables a predefined LoadBalancer configuration.",
+			"type": "java.lang.String"
 		}
 	]
 }

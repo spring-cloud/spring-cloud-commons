@@ -41,19 +41,18 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	private static final Log log = LogFactory.getLog(RoundRobinLoadBalancer.class);
 
-	private final AtomicInteger position;
+	final AtomicInteger position;
 
-	private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
+	final String serviceId;
 
-	private final String serviceId;
+	ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
 	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
 	 * @param serviceId id of the service for which to choose an instance
 	 */
-	public RoundRobinLoadBalancer(
-			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+	public RoundRobinLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId) {
 		this(serviceInstanceListSupplierProvider, serviceId, new Random().nextInt(1000));
 	}
@@ -64,8 +63,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	 * @param serviceId id of the service for which to choose an instance
 	 * @param seedPosition Round Robin element position marker
 	 */
-	public RoundRobinLoadBalancer(
-			ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+	public RoundRobinLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId, int seedPosition) {
 		this.serviceId = serviceId;
 		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
@@ -80,13 +78,24 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
 				.getIfAvailable(NoopServiceInstanceListSupplier::new);
-		return supplier.get().next().map(this::getInstanceResponse);
+		return supplier.get(request).next()
+				.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
 
-	private Response<ServiceInstance> getInstanceResponse(
-			List<ServiceInstance> instances) {
+	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,
+			List<ServiceInstance> serviceInstances) {
+		Response<ServiceInstance> serviceInstanceResponse = getInstanceResponse(serviceInstances);
+		if (supplier instanceof SelectedInstanceCallback && serviceInstanceResponse.hasServer()) {
+			((SelectedInstanceCallback) supplier).selectedServiceInstance(serviceInstanceResponse.getServer());
+		}
+		return serviceInstanceResponse;
+	}
+
+	private Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances) {
 		if (instances.isEmpty()) {
-			log.warn("No servers available for service: " + this.serviceId);
+			if (log.isWarnEnabled()) {
+				log.warn("No servers available for service: " + serviceId);
+			}
 			return new EmptyResponse();
 		}
 		// TODO: enforce order?

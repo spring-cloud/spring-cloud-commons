@@ -74,8 +74,7 @@ import static org.springframework.cloud.util.PropertyUtils.useLegacyProcessing;
  * @author Dave Syer
  *
  */
-public class BootstrapApplicationListener
-		implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
+public class BootstrapApplicationListener implements ApplicationListener<ApplicationEnvironmentPreparedEvent>, Ordered {
 
 	/**
 	 * Property source name for bootstrap.
@@ -105,33 +104,25 @@ public class BootstrapApplicationListener
 			return;
 		}
 		ConfigurableApplicationContext context = null;
-		String configName = environment
-				.resolvePlaceholders("${spring.cloud.bootstrap.name:bootstrap}");
-		for (ApplicationContextInitializer<?> initializer : event.getSpringApplication()
-				.getInitializers()) {
+		String configName = environment.resolvePlaceholders("${spring.cloud.bootstrap.name:bootstrap}");
+		for (ApplicationContextInitializer<?> initializer : event.getSpringApplication().getInitializers()) {
 			if (initializer instanceof ParentContextApplicationContextInitializer) {
-				context = findBootstrapContext(
-						(ParentContextApplicationContextInitializer) initializer,
-						configName);
+				context = findBootstrapContext((ParentContextApplicationContextInitializer) initializer, configName);
 			}
 		}
 		if (context == null) {
-			context = bootstrapServiceContext(environment, event.getSpringApplication(),
-					configName);
-			event.getSpringApplication()
-					.addListeners(new CloseContextOnFailureApplicationListener(context));
+			context = bootstrapServiceContext(environment, event.getSpringApplication(), configName);
+			event.getSpringApplication().addListeners(new CloseContextOnFailureApplicationListener(context));
 		}
 
 		apply(context, event.getSpringApplication(), environment);
 	}
 
-	private ConfigurableApplicationContext findBootstrapContext(
-			ParentContextApplicationContextInitializer initializer, String configName) {
-		Field field = ReflectionUtils
-				.findField(ParentContextApplicationContextInitializer.class, "parent");
+	private ConfigurableApplicationContext findBootstrapContext(ParentContextApplicationContextInitializer initializer,
+			String configName) {
+		Field field = ReflectionUtils.findField(ParentContextApplicationContextInitializer.class, "parent");
 		ReflectionUtils.makeAccessible(field);
-		ConfigurableApplicationContext parent = safeCast(
-				ConfigurableApplicationContext.class,
+		ConfigurableApplicationContext parent = safeCast(ConfigurableApplicationContext.class,
 				ReflectionUtils.getField(field, initializer));
 		if (parent != null && !configName.equals(parent.getId())) {
 			parent = safeCast(ConfigurableApplicationContext.class, parent.getParent());
@@ -148,17 +139,14 @@ public class BootstrapApplicationListener
 		}
 	}
 
-	private ConfigurableApplicationContext bootstrapServiceContext(
-			ConfigurableEnvironment environment, final SpringApplication application,
-			String configName) {
+	private ConfigurableApplicationContext bootstrapServiceContext(ConfigurableEnvironment environment,
+			final SpringApplication application, String configName) {
 		StandardEnvironment bootstrapEnvironment = new StandardEnvironment();
-		MutablePropertySources bootstrapProperties = bootstrapEnvironment
-				.getPropertySources();
+		MutablePropertySources bootstrapProperties = bootstrapEnvironment.getPropertySources();
 		for (PropertySource<?> source : bootstrapProperties) {
 			bootstrapProperties.remove(source.getName());
 		}
-		String configLocation = environment
-				.resolvePlaceholders("${spring.cloud.bootstrap.location:}");
+		String configLocation = environment.resolvePlaceholders("${spring.cloud.bootstrap.location:}");
 		String configAdditionalLocation = environment
 				.resolvePlaceholders("${spring.cloud.bootstrap.additional-location:}");
 		Map<String, Object> bootstrapMap = new HashMap<>();
@@ -173,11 +161,9 @@ public class BootstrapApplicationListener
 			bootstrapMap.put("spring.config.location", configLocation);
 		}
 		if (StringUtils.hasText(configAdditionalLocation)) {
-			bootstrapMap.put("spring.config.additional-location",
-					configAdditionalLocation);
+			bootstrapMap.put("spring.config.additional-location", configAdditionalLocation);
 		}
-		bootstrapProperties.addFirst(
-				new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME, bootstrapMap));
+		bootstrapProperties.addFirst(new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME, bootstrapMap));
 		for (PropertySource<?> source : environment.getPropertySources()) {
 			if (source instanceof StubPropertySource) {
 				continue;
@@ -185,12 +171,10 @@ public class BootstrapApplicationListener
 			bootstrapProperties.addLast(source);
 		}
 		// TODO: is it possible or sensible to share a ResourceLoader?
-		SpringApplicationBuilder builder = new SpringApplicationBuilder()
-				.profiles(environment.getActiveProfiles()).bannerMode(Mode.OFF)
-				.environment(bootstrapEnvironment)
+		SpringApplicationBuilder builder = new SpringApplicationBuilder().profiles(environment.getActiveProfiles())
+				.bannerMode(Mode.OFF).environment(bootstrapEnvironment)
 				// Don't use the default properties in this builder
-				.registerShutdownHook(false).logStartupInfo(false)
-				.web(WebApplicationType.NONE);
+				.registerShutdownHook(false).logStartupInfo(false).web(WebApplicationType.NONE);
 		final SpringApplication builderApplication = builder.application();
 		if (builderApplication.getMainApplicationClass() == null) {
 			// gh_425:
@@ -207,8 +191,7 @@ public class BootstrapApplicationListener
 			// Environment, and there are some toxic listeners (like the
 			// LoggingApplicationListener) that affect global static state, so we need a
 			// way to switch those off.
-			builderApplication
-					.setListeners(filterListeners(builderApplication.getListeners()));
+			builderApplication.setListeners(filterListeners(builderApplication.getListeners()));
 		}
 		builder.sources(BootstrapImportSelectorConfiguration.class);
 		final ConfigurableApplicationContext context = builder.run();
@@ -226,8 +209,7 @@ public class BootstrapApplicationListener
 		return context;
 	}
 
-	private Collection<? extends ApplicationListener<?>> filterListeners(
-			Set<ApplicationListener<?>> listeners) {
+	private Collection<? extends ApplicationListener<?>> filterListeners(Set<ApplicationListener<?>> listeners) {
 		Set<ApplicationListener<?>> result = new LinkedHashSet<>();
 		for (ApplicationListener<?> listener : listeners) {
 			if (!(listener instanceof LoggingApplicationListener)
@@ -238,8 +220,7 @@ public class BootstrapApplicationListener
 		return result;
 	}
 
-	private void mergeDefaultProperties(MutablePropertySources environment,
-			MutablePropertySources bootstrap) {
+	private void mergeDefaultProperties(MutablePropertySources environment, MutablePropertySources bootstrap) {
 		String name = DEFAULT_PROPERTIES;
 		if (bootstrap.contains(name)) {
 			PropertySource<?> source = bootstrap.get(name);
@@ -248,10 +229,8 @@ public class BootstrapApplicationListener
 			}
 			else {
 				PropertySource<?> target = environment.get(name);
-				if (target instanceof MapPropertySource && target != source
-						&& source instanceof MapPropertySource) {
-					Map<String, Object> targetMap = ((MapPropertySource) target)
-							.getSource();
+				if (target instanceof MapPropertySource && target != source && source instanceof MapPropertySource) {
+					Map<String, Object> targetMap = ((MapPropertySource) target).getSource();
 					Map<String, Object> map = ((MapPropertySource) source).getSource();
 					for (String key : map.keySet()) {
 						if (!target.containsProperty(key)) {
@@ -264,13 +243,11 @@ public class BootstrapApplicationListener
 		mergeAdditionalPropertySources(environment, bootstrap);
 	}
 
-	private void mergeAdditionalPropertySources(MutablePropertySources environment,
-			MutablePropertySources bootstrap) {
+	private void mergeAdditionalPropertySources(MutablePropertySources environment, MutablePropertySources bootstrap) {
 		PropertySource<?> defaultProperties = environment.get(DEFAULT_PROPERTIES);
 		ExtendedDefaultPropertySource result = defaultProperties instanceof ExtendedDefaultPropertySource
 				? (ExtendedDefaultPropertySource) defaultProperties
-				: new ExtendedDefaultPropertySource(DEFAULT_PROPERTIES,
-						defaultProperties);
+				: new ExtendedDefaultPropertySource(DEFAULT_PROPERTIES, defaultProperties);
 		for (PropertySource<?> source : bootstrap) {
 			if (!environment.contains(source.getName())) {
 				result.add(source);
@@ -283,8 +260,7 @@ public class BootstrapApplicationListener
 		addOrReplace(bootstrap, result);
 	}
 
-	private void addOrReplace(MutablePropertySources environment,
-			PropertySource<?> result) {
+	private void addOrReplace(MutablePropertySources environment, PropertySource<?> result) {
 		if (environment.contains(result.getName())) {
 			environment.replace(result.getName(), result);
 		}
@@ -293,11 +269,9 @@ public class BootstrapApplicationListener
 		}
 	}
 
-	private void addAncestorInitializer(SpringApplication application,
-			ConfigurableApplicationContext context) {
+	private void addAncestorInitializer(SpringApplication application, ConfigurableApplicationContext context) {
 		boolean installed = false;
-		for (ApplicationContextInitializer<?> initializer : application
-				.getInitializers()) {
+		for (ApplicationContextInitializer<?> initializer : application.getInitializers()) {
 			if (initializer instanceof AncestorInitializer) {
 				installed = true;
 				// New parent
@@ -311,16 +285,15 @@ public class BootstrapApplicationListener
 	}
 
 	@SuppressWarnings("unchecked")
-	private void apply(ConfigurableApplicationContext context,
-			SpringApplication application, ConfigurableEnvironment environment) {
+	private void apply(ConfigurableApplicationContext context, SpringApplication application,
+			ConfigurableEnvironment environment) {
 		if (application.getAllSources().contains(BootstrapMarkerConfiguration.class)) {
 			return;
 		}
 		application.addPrimarySources(Arrays.asList(BootstrapMarkerConfiguration.class));
 		@SuppressWarnings("rawtypes")
 		Set target = new LinkedHashSet<>(application.getInitializers());
-		target.addAll(
-				getOrderedBeansOfType(context, ApplicationContextInitializer.class));
+		target.addAll(getOrderedBeansOfType(context, ApplicationContextInitializer.class));
 		application.setInitializers(target);
 		addBootstrapDecryptInitializer(application);
 	}
@@ -349,8 +322,7 @@ public class BootstrapApplicationListener
 		application.setInitializers(target);
 	}
 
-	private <T> List<T> getOrderedBeansOfType(ListableBeanFactory context,
-			Class<T> type) {
+	private <T> List<T> getOrderedBeansOfType(ListableBeanFactory context, Class<T> type) {
 		List<T> result = new ArrayList<T>();
 		for (String name : context.getBeanNamesForType(type)) {
 			result.add(context.getBean(name, type));
@@ -372,8 +344,8 @@ public class BootstrapApplicationListener
 
 	}
 
-	private static class AncestorInitializer implements
-			ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
+	private static class AncestorInitializer
+			implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
 		private ConfigurableApplicationContext parent;
 
@@ -400,22 +372,18 @@ public class BootstrapApplicationListener
 				context = (ConfigurableApplicationContext) context.getParent();
 			}
 			reorderSources(context.getEnvironment());
-			new ParentContextApplicationContextInitializer(this.parent)
-					.initialize(context);
+			new ParentContextApplicationContextInitializer(this.parent).initialize(context);
 		}
 
 		private void reorderSources(ConfigurableEnvironment environment) {
-			PropertySource<?> removed = environment.getPropertySources()
-					.remove(DEFAULT_PROPERTIES);
+			PropertySource<?> removed = environment.getPropertySources().remove(DEFAULT_PROPERTIES);
 			if (removed instanceof ExtendedDefaultPropertySource) {
 				ExtendedDefaultPropertySource defaultProperties = (ExtendedDefaultPropertySource) removed;
-				environment.getPropertySources().addLast(new MapPropertySource(
-						DEFAULT_PROPERTIES, defaultProperties.getSource()));
-				for (PropertySource<?> source : defaultProperties.getPropertySources()
-						.getPropertySources()) {
+				environment.getPropertySources()
+						.addLast(new MapPropertySource(DEFAULT_PROPERTIES, defaultProperties.getSource()));
+				for (PropertySource<?> source : defaultProperties.getPropertySources().getPropertySources()) {
 					if (!environment.getPropertySources().contains(source.getName())) {
-						environment.getPropertySources().addBefore(DEFAULT_PROPERTIES,
-								source);
+						environment.getPropertySources().addBefore(DEFAULT_PROPERTIES, source);
 					}
 				}
 			}
@@ -445,8 +413,8 @@ public class BootstrapApplicationListener
 
 	}
 
-	private static class ExtendedDefaultPropertySource
-			extends SystemEnvironmentPropertySource implements OriginLookup<String> {
+	private static class ExtendedDefaultPropertySource extends SystemEnvironmentPropertySource
+			implements OriginLookup<String> {
 
 		private final OriginTrackedCompositePropertySource sources;
 
@@ -475,8 +443,7 @@ public class BootstrapApplicationListener
 
 		public void add(PropertySource<?> source) {
 			// Only add map property sources added by boot, see gh-476
-			if (source instanceof OriginTrackedMapPropertySource
-					&& !this.names.contains(source.getName())) {
+			if (source instanceof OriginTrackedMapPropertySource && !this.names.contains(source.getName())) {
 				this.sources.addPropertySource(source);
 				this.names.add(source.getName());
 			}
@@ -513,8 +480,7 @@ public class BootstrapApplicationListener
 
 	}
 
-	private static class CloseContextOnFailureApplicationListener
-			implements SmartApplicationListener {
+	private static class CloseContextOnFailureApplicationListener implements SmartApplicationListener {
 
 		private final ConfigurableApplicationContext context;
 

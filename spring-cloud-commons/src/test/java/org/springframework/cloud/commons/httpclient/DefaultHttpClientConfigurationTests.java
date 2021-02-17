@@ -32,8 +32,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Ryan Baxter
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = MyApplication.class,
-		properties = { "spring.cloud.httpclient.ok.enabled: true" })
+@SpringBootTest(classes = MyApplication.class, properties = { "spring.cloud.httpclient.ok.enabled: true" })
 public class DefaultHttpClientConfigurationTests {
 
 	@Autowired
@@ -50,32 +49,27 @@ public class DefaultHttpClientConfigurationTests {
 
 	@Test
 	public void connManFactory() throws Exception {
-		then(ApacheHttpClientConnectionManagerFactory.class
-				.isInstance(this.connectionManagerFactory)).isTrue();
-		then(DefaultApacheHttpClientConnectionManagerFactory.class
-				.isInstance(this.connectionManagerFactory)).isTrue();
+		then(ApacheHttpClientConnectionManagerFactory.class.isInstance(this.connectionManagerFactory)).isTrue();
+		then(DefaultApacheHttpClientConnectionManagerFactory.class.isInstance(this.connectionManagerFactory)).isTrue();
 	}
 
 	@Test
 	public void apacheHttpClientFactory() throws Exception {
 		then(ApacheHttpClientFactory.class.isInstance(this.httpClientFactory)).isTrue();
-		then(DefaultApacheHttpClientFactory.class.isInstance(this.httpClientFactory))
-				.isTrue();
+		then(DefaultApacheHttpClientFactory.class.isInstance(this.httpClientFactory)).isTrue();
 	}
 
 	@Test
 	public void connPoolFactory() throws Exception {
-		then(OkHttpClientConnectionPoolFactory.class
-				.isInstance(this.okHttpClientConnectionPoolFactory)).isTrue();
-		then(DefaultOkHttpClientConnectionPoolFactory.class
-				.isInstance(this.okHttpClientConnectionPoolFactory)).isTrue();
+		then(OkHttpClientConnectionPoolFactory.class.isInstance(this.okHttpClientConnectionPoolFactory)).isTrue();
+		then(DefaultOkHttpClientConnectionPoolFactory.class.isInstance(this.okHttpClientConnectionPoolFactory))
+				.isTrue();
 	}
 
 	@Test
 	public void setOkHttpClientFactory() throws Exception {
 		then(OkHttpClientFactory.class.isInstance(this.okHttpClientFactory)).isTrue();
-		then(DefaultOkHttpClientFactory.class.isInstance(this.okHttpClientFactory))
-				.isTrue();
+		then(DefaultOkHttpClientFactory.class.isInstance(this.okHttpClientFactory)).isTrue();
 	}
 
 }

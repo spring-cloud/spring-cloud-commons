@@ -109,8 +109,7 @@ public class RefreshScopePureScaleTests {
 
 	}
 
-	public static class ExampleService
-			implements Service, InitializingBean, DisposableBean {
+	public static class ExampleService implements Service, InitializingBean, DisposableBean {
 
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 
@@ -124,43 +123,37 @@ public class RefreshScopePureScaleTests {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
-			logger.debug("Initializing: " + ObjectUtils.getIdentityHexString(this) + ", "
-					+ this.message);
+			logger.debug("Initializing: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 			try {
 				Thread.sleep(this.delay);
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			logger.debug("Initialized: " + ObjectUtils.getIdentityHexString(this) + ", "
-					+ this.message);
+			logger.debug("Initialized: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 		}
 
 		@Override
 		public void destroy() throws Exception {
-			logger.debug("Destroying message: " + ObjectUtils.getIdentityHexString(this)
-					+ ", " + this.message);
+			logger.debug("Destroying message: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 			this.message = null;
 		}
 
 		@Override
 		public String getMessage() {
-			logger.debug("Returning message: " + ObjectUtils.getIdentityHexString(this)
-					+ ", " + this.message);
+			logger.debug("Returning message: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 			return this.message;
 		}
 
 		public void setMessage(String message) {
-			logger.debug("Setting message: " + ObjectUtils.getIdentityHexString(this)
-					+ ", " + message);
+			logger.debug("Setting message: " + ObjectUtils.getIdentityHexString(this) + ", " + message);
 			this.message = message;
 		}
 
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@Import({ RefreshAutoConfiguration.class,
-			PropertyPlaceholderAutoConfiguration.class })
+	@Import({ RefreshAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 
 		@Bean

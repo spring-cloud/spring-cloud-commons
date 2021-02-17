@@ -41,8 +41,8 @@ public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeEx
 	 * @throws IOException Thrown if the {@link ClientHttpResponse} response code cannot
 	 * be retrieved.
 	 */
-	public ClientHttpResponseStatusCodeException(String serviceId,
-			ClientHttpResponse response, byte[] body) throws IOException {
+	public ClientHttpResponseStatusCodeException(String serviceId, ClientHttpResponse response, byte[] body)
+			throws IOException {
 		super(serviceId, response.getRawStatusCode(), response, null);
 		this.response = new ClientHttpResponseWrapper(response, body);
 	}

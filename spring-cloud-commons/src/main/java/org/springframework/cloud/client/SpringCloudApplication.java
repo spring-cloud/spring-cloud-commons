@@ -24,19 +24,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * @author Spencer Gibb
+ * @deprecated This annotation has been deprecated as of the 3.0.1 release.
+ * <code>@EnableDiscoveryClient</code> is no longer needed, discovery client
+ * implementations are enabled as long as an implementation is on the classpath.
+ * <code>@EnableCircuitBreaker</code> is no longer used now that Hystrix has been removed
+ * from Spring Cloud.
  */
+@Deprecated
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableCircuitBreaker
 public @interface SpringCloudApplication {
 
 }

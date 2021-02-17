@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.client.discovery.simple.reactive;
 
-import java.net.URI;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
@@ -44,6 +42,7 @@ import org.springframework.core.annotation.Order;
  * Spring Boot auto-configuration for simple properties-based reactive discovery client.
  *
  * @author Tim Ysewyn
+ * @author Charu Covindane
  * @since 2.2.0
  */
 @Configuration(proxyBeanMethods = false)
@@ -52,8 +51,7 @@ import org.springframework.core.annotation.Order;
 @EnableConfigurationProperties(DiscoveryClientHealthIndicatorProperties.class)
 @AutoConfigureBefore(ReactiveCommonsClientAutoConfiguration.class)
 @AutoConfigureAfter(ReactiveCompositeDiscoveryClientAutoConfiguration.class)
-public class SimpleReactiveDiscoveryClientAutoConfiguration
-		implements ApplicationListener<WebServerInitializedEvent> {
+public class SimpleReactiveDiscoveryClientAutoConfiguration implements ApplicationListener<WebServerInitializedEvent> {
 
 	@Autowired(required = false)
 	private ServerProperties server;
@@ -71,15 +69,15 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 	@Bean
 	public SimpleReactiveDiscoveryProperties simpleReactiveDiscoveryProperties() {
 		simple.getLocal().setServiceId(serviceId);
-		simple.getLocal().setUri(URI.create("http://"
-				+ inet.findFirstNonLoopbackHostInfo().getHostname() + ":" + findPort()));
+		simple.getLocal().setHost(inet.findFirstNonLoopbackHostInfo().getHostname());
+		simple.getLocal().setPort(findPort());
 		return simple;
 	}
 
 	@Bean
 	@Order
-	public SimpleReactiveDiscoveryClient simpleReactiveDiscoveryClient() {
-		return new SimpleReactiveDiscoveryClient(simpleReactiveDiscoveryProperties());
+	public SimpleReactiveDiscoveryClient simpleReactiveDiscoveryClient(SimpleReactiveDiscoveryProperties properties) {
+		return new SimpleReactiveDiscoveryClient(properties);
 	}
 
 	private int findPort() {
@@ -96,8 +94,8 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 	public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
 		port = webServerInitializedEvent.getWebServer().getPort();
 		if (port > 0) {
-			simple.getLocal().setUri(URI.create("http://"
-					+ inet.findFirstNonLoopbackHostInfo().getHostname() + ":" + port));
+			simple.getLocal().setHost(inet.findFirstNonLoopbackHostInfo().getHostname());
+			simple.getLocal().setPort(port);
 		}
 	}
 
@@ -110,8 +108,7 @@ public class SimpleReactiveDiscoveryClientAutoConfiguration
 		public ReactiveDiscoveryClientHealthIndicator simpleReactiveDiscoveryClientHealthIndicator(
 				DiscoveryClientHealthIndicatorProperties properties,
 				SimpleReactiveDiscoveryClient simpleReactiveDiscoveryClient) {
-			return new ReactiveDiscoveryClientHealthIndicator(
-					simpleReactiveDiscoveryClient, properties);
+			return new ReactiveDiscoveryClientHealthIndicator(simpleReactiveDiscoveryClient, properties);
 		}
 
 	}

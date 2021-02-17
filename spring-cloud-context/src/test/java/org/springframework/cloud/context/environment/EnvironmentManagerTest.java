@@ -41,8 +41,7 @@ public class EnvironmentManagerTest {
 		environmentManager.setProperty("foo", "bar");
 
 		then(environment.getProperty("foo")).isEqualTo("bar");
-		ArgumentCaptor<ApplicationEvent> eventCaptor = ArgumentCaptor
-				.forClass(ApplicationEvent.class);
+		ArgumentCaptor<ApplicationEvent> eventCaptor = ArgumentCaptor.forClass(ApplicationEvent.class);
 		verify(publisher, times(1)).publishEvent(eventCaptor.capture());
 		then(eventCaptor.getValue()).isInstanceOf(EnvironmentChangeEvent.class);
 		EnvironmentChangeEvent event = (EnvironmentChangeEvent) eventCaptor.getValue();

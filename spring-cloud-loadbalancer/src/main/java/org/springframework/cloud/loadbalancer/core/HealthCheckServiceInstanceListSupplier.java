@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,40 +19,36 @@ package org.springframework.cloud.loadbalancer.core;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.retry.Repeat;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 
 /**
  * A {@link ServiceInstanceListSupplier} implementation that verifies whether the
- * instances are alive and only returns the healthy one, unless there are none. Uses
- * {@link WebClient} to ping the <code>health</code> endpoint of the instances.
+ * instances are alive and only returns the healthy one, unless there are none. Uses a
+ * user-provided function to ping the <code>health</code> endpoint of the instances.
  *
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko
+ * @author Roman Chigvintsev
  * @since 2.2.0
  */
-public class HealthCheckServiceInstanceListSupplier
-		extends DelegatingServiceInstanceListSupplier
+public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier
 		implements InitializingBean, DisposableBean {
 
-	private static final Log LOG = LogFactory
-			.getLog(HealthCheckServiceInstanceListSupplier.class);
+	private static final Log LOG = LogFactory.getLog(HealthCheckServiceInstanceListSupplier.class);
 
 	private final LoadBalancerProperties.HealthCheck healthCheck;
-
-	private final WebClient webClient;
 
 	private final String defaultHealthCheckPath;
 
@@ -60,18 +56,23 @@ public class HealthCheckServiceInstanceListSupplier
 
 	private Disposable healthCheckDisposable;
 
+	private final BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction;
+
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
+			LoadBalancerProperties.HealthCheck healthCheck,
+			BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction) {
 		super(delegate);
+		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default", "/actuator/health");
+		this.aliveFunction = aliveFunction;
 		this.healthCheck = healthCheck;
-		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default",
-				"/actuator/health");
-		this.webClient = webClient;
-		aliveInstancesReplay = Flux.defer(delegate)
-				.delaySubscription(healthCheck.getInitialDelay())
-				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(
-						alive -> Collections.unmodifiableList(new ArrayList<>(alive))))
-				.replay(1).refCount(1);
+		Repeat<Object> aliveInstancesReplayRepeat = Repeat
+				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
+				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
+		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate).repeatWhen(aliveInstancesReplayRepeat)
+				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
+						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))));
+		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
+				.refCount(1);
 	}
 
 	@Override
@@ -83,8 +84,9 @@ public class HealthCheckServiceInstanceListSupplier
 		this.healthCheckDisposable = aliveInstancesReplay.subscribe();
 	}
 
-	protected Flux<List<ServiceInstance>> healthCheckFlux(
-			List<ServiceInstance> instances) {
+	protected Flux<List<ServiceInstance>> healthCheckFlux(List<ServiceInstance> instances) {
+		Repeat<Object> healthCheckFluxRepeat = Repeat.onlyIf(repeatContext -> healthCheck.getRepeatHealthCheck())
+				.fixedBackoff(healthCheck.getInterval());
 		return Flux.defer(() -> {
 			List<Mono<ServiceInstance>> checks = new ArrayList<>(instances.size());
 			for (ServiceInstance instance : instances) {
@@ -99,8 +101,7 @@ public class HealthCheckServiceInstanceListSupplier
 					if (LOG.isDebugEnabled()) {
 						LOG.debug(String.format(
 								"The instance for service %s: %s did not respond for %s during health check",
-								instance.getServiceId(), instance.getUri(),
-								healthCheck.getInterval()));
+								instance.getServiceId(), instance.getUri(), healthCheck.getInterval()));
 					}
 					return Mono.empty();
 				})).handle((isHealthy, sink) -> {
@@ -116,7 +117,7 @@ public class HealthCheckServiceInstanceListSupplier
 				result.add(alive);
 				return result;
 			}).defaultIfEmpty(result);
-		}).repeatWhen(restart -> restart.delayElements(healthCheck.getInterval()));
+		}).repeatWhen(healthCheckFluxRepeat);
 	}
 
 	@Override
@@ -125,16 +126,9 @@ public class HealthCheckServiceInstanceListSupplier
 	}
 
 	protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
-		String healthCheckPropertyValue = healthCheck.getPath()
-				.get(serviceInstance.getServiceId());
-		String healthCheckPath = healthCheckPropertyValue != null
-				? healthCheckPropertyValue : defaultHealthCheckPath;
-		return webClient.get()
-				.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri())
-						.path(healthCheckPath).build().toUri())
-				.exchange()
-				.flatMap(clientResponse -> clientResponse.releaseBody().thenReturn(
-						HttpStatus.OK.value() == clientResponse.rawStatusCode()));
+		String healthCheckPropertyValue = healthCheck.getPath().get(serviceInstance.getServiceId());
+		String healthCheckPath = healthCheckPropertyValue != null ? healthCheckPropertyValue : defaultHealthCheckPath;
+		return aliveFunction.apply(serviceInstance, healthCheckPath);
 	}
 
 	@Override

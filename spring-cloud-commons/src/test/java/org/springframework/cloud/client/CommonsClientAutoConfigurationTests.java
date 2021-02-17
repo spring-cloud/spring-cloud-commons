@@ -43,19 +43,14 @@ public class CommonsClientAutoConfigurationTests {
 
 	ApplicationContextRunner applicationContextRunner = new ApplicationContextRunner()
 			.withConfiguration(AutoConfigurations.of(CommonsClientAutoConfiguration.class,
-					SimpleDiscoveryClientAutoConfiguration.class,
-					UtilAutoConfiguration.class));
+					SimpleDiscoveryClientAutoConfiguration.class, UtilAutoConfiguration.class));
 
 	@Test
 	public void beansCreatedNormally() {
-		applicationContextRunner
-				.withConfiguration(
-						AutoConfigurations.of(HealthEndpointAutoConfiguration.class))
-				.withPropertyValues("management.endpoints.web.exposure.include=features")
-				.run(ctxt -> {
+		applicationContextRunner.withConfiguration(AutoConfigurations.of(HealthEndpointAutoConfiguration.class))
+				.withPropertyValues("management.endpoints.web.exposure.include=features").run(ctxt -> {
 					then(ctxt.getBean(DiscoveryClientHealthIndicator.class)).isNotNull();
-					then(ctxt.getBean(DiscoveryCompositeHealthContributor.class))
-							.isNotNull();
+					then(ctxt.getBean(DiscoveryCompositeHealthContributor.class)).isNotNull();
 					then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull();
 					then(ctxt.getBeansOfType(HasFeatures.class).values()).isNotEmpty();
 				});
@@ -63,14 +58,10 @@ public class CommonsClientAutoConfigurationTests {
 
 	@Test
 	public void disableAll() {
-		applicationContextRunner
-				.withPropertyValues("spring.cloud.discovery.enabled=false",
-						"management.endpoints.web.exposure.include=features")
-				.run(ctxt -> {
-					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
-					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
+		applicationContextRunner.withPropertyValues("spring.cloud.discovery.enabled=false",
+				"management.endpoints.web.exposure.include=features").run(ctxt -> {
+					assertThat(ctxt).doesNotHaveBean(DiscoveryClientHealthIndicator.class);
+					assertThat(ctxt).doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
 					then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull();
 					// features actuator is independent of discovery
 					assertThat(ctxt).doesNotHaveBean(HasFeatures.class);
@@ -79,14 +70,10 @@ public class CommonsClientAutoConfigurationTests {
 
 	@Test
 	public void disableBlocking() {
-		applicationContextRunner
-				.withPropertyValues("spring.cloud.discovery.blocking.enabled=false",
-						"management.endpoints.web.exposure.include=features")
-				.run(ctxt -> {
-					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
-					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
+		applicationContextRunner.withPropertyValues("spring.cloud.discovery.blocking.enabled=false",
+				"management.endpoints.web.exposure.include=features").run(ctxt -> {
+					assertThat(ctxt).doesNotHaveBean(DiscoveryClientHealthIndicator.class);
+					assertThat(ctxt).doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
 					then(ctxt.getBean(FeaturesEndpoint.class)).isNotNull();
 					// features actuator is independent of discovery
 					assertThat(ctxt).doesNotHaveBean(HasFeatures.class);
@@ -95,41 +82,30 @@ public class CommonsClientAutoConfigurationTests {
 
 	@Test
 	public void disableAllIndividually() {
-		applicationContextRunner.withPropertyValues(
-				"spring.cloud.discovery.client.health-indicator.enabled=false",
+		applicationContextRunner.withPropertyValues("spring.cloud.discovery.client.health-indicator.enabled=false",
 				"spring.cloud.discovery.client.composite-indicator.enabled=false",
 				"spring.cloud.features.enabled=false").run(ctxt -> {
-					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
-					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
+					assertThat(ctxt).doesNotHaveBean(DiscoveryClientHealthIndicator.class);
+					assertThat(ctxt).doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
 					assertThat(ctxt).doesNotHaveBean(FeaturesEndpoint.class);
 				});
 	}
 
 	@Test
 	public void disableHealthIndicator() {
-		applicationContextRunner
-				.withPropertyValues(
-						"spring.cloud.discovery.client.health-indicator.enabled=false")
+		applicationContextRunner.withPropertyValues("spring.cloud.discovery.client.health-indicator.enabled=false")
 				.run(ctxt -> {
-					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
-					assertThat(ctxt)
-							.doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
+					assertThat(ctxt).doesNotHaveBean(DiscoveryClientHealthIndicator.class);
+					assertThat(ctxt).doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
 				});
 	}
 
 	@Test
 	public void worksWithoutActuator() {
-		applicationContextRunner
-				.withClassLoader(
-						new FilteredClassLoader("org.springframework.boot.actuate"))
+		applicationContextRunner.withClassLoader(new FilteredClassLoader("org.springframework.boot.actuate"))
 				.run(context -> {
-					assertThat(context)
-							.doesNotHaveBean(DiscoveryClientHealthIndicator.class);
-					assertThat(context)
-							.doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
+					assertThat(context).doesNotHaveBean(DiscoveryClientHealthIndicator.class);
+					assertThat(context).doesNotHaveBean(DiscoveryCompositeHealthContributor.class);
 					then(context.getBeansOfType(HasFeatures.class).values()).isEmpty();
 				});
 	}
@@ -146,12 +122,10 @@ public class CommonsClientAutoConfigurationTests {
 
 	@Test
 	public void conditionalOnBlockingDiscoveryEnabledWorks() {
-		applicationContextRunner
-				.withUserConfiguration(BlockingDiscoveryEnabledConfig.class)
+		applicationContextRunner.withUserConfiguration(BlockingDiscoveryEnabledConfig.class)
 				.withPropertyValues("spring.cloud.discovery.blocking.enabled=false")
 				.run(context -> assertThat(context).doesNotHaveBean(TestBean.class));
-		applicationContextRunner
-				.withUserConfiguration(BlockingDiscoveryEnabledConfig.class)
+		applicationContextRunner.withUserConfiguration(BlockingDiscoveryEnabledConfig.class)
 				.withPropertyValues("spring.cloud.discovery.blocking.enabled=true")
 				.run(context -> assertThat(context.getBean(TestBean.class)).isNotNull());
 	}

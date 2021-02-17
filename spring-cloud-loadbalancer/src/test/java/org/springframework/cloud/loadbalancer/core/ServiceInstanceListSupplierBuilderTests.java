@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -34,55 +34,41 @@ public class ServiceInstanceListSupplierBuilderTests {
 
 	@Test
 	public void testBuilder() {
-		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class)
-				.run(context -> {
-					ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier
-							.builder().withDiscoveryClient().withHealthChecks()
-							.withCaching().build(context);
-					assertThat(supplier)
-							.isInstanceOf(CachingServiceInstanceListSupplier.class);
-					DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
-					assertThat(delegating.getDelegate())
-							.isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
-					delegating = (DelegatingServiceInstanceListSupplier) delegating
-							.getDelegate();
-					assertThat(delegating.getDelegate()).isInstanceOf(
-							DiscoveryClientServiceInstanceListSupplier.class);
-				});
+		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class).run(context -> {
+			ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier.builder().withDiscoveryClient()
+					.withHealthChecks().withCaching().build(context);
+			assertThat(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+			DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
+			assertThat(delegating.getDelegate()).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
+			delegating = (DelegatingServiceInstanceListSupplier) delegating.getDelegate();
+			assertThat(delegating.getDelegate()).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+		});
 	}
 
 	@Test
 	public void testIllegalArgumentExceptionThrownWhenBaseBuilderNull() {
-		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class)
-				.run(context -> {
-					try {
-						ServiceInstanceListSupplier.builder().withHealthChecks()
-								.build(context);
-						fail("Should have thrown exception.");
-					}
-					catch (Exception exception) {
-						assertThat(exception)
-								.isInstanceOf(IllegalArgumentException.class);
-					}
+		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class).run(context -> {
+			try {
+				ServiceInstanceListSupplier.builder().withHealthChecks().build(context);
+				fail("Should have thrown exception.");
+			}
+			catch (Exception exception) {
+				assertThat(exception).isInstanceOf(IllegalArgumentException.class);
+			}
 
-				});
+		});
 	}
 
 	@Test
 	public void testDelegateReturnedIfLoadBalancerCacheManagerNotAvailable() {
-		new ApplicationContextRunner().withUserConfiguration(BaseTestConfig.class)
-				.run(context -> {
-					ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier
-							.builder().withDiscoveryClient().withHealthChecks()
-							.withCaching().build(context);
-					assertThat(supplier)
-							.isNotInstanceOf(CachingServiceInstanceListSupplier.class);
-					assertThat(supplier)
-							.isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
-					DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
-					assertThat(delegating.getDelegate()).isInstanceOf(
-							DiscoveryClientServiceInstanceListSupplier.class);
-				});
+		new ApplicationContextRunner().withUserConfiguration(BaseTestConfig.class).run(context -> {
+			ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier.builder().withDiscoveryClient()
+					.withHealthChecks().withCaching().build(context);
+			assertThat(supplier).isNotInstanceOf(CachingServiceInstanceListSupplier.class);
+			assertThat(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
+			DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
+			assertThat(delegating.getDelegate()).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+		});
 	}
 
 	@Import(BaseTestConfig.class)

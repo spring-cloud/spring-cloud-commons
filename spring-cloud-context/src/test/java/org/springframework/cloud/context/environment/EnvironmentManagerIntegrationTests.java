@@ -52,8 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class,
-		properties = { "management.endpoints.web.exposure.include=*",
-				"management.endpoint.env.post.enabled=true" })
+		properties = { "management.endpoints.web.exposure.include=*", "management.endpoint.env.post.enabled=true" })
 @AutoConfigureMockMvc
 public class EnvironmentManagerIntegrationTests {
 
@@ -76,9 +75,8 @@ public class EnvironmentManagerIntegrationTests {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		String content = property("message", "Foo");
 
-		this.mvc.perform(post(BASE_PATH + "/env").content(content)
-				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(content().string("{\"message\":\"Foo\"}"));
+		this.mvc.perform(post(BASE_PATH + "/env").content(content).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(content().string("{\"message\":\"Foo\"}"));
 		then(this.properties.getMessage()).isEqualTo("Foo");
 	}
 
@@ -94,9 +92,9 @@ public class EnvironmentManagerIntegrationTests {
 	@Test
 	public void testRefreshFails() throws Exception {
 		try {
-			this.mvc.perform(post(BASE_PATH + "/env").content(property("delay", "foo"))
-					.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-					.andExpect(status().is5xxServerError());
+			this.mvc.perform(
+					post(BASE_PATH + "/env").content(property("delay", "foo")).contentType(MediaType.APPLICATION_JSON))
+					.andExpect(status().isOk()).andExpect(status().is5xxServerError());
 			fail("expected ServletException");
 		}
 		catch (ServletException e) {
@@ -107,17 +105,14 @@ public class EnvironmentManagerIntegrationTests {
 
 	@Test
 	public void coreWebExtensionAvailable() throws Exception {
-		this.mvc.perform(get(BASE_PATH + "/env/" + UUID.randomUUID().toString()))
-				.andExpect(status().isNotFound());
+		this.mvc.perform(get(BASE_PATH + "/env/" + UUID.randomUUID().toString())).andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void environmentBeansConfiguredCorrectly() {
-		Map<String, EnvironmentEndpoint> envbeans = this.context
-				.getBeansOfType(EnvironmentEndpoint.class);
+		Map<String, EnvironmentEndpoint> envbeans = this.context.getBeansOfType(EnvironmentEndpoint.class);
 		then(envbeans).hasSize(1).containsKey("writableEnvironmentEndpoint");
-		then(envbeans.get("writableEnvironmentEndpoint"))
-				.isInstanceOf(WritableEnvironmentEndpoint.class);
+		then(envbeans.get("writableEnvironmentEndpoint")).isInstanceOf(WritableEnvironmentEndpoint.class);
 
 		Map<String, EnvironmentEndpointWebExtension> extbeans = this.context
 				.getBeansOfType(EnvironmentEndpointWebExtension.class);

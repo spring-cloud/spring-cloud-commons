@@ -68,8 +68,8 @@ public class CompositeDiscoveryClientTestsConfig {
 			@Override
 			public List<ServiceInstance> getInstances(String serviceId) {
 				if (serviceId.equals(CUSTOM_SERVICE_ID)) {
-					ServiceInstance s1 = new DefaultServiceInstance("customInstance",
-							CUSTOM_SERVICE_ID, "host", 123, false);
+					ServiceInstance s1 = new DefaultServiceInstance("customInstance", CUSTOM_SERVICE_ID, "host", 123,
+							false);
 					return singletonList(s1);
 				}
 				return Collections.emptyList();

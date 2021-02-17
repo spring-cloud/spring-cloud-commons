@@ -88,8 +88,7 @@ public class MoreRefreshScopeIntegrationTests {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
-		TestPropertyValues.of("message:Foo").applyTo(this.environment, Type.MAP,
-				"morerefreshtests");
+		TestPropertyValues.of("message:Foo").applyTo(this.environment, Type.MAP, "morerefreshtests");
 		// ...and then refresh, so the bean is re-initialized:
 		this.scope.refreshAll();
 		String id2 = this.service.toString();

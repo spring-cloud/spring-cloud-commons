@@ -47,6 +47,11 @@
 			"name": "management.endpoint.env.post.enabled",
 			"description": "Enables writable environment endpoint.",
 			"type": "java.lang.Boolean"
+		},
+		{
+			"name": "spring.cloud.loadbalancer.retry.enabled",
+			"description": "Enables LoadBalancer retries.",
+			"type": "java.lang.Boolean"
 		}
 	]
 }

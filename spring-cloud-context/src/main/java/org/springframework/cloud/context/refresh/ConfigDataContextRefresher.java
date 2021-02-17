@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.context.refresh;
 
+import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -30,8 +31,7 @@ import org.springframework.core.io.DefaultResourceLoader;
  */
 public class ConfigDataContextRefresher extends ContextRefresher {
 
-	public ConfigDataContextRefresher(ConfigurableApplicationContext context,
-			RefreshScope scope) {
+	public ConfigDataContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
 		super(context, scope);
 	}
 
@@ -43,14 +43,13 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 		StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
 		String[] activeProfiles = getContext().getEnvironment().getActiveProfiles();
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		ConfigDataEnvironmentPostProcessor.applyTo(environment, resourceLoader,
+		ConfigDataEnvironmentPostProcessor.applyTo(environment, resourceLoader, new DefaultBootstrapContext(),
 				activeProfiles);
 
 		if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
 			environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
 		}
-		MutablePropertySources target = getContext().getEnvironment()
-				.getPropertySources();
+		MutablePropertySources target = getContext().getEnvironment().getPropertySources();
 		String targetName = null;
 		for (PropertySource<?> source : environment.getPropertySources()) {
 			String name = source.getName();

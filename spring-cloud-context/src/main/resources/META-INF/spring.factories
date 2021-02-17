@@ -10,10 +10,16 @@ org.springframework.context.ApplicationListener=\
 org.springframework.cloud.bootstrap.BootstrapApplicationListener,\
 org.springframework.cloud.bootstrap.LoggingSystemShutdownListener,\
 org.springframework.cloud.context.restart.RestartListener
-# Bootstrap components
+# Spring Cloud Bootstrap components
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration,\
 org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfiguration,\
 org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration,\
 org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration,\
 org.springframework.cloud.util.random.CachedRandomPropertySourceAutoConfiguration
+# Spring Boot Bootstrappers
+org.springframework.boot.Bootstrapper=\
+org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper
+# Environment Post Processors
+org.springframework.boot.env.EnvironmentPostProcessor=\
+org.springframework.cloud.bootstrap.encrypt.DecryptEnvironmentPostProcessor

@@ -28,8 +28,7 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration(proxyBeanMethods = false)
 @Import(AutoServiceRegistrationConfiguration.class)
-@ConditionalOnProperty(value = "spring.cloud.service-registry.auto-registration.enabled",
-		matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.cloud.service-registry.auto-registration.enabled", matchIfMissing = true)
 public class AutoServiceRegistrationAutoConfiguration {
 
 	@Autowired(required = false)
@@ -41,8 +40,8 @@ public class AutoServiceRegistrationAutoConfiguration {
 	@PostConstruct
 	protected void init() {
 		if (this.autoServiceRegistration == null && this.properties.isFailFast()) {
-			throw new IllegalStateException("Auto Service Registration has "
-					+ "been requested, but there is no AutoServiceRegistration bean");
+			throw new IllegalStateException(
+					"Auto Service Registration has " + "been requested, but there is no AutoServiceRegistration bean");
 		}
 	}
 

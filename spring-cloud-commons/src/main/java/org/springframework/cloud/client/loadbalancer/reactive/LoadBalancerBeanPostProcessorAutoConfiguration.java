@@ -48,10 +48,8 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
 	@Bean
 	public LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
-			DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction,
-			ApplicationContext context) {
-		return new LoadBalancerWebClientBuilderBeanPostProcessor(
-				deferringExchangeFilterFunction, context);
+			DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction, ApplicationContext context) {
+		return new LoadBalancerWebClientBuilderBeanPostProcessor(deferringExchangeFilterFunction, context);
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -60,16 +58,14 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
 		@Bean
 		@Primary
-		DeferringLoadBalancerExchangeFilterFunction<ReactorLoadBalancerExchangeFilterFunction> reactorDeferringLoadBalancerExchangeFilterFunction(
-				ObjectProvider<ReactorLoadBalancerExchangeFilterFunction> exchangeFilterFunctionProvider) {
-			return new DeferringLoadBalancerExchangeFilterFunction<>(
-					exchangeFilterFunctionProvider);
+		DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> reactorDeferringLoadBalancerExchangeFilterFunction(
+				ObjectProvider<LoadBalancedExchangeFilterFunction> exchangeFilterFunctionProvider) {
+			return new DeferringLoadBalancerExchangeFilterFunction<>(exchangeFilterFunctionProvider);
 		}
 
 	}
 
-	static final class OnAnyLoadBalancerImplementationPresentCondition
-			extends AnyNestedCondition {
+	static final class OnAnyLoadBalancerImplementationPresentCondition extends AnyNestedCondition {
 
 		private OnAnyLoadBalancerImplementationPresentCondition() {
 			super(ConfigurationPhase.REGISTER_BEAN);

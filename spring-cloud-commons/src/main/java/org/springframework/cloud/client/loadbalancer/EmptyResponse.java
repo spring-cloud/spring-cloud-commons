@@ -33,9 +33,4 @@ public class EmptyResponse implements Response<ServiceInstance> {
 		return null;
 	}
 
-	@Override
-	public void onComplete(CompletionContext completionContext) {
-		// do nothing: deprecated interface method
-	}
-
 }

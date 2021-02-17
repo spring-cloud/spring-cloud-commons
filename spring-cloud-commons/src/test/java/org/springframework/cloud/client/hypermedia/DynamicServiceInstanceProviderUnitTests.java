@@ -42,8 +42,7 @@ public class DynamicServiceInstanceProviderUnitTests {
 
 	@Test
 	public void returnsNoServiceInCaseNoneIsAvailable() {
-		then(new DynamicServiceInstanceProvider(this.client, "service")
-				.getServiceInstance()).isNull();
+		then(new DynamicServiceInstanceProvider(this.client, "service").getServiceInstance()).isNull();
 	}
 
 	@Test
@@ -52,11 +51,9 @@ public class DynamicServiceInstanceProviderUnitTests {
 		ServiceInstance first = mock(ServiceInstance.class);
 		ServiceInstance second = mock(ServiceInstance.class);
 
-		when(this.client.getInstances(anyString()))
-				.thenReturn(Arrays.asList(first, second));
+		when(this.client.getInstances(anyString())).thenReturn(Arrays.asList(first, second));
 
-		then(new DynamicServiceInstanceProvider(this.client, "service")
-				.getServiceInstance()).isEqualTo(first);
+		then(new DynamicServiceInstanceProvider(this.client, "service").getServiceInstance()).isEqualTo(first);
 	}
 
 }

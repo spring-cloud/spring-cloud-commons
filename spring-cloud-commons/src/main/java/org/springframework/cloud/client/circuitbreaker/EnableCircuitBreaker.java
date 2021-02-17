@@ -28,8 +28,11 @@ import org.springframework.context.annotation.Import;
 /**
  * Annotation to enable a CircuitBreaker implementation.
  * https://martinfowler.com/bliki/CircuitBreaker.html
+ * @deprecated as of the 3.0.1 release. Hystrix has been removed from Spring Cloud Netflix
+ * and it was the only implementation using this annotation.
  * @author Spencer Gibb
  */
+@Deprecated
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

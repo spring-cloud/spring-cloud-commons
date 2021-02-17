@@ -51,8 +51,7 @@ public class ServiceRegistryEndpoint {
 		Assert.notNull(status, "status may not by null");
 
 		if (this.registration == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body("no registration found");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no registration found");
 		}
 
 		this.serviceRegistry.setStatus(this.registration, status);
@@ -62,12 +61,10 @@ public class ServiceRegistryEndpoint {
 	@ReadOperation
 	public ResponseEntity getStatus() {
 		if (this.registration == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND)
-					.body("no registration found");
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no registration found");
 		}
 
-		return ResponseEntity.ok()
-				.body(this.serviceRegistry.getStatus(this.registration));
+		return ResponseEntity.ok().body(this.serviceRegistry.getStatus(this.registration));
 	}
 
 }

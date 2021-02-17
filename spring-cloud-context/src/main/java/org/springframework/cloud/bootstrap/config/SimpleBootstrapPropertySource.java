@@ -30,8 +30,7 @@ public class SimpleBootstrapPropertySource<T> extends PropertySource<T> {
 	private PropertySource<T> delegate;
 
 	public SimpleBootstrapPropertySource(PropertySource<T> delegate) {
-		super(BOOTSTRAP_PROPERTY_SOURCE_NAME + "-" + delegate.getName(),
-				delegate.getSource());
+		super(BOOTSTRAP_PROPERTY_SOURCE_NAME + "-" + delegate.getName(), delegate.getSource());
 		this.delegate = delegate;
 	}
 
