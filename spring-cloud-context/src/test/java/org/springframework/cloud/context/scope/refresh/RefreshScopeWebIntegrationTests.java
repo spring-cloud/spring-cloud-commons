@@ -19,6 +19,7 @@ package org.springframework.cloud.context.scope.refresh;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -58,7 +59,8 @@ public class RefreshScopeWebIntegrationTests {
 
 	@Test
 	public void scopeOnBeanDefinition() throws Exception {
-		then(this.beanFactory.getBeanDefinition("scopedTarget.application").getScope()).isEqualTo("refresh");
+		then(this.beanFactory.getBeanDefinition(ScopedProxyUtils.getTargetBeanName("application")).getScope())
+				.isEqualTo("refresh");
 	}
 
 	@Test

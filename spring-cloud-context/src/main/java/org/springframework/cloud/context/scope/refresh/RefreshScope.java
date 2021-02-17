@@ -18,6 +18,7 @@ package org.springframework.cloud.context.scope.refresh;
 
 import java.io.Serializable;
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -132,10 +133,10 @@ public class RefreshScope extends GenericScope
 	@ManagedOperation(description = "Dispose of the current instance of bean name "
 			+ "provided and force a refresh on next method execution.")
 	public boolean refresh(String name) {
-		if (!name.startsWith(SCOPED_TARGET_PREFIX)) {
+		if (!ScopedProxyUtils.isScopedTarget(name)) {
 			// User wants to refresh the bean with this name but that isn't the one in the
 			// cache...
-			name = SCOPED_TARGET_PREFIX + name;
+			name = ScopedProxyUtils.getTargetBeanName(name);
 		}
 		// Ensure lifecycle is finished if bean was disposable
 		if (super.destroy(name)) {
