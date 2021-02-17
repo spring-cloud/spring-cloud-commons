@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
  *
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko
+ * @author Roman Chigvintsev
  * @since 2.2.0
  */
 public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier
@@ -67,10 +68,9 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 		Repeat<Object> aliveInstancesReplayRepeat = Repeat
 				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
 				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
-		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate)
+		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate).repeatWhen(aliveInstancesReplayRepeat)
 				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
-						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))))
-				.repeatWhen(aliveInstancesReplayRepeat);
+						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))));
 		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
 				.refCount(1);
 	}
