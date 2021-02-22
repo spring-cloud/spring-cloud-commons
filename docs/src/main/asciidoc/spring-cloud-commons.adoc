@@ -228,6 +228,7 @@ include::jce.adoc[]
 For a Spring Boot Actuator application, some additional management endpoints are available. You can use:
 
 * `POST` to `/actuator/env` to update the `Environment` and rebind `@ConfigurationProperties` and log levels.
+  To enabled this endpoint you must set `management.endpoint.env.post.enabled=true`.
 * `/actuator/refresh` to re-load the boot strap context and refresh the `@RefreshScope` beans.
 * `/actuator/restart` to close the `ApplicationContext` and restart it (disabled by default).
 * `/actuator/pause` and `/actuator/resume` for calling the `Lifecycle` methods (`stop()` and `start()` on the `ApplicationContext`).
