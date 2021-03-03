@@ -27,6 +27,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -39,6 +40,7 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.support.StandardServletEnvironment;
 
 /**
@@ -62,13 +64,23 @@ public abstract class ContextRefresher {
 					StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, "configurationProperties"));
 
+	protected final List<String> additionalPropertySourcesToRetain;
+
 	private ConfigurableApplicationContext context;
 
 	private RefreshScope scope;
 
+	@Deprecated
 	protected ContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
+		this(context, scope, new RefreshAutoConfiguration.RefreshProperties());
+	}
+
+	@SuppressWarnings("unchecked")
+	protected ContextRefresher(ConfigurableApplicationContext context, RefreshScope scope,
+			RefreshAutoConfiguration.RefreshProperties properties) {
 		this.context = context;
 		this.scope = scope;
+		additionalPropertySourcesToRetain = properties.getAdditionalPropertySourcesToRetain();
 	}
 
 	protected ConfigurableApplicationContext getContext() {
@@ -102,7 +114,12 @@ public abstract class ContextRefresher {
 		MutablePropertySources capturedPropertySources = environment.getPropertySources();
 		// Only copy the default property source(s) and the profiles over from the main
 		// environment (everything else should be pristine, just like it was on startup).
-		for (String name : DEFAULT_PROPERTY_SOURCES) {
+		List<String> propertySourcesToRetain = new ArrayList<>(Arrays.asList(DEFAULT_PROPERTY_SOURCES));
+		if (!CollectionUtils.isEmpty(additionalPropertySourcesToRetain)) {
+			propertySourcesToRetain.addAll(additionalPropertySourcesToRetain);
+		}
+
+		for (String name : propertySourcesToRetain) {
 			if (input.getPropertySources().contains(name)) {
 				if (capturedPropertySources.contains(name)) {
 					capturedPropertySources.replace(name, input.getPropertySources().get(name));

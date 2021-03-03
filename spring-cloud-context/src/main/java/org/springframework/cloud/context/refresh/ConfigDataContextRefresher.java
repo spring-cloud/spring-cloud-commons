@@ -18,6 +18,7 @@ package org.springframework.cloud.context.refresh;
 
 import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
+import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
@@ -31,8 +32,14 @@ import org.springframework.core.io.DefaultResourceLoader;
  */
 public class ConfigDataContextRefresher extends ContextRefresher {
 
+	@Deprecated
 	public ConfigDataContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
 		super(context, scope);
+	}
+
+	public ConfigDataContextRefresher(ConfigurableApplicationContext context, RefreshScope scope,
+			RefreshAutoConfiguration.RefreshProperties properties) {
+		super(context, scope, properties);
 	}
 
 	@Override

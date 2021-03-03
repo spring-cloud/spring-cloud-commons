@@ -21,6 +21,7 @@ import java.util.Arrays;
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
 import org.springframework.cloud.bootstrap.BootstrapConfigFileApplicationListener;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
@@ -37,8 +38,14 @@ import static org.springframework.cloud.util.PropertyUtils.BOOTSTRAP_ENABLED_PRO
  */
 public class LegacyContextRefresher extends ContextRefresher {
 
+	@Deprecated
 	public LegacyContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
 		super(context, scope);
+	}
+
+	public LegacyContextRefresher(ConfigurableApplicationContext context, RefreshScope scope,
+			RefreshAutoConfiguration.RefreshProperties properties) {
+		super(context, scope, properties);
 	}
 
 	@Override
