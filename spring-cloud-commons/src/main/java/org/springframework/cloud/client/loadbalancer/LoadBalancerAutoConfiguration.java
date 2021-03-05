@@ -30,7 +30,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClas
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
@@ -129,10 +128,9 @@ public class LoadBalancerAutoConfiguration {
 				LoadBalancerClient loadBalancerClient,
 				LoadBalancerRetryProperties properties,
 				LoadBalancerRequestFactory requestFactory,
-				List<LoadBalancedRetryFactory> loadBalancedRetryFactories) {
-			AnnotationAwareOrderComparator.sort(loadBalancedRetryFactories);
+				LoadBalancedRetryFactory loadBalancedRetryFactory) {
 			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties,
-					requestFactory, loadBalancedRetryFactories.get(0));
+					requestFactory, loadBalancedRetryFactory);
 		}
 
 		@Bean
