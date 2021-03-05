@@ -25,6 +25,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
@@ -39,7 +40,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.annotation.Order;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
@@ -85,9 +85,7 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 		protected static class BlockingLoadBalancerRetryConfig {
 
 			@Bean
-			// Allow users to override the factory while avoiding loading
-			// RibbonLoadBalancedRetryFactory.
-			@Order(1000)
+			@ConditionalOnMissingBean
 			LoadBalancedRetryFactory loadBalancedRetryFactory(
 					LoadBalancerRetryProperties retryProperties) {
 				return new BlockingLoadBalancedRetryFactory(retryProperties);
