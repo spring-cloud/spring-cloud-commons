@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
  */
 public class CachedRandomPropertySource extends PropertySource<PropertySource> {
 
-	private static final String NAME = "cachedrandom";
+	static final String NAME = "cachedrandom";
 
 	private static final String PREFIX = NAME + ".";
 

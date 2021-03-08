@@ -16,11 +16,15 @@
 
 package org.springframework.cloud.util.random;
 
-import javax.annotation.PostConstruct;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.env.RandomValuePropertySource;
+import org.springframework.boot.env.RandomValuePropertySourceEnvironmentPostProcessor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -29,18 +33,28 @@ import org.springframework.core.env.PropertySource;
  * @author Ryan Baxter
  */
 @Configuration(proxyBeanMethods = false)
-public class CachedRandomPropertySourceAutoConfiguration {
+public class CachedRandomPropertySourceEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
-	@Autowired
-	ConfigurableEnvironment environment;
+	private static final Log logger = LogFactory.getLog(CachedRandomPropertySourceEnvironmentPostProcessor.class);
 
-	@PostConstruct
-	public void initialize() {
+	@Override
+	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
 		MutablePropertySources propertySources = environment.getPropertySources();
-		PropertySource propertySource = propertySources.get(RandomValuePropertySource.RANDOM_PROPERTY_SOURCE_NAME);
+		PropertySource<?> propertySource = propertySources.get(RandomValuePropertySource.RANDOM_PROPERTY_SOURCE_NAME);
 		if (propertySource != null) {
+			PropertySource<?> existing = propertySources.get(CachedRandomPropertySource.NAME);
+			if (existing != null) {
+				logger.trace("CachedRandomPropertySource already present");
+				return;
+			}
 			propertySources.addLast(new CachedRandomPropertySource(propertySource));
+			logger.trace("CachedRandomPropertySource added to Environment");
 		}
+	}
+
+	@Override
+	public int getOrder() {
+		return RandomValuePropertySourceEnvironmentPostProcessor.ORDER + 1;
 	}
 
 }

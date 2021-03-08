@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.SpringApplication;
@@ -121,14 +120,13 @@ public class ConfigDataContextRefresherIntegrationTests {
 	}
 
 	@Test
-	@Disabled
 	public void testCachedRandom() {
-		// long cachedRandomLong = properties.getCachedRandomLong();
+		long cachedRandomLong = properties.getCachedRandomLong();
 		long randomLong = properties.randomLong();
-		// then(cachedRandomLong).isNotNull();
+		then(cachedRandomLong).isNotNull();
 		this.refresher.refresh();
 		then(randomLong).isNotEqualTo(properties.randomLong());
-		// then(cachedRandomLong).isEqualTo(properties.cachedRandomLong);
+		then(cachedRandomLong).isEqualTo(properties.cachedRandomLong);
 	}
 
 	protected static class TestEnvPostProcessor implements EnvironmentPostProcessor, Ordered {
@@ -222,7 +220,7 @@ public class ConfigDataContextRefresherIntegrationTests {
 
 		private int delay;
 
-		// private Long cachedRandomLong;
+		private Long cachedRandomLong;
 
 		private Long randomLong;
 
@@ -242,12 +240,13 @@ public class ConfigDataContextRefresherIntegrationTests {
 			this.delay = delay;
 		}
 
-		/*
-		 * public long getCachedRandomLong() { return cachedRandomLong; }
-		 *
-		 * public void setCachedRandomLong(long cachedRandomLong) { this.cachedRandomLong
-		 * = cachedRandomLong; }
-		 */
+		public Long getCachedRandomLong() {
+			return this.cachedRandomLong;
+		}
+
+		public void setCachedRandomLong(Long cachedRandomLong) {
+			this.cachedRandomLong = cachedRandomLong;
+		}
 
 		public long randomLong() {
 			return randomLong;
