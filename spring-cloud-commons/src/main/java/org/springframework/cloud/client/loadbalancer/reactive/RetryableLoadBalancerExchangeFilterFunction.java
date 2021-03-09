@@ -19,6 +19,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -75,6 +76,11 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
 	private final List<LoadBalancerClientRequestTransformer> transformers;
+
+	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties) {
+		this(retryPolicy, loadBalancerFactory, properties, Collections.emptyList());
+	}
 
 	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,

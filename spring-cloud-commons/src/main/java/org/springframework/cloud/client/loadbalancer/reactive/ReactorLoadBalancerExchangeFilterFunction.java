@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -63,6 +64,11 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 	private final LoadBalancerProperties properties;
 
 	private final List<LoadBalancerClientRequestTransformer> transformers;
+
+	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			LoadBalancerProperties properties) {
+		this(loadBalancerFactory, properties, Collections.emptyList());
+	}
 
 	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerProperties properties, List<LoadBalancerClientRequestTransformer> transformers) {
