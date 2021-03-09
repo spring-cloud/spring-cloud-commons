@@ -17,7 +17,9 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.List;
 
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 
@@ -33,12 +35,21 @@ public final class ExchangeFilterFunctionUtils {
 		throw new IllegalStateException("Can't instantiate a utility class.");
 	}
 
-	static ClientRequest buildClientRequest(ClientRequest request, URI uri) {
-		return ClientRequest.create(request.method(), uri)
+	static ClientRequest buildClientRequest(ClientRequest request, URI uri,
+			ServiceInstance serviceInstance,
+			List<LoadBalancerClientRequestTransformer> transformers) {
+		ClientRequest clientRequest = ClientRequest.create(request.method(), uri)
 				.headers(headers -> headers.addAll(request.headers()))
 				.cookies(cookies -> cookies.addAll(request.cookies()))
 				.attributes(attributes -> attributes.putAll(request.attributes()))
 				.body(request.body()).build();
+		if (transformers != null) {
+			for (LoadBalancerClientRequestTransformer transformer : transformers) {
+				clientRequest = transformer.transformRequest(clientRequest,
+						serviceInstance);
+			}
+		}
+		return clientRequest;
 	}
 
 }
