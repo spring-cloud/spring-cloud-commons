@@ -27,10 +27,10 @@ import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfig
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceInstanceCookieTransformer;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
+import org.springframework.cloud.loadbalancer.core.LoadBalancerServiceInstanceCookieTransformer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer;
+package org.springframework.cloud.loadbalancer.core;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerRequestTransformer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
