@@ -20,8 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -48,10 +47,10 @@ import org.springframework.cloud.loadbalancer.support.SimpleObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,7 +58,6 @@ import static org.mockito.Mockito.when;
 /**
  * @author Spencer Gibb
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class LoadBalancerTests {
 
@@ -135,7 +133,7 @@ public class LoadBalancerTests {
 		String serviceId = "test1";
 		RoundRobinLoadBalancer loadBalancer = new TestHintLoadBalancer(ServiceInstanceListSuppliers.toProvider(
 				serviceId, instance(serviceId, "1host", false), instance(serviceId, "2host-secure", true)), serviceId);
-		Request<DefaultRequestContext> request = new DefaultRequest<>(new DefaultRequestContext("test2"));
+		Request<DefaultRequestContext> request = new DefaultRequest<>(new DefaultRequestContext("test2", "test2"));
 
 		ServiceInstance serviceInstance = loadBalancer.choose(request).block().getServer();
 
@@ -148,7 +146,7 @@ public class LoadBalancerTests {
 		ServiceInstance serviceInstance = instance(serviceId, "1host", false);
 		SameInstancePreferenceServiceInstanceListSupplier supplier = mock(
 				SameInstancePreferenceServiceInstanceListSupplier.class);
-		when(supplier.get()).thenReturn(Flux.just(Collections.singletonList(serviceInstance)));
+		when(supplier.get(any())).thenReturn(Flux.just(Collections.singletonList(serviceInstance)));
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(new SimpleObjectProvider<>(supplier),
 				serviceId);
 
