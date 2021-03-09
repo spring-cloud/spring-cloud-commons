@@ -38,7 +38,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(OAuth2RestTemplate.class)
-@ConditionalOnProperty("spring.cloud.oauth2.load-balanced.enabled=true")
+@ConditionalOnProperty("spring.cloud.oauth2.load-balanced.enabled")
 @AutoConfigureAfter(OAuth2AutoConfiguration.class)
 public class OAuth2LoadBalancerClientAutoConfiguration {
 
@@ -49,13 +49,10 @@ public class OAuth2LoadBalancerClientAutoConfiguration {
 		@Bean
 		public UserInfoRestTemplateCustomizer loadBalancedUserInfoRestTemplateCustomizer(
 				final LoadBalancerInterceptor loadBalancerInterceptor) {
-			return new UserInfoRestTemplateCustomizer() {
-				@Override
-				public void customize(OAuth2RestTemplate restTemplate) {
-					List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
-					interceptors.add(loadBalancerInterceptor);
-					restTemplate.setInterceptors(interceptors);
-				}
+			return restTemplate -> {
+				List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
+				interceptors.add(loadBalancerInterceptor);
+				restTemplate.setInterceptors(interceptors);
 			};
 		}
 
