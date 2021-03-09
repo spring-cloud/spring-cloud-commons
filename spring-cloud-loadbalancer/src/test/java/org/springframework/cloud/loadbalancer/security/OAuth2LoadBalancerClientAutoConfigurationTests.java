@@ -18,7 +18,9 @@ package org.springframework.cloud.loadbalancer.security;
 
 import java.net.URI;
 
+import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -50,6 +52,14 @@ public class OAuth2LoadBalancerClientAutoConfigurationTests {
 
 	@Rule
 	public ExpectedException expected = ExpectedException.none();
+
+	@Before
+	public void before() {
+		// FIXME: why do I need to do this? (fails in maven build without it.
+		// https://stackoverflow.com/questions/28911560/tomcat-8-embedded-error-org-apache-catalina-core-containerbase-a-child-con
+		// https://github.com/spring-projects/spring-boot/issues/21535
+		TomcatURLStreamHandlerFactory.disable();
+	}
 
 	@After
 	public void close() {
