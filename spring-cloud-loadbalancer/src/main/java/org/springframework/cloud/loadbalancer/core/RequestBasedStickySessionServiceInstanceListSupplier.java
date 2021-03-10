@@ -49,11 +49,6 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 	}
 
 	@Override
-	public String getServiceId() {
-		return delegate.getServiceId();
-	}
-
-	@Override
 	public Flux<List<ServiceInstance>> get() {
 		return delegate.get();
 	}

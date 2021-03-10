@@ -50,6 +50,12 @@ public class LoadBalancerProperties {
 	private Map<String, String> hint = new LinkedCaseInsensitiveMap<>();
 
 	/**
+	 * Allows setting the name of the header used for passing the hint for hint-based
+	 * service instance filtering.
+	 */
+	private String hintHeaderName = "X-SC-LB-Hint";
+
+	/**
 	 * Properties for Spring-Retry and Reactor Retry support in Spring Cloud LoadBalancer.
 	 */
 	private Retry retry = new Retry();
@@ -89,6 +95,14 @@ public class LoadBalancerProperties {
 
 	public void setStickySession(StickySession stickySession) {
 		this.stickySession = stickySession;
+	}
+
+	public String getHintHeaderName() {
+		return hintHeaderName;
+	}
+
+	public void setHintHeaderName(String hintHeaderName) {
+		this.hintHeaderName = hintHeaderName;
 	}
 
 	public static class StickySession {

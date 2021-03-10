@@ -239,6 +239,15 @@ public final class ServiceInstanceListSupplierBuilder {
 		return this;
 	}
 
+	public ServiceInstanceListSupplierBuilder withHints() {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			return new HintBasedServiceInstanceListSupplier(delegate, properties);
+		};
+		creators.add(creator);
+		return this;
+	}
+
 	/**
 	 * Builds the {@link ServiceInstanceListSupplier} hierarchy.
 	 * @param context application context

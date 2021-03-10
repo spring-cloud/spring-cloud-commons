@@ -35,6 +35,7 @@
 |spring.cloud.loadbalancer.health-check.refetch-instances-interval | `25s` | Interval for refetching available service instances.
 |spring.cloud.loadbalancer.health-check.repeat-health-check | `true` | Indicates whether health checks should keep repeating. It might be useful to set it to <code>false</code> if periodically refetching the instances, as every refetch will also trigger a healthcheck.
 |spring.cloud.loadbalancer.hint |  | Allows setting the value of <code>hint</code> that is passed on to the LoadBalancer request and can subsequently be used in {@link ReactiveLoadBalancer} implementations.
+|spring.cloud.loadbalancer.hint-header-name | `X-SC-LB-Hint` | Allows setting the name of the header used for passing the hint for hint-based service instance filtering.
 |spring.cloud.loadbalancer.retry.avoid-previous-instance | `true` | Enables wrapping ServiceInstanceListSupplier beans with `RetryAwareServiceInstanceListSupplier` if Spring-Retry is in the classpath.
 |spring.cloud.loadbalancer.retry.backoff.enabled | `false` | Indicates whether Reactor Retry backoffs should be applied.
 |spring.cloud.loadbalancer.retry.backoff.jitter | `0.5` | Used to set {@link RetryBackoffSpec#jitter}.
