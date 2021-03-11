@@ -67,7 +67,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 
 	/**
 	 * Deprecated in favor of
-	 * {@link #ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}
+	 * {@link #ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}.
 	 */
 	@Deprecated
 	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,

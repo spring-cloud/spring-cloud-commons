@@ -79,7 +79,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 
 	/**
 	 * Deprecated in favor of
-	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}
+	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}.
 	 */
 	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
