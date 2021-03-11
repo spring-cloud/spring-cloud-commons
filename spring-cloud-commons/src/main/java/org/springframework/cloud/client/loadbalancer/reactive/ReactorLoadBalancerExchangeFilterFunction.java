@@ -65,6 +65,11 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 
 	private final List<LoadBalancerClientRequestTransformer> transformers;
 
+	/**
+	 * Deprecated in favor of
+	 * {@link #ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}
+	 */
+	@Deprecated
 	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerProperties properties) {
 		this(loadBalancerFactory, properties, Collections.emptyList());
