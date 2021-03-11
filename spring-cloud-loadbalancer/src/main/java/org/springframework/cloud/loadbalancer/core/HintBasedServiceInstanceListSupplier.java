@@ -53,32 +53,37 @@ public class HintBasedServiceInstanceListSupplier extends DelegatingServiceInsta
 
 	@Override
 	public Flux<List<ServiceInstance>> get(Request request) {
-		if (request.getContext() == null) {
-			return get();
+		return get().map(instances -> filteredByHint(instances, getHint(request.getContext())));
+	}
+
+	private String getHint(Object requestContext) {
+		if (requestContext == null) {
+			return null;
 		}
-		if (request.getContext() instanceof RequestDataContext) {
-			RequestDataContext context = (RequestDataContext) request.getContext();
-			if (context.getClientRequest() != null) {
-				HttpHeaders headers = context.getClientRequest().getHeaders();
-				if (headers != null) {
-					String hintFromHeader = headers.getFirst(properties.getHintHeaderName());
-					if (StringUtils.hasText(hintFromHeader)) {
-						return get().map(instances -> filteredByHint(instances, hintFromHeader));
-					}
-				}
+		String hint = null;
+		if (requestContext instanceof RequestDataContext) {
+			hint = getHintFromHeader((RequestDataContext) requestContext);
+		}
+		if (!StringUtils.hasText(hint) && requestContext instanceof HintRequestContext) {
+			hint = ((HintRequestContext) requestContext).getHint();
+		}
+		return hint;
+	}
+
+	private String getHintFromHeader(RequestDataContext context) {
+		if (context.getClientRequest() != null) {
+			HttpHeaders headers = context.getClientRequest().getHeaders();
+			if (headers != null) {
+				return headers.getFirst(properties.getHintHeaderName());
 			}
 		}
-		if (request.getContext() instanceof HintRequestContext) {
-			HintRequestContext context = (HintRequestContext) request.getContext();
-			String hintFromProperties = context.getHint();
-			if (StringUtils.hasText(hintFromProperties)) {
-				return get().map(instances -> filteredByHint(instances, hintFromProperties));
-			}
-		}
-		return get();
+		return null;
 	}
 
 	private List<ServiceInstance> filteredByHint(List<ServiceInstance> instances, String hint) {
+		if (!StringUtils.hasText(hint)) {
+			return instances;
+		}
 		List<ServiceInstance> filteredInstances = new ArrayList<>();
 		for (ServiceInstance serviceInstance : instances) {
 			if (serviceInstance.getMetadata().getOrDefault("hint", "").equals(hint)) {
