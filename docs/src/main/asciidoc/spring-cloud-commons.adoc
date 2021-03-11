@@ -1080,6 +1080,53 @@ public class CustomLoadBalancerConfiguration {
 
 TIP: This is also a replacement for Zookeeper `StickyRule`.
 
+=== Transform the load-balanced HTTP request
+
+You can use the selected `ServiceInstance` to transform the load-balanced HTTP Request.
+
+For `RestTemplate`, you need to implement and define `LoadBalancerRequestTransformer` as follows:
+
+[source,java,indent=0]
+----
+	@Bean
+	public LoadBalancerRequestTransformer transformer() {
+		return new LoadBalancerRequestTransformer() {
+			@Override
+			public HttpRequest transformRequest(HttpRequest request, ServiceInstance instance) {
+				return new HttpRequestWrapper(request) {
+					@Override
+					public HttpHeaders getHeaders() {
+						HttpHeaders headers = new HttpHeaders();
+						headers.putAll(super.getHeaders());
+						headers.add("X-InstanceId", instance.getInstanceId());
+						return headers;
+					}
+				};
+			}
+		};
+	}
+----
+
+For `WebClient`, you need to implement and define `LoadBalancerClientRequestTransformer` as follows:
+
+[source,java,indent=0]
+----
+	@Bean
+	public LoadBalancerClientRequestTransformer transformer() {
+		return new LoadBalancerClientRequestTransformer() {
+			@Override
+			public ClientRequest transformRequest(ClientRequest request, ServiceInstance instance) {
+				return ClientRequest.from(request)
+						.header("X-InstanceId", instance.getInstanceId())
+						.build();
+			}
+		};
+	}
+----
+
+If multiple transformers are defined, they will be applied in the order of Bean.
+You can use `LoadBalancerRequestTransformer.DEFAULT_ORDER` or `LoadBalancerClientRequestTransformer.DEFAULT_ORDER` to specify the order.
+
 [[spring-cloud-loadbalancer-starter]]
 === Spring Cloud LoadBalancer Starter
 
