@@ -69,13 +69,23 @@ public class RetryableLoadBalancerExchangeFilterFunction
 
 	private final List<LoadBalancerClientRequestTransformer> transformers;
 
+	/**
+	 * Deprecated in favor of
+	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerRetryProperties, List)}
+	 */
+	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(
 			LoadBalancerRetryPolicy retryPolicy,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerRetryProperties retryProperties) {
 		this(retryPolicy, loadBalancerFactory, retryProperties, Collections.emptyList());
 	}
-
+	
+	/**
+	 * Deprecated in favor of
+	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerRetryProperties, List)}
+	 */
+	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerRetryProperties retryProperties) {
