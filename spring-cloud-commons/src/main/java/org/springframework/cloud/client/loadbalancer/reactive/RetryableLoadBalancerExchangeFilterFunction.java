@@ -71,7 +71,10 @@ public class RetryableLoadBalancerExchangeFilterFunction
 
 	/**
 	 * Deprecated in favor of
-	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerRetryProperties, List)}
+	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerRetryProperties, List)}.
+	 * @param retryPolicy the retry policy
+	 * @param loadBalancerFactory the loadbalancer factory
+	 * @param retryProperties the retry properties
 	 */
 	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(
@@ -80,10 +83,12 @@ public class RetryableLoadBalancerExchangeFilterFunction
 			LoadBalancerRetryProperties retryProperties) {
 		this(retryPolicy, loadBalancerFactory, retryProperties, Collections.emptyList());
 	}
-	
+
 	/**
 	 * Deprecated in favor of
-	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerRetryProperties, List)}
+	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerRetryProperties, List)}.
+	 * @param loadBalancerFactory the loadbalancer factory
+	 * @param retryProperties the retry properties
 	 */
 	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(
