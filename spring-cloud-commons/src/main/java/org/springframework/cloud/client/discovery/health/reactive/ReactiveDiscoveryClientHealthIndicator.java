@@ -37,6 +37,7 @@ import static java.util.Collections.emptyList;
  * initialized.
  *
  * @author Tim Ysewyn
+ * @author Chris Bono
  */
 public class ReactiveDiscoveryClientHealthIndicator
 		implements ReactiveDiscoveryHealthIndicator, Ordered, ApplicationListener<InstanceRegisteredEvent<?>> {
@@ -77,20 +78,40 @@ public class ReactiveDiscoveryClientHealthIndicator
 
 	private Mono<Health> doHealthCheck() {
 		// @formatter:off
+		return Mono.just(this.properties.isUseServicesQuery())
+				.flatMap(useServices -> useServices ? doHealthCheckWithServices() : doHealthCheckWithProbe())
+				.onErrorResume(exception -> {
+					this.log.error("Error", exception);
+					return Mono.just(Health.down().withException(exception).build());
+				});
+		// @formatter:on
+	}
+
+	private Mono<Health> doHealthCheckWithProbe() {
+		// @formatter:off
+		return Mono.justOrEmpty(this.discoveryClient)
+				.flatMap(client -> {
+					client.probe();
+					return Mono.just(client);
+				})
+				.map(client -> {
+					String description = (this.properties.isIncludeDescription()) ? client.description() : "";
+					return Health.status(new Status("UP", description)).build();
+				});
+		// @formatter:on
+	}
+
+	private Mono<Health> doHealthCheckWithServices() {
+		// @formatter:off
 		return Mono.justOrEmpty(this.discoveryClient)
 				.flatMapMany(ReactiveDiscoveryClient::getServices)
 				.collectList()
 				.defaultIfEmpty(emptyList())
 				.map(services -> {
-					ReactiveDiscoveryClient client = this.discoveryClient;
-					String description = (this.properties.isIncludeDescription())
-							? client.description() : "";
+					String description = (this.properties.isIncludeDescription()) ?
+						this.discoveryClient.description() : "";
 					return Health.status(new Status("UP", description))
-							.withDetail("services", services).build();
-				})
-				.onErrorResume(exception -> {
-					this.log.error("Error", exception);
-					return Mono.just(Health.down().withException(exception).build());
+						.withDetail("services", services).build();
 				});
 		// @formatter:on
 	}

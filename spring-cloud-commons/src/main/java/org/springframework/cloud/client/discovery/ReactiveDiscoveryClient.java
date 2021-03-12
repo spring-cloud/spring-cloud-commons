@@ -53,6 +53,19 @@ public interface ReactiveDiscoveryClient extends Ordered {
 	Flux<String> getServices();
 
 	/**
+	 * Can be used to verify the client is still valid and able to make calls.
+	 * <p>
+	 * A successful invocation with no exception thrown implies the client is able to make
+	 * calls.
+	 * <p>
+	 * The default implementation simply calls {@link #getServices()} - client
+	 * implementations can override with a lighter weight operation if they choose to.
+	 */
+	default void probe() {
+		getServices();
+	}
+
+	/**
 	 * Default implementation for getting order of discovery clients.
 	 * @return order
 	 */

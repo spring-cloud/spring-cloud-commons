@@ -10,6 +10,10 @@
 |spring.cloud.discovery.client.health-indicator.enabled | `true` | 
 |spring.cloud.discovery.client.health-indicator.include-description | `false` | 
 |spring.cloud.discovery.client.simple.instances |  | 
+|spring.cloud.discovery.client.simple.local.instance-id |  | The unique identifier or name for the service instance.
+|spring.cloud.discovery.client.simple.local.metadata |  | Metadata for the service instance. Can be used by discovery clients to modify their behaviour per instance, e.g. when load balancing.
+|spring.cloud.discovery.client.simple.local.service-id |  | The identifier or name for the service. Multiple instances might share the same service ID.
+|spring.cloud.discovery.client.simple.local.uri |  | The URI of the service instance. Will be parsed to extract the scheme, host, and port.
 |spring.cloud.discovery.client.simple.order |  | 
 |spring.cloud.discovery.enabled | `true` | Enables discovery client health indicators.
 |spring.cloud.features.enabled | `true` | Enables the features endpoint.

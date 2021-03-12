@@ -32,6 +32,7 @@ import org.springframework.core.Ordered;
 
 /**
  * @author Spencer Gibb
+ * @author Chris Bono
  */
 public class DiscoveryClientHealthIndicator
 		implements DiscoveryHealthIndicator, Ordered, ApplicationListener<InstanceRegisteredEvent<?>> {
@@ -66,9 +67,16 @@ public class DiscoveryClientHealthIndicator
 		if (this.discoveryInitialized.get()) {
 			try {
 				DiscoveryClient client = this.discoveryClient.getIfAvailable();
-				List<String> services = client.getServices();
 				String description = (this.properties.isIncludeDescription()) ? client.description() : "";
-				builder.status(new Status("UP", description)).withDetail("services", services);
+
+				if (properties.isUseServicesQuery()) {
+					List<String> services = client.getServices();
+					builder.status(new Status("UP", description)).withDetail("services", services);
+				}
+				else {
+					client.probe();
+					builder.status(new Status("UP", description));
+				}
 			}
 			catch (Exception e) {
 				this.log.error("Error", e);
