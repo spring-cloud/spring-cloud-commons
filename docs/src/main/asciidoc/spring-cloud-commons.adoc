@@ -932,7 +932,7 @@ public class CustomLoadBalancerConfiguration {
 	@Bean
 	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 			ConfigurableApplicationContext context) {
-		return ServiceInstanceListSuppliers.builder()
+		return ServiceInstanceListSupplier.builder()
 					.withDiscoveryClient()
 					.withZonePreference()
 					.withCaching()
@@ -1052,6 +1052,38 @@ Spring Cloud LoadBalancer lets you set `String` hints that are passed to the Loa
 
 You can set a default hint for all services by setting the value of the `spring.cloud.loadbalancer.hint.default` property. You can also set a specific value
 for any given service by setting the value of the `spring.cloud.loadbalancer.hint.[SERVICE_ID]` property, substituting `[SERVICE_ID]` with the correct ID of your service. If the hint is not set by the user, `default` is used.
+
+[[hints-based-loadbalancing]]
+=== Hint-Based Load-Balancing
+
+We also provide a `HintBasedServiceInstanceListSupplier`, which is a `ServiceInstanceListSupplier` implementation for hint-based instance selection.
+
+`HintBasedServiceInstanceListSupplier` checks for a hint request header (the default header-name is `X-SC-LB-Hint`, but you can modify it by changing the value of the `spring.cloud.loadbalancer.hint-header-name` property) and, if it finds a hint request header, uses the hint value passed in the header  to filter service instances.
+
+If no hint header has been added, `HintBasedServiceInstanceListSupplier` uses <<spring-cloud-loadbalancer-hints,hint values from properties>> to filter service instances.
+
+If no hint is set, either by the header or by properties, all service instances provided by the delegate are returned.
+
+While filtering, `HintBasedServiceInstanceListSupplier` looks for service instances that have a matching value set under the `hint` key in their `metadataMap`. If no matching instances are found, all instances provided by the delegate are returned.
+
+You could use the following sample configuration to set it up:
+
+[[hints-based-custom-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withHints()
+					.withCaching()
+					.build(context);
+	}
+}
+----
 
 [[spring-cloud-loadbalancer-starter]]
 === Spring Cloud LoadBalancer Starter
