@@ -70,7 +70,7 @@ public class RetryableLoadBalancerExchangeFilterFunction
 	private final List<LoadBalancerClientRequestTransformer> transformers;
 
 	/**
-	 * Deprecated in favor of
+	 * @deprecated Deprecated in favor of
 	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerRetryProperties, List)}.
 	 * @param retryPolicy the retry policy
 	 * @param loadBalancerFactory the loadbalancer factory
@@ -85,7 +85,7 @@ public class RetryableLoadBalancerExchangeFilterFunction
 	}
 
 	/**
-	 * Deprecated in favor of
+	 * @deprecated Deprecated in favor of
 	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerRetryProperties, List)}.
 	 * @param loadBalancerFactory the loadbalancer factory
 	 * @param retryProperties the retry properties
