@@ -78,8 +78,7 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 	@Test
 	public void shouldReturnUpStatusWhenNotUsingServicesQueryAndProbeSucceeds() {
 		when(properties.isUseServicesQuery()).thenReturn(false);
-		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), ""))
-				.build();
+		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), "")).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
 		Mono<Health> health = indicator.health();

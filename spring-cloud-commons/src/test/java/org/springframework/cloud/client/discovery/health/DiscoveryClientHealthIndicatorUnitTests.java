@@ -60,14 +60,12 @@ class DiscoveryClientHealthIndicatorUnitTests {
 
 	@BeforeEach
 	public void prepareMocks() {
-		lenient().when(discoveryClientProvider.getIfAvailable())
-				.thenReturn(discoveryClient);
+		lenient().when(discoveryClientProvider.getIfAvailable()).thenReturn(discoveryClient);
 	}
 
 	@Test
 	public void shouldReturnUnknownStatusWhenNotInitialized() {
-		Health expectedHealth = Health.status(
-				new Status(Status.UNKNOWN.getCode(), "Discovery Client not initialized"))
+		Health expectedHealth = Health.status(new Status(Status.UNKNOWN.getCode(), "Discovery Client not initialized"))
 				.build();
 		Health health = indicator.health();
 		assertThat(health).isEqualTo(expectedHealth);
@@ -76,8 +74,7 @@ class DiscoveryClientHealthIndicatorUnitTests {
 	@Test
 	public void shouldReturnUpStatusWhenNotUsingServicesQueryAndProbeSucceeds() {
 		when(properties.isUseServicesQuery()).thenReturn(false);
-		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), ""))
-				.build();
+		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), "")).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
 		Health health = indicator.health();
@@ -102,8 +99,8 @@ class DiscoveryClientHealthIndicatorUnitTests {
 	public void shouldReturnUpStatusWhenUsingServicesQueryAndNoServicesReturned() {
 		when(properties.isUseServicesQuery()).thenReturn(true);
 		when(discoveryClient.getServices()).thenReturn(Collections.emptyList());
-		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), ""))
-				.withDetail("services", emptyList()).build();
+		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), "")).withDetail("services", emptyList())
+				.build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
 		Health health = indicator.health();
@@ -117,9 +114,7 @@ class DiscoveryClientHealthIndicatorUnitTests {
 		when(properties.isIncludeDescription()).thenReturn(true);
 		when(discoveryClient.description()).thenReturn("Mocked Service Discovery Client");
 		when(discoveryClient.getServices()).thenReturn(singletonList("service"));
-		Health expectedHealth = Health
-				.status(new Status(Status.UP.getCode(),
-						"Mocked Service Discovery Client"))
+		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), "Mocked Service Discovery Client"))
 				.withDetail("services", singletonList("service")).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
