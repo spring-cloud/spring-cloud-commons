@@ -17,6 +17,8 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,9 +48,24 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
+	private final List<LoadBalancerClientRequestTransformer> transformers;
+
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, List)}.
+	 * @param loadBalancerFactory the loadbalancer factory
+	 */
+	@Deprecated
 	public ReactorLoadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+		this(loadBalancerFactory, Collections.emptyList());
+	}
+
+	public ReactorLoadBalancerExchangeFilterFunction(
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			List<LoadBalancerClientRequestTransformer> transformers) {
 		this.loadBalancerFactory = loadBalancerFactory;
+		this.transformers = transformers;
 	}
 
 	@Override
@@ -82,7 +99,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 						serviceId, instance.getUri()));
 			}
 			ClientRequest newRequest = buildClientRequest(request,
-					reconstructURI(instance, originalUrl));
+					reconstructURI(instance, originalUrl), instance, transformers);
 			return next.exchange(newRequest);
 		});
 	}
