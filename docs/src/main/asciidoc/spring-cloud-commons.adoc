@@ -1056,17 +1056,17 @@ for any given service by setting the value of the `spring.cloud.loadbalancer.hin
 [[hints-based-loadbalancing]]
 === Hint-Based Load-Balancing
 
-We also provide a `HintBasedServiceInstanceListSupplier`, which is an out-of-the-box implementation for hint-based instance selection.
+We also provide a `HintBasedServiceInstanceListSupplier`, which is a `ServiceInstanceListSupplier` implementation for hint-based instance selection.
 
-`HintBasedServiceInstanceListSupplier` will check for a hint request header (the default header-name is `X-SC-LB-Hint`, but you can modify it by changing the value of the `spring.cloud.loadbalancer.hint-header-name` property) and, if it finds it, will use the hint value passed in the header  to filter service instances.
+`HintBasedServiceInstanceListSupplier` checks for a hint request header (the default header-name is `X-SC-LB-Hint`, but you can modify it by changing the value of the `spring.cloud.loadbalancer.hint-header-name` property) and, if it finds a hint request header, uses the hint value passed in the header  to filter service instances.
 
-If no hint header has been added, `HintBasedServiceInstanceListSupplier` will use <<spring-cloud-loadbalancer-hints,hint values from properties>> to filter service instances.
+If no hint header has been added, `HintBasedServiceInstanceListSupplier` uses <<spring-cloud-loadbalancer-hints,hint values from properties>> to filter service instances.
 
-If there's no hint set either via the header or via properties, all service instances provided by the delegate will be returned.
+If no hint is set, either by the header or by properties, all service instances provided by the delegate are returned.
 
-While filtering, `HintBasedServiceInstanceListSupplier` will look for service instances that have a matching value set under the `hint` key in their `metadataMap`. If no matching instances are found, all instances provided by the delegate will be returned.
+While filtering, `HintBasedServiceInstanceListSupplier` looks for service instances that have a matching value set under the `hint` key in their `metadataMap`. If no matching instances are found, all instances provided by the delegate are returned.
 
-You could use this sample configuration to set it up:
+You could use the following sample configuration to set it up:
 
 [[hints-based-custom-loadbalancer-configuration]]
 [source,java,indent=0]
