@@ -126,6 +126,19 @@ public final class ServiceInstanceListSupplierBuilder {
 	}
 
 	/**
+	 * Adds a {@link SameInstancePreferenceServiceInstanceListSupplier} to the
+	 * {@link ServiceInstanceListSupplier} hierarchy.
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withSameInstancePreference() {
+		DelegateCreator creator = (context,
+				delegate) -> new SameInstancePreferenceServiceInstanceListSupplier(
+						delegate);
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
 	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
 	 * {@link WebClient} instance to the {@link ServiceInstanceListSupplier} hierarchy.
 	 * @param webClient a user-provided {@link WebClient} instance

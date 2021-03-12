@@ -8,8 +8,8 @@
 |spring.cloud.config.override-system-properties | true | Flag to indicate that the external properties should override system properties. Default true.
 |spring.cloud.discovery.client.composite-indicator.enabled | true | Enables discovery client composite health indicator.
 |spring.cloud.discovery.client.health-indicator.enabled | true | 
-|spring.cloud.discovery.client.health-indicator.include-description | false |
-|spring.cloud.discovery.client.simple.instances |  |
+|spring.cloud.discovery.client.health-indicator.include-description | false | 
+|spring.cloud.discovery.client.simple.instances |  | 
 |spring.cloud.discovery.client.simple.local.instance-id |  | The unique identifier or name for the service instance.
 |spring.cloud.discovery.client.simple.local.metadata |  | Metadata for the service instance. Can be used by discovery clients to modify their behaviour per instance, e.g. when load balancing.
 |spring.cloud.discovery.client.simple.local.service-id |  | The identifier or name for the service. Multiple instances might share the same service ID.
@@ -34,7 +34,18 @@
 |spring.cloud.loadbalancer.health-check.initial-delay | 0 | Initial delay value for the HealthCheck scheduler.
 |spring.cloud.loadbalancer.health-check.interval | 25s | Interval for rerunning the HealthCheck scheduler.
 |spring.cloud.loadbalancer.health-check.path |  | 
+|spring.cloud.loadbalancer.health-check.refetch-instances | false | Indicates whether the instances should be refetched by the <code>HealthCheckServiceInstanceListSupplier</code>. This can be used if the instances can be updated and the underlying delegate does not provide an ongoing flux.
+|spring.cloud.loadbalancer.health-check.refetch-instances-interval | 25s | Interval for refetching available service instances.
+|spring.cloud.loadbalancer.health-check.repeat-health-check | true | Indicates whether health checks should keep repeating. It might be useful to set it to <code>false</code> if periodically refetching the instances, as every refetch will also trigger a healthcheck.
+|spring.cloud.loadbalancer.retry.backoff.enabled | false | Indicates whether Reactor Retry backoffs should be applied.
+|spring.cloud.loadbalancer.retry.backoff.jitter | 0.5 | Used to set {@link RetryBackoffSpec#jitter}.
+|spring.cloud.loadbalancer.retry.backoff.max-backoff |  | Used to set {@link RetryBackoffSpec#maxBackoff}.
+|spring.cloud.loadbalancer.retry.backoff.min-backoff | 5ms | Used to set {@link RetryBackoffSpec#minBackoff}.
 |spring.cloud.loadbalancer.retry.enabled | true | 
+|spring.cloud.loadbalancer.retry.max-retries-on-next-service-instance | 1 | Number of retries to be executed on the next <code>ServiceInstance</code>. A <code>ServiceInstance</code> is chosen before each retry call.
+|spring.cloud.loadbalancer.retry.max-retries-on-same-service-instance | 0 | Number of retries to be executed on the same <code>ServiceInstance</code>.
+|spring.cloud.loadbalancer.retry.retry-on-all-operations | false | Indicates retries should be attempted on operations other than {@link HttpMethod#GET}.
+|spring.cloud.loadbalancer.retry.retryable-status-codes |  | A {@link Set} of status codes that should trigger a retry.
 |spring.cloud.loadbalancer.ribbon.enabled | true | Causes `RibbonLoadBalancerClient` to be used by default.
 |spring.cloud.loadbalancer.service-discovery.timeout |  | String representation of Duration of the timeout for calls to service discovery.
 |spring.cloud.loadbalancer.zone |  | Spring Cloud LoadBalancer zone.

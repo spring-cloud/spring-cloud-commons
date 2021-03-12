@@ -17,10 +17,12 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -45,6 +47,7 @@ import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.cloud.loadbalancer.support.ServiceInstanceListSuppliers;
 import org.springframework.cloud.loadbalancer.support.ServiceInstanceSuppliers;
+import org.springframework.cloud.loadbalancer.support.SimpleObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
@@ -52,6 +55,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Spencer Gibb
@@ -163,6 +169,22 @@ public class LoadBalancerTests {
 				.getServer();
 
 		assertThat(serviceInstance.getServiceId()).isEqualTo("test2");
+	}
+
+	@Test
+	public void selectedInstanceCallback() {
+		String serviceId = "test1";
+		ServiceInstance serviceInstance = instance(serviceId, "1host", false);
+		SameInstancePreferenceServiceInstanceListSupplier supplier = mock(
+				SameInstancePreferenceServiceInstanceListSupplier.class);
+		when(supplier.get())
+				.thenReturn(Flux.just(Collections.singletonList(serviceInstance)));
+		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(
+				new SimpleObjectProvider<>(supplier), serviceId);
+
+		loadBalancer.choose().block();
+
+		verify(supplier).selectedServiceInstance(serviceInstance);
 	}
 
 	private static class TestHintLoadBalancer extends RoundRobinLoadBalancer {

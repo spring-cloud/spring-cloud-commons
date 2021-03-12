@@ -64,13 +64,14 @@ public class DiscoveryClientServiceInstanceListSupplier
 		resolveTimeout(environment);
 		this.serviceInstances = Flux
 				.defer(() -> Flux.just(delegate.getInstances(serviceId)))
+				.subscribeOn(Schedulers.boundedElastic())
 				.timeout(timeout, Flux.defer(() -> {
 					logTimeout();
 					return Flux.just(new ArrayList<>());
 				})).onErrorResume(error -> {
 					logException(error);
 					return Flux.just(new ArrayList<>());
-				}).subscribeOn(Schedulers.boundedElastic());
+				});
 	}
 
 	public DiscoveryClientServiceInstanceListSupplier(ReactiveDiscoveryClient delegate,
@@ -114,11 +115,9 @@ public class DiscoveryClientServiceInstanceListSupplier
 	}
 
 	private void logException(Throwable error) {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(String.format(
-					"Exception occurred while retrieving instances for service %s",
-					serviceId), error);
-		}
+		LOG.error(String.format(
+				"Exception occurred while retrieving instances for service %s",
+				serviceId), error);
 	}
 
 }

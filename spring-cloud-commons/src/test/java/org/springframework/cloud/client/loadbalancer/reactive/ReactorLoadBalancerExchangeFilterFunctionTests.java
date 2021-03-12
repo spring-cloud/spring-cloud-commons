@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -32,6 +31,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -51,6 +51,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * Tests for {@link ReactorLoadBalancerExchangeFilterFunction}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Charu Covindane
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -67,9 +68,10 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 
 	@BeforeEach
 	void setUp() {
-		SimpleDiscoveryProperties.SimpleServiceInstance instance = new SimpleDiscoveryProperties.SimpleServiceInstance();
+		DefaultServiceInstance instance = new DefaultServiceInstance();
 		instance.setServiceId("testservice");
-		instance.setUri(URI.create("http://localhost:" + this.port));
+		instance.setHost("localhost");
+		instance.setPort(this.port);
 		this.properties.getInstances().put("testservice",
 				Collections.singletonList(instance));
 	}

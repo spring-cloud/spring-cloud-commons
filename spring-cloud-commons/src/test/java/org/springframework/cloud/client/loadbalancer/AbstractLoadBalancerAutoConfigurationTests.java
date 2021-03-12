@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
@@ -156,7 +155,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-				LoadBalancerRequest<T> request) throws IOException {
+				LoadBalancerRequest<T> request) {
 			try {
 				return request.apply(choose(serviceId));
 			}

@@ -35,7 +35,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Auto-configuration for Ribbon (client-side load balancing).
+ * Auto-configuration for blocking client-side load balancing.
  *
  * @author Spencer Gibb
  * @author Dave Syer
@@ -79,7 +79,7 @@ public class LoadBalancerAutoConfiguration {
 	static class LoadBalancerInterceptorConfig {
 
 		@Bean
-		public LoadBalancerInterceptor ribbonInterceptor(
+		public LoadBalancerInterceptor loadBalancerInterceptor(
 				LoadBalancerClient loadBalancerClient,
 				LoadBalancerRequestFactory requestFactory) {
 			return new LoadBalancerInterceptor(loadBalancerClient, requestFactory);
@@ -124,7 +124,7 @@ public class LoadBalancerAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public RetryLoadBalancerInterceptor ribbonInterceptor(
+		public RetryLoadBalancerInterceptor loadBalancerRetryInterceptor(
 				LoadBalancerClient loadBalancerClient,
 				LoadBalancerRetryProperties properties,
 				LoadBalancerRequestFactory requestFactory,

@@ -17,6 +17,8 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +31,8 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
+
+import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFilterFunctionUtils.buildClientRequest;
 
 /**
  * An {@link ExchangeFilterFunction} that uses {@link ReactiveLoadBalancer} to execute
@@ -44,9 +48,24 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
+	private final List<LoadBalancerClientRequestTransformer> transformers;
+
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, List)}.
+	 * @param loadBalancerFactory the loadbalancer factory
+	 */
+	@Deprecated
 	public ReactorLoadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+		this(loadBalancerFactory, Collections.emptyList());
+	}
+
+	public ReactorLoadBalancerExchangeFilterFunction(
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			List<LoadBalancerClientRequestTransformer> transformers) {
 		this.loadBalancerFactory = loadBalancerFactory;
+		this.transformers = transformers;
 	}
 
 	@Override
@@ -80,7 +99,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 						serviceId, instance.getUri()));
 			}
 			ClientRequest newRequest = buildClientRequest(request,
-					reconstructURI(instance, originalUrl));
+					reconstructURI(instance, originalUrl), instance, transformers);
 			return next.exchange(newRequest);
 		});
 	}
@@ -100,14 +119,6 @@ public class ReactorLoadBalancerExchangeFilterFunction implements ExchangeFilter
 
 	private String serviceInstanceUnavailableMessage(String serviceId) {
 		return "Load balancer does not contain an instance for the service " + serviceId;
-	}
-
-	private ClientRequest buildClientRequest(ClientRequest request, URI uri) {
-		return ClientRequest.create(request.method(), uri)
-				.headers(headers -> headers.addAll(request.headers()))
-				.cookies(cookies -> cookies.addAll(request.cookies()))
-				.attributes(attributes -> attributes.putAll(request.attributes()))
-				.body(request.body()).build();
 	}
 
 }

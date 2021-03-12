@@ -66,7 +66,7 @@ class CachingServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldNotHangOnCachingWhenDelegateReturnsInfiniteStream() {
-		assertTimeoutPreemptively(ofMillis(500), () -> {
+		assertTimeoutPreemptively(ofMillis(1000), () -> {
 			blockingLoadBalancerClient.choose(SERVICE_ID);
 		});
 

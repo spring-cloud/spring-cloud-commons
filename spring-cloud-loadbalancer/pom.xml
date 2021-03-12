@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-commons-parent</artifactId>
-		<version>2.2.4.BUILD-SNAPSHOT</version>
+		<version>2.2.8.BUILD-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>spring-cloud-loadbalancer</artifactId>
@@ -75,6 +75,11 @@
 			<groupId>com.stoyanr</groupId>
 			<artifactId>evictor</artifactId>
 			<version>${evictor.version}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.retry</groupId>
+			<artifactId>spring-retry</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

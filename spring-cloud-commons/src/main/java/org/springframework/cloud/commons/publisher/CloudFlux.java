@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2013-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package reactor.core.publisher;
+package org.springframework.cloud.commons.publisher;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
 /**
  * INTERNAL USAGE ONLY. This functionality will be ported to reactor-core and will be
- * removed in a next release.
+ * removed in a future release.
  *
  * @author Tim Ysewyn
  */
