@@ -210,7 +210,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 			return new RetryableLoadBalancerExchangeFilterFunction(
 					new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
 							properties),
-					factory, properties);
+					factory, properties, Collections.emptyList());
 		}
 
 	}

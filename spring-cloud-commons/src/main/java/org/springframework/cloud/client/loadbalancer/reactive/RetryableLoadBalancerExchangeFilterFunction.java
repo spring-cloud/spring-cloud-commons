@@ -19,6 +19,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -66,22 +67,46 @@ public class RetryableLoadBalancerExchangeFilterFunction
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
+	private final List<LoadBalancerClientRequestTransformer> transformers;
+
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerRetryProperties, List)}.
+	 * @param retryPolicy the retry policy
+	 * @param loadBalancerFactory the loadbalancer factory
+	 * @param retryProperties the retry properties
+	 */
+	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(
 			LoadBalancerRetryPolicy retryPolicy,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerRetryProperties retryProperties) {
-		this.retryPolicy = retryPolicy;
-		this.loadBalancerFactory = loadBalancerFactory;
-		this.retryProperties = retryProperties;
+		this(retryPolicy, loadBalancerFactory, retryProperties, Collections.emptyList());
 	}
 
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerRetryProperties, List)}.
+	 * @param loadBalancerFactory the loadbalancer factory
+	 * @param retryProperties the retry properties
+	 */
+	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerRetryProperties retryProperties) {
-		this.retryPolicy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
-				retryProperties);
+		this(new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(retryProperties),
+				loadBalancerFactory, retryProperties);
+	}
+
+	public RetryableLoadBalancerExchangeFilterFunction(
+			LoadBalancerRetryPolicy retryPolicy,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			LoadBalancerRetryProperties retryProperties,
+			List<LoadBalancerClientRequestTransformer> transformers) {
+		this.retryPolicy = retryPolicy;
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.retryProperties = retryProperties;
+		this.transformers = transformers;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -129,7 +154,7 @@ public class RetryableLoadBalancerExchangeFilterFunction
 						serviceId, instance.getUri()));
 			}
 			ClientRequest newRequest = buildClientRequest(clientRequest,
-					reconstructURI(instance, originalUrl));
+					reconstructURI(instance, originalUrl), instance, transformers);
 			return next.exchange(newRequest).map(clientResponse -> {
 				loadBalancerRetryContext.setClientResponse(clientResponse);
 				if (shouldRetrySameServiceInstance(loadBalancerRetryContext)) {

@@ -16,11 +16,15 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -60,8 +64,10 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 		@ConditionalOnMissingBean
 		@Bean
 		public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
-				ReactiveLoadBalancer.Factory loadBalancerFactory) {
-			return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory);
+				ReactiveLoadBalancer.Factory loadBalancerFactory,
+				ObjectProvider<List<LoadBalancerClientRequestTransformer>> transformers) {
+			return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory,
+					transformers.getIfAvailable(Collections::emptyList));
 		}
 
 	}
