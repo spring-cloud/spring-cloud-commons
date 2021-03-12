@@ -21,8 +21,7 @@ import org.springframework.boot.origin.OriginLookup;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.PropertySource;
 
-public class OriginTrackedCompositePropertySource extends CompositePropertySource
-		implements OriginLookup<String> {
+public class OriginTrackedCompositePropertySource extends CompositePropertySource implements OriginLookup<String> {
 
 	/**
 	 * Create a new {@code CompositePropertySource}.

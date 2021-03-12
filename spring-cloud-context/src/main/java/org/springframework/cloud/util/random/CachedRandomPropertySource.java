@@ -27,7 +27,7 @@ import org.springframework.util.StringUtils;
  */
 public class CachedRandomPropertySource extends PropertySource<PropertySource> {
 
-	private static final String NAME = "cachedrandom";
+	static final String NAME = "cachedrandom";
 
 	private static final String PREFIX = NAME + ".";
 
@@ -38,8 +38,7 @@ public class CachedRandomPropertySource extends PropertySource<PropertySource> {
 
 	}
 
-	CachedRandomPropertySource(PropertySource randomValuePropertySource,
-			Map<String, Map<String, Object>> cache) {
+	CachedRandomPropertySource(PropertySource randomValuePropertySource, Map<String, Map<String, Object>> cache) {
 		super(NAME, randomValuePropertySource);
 		this.cache = cache;
 	}
@@ -78,8 +77,7 @@ public class CachedRandomPropertySource extends PropertySource<PropertySource> {
 		}
 		return randomValueCache.computeIfAbsent(type, (theType) -> {
 			if (logger.isDebugEnabled()) {
-				logger.debug(
-						"No random value found in cache for key and value, generating a new value");
+				logger.debug("No random value found in cache for key and value, generating a new value");
 			}
 			return getSource().getProperty("random." + type);
 		});

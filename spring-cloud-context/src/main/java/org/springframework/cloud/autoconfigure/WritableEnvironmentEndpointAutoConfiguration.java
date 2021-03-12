@@ -53,18 +53,15 @@ public class WritableEnvironmentEndpointAutoConfiguration {
 
 	private final EnvironmentEndpointProperties properties;
 
-	public WritableEnvironmentEndpointAutoConfiguration(
-			EnvironmentEndpointProperties properties) {
+	public WritableEnvironmentEndpointAutoConfiguration(EnvironmentEndpointProperties properties) {
 		this.properties = properties;
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnAvailableEndpoint
-	public WritableEnvironmentEndpoint writableEnvironmentEndpoint(
-			Environment environment) {
-		WritableEnvironmentEndpoint endpoint = new WritableEnvironmentEndpoint(
-				environment);
+	public WritableEnvironmentEndpoint writableEnvironmentEndpoint(Environment environment) {
+		WritableEnvironmentEndpoint endpoint = new WritableEnvironmentEndpoint(environment);
 		String[] keysToSanitize = this.properties.getKeysToSanitize();
 		if (keysToSanitize != null) {
 			endpoint.setKeysToSanitize(keysToSanitize);

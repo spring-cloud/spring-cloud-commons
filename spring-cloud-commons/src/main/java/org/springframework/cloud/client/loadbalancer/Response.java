@@ -28,13 +28,4 @@ public interface Response<T> {
 
 	T getServer();
 
-	/**
-	 * Notification that the request completed.
-	 * @deprecated in favour of
-	 * {@link LoadBalancerLifecycle#onComplete(CompletionContext)}
-	 * @param completionContext - completion context
-	 */
-	@Deprecated
-	void onComplete(CompletionContext completionContext);
-
 }

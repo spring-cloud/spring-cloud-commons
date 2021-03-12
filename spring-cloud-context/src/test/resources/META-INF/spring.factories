@@ -1,6 +1,15 @@
 # Bootstrap components
 org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.bootstrap.TestBootstrapConfiguration,\
-org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration,\
-org.springframework.cloud.util.random.CachedRandomPropertySourceAutoConfiguration
+org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration
 
+org.springframework.boot.env.EnvironmentPostProcessor=\
+org.springframework.cloud.context.refresh.ConfigDataContextRefresherIntegrationTests.TestEnvPostProcessor
+
+# ConfigData Location Resolvers
+org.springframework.boot.context.config.ConfigDataLocationResolver=\
+org.springframework.cloud.context.refresh.ConfigDataContextRefresherIntegrationTests.TestConfigDataLocationResolver
+
+# ConfigData Loaders
+org.springframework.boot.context.config.ConfigDataLoader=\
+org.springframework.cloud.context.refresh.ConfigDataContextRefresherIntegrationTests.TestConfigDataLoader

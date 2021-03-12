@@ -18,6 +18,7 @@ package org.springframework.cloud.context.scope.refresh;
 
 import java.io.Serializable;
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -64,8 +65,8 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  *
  */
 @ManagedResource
-public class RefreshScope extends GenericScope implements ApplicationContextAware,
-		ApplicationListener<ContextRefreshedEvent>, Ordered {
+public class RefreshScope extends GenericScope
+		implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>, Ordered {
 
 	private ApplicationContext context;
 
@@ -101,8 +102,7 @@ public class RefreshScope extends GenericScope implements ApplicationContextAwar
 	}
 
 	@Override
-	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
-			throws BeansException {
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 		this.registry = registry;
 		super.postProcessBeanDefinitionRegistry(registry);
 	}
@@ -113,8 +113,7 @@ public class RefreshScope extends GenericScope implements ApplicationContextAwar
 	}
 
 	public void start(ContextRefreshedEvent event) {
-		if (event.getApplicationContext() == this.context && this.eager
-				&& this.registry != null) {
+		if (event.getApplicationContext() == this.context && this.eager && this.registry != null) {
 			eagerlyInitialize();
 		}
 	}
@@ -122,8 +121,7 @@ public class RefreshScope extends GenericScope implements ApplicationContextAwar
 	private void eagerlyInitialize() {
 		for (String name : this.context.getBeanDefinitionNames()) {
 			BeanDefinition definition = this.registry.getBeanDefinition(name);
-			if (this.getName().equals(definition.getScope())
-					&& !definition.isLazyInit()) {
+			if (this.getName().equals(definition.getScope()) && !definition.isLazyInit()) {
 				Object bean = this.context.getBean(name);
 				if (bean != null) {
 					bean.getClass();
@@ -135,10 +133,10 @@ public class RefreshScope extends GenericScope implements ApplicationContextAwar
 	@ManagedOperation(description = "Dispose of the current instance of bean name "
 			+ "provided and force a refresh on next method execution.")
 	public boolean refresh(String name) {
-		if (!name.startsWith(SCOPED_TARGET_PREFIX)) {
+		if (!ScopedProxyUtils.isScopedTarget(name)) {
 			// User wants to refresh the bean with this name but that isn't the one in the
 			// cache...
-			name = SCOPED_TARGET_PREFIX + name;
+			name = ScopedProxyUtils.getTargetBeanName(name);
 		}
 		// Ensure lifecycle is finished if bean was disposable
 		if (super.destroy(name)) {

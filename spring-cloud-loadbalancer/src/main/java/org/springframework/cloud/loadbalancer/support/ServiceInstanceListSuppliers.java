@@ -26,7 +26,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 
 /**
- * Utility class for service instances.
+ * Utility class for service instance list suppliers.
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
@@ -37,8 +37,7 @@ public final class ServiceInstanceListSuppliers {
 		throw new IllegalStateException("Can't instantiate a utility class");
 	}
 
-	public static ServiceInstanceListSupplier from(String serviceId,
-			ServiceInstance... instances) {
+	public static ServiceInstanceListSupplier from(String serviceId, ServiceInstance... instances) {
 		return new ServiceInstanceListSupplier() {
 			@Override
 			public Flux<List<ServiceInstance>> get() {

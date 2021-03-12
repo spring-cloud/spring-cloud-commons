@@ -25,12 +25,15 @@ import org.springframework.retry.context.RetryContextSupport;
  * {@link RetryContext} for load-balanced retries.
  *
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 public class LoadBalancedRetryContext extends RetryContextSupport {
 
 	private HttpRequest request;
 
 	private ServiceInstance serviceInstance;
+
+	private ServiceInstance previousServiceInstance;
 
 	/**
 	 * Creates a new load-balanced context.
@@ -71,7 +74,16 @@ public class LoadBalancedRetryContext extends RetryContextSupport {
 	 * @param serviceInstance The service instance to use during the retry.
 	 */
 	public void setServiceInstance(ServiceInstance serviceInstance) {
+		setPreviousServiceInstance(this.serviceInstance);
 		this.serviceInstance = serviceInstance;
+	}
+
+	public ServiceInstance getPreviousServiceInstance() {
+		return previousServiceInstance;
+	}
+
+	public void setPreviousServiceInstance(ServiceInstance previousServiceInstance) {
+		this.previousServiceInstance = previousServiceInstance;
 	}
 
 }

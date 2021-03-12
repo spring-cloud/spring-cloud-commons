@@ -39,15 +39,13 @@ import static java.util.Collections.emptyList;
  * @author Tim Ysewyn
  */
 public class ReactiveDiscoveryClientHealthIndicator
-		implements ReactiveDiscoveryHealthIndicator, Ordered,
-		ApplicationListener<InstanceRegisteredEvent<?>> {
+		implements ReactiveDiscoveryHealthIndicator, Ordered, ApplicationListener<InstanceRegisteredEvent<?>> {
 
 	private final ReactiveDiscoveryClient discoveryClient;
 
 	private final DiscoveryClientHealthIndicatorProperties properties;
 
-	private final Log log = LogFactory
-			.getLog(ReactiveDiscoveryClientHealthIndicator.class);
+	private final Log log = LogFactory.getLog(ReactiveDiscoveryClientHealthIndicator.class);
 
 	private AtomicBoolean discoveryInitialized = new AtomicBoolean(false);
 
@@ -72,8 +70,8 @@ public class ReactiveDiscoveryClientHealthIndicator
 			return doHealthCheck();
 		}
 		else {
-			return Mono.just(Health.status(new Status(Status.UNKNOWN.getCode(),
-					"Discovery Client not initialized")).build());
+			return Mono.just(
+					Health.status(new Status(Status.UNKNOWN.getCode(), "Discovery Client not initialized")).build());
 		}
 	}
 

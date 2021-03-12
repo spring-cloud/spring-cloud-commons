@@ -37,8 +37,7 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 
 	private LoadBalancerRequestFactory requestFactory;
 
-	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer,
-			LoadBalancerRequestFactory requestFactory) {
+	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRequestFactory requestFactory) {
 		this.loadBalancer = loadBalancer;
 		this.requestFactory = requestFactory;
 	}
@@ -53,10 +52,8 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 			final ClientHttpRequestExecution execution) throws IOException {
 		final URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
-		Assert.state(serviceName != null,
-				"Request URI does not contain a valid hostname: " + originalUri);
-		return this.loadBalancer.execute(serviceName,
-				this.requestFactory.createRequest(request, body, execution));
+		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
+		return this.loadBalancer.execute(serviceName, this.requestFactory.createRequest(request, body, execution));
 	}
 
 }

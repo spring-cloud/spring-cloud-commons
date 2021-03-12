@@ -32,8 +32,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Ryan Baxter
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(
-		classes = ServletSimpleDiscoveryPropertiesAutoConfigurationTests.Config.class,
+@SpringBootTest(classes = ServletSimpleDiscoveryPropertiesAutoConfigurationTests.Config.class,
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ServletSimpleDiscoveryPropertiesAutoConfigurationTests {
 

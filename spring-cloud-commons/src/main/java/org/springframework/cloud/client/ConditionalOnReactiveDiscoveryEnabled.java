@@ -39,8 +39,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 @Documented
 @Inherited
 @ConditionalOnClass(name = "org.springframework.web.reactive.function.client.WebClient")
-@ConditionalOnProperty(value = "spring.cloud.discovery.reactive.enabled",
-		matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.cloud.discovery.reactive.enabled", matchIfMissing = true)
 public @interface ConditionalOnReactiveDiscoveryEnabled {
 
 }

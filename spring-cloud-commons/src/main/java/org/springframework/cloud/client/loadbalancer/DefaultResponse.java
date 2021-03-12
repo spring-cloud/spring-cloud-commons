@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.util.Objects;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.style.ToStringCreator;
 
@@ -42,15 +44,27 @@ public class DefaultResponse implements Response<ServiceInstance> {
 	}
 
 	@Override
-	public void onComplete(CompletionContext completionContext) {
-		// do nothing: deprecated interface method
-	}
-
-	@Override
 	public String toString() {
 		ToStringCreator to = new ToStringCreator(this);
 		to.append("serviceInstance", serviceInstance);
 		return to.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof DefaultResponse)) {
+			return false;
+		}
+		DefaultResponse that = (DefaultResponse) o;
+		return Objects.equals(serviceInstance, that.serviceInstance);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(serviceInstance);
 	}
 
 }

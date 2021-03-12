@@ -25,13 +25,14 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties.SimpleServiceInstance;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Biju Kunjummen
+ * @author Charu Covindane
  */
 public class SimpleDiscoveryClientTests {
 
@@ -41,11 +42,9 @@ public class SimpleDiscoveryClientTests {
 	public void setUp() {
 		SimpleDiscoveryProperties simpleDiscoveryProperties = new SimpleDiscoveryProperties();
 
-		Map<String, List<SimpleServiceInstance>> map = new HashMap<>();
-		SimpleServiceInstance service1Inst1 = new SimpleServiceInstance(
-				URI.create("http://host1:8080"));
-		SimpleServiceInstance service1Inst2 = new SimpleServiceInstance(
-				URI.create("https://host2:8443"));
+		Map<String, List<DefaultServiceInstance>> map = new HashMap<>();
+		DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null, "host1", 8080, false);
+		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null, "host2", 8443, true);
 		map.put("service1", Arrays.asList(service1Inst1, service1Inst2));
 		simpleDiscoveryProperties.setInstances(map);
 		simpleDiscoveryProperties.init();
@@ -54,8 +53,7 @@ public class SimpleDiscoveryClientTests {
 
 	@Test
 	public void shouldBeAbleToRetrieveServiceDetailsByName() {
-		List<ServiceInstance> instances = this.simpleDiscoveryClient
-				.getInstances("service1");
+		List<ServiceInstance> instances = this.simpleDiscoveryClient.getInstances("service1");
 		then(instances.size()).isEqualTo(2);
 		then(instances.get(0).getServiceId()).isEqualTo("service1");
 		then(instances.get(0).getHost()).isEqualTo("host1");

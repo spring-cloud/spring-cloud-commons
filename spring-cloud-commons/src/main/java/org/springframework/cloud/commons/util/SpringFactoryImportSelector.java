@@ -54,8 +54,8 @@ public abstract class SpringFactoryImportSelector<T>
 
 	@SuppressWarnings("unchecked")
 	protected SpringFactoryImportSelector() {
-		this.annotationClass = (Class<T>) GenericTypeResolver
-				.resolveTypeArgument(this.getClass(), SpringFactoryImportSelector.class);
+		this.annotationClass = (Class<T>) GenericTypeResolver.resolveTypeArgument(this.getClass(),
+				SpringFactoryImportSelector.class);
 	}
 
 	@Override
@@ -63,15 +63,15 @@ public abstract class SpringFactoryImportSelector<T>
 		if (!isEnabled()) {
 			return new String[0];
 		}
-		AnnotationAttributes attributes = AnnotationAttributes.fromMap(
-				metadata.getAnnotationAttributes(this.annotationClass.getName(), true));
+		AnnotationAttributes attributes = AnnotationAttributes
+				.fromMap(metadata.getAnnotationAttributes(this.annotationClass.getName(), true));
 
-		Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is "
-				+ metadata.getClassName() + " annotated with @" + getSimpleName() + "?");
+		Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is " + metadata.getClassName()
+				+ " annotated with @" + getSimpleName() + "?");
 
 		// Find all possible auto configuration classes, filtering duplicates
-		List<String> factories = new ArrayList<>(new LinkedHashSet<>(SpringFactoriesLoader
-				.loadFactoryNames(this.annotationClass, this.beanClassLoader)));
+		List<String> factories = new ArrayList<>(new LinkedHashSet<>(
+				SpringFactoriesLoader.loadFactoryNames(this.annotationClass, this.beanClassLoader)));
 
 		if (factories.isEmpty() && !hasDefaultFactory()) {
 			throw new IllegalStateException("Annotation @" + getSimpleName()

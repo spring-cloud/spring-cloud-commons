@@ -37,8 +37,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class,
-		properties = { "spring.datasource.hikari.read-only=false",
-				"spring.config.use-legacy-processing=true" })
+		properties = { "spring.datasource.hikari.read-only=false", "spring.config.use-legacy-processing=true" })
 public class ContextRefresherIntegrationTests {
 
 	@Autowired
@@ -75,8 +74,7 @@ public class ContextRefresherIntegrationTests {
 	@DirtiesContext
 	public void testUpdateHikari() throws Exception {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
-		TestPropertyValues.of("spring.datasource.hikari.read-only=true")
-				.applyTo(this.environment);
+		TestPropertyValues.of("spring.datasource.hikari.read-only=true").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.refresher.refresh();
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");

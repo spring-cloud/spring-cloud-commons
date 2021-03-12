@@ -32,8 +32,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  */
 @RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions({ "spring-retry-*.jar", "spring-boot-starter-aop-*.jar" })
-public class LoadBalancerAutoConfigurationTests
-		extends AbstractLoadBalancerAutoConfigurationTests {
+public class LoadBalancerAutoConfigurationTests extends AbstractLoadBalancerAutoConfigurationTests {
 
 	@Override
 	protected void assertLoadBalanced(RestTemplate restTemplate) {

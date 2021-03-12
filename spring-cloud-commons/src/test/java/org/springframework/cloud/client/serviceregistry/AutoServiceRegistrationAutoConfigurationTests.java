@@ -44,10 +44,8 @@ public class AutoServiceRegistrationAutoConfigurationTests {
 
 	@Test
 	public void hasAutoServiceRegistration() {
-		try (AnnotationConfigApplicationContext context = setup(
-				HasAutoServiceRegistrationConfiguration.class)) {
-			AutoServiceRegistration autoServiceRegistration = context
-					.getBean(AutoServiceRegistration.class);
+		try (AnnotationConfigApplicationContext context = setup(HasAutoServiceRegistrationConfiguration.class)) {
+			AutoServiceRegistration autoServiceRegistration = context.getBean(AutoServiceRegistration.class);
 			then(autoServiceRegistration).isNotNull();
 		}
 	}
@@ -55,8 +53,7 @@ public class AutoServiceRegistrationAutoConfigurationTests {
 	@Test
 	public void noAutoServiceRegistrationAndFailFast() {
 		this.exception.expect(BeanCreationException.class);
-		this.exception
-				.expectMessage(Matchers.containsString("no AutoServiceRegistration"));
+		this.exception.expectMessage(Matchers.containsString("no AutoServiceRegistration"));
 		try (AnnotationConfigApplicationContext context = setup(
 				"spring.cloud.service-registry.auto-registration.failFast=true")) {
 			assertNoBean(context);
@@ -71,8 +68,7 @@ public class AutoServiceRegistrationAutoConfigurationTests {
 	}
 
 	private void assertNoBean(AnnotationConfigApplicationContext context) {
-		Map<String, AutoServiceRegistration> beans = context
-				.getBeansOfType(AutoServiceRegistration.class);
+		Map<String, AutoServiceRegistration> beans = context.getBeansOfType(AutoServiceRegistration.class);
 		then(beans).isEmpty();
 	}
 

@@ -42,8 +42,7 @@ public class FeaturesEndpointTests {
 	@Before
 	public void setup() {
 		this.context = new AnnotationConfigApplicationContext();
-		this.context.register(JacksonAutoConfiguration.class, FeaturesConfig.class,
-				Config.class);
+		this.context.register(JacksonAutoConfiguration.class, FeaturesConfig.class, Config.class);
 		this.context.refresh();
 	}
 
@@ -56,8 +55,7 @@ public class FeaturesEndpointTests {
 
 	@Test
 	public void invokeWorks() {
-		FeaturesEndpoint.Features features = this.context.getBean(FeaturesEndpoint.class)
-				.features();
+		FeaturesEndpoint.Features features = this.context.getBean(FeaturesEndpoint.class).features();
 		then(features).isNotNull();
 		then(features.getEnabled()).hasSize(2).contains(newFeature("foo", Foo.class),
 				newFeature("Baz Feature", Baz.class));
@@ -78,8 +76,7 @@ public class FeaturesEndpointTests {
 
 		@Bean
 		HasFeatures localFeatures() {
-			HasFeatures features = HasFeatures.namedFeatures(
-					new NamedFeature("foo", Foo.class),
+			HasFeatures features = HasFeatures.namedFeatures(new NamedFeature("foo", Foo.class),
 					new NamedFeature("Baz Feature", Baz.class));
 			features.getAbstractFeatures().add(Bar.class);
 			return features;

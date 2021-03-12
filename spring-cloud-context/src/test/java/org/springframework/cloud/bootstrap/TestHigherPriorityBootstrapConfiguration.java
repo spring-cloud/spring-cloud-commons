@@ -33,8 +33,7 @@ public class TestHigherPriorityBootstrapConfiguration {
 
 	public TestHigherPriorityBootstrapConfiguration() {
 		count.incrementAndGet();
-		firstToBeCreated.compareAndSet(null,
-				TestHigherPriorityBootstrapConfiguration.class);
+		firstToBeCreated.compareAndSet(null, TestHigherPriorityBootstrapConfiguration.class);
 	}
 
 }

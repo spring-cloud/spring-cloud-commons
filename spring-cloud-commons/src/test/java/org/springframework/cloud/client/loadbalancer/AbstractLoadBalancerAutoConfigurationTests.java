@@ -28,7 +28,6 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -50,8 +49,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	@Test
 	public void restTemplateGetsLoadBalancerInterceptor() {
 		ConfigurableApplicationContext context = init(OneRestTemplate.class);
-		final Map<String, RestTemplate> restTemplates = context
-				.getBeansOfType(RestTemplate.class);
+		final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
 
 		then(restTemplates).isNotNull();
 		then(restTemplates.values()).hasSize(1);
@@ -66,8 +64,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	@Test
 	public void multipleRestTemplates() {
 		ConfigurableApplicationContext context = init(TwoRestTemplates.class);
-		final Map<String, RestTemplate> restTemplates = context
-				.getBeansOfType(RestTemplate.class);
+		final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
 
 		then(restTemplates).isNotNull();
 		Collection<RestTemplate> templates = restTemplates.values();
@@ -83,8 +80,11 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	}
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
-		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.aop.proxyTargetClass=true")
+		return init(config, "spring.aop.proxyTargetClass=true");
+	}
+
+	protected ConfigurableApplicationContext init(Class<?> config, String... props) {
+		return new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(props)
 				.sources(config, LoadBalancerAutoConfiguration.class).run();
 	}
 
@@ -100,11 +100,6 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		@Bean
 		LoadBalancerClient loadBalancerClient() {
 			return new NoopLoadBalancerClient();
-		}
-
-		@Bean
-		LoadBalancerProperties loadBalancerProperties() {
-			return new LoadBalancerProperties();
 		}
 
 		@Bean
@@ -149,8 +144,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public <T> ServiceInstance choose(String serviceId, Request<T> request) {
-			return new DefaultServiceInstance(serviceId, serviceId, serviceId,
-					this.random.nextInt(40000), false);
+			return new DefaultServiceInstance(serviceId, serviceId, serviceId, this.random.nextInt(40000), false);
 		}
 
 		@Override
@@ -164,8 +158,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		}
 
 		@Override
-		public <T> T execute(String serviceId, ServiceInstance serviceInstance,
-				LoadBalancerRequest<T> request) {
+		public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) {
 			try {
 				return request.apply(choose(serviceId, REQUEST));
 			}
@@ -181,8 +174,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 	}
 
-	private static class TestLoadBalancerFactory
-			implements ReactiveLoadBalancer.Factory<ServiceInstance> {
+	private static class TestLoadBalancerFactory implements ReactiveLoadBalancer.Factory<ServiceInstance> {
 
 		@Override
 		public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {

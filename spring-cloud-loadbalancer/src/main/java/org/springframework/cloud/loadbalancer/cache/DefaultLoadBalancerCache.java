@@ -50,8 +50,7 @@ public class DefaultLoadBalancerCache extends AbstractValueAdaptingCache {
 
 	private final long evictMs;
 
-	DefaultLoadBalancerCache(String name,
-			ConcurrentMapWithTimedEviction<Object, Object> cache, long evictMs,
+	DefaultLoadBalancerCache(String name, ConcurrentMapWithTimedEviction<Object, Object> cache, long evictMs,
 			boolean allowNullValues) {
 		super(allowNullValues);
 		Assert.notNull(name, "Name must not be null");
@@ -66,8 +65,7 @@ public class DefaultLoadBalancerCache extends AbstractValueAdaptingCache {
 	 * @param name the name of the cache
 	 */
 	public DefaultLoadBalancerCache(String name) {
-		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
-				new DelayedTaskEvictionScheduler<>()), 0, true);
+		this(name, new ConcurrentHashMapWithTimedEviction<>(256, new DelayedTaskEvictionScheduler<>()), 0, true);
 	}
 
 	/**
@@ -79,8 +77,8 @@ public class DefaultLoadBalancerCache extends AbstractValueAdaptingCache {
 	 * cache
 	 */
 	public DefaultLoadBalancerCache(String name, long evictMs, boolean allowNullValues) {
-		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
-				new DelayedTaskEvictionScheduler<>()), evictMs, allowNullValues);
+		this(name, new ConcurrentHashMapWithTimedEviction<>(256, new DelayedTaskEvictionScheduler<>()), evictMs,
+				allowNullValues);
 	}
 
 	/**
@@ -90,8 +88,8 @@ public class DefaultLoadBalancerCache extends AbstractValueAdaptingCache {
 	 * cache
 	 */
 	public DefaultLoadBalancerCache(String name, boolean allowNullValues) {
-		this(name, new ConcurrentHashMapWithTimedEviction<>(256,
-				new DelayedTaskEvictionScheduler<>()), 0, allowNullValues);
+		this(name, new ConcurrentHashMapWithTimedEviction<>(256, new DelayedTaskEvictionScheduler<>()), 0,
+				allowNullValues);
 	}
 
 	@Override

@@ -16,10 +16,11 @@
 
 package org.springframework.cloud.configuration;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -32,8 +33,7 @@ public class SpringBootDependencyTests {
 	@Test
 	public void should_read_concrete_version_from_manifest() {
 		List<String> acceptedVersions = Collections.singletonList("2.1.3.RELEASE");
-		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
-				acceptedVersions) {
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
 				return "2.1.3.RELEASE";
@@ -50,8 +50,7 @@ public class SpringBootDependencyTests {
 	@Test
 	public void should_read_concrete_version_from_manifest_and_return_false_when_version_is_not_matched() {
 		List<String> acceptedVersions = Collections.singletonList("2.1.9.RELEASE");
-		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
-				acceptedVersions) {
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
 				return "2.1.3.RELEASE";
@@ -68,8 +67,7 @@ public class SpringBootDependencyTests {
 	@Test
 	public void should_read_concrete_version_from_manifest_and_return_false_when_minor_version_is_not_matched() {
 		List<String> acceptedVersions = Collections.singletonList("2.1");
-		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
-				acceptedVersions) {
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
 				return "2.99.3.RELEASE";
@@ -86,8 +84,7 @@ public class SpringBootDependencyTests {
 	@Test
 	public void should_read_concrete_version_from_manifest_and_match_it_against_minor_version() {
 		List<String> acceptedVersions = Collections.singletonList("2.1");
-		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
-				acceptedVersions) {
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
 				return "2.1.3.RELEASE";
@@ -104,20 +101,14 @@ public class SpringBootDependencyTests {
 	@Test
 	public void should_match_against_predicate() {
 		List<String> acceptedVersions = Collections.singletonList("2.5");
-		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
-				acceptedVersions) {
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
 				return "";
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("2.5", new CompatibilityPredicate() {
-			@Override
-			public boolean isCompatible() {
-				return true;
-			}
-		});
+		versionVerifier.ACCEPTED_VERSIONS.put("2.5", () -> true);
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
@@ -128,8 +119,7 @@ public class SpringBootDependencyTests {
 	@Test
 	public void should_fail_to_match_against_predicate_when_none_is_matching() {
 		List<String> acceptedVersions = Collections.singletonList("2.5");
-		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
-				acceptedVersions) {
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
 				return "2.1";
@@ -143,17 +133,56 @@ public class SpringBootDependencyTests {
 		then(verificationResult.action).isNotEmpty();
 	}
 
-	@Ignore // FIXME: https://github.com/spring-cloud/spring-cloud-commons/issues/717
+	@Test
+	public void should_not_match_when_manifest_has_version_and_not_compatible() {
+		List<String> acceptedVersions = Collections.singletonList("2.5");
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
+			@Override
+			String getVersionFromManifest() {
+				return "2.1";
+			}
+		};
+		versionVerifier.ACCEPTED_VERSIONS.clear();
+		AtomicBoolean verifierRun = new AtomicBoolean(false);
+		versionVerifier.ACCEPTED_VERSIONS.put("2.5", () -> verifierRun.compareAndSet(false, true));
+
+		VerificationResult verificationResult = versionVerifier.verify();
+
+		then(verifierRun).isFalse();
+		then(verificationResult.description).isNotEmpty();
+		then(verificationResult.action).isNotEmpty();
+	}
+
+	@Test
+	public void should_match_when_manifest_has_version_and_compatible_list() {
+		List<String> acceptedVersions = Arrays.asList("2.0", "2.1");
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
+			@Override
+			String getVersionFromManifest() {
+				return "2.1";
+			}
+		};
+		versionVerifier.ACCEPTED_VERSIONS.clear();
+		AtomicBoolean verifierRun = new AtomicBoolean(false);
+		versionVerifier.ACCEPTED_VERSIONS.put("2.5", () -> verifierRun.compareAndSet(false, true));
+
+		VerificationResult verificationResult = versionVerifier.verify();
+
+		then(verifierRun).isFalse();
+		then(verificationResult.description).isEmpty();
+		then(verificationResult.action).isEmpty();
+	}
+
+	// @Ignore // FIXME: https://github.com/spring-cloud/spring-cloud-commons/issues/717
 	@Test
 	public void should_match_against_current_manifest() {
-		verifyCurrentVersionFromManifest("2.3");
-		verifyCurrentVersionFromManifest("2.3.x");
+		verifyCurrentVersionFromManifest("2.4");
+		verifyCurrentVersionFromManifest("2.4.x");
 	}
 
 	private void verifyCurrentVersionFromManifest(String version) {
 		List<String> acceptedVersions = Collections.singletonList(version);
-		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
-				acceptedVersions);
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions);
 		versionVerifier.ACCEPTED_VERSIONS.clear();
 
 		VerificationResult verificationResult = versionVerifier.verify();
@@ -164,16 +193,15 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_predicate() {
-		List<String> acceptedVersions = Collections.singletonList("2.1");
-		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
-				acceptedVersions) {
+		List<String> acceptedVersions = Collections.singletonList("2.4");
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
 				return "";
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("2.1", versionVerifier.is2_1());
+		versionVerifier.ACCEPTED_VERSIONS.put("2.4", versionVerifier.is2_4());
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
@@ -183,16 +211,15 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_predicate_with_version_ending_with_x() {
-		List<String> acceptedVersions = Collections.singletonList("2.1.x");
-		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
-				acceptedVersions) {
+		List<String> acceptedVersions = Collections.singletonList("2.4.x");
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
 				return "";
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("2.1", versionVerifier.is2_1());
+		versionVerifier.ACCEPTED_VERSIONS.put("2.4", versionVerifier.is2_4());
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
@@ -203,8 +230,7 @@ public class SpringBootDependencyTests {
 	@Test
 	public void should_fail_to_match_against_predicate_for_non_current_versions() {
 		List<String> acceptedVersions = Collections.singletonList("2.1");
-		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(
-				acceptedVersions) {
+		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
 				return "2.0";

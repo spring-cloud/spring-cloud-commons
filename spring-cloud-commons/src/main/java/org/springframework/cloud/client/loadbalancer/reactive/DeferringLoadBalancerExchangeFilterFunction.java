@@ -40,8 +40,7 @@ public class DeferringLoadBalancerExchangeFilterFunction<T extends ExchangeFilte
 
 	private T delegate;
 
-	public DeferringLoadBalancerExchangeFilterFunction(
-			ObjectProvider<T> exchangeFilterFunctionProvider) {
+	public DeferringLoadBalancerExchangeFilterFunction(ObjectProvider<T> exchangeFilterFunctionProvider) {
 		this.exchangeFilterFunctionProvider = exchangeFilterFunctionProvider;
 	}
 
@@ -56,8 +55,7 @@ public class DeferringLoadBalancerExchangeFilterFunction<T extends ExchangeFilte
 		if (delegate == null) {
 			delegate = exchangeFilterFunctionProvider.getIfAvailable();
 			if (delegate == null) {
-				throw new IllegalStateException(
-						"ReactorLoadBalancerExchangeFilterFunction not available.");
+				throw new IllegalStateException("ReactorLoadBalancerExchangeFilterFunction not available.");
 			}
 		}
 	}

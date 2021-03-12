@@ -52,8 +52,7 @@ public class ReactiveCommonsClientAutoConfiguration {
 	protected static class ReactiveDiscoveryLoadBalancerConfiguration {
 
 		@Bean
-		@ConditionalOnProperty(
-				value = "spring.cloud.discovery.client.composite-indicator.enabled",
+		@ConditionalOnProperty(value = "spring.cloud.discovery.client.composite-indicator.enabled",
 				matchIfMissing = true)
 		@ConditionalOnBean({ ReactiveDiscoveryHealthIndicator.class })
 		public ReactiveDiscoveryCompositeHealthContributor reactiveDiscoveryClients(
@@ -63,8 +62,7 @@ public class ReactiveCommonsClientAutoConfiguration {
 
 		@Bean
 		public HasFeatures reactiveCommonsFeatures() {
-			return HasFeatures.abstractFeatures(ReactiveDiscoveryClient.class,
-					ReactiveLoadBalancer.class);
+			return HasFeatures.abstractFeatures(ReactiveDiscoveryClient.class, ReactiveLoadBalancer.class);
 		}
 
 	}

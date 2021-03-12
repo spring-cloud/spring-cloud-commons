@@ -45,11 +45,9 @@ import org.springframework.core.env.Environment;
  * @author Spencer Gibb
  */
 public abstract class AbstractAutoServiceRegistration<R extends Registration>
-		implements AutoServiceRegistration, ApplicationContextAware,
-		ApplicationListener<WebServerInitializedEvent> {
+		implements AutoServiceRegistration, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
 
-	private static final Log logger = LogFactory
-			.getLog(AbstractAutoServiceRegistration.class);
+	private static final Log logger = LogFactory.getLog(AbstractAutoServiceRegistration.class);
 
 	private final ServiceRegistry<R> serviceRegistry;
 
@@ -92,8 +90,7 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	public void bind(WebServerInitializedEvent event) {
 		ApplicationContext context = event.getApplicationContext();
 		if (context instanceof ConfigurableWebServerApplicationContext) {
-			if ("management".equals(((ConfigurableWebServerApplicationContext) context)
-					.getServerNamespace())) {
+			if ("management".equals(((ConfigurableWebServerApplicationContext) context).getServerNamespace())) {
 				return;
 			}
 		}
@@ -102,8 +99,7 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.context = applicationContext;
 		this.environment = this.context.getEnvironment();
 	}
@@ -133,14 +129,12 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		// only initialize if nonSecurePort is greater than 0 and it isn't already running
 		// because of containerPortInitializer below
 		if (!this.running.get()) {
-			this.context.publishEvent(
-					new InstancePreRegisteredEvent(this, getRegistration()));
+			this.context.publishEvent(new InstancePreRegisteredEvent(this, getRegistration()));
 			register();
 			if (shouldRegisterManagement()) {
 				registerManagement();
 			}
-			this.context.publishEvent(
-					new InstanceRegisteredEvent<>(this, getConfiguration()));
+			this.context.publishEvent(new InstanceRegisteredEvent<>(this, getConfiguration()));
 			this.running.compareAndSet(false, true);
 		}
 
@@ -152,8 +146,7 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	 */
 	protected boolean shouldRegisterManagement() {
 		if (this.properties == null || this.properties.isRegisterManagement()) {
-			return getManagementPort() != null
-					&& ManagementServerPortUtils.isDifferent(this.context);
+			return getManagementPort() != null && ManagementServerPortUtils.isDifferent(this.context);
 		}
 		return false;
 	}

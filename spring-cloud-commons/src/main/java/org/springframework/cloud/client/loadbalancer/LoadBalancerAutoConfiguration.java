@@ -23,32 +23,35 @@ import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Auto-configuration for blocking (client-side load balancing).
+ * Auto-configuration for blocking client-side load balancing.
  *
  * @author Spencer Gibb
  * @author Dave Syer
  * @author Will Tran
  * @author Gang Li
+ * @author Olga Maciaszek-Sharma
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RestTemplate.class)
 @ConditionalOnBean(LoadBalancerClient.class)
-@EnableConfigurationProperties(LoadBalancerRetryProperties.class)
+@EnableConfigurationProperties(LoadBalancerProperties.class)
 public class LoadBalancerAutoConfiguration {
 
 	@LoadBalanced
@@ -72,32 +75,46 @@ public class LoadBalancerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public LoadBalancerRequestFactory loadBalancerRequestFactory(
-			LoadBalancerClient loadBalancerClient) {
+	public LoadBalancerRequestFactory loadBalancerRequestFactory(LoadBalancerClient loadBalancerClient) {
 		return new LoadBalancerRequestFactory(loadBalancerClient, this.transformers);
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnMissingClass("org.springframework.retry.support.RetryTemplate")
+	@Conditional(RetryMissingOrDisabledCondition.class)
 	static class LoadBalancerInterceptorConfig {
 
 		@Bean
-		public LoadBalancerInterceptor loadBalancerInterceptor(
-				LoadBalancerClient loadBalancerClient,
+		public LoadBalancerInterceptor loadBalancerInterceptor(LoadBalancerClient loadBalancerClient,
 				LoadBalancerRequestFactory requestFactory) {
 			return new LoadBalancerInterceptor(loadBalancerClient, requestFactory);
 		}
 
 		@Bean
 		@ConditionalOnMissingBean
-		public RestTemplateCustomizer restTemplateCustomizer(
-				final LoadBalancerInterceptor loadBalancerInterceptor) {
+		public RestTemplateCustomizer restTemplateCustomizer(final LoadBalancerInterceptor loadBalancerInterceptor) {
 			return restTemplate -> {
-				List<ClientHttpRequestInterceptor> list = new ArrayList<>(
-						restTemplate.getInterceptors());
+				List<ClientHttpRequestInterceptor> list = new ArrayList<>(restTemplate.getInterceptors());
 				list.add(loadBalancerInterceptor);
 				restTemplate.setInterceptors(list);
 			};
+		}
+
+	}
+
+	private static class RetryMissingOrDisabledCondition extends AnyNestedCondition {
+
+		RetryMissingOrDisabledCondition() {
+			super(ConfigurationPhase.REGISTER_BEAN);
+		}
+
+		@ConditionalOnMissingClass("org.springframework.retry.support.RetryTemplate")
+		static class RetryTemplateMissing {
+
+		}
+
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "false")
+		static class RetryDisabled {
+
 		}
 
 	}
@@ -124,20 +141,17 @@ public class LoadBalancerAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(RetryTemplate.class)
 	@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", matchIfMissing = true)
 	public static class RetryInterceptorAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public RetryLoadBalancerInterceptor loadBalancerInterceptor(
-				LoadBalancerClient loadBalancerClient,
-				LoadBalancerRetryProperties retryProperties,
-				LoadBalancerRequestFactory requestFactory,
+		public RetryLoadBalancerInterceptor loadBalancerInterceptor(LoadBalancerClient loadBalancerClient,
+				LoadBalancerProperties properties, LoadBalancerRequestFactory requestFactory,
 				LoadBalancedRetryFactory loadBalancedRetryFactory,
-				LoadBalancerProperties properties,
 				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
-			return new RetryLoadBalancerInterceptor(loadBalancerClient, retryProperties,
-					requestFactory, loadBalancedRetryFactory, properties,
-					loadBalancerFactory);
+			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties, requestFactory,
+					loadBalancedRetryFactory, loadBalancerFactory);
 		}
 
 		@Bean
@@ -145,8 +159,7 @@ public class LoadBalancerAutoConfiguration {
 		public RestTemplateCustomizer restTemplateCustomizer(
 				final RetryLoadBalancerInterceptor loadBalancerInterceptor) {
 			return restTemplate -> {
-				List<ClientHttpRequestInterceptor> list = new ArrayList<>(
-						restTemplate.getInterceptors());
+				List<ClientHttpRequestInterceptor> list = new ArrayList<>(restTemplate.getInterceptors());
 				list.add(loadBalancerInterceptor);
 				restTemplate.setInterceptors(list);
 			};

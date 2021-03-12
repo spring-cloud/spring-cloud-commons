@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.cloud.context.scope.GenericScope;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeLazyIntegrationTests.TestConfiguration;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
@@ -99,8 +99,7 @@ public class RefreshScopeLazyIntegrationTests {
 		then(ExampleService.getDestroyCount()).isEqualTo(1);
 		then(id2).isNotSameAs(id1);
 		then(ExampleService.event).isNotNull();
-		then(ExampleService.event.getName())
-				.isEqualTo(RefreshScopeRefreshedEvent.DEFAULT_NAME);
+		then(ExampleService.event.getName()).isEqualTo(RefreshScopeRefreshedEvent.DEFAULT_NAME);
 	}
 
 	@Test
@@ -118,8 +117,7 @@ public class RefreshScopeLazyIntegrationTests {
 		then(ExampleService.getDestroyCount()).isEqualTo(1);
 		then(id2).isNotSameAs(id1);
 		then(ExampleService.event).isNotNull();
-		then(ExampleService.event.getName())
-				.isEqualTo(GenericScope.SCOPED_TARGET_PREFIX + "service");
+		then(ExampleService.event.getName()).isEqualTo(ScopedProxyUtils.getTargetBeanName("service"));
 	}
 
 	public interface Service {
@@ -128,8 +126,8 @@ public class RefreshScopeLazyIntegrationTests {
 
 	}
 
-	public static class ExampleService implements Service, InitializingBean,
-			DisposableBean, ApplicationListener<RefreshScopeRefreshedEvent> {
+	public static class ExampleService
+			implements Service, InitializingBean, DisposableBean, ApplicationListener<RefreshScopeRefreshedEvent> {
 
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 
@@ -201,8 +199,7 @@ public class RefreshScopeLazyIntegrationTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(TestProperties.class)
-	@ImportAutoConfiguration({ RefreshAutoConfiguration.class,
-			PropertyPlaceholderAutoConfiguration.class })
+	@ImportAutoConfiguration({ RefreshAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
 	protected static class TestConfiguration {
 
 		@Autowired

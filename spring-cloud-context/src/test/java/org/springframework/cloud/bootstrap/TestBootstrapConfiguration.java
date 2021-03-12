@@ -48,8 +48,7 @@ public class TestBootstrapConfiguration {
 
 	@Bean
 	@Qualifier("foo-during-bootstrap")
-	public String fooDuringBootstrap(ConfigurableEnvironment environment,
-			ApplicationEventPublisher publisher) {
+	public String fooDuringBootstrap(ConfigurableEnvironment environment, ApplicationEventPublisher publisher) {
 		String property = environment.getProperty("test.bootstrap.foo", "undefined");
 
 		if (fooSightings != null) {
@@ -66,11 +65,9 @@ public class TestBootstrapConfiguration {
 			@Override
 			public void initialize(ConfigurableApplicationContext applicationContext) {
 				ConfigurableEnvironment environment = applicationContext.getEnvironment();
-				environment.getPropertySources()
-						.addLast(new MapPropertySource("customProperties",
-								Collections.<String, Object>singletonMap("custom.foo",
-										environment.resolvePlaceholders(
-												"${spring.application.name:bar}"))));
+				environment.getPropertySources().addLast(
+						new MapPropertySource("customProperties", Collections.<String, Object>singletonMap("custom.foo",
+								environment.resolvePlaceholders("${spring.application.name:bar}"))));
 			}
 
 		};

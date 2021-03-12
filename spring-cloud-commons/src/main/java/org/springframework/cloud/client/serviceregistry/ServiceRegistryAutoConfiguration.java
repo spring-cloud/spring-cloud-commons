@@ -40,10 +40,8 @@ public class ServiceRegistryAutoConfiguration {
 
 		@Bean
 		@ConditionalOnAvailableEndpoint
-		public ServiceRegistryEndpoint serviceRegistryEndpoint(
-				ServiceRegistry serviceRegistry) {
-			ServiceRegistryEndpoint endpoint = new ServiceRegistryEndpoint(
-					serviceRegistry);
+		public ServiceRegistryEndpoint serviceRegistryEndpoint(ServiceRegistry serviceRegistry) {
+			ServiceRegistryEndpoint endpoint = new ServiceRegistryEndpoint(serviceRegistry);
 			endpoint.setRegistration(this.registration);
 			return endpoint;
 		}

@@ -37,23 +37,20 @@ import org.springframework.cloud.client.ServiceInstance;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
  */
-public class CachingServiceInstanceListSupplier
-		extends DelegatingServiceInstanceListSupplier {
+public class CachingServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
-	private static final Log log = LogFactory
-			.getLog(CachingServiceInstanceListSupplier.class);
+	private static final Log log = LogFactory.getLog(CachingServiceInstanceListSupplier.class);
 
 	/**
 	 * Name of the service cache instance.
 	 */
-	public static final String SERVICE_INSTANCE_CACHE_NAME = CachingServiceInstanceListSupplier.class
-			.getSimpleName() + "Cache";
+	public static final String SERVICE_INSTANCE_CACHE_NAME = CachingServiceInstanceListSupplier.class.getSimpleName()
+			+ "Cache";
 
 	private final Flux<List<ServiceInstance>> serviceInstances;
 
 	@SuppressWarnings("unchecked")
-	public CachingServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			CacheManager cacheManager) {
+	public CachingServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, CacheManager cacheManager) {
 		super(delegate);
 		this.serviceInstances = CacheFlux.lookup(key -> {
 			// TODO: configurable cache name
@@ -70,20 +67,17 @@ public class CachingServiceInstanceListSupplier
 			}
 			return Flux.just(list).materialize().collectList();
 		}, delegate.getServiceId()).onCacheMissResume(delegate.get().take(1))
-				.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize()
-						.doOnNext(instances -> {
-							Cache cache = cacheManager
-									.getCache(SERVICE_INSTANCE_CACHE_NAME);
-							if (cache == null) {
-								if (log.isErrorEnabled()) {
-									log.error("Unable to find cache for writing: "
-											+ SERVICE_INSTANCE_CACHE_NAME);
-								}
-							}
-							else {
-								cache.put(key, instances);
-							}
-						}).then());
+				.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize().doOnNext(instances -> {
+					Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
+					if (cache == null) {
+						if (log.isErrorEnabled()) {
+							log.error("Unable to find cache for writing: " + SERVICE_INSTANCE_CACHE_NAME);
+						}
+					}
+					else {
+						cache.put(key, instances);
+					}
+				}).then());
 	}
 
 	@Override

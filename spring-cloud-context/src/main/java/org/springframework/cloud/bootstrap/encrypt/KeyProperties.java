@@ -24,8 +24,13 @@ import org.springframework.core.io.Resource;
  *
  * @author Dave Syer
  */
-@ConfigurationProperties("encrypt")
+@ConfigurationProperties(KeyProperties.PREFIX)
 public class KeyProperties {
+
+	/**
+	 * ConfigurationProperties prefix for KeyProperties.
+	 */
+	public static final String PREFIX = "encrypt";
 
 	/**
 	 * A symmetric key. As a stronger alternative, consider using a keystore.

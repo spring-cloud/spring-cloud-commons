@@ -19,10 +19,12 @@ package org.springframework.cloud.context.restart;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+//
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.SpringApplication;
@@ -63,6 +65,8 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 
 	private IntegrationShutdown integrationShutdown;
 
+	private List<PauseHandler> pauseHandlers = Collections.emptyList();
+
 	private long timeout;
 
 	// @ManagedAttribute
@@ -88,6 +92,8 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 			this.args = this.event.getArgs();
 			this.application = this.event.getSpringApplication();
 			this.application.addInitializers(new PostProcessorInitializer());
+			this.pauseHandlers = this.context.getBeanProvider(PauseHandler.class).orderedStream()
+					.collect(Collectors.toList());
 		}
 	}
 
@@ -163,25 +169,24 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 
 	// @ManagedOperation
 	public synchronized void doPause() {
-		if (this.context != null) {
-			this.context.stop();
+		for (PauseHandler handler : this.pauseHandlers) {
+			handler.pause();
 		}
 	}
 
 	// @ManagedOperation
 	public synchronized void doResume() {
-		if (this.context != null) {
-			this.context.start();
+		for (int i = this.pauseHandlers.size(); i-- > 0;) {
+			PauseHandler handler = this.pauseHandlers.get(i);
+			handler.resume();
 		}
 	}
 
 	private void overrideClassLoaderForRestart() {
-		ClassUtils.overrideThreadContextClassLoader(
-				this.application.getClass().getClassLoader());
+		ClassUtils.overrideThreadContextClassLoader(this.application.getClass().getClassLoader());
 	}
 
-	class PostProcessorInitializer
-			implements ApplicationContextInitializer<GenericApplicationContext> {
+	class PostProcessorInitializer implements ApplicationContextInitializer<GenericApplicationContext> {
 
 		@Override
 		public void initialize(GenericApplicationContext context) {
@@ -193,8 +198,7 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 	class PostProcessor implements BeanPostProcessor {
 
 		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName)
-				throws BeansException {
+		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 			if (bean instanceof RestartEndpoint) {
 				return RestartEndpoint.this;
 			}

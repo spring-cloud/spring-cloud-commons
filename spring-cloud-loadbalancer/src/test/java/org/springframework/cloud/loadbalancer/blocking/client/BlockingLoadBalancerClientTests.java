@@ -17,10 +17,10 @@
 package org.springframework.cloud.loadbalancer.blocking.client;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
@@ -40,10 +41,10 @@ import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
@@ -60,6 +61,7 @@ import static org.assertj.core.api.Assertions.fail;
  * Tests for {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Charu Covindane
  */
 @SpringBootTest
 class BlockingLoadBalancerClientTests {
@@ -78,10 +80,8 @@ class BlockingLoadBalancerClientTests {
 
 	@BeforeEach
 	void setUp() {
-		properties.getInstances().put("myservice",
-				Collections.singletonList(
-						new SimpleDiscoveryProperties.SimpleServiceInstance(
-								URI.create("https://test.example:9999"))));
+		DefaultServiceInstance serviceInstance = new DefaultServiceInstance(null, null, "test.example", 9999, true);
+		properties.getInstances().put("myservice", Collections.singletonList(serviceInstance));
 	}
 
 	@Test
@@ -99,11 +99,10 @@ class BlockingLoadBalancerClientTests {
 	@Test
 	void requestExecutedAgainstCorrectInstance() throws IOException {
 		final String result = "result";
-		Object actualResult = loadBalancerClient.execute("myservice",
-				(LoadBalancerRequest<Object>) instance -> {
-					assertThat(instance.getHost()).isEqualTo("test.example");
-					return result;
-				});
+		Object actualResult = loadBalancerClient.execute("myservice", (LoadBalancerRequest<Object>) instance -> {
+			assertThat(instance.getHost()).isEqualTo("test.example");
+			return result;
+		});
 		assertThat(actualResult).isEqualTo(result);
 	}
 
@@ -155,12 +154,11 @@ class BlockingLoadBalancerClientTests {
 
 	@Test
 	void exceptionNotThrownWhenFactoryReturnsNullLifecycleProcessorsMap() {
-		assertThatCode(
-				() -> loadBalancerClient.execute("serviceWithNoLifecycleProcessors",
-						(LoadBalancerRequest<Object>) instance -> {
-							assertThat(instance.getHost()).isEqualTo("test.example");
-							return "result";
-						})).doesNotThrowAnyException();
+		assertThatCode(() -> loadBalancerClient.execute("serviceWithNoLifecycleProcessors",
+				(LoadBalancerRequest<Object>) instance -> {
+					assertThat(instance.getHost()).isEqualTo("test.example");
+					return "result";
+				})).doesNotThrowAnyException();
 	}
 
 	@Test
@@ -168,33 +166,33 @@ class BlockingLoadBalancerClientTests {
 		String callbackTestHint = "callbackTestHint";
 		loadBalancerProperties.getHint().put("myservice", "callbackTestHint");
 		final String result = "callbackTestResult";
-		Object actualResult = loadBalancerClient.execute("myservice",
-				(LoadBalancerRequest<Object>) instance -> {
-					assertThat(instance.getHost()).isEqualTo("test.example");
-					return result;
-				});
+		Object actualResult = loadBalancerClient.execute("myservice", (LoadBalancerRequest<Object>) instance -> {
+			assertThat(instance.getHost()).isEqualTo("test.example");
+			return result;
+		});
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class)
-				.get("loadBalancerLifecycle")).getStartLog().values();
-		Collection<CompletionContext<Object, ServiceInstance>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class)
-				.get("anotherLoadBalancerLifecycle")).getCompleteLog().values();
+				.getInstances("myservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
+						.values();
+		Collection<Request<Object>> lifecycleLogStartedRequests = ((TestLoadBalancerLifecycle) factory
+				.getInstances("myservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle"))
+						.getStartRequestLog().values();
+		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
+				.getInstances("myservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
+						.getCompleteLog().values();
 		assertThat(actualResult).isEqualTo(result);
-		assertThat(lifecycleLogRequests).extracting(
-				request -> ((DefaultRequestContext) request.getContext()).getHint())
+		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
 				.contains(callbackTestHint);
-		assertThat(anotherLifecycleLogRequests)
-				.extracting(CompletionContext::getClientResponse).contains(result);
+		assertThat(lifecycleLogStartedRequests)
+				.extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
+				.contains(callbackTestHint);
+		assertThat(anotherLifecycleLogRequests).extracting(CompletionContext::getClientResponse).contains(result);
 	}
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
-	@LoadBalancerClients({
-			@LoadBalancerClient(name = "myservice",
-					configuration = MyServiceConfig.class),
-			@LoadBalancerClient(name = "unknownservice",
-					configuration = UnknownServiceConfig.class),
+	@LoadBalancerClients({ @LoadBalancerClient(name = "myservice", configuration = MyServiceConfig.class),
+			@LoadBalancerClient(name = "unknownservice", configuration = UnknownServiceConfig.class),
 			@LoadBalancerClient(name = "serviceWithNoLifecycleProcessors",
 					configuration = NoLifecycleProcessorsConfig.class) })
 	protected static class Config {
@@ -204,10 +202,8 @@ class BlockingLoadBalancerClientTests {
 	protected static class NoLifecycleProcessorsConfig {
 
 		@Bean
-		ReactorLoadBalancer<ServiceInstance> reactiveLoadBalancer(
-				DiscoveryClient discoveryClient) {
-			return new DiscoveryClientBasedReactiveLoadBalancer("myservice",
-					discoveryClient);
+		ReactorLoadBalancer<ServiceInstance> reactiveLoadBalancer(DiscoveryClient discoveryClient) {
+			return new DiscoveryClientBasedReactiveLoadBalancer("myservice", discoveryClient);
 		}
 
 	}
@@ -215,10 +211,8 @@ class BlockingLoadBalancerClientTests {
 	protected static class MyServiceConfig {
 
 		@Bean
-		ReactorLoadBalancer<ServiceInstance> reactiveLoadBalancer(
-				DiscoveryClient discoveryClient) {
-			return new DiscoveryClientBasedReactiveLoadBalancer("myservice",
-					discoveryClient);
+		ReactorLoadBalancer<ServiceInstance> reactiveLoadBalancer(DiscoveryClient discoveryClient) {
+			return new DiscoveryClientBasedReactiveLoadBalancer("myservice", discoveryClient);
 		}
 
 		@Bean
@@ -236,20 +230,19 @@ class BlockingLoadBalancerClientTests {
 	protected static class UnknownServiceConfig {
 
 		@Bean
-		ReactorLoadBalancer<ServiceInstance> reactiveLoadBalancer(
-				DiscoveryClient discoveryClient) {
-			return new DiscoveryClientBasedReactiveLoadBalancer("unknownservice",
-					discoveryClient);
+		ReactorLoadBalancer<ServiceInstance> reactiveLoadBalancer(DiscoveryClient discoveryClient) {
+			return new DiscoveryClientBasedReactiveLoadBalancer("unknownservice", discoveryClient);
 		}
 
 	}
 
-	protected static class TestLoadBalancerLifecycle
-			implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
+	protected static class TestLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
-		final ConcurrentHashMap<String, Request<Object>> startLog = new ConcurrentHashMap<>();
+		final Map<String, Request<Object>> startLog = new ConcurrentHashMap<>();
 
-		final ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> completeLog = new ConcurrentHashMap<>();
+		final Map<String, Request<Object>> startRequestLog = new ConcurrentHashMap<>();
+
+		final Map<String, CompletionContext<Object, ServiceInstance, Object>> completeLog = new ConcurrentHashMap<>();
 
 		@Override
 		public void onStart(Request<Object> request) {
@@ -257,17 +250,25 @@ class BlockingLoadBalancerClientTests {
 		}
 
 		@Override
-		public void onComplete(
-				CompletionContext<Object, ServiceInstance> completionContext) {
+		public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
+			startRequestLog.put(getName() + UUID.randomUUID(), request);
+		}
+
+		@Override
+		public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 			completeLog.put(getName() + UUID.randomUUID(), completionContext);
 		}
 
-		ConcurrentHashMap<String, Request<Object>> getStartLog() {
+		Map<String, Request<Object>> getStartLog() {
 			return startLog;
 		}
 
-		ConcurrentHashMap<String, CompletionContext<Object, ServiceInstance>> getCompleteLog() {
+		Map<String, CompletionContext<Object, ServiceInstance, Object>> getCompleteLog() {
 			return completeLog;
+		}
+
+		Map<String, Request<Object>> getStartRequestLog() {
+			return startRequestLog;
 		}
 
 		protected String getName() {
@@ -276,8 +277,7 @@ class BlockingLoadBalancerClientTests {
 
 	}
 
-	protected static class AnotherLoadBalancerLifecycle
-			extends TestLoadBalancerLifecycle {
+	protected static class AnotherLoadBalancerLifecycle extends TestLoadBalancerLifecycle {
 
 		@Override
 		protected String getName() {
@@ -289,8 +289,7 @@ class BlockingLoadBalancerClientTests {
 }
 
 @SuppressWarnings("rawtypes")
-class DiscoveryClientBasedReactiveLoadBalancer
-		implements ReactorServiceInstanceLoadBalancer {
+class DiscoveryClientBasedReactiveLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
 	private final Random random = new Random();
 
@@ -298,8 +297,7 @@ class DiscoveryClientBasedReactiveLoadBalancer
 
 	private final DiscoveryClient discoveryClient;
 
-	DiscoveryClientBasedReactiveLoadBalancer(String serviceId,
-			DiscoveryClient discoveryClient) {
+	DiscoveryClientBasedReactiveLoadBalancer(String serviceId, DiscoveryClient discoveryClient) {
 		this.serviceId = serviceId;
 		this.discoveryClient = discoveryClient;
 	}

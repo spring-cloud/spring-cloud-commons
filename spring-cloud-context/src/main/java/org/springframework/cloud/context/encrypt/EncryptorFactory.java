@@ -56,8 +56,7 @@ public class EncryptorFactory {
 
 			try {
 				String normalizedPemData = normalizePem(data);
-				encryptor = new RsaSecretEncryptor(
-						NEWLINE_ESCAPE_PATTERN.matcher(normalizedPemData).replaceAll(""));
+				encryptor = new RsaSecretEncryptor(NEWLINE_ESCAPE_PATTERN.matcher(normalizedPemData).replaceAll(""));
 			}
 			catch (IllegalArgumentException e) {
 				throw new KeyFormatException(e);
@@ -82,8 +81,7 @@ public class EncryptorFactory {
 
 			StringWriter textWriter = new StringWriter();
 			try (PemWriter pemWriter = new PemWriter(textWriter)) {
-				PemObjectGenerator pemObjectGenerator = new MiscPEMGenerator(
-						privateKeyInfo);
+				PemObjectGenerator pemObjectGenerator = new MiscPEMGenerator(privateKeyInfo);
 
 				pemWriter.writeObject(pemObjectGenerator);
 				pemWriter.flush();

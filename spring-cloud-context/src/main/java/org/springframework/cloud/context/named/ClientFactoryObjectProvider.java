@@ -42,8 +42,7 @@ class ClientFactoryObjectProvider<T> implements ObjectProvider<T> {
 
 	private ObjectProvider<T> provider;
 
-	ClientFactoryObjectProvider(NamedContextFactory<?> clientFactory, String name,
-			Class<T> type) {
+	ClientFactoryObjectProvider(NamedContextFactory<?> clientFactory, String name, Class<T> type) {
 		this.clientFactory = clientFactory;
 		this.name = name;
 		this.type = type;

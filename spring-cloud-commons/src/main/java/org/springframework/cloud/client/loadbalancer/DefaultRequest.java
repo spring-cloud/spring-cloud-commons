@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.util.Objects;
+
 import org.springframework.core.style.ToStringCreator;
 
 /**
@@ -50,6 +52,23 @@ public class DefaultRequest<T> implements Request<T> {
 		ToStringCreator to = new ToStringCreator(this);
 		to.append("context", context);
 		return to.toString();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof DefaultRequest)) {
+			return false;
+		}
+		DefaultRequest<?> that = (DefaultRequest<?>) o;
+		return Objects.equals(context, that.context);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(context);
 	}
 
 }

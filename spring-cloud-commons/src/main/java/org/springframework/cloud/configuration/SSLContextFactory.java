@@ -69,8 +69,7 @@ public class SSLContextFactory {
 			throw new KeyStoreException("Keystore not specified.");
 		}
 		if (!properties.getKeyStore().exists()) {
-			throw new KeyStoreException(
-					"Keystore not exists: " + properties.getKeyStore());
+			throw new KeyStoreException("Keystore not exists: " + properties.getKeyStore());
 		}
 
 		KeyStore result = KeyStore.getInstance(properties.getKeyStoreType());
@@ -93,8 +92,8 @@ public class SSLContextFactory {
 		return result;
 	}
 
-	private static void loadKeyStore(KeyStore keyStore, Resource keyStoreResource,
-			char[] keyStorePassword) throws IOException, GeneralSecurityException {
+	private static void loadKeyStore(KeyStore keyStore, Resource keyStoreResource, char[] keyStorePassword)
+			throws IOException, GeneralSecurityException {
 		try (InputStream inputStream = keyStoreResource.getInputStream()) {
 			keyStore.load(inputStream, keyStorePassword);
 		}
@@ -105,8 +104,7 @@ public class SSLContextFactory {
 			return null;
 		}
 		if (!properties.getTrustStore().exists()) {
-			throw new KeyStoreException(
-					"KeyStore not exists: " + properties.getTrustStore());
+			throw new KeyStoreException("KeyStore not exists: " + properties.getTrustStore());
 		}
 
 		KeyStore result = KeyStore.getInstance(properties.getTrustStoreType());

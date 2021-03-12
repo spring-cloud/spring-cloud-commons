@@ -26,8 +26,7 @@ public class CustomizerTests {
 	@Test
 	public void testCustomizedOnlyOnce() {
 		AtomicInteger counter = new AtomicInteger(0);
-		final Customizer<AtomicInteger> customizer = Customizer
-				.once(AtomicInteger::incrementAndGet, Object::hashCode);
+		final Customizer<AtomicInteger> customizer = Customizer.once(AtomicInteger::incrementAndGet, Object::hashCode);
 		customizer.customize(counter);
 		customizer.customize(counter);
 		customizer.customize(counter);

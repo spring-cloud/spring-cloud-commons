@@ -25,7 +25,7 @@ import org.springframework.core.style.ToStringCreator;
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
  */
-public class CompletionContext<RES, T> {
+public class CompletionContext<RES, T, C> {
 
 	private final Status status;
 
@@ -35,28 +35,31 @@ public class CompletionContext<RES, T> {
 
 	private final RES clientResponse;
 
-	public CompletionContext(Status status) {
-		this(status, null, null, null);
+	private final Request<C> loadBalancerRequest;
+
+	public CompletionContext(Status status, Request<C> loadBalancerRequest) {
+		this(status, null, loadBalancerRequest, null, null);
 	}
 
-	public CompletionContext(Status status, Response<T> response) {
-		this(status, null, response, null);
+	public CompletionContext(Status status, Request<C> loadBalancerRequest, Response<T> response) {
+		this(status, null, loadBalancerRequest, response, null);
 	}
 
-	public CompletionContext(Status status, Throwable throwable,
+	public CompletionContext(Status status, Throwable throwable, Request<C> loadBalancerRequest,
 			Response<T> loadBalancerResponse) {
-		this(status, throwable, loadBalancerResponse, null);
+		this(status, throwable, loadBalancerRequest, loadBalancerResponse, null);
 	}
 
-	public CompletionContext(Status status, Response<T> loadBalancerResponse,
+	public CompletionContext(Status status, Request<C> loadBalancerRequest, Response<T> loadBalancerResponse,
 			RES clientResponse) {
-		this(status, null, loadBalancerResponse, clientResponse);
+		this(status, null, loadBalancerRequest, loadBalancerResponse, clientResponse);
 	}
 
-	public CompletionContext(Status status, Throwable throwable,
+	public CompletionContext(Status status, Throwable throwable, Request<C> loadBalancerRequest,
 			Response<T> loadBalancerResponse, RES clientResponse) {
 		this.status = status;
 		this.throwable = throwable;
+		this.loadBalancerRequest = loadBalancerRequest;
 		this.loadBalancerResponse = loadBalancerResponse;
 		this.clientResponse = clientResponse;
 	}
@@ -75,6 +78,10 @@ public class CompletionContext<RES, T> {
 
 	public RES getClientResponse() {
 		return clientResponse;
+	}
+
+	public Request<C> getLoadBalancerRequest() {
+		return loadBalancerRequest;
 	}
 
 	@Override

@@ -40,35 +40,30 @@ class DefaultLoadBalancerCacheManagerTests {
 		properties.setTtl(Duration.ofMinutes(5));
 		properties.setCapacity(128);
 
-		DefaultLoadBalancerCacheManager cacheManager = new DefaultLoadBalancerCacheManager(
-				properties);
+		DefaultLoadBalancerCacheManager cacheManager = new DefaultLoadBalancerCacheManager(properties);
 
 		assertThat(cacheManager.getCacheNames()).hasSize(1);
-		assertThat(cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME))
-				.isInstanceOf(DefaultLoadBalancerCache.class);
-		assertThat(((DefaultLoadBalancerCache) cacheManager
-				.getCache(SERVICE_INSTANCE_CACHE_NAME)).getEvictMs()).isEqualTo(300000);
+		assertThat(cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME)).isInstanceOf(DefaultLoadBalancerCache.class);
+		assertThat(((DefaultLoadBalancerCache) cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME)).getEvictMs())
+				.isEqualTo(300000);
 	}
 
 	@Test
 	void shouldNotThrowExceptionOnDuplicateCacheName() {
 		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
 
-		assertThatCode(
-				() -> new DefaultLoadBalancerCacheManager(properties, "test", "test"))
-						.doesNotThrowAnyException();
+		assertThatCode(() -> new DefaultLoadBalancerCacheManager(properties, "test", "test"))
+				.doesNotThrowAnyException();
 	}
 
 	@Test
 	void shouldOnlyCreateOneCacheWithGivenName() {
 		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
 
-		CacheManager cacheManager = new DefaultLoadBalancerCacheManager(properties,
-				"test", "test");
+		CacheManager cacheManager = new DefaultLoadBalancerCacheManager(properties, "test", "test");
 
 		assertThat(cacheManager.getCacheNames()).hasSize(1);
-		assertThat(cacheManager.getCache("test"))
-				.isInstanceOf(DefaultLoadBalancerCache.class);
+		assertThat(cacheManager.getCache("test")).isInstanceOf(DefaultLoadBalancerCache.class);
 	}
 
 }

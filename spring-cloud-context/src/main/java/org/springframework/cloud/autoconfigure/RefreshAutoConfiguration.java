@@ -17,6 +17,7 @@
 package org.springframework.cloud.autoconfigure;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -36,6 +37,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.cloud.context.refresh.ConfigDataContextRefresher;
@@ -53,6 +56,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -66,9 +70,9 @@ import org.springframework.util.StringUtils;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RefreshScope.class)
-@ConditionalOnProperty(name = RefreshAutoConfiguration.REFRESH_SCOPE_ENABLED,
-		matchIfMissing = true)
+@ConditionalOnProperty(name = RefreshAutoConfiguration.REFRESH_SCOPE_ENABLED, matchIfMissing = true)
 @AutoConfigureBefore(HibernateJpaAutoConfiguration.class)
+@EnableConfigurationProperties(RefreshAutoConfiguration.RefreshProperties.class)
 public class RefreshAutoConfiguration {
 
 	/**
@@ -101,22 +105,49 @@ public class RefreshAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnBootstrapEnabled
-	public LegacyContextRefresher legacyContextRefresher(
-			ConfigurableApplicationContext context, RefreshScope scope) {
-		return new LegacyContextRefresher(context, scope);
+	public LegacyContextRefresher legacyContextRefresher(ConfigurableApplicationContext context, RefreshScope scope,
+			RefreshProperties properties) {
+		return new LegacyContextRefresher(context, scope, properties);
 	}
 
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnBootstrapDisabled
-	public ConfigDataContextRefresher configDataContextRefresher(
-			ConfigurableApplicationContext context, RefreshScope scope) {
-		return new ConfigDataContextRefresher(context, scope);
+	public ConfigDataContextRefresher configDataContextRefresher(ConfigurableApplicationContext context,
+			RefreshScope scope, RefreshProperties properties) {
+		return new ConfigDataContextRefresher(context, scope, properties);
 	}
 
 	@Bean
 	public RefreshEventListener refreshEventListener(ContextRefresher contextRefresher) {
 		return new RefreshEventListener(contextRefresher);
+	}
+
+	@ConfigurationProperties("spring.cloud.refresh")
+	public static class RefreshProperties {
+
+		/**
+		 * Additional property sources to retain during a refresh. Typically only system
+		 * property sources are retained. This property allows property sources, such as
+		 * property sources created by EnvironmentPostProcessors to be retained as well.
+		 */
+		private List<String> additionalPropertySourcesToRetain;
+
+		public List<String> getAdditionalPropertySourcesToRetain() {
+			return this.additionalPropertySourcesToRetain;
+		}
+
+		public void setAdditionalPropertySourcesToRetain(List<String> additionalPropertySourcesToRetain) {
+			this.additionalPropertySourcesToRetain = additionalPropertySourcesToRetain;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringCreator(this)
+					.append("additionalPropertySourcesToRetain", additionalPropertySourcesToRetain).toString();
+
+		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -170,33 +201,27 @@ public class RefreshAutoConfiguration {
 		}
 
 		@Override
-		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
-				throws BeansException {
+		public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 		}
 
 		@Override
-		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
-				throws BeansException {
+		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 			bindEnvironmentIfNeeded(registry);
 			for (String name : registry.getBeanDefinitionNames()) {
 				BeanDefinition definition = registry.getBeanDefinition(name);
 				if (isApplicable(registry, name, definition)) {
-					BeanDefinitionHolder holder = new BeanDefinitionHolder(definition,
-							name);
-					BeanDefinitionHolder proxy = ScopedProxyUtils
-							.createScopedProxy(holder, registry, true);
+					BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, name);
+					BeanDefinitionHolder proxy = ScopedProxyUtils.createScopedProxy(holder, registry, true);
 					definition.setScope("refresh");
 					if (registry.containsBeanDefinition(proxy.getBeanName())) {
 						registry.removeBeanDefinition(proxy.getBeanName());
 					}
-					registry.registerBeanDefinition(proxy.getBeanName(),
-							proxy.getBeanDefinition());
+					registry.registerBeanDefinition(proxy.getBeanName(), proxy.getBeanDefinition());
 				}
 			}
 		}
 
-		private boolean isApplicable(BeanDefinitionRegistry registry, String name,
-				BeanDefinition definition) {
+		private boolean isApplicable(BeanDefinitionRegistry registry, String name, BeanDefinition definition) {
 			String scope = definition.getScope();
 			if (REFRESH_SCOPE_NAME.equals(scope)) {
 				// Already refresh scoped
@@ -220,8 +245,7 @@ public class RefreshAutoConfiguration {
 				if (this.environment == null) {
 					this.environment = new StandardEnvironment();
 				}
-				Binder.get(this.environment).bind("spring.cloud.refresh",
-						Bindable.ofInstance(this));
+				Binder.get(this.environment).bind("spring.cloud.refresh", Bindable.ofInstance(this));
 				this.bound = true;
 			}
 		}

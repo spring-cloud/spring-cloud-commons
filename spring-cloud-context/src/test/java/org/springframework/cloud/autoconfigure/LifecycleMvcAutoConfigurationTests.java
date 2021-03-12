@@ -37,35 +37,29 @@ import static org.assertj.core.api.BDDAssertions.then;
 // TODO: super slow. Port to @SpringBootTest
 public class LifecycleMvcAutoConfigurationTests {
 
-	private static ConfigurableApplicationContext getApplicationContext(
-			Class<?> configuration, String... properties) {
+	private static ConfigurableApplicationContext getApplicationContext(Class<?> configuration, String... properties) {
 
 		List<String> defaultProperties = Lists.newArrayList(properties);
 		defaultProperties.add("server.port=0");
 		defaultProperties.add("spring.jmx.default-domain=${random.uuid}");
 
-		return new SpringApplicationBuilder(configuration)
-				.properties(defaultProperties.toArray(new String[] {})).run();
+		return new SpringApplicationBuilder(configuration).properties(defaultProperties.toArray(new String[] {})).run();
 	}
 
 	@Test
 	public void environmentWebEndpointExtensionDisabled() {
-		beanNotCreated("writableEnvironmentEndpointWebExtension",
-				"management.endpoint.env.enabled=false");
+		beanNotCreated("writableEnvironmentEndpointWebExtension", "management.endpoint.env.enabled=false");
 	}
 
 	@Test
 	public void environmentWebEndpointExtensionGloballyDisabled() {
-		beanNotCreated("writableEnvironmentEndpointWebExtension",
-				"management.endpoints.enabled-by-default=false");
+		beanNotCreated("writableEnvironmentEndpointWebExtension", "management.endpoints.enabled-by-default=false");
 	}
 
 	@Test
 	public void environmentWebEndpointExtensionEnabled() {
-		beanCreated("writableEnvironmentEndpointWebExtension",
-				"management.endpoint.env.enabled=true",
-				"management.endpoint.env.post.enabled=true",
-				"management.endpoints.web.exposure.include=env");
+		beanCreated("writableEnvironmentEndpointWebExtension", "management.endpoint.env.enabled=true",
+				"management.endpoint.env.post.enabled=true", "management.endpoints.web.exposure.include=env");
 	}
 
 	// restartEndpoint
@@ -81,9 +75,8 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	@Test
 	public void restartEndpointEnabled() {
-		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class,
-				RestartEndpoint::restart, "management.endpoint.restart.enabled=true",
-				"management.endpoints.web.exposure.include=restart");
+		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class, RestartEndpoint::restart,
+				"management.endpoint.restart.enabled=true", "management.endpoints.web.exposure.include=restart");
 	}
 
 	// pauseEndpoint
@@ -105,26 +98,22 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	@Test
 	public void pauseEndpointEnabled() {
-		beanCreatedAndEndpointEnabled("pauseEndpoint",
-				RestartEndpoint.PauseEndpoint.class, RestartEndpoint.PauseEndpoint::pause,
-				"management.endpoint.restart.enabled=true",
-				"management.endpoints.web.exposure.include=restart,pause",
-				"management.endpoint.pause.enabled=true");
+		beanCreatedAndEndpointEnabled("pauseEndpoint", RestartEndpoint.PauseEndpoint.class,
+				RestartEndpoint.PauseEndpoint::pause, "management.endpoint.restart.enabled=true",
+				"management.endpoints.web.exposure.include=restart,pause", "management.endpoint.pause.enabled=true");
 	}
 
 	// resumeEndpoint
 	@Test
 	public void resumeEndpointDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.restart.enabled=true",
-				"management.endpoints.web.exposure.include=restart",
-				"management.endpoint.resume.enabled=false");
+				"management.endpoints.web.exposure.include=restart", "management.endpoint.resume.enabled=false");
 	}
 
 	@Test
 	public void resumeEndpointRestartDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.restart.enabled=false",
-				"management.endpoints.web.exposure.include=resume",
-				"management.endpoint.resume.enabled=true");
+				"management.endpoints.web.exposure.include=resume", "management.endpoint.resume.enabled=true");
 	}
 
 	@Test
@@ -134,37 +123,28 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	@Test
 	public void resumeEndpointEnabled() {
-		beanCreatedAndEndpointEnabled("resumeEndpoint",
-				RestartEndpoint.ResumeEndpoint.class,
-				RestartEndpoint.ResumeEndpoint::resume,
-				"management.endpoint.restart.enabled=true",
-				"management.endpoint.resume.enabled=true",
-				"management.endpoints.web.exposure.include=restart,resume");
+		beanCreatedAndEndpointEnabled("resumeEndpoint", RestartEndpoint.ResumeEndpoint.class,
+				RestartEndpoint.ResumeEndpoint::resume, "management.endpoint.restart.enabled=true",
+				"management.endpoint.resume.enabled=true", "management.endpoints.web.exposure.include=restart,resume");
 	}
 
 	private void beanNotCreated(String beanName, String... contextProperties) {
-		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
-				contextProperties)) {
-			then(context.containsBeanDefinition(beanName))
-					.as("%s bean was created", beanName).isFalse();
+		try (ConfigurableApplicationContext context = getApplicationContext(Config.class, contextProperties)) {
+			then(context.containsBeanDefinition(beanName)).as("%s bean was created", beanName).isFalse();
 		}
 	}
 
 	private void beanCreated(String beanName, String... contextProperties) {
-		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
-				contextProperties)) {
-			then(context.containsBeanDefinition(beanName))
-					.as("%s bean was not created", beanName).isTrue();
+		try (ConfigurableApplicationContext context = getApplicationContext(Config.class, contextProperties)) {
+			then(context.containsBeanDefinition(beanName)).as("%s bean was not created", beanName).isTrue();
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> void beanCreatedAndEndpointEnabled(String beanName, Class<T> type,
-			Function<T, Object> function, String... properties) {
-		try (ConfigurableApplicationContext context = getApplicationContext(Config.class,
-				properties)) {
-			then(context.containsBeanDefinition(beanName))
-					.as("%s bean was not created", beanName).isTrue();
+	private <T> void beanCreatedAndEndpointEnabled(String beanName, Class<T> type, Function<T, Object> function,
+			String... properties) {
+		try (ConfigurableApplicationContext context = getApplicationContext(Config.class, properties)) {
+			then(context.containsBeanDefinition(beanName)).as("%s bean was not created", beanName).isTrue();
 
 			Object endpoint = context.getBean(beanName, type);
 			Object result = function.apply((T) endpoint);

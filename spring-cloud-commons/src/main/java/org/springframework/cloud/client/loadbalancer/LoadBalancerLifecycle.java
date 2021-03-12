@@ -34,8 +34,7 @@ public interface LoadBalancerLifecycle<RC, RES, T> {
 	 * @param serverTypeClass The type of Server that the LoadBalancer retrieves
 	 * @return <code>true</code> if the lifecycle should be used to process given classes
 	 */
-	default boolean supports(Class requestContextClass, Class responseClass,
-			Class serverTypeClass) {
+	default boolean supports(Class requestContextClass, Class responseClass, Class serverTypeClass) {
 		return true;
 	}
 
@@ -47,10 +46,19 @@ public interface LoadBalancerLifecycle<RC, RES, T> {
 	void onStart(Request<RC> request);
 
 	/**
+	 * A callback method executed after a service instance has been selected, before
+	 * executing the actual load-balanced request.
+	 * @param request the {@link Request} that has been used by the LoadBalancer to select
+	 * a service instance
+	 * @param lbResponse the {@link Response} returned by the LoadBalancer
+	 */
+	void onStartRequest(Request<RC> request, Response<T> lbResponse);
+
+	/**
 	 * A callback method executed after load-balancing.
 	 * @param completionContext the {@link CompletionContext} containing data relevant to
 	 * the load-balancing and the response returned from the selected service instance
 	 */
-	void onComplete(CompletionContext<RES, T> completionContext);
+	void onComplete(CompletionContext<RES, T, RC> completionContext);
 
 }

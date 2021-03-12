@@ -44,8 +44,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestConfiguration.class,
-		properties = "spring.config.use-legacy-processing=true")
+@SpringBootTest(classes = TestConfiguration.class, properties = "spring.config.use-legacy-processing=true")
 @ActiveProfiles("config")
 public class ConfigurationPropertiesRebinderIntegrationTests {
 
@@ -131,8 +130,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		@Bean
 		@ConfigurationProperties("some.service")
 		public SomeService someService() {
-			return ProxyFactory.getProxy(SomeService.class,
-					(MethodInterceptor) methodInvocation -> null);
+			return ProxyFactory.getProxy(SomeService.class, (MethodInterceptor) methodInvocation -> null);
 		}
 
 	}
@@ -141,8 +139,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 	protected static class RefreshConfiguration extends RefreshAutoConfiguration {
 
 		@Configuration(proxyBeanMethods = false)
-		protected static class RebinderConfiguration
-				extends ConfigurationPropertiesRebinderAutoConfiguration {
+		protected static class RebinderConfiguration extends ConfigurationPropertiesRebinderAutoConfiguration {
 
 		}
 

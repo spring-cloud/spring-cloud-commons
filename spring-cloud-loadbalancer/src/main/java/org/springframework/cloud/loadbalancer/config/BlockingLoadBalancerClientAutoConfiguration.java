@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,20 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
+import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
-import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
+import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
+import org.springframework.cloud.loadbalancer.core.LoadBalancerServiceInstanceCookieTransformer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -40,8 +46,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration(proxyBeanMethods = false)
 @LoadBalancerClients
 @AutoConfigureAfter(LoadBalancerAutoConfiguration.class)
-@AutoConfigureBefore({
-		org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration.class,
+@AutoConfigureBefore({ org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration.class,
 		AsyncLoadBalancerAutoConfiguration.class })
 @ConditionalOnClass(RestTemplate.class)
 public class BlockingLoadBalancerClientAutoConfiguration {
@@ -49,10 +54,31 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	@ConditionalOnMissingBean
-	public LoadBalancerClient blockingLoadBalancerClient(
-			LoadBalancerClientFactory loadBalancerClientFactory,
+	public LoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
 			LoadBalancerProperties properties) {
 		return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
+	}
+
+	@Bean
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.sticky-session.add-service-instance-cookie",
+			havingValue = "true")
+	@ConditionalOnMissingBean(LoadBalancerServiceInstanceCookieTransformer.class)
+	public LoadBalancerServiceInstanceCookieTransformer loadBalancerServiceInstanceCookieTransformer(
+			LoadBalancerProperties properties) {
+		return new LoadBalancerServiceInstanceCookieTransformer(properties.getStickySession());
+	}
+
+	@Configuration
+	@ConditionalOnClass(RetryTemplate.class)
+	@EnableConfigurationProperties(LoadBalancerProperties.class)
+	protected static class BlockingLoadBalancerRetryConfig {
+
+		@Bean
+		@ConditionalOnMissingBean
+		LoadBalancedRetryFactory loadBalancedRetryFactory(LoadBalancerProperties properties) {
+			return new BlockingLoadBalancedRetryFactory(properties);
+		}
+
 	}
 
 }

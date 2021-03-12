@@ -31,8 +31,7 @@ public class SimpleReactiveDiscoveryClient implements ReactiveDiscoveryClient {
 
 	private SimpleReactiveDiscoveryProperties simpleDiscoveryProperties;
 
-	public SimpleReactiveDiscoveryClient(
-			SimpleReactiveDiscoveryProperties simpleDiscoveryProperties) {
+	public SimpleReactiveDiscoveryClient(SimpleReactiveDiscoveryProperties simpleDiscoveryProperties) {
 		this.simpleDiscoveryProperties = simpleDiscoveryProperties;
 	}
 

@@ -36,7 +36,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * Tests for mapping properties to instances in {@link SimpleDiscoveryClient}
  *
- * @author Biju Kunjummen
+ * @author Daniel Gerber
  */
 
 @RunWith(SpringRunner.class)
@@ -59,41 +59,34 @@ public class SimpleReactiveDiscoveryClientPropertiesMappingTests {
 		then(this.props.getInstances().get("service1").size()).isEqualTo(2);
 		then(this.props.getInstances().get("service1").get(0).getHost()).isEqualTo("s11");
 		then(this.props.getInstances().get("service1").get(0).getPort()).isEqualTo(8080);
-		then(this.props.getInstances().get("service1").get(0).getUri())
-				.isEqualTo(URI.create("http://s11:8080"));
-		then(this.props.getInstances().get("service1").get(0).isSecure())
-				.isEqualTo(false);
+		then(this.props.getInstances().get("service1").get(0).getUri()).isEqualTo(URI.create("http://s11:8080"));
+		then(this.props.getInstances().get("service1").get(0).isSecure()).isEqualTo(false);
 
 		then(this.props.getInstances().get("service2").size()).isEqualTo(2);
 		then(this.props.getInstances().get("service2").get(0).getHost()).isEqualTo("s21");
 		then(this.props.getInstances().get("service2").get(0).getPort()).isEqualTo(8080);
-		then(this.props.getInstances().get("service2").get(0).getUri())
-				.isEqualTo(URI.create("https://s21:8080"));
+		then(this.props.getInstances().get("service2").get(0).getUri()).isEqualTo(URI.create("https://s21:8080"));
 		then(this.props.getInstances().get("service2").get(0).isSecure()).isEqualTo(true);
 	}
 
 	@Test
 	public void testDiscoveryClientShouldResolveSimpleValues() {
-		then(this.discoveryClient.description())
-				.isEqualTo("Simple Reactive Discovery Client");
+		then(this.discoveryClient.description()).isEqualTo("Simple Reactive Discovery Client");
 
 		Flux<ServiceInstance> services = this.discoveryClient.getInstances("service1");
 		StepVerifier.create(services)
-				.expectNextMatches(
-						inst -> inst.getHost().equals("s11") && inst.getPort() == 8080
-								&& inst.getUri().toString().equals("http://s11:8080")
-								&& !inst.isSecure() && inst.getScheme().equals("http"))
-				.expectNextMatches(
-						inst -> inst.getHost().equals("s12") && inst.getPort() == 8443
-								&& inst.getUri().toString().equals("https://s12:8443")
-								&& inst.isSecure() && inst.getScheme().equals("https"))
+				.expectNextMatches(inst -> inst.getHost().equals("s11") && inst.getPort() == 8080
+						&& inst.getUri().toString().equals("http://s11:8080") && !inst.isSecure()
+						&& inst.getScheme().equals("http"))
+				.expectNextMatches(inst -> inst.getHost().equals("s12") && inst.getPort() == 8443
+						&& inst.getUri().toString().equals("https://s12:8443") && inst.isSecure()
+						&& inst.getScheme().equals("https"))
 				.expectComplete().verify();
 	}
 
 	@Test
 	public void testGetANonExistentServiceShouldReturnAnEmptyList() {
-		then(this.discoveryClient.description())
-				.isEqualTo("Simple Reactive Discovery Client");
+		then(this.discoveryClient.description()).isEqualTo("Simple Reactive Discovery Client");
 
 		Flux<ServiceInstance> services = this.discoveryClient.getInstances("nonexistent");
 

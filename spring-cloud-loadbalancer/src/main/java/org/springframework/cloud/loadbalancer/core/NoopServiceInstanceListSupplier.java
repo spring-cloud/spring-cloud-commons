@@ -16,11 +16,13 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.Collections;
 import java.util.List;
 
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.Request;
 
 /**
  * A no-op implementation of {@link ServiceInstanceListSupplier}.
@@ -36,7 +38,12 @@ public class NoopServiceInstanceListSupplier implements ServiceInstanceListSuppl
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		return Flux.empty();
+		return Flux.defer(() -> Flux.just(Collections.emptyList()));
+	}
+
+	@Override
+	public Flux<List<ServiceInstance>> get(Request request) {
+		return Flux.defer(() -> Flux.just(Collections.emptyList()));
 	}
 
 }
