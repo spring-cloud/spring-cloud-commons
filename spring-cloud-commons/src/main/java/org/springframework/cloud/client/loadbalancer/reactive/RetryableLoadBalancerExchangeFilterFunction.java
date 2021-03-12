@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -66,8 +67,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 	private static final Log LOG = LogFactory.getLog(RetryableLoadBalancerExchangeFilterFunction.class);
 
 	private static final List<Class<? extends Throwable>> exceptions = Arrays.asList(IOException.class,
-			TimeoutException.class,
-			org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
+			TimeoutException.class, RetryableStatusCodeException.class);
 
 	private final LoadBalancerRetryPolicy retryPolicy;
 
@@ -75,11 +75,25 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
+	private final List<LoadBalancerClientRequestTransformer> transformers;
+
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}.
+	 */
+	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties) {
+		this(retryPolicy, loadBalancerFactory, properties, Collections.emptyList());
+	}
+
+	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
+			List<LoadBalancerClientRequestTransformer> transformers) {
 		this.retryPolicy = retryPolicy;
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.properties = properties;
+		this.transformers = transformers;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -129,7 +143,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
 					stickySessionProperties.getInstanceIdCookieName(),
-					stickySessionProperties.isAddServiceInstanceCookie());
+					stickySessionProperties.isAddServiceInstanceCookie(), transformers);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, lbResponse));
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle

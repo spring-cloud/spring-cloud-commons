@@ -17,6 +17,8 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -61,10 +63,25 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 
 	private final LoadBalancerProperties properties;
 
+	private final List<LoadBalancerClientRequestTransformer> transformers;
+
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}.
+	 * @param loadBalancerFactory the loadbalancer factory
+	 * @param properties the properties for SC LoadBalancer
+	 */
+	@Deprecated
 	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerProperties properties) {
+		this(loadBalancerFactory, properties, Collections.emptyList());
+	}
+
+	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			LoadBalancerProperties properties, List<LoadBalancerClientRequestTransformer> transformers) {
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.properties = properties;
+		this.transformers = transformers;
 	}
 
 	@Override
@@ -106,7 +123,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
 					stickySessionProperties.getInstanceIdCookieName(),
-					stickySessionProperties.isAddServiceInstanceCookie());
+					stickySessionProperties.isAddServiceInstanceCookie(), transformers);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, lbResponse));
 			return next.exchange(newRequest)
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle

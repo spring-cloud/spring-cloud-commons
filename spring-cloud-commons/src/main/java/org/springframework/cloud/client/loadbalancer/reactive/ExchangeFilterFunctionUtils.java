@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -43,9 +44,11 @@ public final class ExchangeFilterFunctionUtils {
 	}
 
 	static ClientRequest buildClientRequest(ClientRequest request, ServiceInstance serviceInstance,
-			String instanceIdCookieName, boolean addServiceInstanceCookie) {
+			String instanceIdCookieName, boolean addServiceInstanceCookie,
+			List<LoadBalancerClientRequestTransformer> transformers) {
 		URI originalUrl = request.url();
-		return ClientRequest.create(request.method(), LoadBalancerUriTools.reconstructURI(serviceInstance, originalUrl))
+		ClientRequest clientRequest = ClientRequest
+				.create(request.method(), LoadBalancerUriTools.reconstructURI(serviceInstance, originalUrl))
 				.headers(headers -> headers.addAll(request.headers())).cookies(cookies -> {
 					cookies.addAll(request.cookies());
 					if (!(instanceIdCookieName == null || instanceIdCookieName.length() == 0)
@@ -53,6 +56,12 @@ public final class ExchangeFilterFunctionUtils {
 						cookies.add(instanceIdCookieName, serviceInstance.getInstanceId());
 					}
 				}).attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
+		if (transformers != null) {
+			for (LoadBalancerClientRequestTransformer transformer : transformers) {
+				clientRequest = transformer.transformRequest(clientRequest, serviceInstance);
+			}
+		}
+		return clientRequest;
 	}
 
 	static String serviceInstanceUnavailableMessage(String serviceId) {

@@ -59,13 +59,13 @@ import static org.mockito.Mockito.when;
  * @author Spencer Gibb
  */
 @SpringBootTest
-public class LoadBalancerTests {
+class LoadBalancerTests {
 
 	@Autowired
 	private LoadBalancerClientFactory clientFactory;
 
 	@Test
-	public void roundRobbinLoadbalancerWorks() {
+	void roundRobbinLoadbalancerWorks() {
 		ReactiveLoadBalancer<ServiceInstance> reactiveLoadBalancer = this.clientFactory.getInstance("myservice",
 				ReactiveLoadBalancer.class, ServiceInstance.class);
 
@@ -101,7 +101,7 @@ public class LoadBalancerTests {
 	}
 
 	@Test
-	public void emptyHosts() {
+	void emptyHosts() {
 		ResolvableType type = ResolvableType.forClassWithGenerics(ReactorLoadBalancer.class, ServiceInstance.class);
 		ReactorLoadBalancer<ServiceInstance> loadBalancer = this.clientFactory.getInstance("unknownservice", type);
 
@@ -115,7 +115,7 @@ public class LoadBalancerTests {
 	}
 
 	@Test
-	public void staticConfigurationWorks() {
+	void staticConfigurationWorks() {
 		String serviceId = "test1";
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(ServiceInstanceListSuppliers
 				.toProvider(serviceId, instance(serviceId, "1host", false), instance(serviceId, "2host-secure", true)),
@@ -129,7 +129,7 @@ public class LoadBalancerTests {
 
 	@SuppressWarnings("ConstantConditions")
 	@Test
-	public void canPassHintViaRequest() {
+	void canPassHintViaRequest() {
 		String serviceId = "test1";
 		RoundRobinLoadBalancer loadBalancer = new TestHintLoadBalancer(ServiceInstanceListSuppliers.toProvider(
 				serviceId, instance(serviceId, "1host", false), instance(serviceId, "2host-secure", true)), serviceId);
@@ -141,7 +141,7 @@ public class LoadBalancerTests {
 	}
 
 	@Test
-	public void selectedInstanceCallback() {
+	void selectedInstanceCallback() {
 		String serviceId = "test1";
 		ServiceInstance serviceInstance = instance(serviceId, "1host", false);
 		SameInstancePreferenceServiceInstanceListSupplier supplier = mock(
