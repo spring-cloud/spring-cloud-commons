@@ -1090,7 +1090,7 @@ For `WebClient`, you need to implement and define `LoadBalancerClientRequestTran
 ----
 
 If multiple transformers are defined, they are applied in the order in which Beans are defined.
-You can use `LoadBalancerRequestTransformer.DEFAULT_ORDER` or `LoadBalancerClientRequestTransformer.DEFAULT_ORDER` to specify the order.
+Alternatively, you can use `LoadBalancerRequestTransformer.DEFAULT_ORDER` or `LoadBalancerClientRequestTransformer.DEFAULT_ORDER` to specify the order.
 
 [[spring-cloud-loadbalancer-hints]]
 === Spring Cloud LoadBalancer Hints
