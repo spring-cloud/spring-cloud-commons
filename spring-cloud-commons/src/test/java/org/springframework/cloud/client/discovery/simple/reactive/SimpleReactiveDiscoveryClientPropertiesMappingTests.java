@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.discovery.simple;
+package org.springframework.cloud.client.discovery.simple.reactive;
 
 import java.net.URI;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -33,7 +36,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * Tests for mapping properties to instances in {@link SimpleDiscoveryClient}
  *
- * @author Biju Kunjummen
+ * @author Daniel Gerber
  */
 
 @RunWith(SpringRunner.class)
@@ -42,13 +45,13 @@ import static org.assertj.core.api.BDDAssertions.then;
 		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s12:8443",
 		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s21:8080",
 		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s22:443" })
-public class SimpleDiscoveryClientPropertiesMappingTests {
+public class SimpleReactiveDiscoveryClientPropertiesMappingTests {
 
 	@Autowired
-	private SimpleDiscoveryProperties props;
+	private SimpleReactiveDiscoveryProperties props;
 
 	@Autowired
-	private SimpleDiscoveryClient discoveryClient;
+	private SimpleReactiveDiscoveryClient discoveryClient;
 
 	@Test
 	public void propsShouldGetCleanlyMapped() {
@@ -68,33 +71,26 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 
 	@Test
 	public void testDiscoveryClientShouldResolveSimpleValues() {
-		then(this.discoveryClient.description()).isEqualTo("Simple Discovery Client");
-		then(this.discoveryClient.getInstances("service1")).hasSize(2);
+		then(this.discoveryClient.description()).isEqualTo("Simple Reactive Discovery Client");
 
-		ServiceInstance s1 = this.discoveryClient.getInstances("service1").get(0);
-		then(s1.getHost()).isEqualTo("s11");
-		then(s1.getPort()).isEqualTo(8080);
-		then(s1.getUri()).isEqualTo(URI.create("http://s11:8080"));
-		then(s1.isSecure()).isEqualTo(false);
-		then(s1.getScheme()).isEqualTo("http");
-
-		ServiceInstance s2 = this.discoveryClient.getInstances("service1").get(1);
-		then(s2.getHost()).isEqualTo("s12");
-		then(s2.getPort()).isEqualTo(8443);
-		then(s2.getUri()).isEqualTo(URI.create("https://s12:8443"));
-		then(s2.isSecure()).isEqualTo(true);
-		then(s2.getScheme()).isEqualTo("https");
-	}
-
-	@Test
-	public void testGetServices() {
-		then(this.discoveryClient.getServices()).containsExactlyInAnyOrder("service1", "service2");
+		Flux<ServiceInstance> services = this.discoveryClient.getInstances("service1");
+		StepVerifier.create(services)
+				.expectNextMatches(inst -> inst.getHost().equals("s11") && inst.getPort() == 8080
+						&& inst.getUri().toString().equals("http://s11:8080") && !inst.isSecure()
+						&& inst.getScheme().equals("http"))
+				.expectNextMatches(inst -> inst.getHost().equals("s12") && inst.getPort() == 8443
+						&& inst.getUri().toString().equals("https://s12:8443") && inst.isSecure()
+						&& inst.getScheme().equals("https"))
+				.expectComplete().verify();
 	}
 
 	@Test
 	public void testGetANonExistentServiceShouldReturnAnEmptyList() {
-		then(this.discoveryClient.getInstances("nonexistent")).isNotNull();
-		then(this.discoveryClient.getInstances("nonexistent")).isEmpty();
+		then(this.discoveryClient.description()).isEqualTo("Simple Reactive Discovery Client");
+
+		Flux<ServiceInstance> services = this.discoveryClient.getInstances("nonexistent");
+
+		StepVerifier.create(services).expectNextCount(0).expectComplete().verify();
 	}
 
 	@Configuration(proxyBeanMethods = false)

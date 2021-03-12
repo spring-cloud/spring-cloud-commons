@@ -173,4 +173,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 		return Objects.hash(instanceId, serviceId, host, port, secure, metadata);
 	}
 
+	@Override
+	public String getScheme() {
+		return this.isSecure() ? "https" : "http";
+	}
+
 }
