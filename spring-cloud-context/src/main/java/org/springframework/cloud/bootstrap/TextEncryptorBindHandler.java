@@ -33,7 +33,7 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
  * @author Marcin Grzejszczak
  * @since 3.0.0
  */
-class TextEncryptorBindHandler extends AbstractBindHandler {
+public class TextEncryptorBindHandler extends AbstractBindHandler {
 
 	private static final Log logger = LogFactory.getLog(TextEncryptorBindHandler.class);
 
@@ -46,7 +46,7 @@ class TextEncryptorBindHandler extends AbstractBindHandler {
 
 	private final KeyProperties keyProperties;
 
-	TextEncryptorBindHandler(TextEncryptor textEncryptor, KeyProperties keyProperties) {
+	public TextEncryptorBindHandler(TextEncryptor textEncryptor, KeyProperties keyProperties) {
 		this.textEncryptor = textEncryptor;
 		this.keyProperties = keyProperties;
 	}

@@ -20,17 +20,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.BootstrapContext;
 import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.Bootstrapper;
-import org.springframework.boot.context.properties.bind.BindHandler;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfiguration;
 import org.springframework.cloud.bootstrap.encrypt.KeyProperties;
 import org.springframework.cloud.bootstrap.encrypt.RsaProperties;
-import org.springframework.cloud.context.encrypt.EncryptorFactory;
-import org.springframework.cloud.util.PropertyUtils;
-import org.springframework.core.env.Environment;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
+import org.springframework.cloud.bootstrap.encrypt.TextEncryptorUtils;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Bootstrapper.
@@ -40,7 +34,10 @@ import org.springframework.util.StringUtils;
  */
 public class TextEncryptorConfigBootstrapper implements Bootstrapper {
 
-	private static final boolean RSA_IS_PRESENT = ClassUtils
+	/**
+	 * RsaSecretEncryptor present.
+	 */
+	public static final boolean RSA_IS_PRESENT = ClassUtils
 			.isPresent("org.springframework.security.rsa.crypto.RsaSecretEncryptor", null);
 
 	@Override
@@ -55,30 +52,11 @@ public class TextEncryptorConfigBootstrapper implements Bootstrapper {
 			registry.registerIfAbsent(RsaProperties.class, context -> context.get(Binder.class)
 					.bind(RsaProperties.PREFIX, RsaProperties.class).orElseGet(RsaProperties::new));
 		}
-		registry.registerIfAbsent(TextEncryptor.class, context -> {
-			KeyProperties keyProperties = context.get(KeyProperties.class);
-			if (keysConfigured(keyProperties)) {
-				if (RSA_IS_PRESENT) {
-					RsaProperties rsaProperties = context.get(RsaProperties.class);
-					return EncryptionBootstrapConfiguration.createTextEncryptor(keyProperties, rsaProperties);
-				}
-				return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
-			}
-			// no keys configured
-			return new FailsafeTextEncryptor();
-		});
-		registry.registerIfAbsent(BindHandler.class, context -> {
-			TextEncryptor textEncryptor = context.get(TextEncryptor.class);
-			if (textEncryptor != null) {
-				KeyProperties keyProperties = context.get(KeyProperties.class);
-				return new TextEncryptorBindHandler(textEncryptor, keyProperties);
-			}
-			return null;
-		});
+		TextEncryptorUtils.register(registry);
 
 		// promote beans to context
 		registry.addCloseListener(event -> {
-			if (isLegacyBootstrap(event.getApplicationContext().getEnvironment())) {
+			if (TextEncryptorUtils.isLegacyBootstrap(event.getApplicationContext().getEnvironment())) {
 				return;
 			}
 			BootstrapContext bootstrapContext = event.getBootstrapContext();
@@ -93,59 +71,17 @@ public class TextEncryptorConfigBootstrapper implements Bootstrapper {
 					beanFactory.registerSingleton("rsaProperties", rsaProperties);
 				}
 			}
-			TextEncryptor textEncryptor = bootstrapContext.get(TextEncryptor.class);
-			if (textEncryptor != null) {
-				beanFactory.registerSingleton("textEncryptor", textEncryptor);
-			}
+			TextEncryptorUtils.promote(bootstrapContext, beanFactory);
 		});
 	}
 
+	@Deprecated
 	public static boolean keysConfigured(KeyProperties properties) {
-		if (hasProperty(properties.getKeyStore().getLocation())) {
-			if (hasProperty(properties.getKeyStore().getPassword())) {
-				return true;
-			}
-			return false;
-		}
-		else if (hasProperty(properties.getKey())) {
-			return true;
-		}
-		return false;
+		return TextEncryptorUtils.keysConfigured(properties);
 	}
 
-	static boolean hasProperty(Object value) {
-		if (value instanceof String) {
-			return StringUtils.hasText((String) value);
-		}
-		return value != null;
-	}
-
-	static boolean isLegacyBootstrap(Environment environment) {
-		boolean isLegacy = PropertyUtils.useLegacyProcessing(environment);
-		boolean isBootstrapEnabled = PropertyUtils.bootstrapEnabled(environment);
-		return isLegacy || isBootstrapEnabled;
-	}
-
-	/**
-	 * TextEncryptor that just fails, so that users don't get a false sense of security
-	 * adding ciphers to config files and not getting them decrypted.
-	 *
-	 * @author Dave Syer
-	 *
-	 */
-	public static class FailsafeTextEncryptor implements TextEncryptor {
-
-		@Override
-		public String encrypt(String text) {
-			throw new UnsupportedOperationException(
-					"No encryption for FailsafeTextEncryptor. Did you configure the keystore correctly?");
-		}
-
-		@Override
-		public String decrypt(String encryptedText) {
-			throw new UnsupportedOperationException(
-					"No decryption for FailsafeTextEncryptor. Did you configure the keystore correctly?");
-		}
+	@Deprecated
+	public static class FailsafeTextEncryptor extends TextEncryptorUtils.FailsafeTextEncryptor {
 
 	}
 

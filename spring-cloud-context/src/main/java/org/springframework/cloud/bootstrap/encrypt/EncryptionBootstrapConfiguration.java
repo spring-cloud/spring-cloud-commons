@@ -24,7 +24,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.SpringBootCondition;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.bootstrap.encrypt.KeyProperties.KeyStore;
 import org.springframework.cloud.context.encrypt.EncryptorFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +33,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.security.rsa.crypto.KeyStoreKeyFactory;
 import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
 import org.springframework.util.StringUtils;
 
@@ -61,27 +59,16 @@ public class EncryptionBootstrapConfiguration {
 			encryptor = context.getBean(TextEncryptor.class);
 		}
 		catch (NoSuchBeanDefinitionException e) {
-			encryptor = new FailsafeTextEncryptor();
+			encryptor = new TextEncryptorUtils.FailsafeTextEncryptor();
 		}
 		EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(encryptor);
 		listener.setFailOnError(keyProperties.isFailOnError());
 		return listener;
 	}
 
+	@Deprecated
 	public static TextEncryptor createTextEncryptor(KeyProperties keyProperties, RsaProperties rsaProperties) {
-		KeyStore keyStore = keyProperties.getKeyStore();
-		if (keyStore.getLocation() != null) {
-			if (keyStore.getLocation().exists()) {
-				return new RsaSecretEncryptor(
-						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray())
-								.getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
-						rsaProperties.getAlgorithm(), rsaProperties.getSalt(), rsaProperties.isStrong());
-			}
-
-			throw new IllegalStateException("Invalid keystore location");
-		}
-
-		return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
+		return TextEncryptorUtils.createTextEncryptor(keyProperties, rsaProperties);
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -99,7 +86,7 @@ public class EncryptionBootstrapConfiguration {
 		@Bean
 		@ConditionalOnMissingBean(TextEncryptor.class)
 		public TextEncryptor textEncryptor(KeyProperties keyProperties, RsaProperties rsaProperties) {
-			return createTextEncryptor(keyProperties, rsaProperties);
+			return TextEncryptorUtils.createTextEncryptor(keyProperties, rsaProperties);
 		}
 
 	}
@@ -150,26 +137,8 @@ public class EncryptionBootstrapConfiguration {
 
 	}
 
-	/**
-	 * TextEncryptor that just fails, so that users don't get a false sense of security
-	 * adding ciphers to config files and not getting them decrypted.
-	 *
-	 * @author Dave Syer
-	 *
-	 */
-	protected static class FailsafeTextEncryptor implements TextEncryptor {
-
-		@Override
-		public String encrypt(String text) {
-			throw new UnsupportedOperationException(
-					"No encryption for FailsafeTextEncryptor. Did you configure the keystore correctly?");
-		}
-
-		@Override
-		public String decrypt(String encryptedText) {
-			throw new UnsupportedOperationException(
-					"No decryption for FailsafeTextEncryptor. Did you configure the keystore correctly?");
-		}
+	@Deprecated
+	protected static class FailsafeTextEncryptor extends TextEncryptorUtils.FailsafeTextEncryptor {
 
 	}
 

@@ -19,18 +19,13 @@ package org.springframework.cloud.bootstrap.encrypt;
 import java.util.Map;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.env.EnvironmentPostProcessor;
-import org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper.FailsafeTextEncryptor;
-import org.springframework.cloud.context.encrypt.EncryptorFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.util.ClassUtils;
 
-import static org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper.keysConfigured;
 import static org.springframework.cloud.util.PropertyUtils.bootstrapEnabled;
 import static org.springframework.cloud.util.PropertyUtils.useLegacyProcessing;
 
@@ -60,36 +55,20 @@ public class DecryptEnvironmentPostProcessor extends AbstractEnvironmentDecrypt
 		if (bootstrapEnabled(environment) || useLegacyProcessing(environment)) {
 			return;
 		}
+		if (!ClassUtils.isPresent("org.springframework.security.crypto.encrypt.TextEncryptor", null)) {
+			return;
+		}
 
 		MutablePropertySources propertySources = environment.getPropertySources();
 
 		environment.getPropertySources().remove(DECRYPTED_PROPERTY_SOURCE_NAME);
 
-		TextEncryptor encryptor = getTextEncryptor(environment);
-
-		Map<String, Object> map = decrypt(encryptor, propertySources);
+		Map<String, Object> map = TextEncryptorUtils.decrypt(this, environment, propertySources);
 		if (!map.isEmpty()) {
 			// We have some decrypted properties
 			propertySources.addFirst(new SystemEnvironmentPropertySource(DECRYPTED_PROPERTY_SOURCE_NAME, map));
 		}
 
-	}
-
-	protected TextEncryptor getTextEncryptor(ConfigurableEnvironment environment) {
-		Binder binder = Binder.get(environment);
-		KeyProperties keyProperties = binder.bind(KeyProperties.PREFIX, KeyProperties.class)
-				.orElseGet(KeyProperties::new);
-		if (keysConfigured(keyProperties)) {
-			setFailOnError(keyProperties.isFailOnError());
-			if (ClassUtils.isPresent("org.springframework.security.rsa.crypto.RsaSecretEncryptor", null)) {
-				RsaProperties rsaProperties = binder.bind(RsaProperties.PREFIX, RsaProperties.class)
-						.orElseGet(RsaProperties::new);
-				return EncryptionBootstrapConfiguration.createTextEncryptor(keyProperties, rsaProperties);
-			}
-			return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
-		}
-		// no keys configured
-		return new FailsafeTextEncryptor();
 	}
 
 }
