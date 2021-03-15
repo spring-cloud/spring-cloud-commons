@@ -867,6 +867,8 @@ public class CustomLoadBalancerConfiguration {
 }
 ----
 
+NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` configuration arguments should either not be annotated with `@Configuration` or be outside component scan scope.
+
 === Spring Cloud LoadBalancer integrations
 
 In order to make it easy to use Spring Cloud LoadBalancer, we provide `ReactorLoadBalancerExchangeFilterFunction` that can be used with `WebClient` and `BlockingLoadBalancerClient` that works with `RestTemplate`.
@@ -1198,6 +1200,9 @@ public class MyConfiguration {
 	}
 }
 ----
+
+NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` configuration arguments should either not be annotated with `@Configuration` or be outside component scan scope.
+
 ====
 
 [[loadbalancer-lifecycle]]
