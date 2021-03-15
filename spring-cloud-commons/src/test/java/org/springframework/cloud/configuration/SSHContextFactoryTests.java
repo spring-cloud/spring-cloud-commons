@@ -92,8 +92,6 @@ public class SSHContextFactoryTests {
 		properties.setKeyPassword(KEY_PASSWORD);
 		properties.setTrustStore(resourceOf(trustStore));
 		properties.setTrustStorePassword(KEY_STORE_PASSWORD);
-
-		properties.postConstruct();
 	}
 
 	private Resource resourceOf(File file) {

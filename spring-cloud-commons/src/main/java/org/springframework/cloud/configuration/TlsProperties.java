@@ -20,8 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.core.io.Resource;
 
 /**
@@ -76,6 +74,9 @@ public class TlsProperties {
 	}
 
 	public String getKeyStoreType() {
+		if (keyStore != null && keyStoreType == null) {
+			keyStoreType = storeTypeOf(keyStore);
+		}
 		return keyStoreType;
 	}
 
@@ -116,6 +117,9 @@ public class TlsProperties {
 	}
 
 	public String getTrustStoreType() {
+		if (trustStore != null && trustStoreType == null) {
+			trustStoreType = storeTypeOf(trustStore);
+		}
 		return trustStoreType;
 	}
 
@@ -135,14 +139,8 @@ public class TlsProperties {
 		return trustStorePassword.toCharArray();
 	}
 
-	@PostConstruct
+	@Deprecated
 	public void postConstruct() {
-		if (keyStore != null && keyStoreType == null) {
-			keyStoreType = storeTypeOf(keyStore);
-		}
-		if (trustStore != null && trustStoreType == null) {
-			trustStoreType = storeTypeOf(trustStore);
-		}
 	}
 
 	private String storeTypeOf(Resource resource) {
