@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,18 +27,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
- * Tests for mapping properties to instances in {@link SimpleDiscoveryClient}
+ * Tests for mapping properties to instances in {@link SimpleReactiveDiscoveryClient}
  *
  * @author Daniel Gerber
  */
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = { "spring.application.name=service0",
 		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s11:8080",
@@ -55,25 +53,25 @@ public class SimpleReactiveDiscoveryClientPropertiesMappingTests {
 
 	@Test
 	public void propsShouldGetCleanlyMapped() {
-		then(this.props.getInstances().size()).isEqualTo(2);
-		then(this.props.getInstances().get("service1").size()).isEqualTo(2);
-		then(this.props.getInstances().get("service1").get(0).getHost()).isEqualTo("s11");
-		then(this.props.getInstances().get("service1").get(0).getPort()).isEqualTo(8080);
-		then(this.props.getInstances().get("service1").get(0).getUri()).isEqualTo(URI.create("http://s11:8080"));
-		then(this.props.getInstances().get("service1").get(0).isSecure()).isEqualTo(false);
+		then(props.getInstances().size()).isEqualTo(2);
+		then(props.getInstances().get("service1").size()).isEqualTo(2);
+		then(props.getInstances().get("service1").get(0).getHost()).isEqualTo("s11");
+		then(props.getInstances().get("service1").get(0).getPort()).isEqualTo(8080);
+		then(props.getInstances().get("service1").get(0).getUri()).isEqualTo(URI.create("http://s11:8080"));
+		then(props.getInstances().get("service1").get(0).isSecure()).isEqualTo(false);
 
-		then(this.props.getInstances().get("service2").size()).isEqualTo(2);
-		then(this.props.getInstances().get("service2").get(0).getHost()).isEqualTo("s21");
-		then(this.props.getInstances().get("service2").get(0).getPort()).isEqualTo(8080);
-		then(this.props.getInstances().get("service2").get(0).getUri()).isEqualTo(URI.create("https://s21:8080"));
-		then(this.props.getInstances().get("service2").get(0).isSecure()).isEqualTo(true);
+		then(props.getInstances().get("service2").size()).isEqualTo(2);
+		then(props.getInstances().get("service2").get(0).getHost()).isEqualTo("s21");
+		then(props.getInstances().get("service2").get(0).getPort()).isEqualTo(8080);
+		then(props.getInstances().get("service2").get(0).getUri()).isEqualTo(URI.create("https://s21:8080"));
+		then(props.getInstances().get("service2").get(0).isSecure()).isEqualTo(true);
 	}
 
 	@Test
 	public void testDiscoveryClientShouldResolveSimpleValues() {
-		then(this.discoveryClient.description()).isEqualTo("Simple Reactive Discovery Client");
+		then(discoveryClient.description()).isEqualTo("Simple Reactive Discovery Client");
 
-		Flux<ServiceInstance> services = this.discoveryClient.getInstances("service1");
+		Flux<ServiceInstance> services = discoveryClient.getInstances("service1");
 		StepVerifier.create(services)
 				.expectNextMatches(inst -> inst.getHost().equals("s11") && inst.getPort() == 8080
 						&& inst.getUri().toString().equals("http://s11:8080") && !inst.isSecure()
@@ -86,9 +84,9 @@ public class SimpleReactiveDiscoveryClientPropertiesMappingTests {
 
 	@Test
 	public void testGetANonExistentServiceShouldReturnAnEmptyList() {
-		then(this.discoveryClient.description()).isEqualTo("Simple Reactive Discovery Client");
+		then(discoveryClient.description()).isEqualTo("Simple Reactive Discovery Client");
 
-		Flux<ServiceInstance> services = this.discoveryClient.getInstances("nonexistent");
+		Flux<ServiceInstance> services = discoveryClient.getInstances("nonexistent");
 
 		StepVerifier.create(services).expectNextCount(0).expectComplete().verify();
 	}

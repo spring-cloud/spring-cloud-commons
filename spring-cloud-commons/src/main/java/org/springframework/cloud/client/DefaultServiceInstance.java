@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,7 +82,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @return URI of the form (secure)?https:http + "host:port".
 	 */
 	public static URI getUri(ServiceInstance instance) {
-		String scheme = (instance.isSecure()) ? "https" : "http";
+		String scheme = instance.getScheme();
 		String uri = String.format("%s://%s:%s", scheme, instance.getHost(), instance.getPort());
 		return URI.create(uri);
 	}
@@ -175,7 +175,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	@Override
 	public String getScheme() {
-		return this.isSecure() ? "https" : "http";
+		return isSecure() ? "https" : "http";
 	}
 
 }
