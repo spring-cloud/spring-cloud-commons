@@ -468,8 +468,6 @@ For the reactive implementation, you can additionally set:
 
 For the reactive implementation, you can also implement your own `LoadBalancerRetryPolicy` to have more detailed control over the load-balanced call retries.
 
-NOTE: For load-balanced retries, by default, we wrap the `ServiceInstanceListSupplier` bean with `RetryAwareServiceInstanceListSupplier` to select a different instance from the one previously chosen, if available. You can disable this behavior by setting the value of `spring.cloud.loadbalancer.retry.avoidPreviousInstance` to `false`.
-
 ====
 [source,java,indent=0]
 ----
@@ -525,6 +523,44 @@ public class MyConfiguration {
 }
 ----
 ====
+
+===== Retry-aware instance selection
+
+For load-balanced retries, by default, we wrap the `ServiceInstanceListSupplier` bean with `RetryAwareServiceInstanceListSupplier` to select a different instance from the one previously chosen, if available. You can disable this behavior by setting the value of `spring.cloud.loadbalancer.retry.avoidPreviousInstance` to `false`.
+You can also instantiate `RetryAwareServiceInstanceListSupplier` on your own. Then, apart from the constructor that allows for passing only one delegate, you can also use `RetryAwareServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, ServiceInstanceListSupplier secondaryDelegate)`. If you do, the secondary delegate will be used for providing instances during retries.
+
+You can use the builder we provide to easily instantiate suppliers, either with a secondary delegate:
+
+[source,java,indent=0]
+----
+	@Bean
+	ServiceInstanceListSupplier serviceInstanceListSupplier(ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier
+				.builder()
+				.withDiscoveryClient()
+				.withRetryAwareness(ServiceInstanceListSupplier.builder()
+						.withDiscoveryClient()
+						.withHints()
+						.build(context))
+				.build(context);
+	}
+----
+
+or without it:
+
+[source,java,indent=0]
+----
+@Bean
+	ServiceInstanceListSupplier serviceInstanceListSupplier(ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier
+				.builder()
+				.withDiscoveryClient()
+				.withRetryAwareness()
+				.build(context);
+	}
+----
+
+WARNING: If you opt for instantiating `RetryAwareServiceInstanceListSupplier` on your own, make sure you set the value of `spring.cloud.loadbalancer.retry.avoid-previous-instance` to `false` so that we do not instantiate one for you automatically.
 
 === Multiple `RestTemplate` Objects
 

@@ -239,6 +239,13 @@ public final class ServiceInstanceListSupplierBuilder {
 		return this;
 	}
 
+	public ServiceInstanceListSupplierBuilder withRetryAwareness(ServiceInstanceListSupplier secondaryDelegate) {
+		DelegateCreator creator = (context, delegate) -> new RetryAwareServiceInstanceListSupplier(delegate,
+				secondaryDelegate);
+		creators.add(creator);
+		return this;
+	}
+
 	public ServiceInstanceListSupplierBuilder withHints() {
 		DelegateCreator creator = (context, delegate) -> {
 			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);

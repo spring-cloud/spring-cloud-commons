@@ -53,6 +53,23 @@ class RetryAwareServiceInstanceListSupplierTests {
 	}
 
 	@Test
+	void shouldUseSecondaryDelegateIfAvailable() {
+		ServiceInstance firstInstance = instance(serviceId, "1host", false);
+		ServiceInstance secondInstance = instance(serviceId, "2host-secure", true);
+		ServiceInstance thirdInstance = instance(serviceId, "3host-secure", true);
+		ServiceInstanceListSupplier delegate = ServiceInstanceListSuppliers.from(serviceId, firstInstance,
+				secondInstance);
+		ServiceInstanceListSupplier secondaryDelegate = ServiceInstanceListSuppliers.from(serviceId, firstInstance,
+				thirdInstance);
+		ServiceInstanceListSupplier supplier = new RetryAwareServiceInstanceListSupplier(delegate, secondaryDelegate);
+
+		List<ServiceInstance> returnedInstances = supplier
+				.get(new DefaultRequest<>(new RetryableRequestContext(firstInstance))).blockFirst();
+
+		assertThat(returnedInstances).containsExactly(thirdInstance);
+	}
+
+	@Test
 	void shouldReturnFilteredInstances() {
 		ServiceInstance firstInstance = instance(serviceId, "1host", false);
 		ServiceInstance secondInstance = instance(serviceId, "2host-secure", true);

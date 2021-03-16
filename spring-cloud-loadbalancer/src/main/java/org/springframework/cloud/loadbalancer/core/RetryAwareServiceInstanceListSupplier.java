@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,10 +36,26 @@ import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
  */
 public class RetryAwareServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
-	private final Log LOG = LogFactory.getLog(RetryAwareServiceInstanceListSupplier.class);
+	private static final Log LOG = LogFactory.getLog(RetryAwareServiceInstanceListSupplier.class);
+
+	private ServiceInstanceListSupplier secondaryDelegate;
 
 	public RetryAwareServiceInstanceListSupplier(ServiceInstanceListSupplier delegate) {
 		super(delegate);
+	}
+
+	/**
+	 * Allows passing additional, secondary, delegate that will be used to fetch instances
+	 * during retries.
+	 * @param delegate The primary delegate used for providing service instances
+	 * @param secondaryDelegate The secondary delegate used for providing service
+	 * instances
+	 * @since 3.0.2
+	 */
+	public RetryAwareServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			ServiceInstanceListSupplier secondaryDelegate) {
+		super(delegate);
+		this.secondaryDelegate = secondaryDelegate;
 	}
 
 	@Override
@@ -55,9 +71,13 @@ public class RetryAwareServiceInstanceListSupplier extends DelegatingServiceInst
 		RetryableRequestContext context = (RetryableRequestContext) request.getContext();
 		ServiceInstance previousServiceInstance = context.getPreviousServiceInstance();
 		if (previousServiceInstance == null) {
-			return get();
+			return delegate.get(request);
 		}
-		return get().map(instances -> filteredByPreviousInstance(instances, previousServiceInstance));
+		if (secondaryDelegate != null) {
+			return secondaryDelegate.get(request)
+					.map(instances -> filteredByPreviousInstance(instances, previousServiceInstance));
+		}
+		return delegate.get(request).map(instances -> filteredByPreviousInstance(instances, previousServiceInstance));
 	}
 
 	private List<ServiceInstance> filteredByPreviousInstance(List<ServiceInstance> instances,
