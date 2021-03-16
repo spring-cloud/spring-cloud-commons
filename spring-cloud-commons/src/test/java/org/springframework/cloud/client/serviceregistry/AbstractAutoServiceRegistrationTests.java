@@ -44,7 +44,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @RunWith(SpringRunner.class)
 // @checkstyle:off
-@SpringBootTest(classes = AbstractAutoServiceRegistrationTests.Config.class, properties = "management.server.port=0",
+@SpringBootTest(classes = AbstractAutoServiceRegistrationTests.Config.class, properties = "management.port=0",
 		webEnvironment = RANDOM_PORT)
 // @checkstyle:on
 public class AbstractAutoServiceRegistrationTests {
