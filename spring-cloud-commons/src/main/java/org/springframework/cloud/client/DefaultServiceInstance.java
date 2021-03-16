@@ -27,7 +27,6 @@ import java.util.Objects;
  * @author Spencer Gibb
  * @author Tim Ysewyn
  * @author Charu Covindane
- * @author Daniel Gerber
  */
 public class DefaultServiceInstance implements ServiceInstance {
 
