@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  * Tests for mapping properties to instances in {@link SimpleDiscoveryClient}
  *
  * @author Biju Kunjummen
+ * @author Daniel Gerber
  */
 
 @RunWith(SpringRunner.class)
@@ -76,6 +77,14 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 		then(s1.getPort()).isEqualTo(8080);
 		then(s1.getUri()).isEqualTo(URI.create("http://s11:8080"));
 		then(s1.isSecure()).isEqualTo(false);
+		then(s1.getScheme()).isEqualTo("http");
+
+		ServiceInstance s2 = this.discoveryClient.getInstances("service1").get(1);
+		then(s2.getHost()).isEqualTo("s12");
+		then(s2.getPort()).isEqualTo(8443);
+		then(s2.getUri()).isEqualTo(URI.create("https://s12:8443"));
+		then(s2.isSecure()).isEqualTo(true);
+		then(s2.getScheme()).isEqualTo("https");
 	}
 
 	@Test
