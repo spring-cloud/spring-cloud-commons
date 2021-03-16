@@ -99,6 +99,16 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
+	public void decryptEnvironmentPostProcessorDisabled() {
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
+				.web(WebApplicationType.NONE).properties("spring.config.use-legacy-processing=false", "encrypt.key:pie",
+						"spring.cloud.decrypt-environment-post-processor.enabled=false",
+						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
+				.run();
+		then(context.getEnvironment().getProperty("foo.password")).startsWith("{cipher}bf2945");
+	}
+
+	@Test
 	public void symmetricConfigurationProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
 				.web(WebApplicationType.NONE).properties("spring.config.use-legacy-processing=false", "encrypt.key:pie",

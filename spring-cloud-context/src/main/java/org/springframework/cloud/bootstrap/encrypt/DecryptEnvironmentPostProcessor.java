@@ -52,7 +52,7 @@ public class DecryptEnvironmentPostProcessor extends AbstractEnvironmentDecrypt
 
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-		if (bootstrapEnabled(environment) || useLegacyProcessing(environment)) {
+		if (bootstrapEnabled(environment) || useLegacyProcessing(environment) || !isEnabled(environment)) {
 			return;
 		}
 		if (!ClassUtils.isPresent("org.springframework.security.crypto.encrypt.TextEncryptor", null)) {
@@ -69,6 +69,10 @@ public class DecryptEnvironmentPostProcessor extends AbstractEnvironmentDecrypt
 			propertySources.addFirst(new SystemEnvironmentPropertySource(DECRYPTED_PROPERTY_SOURCE_NAME, map));
 		}
 
+	}
+
+	protected Boolean isEnabled(ConfigurableEnvironment environment) {
+		return environment.getProperty("spring.cloud.decrypt-environment-post-processor.enabled", Boolean.class, true);
 	}
 
 }

@@ -47,6 +47,12 @@
 			"type": "java.lang.String",
 			"description": "Comma separated list of class names for beans to never be refreshed or rebound.",
 			"defaultValue": true
+		},
+		{
+			"name": "spring.cloud.decrypt-environment-post-processor.enabled",
+			"type": "java.lang.Boolean",
+			"description": "Enable the DecryptEnvironmentPostProcessor.",
+			"defaultValue": true
 		}
 	]
 }
