@@ -17,6 +17,8 @@
 package org.springframework.cloud.context.refresh;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.boot.Banner;
 import org.springframework.boot.WebApplicationType;
@@ -26,6 +28,7 @@ import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
 import org.springframework.cloud.bootstrap.BootstrapConfigFileApplicationListener;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
@@ -57,8 +60,16 @@ public class LegacyContextRefresher extends ContextRefresher {
 		ConfigurableApplicationContext capture = null;
 		try {
 			StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
-			SpringApplicationBuilder builder = new SpringApplicationBuilder(Empty.class)
-					.properties(BOOTSTRAP_ENABLED_PROPERTY + "=true").bannerMode(Banner.Mode.OFF)
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("spring.jmx.enabled", false);
+			map.put("spring.main.sources", "");
+			// gh-678 without this apps with this property set to REACTIVE or SERVLET fail
+			map.put("spring.main.web-application-type", "NONE");
+			map.put(BOOTSTRAP_ENABLED_PROPERTY, Boolean.TRUE.toString());
+			environment.getPropertySources().addFirst(new MapPropertySource(REFRESH_ARGS_PROPERTY_SOURCE, map));
+
+			SpringApplicationBuilder builder = new SpringApplicationBuilder(Empty.class).bannerMode(Banner.Mode.OFF)
 					.web(WebApplicationType.NONE).environment(environment);
 			// Just the listeners that affect the environment (e.g. excluding logging
 			// listener because it has side effects)

@@ -36,7 +36,6 @@ import org.springframework.core.env.CommandLinePropertySource;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
@@ -131,12 +130,6 @@ public abstract class ContextRefresher {
 		}
 		environment.setActiveProfiles(input.getActiveProfiles());
 		environment.setDefaultProfiles(input.getDefaultProfiles());
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("spring.jmx.enabled", false);
-		map.put("spring.main.sources", "");
-		// gh-678 without this apps with this property set to REACTIVE or SERVLET fail
-		map.put("spring.main.web-application-type", "NONE");
-		capturedPropertySources.addFirst(new MapPropertySource(REFRESH_ARGS_PROPERTY_SOURCE, map));
 		return environment;
 	}
 

@@ -70,7 +70,8 @@ public abstract class TextEncryptorUtils {
 	}
 
 	/**
-	 * Register all classes that need a {@link TextEncryptor} in {@link TextEncryptorConfigBootstrapper}.
+	 * Register all classes that need a {@link TextEncryptor} in
+	 * {@link TextEncryptorConfigBootstrapper}.
 	 * @param registry the BootstrapRegistry.
 	 */
 	public static void register(BootstrapRegistry registry) {
@@ -156,8 +157,8 @@ public abstract class TextEncryptorUtils {
 	}
 
 	/**
-	 * Method to check if legacy bootstrap mode is enabled. This is either if the
-	 * boot legacy processing property is set or spring.cloud.bootstrap.enabled=true.
+	 * Method to check if legacy bootstrap mode is enabled. This is either if the boot
+	 * legacy processing property is set or spring.cloud.bootstrap.enabled=true.
 	 * @param environment where to check properties.
 	 * @return true if bootstrap enabled.
 	 */

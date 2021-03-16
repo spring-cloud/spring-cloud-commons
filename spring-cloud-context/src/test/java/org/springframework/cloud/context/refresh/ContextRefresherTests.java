@@ -78,7 +78,6 @@ public class ContextRefresherTests {
 	}
 
 	@Test
-	@Ignore // FIXME: legacy
 	public void bootstrapPropertySourceAlwaysFirst() {
 		// Use spring.cloud.bootstrap.name to switch off the defaults (which would pick up
 		// a bootstrapProperties immediately
