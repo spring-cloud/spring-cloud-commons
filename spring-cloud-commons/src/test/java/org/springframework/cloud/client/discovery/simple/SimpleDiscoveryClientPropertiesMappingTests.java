@@ -79,14 +79,6 @@ public class SimpleDiscoveryClientPropertiesMappingTests {
 		then(s1.getPort()).isEqualTo(8080);
 		then(s1.getUri()).isEqualTo(URI.create("http://s11:8080"));
 		then(s1.isSecure()).isEqualTo(false);
-		then(s1.getScheme()).isEqualTo("http");
-
-		ServiceInstance s2 = this.discoveryClient.getInstances("service1").get(1);
-		then(s2.getHost()).isEqualTo("s12");
-		then(s2.getPort()).isEqualTo(8443);
-		then(s2.getUri()).isEqualTo(URI.create("https://s12:8443"));
-		then(s2.isSecure()).isEqualTo(true);
-		then(s2.getScheme()).isEqualTo("https");
 	}
 
 	@Test
