@@ -33,6 +33,16 @@
 			"name": "spring.cloud.loadbalancer.configurations",
 			"description": "Enables a predefined LoadBalancer configuration.",
 			"type": "java.lang.String"
+		},
+		{
+			"name": "spring.cloud.loadbalancer.eager-load.enabled",
+			"description": "Enables eager load of clients context.",
+			"type": "java.lang.Boolean"
+		},
+		{
+			"name": "spring.cloud.loadbalancer.eager-load.clients",
+			"description": "Names of the clients.",
+			"type": "java.util.List"
 		}
 	]
 }
