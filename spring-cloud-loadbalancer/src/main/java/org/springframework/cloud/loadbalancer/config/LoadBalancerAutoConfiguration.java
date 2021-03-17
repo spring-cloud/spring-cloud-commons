@@ -25,11 +25,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
+import org.springframework.cloud.client.loadbalancer.LoadbalancerEagerLoadProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerEagerContextInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -66,4 +68,10 @@ public class LoadBalancerAutoConfiguration {
 		return clientFactory;
 	}
 
+	@Bean
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.eager-load.enabled", havingValue = "true")
+	public LoadBalancerEagerContextInitializer loadBalancerEagerContextInitializer(
+			LoadBalancerClientFactory clientFactory, LoadbalancerEagerLoadProperties properties) {
+		return new LoadBalancerEagerContextInitializer(clientFactory, properties.getClients());
+	}
 }
