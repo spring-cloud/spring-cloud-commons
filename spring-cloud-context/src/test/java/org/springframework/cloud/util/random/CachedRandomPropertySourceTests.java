@@ -66,12 +66,12 @@ public class CachedRandomPropertySourceTests {
 
 		then(cachedRandomPropertySource.getProperty("cachedrandom.app.long")).isEqualTo(1234L);
 		then(cachedRandomPropertySource.getProperty("cachedrandom.foo.long")).isEqualTo(5678L);
-		System.err.println(output);
-		then(StringUtils.countOccurrencesOf(output.toString(), "No cached value found for key: app")).isEqualTo(1);
-		then(StringUtils.countOccurrencesOf(output.toString(),
+		String str = output.toString();
+		then(StringUtils.countOccurrencesOf(str, "No cached value found for key: app")).isEqualTo(1);
+		then(StringUtils.countOccurrencesOf(str,
 				"No random value found in cache for key: app and type: long, generating a new value")).isEqualTo(1);
-		then(StringUtils.countOccurrencesOf(output.toString(), "No cached value found for key: foo")).isEqualTo(0);
-		then(StringUtils.countOccurrencesOf(output.toString(),
+		then(StringUtils.countOccurrencesOf(str, "No cached value found for key: foo")).isEqualTo(0);
+		then(StringUtils.countOccurrencesOf(str,
 				"No random value found in cache for key: foot and type: long, generating a new value")).isEqualTo(0);
 	}
 
