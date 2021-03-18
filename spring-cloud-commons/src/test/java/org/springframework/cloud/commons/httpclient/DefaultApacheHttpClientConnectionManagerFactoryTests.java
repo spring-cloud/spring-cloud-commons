@@ -28,7 +28,9 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.impl.conn.DefaultHttpClientConnectionOperator;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 
 import org.springframework.util.ReflectionUtils;
 
@@ -65,6 +67,7 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 	}
 
 	@Test
+	@DisabledForJreRange(min = JRE.JAVA_16)
 	public void newConnectionManagerWithSSL() {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
 				.newConnectionManager(false, 2, 6);
@@ -75,6 +78,7 @@ public class DefaultApacheHttpClientConnectionManagerFactoryTests {
 	}
 
 	@Test
+	@DisabledForJreRange(min = JRE.JAVA_16)
 	public void newConnectionManagerWithDisabledSSLValidation() {
 		HttpClientConnectionManager connectionManager = new DefaultApacheHttpClientConnectionManagerFactory()
 				.newConnectionManager(true, 2, 6);
