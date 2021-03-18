@@ -18,6 +18,8 @@ package org.springframework.cloud.util.random;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,11 +27,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,7 +38,6 @@ import static org.mockito.Mockito.when;
  * @author Ryan Baxter
  */
 @ExtendWith(MockitoExtension.class)
-@ExtendWith(OutputCaptureExtension.class)
 @DirtiesContext
 public class CachedRandomPropertySourceTests {
 
@@ -51,11 +49,13 @@ public class CachedRandomPropertySourceTests {
 		when(randomValuePropertySource.getProperty(eq("random.long"))).thenReturn(1234L);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void getProperty(CapturedOutput output) {
-		Map<String, Map<String, Object>> cache = new HashMap<>();
-		Map<String, Object> typeCache = new HashMap<>();
+	public void getProperty() {
+		HashMap<String, AtomicInteger> keyCount = new HashMap<>();
+		HashMap<Map<String, Object>, String> typeToKeyLookup = new HashMap<>();
+		HashMap<String, AtomicInteger> typeCount = new HashMap<>();
+		Map<String, Map<String, Object>> cache = createCache(keyCount, typeToKeyLookup, typeCount);
+		Map<String, Object> typeCache = createTypeCache(typeToKeyLookup, typeCount);
 		typeCache.put("long", 5678L);
 		cache.put("foo", typeCache);
 
@@ -66,13 +66,46 @@ public class CachedRandomPropertySourceTests {
 
 		then(cachedRandomPropertySource.getProperty("cachedrandom.app.long")).isEqualTo(1234L);
 		then(cachedRandomPropertySource.getProperty("cachedrandom.foo.long")).isEqualTo(5678L);
-		String str = output.toString();
-		then(StringUtils.countOccurrencesOf(str, "No cached value found for key: app")).isEqualTo(1);
-		then(StringUtils.countOccurrencesOf(str,
-				"No random value found in cache for key: app and type: long, generating a new value")).isEqualTo(1);
-		then(StringUtils.countOccurrencesOf(str, "No cached value found for key: foo")).isEqualTo(0);
-		then(StringUtils.countOccurrencesOf(str,
-				"No random value found in cache for key: foot and type: long, generating a new value")).isEqualTo(0);
+		then(keyCount).containsOnlyKeys("app"); // verifies foo wasn't computed
+		then(keyCount.get("app").get()).isEqualTo(1);
+		then(typeCount).containsOnlyKeys("app.long"); // verifies foo.long wasn't computed
+		then(typeCount.get("app.long").get()).isEqualTo(1);
+	}
+
+	private HashMap<String, Map<String, Object>> createCache(HashMap<String, AtomicInteger> keyCount,
+			HashMap<Map<String, Object>, String> typeToKeyLookup, HashMap<String, AtomicInteger> typeCount) {
+		return new HashMap<String, Map<String, Object>>() {
+			@Override
+			public Map<String, Object> computeIfAbsent(String key,
+					Function<? super String, ? extends Map<String, Object>> mappingFunction) {
+				boolean computed = false;
+				if (!containsKey(key)) {
+					keyCount.computeIfAbsent(key, s -> new AtomicInteger()).incrementAndGet();
+					computed = true;
+				}
+				Map<String, Object> value = super.computeIfAbsent(key, mappingFunction);
+				if (computed && value.isEmpty()) {
+					// replace value with instrumented map
+					value = createTypeCache(typeToKeyLookup, typeCount);
+					typeToKeyLookup.put(value, key);
+				}
+				return value;
+			}
+		};
+	}
+
+	private HashMap<String, Object> createTypeCache(HashMap<Map<String, Object>, String> typeToKeyLookup,
+			HashMap<String, AtomicInteger> typeCount) {
+		return new HashMap<String, Object>() {
+			@Override
+			public Object computeIfAbsent(String key, Function<? super String, ?> mappingFunction) {
+				if (!containsKey(key)) {
+					String parentKey = typeToKeyLookup.get(this);
+					typeCount.computeIfAbsent(parentKey + "." + key, s -> new AtomicInteger()).incrementAndGet();
+				}
+				return super.computeIfAbsent(key, mappingFunction);
+			}
+		};
 	}
 
 }
