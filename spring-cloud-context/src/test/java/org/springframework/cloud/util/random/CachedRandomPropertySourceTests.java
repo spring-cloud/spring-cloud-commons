@@ -18,59 +18,60 @@ package org.springframework.cloud.util.random;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.util.StringUtils;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Ryan Baxter
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@ExtendWith(OutputCaptureExtension.class)
 @DirtiesContext
 public class CachedRandomPropertySourceTests {
 
 	@Mock
 	private PropertySource randomValuePropertySource;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		when(randomValuePropertySource.getProperty(eq("random.long"))).thenReturn(1234L);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void getProperty() {
+	public void getProperty(CapturedOutput output) {
 		Map<String, Map<String, Object>> cache = new HashMap<>();
 		Map<String, Object> typeCache = new HashMap<>();
 		typeCache.put("long", 5678L);
-		Map<String, Object> spyedTypeCache = spy(typeCache);
-		cache.put("foo", spyedTypeCache);
-		Map<String, Map<String, Object>> spyedCache = spy(cache);
+		cache.put("foo", typeCache);
 
 		CachedRandomPropertySource cachedRandomPropertySource = new CachedRandomPropertySource(
-				randomValuePropertySource, spyedCache);
+				randomValuePropertySource, cache);
 		then(cachedRandomPropertySource.getProperty("foo.app.long")).isNull();
 		then(cachedRandomPropertySource.getProperty("cachedrandom.app")).isNull();
 
 		then(cachedRandomPropertySource.getProperty("cachedrandom.app.long")).isEqualTo(1234L);
 		then(cachedRandomPropertySource.getProperty("cachedrandom.foo.long")).isEqualTo(5678L);
-		verify(spyedCache, times(1)).computeIfAbsent(eq("app"), isA(Function.class));
-		verify(spyedTypeCache, times(1)).computeIfAbsent(eq("long"), isA(Function.class));
+		then(StringUtils.countOccurrencesOf(output.toString(), "No cached value found for key: app")).isEqualTo(1);
+		then(StringUtils.countOccurrencesOf(output.toString(),
+				"No random value found in cache for key: app and type: long, generating a new value")).isEqualTo(1);
+		then(StringUtils.countOccurrencesOf(output.toString(), "No cached value found for key: foo")).isEqualTo(0);
+		then(StringUtils.countOccurrencesOf(output.toString(),
+				"No random value found in cache for key: foot and type: long, generating a new value")).isEqualTo(0);
 	}
 
 }

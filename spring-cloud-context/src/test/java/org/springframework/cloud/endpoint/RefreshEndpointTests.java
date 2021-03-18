@@ -23,9 +23,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 
 import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.WebApplicationType;
@@ -59,7 +61,7 @@ public class RefreshEndpointTests {
 
 	private ConfigurableApplicationContext context;
 
-	@After
+	@AfterEach
 	public void close() {
 		if (this.context != null) {
 			this.context.close();
@@ -67,7 +69,7 @@ public class RefreshEndpointTests {
 	}
 
 	@Test
-	@Ignore // FIXME: legacy
+	@Disabled // FIXME: legacy
 	public void keysComputedWhenAdded() throws Exception {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
 				.properties("spring.config.use-legacy-processing=true", "spring.cloud.bootstrap.name:none").run();
@@ -81,7 +83,7 @@ public class RefreshEndpointTests {
 	}
 
 	@Test
-	@Ignore // FIXME: legacy
+	@Disabled // FIXME: legacy
 	public void keysComputedWhenOveridden() throws Exception {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
 				.properties("spring.config.use-legacy-processing=true", "spring.cloud.bootstrap.name:none").run();
@@ -95,7 +97,6 @@ public class RefreshEndpointTests {
 	}
 
 	@Test
-	@Ignore // FIXME: legacy
 	public void keysComputedWhenChangesInExternalProperties() throws Exception {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
 				.properties("spring.cloud.bootstrap.name:none", "spring.config.use-legacy-processing=true").run();
@@ -142,6 +143,7 @@ public class RefreshEndpointTests {
 	}
 
 	@Test
+	@DisabledForJreRange(min = JRE.JAVA_16) // FIXME:
 	public void shutdownHooksCleaned() {
 		try (ConfigurableApplicationContext context = new SpringApplicationBuilder(Empty.class)
 				.web(WebApplicationType.NONE).bannerMode(Mode.OFF).run()) {
