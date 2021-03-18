@@ -28,7 +28,7 @@
 	<properties>
 		<bintray.package>commons</bintray.package>
 		<evictor.version>1.0.0</evictor.version>
-		<spring-security-oauth2-autoconfigure.version>2.1.2.RELEASE</spring-security-oauth2-autoconfigure.version>
+		<spring-security-oauth2-autoconfigure.version>2.4.3</spring-security-oauth2-autoconfigure.version>
 	</properties>
 	<build>
 		<plugins>
