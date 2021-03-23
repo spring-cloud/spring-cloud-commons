@@ -35,6 +35,7 @@ import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -65,7 +66,7 @@ class HintBasedServiceInstanceListSupplierTests {
 	@BeforeEach
 	void setUp() {
 		properties.setHintHeaderName("X-Test");
-		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(first, second, third)));
+		when(delegate.get(any())).thenReturn(Flux.just(Arrays.asList(first, second, third)));
 	}
 
 	@Test
