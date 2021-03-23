@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,14 +50,14 @@ public class RetryAwareServiceInstanceListSupplier extends DelegatingServiceInst
 	@Override
 	public Flux<List<ServiceInstance>> get(Request request) {
 		if (!(request.getContext() instanceof RetryableRequestContext)) {
-			return get();
+			return delegate.get(request);
 		}
 		RetryableRequestContext context = (RetryableRequestContext) request.getContext();
 		ServiceInstance previousServiceInstance = context.getPreviousServiceInstance();
 		if (previousServiceInstance == null) {
-			return get();
+			return delegate.get(request);
 		}
-		return get().map(instances -> filteredByPreviousInstance(instances, previousServiceInstance));
+		return delegate.get(request).map(instances -> filteredByPreviousInstance(instances, previousServiceInstance));
 	}
 
 	private List<ServiceInstance> filteredByPreviousInstance(List<ServiceInstance> instances,
