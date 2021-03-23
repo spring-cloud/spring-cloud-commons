@@ -53,7 +53,7 @@ public class HintBasedServiceInstanceListSupplier extends DelegatingServiceInsta
 
 	@Override
 	public Flux<List<ServiceInstance>> get(Request request) {
-		return get().map(instances -> filteredByHint(instances, getHint(request.getContext())));
+		return delegate.get(request).map(instances -> filteredByHint(instances, getHint(request.getContext())));
 	}
 
 	private String getHint(Object requestContext) {

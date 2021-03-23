@@ -61,21 +61,21 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 		if ((context instanceof RequestDataContext)) {
 			MultiValueMap<String, String> cookies = ((RequestDataContext) context).getClientRequest().getCookies();
 			if (cookies == null) {
-				return get();
+				return delegate.get(request);
 			}
 			// We expect there to be one value in this cookie
 			String cookie = cookies.getFirst(instanceIdCookieName);
 			if (cookie != null) {
-				return get().map(serviceInstances -> selectInstance(serviceInstances, cookie));
+				return delegate.get(request).map(serviceInstances -> selectInstance(serviceInstances, cookie));
 			}
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Cookie not found. Returning all instances returned by delegate.");
 			}
-			return get();
+			return delegate.get(request);
 		}
 		// If the object type is not RequestData, we return all the instances provided by
 		// the delegate.
-		return get();
+		return delegate.get(request);
 	}
 
 	private List<ServiceInstance> selectInstance(List<ServiceInstance> serviceInstances, String cookie) {

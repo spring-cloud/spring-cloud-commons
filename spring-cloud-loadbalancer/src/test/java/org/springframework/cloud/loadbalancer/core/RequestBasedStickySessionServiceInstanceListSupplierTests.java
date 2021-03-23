@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,7 +67,7 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 
 	@BeforeEach
 	void setUp() {
-		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(first, second, third)));
+		when(delegate.get(any())).thenReturn(Flux.just(Arrays.asList(first, second, third)));
 	}
 
 	@Test
