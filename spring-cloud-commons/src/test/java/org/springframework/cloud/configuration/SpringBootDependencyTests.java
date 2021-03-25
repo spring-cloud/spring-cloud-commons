@@ -173,11 +173,22 @@ public class SpringBootDependencyTests {
 		then(verificationResult.action).isEmpty();
 	}
 
-	// @Ignore // FIXME: https://github.com/spring-cloud/spring-cloud-commons/issues/717
 	@Test
 	public void should_match_against_current_manifest() {
-		verifyCurrentVersionFromManifest("2.4");
-		verifyCurrentVersionFromManifest("2.4.x");
+		try {
+			verifyCurrentVersionFromManifest("2.4");
+			verifyCurrentVersionFromManifest("2.4.x");
+		}
+		catch (AssertionError e) {
+			if (e.getMessage() != null && e.getMessage().contains("2.5.")) {
+				// we're likely running a boot 2.5 compatibility test, try 2.5
+				verifyCurrentVersionFromManifest("2.5");
+				verifyCurrentVersionFromManifest("2.5.x");
+			}
+			else {
+				throw e;
+			}
+		}
 	}
 
 	private void verifyCurrentVersionFromManifest(String version) {
