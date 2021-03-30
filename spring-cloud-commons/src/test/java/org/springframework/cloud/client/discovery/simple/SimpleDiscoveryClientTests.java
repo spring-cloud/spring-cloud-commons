@@ -33,6 +33,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Biju Kunjummen
  * @author Charu Covindane
+ * @author Olga Maciaszek-Sharma
  */
 public class SimpleDiscoveryClientTests {
 
@@ -43,7 +44,7 @@ public class SimpleDiscoveryClientTests {
 		SimpleDiscoveryProperties simpleDiscoveryProperties = new SimpleDiscoveryProperties();
 
 		Map<String, List<DefaultServiceInstance>> map = new HashMap<>();
-		DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null, "host1", 8080, false);
+		DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null, "host1", 8080, false, "http");
 		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null, "host2", 8443, true);
 		map.put("service1", Arrays.asList(service1Inst1, service1Inst2));
 		simpleDiscoveryProperties.setInstances(map);
