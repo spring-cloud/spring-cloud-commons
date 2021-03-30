@@ -49,9 +49,9 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 		return ORDER;
 	}
 
-	public abstract boolean shouldProcessEnvironment(Environment environment);
+	protected abstract boolean shouldProcessEnvironment(Environment environment);
 
-	public abstract String getPrefix();
+	protected abstract String getPrefix();
 
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
