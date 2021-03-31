@@ -38,6 +38,8 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 	 */
 	public static final String CONFIG_IMPORT_PROPERTY = "spring.config.import";
 
+	private static final Bindable<String[]> CONFIG_DATA_LOCATION_ARRAY = Bindable.of(String[].class);
+
 	/**
 	 * Order of post processor, set to run after
 	 * {@link ConfigDataEnvironmentPostProcessor}.
@@ -71,7 +73,6 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 		List<String> property = environment.getProperty(CONFIG_IMPORT_PROPERTY, List.class);
 		if (property == null || property.isEmpty()) {
 			Binder binder = Binder.get(environment);
-			Bindable<String[]> CONFIG_DATA_LOCATION_ARRAY = Bindable.of(String[].class);
 			property = Arrays
 					.asList(binder.bind(CONFIG_IMPORT_PROPERTY, CONFIG_DATA_LOCATION_ARRAY).orElse(new String[0]));
 		}
