@@ -845,6 +845,8 @@ have been provided for it. In order to get instances to select from reactive `Se
 is used. Currently we support a service-discovery-based implementation of `ServiceInstanceListSupplier`
 that retrieves available instances from Service Discovery using a <<discovery-client, Discovery Client>> available in the classpath.
 
+TIP: It is possible to disable Spring Cloud LoadBalancer by setting the value of `spring.cloud.loadbalancer.enabled` to `false`.
+
 === Switching between the load-balancing algorithms
 
 The `ReactiveLoadBalancer` implementation that is used by default is `RoundRobinLoadBalancer`. To switch to a different implementation, either for selected services or all of them, you can use the <<custom-loadbalancer-configuration, custom LoadBalancer configurations mechanism>>.
