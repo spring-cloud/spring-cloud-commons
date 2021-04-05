@@ -20,10 +20,15 @@ package org.springframework.cloud.client.circuitbreaker;
  * Creates circuit breakers based on the underlying implementation.
  *
  * @author Ryan Baxter
+ * @author Andrii Bohutskyi
  */
 public abstract class CircuitBreakerFactory<CONF, CONFB extends ConfigBuilder<CONF>>
 		extends AbstractCircuitBreakerFactory<CONF, CONFB> {
 
 	public abstract CircuitBreaker create(String id);
+
+	public CircuitBreaker create(String id, String groupName) {
+		return create(id);
+	}
 
 }
