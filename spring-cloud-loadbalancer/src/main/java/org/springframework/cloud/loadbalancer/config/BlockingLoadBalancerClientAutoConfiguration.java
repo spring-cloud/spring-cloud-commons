@@ -27,6 +27,7 @@ import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfig
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
@@ -75,8 +76,8 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		LoadBalancedRetryFactory loadBalancedRetryFactory(LoadBalancerProperties properties) {
-			return new BlockingLoadBalancedRetryFactory(properties);
+		LoadBalancedRetryFactory loadBalancedRetryFactory(LoadBalancerPropertiesFactory propertiesFactory) {
+			return new BlockingLoadBalancedRetryFactory(propertiesFactory);
 		}
 
 	}

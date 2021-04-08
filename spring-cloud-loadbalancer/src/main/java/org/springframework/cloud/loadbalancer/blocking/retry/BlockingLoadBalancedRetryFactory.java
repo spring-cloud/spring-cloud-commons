@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.blocking.retry;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryPolicy;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
 import org.springframework.cloud.client.loadbalancer.ServiceInstanceChooser;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 
@@ -31,15 +32,31 @@ import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalanc
  */
 public class BlockingLoadBalancedRetryFactory implements LoadBalancedRetryFactory {
 
-	private final LoadBalancerProperties loadBalancerProperties;
+	private LoadBalancerProperties loadBalancerProperties;
 
+	private LoadBalancerPropertiesFactory factoryProperties;
+
+	@Deprecated
 	public BlockingLoadBalancedRetryFactory(LoadBalancerProperties loadBalancerProperties) {
 		this.loadBalancerProperties = loadBalancerProperties;
 	}
 
+	public BlockingLoadBalancedRetryFactory(LoadBalancerPropertiesFactory factoryProperties) {
+		this.factoryProperties = factoryProperties;
+	}
+
 	@Override
 	public LoadBalancedRetryPolicy createRetryPolicy(String serviceId, ServiceInstanceChooser serviceInstanceChooser) {
-		return new BlockingLoadBalancedRetryPolicy(loadBalancerProperties);
+		return new BlockingLoadBalancedRetryPolicy(getLoadBalancerProperties(serviceId));
+	}
+
+	@Deprecated
+	private LoadBalancerProperties getLoadBalancerProperties(String serviceId) {
+		if (factoryProperties != null) {
+			return factoryProperties.getLoadBalancerProperties(serviceId);
+		} else {
+			return loadBalancerProperties;
+		}
 	}
 
 }

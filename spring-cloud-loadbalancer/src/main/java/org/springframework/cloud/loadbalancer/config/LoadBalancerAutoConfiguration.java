@@ -20,10 +20,13 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
@@ -39,7 +42,7 @@ import org.springframework.core.env.Environment;
  */
 @Configuration(proxyBeanMethods = false)
 @LoadBalancerClients
-@EnableConfigurationProperties(LoadBalancerProperties.class)
+@EnableConfigurationProperties({ LoadBalancerProperties.class, LoadBalancerServiceProperties.class })
 @AutoConfigureBefore({ ReactorLoadBalancerClientAutoConfiguration.class,
 		LoadBalancerBeanPostProcessorAutoConfiguration.class })
 public class LoadBalancerAutoConfiguration {
@@ -62,6 +65,13 @@ public class LoadBalancerAutoConfiguration {
 		LoadBalancerClientFactory clientFactory = new LoadBalancerClientFactory();
 		clientFactory.setConfigurations(this.configurations.getIfAvailable(Collections::emptyList));
 		return clientFactory;
+	}
+
+	@Bean
+	public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties properties,
+			LoadBalancerServiceProperties servicesProperties,
+			@Value("${spring.cloud.loadbalancer.service.configuration.enabled:false}") boolean isServiceProperties) {
+		return new LoadBalancerPropertiesFactory(properties, servicesProperties, isServiceProperties);
 	}
 
 }
