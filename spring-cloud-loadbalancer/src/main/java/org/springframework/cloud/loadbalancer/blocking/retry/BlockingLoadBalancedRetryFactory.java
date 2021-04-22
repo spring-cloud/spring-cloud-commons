@@ -28,21 +28,28 @@ import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalanc
  * {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  * @since 2.2.6
  */
 public class BlockingLoadBalancedRetryFactory implements LoadBalancedRetryFactory {
 
-	private LoadBalancerProperties loadBalancerProperties;
+	private final LoadBalancerProperties loadBalancerProperties;
 
-	private LoadBalancerPropertiesFactory factoryProperties;
+	private LoadBalancerPropertiesFactory propertiesFactory;
 
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #BlockingLoadBalancedRetryFactory(LoadBalancerProperties, LoadBalancerPropertiesFactory)}
+	 */
 	@Deprecated
 	public BlockingLoadBalancedRetryFactory(LoadBalancerProperties loadBalancerProperties) {
 		this.loadBalancerProperties = loadBalancerProperties;
 	}
 
-	public BlockingLoadBalancedRetryFactory(LoadBalancerPropertiesFactory factoryProperties) {
-		this.factoryProperties = factoryProperties;
+	public BlockingLoadBalancedRetryFactory(LoadBalancerProperties loadBalancerProperties,
+											LoadBalancerPropertiesFactory propertiesFactory) {
+		this.loadBalancerProperties = loadBalancerProperties;
+		this.propertiesFactory = propertiesFactory;
 	}
 
 	@Override
@@ -52,8 +59,8 @@ public class BlockingLoadBalancedRetryFactory implements LoadBalancedRetryFactor
 
 	@Deprecated
 	private LoadBalancerProperties getLoadBalancerProperties(String serviceId) {
-		if (factoryProperties != null) {
-			return factoryProperties.getLoadBalancerProperties(serviceId);
+		if (propertiesFactory != null) {
+			return propertiesFactory.getLoadBalancerProperties(serviceId);
 		} else {
 			return loadBalancerProperties;
 		}

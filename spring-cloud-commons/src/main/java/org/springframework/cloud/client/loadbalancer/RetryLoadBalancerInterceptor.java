@@ -42,6 +42,7 @@ import org.springframework.util.StreamUtils;
  * @author Will Tran
  * @author Gang Li
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class RetryLoadBalancerInterceptor implements ClientHttpRequestInterceptor {
@@ -58,6 +59,13 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
+	private LoadBalancerPropertiesFactory propertiesFactory;
+
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #RetryLoadBalancerInterceptor(LoadBalancerClient, LoadBalancerProperties, LoadBalancerRequestFactory, LoadBalancedRetryFactory, ReactiveLoadBalancer.Factory, LoadBalancerPropertiesFactory)}.
+	 */
+	@Deprecated
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerProperties properties,
 			LoadBalancerRequestFactory requestFactory, LoadBalancedRetryFactory lbRetryFactory,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
@@ -66,6 +74,14 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		this.requestFactory = requestFactory;
 		this.lbRetryFactory = lbRetryFactory;
 		this.loadBalancerFactory = loadBalancerFactory;
+	}
+
+	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerProperties properties,
+			LoadBalancerRequestFactory requestFactory, LoadBalancedRetryFactory lbRetryFactory,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			LoadBalancerPropertiesFactory propertiesFactory) {
+		this(loadBalancer, properties, requestFactory, lbRetryFactory, loadBalancerFactory);
+		this.propertiesFactory = propertiesFactory;
 	}
 
 	@Override
@@ -159,15 +175,24 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		if (retryListeners != null && retryListeners.length != 0) {
 			template.setListeners(retryListeners);
 		}
-		template.setRetryPolicy(!properties.getRetry().isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
+		template.setRetryPolicy(!getLoadBalancerProperties(serviceName).getRetry().isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
 				: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer, serviceName));
 		return template;
 	}
 
 	private String getHint(String serviceId) {
-		String defaultHint = properties.getHint().getOrDefault("default", "default");
-		String hintPropertyValue = properties.getHint().get(serviceId);
+		String defaultHint = getLoadBalancerProperties(serviceId).getHint().getOrDefault("default", "default");
+		String hintPropertyValue = getLoadBalancerProperties(serviceId).getHint().get(serviceId);
 		return hintPropertyValue != null ? hintPropertyValue : defaultHint;
+	}
+
+	@Deprecated
+	private LoadBalancerProperties getLoadBalancerProperties(String serviceId) {
+		if (propertiesFactory != null) {
+			return propertiesFactory.getLoadBalancerProperties(serviceId);
+		} else {
+			return properties;
+		}
 	}
 
 }

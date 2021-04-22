@@ -32,6 +32,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequestAdapter;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
@@ -49,6 +50,7 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoa
  * The default {@link LoadBalancerClient} implementation.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  * @since 2.2.0
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -58,11 +60,23 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	private final LoadBalancerProperties properties;
 
+	private LoadBalancerPropertiesFactory propertiesFactory;
+
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #BlockingLoadBalancerClient(LoadBalancerClientFactory, LoadBalancerProperties, LoadBalancerPropertiesFactory)}
+	 */
+	@Deprecated
 	public BlockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
 			LoadBalancerProperties properties) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 		this.properties = properties;
+	}
 
+	public BlockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
+			LoadBalancerProperties properties, LoadBalancerPropertiesFactory propertiesFactory) {
+		this(loadBalancerClientFactory, properties);
+		this.propertiesFactory = propertiesFactory;
 	}
 
 	@Override
@@ -155,9 +169,18 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	}
 
 	private String getHint(String serviceId) {
-		String defaultHint = properties.getHint().getOrDefault("default", "default");
-		String hintPropertyValue = properties.getHint().get(serviceId);
+		String defaultHint = getLoadBalancerProperties(serviceId).getHint().getOrDefault("default", "default");
+		String hintPropertyValue = getLoadBalancerProperties(serviceId).getHint().get(serviceId);
 		return hintPropertyValue != null ? hintPropertyValue : defaultHint;
+	}
+
+	@Deprecated
+	private LoadBalancerProperties getLoadBalancerProperties(String serviceId) {
+		if (propertiesFactory != null) {
+			return propertiesFactory.getLoadBalancerProperties(serviceId);
+		} else {
+			return properties;
+		}
 	}
 
 }

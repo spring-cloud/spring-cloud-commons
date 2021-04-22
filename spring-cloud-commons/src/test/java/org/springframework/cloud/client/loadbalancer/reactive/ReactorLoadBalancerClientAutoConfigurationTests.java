@@ -25,6 +25,8 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -165,6 +167,17 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		@Bean
 		LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
+		}
+
+		@Bean
+		public LoadBalancerServiceProperties loadBalancerServiceProperties() {
+			return new LoadBalancerServiceProperties();
+		}
+
+		@Bean
+		public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties properties,
+				LoadBalancerServiceProperties serviceProperties) {
+			return new LoadBalancerPropertiesFactory(properties, serviceProperties, false);
 		}
 
 	}

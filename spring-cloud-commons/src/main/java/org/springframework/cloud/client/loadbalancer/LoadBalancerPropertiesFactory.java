@@ -16,11 +16,16 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+/**
+ * Factory class used to provide client properties.
+ *
+ * @author Andrii Bohutskyi
+ */
 public class LoadBalancerPropertiesFactory {
 
-	private final LoadBalancerServiceProperties servicesProperties;
-
 	private final LoadBalancerProperties properties;
+
+	private final LoadBalancerServiceProperties servicesProperties;
 
 	private final boolean isServiceProperties;
 

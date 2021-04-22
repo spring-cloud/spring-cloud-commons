@@ -47,25 +47,24 @@ import static org.mockito.Mockito.when;
  * Tests for {@link RetryableLoadBalancerExchangeFilterFunction}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  * @since 3.0.0
  */
 @SuppressWarnings("unchecked")
-class RetryableLoadBalancerExchangeFilterFunctionTests {
-
-	private final LoadBalancerProperties properties = new LoadBalancerProperties();
+class RetryableLoadBalancerExchangeFilterFunctionPerServiceTests {
 
 	private final LoadBalancerServiceProperties serviceProperties = new LoadBalancerServiceProperties();
 
-	private final LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(properties,
-			serviceProperties, false);
+	private final LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(new LoadBalancerProperties(),
+			serviceProperties, true);
 
 	private final LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
-			properties, propertiesFactory);
+			new LoadBalancerProperties(), propertiesFactory);
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
 
 	private final RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-			policy, factory, properties, Collections.emptyList(), propertiesFactory);
+			policy, factory, new LoadBalancerProperties(), Collections.emptyList(), propertiesFactory);
 
 	private final ClientRequest clientRequest = mock(ClientRequest.class);
 
@@ -77,8 +76,10 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 	@BeforeEach
 	void setUp() {
-		properties.getRetry().setMaxRetriesOnSameServiceInstance(1);
-		properties.getRetry().getRetryableStatusCodes().add(404);
+		serviceProperties.getServices().put("test", new LoadBalancerProperties());
+		serviceProperties.getServices().get("test").getRetry().setMaxRetriesOnSameServiceInstance(1);
+		serviceProperties.getServices().get("test").getRetry().getRetryableStatusCodes().add(404);
+
 		when(clientRequest.url()).thenReturn(URI.create("http://test"));
 		when(factory.getInstance("test")).thenReturn(new TestReactiveLoadBalancer());
 		when(clientRequest.headers()).thenReturn(new HttpHeaders());
@@ -160,5 +161,4 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 		inOrder.verify(factory, times(1)).getInstance(any());
 		inOrder.verify(next, times(2)).exchange(any());
 	}
-
 }

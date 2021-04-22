@@ -17,20 +17,35 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
 import org.springframework.http.HttpMethod;
 
 /**
  * The default implementation of {@link LoadBalancerRetryPolicy}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  * @since 3.0.0
  */
 public class RetryableExchangeFilterFunctionLoadBalancerRetryPolicy implements LoadBalancerRetryPolicy {
 
 	private final LoadBalancerProperties properties;
 
+	private LoadBalancerPropertiesFactory propertiesFactory;
+
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(LoadBalancerProperties, LoadBalancerPropertiesFactory)}
+	 */
+	@Deprecated
 	public RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(LoadBalancerProperties properties) {
 		this.properties = properties;
+	}
+
+	public RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(LoadBalancerProperties properties,
+			LoadBalancerPropertiesFactory propertiesFactory) {
+		this.properties = properties;
+		this.propertiesFactory = propertiesFactory;
 	}
 
 	@Override
@@ -39,8 +54,21 @@ public class RetryableExchangeFilterFunctionLoadBalancerRetryPolicy implements L
 	}
 
 	@Override
+	public boolean canRetrySameServiceInstance(String serviceId, LoadBalancerRetryContext context) {
+		return context.getRetriesSameServiceInstance() < getLoadBalancerProperties(serviceId).getRetry()
+				.getMaxRetriesOnSameServiceInstance();
+	}
+
+	@Override
 	public boolean canRetryNextServiceInstance(LoadBalancerRetryContext context) {
 		return context.getRetriesNextServiceInstance() < properties.getRetry().getMaxRetriesOnNextServiceInstance();
+	}
+
+	@Override
+	public boolean canRetryNextServiceInstance(String serviceId, LoadBalancerRetryContext context) {
+		return context.getRetriesNextServiceInstance() < getLoadBalancerProperties(serviceId).getRetry()
+				.getMaxRetriesOnNextServiceInstance();
+
 	}
 
 	@Override
@@ -49,8 +77,29 @@ public class RetryableExchangeFilterFunctionLoadBalancerRetryPolicy implements L
 	}
 
 	@Override
+	public boolean retryableStatusCode(String serviceId, int statusCode) {
+		return getLoadBalancerProperties(serviceId).getRetry().getRetryableStatusCodes().contains(statusCode);
+	}
+
+	@Override
 	public boolean canRetryOnMethod(HttpMethod method) {
 		return HttpMethod.GET.equals(method) || properties.getRetry().isRetryOnAllOperations();
+	}
+
+	@Override
+	public boolean canRetryOnMethod(String serviceId, HttpMethod method) {
+		return HttpMethod.GET.equals(method)
+				|| getLoadBalancerProperties(serviceId).getRetry().isRetryOnAllOperations();
+	}
+
+	@Deprecated
+	private LoadBalancerProperties getLoadBalancerProperties(String serviceId) {
+		if (propertiesFactory != null) {
+			return propertiesFactory.getLoadBalancerProperties(serviceId);
+		}
+		else {
+			return properties;
+		}
 	}
 
 }

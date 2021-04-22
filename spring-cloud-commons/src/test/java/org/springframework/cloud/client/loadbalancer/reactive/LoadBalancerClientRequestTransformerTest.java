@@ -26,6 +26,8 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -49,8 +51,13 @@ class LoadBalancerClientRequestTransformerTest {
 
 	private final LoadBalancerProperties properties = new LoadBalancerProperties();
 
+	private final LoadBalancerServiceProperties serviceProperties = new LoadBalancerServiceProperties();
+
+	private final LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(properties,
+			serviceProperties, false);
+
 	private final LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
-			properties);
+			properties, propertiesFactory);
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
 
@@ -75,7 +82,7 @@ class LoadBalancerClientRequestTransformerTest {
 	void transformReactorLoadBalancerExchangeFilterFunction() {
 		ArgumentCaptor<ClientRequest> captor = ArgumentCaptor.forClass(ClientRequest.class);
 		ReactorLoadBalancerExchangeFilterFunction filterFunction = new ReactorLoadBalancerExchangeFilterFunction(
-				factory, properties, Arrays.asList(new Transformer1(), new Transformer2()));
+				factory, properties, Arrays.asList(new Transformer1(), new Transformer2()), propertiesFactory);
 		filterFunction.filter(clientRequest, next).subscribe();
 		verify(next).exchange(captor.capture());
 		HttpHeaders headers = captor.getValue().headers();
@@ -87,7 +94,7 @@ class LoadBalancerClientRequestTransformerTest {
 	void transformRetryableLoadBalancerExchangeFilterFunction() {
 		ArgumentCaptor<ClientRequest> captor = ArgumentCaptor.forClass(ClientRequest.class);
 		RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-				policy, factory, properties, Arrays.asList(new Transformer1(), new Transformer2()));
+				policy, factory, properties, Arrays.asList(new Transformer1(), new Transformer2()), propertiesFactory);
 		filterFunction.filter(clientRequest, next).subscribe();
 		verify(next).exchange(captor.capture());
 		HttpHeaders headers = captor.getValue().headers();

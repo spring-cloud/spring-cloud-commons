@@ -28,6 +28,8 @@ import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerCacheAutoConfiguration;
@@ -109,13 +111,24 @@ class CachingServiceInstanceListSupplierTests {
 
 		@Bean
 		BlockingLoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
-				LoadBalancerProperties properties) {
-			return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
+				LoadBalancerProperties properties, LoadBalancerPropertiesFactory propertiesFactory) {
+			return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties, propertiesFactory);
 		}
 
 		@Bean
 		public LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
+		}
+
+		@Bean
+		public LoadBalancerServiceProperties loadBalancerServiceProperties() {
+			return new LoadBalancerServiceProperties();
+		}
+
+		@Bean
+		public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties properties,
+				LoadBalancerServiceProperties serviceProperties) {
+			return new LoadBalancerPropertiesFactory(properties, serviceProperties, false);
 		}
 
 		@Bean

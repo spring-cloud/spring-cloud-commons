@@ -28,6 +28,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
@@ -42,6 +43,7 @@ import org.springframework.web.client.RestTemplate;
  * An autoconfiguration for {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  * @since 2.1.3
  */
 @Configuration(proxyBeanMethods = false)
@@ -56,8 +58,8 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	@ConditionalOnMissingBean
 	public LoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
-			LoadBalancerProperties properties) {
-		return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
+			LoadBalancerProperties properties, LoadBalancerPropertiesFactory propertiesFactory) {
+		return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties, propertiesFactory);
 	}
 
 	@Bean
@@ -65,19 +67,20 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 			havingValue = "true")
 	@ConditionalOnMissingBean(LoadBalancerServiceInstanceCookieTransformer.class)
 	public LoadBalancerServiceInstanceCookieTransformer loadBalancerServiceInstanceCookieTransformer(
-			LoadBalancerProperties properties) {
-		return new LoadBalancerServiceInstanceCookieTransformer(properties.getStickySession());
+			LoadBalancerProperties properties, LoadBalancerPropertiesFactory propertiesFactory) {
+		return new LoadBalancerServiceInstanceCookieTransformer(properties.getStickySession(), propertiesFactory);
 	}
 
 	@Configuration
 	@ConditionalOnClass(RetryTemplate.class)
-	@EnableConfigurationProperties(LoadBalancerProperties.class)
+	@EnableConfigurationProperties({ LoadBalancerProperties.class, LoadBalancerServiceProperties.class })
 	protected static class BlockingLoadBalancerRetryConfig {
 
 		@Bean
 		@ConditionalOnMissingBean
-		LoadBalancedRetryFactory loadBalancedRetryFactory(LoadBalancerPropertiesFactory propertiesFactory) {
-			return new BlockingLoadBalancedRetryFactory(propertiesFactory);
+		LoadBalancedRetryFactory loadBalancedRetryFactory(LoadBalancerProperties properties,
+				LoadBalancerPropertiesFactory propertiesFactory) {
+			return new BlockingLoadBalancedRetryFactory(properties, propertiesFactory);
 		}
 
 	}

@@ -30,6 +30,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -39,12 +40,15 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory.PROPERTY_NAME;
+
 /**
  * A Builder for creating a {@link ServiceInstanceListSupplier} hierarchy to be used in
  * {@link ReactorLoadBalancer} configuration.
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  */
 public final class ServiceInstanceListSupplierBuilder {
 
@@ -113,7 +117,9 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withHealthChecks() {
 		DelegateCreator creator = (context, delegate) -> {
-			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			String serviceId = context.getEnvironment().getProperty(PROPERTY_NAME);
+			final LoadBalancerProperties properties = context.getBean(LoadBalancerPropertiesFactory.class)
+					.getLoadBalancerProperties(serviceId);
 			WebClient.Builder webClient = context.getBean(WebClient.Builder.class);
 			return healthCheckServiceInstanceListSupplier(webClient.build(), delegate, properties);
 		};
@@ -129,7 +135,9 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withHealthChecks(WebClient webClient) {
 		DelegateCreator creator = (context, delegate) -> {
-			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			String serviceId = context.getEnvironment().getProperty(PROPERTY_NAME);
+			final LoadBalancerProperties properties = context.getBean(LoadBalancerPropertiesFactory.class)
+					.getLoadBalancerProperties(serviceId);
 			return healthCheckServiceInstanceListSupplier(webClient, delegate, properties);
 		};
 		this.creators.add(creator);
@@ -156,7 +164,9 @@ public final class ServiceInstanceListSupplierBuilder {
 	public ServiceInstanceListSupplierBuilder withBlockingHealthChecks() {
 		DelegateCreator creator = (context, delegate) -> {
 			RestTemplate restTemplate = context.getBean(RestTemplate.class);
-			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			String serviceId = context.getEnvironment().getProperty(PROPERTY_NAME);
+			final LoadBalancerProperties properties = context.getBean(LoadBalancerPropertiesFactory.class)
+					.getLoadBalancerProperties(serviceId);
 			return blockingHealthCheckServiceInstanceListSupplier(restTemplate, delegate, properties);
 		};
 		this.creators.add(creator);
@@ -171,7 +181,9 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withBlockingHealthChecks(RestTemplate restTemplate) {
 		DelegateCreator creator = (context, delegate) -> {
-			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			String serviceId = context.getEnvironment().getProperty(PROPERTY_NAME);
+			final LoadBalancerProperties properties = context.getBean(LoadBalancerPropertiesFactory.class)
+					.getLoadBalancerProperties(serviceId);
 			return blockingHealthCheckServiceInstanceListSupplier(restTemplate, delegate, properties);
 		};
 		this.creators.add(creator);
@@ -199,7 +211,9 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withRequestBasedStickySession() {
 		DelegateCreator creator = (context, delegate) -> {
-			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			String serviceId = context.getEnvironment().getProperty(PROPERTY_NAME);
+			final LoadBalancerProperties properties = context.getBean(LoadBalancerPropertiesFactory.class)
+					.getLoadBalancerProperties(serviceId);
 			return new RequestBasedStickySessionServiceInstanceListSupplier(delegate, properties);
 		};
 		this.creators.add(creator);
@@ -241,7 +255,9 @@ public final class ServiceInstanceListSupplierBuilder {
 
 	public ServiceInstanceListSupplierBuilder withHints() {
 		DelegateCreator creator = (context, delegate) -> {
-			LoadBalancerProperties properties = context.getBean(LoadBalancerProperties.class);
+			String serviceId = context.getEnvironment().getProperty(PROPERTY_NAME);
+			final LoadBalancerProperties properties = context.getBean(LoadBalancerPropertiesFactory.class)
+					.getLoadBalancerProperties(serviceId);
 			return new HintBasedServiceInstanceListSupplier(delegate, properties);
 		};
 		creators.add(creator);

@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -47,12 +48,21 @@ import org.springframework.web.client.RestTemplate;
  * @author Will Tran
  * @author Gang Li
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RestTemplate.class)
 @ConditionalOnBean(LoadBalancerClient.class)
-@EnableConfigurationProperties(LoadBalancerProperties.class)
+@EnableConfigurationProperties({ LoadBalancerProperties.class, LoadBalancerServiceProperties.class })
 public class LoadBalancerAutoConfiguration {
+
+	@Bean
+	@ConditionalOnMissingBean
+	public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties properties,
+			LoadBalancerServiceProperties servicesProperties,
+			@Value("${spring.cloud.loadbalancer.service.configuration.enabled:false}") boolean isServiceProperties) {
+		return new LoadBalancerPropertiesFactory(properties, servicesProperties, isServiceProperties);
+	}
 
 	@LoadBalanced
 	@Autowired(required = false)
@@ -149,9 +159,10 @@ public class LoadBalancerAutoConfiguration {
 		public RetryLoadBalancerInterceptor loadBalancerInterceptor(LoadBalancerClient loadBalancerClient,
 				LoadBalancerProperties properties, LoadBalancerRequestFactory requestFactory,
 				LoadBalancedRetryFactory loadBalancedRetryFactory,
-				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+				LoadBalancerPropertiesFactory propertiesFactory) {
 			return new RetryLoadBalancerInterceptor(loadBalancerClient, properties, requestFactory,
-					loadBalancedRetryFactory, loadBalancerFactory);
+					loadBalancedRetryFactory, loadBalancerFactory, propertiesFactory);
 		}
 
 		@Bean

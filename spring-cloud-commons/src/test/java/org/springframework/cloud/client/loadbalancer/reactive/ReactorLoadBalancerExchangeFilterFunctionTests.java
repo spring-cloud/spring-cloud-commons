@@ -42,6 +42,8 @@ import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
@@ -204,6 +206,17 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		@Bean
 		LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
+		}
+
+		@Bean
+		public LoadBalancerServiceProperties loadBalancerServiceProperties() {
+			return new LoadBalancerServiceProperties();
+		}
+
+		@Bean
+		public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties properties,
+				LoadBalancerServiceProperties serviceProperties) {
+			return new LoadBalancerPropertiesFactory(properties, serviceProperties, false);
 		}
 
 	}

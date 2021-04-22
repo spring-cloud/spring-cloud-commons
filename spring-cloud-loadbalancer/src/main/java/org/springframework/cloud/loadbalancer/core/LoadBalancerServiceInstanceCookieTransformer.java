@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequestTransformer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -33,14 +34,28 @@ import org.springframework.util.StringUtils;
  * the {@link ServiceInstance} selected by the {@link LoadBalancerClient} in a cookie.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  * @since 3.0.2
  */
 public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalancerRequestTransformer {
 
 	private final LoadBalancerProperties.StickySession stickySessionProperties;
 
+	private LoadBalancerPropertiesFactory propertiesFactory;
+
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #LoadBalancerServiceInstanceCookieTransformer(LoadBalancerProperties.StickySession, LoadBalancerPropertiesFactory)}
+	 */
+	@Deprecated
 	public LoadBalancerServiceInstanceCookieTransformer(LoadBalancerProperties.StickySession stickySessionProperties) {
 		this.stickySessionProperties = stickySessionProperties;
+	}
+
+	public LoadBalancerServiceInstanceCookieTransformer(LoadBalancerProperties.StickySession stickySessionProperties,
+			LoadBalancerPropertiesFactory propertiesFactory) {
+		this.stickySessionProperties = stickySessionProperties;
+		this.propertiesFactory = propertiesFactory;
 	}
 
 	@Override
@@ -48,7 +63,7 @@ public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalance
 		if (instance == null) {
 			return request;
 		}
-		String instanceIdCookieName = stickySessionProperties.getInstanceIdCookieName();
+		String instanceIdCookieName = getLoadBalancerProperties(instance.getServiceId()).getInstanceIdCookieName();
 		if (!StringUtils.hasText(instanceIdCookieName)) {
 			return request;
 		}
@@ -58,6 +73,16 @@ public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalance
 		cookieHeaders.add(serviceInstanceCookie);
 		headers.put(HttpHeaders.COOKIE, cookieHeaders);
 		return request;
+	}
+
+	@Deprecated
+	private LoadBalancerProperties.StickySession getLoadBalancerProperties(String serviceId) {
+		if (propertiesFactory != null) {
+			return propertiesFactory.getLoadBalancerProperties(serviceId).getStickySession();
+		}
+		else {
+			return stickySessionProperties;
+		}
 	}
 
 }

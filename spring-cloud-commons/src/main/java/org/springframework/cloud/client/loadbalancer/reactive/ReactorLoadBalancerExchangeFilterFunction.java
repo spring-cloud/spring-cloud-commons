@@ -32,6 +32,7 @@ import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
@@ -52,6 +53,7 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFil
  * requests against a correct {@link ServiceInstance}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  * @since 2.2.0
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -65,6 +67,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 
 	private final List<LoadBalancerClientRequestTransformer> transformers;
 
+	private LoadBalancerPropertiesFactory propertiesFactory;
+
 	/**
 	 * @deprecated Deprecated in favor of
 	 * {@link #ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}.
@@ -77,11 +81,29 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 		this(loadBalancerFactory, properties, Collections.emptyList());
 	}
 
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, LoadBalancerProperties, List, LoadBalancerPropertiesFactory)}
+	 */
+	@Deprecated
 	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerProperties properties, List<LoadBalancerClientRequestTransformer> transformers) {
 		this.loadBalancerFactory = loadBalancerFactory;
 		this.properties = properties;
 		this.transformers = transformers;
+	}
+
+	/**
+	 * @param loadBalancerFactory the loadbalancer factory
+	 * @param properties the properties for SC LoadBalancer
+	 * @param transformers LoadBalancer request transformers
+	 * @param propertiesFactory the client LoadBalancer properties factory
+	 */
+	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			LoadBalancerProperties properties, List<LoadBalancerClientRequestTransformer> transformers,
+			LoadBalancerPropertiesFactory propertiesFactory) {
+		this(loadBalancerFactory, properties, transformers);
+		this.propertiesFactory = propertiesFactory;
 	}
 
 	@Override
@@ -99,7 +121,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 				.getSupportedLifecycleProcessors(
 						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
 						RequestDataContext.class, ResponseData.class, ServiceInstance.class);
-		String hint = getHint(serviceId, properties.getHint());
+		String hint = getHint(serviceId, getLoadBalancerProperties(serviceId).getHint());
 		RequestData requestData = new RequestData(clientRequest);
 		DefaultRequest<RequestDataContext> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData, hint));
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
@@ -120,7 +142,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 				LOG.debug(String.format("LoadBalancer has retrieved the instance for service %s: %s", serviceId,
 						instance.getUri()));
 			}
-			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
+			LoadBalancerProperties.StickySession stickySessionProperties = getLoadBalancerProperties(serviceId)
+					.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
 					stickySessionProperties.getInstanceIdCookieName(),
 					stickySessionProperties.isAddServiceInstanceCookie(), transformers);
@@ -141,6 +164,16 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 			return Mono.just(new EmptyResponse());
 		}
 		return Mono.from(loadBalancer.choose(request));
+	}
+
+	@Deprecated
+	private LoadBalancerProperties getLoadBalancerProperties(String serviceId) {
+		if (propertiesFactory != null) {
+			return propertiesFactory.getLoadBalancerProperties(serviceId);
+		}
+		else {
+			return properties;
+		}
 	}
 
 }

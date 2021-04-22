@@ -1228,6 +1228,25 @@ NOTE: The meters are registered in the registry when at least one record is adde
 
 TIP: You can further configure the behavior of those metrics (for example, add https://micrometer.io/docs/concepts#_histograms_and_percentiles[publishing percentiles and histograms]) by https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-metrics-per-meter-properties[adding `MeterFilters`].
 
+=== Spring Cloud LoadBalancer per client configuration
+You can configure multiple loadBalancer clients by using `spring.cloud.loadbalancer.client.services[]` property:
+====
+[source,yaml]
+----
+spring:
+  cloud:
+    loadBalancer:
+      client:
+        services:
+          foo1:
+            retry:
+              retryOnAllOperations: true
+          foo2:
+            healthCheck:
+              refetchInstances: true
+----
+====
+
 == Spring Cloud Circuit Breaker
 
 include::spring-cloud-circuitbreaker.adoc[leveloffset=+1]

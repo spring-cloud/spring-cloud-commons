@@ -38,6 +38,7 @@ import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.Response;
@@ -60,6 +61,7 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFil
  * {@link LoadBalancerRetryPolicy}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Andrii Bohutskyi
  * @since 3.0.0
  */
 public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalancedExchangeFilterFunction {
@@ -77,6 +79,8 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 
 	private final List<LoadBalancerClientRequestTransformer> transformers;
 
+	private LoadBalancerPropertiesFactory propertiesFactory;
+
 	/**
 	 * @deprecated Deprecated in favor of
 	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}.
@@ -87,6 +91,11 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		this(retryPolicy, loadBalancerFactory, properties, Collections.emptyList());
 	}
 
+	/**
+	 * @deprecated Deprecated in favor of
+	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerProperties, List, LoadBalancerPropertiesFactory)}
+	 */
+	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
 			List<LoadBalancerClientRequestTransformer> transformers) {
@@ -96,13 +105,16 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		this.transformers = transformers;
 	}
 
+	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
+			List<LoadBalancerClientRequestTransformer> transformers, LoadBalancerPropertiesFactory propertiesFactory) {
+		this(retryPolicy, loadBalancerFactory, properties, transformers);
+		this.propertiesFactory = propertiesFactory;
+	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public Mono<ClientResponse> filter(ClientRequest clientRequest, ExchangeFunction next) {
-		LoadBalancerRetryContext loadBalancerRetryContext = new LoadBalancerRetryContext(clientRequest);
-		Retry exchangeRetry = buildRetrySpec(properties.getRetry().getMaxRetriesOnSameServiceInstance(), true);
-		Retry filterRetry = buildRetrySpec(properties.getRetry().getMaxRetriesOnNextServiceInstance(), false);
-
 		URI originalUrl = clientRequest.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
@@ -112,11 +124,18 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 			}
 			return Mono.just(ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
+
+		LoadBalancerRetryContext loadBalancerRetryContext = new LoadBalancerRetryContext(clientRequest);
+		Retry exchangeRetry = buildRetrySpec(serviceId,
+				getLoadBalancerProperties(serviceId).getRetry().getMaxRetriesOnSameServiceInstance(), true);
+		Retry filterRetry = buildRetrySpec(serviceId,
+				getLoadBalancerProperties(serviceId).getRetry().getMaxRetriesOnNextServiceInstance(), false);
+
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
 						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
 						RetryableRequestContext.class, ResponseData.class, ServiceInstance.class);
-		String hint = getHint(serviceId, properties.getHint());
+		String hint = getHint(serviceId, getLoadBalancerProperties(serviceId).getHint());
 		RequestData requestData = new RequestData(clientRequest);
 		DefaultRequest<RetryableRequestContext> lbRequest = new DefaultRequest<>(
 				new RetryableRequestContext(null, requestData, hint));
@@ -140,7 +159,8 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 				LOG.debug(String.format("LoadBalancer has retrieved the instance for service %s: %s", serviceId,
 						instance.getUri()));
 			}
-			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
+			LoadBalancerProperties.StickySession stickySessionProperties = getLoadBalancerProperties(serviceId)
+					.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
 					stickySessionProperties.getInstanceIdCookieName(),
 					stickySessionProperties.isAddServiceInstanceCookie(), transformers);
@@ -154,7 +174,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 									lbRequest, lbResponse, new ResponseData(clientResponse, requestData)))))
 					.map(clientResponse -> {
 						loadBalancerRetryContext.setClientResponse(clientResponse);
-						if (shouldRetrySameServiceInstance(loadBalancerRetryContext)) {
+						if (shouldRetrySameServiceInstance(serviceId, loadBalancerRetryContext)) {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug(String.format("Retrying on status code: %d",
 										clientResponse.statusCode().value()));
@@ -166,7 +186,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 					});
 		}).map(clientResponse -> {
 			loadBalancerRetryContext.setClientResponse(clientResponse);
-			if (shouldRetryNextServiceInstance(loadBalancerRetryContext)) {
+			if (shouldRetryNextServiceInstance(serviceId, loadBalancerRetryContext)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format("Retrying on status code: %d", clientResponse.statusCode().value()));
 				}
@@ -177,8 +197,9 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		}).retryWhen(exchangeRetry)).retryWhen(filterRetry);
 	}
 
-	private Retry buildRetrySpec(int max, boolean transientErrors) {
-		LoadBalancerProperties.Retry.Backoff backoffProperties = properties.getRetry().getBackoff();
+	private Retry buildRetrySpec(String serviceId, int max, boolean transientErrors) {
+		LoadBalancerProperties.Retry.Backoff backoffProperties = getLoadBalancerProperties(serviceId).getRetry()
+				.getBackoff();
 		if (backoffProperties.isEnabled()) {
 			return RetrySpec.backoff(max, backoffProperties.getMinBackoff()).filter(this::isRetryException)
 					.maxBackoff(backoffProperties.getMaxBackoff()).jitter(backoffProperties.getJitter())
@@ -187,20 +208,24 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		return RetrySpec.max(max).filter(this::isRetryException).transientErrors(transientErrors);
 	}
 
-	private boolean shouldRetrySameServiceInstance(LoadBalancerRetryContext loadBalancerRetryContext) {
-		boolean shouldRetry = retryPolicy.retryableStatusCode(loadBalancerRetryContext.getResponseStatusCode())
-				&& retryPolicy.canRetryOnMethod(loadBalancerRetryContext.getRequestMethod())
-				&& retryPolicy.canRetrySameServiceInstance(loadBalancerRetryContext);
+	private boolean shouldRetrySameServiceInstance(String serviceId,
+			LoadBalancerRetryContext loadBalancerRetryContext) {
+		boolean shouldRetry = retryPolicy.retryableStatusCode(serviceId,
+				loadBalancerRetryContext.getResponseStatusCode())
+				&& retryPolicy.canRetryOnMethod(serviceId, loadBalancerRetryContext.getRequestMethod())
+				&& retryPolicy.canRetrySameServiceInstance(serviceId, loadBalancerRetryContext);
 		if (shouldRetry) {
 			loadBalancerRetryContext.incrementRetriesSameServiceInstance();
 		}
 		return shouldRetry;
 	}
 
-	private boolean shouldRetryNextServiceInstance(LoadBalancerRetryContext loadBalancerRetryContext) {
-		boolean shouldRetry = retryPolicy.retryableStatusCode(loadBalancerRetryContext.getResponseStatusCode())
-				&& retryPolicy.canRetryOnMethod(loadBalancerRetryContext.getRequestMethod())
-				&& retryPolicy.canRetryNextServiceInstance(loadBalancerRetryContext);
+	private boolean shouldRetryNextServiceInstance(String serviceId,
+			LoadBalancerRetryContext loadBalancerRetryContext) {
+		boolean shouldRetry = retryPolicy.retryableStatusCode(serviceId,
+				loadBalancerRetryContext.getResponseStatusCode())
+				&& retryPolicy.canRetryOnMethod(serviceId, loadBalancerRetryContext.getRequestMethod())
+				&& retryPolicy.canRetryNextServiceInstance(serviceId, loadBalancerRetryContext);
 		if (shouldRetry) {
 			loadBalancerRetryContext.incrementRetriesNextServiceInstance();
 			loadBalancerRetryContext.resetRetriesSameServiceInstance();
@@ -221,6 +246,15 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 			return Mono.just(new EmptyResponse());
 		}
 		return Mono.from(loadBalancer.choose(request));
+	}
+
+	@Deprecated
+	private LoadBalancerProperties getLoadBalancerProperties(String serviceId) {
+		if (propertiesFactory != null) {
+			return propertiesFactory.getLoadBalancerProperties(serviceId);
+		} else {
+			return properties;
+		}
 	}
 
 }

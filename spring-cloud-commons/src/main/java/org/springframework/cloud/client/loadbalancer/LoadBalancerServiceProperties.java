@@ -21,7 +21,12 @@ import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("spring.cloud.loadbalancer")
+/**
+ * A {@link ConfigurationProperties} bean for client LoadBalancer.
+ *
+ * @author Andrii Bohutskyi
+ */
+@ConfigurationProperties("spring.cloud.loadbalancer.client")
 public class LoadBalancerServiceProperties {
 
 	private Map<String, LoadBalancerProperties> services = new HashMap<>();
