@@ -134,8 +134,8 @@ function add_docs_from_target() {
 
 # Copies the docs by using the retrieved properties from Maven build
 function copy_docs_for_current_version() {
-    if [[ "${CURRENT_BRANCH}" == "master" ]] ; then
-        echo -e "Current branch is master - will copy the current docs only to the root folder"
+    if [[ "${CURRENT_BRANCH}" == "main" ]] ; then
+        echo -e "Current branch is main - will copy the current docs only to the root folder"
         for f in docs/target/generated-docs/*; do
             file=${f#docs/target/generated-docs/*}
             if ! git ls-files -i -o --exclude-standard --directory | grep -q ^$file$; then
@@ -249,7 +249,7 @@ The idea of this script is to update gh-pages branch with the generated docs. Wi
 the script will work in the following manner:
 
 - if there's no gh-pages / target for docs module then the script ends
-- for master branch the generated docs are copied to the root of gh-pages branch
+- for main branch the generated docs are copied to the root of gh-pages branch
 - for any other branch (if that branch is allowed) a subfolder with branch name is created
     and docs are copied there
 - if the version switch is passed (-v) then a tag with (v) prefix will be retrieved and a folder

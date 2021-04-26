@@ -50,7 +50,7 @@ public final class LoadBalancerUriTools {
 	}
 
 	// see original
-	// https://github.com/spring-cloud/spring-cloud-gateway/blob/master/spring-cloud-gateway-core/
+	// https://github.com/spring-cloud/spring-cloud-gateway/blob/main/spring-cloud-gateway-core/
 	// src/main/java/org/springframework/cloud/gateway/support/ServerWebExchangeUtils.java
 	private static boolean containsEncodedParts(URI uri) {
 		boolean encoded = (uri.getRawQuery() != null && uri.getRawQuery().contains(PERCENTAGE_SIGN))
