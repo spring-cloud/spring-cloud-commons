@@ -5,7 +5,7 @@ Edit the files in the src/main/asciidoc/ directory instead.
 ////
 
 
-image::https://github.com/spring-cloud/spring-cloud-commons/workflows/Build/badge.svg?branch=2.2.x&style=svg["Build",link="https://github.com/spring-cloud/spring-cloud-commons/actions"]
+image::https://circleci.com/gh/spring-cloud/spring-cloud-commons.svg?style=svg[Build Status, link=https://circleci.com/gh/spring-cloud/spring-cloud-commons]
 
 
 https://pivotal.io/platform-as-a-service/migrating-to-cloud-native-application-architectures-ebook[Cloud Native] is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development.
