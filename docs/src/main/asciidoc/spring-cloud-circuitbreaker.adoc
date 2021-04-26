@@ -86,7 +86,7 @@ the following documentation:
 
 * link:../../../../spring-cloud-circuitbreaker/current/reference/html/spring-cloud-circuitbreaker.html#configuring-resilience4j-circuit-breakers[Resilience4J]
 * link:https://github.com/alibaba/spring-cloud-alibaba/blob/master/spring-cloud-alibaba-docs/src/main/asciidoc/circuitbreaker-sentinel.adoc#circuit-breaker-spring-cloud-circuit-breaker-with-sentinel--configuring-sentinel-circuit-breakers[Sentinal]
-* link:../../../../spring-cloud-circuitbreaker/current/reference/html/spring-cloud-circuitbreaker.html#configuring-spring-retry-circuit-breakers[Spring Retry]
+* link:../../../../../spring-cloud-circuitbreaker/docs/current/reference/html/spring-cloud-circuitbreaker.html#configuring-spring-retry-circuit-breakers[Spring Retry]
 
 Some `CircuitBreaker` implementations such as `Resilience4JCircuitBreaker` call `customize` method every time `CircuitBreaker#run` is called.
 It can be inefficient. In that case, you can use `CircuitBreaker#once` method. It is useful where calling `customize` many times doesn't make sense,
