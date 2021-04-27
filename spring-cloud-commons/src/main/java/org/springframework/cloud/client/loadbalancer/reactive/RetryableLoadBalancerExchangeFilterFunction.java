@@ -125,6 +125,11 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 			return Mono.just(ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
 
+		if (!getLoadBalancerProperties(serviceId).getRetry().isEnabled()) {
+			return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory, properties, transformers,
+					propertiesFactory).filter(clientRequest, next);
+		}
+
 		LoadBalancerRetryContext loadBalancerRetryContext = new LoadBalancerRetryContext(clientRequest);
 		Retry exchangeRetry = buildRetrySpec(serviceId,
 				getLoadBalancerProperties(serviceId).getRetry().getMaxRetriesOnSameServiceInstance(), true);
@@ -252,7 +257,8 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 	private LoadBalancerProperties getLoadBalancerProperties(String serviceId) {
 		if (propertiesFactory != null) {
 			return propertiesFactory.getLoadBalancerProperties(serviceId);
-		} else {
+		}
+		else {
 			return properties;
 		}
 	}
