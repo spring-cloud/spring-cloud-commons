@@ -49,7 +49,6 @@
 |spring.cloud.loadbalancer.retry.max-retries-on-same-service-instance | `0` | Number of retries to be executed on the same <code>ServiceInstance</code>.
 |spring.cloud.loadbalancer.retry.retry-on-all-operations | `false` | Indicates retries should be attempted on operations other than {@link HttpMethod#GET}.
 |spring.cloud.loadbalancer.retry.retryable-status-codes |  | A {@link Set} of status codes that should trigger a retry.
-|spring.cloud.loadbalancer.ribbon.enabled | `true` | Causes `RibbonLoadBalancerClient` to be used by default.
 |spring.cloud.loadbalancer.service-discovery.timeout |  | String representation of Duration of the timeout for calls to service discovery.
 |spring.cloud.loadbalancer.sticky-session.add-service-instance-cookie | `false` | Indicates whether a cookie with the newly selected instance should be added by SC LoadBalancer.
 |spring.cloud.loadbalancer.sticky-session.instance-id-cookie-name | `sc-lb-instance-id` | The name of the cookie holding the preferred instance id.
