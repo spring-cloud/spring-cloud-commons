@@ -1229,7 +1229,11 @@ NOTE: The meters are registered in the registry when at least one record is adde
 TIP: You can further configure the behavior of those metrics (for example, add https://micrometer.io/docs/concepts#_histograms_and_percentiles[publishing percentiles and histograms]) by https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-metrics-per-meter-properties[adding `MeterFilters`].
 
 === Spring Cloud LoadBalancer per client configuration
-You can configure multiple loadBalancer clients by using `spring.cloud.loadbalancer.client.services[]` property:
+By default, to preserve backward compatibility, Spring Cloud LoadBalancer uses general `spring.cloud.loadbalancer` configuration.
+To enable per client configuration, set the `spring.cloud.loadbalancer.client.configuration.enabled` property to `true`.
+
+When per client configuration is enabled, you can configure multiple loadBalancer clients by using
+`spring.cloud.loadbalancer.client.services[]` properties:
 ====
 [source,yaml]
 ----
@@ -1237,13 +1241,28 @@ spring:
   cloud:
     loadBalancer:
       client:
-        services:
-          foo1:
-            retry:
-              retryOnAllOperations: true
-          foo2:
-            healthCheck:
-              refetchInstances: true
+        foo1:
+          retry:
+            retryOnAllOperations: true
+        foo2:
+          healthCheck:
+            refetchInstances: true
+----
+====
+
+You can also configure default properties for LoadBalancer:
+====
+[source,yaml]
+----
+spring:
+  cloud:
+    loadBalancer:
+      client:
+        default:
+          retry:
+            retryOnAllOperations: true
+          healthCheck:
+            refetchInstances: true
 ----
 ====
 

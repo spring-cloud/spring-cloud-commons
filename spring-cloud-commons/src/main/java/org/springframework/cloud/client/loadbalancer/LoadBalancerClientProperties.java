@@ -26,21 +26,21 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author Andrii Bohutskyi
  */
-@ConfigurationProperties("spring.cloud.loadbalancer.client")
-public class LoadBalancerServiceProperties {
+@ConfigurationProperties("spring.cloud.loadbalancer")
+public class LoadBalancerClientProperties {
 
-	private Map<String, LoadBalancerProperties> services = new HashMap<>();
+	private Map<String, LoadBalancerProperties> client = new HashMap<>();
 
-	public Map<String, LoadBalancerProperties> getServices() {
-		return services;
+	public Map<String, LoadBalancerProperties> getClient() {
+		return client;
 	}
 
-	public void setServices(Map<String, LoadBalancerProperties> services) {
-		this.services = services;
+	public void setClient(Map<String, LoadBalancerProperties> client) {
+		this.client = client;
 	}
 
-	public LoadBalancerProperties getDefaultServiceProperties() {
-		return services.getOrDefault("default", new LoadBalancerProperties());
+	public LoadBalancerProperties getDefaultClientProperties() {
+		return client.getOrDefault("default", new LoadBalancerProperties());
 	}
 
 }

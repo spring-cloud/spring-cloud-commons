@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class LoadBalancerServiceInstanceCookieTransformerPerServiceTests {
 
-	LoadBalancerServiceProperties serviceProperties = new LoadBalancerServiceProperties();
+	LoadBalancerClientProperties serviceProperties = new LoadBalancerClientProperties();
 
 	LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(new LoadBalancerProperties(),
 			serviceProperties, true);
@@ -76,8 +76,8 @@ class LoadBalancerServiceInstanceCookieTransformerPerServiceTests {
 
 	@Test
 	void shouldReturnPassedRequestWhenNullServiceInstanceCookieName() {
-		serviceProperties.getServices().put("test", new LoadBalancerProperties());
-		serviceProperties.getServices().get("test").getStickySession().setInstanceIdCookieName(null);
+		serviceProperties.getClient().put("test", new LoadBalancerProperties());
+		serviceProperties.getClient().get("test").getStickySession().setInstanceIdCookieName(null);
 
 		HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
 
@@ -86,8 +86,8 @@ class LoadBalancerServiceInstanceCookieTransformerPerServiceTests {
 
 	@Test
 	void shouldReturnPassedRequestWhenEmptyServiceInstanceCookieName() {
-		serviceProperties.getServices().put("test", new LoadBalancerProperties());
-		serviceProperties.getServices().get("test").getStickySession().setInstanceIdCookieName("");
+		serviceProperties.getClient().put("test", new LoadBalancerProperties());
+		serviceProperties.getClient().get("test").getStickySession().setInstanceIdCookieName("");
 
 		HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
 

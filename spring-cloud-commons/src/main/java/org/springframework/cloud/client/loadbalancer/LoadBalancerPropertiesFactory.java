@@ -23,26 +23,30 @@ package org.springframework.cloud.client.loadbalancer;
  */
 public class LoadBalancerPropertiesFactory {
 
-	private final LoadBalancerProperties properties;
+	private final LoadBalancerProperties globalProperties;
 
-	private final LoadBalancerServiceProperties servicesProperties;
+	private final LoadBalancerClientProperties servicesProperties;
 
 	private final boolean isServiceProperties;
 
-	public LoadBalancerPropertiesFactory(LoadBalancerProperties properties,
-			LoadBalancerServiceProperties servicesProperties, boolean isServiceProperties) {
-		this.properties = properties;
+	public LoadBalancerPropertiesFactory(LoadBalancerProperties globalProperties,
+			LoadBalancerClientProperties servicesProperties, boolean isServiceProperties) {
+		this.globalProperties = globalProperties;
 		this.servicesProperties = servicesProperties;
 		this.isServiceProperties = isServiceProperties;
 	}
 
 	public LoadBalancerProperties getLoadBalancerProperties(String serviceName) {
-		return isServiceProperties ? getLoadBalancerServiceProperties(serviceName) : properties;
+		return isServiceProperties ? getLoadBalancerServiceProperties(serviceName) : globalProperties;
+	}
+
+	public LoadBalancerProperties getGlobalLoadBalancerProperties() {
+		return globalProperties;
 	}
 
 	private LoadBalancerProperties getLoadBalancerServiceProperties(String serviceName) {
-		return servicesProperties.getServices().getOrDefault(serviceName,
-				servicesProperties.getDefaultServiceProperties());
+		return servicesProperties.getClient().getOrDefault(serviceName,
+				servicesProperties.getDefaultClientProperties());
 	}
 
 }

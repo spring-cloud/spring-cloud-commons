@@ -20,9 +20,9 @@ import org.junit.Test;
 
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -96,14 +96,14 @@ public class ServiceInstanceListSupplierBuilderTests {
 		}
 
 		@Bean
-		public LoadBalancerServiceProperties loadBalancerServiceProperties() {
-			return new LoadBalancerServiceProperties();
+		public LoadBalancerClientProperties loadBalancerServiceProperties() {
+			return new LoadBalancerClientProperties();
 		}
 
 		@Bean
-		public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties properties,
-				LoadBalancerServiceProperties serviceProperties) {
-			return new LoadBalancerPropertiesFactory(properties, serviceProperties, false);
+		public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties globalProperties,
+				LoadBalancerClientProperties serviceProperties) {
+			return new LoadBalancerPropertiesFactory(globalProperties, serviceProperties, false);
 		}
 
 		@Bean

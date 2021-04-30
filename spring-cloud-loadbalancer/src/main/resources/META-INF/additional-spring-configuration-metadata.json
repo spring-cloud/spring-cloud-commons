@@ -33,6 +33,12 @@
 			"name": "spring.cloud.loadbalancer.configurations",
 			"description": "Enables a predefined LoadBalancer configuration.",
 			"type": "java.lang.String"
+		},
+		{
+			"defaultValue": false,
+			"name": "spring.cloud.loadbalancer.client.configuration.enabled",
+			"description": "Enables per client LoadBalancer configuration.",
+			"type": "java.lang.Boolean"
 		}
 	]
 }

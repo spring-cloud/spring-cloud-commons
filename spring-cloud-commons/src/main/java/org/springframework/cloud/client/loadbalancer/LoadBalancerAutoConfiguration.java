@@ -53,15 +53,15 @@ import org.springframework.web.client.RestTemplate;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RestTemplate.class)
 @ConditionalOnBean(LoadBalancerClient.class)
-@EnableConfigurationProperties({ LoadBalancerProperties.class, LoadBalancerServiceProperties.class })
+@EnableConfigurationProperties({ LoadBalancerProperties.class, LoadBalancerClientProperties.class })
 public class LoadBalancerAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties properties,
-			LoadBalancerServiceProperties servicesProperties,
+	public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties globalProperties,
+			LoadBalancerClientProperties servicesProperties,
 			@Value("${spring.cloud.loadbalancer.service.configuration.enabled:false}") boolean isServiceProperties) {
-		return new LoadBalancerPropertiesFactory(properties, servicesProperties, isServiceProperties);
+		return new LoadBalancerPropertiesFactory(globalProperties, servicesProperties, isServiceProperties);
 	}
 
 	@LoadBalanced

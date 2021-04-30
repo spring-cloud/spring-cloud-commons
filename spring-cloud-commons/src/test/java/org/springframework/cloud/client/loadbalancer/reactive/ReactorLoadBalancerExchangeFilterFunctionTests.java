@@ -40,10 +40,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
@@ -209,14 +209,14 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		}
 
 		@Bean
-		public LoadBalancerServiceProperties loadBalancerServiceProperties() {
-			return new LoadBalancerServiceProperties();
+		public LoadBalancerClientProperties loadBalancerServiceProperties() {
+			return new LoadBalancerClientProperties();
 		}
 
 		@Bean
-		public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties properties,
-				LoadBalancerServiceProperties serviceProperties) {
-			return new LoadBalancerPropertiesFactory(properties, serviceProperties, false);
+		public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties globalProperties,
+				LoadBalancerClientProperties serviceProperties) {
+			return new LoadBalancerPropertiesFactory(globalProperties, serviceProperties, false);
 		}
 
 	}

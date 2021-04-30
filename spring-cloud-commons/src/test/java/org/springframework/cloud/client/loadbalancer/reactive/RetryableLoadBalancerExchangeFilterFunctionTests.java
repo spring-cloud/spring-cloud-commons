@@ -26,9 +26,9 @@ import org.mockito.InOrder;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -52,20 +52,20 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("unchecked")
 class RetryableLoadBalancerExchangeFilterFunctionTests {
 
-	private final LoadBalancerProperties properties = new LoadBalancerProperties();
+	private final LoadBalancerProperties globalProperties = new LoadBalancerProperties();
 
-	private final LoadBalancerServiceProperties serviceProperties = new LoadBalancerServiceProperties();
+	private final LoadBalancerClientProperties serviceProperties = new LoadBalancerClientProperties();
 
-	private final LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(properties,
+	private final LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(globalProperties,
 			serviceProperties, false);
 
 	private final LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
-			properties, propertiesFactory);
+			globalProperties, propertiesFactory);
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
 
 	private final RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-			policy, factory, properties, Collections.emptyList(), propertiesFactory);
+			policy, factory, globalProperties, Collections.emptyList(), propertiesFactory);
 
 	private final ClientRequest clientRequest = mock(ClientRequest.class);
 
@@ -77,8 +77,8 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 	@BeforeEach
 	void setUp() {
-		properties.getRetry().setMaxRetriesOnSameServiceInstance(1);
-		properties.getRetry().getRetryableStatusCodes().add(404);
+		globalProperties.getRetry().setMaxRetriesOnSameServiceInstance(1);
+		globalProperties.getRetry().getRetryableStatusCodes().add(404);
 		when(clientRequest.url()).thenReturn(URI.create("http://test"));
 		when(factory.getInstance("test")).thenReturn(new TestReactiveLoadBalancer());
 		when(clientRequest.headers()).thenReturn(new HttpHeaders());
@@ -144,7 +144,7 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 		properties.getRetry().setMaxRetriesOnSameServiceInstance(1);
 		properties.getRetry().getRetryableStatusCodes().add(404);
 		final LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(properties,
-				new LoadBalancerServiceProperties(), false);
+				new LoadBalancerClientProperties(), false);
 		LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties,
 				propertiesFactory);
 		RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(

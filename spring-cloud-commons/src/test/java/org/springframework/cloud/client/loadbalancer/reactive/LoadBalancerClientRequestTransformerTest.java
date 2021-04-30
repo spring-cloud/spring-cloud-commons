@@ -25,9 +25,9 @@ import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -49,15 +49,15 @@ import static org.mockito.Mockito.when;
  */
 class LoadBalancerClientRequestTransformerTest {
 
-	private final LoadBalancerProperties properties = new LoadBalancerProperties();
+	private final LoadBalancerProperties globalProperties = new LoadBalancerProperties();
 
-	private final LoadBalancerServiceProperties serviceProperties = new LoadBalancerServiceProperties();
+	private final LoadBalancerClientProperties serviceProperties = new LoadBalancerClientProperties();
 
-	private final LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(properties,
+	private final LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(globalProperties,
 			serviceProperties, false);
 
 	private final LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
-			properties, propertiesFactory);
+			globalProperties, propertiesFactory);
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
 
@@ -82,7 +82,7 @@ class LoadBalancerClientRequestTransformerTest {
 	void transformReactorLoadBalancerExchangeFilterFunction() {
 		ArgumentCaptor<ClientRequest> captor = ArgumentCaptor.forClass(ClientRequest.class);
 		ReactorLoadBalancerExchangeFilterFunction filterFunction = new ReactorLoadBalancerExchangeFilterFunction(
-				factory, properties, Arrays.asList(new Transformer1(), new Transformer2()), propertiesFactory);
+				factory, globalProperties, Arrays.asList(new Transformer1(), new Transformer2()), propertiesFactory);
 		filterFunction.filter(clientRequest, next).subscribe();
 		verify(next).exchange(captor.capture());
 		HttpHeaders headers = captor.getValue().headers();
@@ -94,7 +94,8 @@ class LoadBalancerClientRequestTransformerTest {
 	void transformRetryableLoadBalancerExchangeFilterFunction() {
 		ArgumentCaptor<ClientRequest> captor = ArgumentCaptor.forClass(ClientRequest.class);
 		RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-				policy, factory, properties, Arrays.asList(new Transformer1(), new Transformer2()), propertiesFactory);
+				policy, factory, globalProperties, Arrays.asList(new Transformer1(), new Transformer2()),
+				propertiesFactory);
 		filterFunction.filter(clientRequest, next).subscribe();
 		verify(next).exchange(captor.capture());
 		HttpHeaders headers = captor.getValue().headers();

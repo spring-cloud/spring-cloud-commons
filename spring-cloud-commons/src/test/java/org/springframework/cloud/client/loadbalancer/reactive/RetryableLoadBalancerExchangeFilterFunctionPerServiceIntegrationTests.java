@@ -42,10 +42,10 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
@@ -79,7 +79,7 @@ class RetryableLoadBalancerExchangeFilterFunctionPerServiceIntegrationTests {
 	private SimpleDiscoveryProperties properties;
 
 	@Autowired
-	private LoadBalancerServiceProperties serviceProperties;
+	private LoadBalancerClientProperties serviceProperties;
 
 	@Autowired
 	private ReactiveLoadBalancer.Factory<ServiceInstance> factory;
@@ -98,13 +98,13 @@ class RetryableLoadBalancerExchangeFilterFunctionPerServiceIntegrationTests {
 		properties.getInstances().put("testservice", Collections.singletonList(instance));
 		properties.getInstances().put("serviceWithNoLifecycleProcessors",
 				Collections.singletonList(instanceWithNoLifecycleProcessors));
-		serviceProperties.getServices().put("testservice", new LoadBalancerProperties());
+		serviceProperties.getClient().put("testservice", new LoadBalancerProperties());
 	}
 
 	@Test
 	void loadBalancerLifecycleCallbacksExecuted() {
 		final String callbackTestHint = "callbackTestHint";
-		serviceProperties.getServices().get("testservice").getHint().put("testservice", "callbackTestHint");
+		serviceProperties.getClient().get("testservice").getHint().put("testservice", "callbackTestHint");
 
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
 				.filter(this.loadBalancerFunction).build().get().uri("/callback").exchange().block();
@@ -141,8 +141,8 @@ class RetryableLoadBalancerExchangeFilterFunctionPerServiceIntegrationTests {
 
 	@Test
 	void correctResponseReturnedAfterRetryingOnSameServiceInstance() {
-		serviceProperties.getServices().get("testservice").getRetry().setMaxRetriesOnSameServiceInstance(1);
-		serviceProperties.getServices().get("testservice").getRetry().getRetryableStatusCodes().add(500);
+		serviceProperties.getClient().get("testservice").getRetry().setMaxRetriesOnSameServiceInstance(1);
+		serviceProperties.getClient().get("testservice").getRetry().getRetryableStatusCodes().add(500);
 
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
 				.filter(this.loadBalancerFunction).build().get().uri("/exception").exchange().block();
@@ -153,9 +153,9 @@ class RetryableLoadBalancerExchangeFilterFunctionPerServiceIntegrationTests {
 
 	@Test
 	void correctResponseReturnedAfterRetryingOnNextServiceInstanceWithBackoff() {
-		serviceProperties.getServices().put("retrytest", new LoadBalancerProperties());
-		serviceProperties.getServices().get("retrytest").getRetry().getBackoff().setEnabled(true);
-		serviceProperties.getServices().get("retrytest").getRetry().setMaxRetriesOnSameServiceInstance(1);
+		serviceProperties.getClient().put("retrytest", new LoadBalancerProperties());
+		serviceProperties.getClient().get("retrytest").getRetry().getBackoff().setEnabled(true);
+		serviceProperties.getClient().get("retrytest").getRetry().setMaxRetriesOnSameServiceInstance(1);
 
 		DefaultServiceInstance goodRetryTestInstance = new DefaultServiceInstance();
 		goodRetryTestInstance.setServiceId("retrytest");
@@ -164,7 +164,7 @@ class RetryableLoadBalancerExchangeFilterFunctionPerServiceIntegrationTests {
 		badRetryTestInstance.setServiceId("retrytest");
 		badRetryTestInstance.setUri(URI.create("http://localhost:" + 8080));
 		properties.getInstances().put("retrytest", Arrays.asList(badRetryTestInstance, goodRetryTestInstance));
-		serviceProperties.getServices().get("retrytest").getRetry().getRetryableStatusCodes().add(500);
+		serviceProperties.getClient().get("retrytest").getRetry().getRetryableStatusCodes().add(500);
 
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://retrytest")
 				.filter(this.loadBalancerFunction).build().get().uri("/hello").exchange().block();
@@ -242,8 +242,7 @@ class RetryableLoadBalancerExchangeFilterFunctionPerServiceIntegrationTests {
 
 				@Override
 				public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
-					return new DiscoveryClientBasedReactiveLoadBalancer(
-							serviceId, discoveryClient);
+					return new DiscoveryClientBasedReactiveLoadBalancer(serviceId, discoveryClient);
 				}
 
 				@Override
@@ -270,24 +269,23 @@ class RetryableLoadBalancerExchangeFilterFunctionPerServiceIntegrationTests {
 		}
 
 		@Bean
-		public LoadBalancerServiceProperties loadBalancerServiceProperties() {
-			return new LoadBalancerServiceProperties();
+		public LoadBalancerClientProperties loadBalancerServiceProperties() {
+			return new LoadBalancerClientProperties();
 		}
 
 		@Bean
-		public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties properties,
-				LoadBalancerServiceProperties serviceProperties) {
-			return new LoadBalancerPropertiesFactory(properties, serviceProperties, true);
+		public LoadBalancerPropertiesFactory loadBalancerPropertiesFactory(LoadBalancerProperties globalProperties,
+				LoadBalancerClientProperties serviceProperties) {
+			return new LoadBalancerPropertiesFactory(globalProperties, serviceProperties, true);
 		}
 
 		@Bean
-		RetryableLoadBalancerExchangeFilterFunction exchangeFilterFunction(
-				LoadBalancerProperties properties,
+		RetryableLoadBalancerExchangeFilterFunction exchangeFilterFunction(LoadBalancerProperties properties,
 				ReactiveLoadBalancer.Factory<ServiceInstance> factory,
 				LoadBalancerPropertiesFactory propertiesFactory) {
 			return new RetryableLoadBalancerExchangeFilterFunction(
-					new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties, propertiesFactory),
-					factory, properties, Collections.emptyList(), propertiesFactory);
+					new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties, propertiesFactory), factory,
+					properties, Collections.emptyList(), propertiesFactory);
 		}
 
 	}

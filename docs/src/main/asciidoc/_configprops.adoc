@@ -27,6 +27,8 @@
 |spring.cloud.loadbalancer.cache.capacity | `256` | Initial cache capacity expressed as int.
 |spring.cloud.loadbalancer.cache.enabled | `true` | Enables Spring Cloud LoadBalancer caching mechanism.
 |spring.cloud.loadbalancer.cache.ttl | `35s` | Time To Live - time counted from writing of the record, after which cache entries are expired, expressed as a {@link Duration}. The property {@link String} has to be in keeping with the appropriate syntax as specified in Spring Boot <code>StringToDurationConverter</code>. @see <a href= "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java">StringToDurationConverter.java</a>
+|spring.cloud.loadbalancer.client |  | 
+|spring.cloud.loadbalancer.client.configuration.enabled | `false` | Enables per client LoadBalancer configuration.
 |spring.cloud.loadbalancer.configurations | `default` | Enables a predefined LoadBalancer configuration.
 |spring.cloud.loadbalancer.health-check.initial-delay | `0` | Initial delay value for the HealthCheck scheduler.
 |spring.cloud.loadbalancer.health-check.interval | `25s` | Interval for rerunning the HealthCheck scheduler.

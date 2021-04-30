@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerPropertiesFactory;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerServiceProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
@@ -36,12 +36,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class LoadBalancerServiceInstanceCookieTransformerTests {
 
-	LoadBalancerProperties loadBalancerProperties = new LoadBalancerProperties();
+	LoadBalancerProperties globalProperties = new LoadBalancerProperties();
 
-	LoadBalancerProperties.StickySession stickySessionProperties = loadBalancerProperties.getStickySession();
+	LoadBalancerProperties.StickySession stickySessionProperties = globalProperties.getStickySession();
 
-	LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(loadBalancerProperties,
-			new LoadBalancerServiceProperties(), false);
+	LoadBalancerPropertiesFactory propertiesFactory = new LoadBalancerPropertiesFactory(globalProperties,
+			new LoadBalancerClientProperties(), false);
 
 	LoadBalancerServiceInstanceCookieTransformer transformer = new LoadBalancerServiceInstanceCookieTransformer(
 			stickySessionProperties, propertiesFactory);
