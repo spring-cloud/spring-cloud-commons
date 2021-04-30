@@ -16,7 +16,10 @@
 
 package org.springframework.cloud.logging;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -120,7 +123,8 @@ public class LoggingRebinderTests {
 		groupsMap.put("app", Stream.of("my-app01").collect(Collectors.toList()));
 
 		loggerGroups.putAll(groupsMap);
-		loggerGroups.get("app").configureLogLevel(LogLevel.TRACE, (name, logLevel) -> loggingSystem.setLogLevel(name, logLevel));
+		loggerGroups.get("app").configureLogLevel(LogLevel.TRACE,
+				(name, logLevel) -> loggingSystem.setLogLevel(name, logLevel));
 
 		Logger testLogger = LoggerFactory.getLogger("my-app01");
 		then(testLogger.isTraceEnabled()).isTrue();
@@ -141,4 +145,5 @@ public class LoggingRebinderTests {
 		rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment, changeKeys));
 		then(testLogger.isErrorEnabled()).isTrue();
 	}
+
 }
