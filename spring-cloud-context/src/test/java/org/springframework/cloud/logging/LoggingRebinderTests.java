@@ -16,8 +16,9 @@
 
 package org.springframework.cloud.logging;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import ch.qos.logback.classic.Level;
 import org.junit.After;
@@ -45,7 +46,7 @@ public class LoggingRebinderTests {
 
 	private LoggingRebinder rebinder = null;
 
-	private Logger logger = LoggerFactory.getLogger("org.springframework.web");
+	private final Logger logger = LoggerFactory.getLogger("org.springframework.web");
 
 	private LoggingSystem loggingSystem;
 
@@ -112,4 +113,32 @@ public class LoggingRebinderTests {
 		then(testLogger.isTraceEnabled()).isTrue();
 	}
 
+	@Test
+	public void logLevelsChangedByGroupRemovedAndRootLevelChanged() {
+		LoggerGroups loggerGroups = new LoggerGroups();
+		HashMap<String, List<String>> groupsMap = new HashMap<>();
+		groupsMap.put("app", Stream.of("my-app01").collect(Collectors.toList()));
+
+		loggerGroups.putAll(groupsMap);
+		loggerGroups.get("app").configureLogLevel(LogLevel.TRACE, (name, logLevel) -> loggingSystem.setLogLevel(name, logLevel));
+
+		Logger testLogger = LoggerFactory.getLogger("my-app01");
+		then(testLogger.isTraceEnabled()).isTrue();
+
+		// first, we removed logger from app logger group
+		StandardEnvironment environment = new StandardEnvironment();
+		TestPropertyValues.of("logging.level.app=trace").applyTo(environment);
+		LoggingRebinder rebinder = new LoggingRebinder(loggingSystem, loggerGroups);
+		rebinder.setEnvironment(environment);
+
+		HashSet<String> changeKeys = new HashSet<>();
+		rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment, changeKeys));
+		// the default root logger level is Info
+		then(testLogger.isInfoEnabled()).isTrue();
+
+		// then, we changed the root logger level to error
+		TestPropertyValues.of("logging.level.root=error").applyTo(environment);
+		rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment, changeKeys));
+		then(testLogger.isErrorEnabled()).isTrue();
+	}
 }
