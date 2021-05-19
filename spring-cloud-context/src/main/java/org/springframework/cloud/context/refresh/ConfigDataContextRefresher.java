@@ -19,6 +19,7 @@ package org.springframework.cloud.context.refresh;
 import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
+import org.springframework.cloud.bootstrap.encrypt.DecryptEnvironmentPostProcessor;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
@@ -44,8 +45,8 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 
 	@Override
 	protected void updateEnvironment() {
-		if (logger.isTraceEnabled()) {
-			logger.trace("Re-processing environment to add config data");
+		if (this.logger.isTraceEnabled()) {
+			this.logger.trace("Re-processing environment to add config data");
 		}
 		StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
 		String[] activeProfiles = getContext().getEnvironment().getActiveProfiles();
@@ -81,6 +82,8 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 				}
 			}
 		}
+
+		new DecryptEnvironmentPostProcessor().postProcessEnvironment(getContext().getEnvironment(), null);
 	}
 
 }
