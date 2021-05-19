@@ -17,7 +17,6 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
 import org.junit.Test;
-
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -43,6 +42,18 @@ public class EncryptionBootstrapConfigurationTests {
 				.web(WebApplicationType.NONE)
 				.properties("encrypt.keyStore.location:classpath:/server.jks", "encrypt.keyStore.password:letmein",
 						"encrypt.keyStore.alias:mytestkey", "encrypt.keyStore.secret:changeme")
+				.run();
+		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
+		then(encryptor.decrypt(encryptor.encrypt("foo"))).isEqualTo("foo");
+		context.close();
+	}
+
+	@Test
+	public void rsaPkcs12KeyStore() {
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
+				.web(WebApplicationType.NONE)
+				.properties("encrypt.keyStore.location:classpath:/server.p12", "encrypt.keyStore.password:letmein",
+						"encrypt.keyStore.alias:mytestkey", "encrypt.keyStore.type:PKCS12")
 				.run();
 		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
 		then(encryptor.decrypt(encryptor.encrypt("foo"))).isEqualTo("foo");
