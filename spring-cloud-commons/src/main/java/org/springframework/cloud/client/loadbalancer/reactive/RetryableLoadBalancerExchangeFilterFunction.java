@@ -124,7 +124,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		return Mono.defer(() -> choose(serviceId, lbRequest).flatMap(lbResponse -> {
 			ServiceInstance instance = lbResponse.getServer();
 			lbRequest.setContext(new RetryableRequestContext(instance, requestData, hint));
-			if (instance == null) {
+			if (instance == null && !retryPolicy.retryableStatusCode(HttpStatus.SERVICE_UNAVAILABLE.value())) {
 				String message = serviceInstanceUnavailableMessage(serviceId);
 				if (LOG.isWarnEnabled()) {
 					LOG.warn(message);
