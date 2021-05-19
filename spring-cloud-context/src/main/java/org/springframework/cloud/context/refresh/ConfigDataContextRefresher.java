@@ -20,6 +20,7 @@ import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
+import org.springframework.cloud.bootstrap.encrypt.DecryptEnvironmentPostProcessor;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
@@ -32,6 +33,8 @@ import org.springframework.core.io.DefaultResourceLoader;
  * @author Venil Noronha
  */
 public class ConfigDataContextRefresher extends ContextRefresher {
+
+	private final DecryptEnvironmentPostProcessor decryptEnvironmentPostProcessor = new DecryptEnvironmentPostProcessor();
 
 	@Deprecated
 	public ConfigDataContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
@@ -83,6 +86,8 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 				}
 			}
 		}
+
+		decryptEnvironmentPostProcessor.postProcessEnvironment(getContext().getEnvironment(), null);
 	}
 
 }
