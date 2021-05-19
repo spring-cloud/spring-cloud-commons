@@ -113,7 +113,7 @@ public class KeyProperties {
 		private String secret;
 
 		/**
-		 * The KeyStore type (key store file extension used as default)
+		 * The KeyStore type (key store file extension used as default).
 		 */
 		private String type;
 
@@ -138,7 +138,7 @@ public class KeyProperties {
 		}
 
 		public String getType() {
-			return type;
+			return this.type;
 		}
 
 		public void setPassword(String password) {
