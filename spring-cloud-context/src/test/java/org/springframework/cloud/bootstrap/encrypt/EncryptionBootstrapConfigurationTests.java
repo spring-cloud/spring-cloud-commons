@@ -17,6 +17,7 @@
 package org.springframework.cloud.bootstrap.encrypt;
 
 import org.junit.Test;
+
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
