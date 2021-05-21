@@ -50,8 +50,7 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 		StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
 		String[] activeProfiles = getContext().getEnvironment().getActiveProfiles();
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		ConfigurableBootstrapContext bootstrapContext = getContext().getBean("bootstrapContext",
-				ConfigurableBootstrapContext.class);
+		ConfigurableBootstrapContext bootstrapContext = getContext().getBean(ConfigurableBootstrapContext.class);
 		ConfigDataEnvironmentPostProcessor.applyTo(environment, resourceLoader, bootstrapContext, activeProfiles);
 
 		if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
