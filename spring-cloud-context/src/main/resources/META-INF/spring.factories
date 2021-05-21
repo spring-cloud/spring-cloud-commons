@@ -16,6 +16,9 @@ org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration,
 org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfiguration,\
 org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration,\
 org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration
+# Spring Boot BootstrapRegistryInitializer
+org.springframework.boot.BootstrapRegistryInitializer=\
+org.springframework.cloud.bootstrap.RefreshBootstrapRegistryInitializer
 # Spring Boot Bootstrappers
 org.springframework.boot.Bootstrapper=\
 org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper

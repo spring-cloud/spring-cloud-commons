@@ -27,6 +27,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.boot.BootstrapRegistry.InstanceSupplier;
+import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.config.ConfigData;
@@ -129,6 +131,13 @@ public class ConfigDataContextRefresherIntegrationTests {
 		then(cachedRandomLong).isEqualTo(properties.cachedRandomLong);
 	}
 
+	@Test
+	public void contextContainsBootstrapContext() {
+		ConfigurableBootstrapContext bootstrapContext = context.getBean(ConfigurableBootstrapContext.class);
+		then(bootstrapContext).isNotNull();
+		then(bootstrapContext.isRegistered(MyTestBean.class)).isTrue();
+	}
+
 	protected static class TestEnvPostProcessor implements EnvironmentPostProcessor, Ordered {
 
 		@Override
@@ -189,6 +198,7 @@ public class ConfigDataContextRefresherIntegrationTests {
 		public List<TestConfigDataResource> resolve(ConfigDataLocationResolverContext context,
 				ConfigDataLocation location)
 				throws ConfigDataLocationNotFoundException, ConfigDataResourceNotFoundException {
+			context.getBootstrapContext().registerIfAbsent(MyTestBean.class, InstanceSupplier.of(new MyTestBean()));
 			return Collections.singletonList(new TestConfigDataResource(count.get()));
 		}
 
@@ -203,6 +213,10 @@ public class ConfigDataContextRefresherIntegrationTests {
 			return new ConfigData(
 					Collections.singletonList(new MapPropertySource("testconfigdatadatasource", stringStringMap)));
 		}
+
+	}
+
+	protected static class MyTestBean {
 
 	}
 
