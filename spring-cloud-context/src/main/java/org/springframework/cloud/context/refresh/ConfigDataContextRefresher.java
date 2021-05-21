@@ -17,6 +17,7 @@
 package org.springframework.cloud.context.refresh;
 
 import org.springframework.boot.ConfigurableBootstrapContext;
+import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
@@ -50,7 +51,8 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 		StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
 		String[] activeProfiles = getContext().getEnvironment().getActiveProfiles();
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		ConfigurableBootstrapContext bootstrapContext = getContext().getBean(ConfigurableBootstrapContext.class);
+		ConfigurableBootstrapContext bootstrapContext = getContext().getBeanProvider(ConfigurableBootstrapContext.class)
+				.getIfAvailable(DefaultBootstrapContext::new);
 		ConfigDataEnvironmentPostProcessor.applyTo(environment, resourceLoader, bootstrapContext, activeProfiles);
 
 		if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
