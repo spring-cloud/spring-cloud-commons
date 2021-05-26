@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.boot.convert.DurationStyle;
@@ -39,6 +40,7 @@ import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientF
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
+ * @author Rod Catter
  * @since 2.2.0
  */
 public class DiscoveryClientServiceInstanceListSupplier
@@ -63,12 +65,11 @@ public class DiscoveryClientServiceInstanceListSupplier
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
 		resolveTimeout(environment);
 		this.serviceInstances = Flux
-				.defer(() -> Flux.just(delegate.getInstances(serviceId)))
-				.subscribeOn(Schedulers.boundedElastic())
+				.defer(() -> Mono.fromCallable(() -> delegate.getInstances(serviceId)))
 				.timeout(timeout, Flux.defer(() -> {
 					logTimeout();
 					return Flux.just(new ArrayList<>());
-				})).onErrorResume(error -> {
+				}), Schedulers.boundedElastic()).onErrorResume(error -> {
 					logException(error);
 					return Flux.just(new ArrayList<>());
 				});
