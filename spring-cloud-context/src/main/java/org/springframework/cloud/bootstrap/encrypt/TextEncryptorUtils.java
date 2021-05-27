@@ -119,17 +119,9 @@ public abstract class TextEncryptorUtils {
 		KeyProperties.KeyStore keyStore = keyProperties.getKeyStore();
 		if (keyStore.getLocation() != null) {
 			if (keyStore.getLocation().exists()) {
-				KeyStoreKeyFactory keyStoreKeyFactory;
-				if (keyStore.getType() != null) {
-					keyStoreKeyFactory = new KeyStoreKeyFactory(keyStore.getLocation(),
-							keyStore.getPassword().toCharArray(), keyStore.getType());
-				}
-				else {
-					keyStoreKeyFactory = new KeyStoreKeyFactory(keyStore.getLocation(),
-							keyStore.getPassword().toCharArray());
-				}
 				return new RsaSecretEncryptor(
-						keyStoreKeyFactory.getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
+						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray(),
+								keyStore.getType()).getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
 						rsaProperties.getAlgorithm(), rsaProperties.getSalt(), rsaProperties.isStrong());
 			}
 

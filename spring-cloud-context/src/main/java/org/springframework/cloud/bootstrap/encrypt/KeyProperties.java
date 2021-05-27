@@ -113,9 +113,9 @@ public class KeyProperties {
 		private String secret;
 
 		/**
-		 * The KeyStore type (key store file extension used as default).
+		 * The KeyStore type. Defaults to jks.
 		 */
-		private String type;
+		private String type = "jks";
 
 		public String getAlias() {
 			return this.alias;
