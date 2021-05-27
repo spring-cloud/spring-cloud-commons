@@ -120,8 +120,8 @@ public abstract class TextEncryptorUtils {
 		if (keyStore.getLocation() != null) {
 			if (keyStore.getLocation().exists()) {
 				return new RsaSecretEncryptor(
-						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray())
-								.getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
+						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray(),
+								keyStore.getType()).getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
 						rsaProperties.getAlgorithm(), rsaProperties.getSalt(), rsaProperties.isStrong());
 			}
 
