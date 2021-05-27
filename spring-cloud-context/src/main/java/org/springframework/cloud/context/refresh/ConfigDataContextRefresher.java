@@ -87,6 +87,7 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 			}
 		}
 
+		// TODO: invert control
 		decryptEnvironmentPostProcessor.postProcessEnvironment(getContext().getEnvironment(), null);
 	}
 
