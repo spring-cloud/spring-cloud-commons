@@ -202,7 +202,7 @@ public class LoadBalancerClientConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnBlockingDiscoveryEnabled
+	@ConditionalOnReactiveDiscoveryEnabled
 	@Conditional(ReactiveOnAvoidPreviousInstanceAndRetryEnabledCondition.class)
 	@AutoConfigureAfter(ReactiveSupportConfiguration.class)
 	@ConditionalOnBean(ServiceInstanceListSupplier.class)
