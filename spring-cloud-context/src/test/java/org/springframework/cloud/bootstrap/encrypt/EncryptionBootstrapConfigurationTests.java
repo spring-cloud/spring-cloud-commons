@@ -50,6 +50,18 @@ public class EncryptionBootstrapConfigurationTests {
 	}
 
 	@Test
+	public void rsaPkcs12KeyStore() {
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
+				.web(WebApplicationType.NONE)
+				.properties("encrypt.keyStore.location:classpath:/server.p12", "encrypt.keyStore.password:letmein",
+						"encrypt.keyStore.alias:mytestkey", "encrypt.keyStore.type:PKCS12")
+				.run();
+		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
+		then(encryptor.decrypt(encryptor.encrypt("foo"))).isEqualTo("foo");
+		context.close();
+	}
+
+	@Test
 	public void rsaKeyStoreWithRelaxedProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
 				.web(WebApplicationType.NONE)
