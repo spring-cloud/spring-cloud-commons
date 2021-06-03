@@ -65,7 +65,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 @ResourceServerTokenRelayAutoConfiguration.ConditionalOnOAuth2ClientInResourceServer
 @ConditionalOnClass(ResourceServerConfiguration.class)
 @ConditionalOnWebApplication
-@ConditionalOnProperty(value = "spring.cloud.mvc.token-relay.enabled=true", matchIfMissing = true)
+@ConditionalOnProperty(value = "spring.cloud.mvc.token-relay.enabled", matchIfMissing = true)
 public class ResourceServerTokenRelayAutoConfiguration {
 
 	@Bean
