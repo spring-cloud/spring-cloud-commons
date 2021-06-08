@@ -106,7 +106,10 @@ public class PropertySourceBootstrapConfiguration
 					sourceList.add(new SimpleBootstrapPropertySource(p));
 				}
 			}
-			logger.info("Located property source: " + sourceList);
+			logger.info("Located property source. Property names: " + sourceList.stream().map(
+					PropertySource::getName).collect(Collectors.toList()));
+			logger.debug("Property values: " + sourceList.stream().map(
+					PropertySource::getSource).collect(Collectors.toList()));
 			composite.addAll(sourceList);
 			empty = false;
 		}
