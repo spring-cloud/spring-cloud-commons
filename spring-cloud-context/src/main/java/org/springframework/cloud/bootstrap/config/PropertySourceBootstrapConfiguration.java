@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -106,10 +107,10 @@ public class PropertySourceBootstrapConfiguration
 					sourceList.add(new SimpleBootstrapPropertySource(p));
 				}
 			}
-			logger.info("Located property source. Property names: " + sourceList.stream().map(
-					PropertySource::getName).collect(Collectors.toList()));
-			logger.debug("Property values: " + sourceList.stream().map(
-					PropertySource::getSource).collect(Collectors.toList()));
+			logger.info("Located property source. Property names: "
+					+ sourceList.stream().map(PropertySource::getName).collect(Collectors.toList()));
+			logger.debug("Property values: "
+					+ sourceList.stream().map(PropertySource::getSource).collect(Collectors.toList()));
 			composite.addAll(sourceList);
 			empty = false;
 		}
