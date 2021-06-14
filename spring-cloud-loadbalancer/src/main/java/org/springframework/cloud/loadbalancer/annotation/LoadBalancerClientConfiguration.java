@@ -50,6 +50,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
+ * @author BaoLin Zhu
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnDiscoveryEnabled
@@ -202,7 +203,7 @@ public class LoadBalancerClientConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnBlockingDiscoveryEnabled
+	@ConditionalOnReactiveDiscoveryEnabled
 	@Conditional(ReactiveOnAvoidPreviousInstanceAndRetryEnabledCondition.class)
 	@AutoConfigureAfter(ReactiveSupportConfiguration.class)
 	@ConditionalOnBean(ServiceInstanceListSupplier.class)
