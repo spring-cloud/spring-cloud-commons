@@ -23,8 +23,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.context.refresh.ContextRefresher;
+import org.springframework.cloud.context.test.TestConfigDataLocationResolver;
+import org.springframework.cloud.context.test.TestEnvPostProcessor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -124,20 +125,21 @@ public class EncryptionIntegrationTests {
 
 	@Test
 	public void decryptAfterRefresh() {
+		TestConfigDataLocationResolver.config.put("foo.password",
+				"{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95");
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
-				.web(WebApplicationType.NONE)
-				.properties("encrypt.key:pie",
-						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95",
+				.web(WebApplicationType.NONE).properties("encrypt.key:pie", TestEnvPostProcessor.EPP_ENABLED + "=true",
 						"spring.cloud.refresh.enabled:true")
 				.run();
 		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
 		ContextRefresher refresher = context.getBean(ContextRefresher.class);
 		ConfigurableEnvironment env = context.getBean(ConfigurableEnvironment.class);
 		then(env.getProperty("foo.password")).isEqualTo("test");
-		TestPropertyValues.of("foo.password={cipher}" + encryptor.encrypt("newValue")).applyTo(env);
+		TestConfigDataLocationResolver.config.put("foo.password", "{cipher}" + encryptor.encrypt("newValue"));
 		refresher.refresh();
 		then(env.getProperty("foo.password")).isEqualTo("newValue");
 		context.close();
+		TestConfigDataLocationResolver.config.clear();
 	}
 
 	@Configuration(proxyBeanMethods = false)

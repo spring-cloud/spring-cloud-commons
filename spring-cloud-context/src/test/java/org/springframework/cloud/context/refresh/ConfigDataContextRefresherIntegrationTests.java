@@ -16,48 +16,25 @@
 
 package org.springframework.cloud.context.refresh;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.boot.BootstrapRegistry.InstanceSupplier;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.context.config.ConfigData;
-import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
-import org.springframework.boot.context.config.ConfigDataLoader;
-import org.springframework.boot.context.config.ConfigDataLoaderContext;
-import org.springframework.boot.context.config.ConfigDataLocation;
-import org.springframework.boot.context.config.ConfigDataLocationNotFoundException;
-import org.springframework.boot.context.config.ConfigDataLocationResolver;
-import org.springframework.boot.context.config.ConfigDataLocationResolverContext;
-import org.springframework.boot.context.config.ConfigDataResource;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.test.util.TestPropertyValues;
+import org.springframework.cloud.context.test.TestConfigDataLocationResolver;
+import org.springframework.cloud.context.test.TestEnvPostProcessor;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.MapPropertySource;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 public class ConfigDataContextRefresherIntegrationTests {
-
-	private static final String EPP_VALUE = "configdatarefresh.epp.count";
-
-	private static final String EPP_ENABLED = "configdatarefresh.epp.enabled";
 
 	private TestProperties properties;
 
@@ -69,8 +46,12 @@ public class ConfigDataContextRefresherIntegrationTests {
 
 	@BeforeEach
 	public void setup() {
+		TestConfigDataLocationResolver.instance = new MyTestBean();
+		System.setProperty("VCAP_SERVICES",
+				"{\"user-provided\":[{\"label\": \"user-provided\",\"name\": \"myvcap\",\"myvar\": \"myval\"}]}");
 		context = new SpringApplication(TestConfiguration.class).run("--spring.datasource.hikari.read-only=false",
-				"--spring.profiles.active=configdatarefresh", "--" + EPP_ENABLED + "=true", "--server.port=0");
+				"--spring.profiles.active=configdatarefresh", "--" + TestEnvPostProcessor.EPP_ENABLED + "=true",
+				"--server.port=0");
 		properties = context.getBean(TestProperties.class);
 		environment = context.getBean(ConfigurableEnvironment.class);
 		refresher = context.getBean(ContextRefresher.class);
@@ -78,9 +59,12 @@ public class ConfigDataContextRefresherIntegrationTests {
 
 	@AfterEach
 	public void after() {
+		System.clearProperty("VCAP_SERVICES");
 		if (context != null) {
 			context.close();
 		}
+		TestConfigDataLocationResolver.count.set(1);
+		TestConfigDataLocationResolver.instance = null;
 	}
 
 	@Test
@@ -94,12 +78,12 @@ public class ConfigDataContextRefresherIntegrationTests {
 
 	@Test
 	public void testAdditionalPropertySourcesToRetain() {
-		then(environment.getProperty(EPP_VALUE)).isEqualTo("1");
+		then(environment.getProperty(TestEnvPostProcessor.EPP_VALUE)).isEqualTo("1");
 		// ...and then refresh, to see if property source is retained during refresh
 		// that means an updated test datasource with EPP_VALUE set to 10
 		TestConfigDataLocationResolver.count.set(10);
 		this.refresher.refresh();
-		then(environment.getProperty(EPP_VALUE)).isEqualTo("10");
+		then(environment.getProperty(TestEnvPostProcessor.EPP_VALUE)).isEqualTo("10");
 	}
 
 	@Test
@@ -110,6 +94,13 @@ public class ConfigDataContextRefresherIntegrationTests {
 		// ...and then refresh, so the bean is re-initialized:
 		this.refresher.refresh();
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
+	}
+
+	@Test
+	public void testVcapPlaceholderAfterRefresh() {
+		// an error will be thrown if count is 99 and myplaceholder contains ${vcap
+		TestConfigDataLocationResolver.count.set(99);
+		this.refresher.refresh();
 	}
 
 	@Test
@@ -136,84 +127,6 @@ public class ConfigDataContextRefresherIntegrationTests {
 		ConfigurableBootstrapContext bootstrapContext = context.getBean(ConfigurableBootstrapContext.class);
 		then(bootstrapContext).isNotNull();
 		then(bootstrapContext.isRegistered(MyTestBean.class)).isTrue();
-	}
-
-	protected static class TestEnvPostProcessor implements EnvironmentPostProcessor, Ordered {
-
-		@Override
-		public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-			if (environment.getProperty(EPP_ENABLED, Boolean.class, false)) {
-				Map<String, Object> source = new HashMap<>();
-				source.put("spring.cloud.refresh.additional-property-sources-to-retain", getClass().getSimpleName());
-				source.put("spring.config.import", "testdatasource:");
-				MapPropertySource propertySource = new MapPropertySource(getClass().getSimpleName(), source);
-				environment.getPropertySources().addFirst(propertySource);
-			}
-		}
-
-		@Override
-		public int getOrder() {
-			return ConfigDataEnvironmentPostProcessor.ORDER - 1;
-		}
-
-	}
-
-	protected static class TestConfigDataResource extends ConfigDataResource {
-
-		private final int count;
-
-		public TestConfigDataResource(int count) {
-			this.count = count;
-		}
-
-		public boolean equals(Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-			TestConfigDataResource that = (TestConfigDataResource) o;
-			return Objects.equals(this.count, that.count);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(this.count);
-		}
-
-	}
-
-	protected static class TestConfigDataLocationResolver
-			implements ConfigDataLocationResolver<TestConfigDataResource> {
-
-		static AtomicInteger count = new AtomicInteger(1);
-
-		@Override
-		public boolean isResolvable(ConfigDataLocationResolverContext context, ConfigDataLocation location) {
-			return location.hasPrefix("testdatasource:");
-		}
-
-		@Override
-		public List<TestConfigDataResource> resolve(ConfigDataLocationResolverContext context,
-				ConfigDataLocation location)
-				throws ConfigDataLocationNotFoundException, ConfigDataResourceNotFoundException {
-			context.getBootstrapContext().registerIfAbsent(MyTestBean.class, InstanceSupplier.of(new MyTestBean()));
-			return Collections.singletonList(new TestConfigDataResource(count.get()));
-		}
-
-	}
-
-	protected static class TestConfigDataLoader implements ConfigDataLoader<TestConfigDataResource> {
-
-		@Override
-		public ConfigData load(ConfigDataLoaderContext context, TestConfigDataResource resource)
-				throws ConfigDataResourceNotFoundException {
-			Map<String, Object> stringStringMap = Collections.singletonMap(EPP_VALUE, resource.count);
-			return new ConfigData(
-					Collections.singletonList(new MapPropertySource("testconfigdatadatasource", stringStringMap)));
-		}
-
 	}
 
 	protected static class MyTestBean {
