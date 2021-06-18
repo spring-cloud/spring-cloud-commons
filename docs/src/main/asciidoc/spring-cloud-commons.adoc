@@ -1058,6 +1058,8 @@ For that functionality, it is useful to have the selected service instance (whic
 
 By default, the name of the cookie is `sc-lb-instance-id`. You can modify it by changing the value of the `spring.cloud.loadbalancer.instance-id-cookie-name` property.
 
+NOTE: This feature is currently supported for WebClient-backed load-balancing.
+
 [[spring-cloud-loadbalancer-hints]]
 === Spring Cloud LoadBalancer Hints
 
