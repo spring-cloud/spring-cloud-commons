@@ -16,25 +16,38 @@
 
 package org.springframework.cloud.context.refresh;
 
+import java.util.List;
+import java.util.function.Supplier;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.boot.BootstrapContext;
+import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.DefaultBootstrapContext;
-import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.event.ApplicationPreparedEvent;
+import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.boot.logging.DeferredLogFactory;
+import org.springframework.boot.util.Instantiator;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
-import org.springframework.cloud.bootstrap.encrypt.DecryptEnvironmentPostProcessor;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
-import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
  * @author Dave Syer
  * @author Venil Noronha
  */
-public class ConfigDataContextRefresher extends ContextRefresher {
+public class ConfigDataContextRefresher extends ContextRefresher
+		implements ApplicationListener<ApplicationPreparedEvent> {
 
-	private final DecryptEnvironmentPostProcessor decryptEnvironmentPostProcessor = new DecryptEnvironmentPostProcessor();
+	private SpringApplication application;
 
 	@Deprecated
 	public ConfigDataContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
@@ -47,16 +60,37 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 	}
 
 	@Override
+	public void onApplicationEvent(ApplicationPreparedEvent event) {
+		application = event.getSpringApplication();
+	}
+
+	@Override
 	protected void updateEnvironment() {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Re-processing environment to add config data");
 		}
 		StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
-		String[] activeProfiles = getContext().getEnvironment().getActiveProfiles();
-		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		ConfigurableBootstrapContext bootstrapContext = getContext().getBeanProvider(ConfigurableBootstrapContext.class)
 				.getIfAvailable(DefaultBootstrapContext::new);
-		ConfigDataEnvironmentPostProcessor.applyTo(environment, resourceLoader, bootstrapContext, activeProfiles);
+
+		// run thru all EnvironmentPostProcessor instances. This lets things like vcap and
+		// decrypt happen after refresh. The hard coded call to
+		// ConfigDataEnvironmentPostProcessor.applyTo() is now automated as well.
+		DeferredLogFactory logFactory = new PassthruDeferredLogFactory();
+		List<String> classNames = SpringFactoriesLoader.loadFactoryNames(EnvironmentPostProcessor.class,
+				getClass().getClassLoader());
+		Instantiator<EnvironmentPostProcessor> instantiator = new Instantiator<>(EnvironmentPostProcessor.class,
+				(parameters) -> {
+					parameters.add(DeferredLogFactory.class, logFactory);
+					parameters.add(Log.class, logFactory::getLog);
+					parameters.add(ConfigurableBootstrapContext.class, bootstrapContext);
+					parameters.add(BootstrapContext.class, bootstrapContext);
+					parameters.add(BootstrapRegistry.class, bootstrapContext);
+				});
+		List<EnvironmentPostProcessor> postProcessors = instantiator.instantiate(classNames);
+		for (EnvironmentPostProcessor postProcessor : postProcessors) {
+			postProcessor.postProcessEnvironment(environment, application);
+		}
 
 		if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
 			environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
@@ -86,9 +120,25 @@ public class ConfigDataContextRefresher extends ContextRefresher {
 				}
 			}
 		}
+	}
 
-		// TODO: invert control
-		decryptEnvironmentPostProcessor.postProcessEnvironment(getContext().getEnvironment(), null);
+	static class PassthruDeferredLogFactory implements DeferredLogFactory {
+
+		@Override
+		public Log getLog(Supplier<Log> destination) {
+			return destination.get();
+		}
+
+		@Override
+		public Log getLog(Class<?> destination) {
+			return getLog(() -> LogFactory.getLog(destination));
+		}
+
+		@Override
+		public Log getLog(Log destination) {
+			return getLog(() -> destination);
+		}
+
 	}
 
 }
