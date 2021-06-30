@@ -18,65 +18,41 @@ package org.springframework.cloud.commons.util;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 
 /**
  * Wrapper that downstream projects can use to keep {@link ThreadPoolTaskScheduler} local.
  *
- * Implementation taken from Spring Vault.
+ * Implementation adapted from Spring Vault.
  *
  */
-public class TaskSchedulerWrapper implements InitializingBean, DisposableBean {
+public class TaskSchedulerWrapper<T extends TaskScheduler>
+		implements InitializingBean, DisposableBean {
 
-	private final ThreadPoolTaskScheduler taskScheduler;
+	private final T taskScheduler;
 
-	private final boolean acceptAfterPropertiesSet;
-
-	private final boolean acceptDestroy;
-
-	public TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler) {
-		this(taskScheduler, true, true);
-	}
-
-	protected TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler,
-			boolean acceptAfterPropertiesSet, boolean acceptDestroy) {
-
+	public TaskSchedulerWrapper(T taskScheduler) {
 		Assert.notNull(taskScheduler, "ThreadPoolTaskScheduler must not be null");
-
 		this.taskScheduler = taskScheduler;
-		this.acceptAfterPropertiesSet = acceptAfterPropertiesSet;
-		this.acceptDestroy = acceptDestroy;
 	}
 
-	/**
-	 * Factory method to adapt an existing {@link ThreadPoolTaskScheduler} bean without
-	 * calling lifecycle methods.
-	 * @param scheduler the actual {@code ThreadPoolTaskScheduler}.
-	 * @return the wrapper for the given {@link ThreadPoolTaskScheduler}.
-	 * @see #afterPropertiesSet()
-	 * @see #destroy()
-	 */
-	public static TaskSchedulerWrapper fromInstance(ThreadPoolTaskScheduler scheduler) {
-		return new TaskSchedulerWrapper(scheduler, false, false);
-	}
-
-	public ThreadPoolTaskScheduler getTaskScheduler() {
+	public T getTaskScheduler() {
 		return this.taskScheduler;
 	}
 
 	@Override
-	public void destroy() {
-		if (acceptDestroy) {
-			this.taskScheduler.destroy();
+	public void destroy() throws Exception {
+		if (DisposableBean.class.isInstance(taskScheduler)) {
+			((DisposableBean) this.taskScheduler).destroy();
 		}
 	}
 
 	@Override
-	public void afterPropertiesSet() {
-
-		if (this.acceptAfterPropertiesSet) {
-			this.taskScheduler.afterPropertiesSet();
+	public void afterPropertiesSet() throws Exception {
+		if (InitializingBean.class.isInstance(taskScheduler)) {
+			((InitializingBean) this.taskScheduler).afterPropertiesSet();
 		}
 	}
 
