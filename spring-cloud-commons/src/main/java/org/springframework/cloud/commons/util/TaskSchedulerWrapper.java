@@ -28,8 +28,7 @@ import org.springframework.util.Assert;
  * Implementation adapted from Spring Vault.
  *
  */
-public class TaskSchedulerWrapper<T extends TaskScheduler>
-		implements InitializingBean, DisposableBean {
+public class TaskSchedulerWrapper<T extends TaskScheduler> implements InitializingBean, DisposableBean {
 
 	private final T taskScheduler;
 
