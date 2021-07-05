@@ -94,7 +94,7 @@ public class ConfigurationPropertiesRebinder
 			try {
 				Object bean = this.applicationContext.getBean(name);
 				if (AopUtils.isAopProxy(bean)) {
-					bean = ProxyUtils.getUltimateTargetObject(bean);
+					bean = ProxyUtils.getTargetObject(bean);
 				}
 				if (bean != null) {
 					// TODO: determine a more general approach to fix this.
