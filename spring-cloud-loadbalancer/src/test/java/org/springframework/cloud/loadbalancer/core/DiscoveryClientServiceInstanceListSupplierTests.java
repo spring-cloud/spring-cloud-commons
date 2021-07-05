@@ -40,6 +40,7 @@ import static org.springframework.cloud.loadbalancer.core.DiscoveryClientService
  * Tests for {@link DiscoveryClientServiceInstanceListSupplier}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Rod Catter
  */
 class DiscoveryClientServiceInstanceListSupplierTests {
 
