@@ -56,6 +56,7 @@ import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMEN
 
 /**
  * @author Dave Syer
+ * @author Haibo Wang
  *
  */
 @Configuration(proxyBeanMethods = false)
@@ -149,7 +150,8 @@ public class PropertySourceBootstrapConfiguration
 	}
 
 	private void setLogLevels(ConfigurableApplicationContext applicationContext, ConfigurableEnvironment environment) {
-		LoggingRebinder rebinder = new LoggingRebinder();
+		LoggingSystem system = LoggingSystem.get(LoggingSystem.class.getClassLoader());
+		LoggingRebinder rebinder = new LoggingRebinder(system, null);
 		rebinder.setEnvironment(environment);
 		// We can't fire the event in the ApplicationContext here (too early), but we can
 		// create our own listener and poke it (it doesn't need the key changes)

@@ -17,14 +17,21 @@
 package org.springframework.cloud.logging;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import ch.qos.logback.classic.Level;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.logging.LogLevel;
+import org.springframework.boot.logging.LoggerGroups;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
@@ -35,13 +42,22 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Dave Syer
  * @author Olga Maciaszek-Sharma
+ * @author Haibo Wang
  *
  */
 public class LoggingRebinderTests {
 
-	private LoggingRebinder rebinder = new LoggingRebinder();
+	private LoggingRebinder rebinder = null;
 
-	private Logger logger = LoggerFactory.getLogger("org.springframework.web");
+	private final Logger logger = LoggerFactory.getLogger("org.springframework.web");
+
+	private LoggingSystem loggingSystem;
+
+	@Before
+	public void init() {
+		loggingSystem = LoggingSystem.get(getClass().getClassLoader());
+		rebinder = new LoggingRebinder(loggingSystem, null);
+	}
 
 	@After
 	public void reset() {
@@ -80,6 +96,54 @@ public class LoggingRebinderTests {
 		rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment,
 				Collections.singleton("logging.level.org.springframework.cloud")));
 		then(Level.OFF).isEqualTo((logger.getLevel()));
+	}
+
+	@Test
+	public void logLevelsChangedByLoggerGroup() {
+		Logger testLogger = LoggerFactory.getLogger("my-app01");
+		then(testLogger.isTraceEnabled()).isFalse();
+		StandardEnvironment environment = new StandardEnvironment();
+		TestPropertyValues.of("logging.level.app=trace", "logging.group.app=my-app01").applyTo(environment);
+
+		LoggingRebinder rebinder = new LoggingRebinder(loggingSystem, new LoggerGroups());
+		rebinder.setEnvironment(environment);
+
+		HashSet<String> changeKeys = new HashSet<>();
+		changeKeys.add("spring.level.app");
+		changeKeys.add("spring.group.app");
+		rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment, changeKeys));
+
+		then(testLogger.isTraceEnabled()).isTrue();
+	}
+
+	@Test
+	public void logLevelsChangedByGroupRemovedAndRootLevelChanged() {
+		LoggerGroups loggerGroups = new LoggerGroups();
+		HashMap<String, List<String>> groupsMap = new HashMap<>();
+		groupsMap.put("app", Stream.of("my-app01").collect(Collectors.toList()));
+
+		loggerGroups.putAll(groupsMap);
+		loggerGroups.get("app").configureLogLevel(LogLevel.TRACE,
+				(name, logLevel) -> loggingSystem.setLogLevel(name, logLevel));
+
+		Logger testLogger = LoggerFactory.getLogger("my-app01");
+		then(testLogger.isTraceEnabled()).isTrue();
+
+		// first, we removed logger from app logger group
+		StandardEnvironment environment = new StandardEnvironment();
+		TestPropertyValues.of("logging.level.app=trace").applyTo(environment);
+		LoggingRebinder rebinder = new LoggingRebinder(loggingSystem, loggerGroups);
+		rebinder.setEnvironment(environment);
+
+		HashSet<String> changeKeys = new HashSet<>();
+		rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment, changeKeys));
+		// the default root logger level is Info
+		then(testLogger.isInfoEnabled()).isTrue();
+
+		// then, we changed the root logger level to error
+		TestPropertyValues.of("logging.level.root=error").applyTo(environment);
+		rebinder.onApplicationEvent(new EnvironmentChangeEvent(environment, changeKeys));
+		then(testLogger.isErrorEnabled()).isTrue();
 	}
 
 }

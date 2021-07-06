@@ -26,6 +26,7 @@ import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -41,6 +42,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.logging.LoggerGroups;
+import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.cloud.context.refresh.ConfigDataContextRefresher;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.refresh.LegacyContextRefresher;
@@ -98,8 +101,11 @@ public class RefreshAutoConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
-	public static LoggingRebinder loggingRebinder() {
-		return new LoggingRebinder();
+	public static LoggingRebinder loggingRebinder(ObjectProvider<LoggingSystem> loggingSystem,
+			ObjectProvider<LoggerGroups> loggerGroups) {
+		return new LoggingRebinder(
+				loggingSystem.getIfAvailable(() -> LoggingSystem.get(LoggingSystem.class.getClassLoader())),
+				loggerGroups.getIfAvailable(LoggerGroups::new));
 	}
 
 	@Bean
