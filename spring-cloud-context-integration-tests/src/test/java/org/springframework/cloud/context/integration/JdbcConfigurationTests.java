@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.context.integration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.WebApplicationType;
