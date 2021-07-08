@@ -35,8 +35,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<String, CompatibilityPredicate>() {
 		{
-			this.put("2.4", is2_4());
-			this.put("2.5", is2_5());
+			this.put("2.6", is2_6());
 		}
 	};
 
@@ -71,42 +70,19 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		return SpringBootVersion.getVersion();
 	}
 
-	CompatibilityPredicate is2_4() {
+	CompatibilityPredicate is2_6() {
 		return new CompatibilityPredicate() {
 
 			@Override
 			public String toString() {
-				return "Predicate for Boot 2.4";
+				return "Predicate for Boot 2.6";
 			}
 
 			@Override
 			public boolean isCompatible() {
 				try {
-					// since 2.4
-					Class.forName("org.springframework.boot.Bootstrapper");
-					return true;
-				}
-				catch (ClassNotFoundException e) {
-					return false;
-				}
-
-			}
-		};
-	}
-
-	CompatibilityPredicate is2_5() {
-		return new CompatibilityPredicate() {
-
-			@Override
-			public String toString() {
-				return "Predicate for Boot 2.5";
-			}
-
-			@Override
-			public boolean isCompatible() {
-				try {
-					// since 2.4
-					Class.forName("org.springframework.boot.context.properties.bind.Bindable.BindRestriction");
+					// since 2.6
+					Class.forName("org.springframework.boot.autoconfigure.data.redis.ClientResourcesBuilderCustomizer");
 					return true;
 				}
 				catch (ClassNotFoundException e) {

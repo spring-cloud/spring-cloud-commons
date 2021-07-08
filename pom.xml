@@ -155,6 +155,16 @@
 				<groupId>org.springframework.security.oauth.boot</groupId>
 				<artifactId>spring-security-oauth2-autoconfigure</artifactId>
 				<version>${spring-security-oauth2-autoconfigure.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-autoconfigure</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
