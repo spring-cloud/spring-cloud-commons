@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.bootstrap;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -26,11 +25,9 @@ import org.springframework.cloud.bootstrap.BootstrapOrderingAutoConfigurationInt
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class,
 		properties = { "encrypt.key:deadbeef", "spring.config.use-legacy-processing=true" })
 @ActiveProfiles("encrypt")

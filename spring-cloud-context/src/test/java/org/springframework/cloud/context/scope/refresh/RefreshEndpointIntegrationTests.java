@@ -21,8 +21,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -39,7 +38,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,7 +48,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * @author Dave Syer
  *
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(classes = ClientApp.class,
 		properties = { "management.endpoints.web.exposure.include=*", "management.endpoint.env.post.enabled=true" },
 		webEnvironment = RANDOM_PORT)

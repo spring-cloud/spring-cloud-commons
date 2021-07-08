@@ -18,8 +18,8 @@ package org.springframework.cloud.health;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -45,7 +45,7 @@ public class RefreshScopeHealthIndicatorTests {
 
 	private RefreshScopeHealthIndicator indicator = new RefreshScopeHealthIndicator(this.scopeProvider, this.rebinder);
 
-	@Before
+	@BeforeEach
 	public void init() {
 		BDDMockito.willReturn(this.scope).given(this.scopeProvider).getIfAvailable();
 		when(this.rebinder.getErrors()).thenReturn(Collections.emptyMap());

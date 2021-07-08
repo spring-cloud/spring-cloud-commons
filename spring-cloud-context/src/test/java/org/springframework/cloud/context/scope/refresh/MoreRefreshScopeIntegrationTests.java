@@ -18,10 +18,9 @@ package org.springframework.cloud.context.scope.refresh;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.BeanCreationException;
@@ -40,12 +39,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.BDDAssertions.then;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
 public class MoreRefreshScopeIntegrationTests {
 
@@ -58,13 +55,13 @@ public class MoreRefreshScopeIntegrationTests {
 	@Autowired
 	private ConfigurableEnvironment environment;
 
-	@Before
+	@BeforeEach
 	public void init() {
 		then(TestService.getInitCount()).isEqualTo(1);
 		TestService.reset();
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		TestService.reset();
 	}

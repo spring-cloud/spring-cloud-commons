@@ -21,11 +21,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -46,6 +44,7 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dave Syer
@@ -53,14 +52,11 @@ import static org.assertj.core.api.BDDAssertions.then;
  */
 public class BootstrapConfigurationTests {
 
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
-
 	private ConfigurableApplicationContext context;
 
 	private ConfigurableApplicationContext sibling;
 
-	@After
+	@AfterEach
 	public void close() {
 		// Expected.* is bound to the PropertySourceConfiguration below
 		System.clearProperty("expected.name");
@@ -148,9 +144,11 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void failsOnPropertySource() {
 		System.setProperty("expected.fail", "true");
-		this.expected.expectMessage("Planned");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.config.use-legacy-processing=true").sources(BareConfiguration.class).run();
+		Throwable throwable = assertThrows(RuntimeException.class, () -> {
+			this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+					.properties("spring.config.use-legacy-processing=true").sources(BareConfiguration.class).run();
+		});
+		then(throwable.getMessage().equals("Planned"));
 	}
 
 	@Test
@@ -336,7 +334,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	@Ignore // FIXME: legacy
+	@Disabled // FIXME: legacy
 	public void differentProfileInChild() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		// Profiles are always merged with the child

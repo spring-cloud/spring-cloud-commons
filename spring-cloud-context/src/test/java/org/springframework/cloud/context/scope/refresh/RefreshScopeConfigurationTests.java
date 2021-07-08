@@ -16,10 +16,8 @@
 
 package org.springframework.cloud.context.scope.refresh;
 
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,12 +42,9 @@ import static org.assertj.core.api.BDDAssertions.then;
  */
 public class RefreshScopeConfigurationTests {
 
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
-
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void init() {
 		if (this.context != null) {
 			this.context.close();

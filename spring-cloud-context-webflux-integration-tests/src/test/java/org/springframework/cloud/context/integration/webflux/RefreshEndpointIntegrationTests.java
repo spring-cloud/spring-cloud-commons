@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.context.integration.webflux;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -27,7 +26,6 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -36,7 +34,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * @author Dave Syer
  *
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = RefreshEndpointIntegrationTests.ClientApp.class,
 		properties = { "management.endpoints.web.exposure.include=*" }, webEnvironment = RANDOM_PORT)
 public class RefreshEndpointIntegrationTests {
