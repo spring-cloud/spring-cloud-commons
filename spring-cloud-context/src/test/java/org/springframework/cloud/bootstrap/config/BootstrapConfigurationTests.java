@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +45,6 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dave Syer
@@ -144,7 +144,7 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void failsOnPropertySource() {
 		System.setProperty("expected.fail", "true");
-		Throwable throwable = assertThrows(RuntimeException.class, () -> {
+		Throwable throwable = Assertions.assertThrows(RuntimeException.class, () -> {
 			this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 					.properties("spring.config.use-legacy-processing=true").sources(BareConfiguration.class).run();
 		});

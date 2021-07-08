@@ -18,6 +18,7 @@ package org.springframework.cloud.bootstrap.encrypt;
 
 import java.nio.charset.Charset;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.context.encrypt.EncryptorFactory;
@@ -26,7 +27,6 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Biju Kunjummen
@@ -49,7 +49,7 @@ public class EncryptorFactoryTests {
 	public void testWithInvalidRsaPrivateKey() {
 		String key = "-----BEGIN RSA PRIVATE KEY-----\n"
 				+ "MIIEowIBAAKCAQEAwClFgrRa/PUHPIJr9gvIPL6g6Rjp/TVZmVNOf2fL96DYbkj5\n";
-		assertThrows(RuntimeException.class, () -> {
+		Assertions.assertThrows(RuntimeException.class, () -> {
 			new EncryptorFactory().create(key);
 		});
 	}

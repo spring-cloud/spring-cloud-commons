@@ -19,6 +19,7 @@ package org.springframework.cloud.context.scope.refresh;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +42,6 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(classes = TestConfiguration.class)
 public class RefreshScopeIntegrationTests {
@@ -120,7 +120,7 @@ public class RefreshScopeIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testCheckedException() {
-		assertThrows(ServiceException.class, () -> {
+		Assertions.assertThrows(ServiceException.class, () -> {
 			this.service.throwsException();
 		});
 	}
