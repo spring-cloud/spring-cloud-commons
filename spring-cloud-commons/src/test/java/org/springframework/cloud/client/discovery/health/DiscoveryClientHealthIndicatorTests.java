@@ -42,7 +42,7 @@ import static org.mockito.Mockito.mock;
  * @author Spencer Gibb
  */
 // @checkstyle:off
-@SpringBootTest(classes = {DiscoveryClientHealthIndicatorTests.Config.class, CommonsClientAutoConfiguration.class},
+@SpringBootTest(classes = { DiscoveryClientHealthIndicatorTests.Config.class, CommonsClientAutoConfiguration.class },
 		properties = "spring.cloud.discovery.client.health-indicator.include-description:true")
 // @checkstyle:on
 public class DiscoveryClientHealthIndicatorTests {

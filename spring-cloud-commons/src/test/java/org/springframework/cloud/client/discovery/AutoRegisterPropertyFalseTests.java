@@ -32,7 +32,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Ryan Baxter
  */
-@SpringBootTest(properties = {"spring.cloud.service-registry.auto-registration.enabled: false"})
+@SpringBootTest(properties = { "spring.cloud.service-registry.auto-registration.enabled: false" })
 public class AutoRegisterPropertyFalseTests {
 
 	@Autowired(required = false)

@@ -38,7 +38,7 @@ import static org.springframework.cloud.client.discovery.composite.CompositeDisc
  * @author Olga Maciaszek-Sharma
  */
 @SpringBootTest(properties = "spring.cloud.discovery.client.simple.order:2",
-		classes = {CompositeDiscoveryClientTestsConfig.class})
+		classes = { CompositeDiscoveryClientTestsConfig.class })
 public class CompositeDiscoveryClientOrderTest {
 
 	@Autowired

@@ -34,11 +34,11 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Biju Kunjummen
  */
 
-@SpringBootTest(properties = {"spring.application.name=service0",
+@SpringBootTest(properties = { "spring.application.name=service0",
 		"spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s11:8080",
 		"spring.cloud.discovery.client.simple.instances.service1[1].uri=https://s12:8443",
 		"spring.cloud.discovery.client.simple.instances.service2[0].uri=https://s21:8080",
-		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s22:443"})
+		"spring.cloud.discovery.client.simple.instances.service2[1].uri=https://s22:443" })
 public class SimpleDiscoveryClientPropertiesMappingTests {
 
 	@Autowired
