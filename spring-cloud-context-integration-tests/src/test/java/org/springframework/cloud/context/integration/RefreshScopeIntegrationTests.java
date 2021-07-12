@@ -121,7 +121,7 @@ public class RefreshScopeIntegrationTests {
 	// see gh-349
 	@Test
 	@DirtiesContext
-	public void testCheckedException() {
+	public void testCheckedException() throws Exception {
 		Assertions.assertThrows(ServiceException.class, () -> {
 			this.service.throwsException();
 		});

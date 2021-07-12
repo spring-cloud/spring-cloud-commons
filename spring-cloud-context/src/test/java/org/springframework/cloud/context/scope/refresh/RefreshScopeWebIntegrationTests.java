@@ -30,7 +30,7 @@ import org.springframework.cloud.context.environment.EnvironmentManager;
 import org.springframework.cloud.context.scope.refresh.RefreshScopeWebIntegrationTests.Application;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -91,7 +91,7 @@ public class RefreshScopeWebIntegrationTests {
 		@Value("${message:Hello World!}")
 		String message;
 
-		@RequestMapping("/")
+		@GetMapping("/")
 		public String hello() {
 			return this.message;
 		}
