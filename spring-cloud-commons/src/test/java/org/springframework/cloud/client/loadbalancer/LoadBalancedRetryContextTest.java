@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
@@ -32,20 +32,20 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Ryan Baxter
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LoadBalancedRetryContextTest {
 
 	private RetryContext context;
 
 	private HttpRequest request;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws Exception {
 		this.context = mock(RetryContext.class);
 		this.request = mock(HttpRequest.class);
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		this.context = null;
 		this.request = null;

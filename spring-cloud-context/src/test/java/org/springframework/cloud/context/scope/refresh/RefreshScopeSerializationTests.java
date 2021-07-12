@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.context.scope.refresh;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.WebApplicationType;

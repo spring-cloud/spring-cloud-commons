@@ -21,15 +21,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.BDDAssertions;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -37,7 +35,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * @author Spencer Gibb
  * @author Tim Ysewyn
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = AbstractAutoServiceRegistrationMgmtDisabledTests.Config.class,
 		properties = { "management.port=0",
 				"spring.cloud.service-registry.auto-registration.register-management=false" },

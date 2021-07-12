@@ -25,7 +25,7 @@ import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.assertj.core.api.BDDAssertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ReflectionUtils;
 

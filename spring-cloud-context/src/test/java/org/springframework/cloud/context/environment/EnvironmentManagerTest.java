@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.context.environment;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.context.ApplicationEvent;

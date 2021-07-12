@@ -27,9 +27,9 @@ import java.security.cert.Certificate;
 
 import javax.net.ssl.SSLContext;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -52,7 +52,7 @@ public class SSHContextFactoryTests {
 
 	private TlsProperties properties;
 
-	@BeforeClass
+	@BeforeAll
 	public static void createKeyStoreAndTrustStore() throws Exception {
 		KeyTool tool = new KeyTool();
 
@@ -82,7 +82,7 @@ public class SSHContextFactoryTests {
 		return result;
 	}
 
-	@Before
+	@BeforeEach
 	public void createProperties() {
 		properties = new TlsProperties();
 

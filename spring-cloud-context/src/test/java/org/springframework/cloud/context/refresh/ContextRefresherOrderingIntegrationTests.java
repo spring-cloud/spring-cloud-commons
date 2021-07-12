@@ -21,10 +21,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -38,12 +37,10 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.config.use-legacy-processing=true")
 @DirtiesContext
 public class ContextRefresherOrderingIntegrationTests {
@@ -56,14 +53,14 @@ public class ContextRefresherOrderingIntegrationTests {
 
 	private static String original;
 
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 		original = System.getProperty("spring.cloud.bootstrap.sources");
 		System.setProperty("spring.cloud.bootstrap.sources",
 				"org.springframework.cloud.context.refresh.ContextRefresherOrderingIntegrationTests.PropertySourceConfiguration");
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void afterClass() {
 		if (original != null) {
 			System.setProperty("spring.cloud.bootstrap.sources", original);

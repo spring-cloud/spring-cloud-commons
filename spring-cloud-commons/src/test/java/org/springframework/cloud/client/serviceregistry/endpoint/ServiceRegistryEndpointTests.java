@@ -22,8 +22,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -35,7 +34,6 @@ import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -49,7 +47,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Spencer Gibb
  * @author Tim Ysewyn
  */
-@RunWith(SpringRunner.class)
 // @checkstyle:off
 @SpringBootTest(classes = ServiceRegistryEndpointTests.TestConfiguration.class,
 		properties = "management.endpoints.web.exposure.include=*")

@@ -18,10 +18,10 @@ package org.springframework.cloud.context.scope.refresh;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -40,11 +40,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class)
 public class RefreshScopeIntegrationTests {
 
@@ -57,13 +55,13 @@ public class RefreshScopeIntegrationTests {
 	@Autowired
 	private org.springframework.cloud.context.scope.refresh.RefreshScope scope;
 
-	@Before
+	@BeforeEach
 	public void init() {
 		then(ExampleService.getInitCount()).isEqualTo(1);
 		ExampleService.reset();
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		ExampleService.reset();
 	}
@@ -119,10 +117,12 @@ public class RefreshScopeIntegrationTests {
 	}
 
 	// see gh-349
-	@Test(expected = ServiceException.class)
+	@Test
 	@DirtiesContext
-	public void testCheckedException() throws Exception {
-		this.service.throwsException();
+	public void testCheckedException() {
+		Assertions.assertThrows(ServiceException.class, () -> {
+			this.service.throwsException();
+		});
 	}
 
 	public interface Service {

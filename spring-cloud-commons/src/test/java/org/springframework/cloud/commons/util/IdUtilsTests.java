@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.commons.util;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.mock.env.MockEnvironment;
 
@@ -33,12 +33,12 @@ public class IdUtilsTests {
 
 	private MockEnvironment env;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.env = new MockEnvironment();
 	}
 
-	@After
+	@AfterEach
 	public void destroy() {
 		this.env = null;
 	}

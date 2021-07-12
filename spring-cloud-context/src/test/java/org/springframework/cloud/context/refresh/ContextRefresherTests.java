@@ -22,9 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.boot.SpringApplication;
@@ -52,14 +52,14 @@ public class ContextRefresherTests {
 
 	private RefreshScope scope = Mockito.mock(RefreshScope.class);
 
-	@After
+	@AfterEach
 	public void close() {
 		System.clearProperty(LoggingSystem.SYSTEM_PROPERTY);
 		TestLoggingSystem.count = 0;
 	}
 
 	@Test
-	@Ignore // FIXME: legacy config
+	@Disabled // FIXME: legacy config
 	public void orderNewPropertiesConsistentWithNewContext() {
 		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
 				"--spring.config.use-legacy-processing=true", "--spring.main.web-application-type=none",

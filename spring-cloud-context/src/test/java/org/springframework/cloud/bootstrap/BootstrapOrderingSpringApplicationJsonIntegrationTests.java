@@ -16,10 +16,9 @@
 
 package org.springframework.cloud.bootstrap;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -27,23 +26,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bootstrap.BootstrapOrderingSpringApplicationJsonIntegrationTests.Application;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = Application.class, properties = "spring.cloud.bootstrap.name:json")
 public class BootstrapOrderingSpringApplicationJsonIntegrationTests {
 
 	@Autowired
 	private ConfigurableEnvironment environment;
 
-	@BeforeClass
+	@BeforeAll
 	public static void spikeJson() {
 		System.setProperty("SPRING_APPLICATION_JSON", "{\"message\":\"From JSON\"}");
 	}
 
-	@AfterClass
+	@AfterAll
 	public static void unspikeJson() {
 		System.clearProperty("SPRING_APPLICATION_JSON");
 	}

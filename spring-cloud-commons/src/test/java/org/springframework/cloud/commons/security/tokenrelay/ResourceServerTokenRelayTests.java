@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.commons.security.tokenrelay;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -41,7 +40,6 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,7 +54,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * @author Peter Szanto (spring@szantocsalad.hu)
  *
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT,
 		properties = { "security.oauth2.resource.jwt.keyValue=secret", "spring.cloud.mvc.token-relay.enabled=true",
 				"spring.autoconfigure.exclude=" })

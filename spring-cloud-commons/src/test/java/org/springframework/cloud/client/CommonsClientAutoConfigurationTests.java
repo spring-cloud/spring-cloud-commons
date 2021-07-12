@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.actuate.autoconfigure.health.HealthEndpointAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigurations;

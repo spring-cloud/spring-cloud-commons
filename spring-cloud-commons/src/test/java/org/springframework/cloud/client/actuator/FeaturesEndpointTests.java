@@ -19,9 +19,9 @@ package org.springframework.cloud.client.actuator;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
@@ -39,14 +39,14 @@ public class FeaturesEndpointTests {
 
 	private AnnotationConfigApplicationContext context;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.context = new AnnotationConfigApplicationContext();
 		this.context.register(JacksonAutoConfiguration.class, FeaturesConfig.class, Config.class);
 		this.context.refresh();
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		if (this.context != null) {
 			this.context.close();
