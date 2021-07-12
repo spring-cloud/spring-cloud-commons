@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.client.discovery;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,15 +26,13 @@ import org.springframework.cloud.client.serviceregistry.AutoServiceRegistration;
 import org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConfiguration;
 import org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Ryan Baxter
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(properties = { "spring.cloud.service-registry.auto-registration.enabled: false" })
+@SpringBootTest(properties = {"spring.cloud.service-registry.auto-registration.enabled: false"})
 public class AutoRegisterPropertyFalseTests {
 
 	@Autowired(required = false)

@@ -18,14 +18,12 @@ package org.springframework.cloud.client.discovery.composite;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.CUSTOM_DISCOVERY_CLIENT;
@@ -39,9 +37,8 @@ import static org.springframework.cloud.client.discovery.composite.CompositeDisc
  *
  * @author Olga Maciaszek-Sharma
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.cloud.discovery.client.simple.order:2",
-		classes = { CompositeDiscoveryClientTestsConfig.class })
+		classes = {CompositeDiscoveryClientTestsConfig.class})
 public class CompositeDiscoveryClientOrderTest {
 
 	@Autowired

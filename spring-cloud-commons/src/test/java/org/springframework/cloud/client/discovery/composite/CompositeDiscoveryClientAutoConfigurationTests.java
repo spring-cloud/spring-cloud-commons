@@ -18,8 +18,7 @@ package org.springframework.cloud.client.discovery.composite;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -29,7 +28,6 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
@@ -39,7 +37,6 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Biju Kunjummen
  */
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class CompositeDiscoveryClientAutoConfigurationTests {
 
