@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.client.serviceregistry.endpoint;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.EndpointAutoConfiguration;
@@ -31,7 +30,6 @@ import org.springframework.cloud.client.serviceregistry.endpoint.ServiceRegistry
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -41,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Spencer Gibb
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ServiceRegistryEndpointNoRegistrationTests.TestConfiguration.class)
 @AutoConfigureMockMvc
 public class ServiceRegistryEndpointNoRegistrationTests {

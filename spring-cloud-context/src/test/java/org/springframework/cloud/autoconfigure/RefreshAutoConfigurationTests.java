@@ -18,8 +18,8 @@ package org.springframework.cloud.autoconfigure;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -27,7 +27,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.system.OutputCaptureRule;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -38,10 +39,8 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Dave Syer
  */
+@ExtendWith(OutputCaptureExtension.class)
 public class RefreshAutoConfigurationTests {
-
-	@Rule
-	public OutputCaptureRule output = new OutputCaptureRule();
 
 	private static ConfigurableApplicationContext getApplicationContext(WebApplicationType type, Class<?> configuration,
 			String... properties) {
@@ -50,10 +49,10 @@ public class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	public void noWarnings() {
+	public void noWarnings(CapturedOutput output) {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class)) {
 			then(context.containsBean("refreshScope")).isTrue();
-			then(this.output.toString()).doesNotContain("WARN");
+			then(output.toString()).doesNotContain("WARN");
 		}
 	}
 

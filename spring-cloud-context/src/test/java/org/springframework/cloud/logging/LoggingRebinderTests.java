@@ -19,8 +19,8 @@ package org.springframework.cloud.logging;
 import java.util.Collections;
 
 import ch.qos.logback.classic.Level;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class LoggingRebinderTests {
 
 	private Logger logger = LoggerFactory.getLogger("org.springframework.web");
 
-	@After
+	@AfterEach
 	public void reset() {
 		LoggingSystem.get(getClass().getClassLoader()).setLogLevel("org.springframework.web", LogLevel.INFO);
 	}

@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.retry.RetryContext;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
  * @author Ryan Baxter
  * @author Olga Maciaszek-Sharma
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class InterceptorRetryPolicyTest {
 
 	private HttpRequest request;
@@ -47,7 +47,7 @@ public class InterceptorRetryPolicyTest {
 
 	private String serviceName;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		request = mock(HttpRequest.class);
 		policy = mock(LoadBalancedRetryPolicy.class);
@@ -55,7 +55,7 @@ public class InterceptorRetryPolicyTest {
 		serviceName = "foo";
 	}
 
-	@After
+	@AfterEach
 	public void teardown() {
 		request = null;
 		policy = null;

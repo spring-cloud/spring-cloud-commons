@@ -18,8 +18,7 @@ package org.springframework.cloud.client.discovery.health;
 
 import java.util.Arrays;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.CompositeHealthContributor;
@@ -34,7 +33,6 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.BDDMockito.given;
@@ -43,7 +41,6 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Spencer Gibb
  */
-@RunWith(SpringRunner.class)
 // @checkstyle:off
 @SpringBootTest(classes = { DiscoveryClientHealthIndicatorTests.Config.class, CommonsClientAutoConfiguration.class },
 		properties = "spring.cloud.discovery.client.health-indicator.include-description:true")

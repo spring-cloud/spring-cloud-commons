@@ -21,10 +21,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.springframework.boot.test.system.OutputCaptureRule;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.util.TestPropertyValues.Type;
 import org.springframework.context.ApplicationContext;
@@ -53,13 +54,11 @@ import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptAppl
  * @author Biju Kunjummen
  * @author Tim Ysewyn
  */
+@ExtendWith(OutputCaptureExtension.class)
 public class EnvironmentDecryptApplicationInitializerTests {
 
 	private EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
 			Encryptors.noOpText());
-
-	@Rule
-	public OutputCaptureRule outputCapture = new OutputCaptureRule();
 
 	@Test
 	public void decryptCipherKey() {
@@ -89,7 +88,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	}
 
 	@Test
-	public void errorOnDecrypt() {
+	public void errorOnDecrypt(CapturedOutput output) {
 		this.listener = new EnvironmentDecryptApplicationInitializer(Encryptors.text("deadbeef", "AFFE37"));
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("spring.cloud.bootstrap.enabled=true", "foo: {cipher}bar").applyTo(context);
@@ -101,19 +100,19 @@ public class EnvironmentDecryptApplicationInitializerTests {
 			then(e).isInstanceOf(IllegalStateException.class);
 		}
 		// Assert logs contain warning even when exception thrown
-		String sysOutput = this.outputCapture.toString();
+		String sysOutput = output.toString();
 		then(sysOutput).contains("Cannot decrypt: key=foo");
 	}
 
 	@Test
-	public void errorOnDecryptWithEmpty() {
+	public void errorOnDecryptWithEmpty(CapturedOutput output) {
 		this.listener = new EnvironmentDecryptApplicationInitializer(Encryptors.text("deadbeef", "AFFE37"));
 		this.listener.setFailOnError(false);
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("spring.cloud.bootstrap.enabled=true", "foo: {cipher}bar").applyTo(context);
 		this.listener.initialize(context);
 		// Assert logs contain warning
-		String sysOutput = this.outputCapture.toString();
+		String sysOutput = output.toString();
 		then(sysOutput).contains("Cannot decrypt: key=foo");
 		// Empty is safest fallback for undecryptable cipher
 		then(context.getEnvironment().getProperty("foo")).isEqualTo("");

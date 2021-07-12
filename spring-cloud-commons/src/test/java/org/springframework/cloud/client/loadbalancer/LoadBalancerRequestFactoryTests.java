@@ -20,12 +20,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class LoadBalancerRequestFactoryTests {
 
 	@Mock
@@ -69,7 +69,7 @@ public class LoadBalancerRequestFactoryTests {
 
 	private ArgumentCaptor<HttpRequest> httpRequestCaptor;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		this.httpRequestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
 	}
