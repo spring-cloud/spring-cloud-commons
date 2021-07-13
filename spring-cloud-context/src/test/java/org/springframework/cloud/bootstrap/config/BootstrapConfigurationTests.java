@@ -123,7 +123,7 @@ public class BootstrapConfigurationTests {
 	/**
 	 * Running the test from maven will start from a different directory then starting it
 	 * from intellij
-	 * @return
+	 * @return external properties resource location
 	 */
 	private String getExternalProperties() {
 		String externalPropertiesPath = "classpath:external-properties/bootstrap.properties";
