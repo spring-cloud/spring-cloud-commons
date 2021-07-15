@@ -47,7 +47,7 @@ import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -160,12 +160,12 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 	@RestController
 	static class Config {
 
-		@RequestMapping("/hello")
+		@GetMapping("/hello")
 		public String hello() {
 			return "Hello World";
 		}
 
-		@RequestMapping("/callback")
+		@GetMapping("/callback")
 		String callbackTestResult() {
 			return "callbackTestResult";
 		}

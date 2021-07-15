@@ -16,10 +16,8 @@
 
 package org.springframework.cloud.context.scope.refresh;
 
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,7 +31,7 @@ import org.springframework.cloud.context.scope.refresh.RefreshScopeConfiguration
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -44,12 +42,9 @@ import static org.assertj.core.api.BDDAssertions.then;
  */
 public class RefreshScopeConfigurationTests {
 
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
-
 	private AnnotationConfigApplicationContext context;
 
-	@After
+	@AfterEach
 	public void init() {
 		if (this.context != null) {
 			this.context.close();
@@ -120,7 +115,7 @@ public class RefreshScopeConfigurationTests {
 			@Value("${message:Hello World!}")
 			String message;
 
-			@RequestMapping("/")
+			@GetMapping("/")
 			public String hello() {
 				return this.message;
 			}
@@ -140,7 +135,7 @@ public class RefreshScopeConfigurationTests {
 			SpringApplication.run(Application.class, args);
 		}
 
-		@RequestMapping("/")
+		@GetMapping("/")
 		public String hello() {
 			return this.message;
 		}
@@ -168,7 +163,7 @@ public class RefreshScopeConfigurationTests {
 		@Value("${message:Hello World!}")
 		String message;
 
-		@RequestMapping("/")
+		@GetMapping("/")
 		// Deliberately use package scope
 		String hello() {
 			return this.message;

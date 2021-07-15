@@ -16,22 +16,19 @@
 
 package org.springframework.cloud.client.discovery.simple;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Ryan Baxter
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = ServletSimpleDiscoveryPropertiesAutoConfigurationTests.Config.class,
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ServletSimpleDiscoveryPropertiesAutoConfigurationTests {

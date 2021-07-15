@@ -21,9 +21,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -40,11 +39,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestConfiguration.class, properties = "messages=one,two")
 public class ConfigurationPropertiesRebinderListIntegrationTests {
 
@@ -68,7 +65,7 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	@Ignore("Can't rebind to list and re-initialize it (need refresh scope for this to work)")
+	@Disabled("Can't rebind to list and re-initialize it (need refresh scope for this to work)")
 	public void testReplaceProperties() throws Exception {
 		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		Map<String, Object> map = findTestProperties();

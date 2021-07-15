@@ -20,29 +20,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.api.BDDAssertions;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.springframework.boot.test.system.OutputCaptureRule;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Marcin Grzejszczak
  */
+@ExtendWith(OutputCaptureExtension.class)
 public class CompatibilityVerifierTests {
 
-	@Rule
-	public OutputCaptureRule outputCapture = new OutputCaptureRule();
-
 	@Test
-	public void should_not_print_the_report_when_no_errors_were_found() {
+	public void should_not_print_the_report_when_no_errors_were_found(CapturedOutput output) {
 		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(
 				new ArrayList<CompatibilityVerifier>());
 
 		verifier.verifyDependencies();
 
-		then(this.outputCapture.toString()).doesNotContain("SPRING CLOUD VERIFICATION FAILED");
+		then(output).doesNotContain("SPRING CLOUD VERIFICATION FAILED");
 	}
 
 	@Test

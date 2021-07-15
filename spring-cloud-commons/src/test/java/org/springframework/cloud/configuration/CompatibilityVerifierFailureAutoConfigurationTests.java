@@ -17,13 +17,11 @@
 package org.springframework.cloud.configuration;
 
 import org.assertj.core.api.BDDAssertions;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.system.OutputCaptureRule;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.NestedExceptionUtils;
 
@@ -33,9 +31,6 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Marcin Grzejszczak
  */
 public class CompatibilityVerifierFailureAutoConfigurationTests {
-
-	@Rule
-	public OutputCaptureRule outputCapture = new OutputCaptureRule();
 
 	@Test
 	public void contextFailsToLoad() {

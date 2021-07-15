@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
@@ -176,14 +176,14 @@ public class SpringBootDependencyTests {
 	@Test
 	public void should_match_against_current_manifest() {
 		try {
-			verifyCurrentVersionFromManifest("2.4");
-			verifyCurrentVersionFromManifest("2.4.x");
+			verifyCurrentVersionFromManifest("2.6");
+			verifyCurrentVersionFromManifest("2.6.x");
 		}
 		catch (AssertionError e) {
-			if (e.getMessage() != null && e.getMessage().contains("2.5.")) {
-				// we're likely running a boot 2.5 compatibility test, try 2.5
-				verifyCurrentVersionFromManifest("2.5");
-				verifyCurrentVersionFromManifest("2.5.x");
+			if (e.getMessage() != null && e.getMessage().contains("2.7.")) {
+				// we're likely running a boot 2.7 compatibility test, try 2.7
+				verifyCurrentVersionFromManifest("2.7");
+				verifyCurrentVersionFromManifest("2.7.x");
 			}
 			else {
 				throw e;
@@ -204,7 +204,7 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_predicate() {
-		List<String> acceptedVersions = Collections.singletonList("2.4");
+		List<String> acceptedVersions = Collections.singletonList("2.6");
 		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
@@ -212,7 +212,7 @@ public class SpringBootDependencyTests {
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("2.4", versionVerifier.is2_4());
+		versionVerifier.ACCEPTED_VERSIONS.put("2.6", versionVerifier.is2_6());
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
@@ -222,7 +222,7 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_predicate_with_version_ending_with_x() {
-		List<String> acceptedVersions = Collections.singletonList("2.4.x");
+		List<String> acceptedVersions = Collections.singletonList("2.6.x");
 		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
@@ -230,7 +230,7 @@ public class SpringBootDependencyTests {
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("2.4", versionVerifier.is2_4());
+		versionVerifier.ACCEPTED_VERSIONS.put("2.6", versionVerifier.is2_6());
 
 		VerificationResult verificationResult = versionVerifier.verify();
 

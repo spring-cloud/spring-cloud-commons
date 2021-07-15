@@ -23,7 +23,7 @@ import javax.net.ssl.HostnameVerifier;
 
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ReflectionUtils;
 

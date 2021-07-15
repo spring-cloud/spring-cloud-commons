@@ -18,7 +18,7 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;

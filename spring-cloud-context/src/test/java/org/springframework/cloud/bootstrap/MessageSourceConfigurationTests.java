@@ -23,8 +23,7 @@ package org.springframework.cloud.bootstrap;
 
 import java.util.Locale;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -32,11 +31,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.bootstrap.MessageSourceConfigurationTests.TestApplication;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestApplication.class, properties = "debug=true")
 public class MessageSourceConfigurationTests {
 

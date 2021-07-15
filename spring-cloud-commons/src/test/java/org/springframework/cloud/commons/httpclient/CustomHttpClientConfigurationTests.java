@@ -23,8 +23,7 @@ import okhttp3.OkHttpClient;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -32,14 +31,12 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Ryan Baxter
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = CustomApplication.class, properties = { "spring.cloud.httpclient.ok.enabled: true" })
 public class CustomHttpClientConfigurationTests {
 
