@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
@@ -35,6 +36,7 @@ import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -273,7 +275,7 @@ public final class ServiceInstanceListSupplierBuilder {
 			ServiceInstanceListSupplier delegate, LoadBalancerProperties properties) {
 		return new HealthCheckServiceInstanceListSupplier(delegate, properties.getHealthCheck(),
 				(serviceInstance, healthCheckPath) -> webClient.get()
-						.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri()).path(healthCheckPath).build()
+						.uri(UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build()
 								.toUri())
 						.exchange().flatMap(clientResponse -> clientResponse.releaseBody()
 								.thenReturn(HttpStatus.OK.value() == clientResponse.rawStatusCode())));
@@ -283,7 +285,7 @@ public final class ServiceInstanceListSupplierBuilder {
 			ServiceInstanceListSupplier delegate, LoadBalancerProperties properties) {
 		return new HealthCheckServiceInstanceListSupplier(delegate, properties.getHealthCheck(),
 				(serviceInstance, healthCheckPath) -> Mono.defer(() -> {
-					URI uri = UriComponentsBuilder.fromUri(serviceInstance.getUri()).path(healthCheckPath).build()
+					URI uri = UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build()
 							.toUri();
 					try {
 						return Mono
@@ -293,6 +295,14 @@ public final class ServiceInstanceListSupplierBuilder {
 						return Mono.just(false);
 					}
 				}));
+	}
+
+	private String getUri(ServiceInstance serviceInstance, String healthCheckPath) {
+		if (StringUtils.hasText(healthCheckPath)) {
+			String path = healthCheckPath.startsWith("/") ? healthCheckPath : "/" + healthCheckPath;
+			return serviceInstance.getUri().toString() + path;
+		}
+		return serviceInstance.getUri().toString();
 	}
 
 	/**
