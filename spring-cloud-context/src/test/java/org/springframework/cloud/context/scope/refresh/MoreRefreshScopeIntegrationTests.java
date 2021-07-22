@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class)
-public class MoreRefreshScopeIntegrationTests {
+class MoreRefreshScopeIntegrationTests {
 
 	@Autowired
 	private TestService service;
@@ -56,19 +56,19 @@ public class MoreRefreshScopeIntegrationTests {
 	private ConfigurableEnvironment environment;
 
 	@BeforeEach
-	public void init() {
+	void init() {
 		then(TestService.getInitCount()).isEqualTo(1);
 		TestService.reset();
 	}
 
 	@AfterEach
-	public void close() {
+	void close() {
 		TestService.reset();
 	}
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	void testSimpleProperties() throws Exception {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		then(this.service instanceof Advised).isTrue();
 		// Change the dynamic property source...
@@ -81,7 +81,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefresh() throws Exception {
+	void testRefresh() throws Exception {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
@@ -98,7 +98,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefreshFails() throws Exception {
+	void testRefreshFails() throws Exception {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo", "delay:foo").applyTo(this.environment);
@@ -119,7 +119,7 @@ public class MoreRefreshScopeIntegrationTests {
 		then(this.service.getMessage()).isEqualTo("Foo");
 	}
 
-	public static class TestService implements InitializingBean, DisposableBean {
+	static class TestService implements InitializingBean, DisposableBean {
 
 		private static Log logger = LogFactory.getLog(TestService.class);
 
@@ -131,37 +131,37 @@ public class MoreRefreshScopeIntegrationTests {
 
 		private volatile long delay = 0;
 
-		public static void reset() {
+		static void reset() {
 			initCount = 0;
 			destroyCount = 0;
 		}
 
-		public static int getInitCount() {
+		static int getInitCount() {
 			return initCount;
 		}
 
-		public static int getDestroyCount() {
+		static int getDestroyCount() {
 			return destroyCount;
 		}
 
-		public void setDelay(long delay) {
+		void setDelay(long delay) {
 			this.delay = delay;
 		}
 
 		@Override
-		public void afterPropertiesSet() throws Exception {
+		void afterPropertiesSet() throws Exception {
 			logger.debug("Initializing message: " + this.message);
 			initCount++;
 		}
 
 		@Override
-		public void destroy() throws Exception {
+		void destroy() throws Exception {
 			logger.debug("Destroying message: " + this.message);
 			destroyCount++;
 			this.message = null;
 		}
 
-		public String getMessage() {
+		String getMessage() {
 			logger.debug("Getting message: " + this.message);
 			try {
 				Thread.sleep(this.delay);
@@ -173,7 +173,7 @@ public class MoreRefreshScopeIntegrationTests {
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			logger.debug("Setting message: " + message);
 			this.message = message;
 		}
@@ -193,7 +193,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 		@Bean
 		@RefreshScope
-		public TestService service() {
+		TestService service() {
 			TestService service = new TestService();
 			service.setMessage(properties().getMessage());
 			service.setDelay(properties().getDelay());
@@ -211,20 +211,20 @@ public class MoreRefreshScopeIntegrationTests {
 		private int delay;
 
 		// @ManagedAttribute
-		public String getMessage() {
+		String getMessage() {
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			this.message = message;
 		}
 
 		// @ManagedAttribute
-		public int getDelay() {
+		int getDelay() {
 			return this.delay;
 		}
 
-		public void setDelay(int delay) {
+		void setDelay(int delay) {
 			this.delay = delay;
 		}
 

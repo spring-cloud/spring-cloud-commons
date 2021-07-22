@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dave Syer
  */
-public class RefreshScopeHealthIndicatorTests {
+class RefreshScopeHealthIndicatorTests {
 
 	@SuppressWarnings("unchecked")
 	private ObjectProvider<RefreshScope> scopeProvider = mock(ObjectProvider.class);
@@ -46,38 +46,38 @@ public class RefreshScopeHealthIndicatorTests {
 	private RefreshScopeHealthIndicator indicator = new RefreshScopeHealthIndicator(this.scopeProvider, this.rebinder);
 
 	@BeforeEach
-	public void init() {
+	void init() {
 		BDDMockito.willReturn(this.scope).given(this.scopeProvider).getIfAvailable();
 		when(this.rebinder.getErrors()).thenReturn(Collections.emptyMap());
 		when(this.scope.getErrors()).thenReturn(Collections.emptyMap());
 	}
 
 	@Test
-	public void sunnyDay() {
+	void sunnyDay() {
 		then(this.indicator.health().getStatus()).isEqualTo(Status.UP);
 	}
 
 	@Test
-	public void binderError() {
+	void binderError() {
 		when(this.rebinder.getErrors()).thenReturn(Collections.singletonMap("foo", new RuntimeException("FOO")));
 		then(this.indicator.health().getStatus()).isEqualTo(Status.DOWN);
 	}
 
 	@Test
-	public void scopeError() {
+	void scopeError() {
 		when(this.scope.getErrors()).thenReturn(Collections.singletonMap("foo", new RuntimeException("FOO")));
 		then(this.indicator.health().getStatus()).isEqualTo(Status.DOWN);
 	}
 
 	@Test
-	public void bothError() {
+	void bothError() {
 		when(this.rebinder.getErrors()).thenReturn(Collections.singletonMap("foo", new RuntimeException("FOO")));
 		when(this.scope.getErrors()).thenReturn(Collections.singletonMap("bar", new RuntimeException("BAR")));
 		then(this.indicator.health().getStatus()).isEqualTo(Status.DOWN);
 	}
 
 	@Test
-	public void nullRefreshScope() {
+	void nullRefreshScope() {
 		ObjectProvider<RefreshScope> scopeProvider = mock(ObjectProvider.class);
 		BDDMockito.willReturn(null).given(scopeProvider).getIfAvailable();
 		then(this.indicator.health().getStatus()).isEqualTo(Status.UP);

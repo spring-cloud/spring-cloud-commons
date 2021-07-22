@@ -32,10 +32,10 @@ import static org.springframework.boot.WebApplicationType.NONE;
  *
  * @author Biju Kunjummen
  */
-public class BootstrapListenerHierarchyIntegrationTests {
+class BootstrapListenerHierarchyIntegrationTests {
 
 	@Test
-	public void shouldAddInABootstrapContext() {
+	void shouldAddInABootstrapContext() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
 				.properties("spring.config.use-legacy-processing=true").sources(BasicConfiguration.class).web(NONE)
 				.run();
@@ -44,7 +44,7 @@ public class BootstrapListenerHierarchyIntegrationTests {
 	}
 
 	@Test
-	public void shouldAddInOneBootstrapForABasicParentChildHierarchy() {
+	void shouldAddInOneBootstrapForABasicParentChildHierarchy() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
 				.properties("spring.config.use-legacy-processing=true").sources(RootConfiguration.class).web(NONE)
 				.child(BasicConfiguration.class).web(NONE).run();
@@ -63,7 +63,7 @@ public class BootstrapListenerHierarchyIntegrationTests {
 	}
 
 	@Test
-	public void shouldAddInOneBootstrapForSiblingsBasedHierarchy() {
+	void shouldAddInOneBootstrapForSiblingsBasedHierarchy() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder()
 				.properties("spring.config.use-legacy-processing=true").sources(RootConfiguration.class).web(NONE)
 				.child(BasicConfiguration.class).web(NONE).sibling(BasicConfiguration.class).web(NONE).run();
@@ -90,7 +90,7 @@ public class BootstrapListenerHierarchyIntegrationTests {
 	static class RootConfiguration {
 
 		@Bean
-		public String rootBean() {
+		String rootBean() {
 			return "rootBean";
 		}
 

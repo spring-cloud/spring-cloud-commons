@@ -48,7 +48,7 @@ import org.springframework.test.annotation.Repeat;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class)
-public class RefreshScopeScaleTests {
+class RefreshScopeScaleTests {
 
 	private static Log logger = LogFactory.getLog(RefreshScopeScaleTests.class);
 
@@ -66,7 +66,7 @@ public class RefreshScopeScaleTests {
 	@Test
 	@Repeat(10)
 	@DirtiesContext
-	public void testConcurrentRefresh() throws Exception {
+	void testConcurrentRefresh() throws Exception {
 
 		// overload the thread pool and try to force Spring to create too many instances
 		int n = 80;
@@ -79,7 +79,7 @@ public class RefreshScopeScaleTests {
 		for (int i = 0; i < n; i++) {
 			result = this.executor.submit(new Callable<String>() {
 				@Override
-				public String call() throws Exception {
+				String call() throws Exception {
 					logger.debug("Background started.");
 					try {
 						return RefreshScopeScaleTests.this.service.getMessage();
@@ -98,13 +98,13 @@ public class RefreshScopeScaleTests {
 		then(ExampleService.count).isEqualTo(1);
 	}
 
-	public interface Service {
+	interface Service {
 
 		String getMessage();
 
 	}
 
-	public static class ExampleService implements Service, InitializingBean, DisposableBean {
+	static class ExampleService implements Service, InitializingBean, DisposableBean {
 
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 
@@ -114,12 +114,12 @@ public class RefreshScopeScaleTests {
 
 		private volatile long delay = 0;
 
-		public void setDelay(long delay) {
+		void setDelay(long delay) {
 			this.delay = delay;
 		}
 
 		@Override
-		public void afterPropertiesSet() throws Exception {
+		void afterPropertiesSet() throws Exception {
 			ExampleService.count++;
 			try {
 				Thread.sleep(this.delay);
@@ -131,18 +131,18 @@ public class RefreshScopeScaleTests {
 		}
 
 		@Override
-		public void destroy() throws Exception {
+		void destroy() throws Exception {
 			logger.debug("Destroying message: " + this.message);
 			this.message = null;
 		}
 
 		@Override
-		public String getMessage() {
+		String getMessage() {
 			logger.debug("Returning message: " + this.message);
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			logger.debug("Setting message: " + message);
 			this.message = message;
 		}
@@ -159,7 +159,7 @@ public class RefreshScopeScaleTests {
 
 		@Bean
 		@RefreshScope
-		public ExampleService service() {
+		ExampleService service() {
 			ExampleService service = new ExampleService();
 			service.setMessage(this.properties.getMessage());
 			service.setDelay(this.properties.getDelay());
@@ -177,20 +177,20 @@ public class RefreshScopeScaleTests {
 		private int delay;
 
 		@ManagedAttribute
-		public String getMessage() {
+		String getMessage() {
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			this.message = message;
 		}
 
 		@ManagedAttribute
-		public int getDelay() {
+		int getDelay() {
 			return this.delay;
 		}
 
-		public void setDelay(int delay) {
+		void setDelay(int delay) {
 			this.delay = delay;
 		}
 

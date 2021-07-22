@@ -43,7 +43,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class, properties = "spring.config.use-legacy-processing=true")
 @ActiveProfiles("config")
-public class ConfigurationPropertiesRebinderIntegrationTests {
+class ConfigurationPropertiesRebinderIntegrationTests {
 
 	@Autowired
 	private TestProperties properties;
@@ -59,7 +59,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	void testSimpleProperties() throws Exception {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		then(this.properties.getCount()).isEqualTo(1);
 		// Change the dynamic property source...
@@ -71,7 +71,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefreshInParent() throws Exception {
+	void testRefreshInParent() throws Exception {
 		then(this.config.getName()).isEqualTo("main");
 		// Change the dynamic property source...
 		TestPropertyValues.of("config.name=foo").applyTo(this.environment);
@@ -82,7 +82,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefresh() throws Exception {
+	void testRefresh() throws Exception {
 		then(this.properties.getCount()).isEqualTo(1);
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
@@ -95,7 +95,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefreshByName() throws Exception {
+	void testRefreshByName() throws Exception {
 		then(this.properties.getCount()).isEqualTo(1);
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
@@ -126,7 +126,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 		// exposes https://github.com/spring-cloud/spring-cloud-commons/issues/337
 		@Bean
 		@ConfigurationProperties("some.service")
-		public SomeService someService() {
+		SomeService someService() {
 			return ProxyFactory.getProxy(SomeService.class, (MethodInterceptor) methodInvocation -> null);
 		}
 
@@ -151,28 +151,28 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 		private int count = 0;
 
-		public int getCount() {
+		int getCount() {
 			return this.count;
 		}
 
-		public String getMessage() {
+		String getMessage() {
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			this.message = message;
 		}
 
-		public int getDelay() {
+		int getDelay() {
 			return this.delay;
 		}
 
-		public void setDelay(int delay) {
+		void setDelay(int delay) {
 			this.delay = delay;
 		}
 
 		@PostConstruct
-		public void init() {
+		void init() {
 			this.count++;
 		}
 
@@ -180,15 +180,15 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	@ConfigurationProperties("config")
 	@ConditionalOnMissingBean(ConfigProperties.class)
-	public static class ConfigProperties {
+	static class ConfigProperties {
 
 		private String name;
 
-		public String getName() {
+		String getName() {
 			return this.name;
 		}
 
-		public void setName(String name) {
+		void setName(String name) {
 			this.name = name;
 		}
 

@@ -37,19 +37,19 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Olga Maciaszek-Sharma
  *
  */
-public class LoggingRebinderTests {
+class LoggingRebinderTests {
 
 	private LoggingRebinder rebinder = new LoggingRebinder();
 
 	private Logger logger = LoggerFactory.getLogger("org.springframework.web");
 
 	@AfterEach
-	public void reset() {
+	void reset() {
 		LoggingSystem.get(getClass().getClassLoader()).setLogLevel("org.springframework.web", LogLevel.INFO);
 	}
 
 	@Test
-	public void logLevelsChanged() {
+	void logLevelsChanged() {
 		then(this.logger.isTraceEnabled()).isFalse();
 		StandardEnvironment environment = new StandardEnvironment();
 		TestPropertyValues.of("logging.level.org.springframework.web=TRACE").applyTo(environment);
@@ -60,7 +60,7 @@ public class LoggingRebinderTests {
 	}
 
 	@Test
-	public void logLevelsLowerCase() {
+	void logLevelsLowerCase() {
 		then(this.logger.isTraceEnabled()).isFalse();
 		StandardEnvironment environment = new StandardEnvironment();
 		TestPropertyValues.of("logging.level.org.springframework.web=trace").applyTo(environment);
@@ -71,7 +71,7 @@ public class LoggingRebinderTests {
 	}
 
 	@Test
-	public void logLevelFalseResolvedToOff() {
+	void logLevelFalseResolvedToOff() {
 		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
 				.getLogger("org.springframework.cloud");
 		StandardEnvironment environment = new StandardEnvironment();

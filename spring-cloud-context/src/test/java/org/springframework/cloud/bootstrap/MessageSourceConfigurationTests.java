@@ -35,13 +35,13 @@ import org.springframework.context.annotation.Configuration;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestApplication.class, properties = "debug=true")
-public class MessageSourceConfigurationTests {
+class MessageSourceConfigurationTests {
 
 	@Autowired
 	private MessageSource messageSource;
 
 	@Test
-	public void loadsMessage() {
+	void loadsMessage() {
 		then(this.messageSource.getMessage("hello.message", null, Locale.getDefault())).isEqualTo("Hello World!");
 	}
 

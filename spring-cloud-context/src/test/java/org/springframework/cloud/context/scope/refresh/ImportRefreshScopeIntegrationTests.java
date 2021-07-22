@@ -31,7 +31,7 @@ import org.springframework.context.annotation.Import;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class)
-public class ImportRefreshScopeIntegrationTests {
+class ImportRefreshScopeIntegrationTests {
 
 	@Autowired
 	org.springframework.cloud.context.scope.refresh.RefreshScope scope;
@@ -43,7 +43,7 @@ public class ImportRefreshScopeIntegrationTests {
 	private ExampleService service;
 
 	@Test
-	public void testSimpleProperties() throws Exception {
+	void testSimpleProperties() throws Exception {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		then(this.beanFactory.getBeanDefinition(ScopedProxyUtils.getTargetBeanName("service")).getScope())
 				.isEqualTo("refresh");
@@ -52,9 +52,9 @@ public class ImportRefreshScopeIntegrationTests {
 
 	@Configuration(value = "service", proxyBeanMethods = false)
 	@RefreshScope
-	public static class ExampleService {
+	static class ExampleService {
 
-		public String getMessage() {
+		String getMessage() {
 			return "Hello scope!";
 		}
 

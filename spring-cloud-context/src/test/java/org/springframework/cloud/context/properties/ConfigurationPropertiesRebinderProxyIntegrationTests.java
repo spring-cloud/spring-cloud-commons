@@ -42,7 +42,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class, properties = { "messages.expiry.one=168", "messages.expiry.two=76" })
-public class ConfigurationPropertiesRebinderProxyIntegrationTests {
+class ConfigurationPropertiesRebinderProxyIntegrationTests {
 
 	@Autowired
 	private TestProperties properties;
@@ -55,7 +55,7 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testAppendProperties() throws Exception {
+	void testAppendProperties() throws Exception {
 		// This comes out as a String not Integer if the rebinder processes the proxy
 		// instead of the target
 		then(this.properties.getExpiry().get("one")).isEqualTo(new Integer(168));
@@ -81,7 +81,7 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 	protected static class Interceptor {
 
 		@Before("execution(* *..TestProperties.*(..))")
-		public void before() {
+		void before() {
 			System.err.println("Before");
 		}
 
@@ -104,15 +104,15 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 
 		private String name;
 
-		public Map<String, Integer> getExpiry() {
+		Map<String, Integer> getExpiry() {
 			return this.expiry;
 		}
 
-		public String getName() {
+		String getName() {
 			return this.name;
 		}
 
-		public void setName(String name) {
+		void setName(String name) {
 			this.name = name;
 		}
 

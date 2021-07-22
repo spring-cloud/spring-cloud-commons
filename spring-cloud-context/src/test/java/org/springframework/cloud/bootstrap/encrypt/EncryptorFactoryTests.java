@@ -31,10 +31,10 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Biju Kunjummen
  */
-public class EncryptorFactoryTests {
+class EncryptorFactoryTests {
 
 	@Test
-	public void testWithRsaPrivateKey() throws Exception {
+	void testWithRsaPrivateKey() throws Exception {
 		String key = StreamUtils.copyToString(new ClassPathResource("/example-test-rsa-private-key").getInputStream(),
 				Charset.forName("ASCII"));
 
@@ -46,7 +46,7 @@ public class EncryptorFactoryTests {
 	}
 
 	@Test
-	public void testWithInvalidRsaPrivateKey() {
+	void testWithInvalidRsaPrivateKey() {
 		String key = "-----BEGIN RSA PRIVATE KEY-----\n"
 				+ "MIIEowIBAAKCAQEAwClFgrRa/PUHPIJr9gvIPL6g6Rjp/TVZmVNOf2fL96DYbkj5\n";
 		Assertions.assertThrows(RuntimeException.class, () -> {

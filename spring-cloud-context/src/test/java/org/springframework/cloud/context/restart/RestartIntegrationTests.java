@@ -27,23 +27,23 @@ import org.springframework.context.support.LiveBeansView;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-public class RestartIntegrationTests {
+class RestartIntegrationTests {
 
 	private ConfigurableApplicationContext context;
 
-	public static void main(String[] args) {
+	static void main(String[] args) {
 		SpringApplication.run(TestConfiguration.class, args);
 	}
 
 	@AfterEach
-	public void close() {
+	void close() {
 		if (this.context != null) {
 			this.context.close();
 		}
 	}
 
 	@Test
-	public void testRestartTwice() throws Exception {
+	void testRestartTwice() throws Exception {
 
 		this.context = SpringApplication.run(TestConfiguration.class, "--management.endpoint.restart.enabled=true",
 				"--server.port=0", "--spring.config.use-legacy-processing=true",

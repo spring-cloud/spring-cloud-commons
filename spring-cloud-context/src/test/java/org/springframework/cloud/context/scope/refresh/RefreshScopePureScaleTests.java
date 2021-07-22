@@ -49,7 +49,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 @SpringBootTest(classes = TestConfiguration.class)
 // ,
 // properties="logging.level.org.springframework.cloud.context.scope.refresh.RefreshScopePureScaleTests=DEBUG")
-public class RefreshScopePureScaleTests {
+class RefreshScopePureScaleTests {
 
 	private static Log logger = LogFactory.getLog(RefreshScopePureScaleTests.class);
 
@@ -64,7 +64,7 @@ public class RefreshScopePureScaleTests {
 	@Test
 	@Repeat(10)
 	@DirtiesContext
-	public void testConcurrentRefresh() throws Exception {
+	void testConcurrentRefresh() throws Exception {
 
 		// overload the thread pool and try to force Spring to create too many instances
 		int n = 80;
@@ -74,7 +74,7 @@ public class RefreshScopePureScaleTests {
 		for (int i = 0; i < n; i++) {
 			results.add(this.executor.submit(new Callable<String>() {
 				@Override
-				public String call() throws Exception {
+				String call() throws Exception {
 					logger.debug("Background started.");
 					try {
 						return RefreshScopePureScaleTests.this.service.getMessage();
@@ -87,7 +87,7 @@ public class RefreshScopePureScaleTests {
 			}));
 			this.executor.submit(new Runnable() {
 				@Override
-				public void run() {
+				void run() {
 					logger.debug("Refreshing.");
 					RefreshScopePureScaleTests.this.scope.refreshAll();
 				}
@@ -100,13 +100,13 @@ public class RefreshScopePureScaleTests {
 		}
 	}
 
-	public interface Service {
+	interface Service {
 
 		String getMessage();
 
 	}
 
-	public static class ExampleService implements Service, InitializingBean, DisposableBean {
+	static class ExampleService implements Service, InitializingBean, DisposableBean {
 
 		private static Log logger = LogFactory.getLog(ExampleService.class);
 
@@ -114,12 +114,12 @@ public class RefreshScopePureScaleTests {
 
 		private volatile long delay = 0;
 
-		public void setDelay(long delay) {
+		void setDelay(long delay) {
 			this.delay = delay;
 		}
 
 		@Override
-		public void afterPropertiesSet() throws Exception {
+		void afterPropertiesSet() throws Exception {
 			logger.debug("Initializing: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 			try {
 				Thread.sleep(this.delay);
@@ -131,18 +131,18 @@ public class RefreshScopePureScaleTests {
 		}
 
 		@Override
-		public void destroy() throws Exception {
+		void destroy() throws Exception {
 			logger.debug("Destroying message: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 			this.message = null;
 		}
 
 		@Override
-		public String getMessage() {
+		String getMessage() {
 			logger.debug("Returning message: " + ObjectUtils.getIdentityHexString(this) + ", " + this.message);
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			logger.debug("Setting message: " + ObjectUtils.getIdentityHexString(this) + ", " + message);
 			this.message = message;
 		}
@@ -155,7 +155,7 @@ public class RefreshScopePureScaleTests {
 
 		@Bean
 		@RefreshScope
-		public ExampleService service() {
+		ExampleService service() {
 			ExampleService service = new ExampleService();
 			service.setMessage("Foo");
 			return service;

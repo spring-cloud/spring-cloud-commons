@@ -27,10 +27,10 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration.firstToBeCreated;
 
 @SpringBootTest(classes = Application.class, properties = "spring.config.use-legacy-processing=true")
-public class BootstrapSourcesOrderingTests {
+class BootstrapSourcesOrderingTests {
 
 	@Test
-	public void sourcesAreOrderedCorrectly() {
+	void sourcesAreOrderedCorrectly() {
 		Class<?> firstConstructedClass = firstToBeCreated.get();
 		then(firstConstructedClass).as("bootstrap sources not ordered correctly")
 				.isEqualTo(TestHigherPriorityBootstrapConfiguration.class);

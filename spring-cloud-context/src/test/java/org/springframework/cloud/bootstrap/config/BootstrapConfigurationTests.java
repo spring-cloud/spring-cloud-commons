@@ -50,14 +50,14 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Dave Syer
  *
  */
-public class BootstrapConfigurationTests {
+class BootstrapConfigurationTests {
 
 	private ConfigurableApplicationContext context;
 
 	private ConfigurableApplicationContext sibling;
 
 	@AfterEach
-	public void close() {
+	void close() {
 		// Expected.* is bound to the PropertySourceConfiguration below
 		System.clearProperty("expected.name");
 		System.clearProperty("expected.fail");
@@ -75,7 +75,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void pickupOnlyExternalBootstrapProperties() {
+	void pickupOnlyExternalBootstrapProperties() {
 		String externalPropertiesPath = getExternalProperties();
 
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
@@ -90,7 +90,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void pickupAdditionalExternalBootstrapProperties() {
+	void pickupAdditionalExternalBootstrapProperties() {
 		String externalPropertiesPath = getExternalProperties();
 
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
@@ -105,12 +105,12 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void bootstrapPropertiesAvailableInInitializer() {
+	void bootstrapPropertiesAvailableInInitializer() {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.config.use-legacy-processing=true").sources(BareConfiguration.class)
 				.initializers(new ApplicationContextInitializer<ConfigurableApplicationContext>() {
 					@Override
-					public void initialize(ConfigurableApplicationContext applicationContext) {
+					void initialize(ConfigurableApplicationContext applicationContext) {
 						// This property is defined in bootstrap.properties
 						then(applicationContext.getEnvironment().getProperty("info.name")).isEqualTo("child");
 					}
@@ -131,7 +131,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void picksUpAdditionalPropertySource() {
+	void picksUpAdditionalPropertySource() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.config.use-legacy-processing=true").sources(BareConfiguration.class).run();
@@ -142,7 +142,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void failsOnPropertySource() {
+	void failsOnPropertySource() {
 		System.setProperty("expected.fail", "true");
 		Throwable throwable = Assertions.assertThrows(RuntimeException.class, () -> {
 			this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
@@ -152,7 +152,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void overrideSystemPropertySourceByDefault() {
+	void overrideSystemPropertySourceByDefault() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		System.setProperty("bootstrap.foo", "system");
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
@@ -161,7 +161,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void systemPropertyOverrideFalse() {
+	void systemPropertyOverrideFalse() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
 		System.setProperty("bootstrap.foo", "system");
@@ -171,7 +171,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void systemPropertyOverrideWhenOverrideDisallowed() {
+	void systemPropertyOverrideWhenOverrideDisallowed() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
 		// If spring.cloud.config.allowOverride=false is in the remote property sources
@@ -185,7 +185,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void systemPropertyOverrideFalseWhenOverrideAllowed() {
+	void systemPropertyOverrideFalseWhenOverrideAllowed() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
@@ -196,7 +196,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void overrideAllWhenOverrideAllowed() {
+	void overrideAllWhenOverrideAllowed() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideNone", "true");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
@@ -210,7 +210,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void applicationNameInBootstrapAndMain() {
+	void applicationNameInBootstrapAndMain() {
 		System.setProperty("expected.name", "main");
 		this.context = new SpringApplicationBuilder()
 				.web(WebApplicationType.NONE).properties("spring.cloud.bootstrap.name:other",
@@ -227,7 +227,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void applicationNameNotInBootstrap() {
+	void applicationNameNotInBootstrap() {
 		System.setProperty("expected.name", "main");
 		this.context = new SpringApplicationBuilder()
 				.web(WebApplicationType.NONE).properties("spring.cloud.bootstrap.name:application",
@@ -240,7 +240,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void applicationNameOnlyInBootstrap() {
+	void applicationNameOnlyInBootstrap() {
 		System.setProperty("expected.name", "main");
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.cloud.bootstrap.name:other", "spring.config.use-legacy-processing=true")
@@ -255,7 +255,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void environmentEnrichedOnceWhenSharedWithChildContext() {
+	void environmentEnrichedOnceWhenSharedWithChildContext() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
 				.properties("spring.config.use-legacy-processing=true").environment(new StandardEnvironment())
@@ -270,7 +270,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void onlyOneBootstrapContext() {
+	void onlyOneBootstrapContext() {
 		TestHigherPriorityBootstrapConfiguration.count.set(0);
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
@@ -284,7 +284,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void listOverride() {
+	void listOverride() {
 		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
 				.properties("spring.config.use-legacy-processing=true").child(BareConfiguration.class)
 				.web(WebApplicationType.NONE).run();
@@ -295,7 +295,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void bootstrapContextSharedBySiblings() {
+	void bootstrapContextSharedBySiblings() {
 		TestHigherPriorityBootstrapConfiguration.count.set(0);
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		SpringApplicationBuilder builder = new SpringApplicationBuilder()
@@ -318,7 +318,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void environmentEnrichedInParentContext() {
+	void environmentEnrichedInParentContext() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
 				.properties("spring.config.use-legacy-processing=true").child(BareConfiguration.class)
@@ -335,7 +335,7 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	@Disabled // FIXME: legacy
-	public void differentProfileInChild() {
+	void differentProfileInChild() {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		// Profiles are always merged with the child
 		ConfigurableApplicationContext parent = new SpringApplicationBuilder().sources(BareConfiguration.class)
@@ -364,7 +364,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void includeProfileFromBootstrapPropertySource() {
+	void includeProfileFromBootstrapPropertySource() {
 		PropertySourceConfiguration.MAP.put("spring.profiles.include", "bar,baz");
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.config.use-legacy-processing=true").profiles("foo").sources(BareConfiguration.class)
@@ -374,7 +374,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void includeProfileFromBootstrapProperties() {
+	void includeProfileFromBootstrapProperties() {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
 				.properties("spring.config.use-legacy-processing=true", "spring.cloud.bootstrap.name=local").run();
 		then(this.context.getEnvironment().acceptsProfiles("local")).isTrue();
@@ -382,7 +382,7 @@ public class BootstrapConfigurationTests {
 	}
 
 	@Test
-	public void nonEnumerablePropertySourceWorks() {
+	void nonEnumerablePropertySourceWorks() {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
 				.properties("spring.config.use-legacy-processing=true", "spring.cloud.bootstrap.name=nonenumerable")
 				.run();
@@ -400,10 +400,10 @@ public class BootstrapConfigurationTests {
 	protected static class SimplePropertySourceConfiguration implements PropertySourceLocator {
 
 		@Override
-		public PropertySource<?> locate(Environment environment) {
+		PropertySource<?> locate(Environment environment) {
 			return new PropertySource("testBootstrapSimple", this) {
 				@Override
-				public Object getProperty(String name) {
+				Object getProperty(String name) {
 					return ("foo".equals(name)) ? "bar" : null;
 				}
 			};
@@ -416,7 +416,7 @@ public class BootstrapConfigurationTests {
 	// This is added to bootstrap context as a source in bootstrap.properties
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 
-		public static Map<String, Object> MAP = new HashMap<String, Object>(
+		static Map<String, Object> MAP = new HashMap<String, Object>(
 				Collections.<String, Object>singletonMap("bootstrap.foo", "bar"));
 
 		private String name;
@@ -424,7 +424,7 @@ public class BootstrapConfigurationTests {
 		private boolean fail = false;
 
 		@Override
-		public PropertySource<?> locate(Environment environment) {
+		PropertySource<?> locate(Environment environment) {
 			if (this.name != null) {
 				then(this.name).isEqualTo(environment.getProperty("spring.application.name"));
 			}
@@ -434,19 +434,19 @@ public class BootstrapConfigurationTests {
 			return new MapPropertySource("testBootstrap", MAP);
 		}
 
-		public String getName() {
+		String getName() {
 			return this.name;
 		}
 
-		public void setName(String name) {
+		void setName(String name) {
 			this.name = name;
 		}
 
-		public boolean isFail() {
+		boolean isFail() {
 			return this.fail;
 		}
 
-		public void setFail(boolean fail) {
+		void setFail(boolean fail) {
 			this.fail = fail;
 		}
 
@@ -457,11 +457,11 @@ public class BootstrapConfigurationTests {
 	// This is added to bootstrap context as a source in bootstrap.properties
 	protected static class CompositePropertySourceConfiguration implements PropertySourceLocator {
 
-		public static Map<String, Object> MAP1 = new HashMap<String, Object>();
+		static Map<String, Object> MAP1 = new HashMap<String, Object>();
 
-		public static Map<String, Object> MAP2 = new HashMap<String, Object>();
+		static Map<String, Object> MAP2 = new HashMap<String, Object>();
 
-		public CompositePropertySourceConfiguration() {
+		CompositePropertySourceConfiguration() {
 			MAP1.put("list.foo[0]", "hello");
 			MAP1.put("list.food[1]", "world");
 			MAP2.put("list.foo[0]", "hello world");
@@ -472,7 +472,7 @@ public class BootstrapConfigurationTests {
 		private boolean fail = false;
 
 		@Override
-		public PropertySource<?> locate(Environment environment) {
+		PropertySource<?> locate(Environment environment) {
 			if (this.name != null) {
 				then(this.name).isEqualTo(environment.getProperty("spring.application.name"));
 			}
@@ -485,19 +485,19 @@ public class BootstrapConfigurationTests {
 			return compositePropertySource;
 		}
 
-		public String getName() {
+		String getName() {
 			return this.name;
 		}
 
-		public void setName(String name) {
+		void setName(String name) {
 			this.name = name;
 		}
 
-		public boolean isFail() {
+		boolean isFail() {
 			return this.fail;
 		}
 
-		public void setFail(boolean fail) {
+		void setFail(boolean fail) {
 			this.fail = fail;
 		}
 
@@ -507,11 +507,11 @@ public class BootstrapConfigurationTests {
 
 		private List<String> foo;
 
-		public List<String> getFoo() {
+		List<String> getFoo() {
 			return foo;
 		}
 
-		public void setFoo(List<String> foo) {
+		void setFoo(List<String> foo) {
 			this.foo = foo;
 		}
 

@@ -35,7 +35,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class,
 		properties = { "spring.datasource.hikari.read-only=false", "spring.config.use-legacy-processing=true" })
-public class ContextRefresherIntegrationTests {
+class ContextRefresherIntegrationTests {
 
 	@Autowired
 	private TestProperties properties;
@@ -48,7 +48,7 @@ public class ContextRefresherIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	void testSimpleProperties() throws Exception {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		this.properties.setMessage("Foo");
@@ -58,7 +58,7 @@ public class ContextRefresherIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefreshBean() throws Exception {
+	void testRefreshBean() throws Exception {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		this.properties.setMessage("Foo");
@@ -69,7 +69,7 @@ public class ContextRefresherIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testUpdateHikari() throws Exception {
+	void testUpdateHikari() throws Exception {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		TestPropertyValues.of("spring.datasource.hikari.read-only=true").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
@@ -79,7 +79,7 @@ public class ContextRefresherIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testCachedRandom() {
+	void testCachedRandom() {
 		long cachedRandomLong = properties.getCachedRandomLong();
 		long randomLong = properties.randomLong();
 		then(cachedRandomLong).isNotNull();
@@ -108,36 +108,36 @@ public class ContextRefresherIntegrationTests {
 		private Long randomLong;
 
 		@ManagedAttribute
-		public String getMessage() {
+		String getMessage() {
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			this.message = message;
 		}
 
 		@ManagedAttribute
-		public int getDelay() {
+		int getDelay() {
 			return this.delay;
 		}
 
-		public void setDelay(int delay) {
+		void setDelay(int delay) {
 			this.delay = delay;
 		}
 
-		public long getCachedRandomLong() {
+		long getCachedRandomLong() {
 			return cachedRandomLong;
 		}
 
-		public void setCachedRandomLong(long cachedRandomLong) {
+		void setCachedRandomLong(long cachedRandomLong) {
 			this.cachedRandomLong = cachedRandomLong;
 		}
 
-		public long randomLong() {
+		long randomLong() {
 			return randomLong;
 		}
 
-		public void setRandomLong(long randomLong) {
+		void setRandomLong(long randomLong) {
 			this.randomLong = randomLong;
 		}
 

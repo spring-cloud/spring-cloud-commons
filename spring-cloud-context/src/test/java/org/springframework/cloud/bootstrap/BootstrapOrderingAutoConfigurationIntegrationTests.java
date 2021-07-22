@@ -31,24 +31,24 @@ import static org.assertj.core.api.BDDAssertions.then;
 @SpringBootTest(classes = Application.class,
 		properties = { "encrypt.key:deadbeef", "spring.config.use-legacy-processing=true" })
 @ActiveProfiles("encrypt")
-public class BootstrapOrderingAutoConfigurationIntegrationTests {
+class BootstrapOrderingAutoConfigurationIntegrationTests {
 
 	@Autowired
 	private ConfigurableEnvironment environment;
 
 	@Test
-	public void bootstrapPropertiesExist() {
+	void bootstrapPropertiesExist() {
 		then(this.environment.getPropertySources().contains("applicationConfig: [classpath:/bootstrap.properties]"))
 				.isTrue();
 	}
 
 	@Test
-	public void normalPropertiesDecrypted() {
+	void normalPropertiesDecrypted() {
 		then(this.environment.resolvePlaceholders("${foo}")).isEqualTo("foo");
 	}
 
 	@Test
-	public void bootstrapPropertiesDecrypted() {
+	void bootstrapPropertiesDecrypted() {
 		then(this.environment.resolvePlaceholders("${bar}")).isEqualTo("bar");
 	}
 

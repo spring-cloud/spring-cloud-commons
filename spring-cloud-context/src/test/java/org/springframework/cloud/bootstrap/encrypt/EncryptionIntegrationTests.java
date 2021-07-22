@@ -34,10 +34,10 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.BDDAssertions.then;
 
-public class EncryptionIntegrationTests {
+class EncryptionIntegrationTests {
 
 	@Test
-	public void legacySymmetricPropertyValues() {
+	void legacySymmetricPropertyValues() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfiguration.class)
 				.web(WebApplicationType.NONE).properties("spring.config.use-legacy-processing=true", "encrypt.key:pie",
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
@@ -46,7 +46,7 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
-	public void legacySymmetricConfigurationProperties() {
+	void legacySymmetricConfigurationProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfiguration.class)
 				.web(WebApplicationType.NONE).properties("spring.config.use-legacy-processing=true", "encrypt.key:pie",
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
@@ -55,7 +55,7 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
-	public void propSymmetricPropertyValues() {
+	void propSymmetricPropertyValues() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfiguration.class)
 				.web(WebApplicationType.NONE).properties("spring.cloud.bootstrap.enabled=true", "encrypt.key:pie",
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
@@ -64,7 +64,7 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
-	public void propSymmetricConfigurationProperties() {
+	void propSymmetricConfigurationProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfiguration.class)
 				.web(WebApplicationType.NONE).properties("spring.cloud.bootstrap.enabled=true", "encrypt.key:pie",
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
@@ -73,7 +73,7 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
-	public void symmetricPropertyValuesFailOnError() {
+	void symmetricPropertyValuesFailOnError() {
 		assertThatThrownBy(() -> {
 			ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
 					.web(WebApplicationType.NONE)
@@ -84,7 +84,7 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
-	public void symmetricPropertyValuesFailOnErrorFalse() {
+	void symmetricPropertyValuesFailOnErrorFalse() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
 				.web(WebApplicationType.NONE)
 				.properties("encrypt.fail-on-error=false", "spring.config.use-legacy-processing=false",
@@ -95,7 +95,7 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
-	public void symmetricPropertyValues() {
+	void symmetricPropertyValues() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
 				.web(WebApplicationType.NONE).properties("spring.config.use-legacy-processing=false", "encrypt.key:pie",
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
@@ -104,7 +104,7 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
-	public void decryptEnvironmentPostProcessorDisabled() {
+	void decryptEnvironmentPostProcessorDisabled() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
 				.web(WebApplicationType.NONE)
 				.properties("spring.config.use-legacy-processing=false", "encrypt.key:pie",
@@ -115,7 +115,7 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
-	public void symmetricConfigurationProperties() {
+	void symmetricConfigurationProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
 				.web(WebApplicationType.NONE).properties("spring.config.use-legacy-processing=false", "encrypt.key:pie",
 						"foo.password:{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95")
@@ -124,7 +124,7 @@ public class EncryptionIntegrationTests {
 	}
 
 	@Test
-	public void decryptAfterRefresh() {
+	void decryptAfterRefresh() {
 		TestConfigDataLocationResolver.config.put("foo.password",
 				"{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95");
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
@@ -160,11 +160,11 @@ public class EncryptionIntegrationTests {
 
 		private String password;
 
-		public String getPassword() {
+		String getPassword() {
 			return this.password;
 		}
 
-		public void setPassword(String password) {
+		void setPassword(String password) {
 			this.password = password;
 		}
 

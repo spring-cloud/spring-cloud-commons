@@ -26,10 +26,10 @@ import org.springframework.security.rsa.crypto.RsaAlgorithm;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-public class EncryptionBootstrapConfigurationTests {
+class EncryptionBootstrapConfigurationTests {
 
 	@Test
-	public void symmetric() {
+	void symmetric() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
 				.web(WebApplicationType.NONE).properties("encrypt.key:pie").run();
 		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
@@ -38,7 +38,7 @@ public class EncryptionBootstrapConfigurationTests {
 	}
 
 	@Test
-	public void rsaKeyStore() {
+	void rsaKeyStore() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
 				.web(WebApplicationType.NONE)
 				.properties("encrypt.keyStore.location:classpath:/server.jks", "encrypt.keyStore.password:letmein",
@@ -50,7 +50,7 @@ public class EncryptionBootstrapConfigurationTests {
 	}
 
 	@Test
-	public void rsaPkcs12KeyStore() {
+	void rsaPkcs12KeyStore() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
 				.web(WebApplicationType.NONE)
 				.properties("encrypt.keyStore.location:classpath:/server.p12", "encrypt.keyStore.password:letmein",
@@ -62,7 +62,7 @@ public class EncryptionBootstrapConfigurationTests {
 	}
 
 	@Test
-	public void rsaKeyStoreWithRelaxedProperties() {
+	void rsaKeyStoreWithRelaxedProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
 				.web(WebApplicationType.NONE)
 				.properties("encrypt.key-store.location:classpath:/server.jks", "encrypt.key-store.password:letmein",
@@ -74,7 +74,7 @@ public class EncryptionBootstrapConfigurationTests {
 	}
 
 	@Test
-	public void rsaProperties() {
+	void rsaProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
 				.web(WebApplicationType.NONE)
 				.properties("encrypt.key-store.location:classpath:/server.jks", "encrypt.key-store.password:letmein",
@@ -89,7 +89,7 @@ public class EncryptionBootstrapConfigurationTests {
 	}
 
 	@Test
-	public void nonExistentKeystoreLocationShouldNotBeAllowed() {
+	void nonExistentKeystoreLocationShouldNotBeAllowed() {
 		try {
 			new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class).web(WebApplicationType.NONE)
 					.properties("encrypt.key-store.location:classpath:/server.jks1",

@@ -36,7 +36,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @SpringBootTest(classes = RefreshEndpointIntegrationTests.ClientApp.class,
 		properties = { "management.endpoints.web.exposure.include=*" }, webEnvironment = RANDOM_PORT)
-public class RefreshEndpointIntegrationTests {
+class RefreshEndpointIntegrationTests {
 
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
 
@@ -44,7 +44,7 @@ public class RefreshEndpointIntegrationTests {
 	private int port;
 
 	@Test
-	public void webAccess() throws Exception {
+	RefreshEndpointIntegrationTestsvoid webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
 		ResponseEntity<String> entity = template.postForEntity("http://localhost:" + this.port + BASE_PATH + "/refresh",
 				null, String.class);

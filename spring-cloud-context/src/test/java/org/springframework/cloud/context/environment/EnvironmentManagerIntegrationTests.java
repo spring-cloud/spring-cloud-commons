@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestConfiguration.class,
 		properties = { "management.endpoints.web.exposure.include=*", "management.endpoint.env.post.enabled=true" })
 @AutoConfigureMockMvc
-public class EnvironmentManagerIntegrationTests {
+class EnvironmentManagerIntegrationTests {
 
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
 
@@ -68,7 +68,7 @@ public class EnvironmentManagerIntegrationTests {
 	private ApplicationContext context;
 
 	@Test
-	public void testRefresh() throws Exception {
+	void testRefresh() throws Exception {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		String content = property("message", "Foo");
 
@@ -87,7 +87,7 @@ public class EnvironmentManagerIntegrationTests {
 	}
 
 	@Test
-	public void testRefreshFails() throws Exception {
+	void testRefreshFails() throws Exception {
 		try {
 			this.mvc.perform(
 					post(BASE_PATH + "/env").content(property("delay", "foo")).contentType(MediaType.APPLICATION_JSON))
@@ -101,12 +101,12 @@ public class EnvironmentManagerIntegrationTests {
 	}
 
 	@Test
-	public void coreWebExtensionAvailable() throws Exception {
+	void coreWebExtensionAvailable() throws Exception {
 		this.mvc.perform(get(BASE_PATH + "/env/" + UUID.randomUUID().toString())).andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void environmentBeansConfiguredCorrectly() {
+	void environmentBeansConfiguredCorrectly() {
 		Map<String, EnvironmentEndpoint> envbeans = this.context.getBeansOfType(EnvironmentEndpoint.class);
 		then(envbeans).hasSize(1).containsKey("writableEnvironmentEndpoint");
 		then(envbeans.get("writableEnvironmentEndpoint")).isInstanceOf(WritableEnvironmentEndpoint.class);
@@ -136,19 +136,19 @@ public class EnvironmentManagerIntegrationTests {
 
 		private int delay;
 
-		public String getMessage() {
+		String getMessage() {
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			this.message = message;
 		}
 
-		public int getDelay() {
+		int getDelay() {
 			return this.delay;
 		}
 
-		public void setDelay(int delay) {
+		void setDelay(int delay) {
 			this.delay = delay;
 		}
 

@@ -40,13 +40,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = Application.class,
 		properties = { "spring.config.use-legacy-processing=true", "spring.cloud.bootstrap.name:ordering" })
-public class BootstrapOrderingCustomOverrideSystemPropertiesIntegrationTests {
+class BootstrapOrderingCustomOverrideSystemPropertiesIntegrationTests {
 
 	@Autowired
 	private ConfigurableEnvironment environment;
 
 	@Test
-	public void orderingIsCorrect() {
+	void orderingIsCorrect() {
 		MutablePropertySources propertySources = environment.getPropertySources();
 		PropertySource<?> test1 = propertySources.get("bootstrapProperties-testBootstrap1");
 		PropertySource<?> test2 = propertySources.get("bootstrapProperties-testBootstrap2");
@@ -69,12 +69,12 @@ public class BootstrapOrderingCustomOverrideSystemPropertiesIntegrationTests {
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 
 		@Override
-		public PropertySource<?> locate(Environment environment) {
+		PropertySource<?> locate(Environment environment) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Collection<PropertySource<?>> locateCollection(Environment environment) {
+		Collection<PropertySource<?>> locateCollection(Environment environment) {
 			ArrayList<PropertySource<?>> sources = new ArrayList<>();
 			sources.add(new MapPropertySource("testBootstrap1", singletonMap("key1", "value1")));
 			sources.add(new MapPropertySource("testBootstrap2", singletonMap("key2", "value2")));

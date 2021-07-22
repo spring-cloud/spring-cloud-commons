@@ -55,13 +55,13 @@ import static org.springframework.cloud.bootstrap.encrypt.EnvironmentDecryptAppl
  * @author Tim Ysewyn
  */
 @ExtendWith(OutputCaptureExtension.class)
-public class EnvironmentDecryptApplicationInitializerTests {
+class EnvironmentDecryptApplicationInitializerTests {
 
 	private EnvironmentDecryptApplicationInitializer listener = new EnvironmentDecryptApplicationInitializer(
 			Encryptors.noOpText());
 
 	@Test
-	public void decryptCipherKey() {
+	void decryptCipherKey() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("spring.cloud.bootstrap.enabled=true", "foo: {cipher}bar").applyTo(context);
 		this.listener.initialize(context);
@@ -69,7 +69,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	}
 
 	@Test
-	public void relaxedBinding() {
+	void relaxedBinding() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("spring.cloud.bootstrap.enabled=true", "FOO_TEXT: {cipher}bar")
 				.applyTo(context.getEnvironment(), TestPropertyValues.Type.SYSTEM_ENVIRONMENT);
@@ -78,7 +78,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	}
 
 	@Test
-	public void propertySourcesOrderedCorrectly() {
+	void propertySourcesOrderedCorrectly() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("spring.cloud.bootstrap.enabled=true", "foo: {cipher}bar").applyTo(context);
 		context.getEnvironment().getPropertySources()
@@ -88,7 +88,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	}
 
 	@Test
-	public void errorOnDecrypt(CapturedOutput output) {
+	void errorOnDecrypt(CapturedOutput output) {
 		this.listener = new EnvironmentDecryptApplicationInitializer(Encryptors.text("deadbeef", "AFFE37"));
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("spring.cloud.bootstrap.enabled=true", "foo: {cipher}bar").applyTo(context);
@@ -105,7 +105,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	}
 
 	@Test
-	public void errorOnDecryptWithEmpty(CapturedOutput output) {
+	void errorOnDecryptWithEmpty(CapturedOutput output) {
 		this.listener = new EnvironmentDecryptApplicationInitializer(Encryptors.text("deadbeef", "AFFE37"));
 		this.listener.setFailOnError(false);
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
@@ -120,7 +120,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void indexedPropertiesCopied() {
+	void indexedPropertiesCopied() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		// tests that collections in another property source don't get copied into
 		// "decrypted" property source
@@ -149,7 +149,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	}
 
 	@Test
-	public void testDecryptNonStandardParent() {
+	void testDecryptNonStandardParent() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
 		EnvironmentDecryptApplicationInitializer initializer = new EnvironmentDecryptApplicationInitializer(
 				Encryptors.noOpText());
@@ -167,7 +167,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	}
 
 	@Test
-	public void testDecryptCompositePropertySource() {
+	void testDecryptCompositePropertySource() {
 		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("spring.cloud.bootstrap.enabled=true").applyTo(ctx);
 		EnvironmentDecryptApplicationInitializer initializer = new EnvironmentDecryptApplicationInitializer(
@@ -190,7 +190,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	}
 
 	@Test
-	public void propertySourcesOrderedCorrectlyWithUnencryptedOverrides() {
+	void propertySourcesOrderedCorrectlyWithUnencryptedOverrides() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TestPropertyValues.of("spring.cloud.bootstrap.enabled=true", "foo: {cipher}bar").applyTo(context);
 		context.getEnvironment().getPropertySources()
@@ -200,7 +200,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	}
 
 	@Test
-	public void doNotDecryptBootstrapTwice() {
+	void doNotDecryptBootstrapTwice() {
 		TextEncryptor encryptor = mock(TextEncryptor.class);
 		when(encryptor.decrypt("bar")).thenReturn("bar");
 		when(encryptor.decrypt("bar2")).thenReturn("bar2");
@@ -246,7 +246,7 @@ public class EnvironmentDecryptApplicationInitializerTests {
 	}
 
 	@Test
-	public void testOnlyDecryptIfNotOverridden() {
+	void testOnlyDecryptIfNotOverridden() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext();
 		TextEncryptor encryptor = mock(TextEncryptor.class);
 		when(encryptor.decrypt("bar2")).thenReturn("bar2");

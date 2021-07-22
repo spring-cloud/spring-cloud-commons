@@ -28,13 +28,13 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = Application.class, properties = "spring.cloud.bootstrap.enabled:false")
-public class BootstrapDisabledAutoConfigurationIntegrationTests {
+class BootstrapDisabledAutoConfigurationIntegrationTests {
 
 	@Autowired
 	private ConfigurableEnvironment environment;
 
 	@Test
-	public void noBootstrapProperties() {
+	void noBootstrapProperties() {
 		then(this.environment.getPropertySources().contains("bootstrap")).isFalse();
 	}
 

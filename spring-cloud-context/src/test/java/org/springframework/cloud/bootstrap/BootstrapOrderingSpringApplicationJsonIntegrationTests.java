@@ -30,23 +30,23 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = Application.class, properties = "spring.cloud.bootstrap.name:json")
-public class BootstrapOrderingSpringApplicationJsonIntegrationTests {
+class BootstrapOrderingSpringApplicationJsonIntegrationTests {
 
 	@Autowired
 	private ConfigurableEnvironment environment;
 
 	@BeforeAll
-	public static void spikeJson() {
+	static void spikeJson() {
 		System.setProperty("SPRING_APPLICATION_JSON", "{\"message\":\"From JSON\"}");
 	}
 
 	@AfterAll
-	public static void unspikeJson() {
+	static void unspikeJson() {
 		System.clearProperty("SPRING_APPLICATION_JSON");
 	}
 
 	@Test
-	public void bootstrapPropertiesExist() {
+	void bootstrapPropertiesExist() {
 		then(this.environment.getProperty("message")).isEqualTo("From JSON");
 	}
 

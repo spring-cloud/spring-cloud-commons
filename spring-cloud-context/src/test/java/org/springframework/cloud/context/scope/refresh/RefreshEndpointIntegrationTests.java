@@ -52,7 +52,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(classes = ClientApp.class,
 		properties = { "management.endpoints.web.exposure.include=*", "management.endpoint.env.post.enabled=true" },
 		webEnvironment = RANDOM_PORT)
-public class RefreshEndpointIntegrationTests {
+class RefreshEndpointIntegrationTests {
 
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
 
@@ -60,7 +60,7 @@ public class RefreshEndpointIntegrationTests {
 	private int port;
 
 	@Test
-	public void webAccess() throws Exception {
+	void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
 		template.exchange(
 				getUrlEncodedEntity("http://localhost:" + this.port + BASE_PATH + "/env", "message", "Hello Dave!"),
@@ -85,13 +85,13 @@ public class RefreshEndpointIntegrationTests {
 	@EnableAutoConfiguration
 	protected static class ClientApp {
 
-		public static void main(String[] args) {
+		static void main(String[] args) {
 			SpringApplication.run(ClientApp.class, args);
 		}
 
 		@Bean
 		@RefreshScope
-		public Controller controller() {
+		Controller controller() {
 			return new Controller();
 		}
 
@@ -103,12 +103,12 @@ public class RefreshEndpointIntegrationTests {
 		String message;
 
 		@Value("${message:Hello World!}")
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			this.message = message;
 		}
 
 		@RequestMapping("/")
-		public String hello() {
+		String hello() {
 			return this.message;
 		}
 

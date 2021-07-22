@@ -40,12 +40,12 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Dave Syer
  *
  */
-public class RefreshScopeConfigurationTests {
+class RefreshScopeConfigurationTests {
 
 	private AnnotationConfigApplicationContext context;
 
 	@AfterEach
-	public void init() {
+	void init() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -63,7 +63,7 @@ public class RefreshScopeConfigurationTests {
 	 * See gh-43
 	 */
 	@Test
-	public void configurationWithRefreshScope() throws Exception {
+	void configurationWithRefreshScope() throws Exception {
 		this.context = new AnnotationConfigApplicationContext(Application.class,
 				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);
@@ -77,7 +77,7 @@ public class RefreshScopeConfigurationTests {
 	}
 
 	@Test
-	public void refreshScopeOnBean() throws Exception {
+	void refreshScopeOnBean() throws Exception {
 		this.context = new AnnotationConfigApplicationContext(ClientApp.class,
 				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);
@@ -89,7 +89,7 @@ public class RefreshScopeConfigurationTests {
 	}
 
 	@Test
-	public void refreshScopeOnNested() throws Exception {
+	void refreshScopeOnNested() throws Exception {
 		this.context = new AnnotationConfigApplicationContext(NestedApp.class,
 				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);
@@ -104,7 +104,7 @@ public class RefreshScopeConfigurationTests {
 	@org.springframework.context.annotation.Configuration
 	protected static class NestedApp {
 
-		public static void main(String[] args) {
+		static void main(String[] args) {
 			SpringApplication.run(ClientApp.class, args);
 		}
 
@@ -116,7 +116,7 @@ public class RefreshScopeConfigurationTests {
 			String message;
 
 			@RequestMapping("/")
-			public String hello() {
+			String hello() {
 				return this.message;
 			}
 
@@ -131,12 +131,12 @@ public class RefreshScopeConfigurationTests {
 		@Value("${message:Hello World!}")
 		String message = "Hello World";
 
-		public static void main(String[] args) {
+		static void main(String[] args) {
 			SpringApplication.run(Application.class, args);
 		}
 
 		@RequestMapping("/")
-		public String hello() {
+		String hello() {
 			return this.message;
 		}
 
@@ -145,13 +145,13 @@ public class RefreshScopeConfigurationTests {
 	@Configuration(proxyBeanMethods = false)
 	protected static class ClientApp {
 
-		public static void main(String[] args) {
+		static void main(String[] args) {
 			SpringApplication.run(ClientApp.class, args);
 		}
 
 		@Bean
 		@RefreshScope
-		public Controller controller() {
+		Controller controller() {
 			return new Controller();
 		}
 

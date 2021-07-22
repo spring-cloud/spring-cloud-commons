@@ -30,10 +30,10 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Spencer Gibb
  */
-public class NamedContextFactoryTests {
+class NamedContextFactoryTests {
 
 	@Test
-	public void testChildContexts() {
+	void testChildContexts() {
 		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
 		parent.register(BaseConfig.class);
 		parent.refresh();
@@ -115,20 +115,20 @@ public class NamedContextFactoryTests {
 		}
 
 		@Override
-		public String getName() {
+		String getName() {
 			return this.name;
 		}
 
-		public void setName(String name) {
+		void setName(String name) {
 			this.name = name;
 		}
 
 		@Override
-		public Class<?>[] getConfiguration() {
+		Class<?>[] getConfiguration() {
 			return this.configuration;
 		}
 
-		public void setConfiguration(Class<?>[] configuration) {
+		void setConfiguration(Class<?>[] configuration) {
 			this.configuration = configuration;
 		}
 
@@ -196,7 +196,7 @@ public class NamedContextFactoryTests {
 			this.item = item;
 		}
 
-		public T getItem() {
+		T getItem() {
 			return this.item;
 		}
 

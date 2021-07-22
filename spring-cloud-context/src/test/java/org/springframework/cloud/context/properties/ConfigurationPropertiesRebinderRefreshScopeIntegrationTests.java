@@ -39,7 +39,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class, properties = "spring.config.use-legacy-processing=true")
-public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
+class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 
 	@Autowired
 	private TestProperties properties;
@@ -55,7 +55,7 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	void testSimpleProperties() throws Exception {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
@@ -66,7 +66,7 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefresh() throws Exception {
+	void testRefresh() throws Exception {
 		then(this.properties.getCount()).isEqualTo(1);
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		then(this.properties.getCount()).isEqualTo(1);
@@ -106,28 +106,28 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 
 		private int count = 0;
 
-		public int getCount() {
+		int getCount() {
 			return this.count;
 		}
 
-		public String getMessage() {
+		String getMessage() {
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			this.message = message;
 		}
 
-		public int getDelay() {
+		int getDelay() {
 			return this.delay;
 		}
 
-		public void setDelay(int delay) {
+		void setDelay(int delay) {
 			this.delay = delay;
 		}
 
 		@PostConstruct
-		public void init() {
+		void init() {
 			this.count++;
 		}
 

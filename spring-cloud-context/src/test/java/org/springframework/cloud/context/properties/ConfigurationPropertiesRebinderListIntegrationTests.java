@@ -43,7 +43,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class, properties = "messages=one,two")
-public class ConfigurationPropertiesRebinderListIntegrationTests {
+class ConfigurationPropertiesRebinderListIntegrationTests {
 
 	@Autowired
 	private TestProperties properties;
@@ -56,7 +56,7 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testAppendProperties() throws Exception {
+	void testAppendProperties() throws Exception {
 		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		TestPropertyValues.of("messages[0]:foo").applyTo(this.environment);
 		this.rebinder.rebind();
@@ -66,7 +66,7 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	@Test
 	@DirtiesContext
 	@Disabled("Can't rebind to list and re-initialize it (need refresh scope for this to work)")
-	public void testReplaceProperties() throws Exception {
+	void testReplaceProperties() throws Exception {
 		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		Map<String, Object> map = findTestProperties();
 		map.clear();
@@ -88,7 +88,7 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testReplacePropertiesWithCommaSeparated() throws Exception {
+	void testReplacePropertiesWithCommaSeparated() throws Exception {
 		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		Map<String, Object> map = findTestProperties();
 		map.clear();
@@ -126,20 +126,20 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 
 		private int count;
 
-		public List<String> getMessages() {
+		List<String> getMessages() {
 			return this.messages;
 		}
 
-		public void setMessages(List<String> messages) {
+		void setMessages(List<String> messages) {
 			this.messages = messages;
 		}
 
-		public int getCount() {
+		int getCount() {
 			return this.count;
 		}
 
 		@PostConstruct
-		public void init() {
+		void init() {
 			this.count++;
 		}
 

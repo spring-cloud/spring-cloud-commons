@@ -39,19 +39,19 @@ import static org.assertj.core.api.BDDAssertions.then;
 @SpringBootTest(classes = Application.class, properties = { "encrypt.key:deadbeef",
 		"spring.cloud.bootstrap.name:custom", "spring.config.use-legacy-processing=true" })
 @ActiveProfiles("encrypt")
-public class BootstrapOrderingCustomPropertySourceIntegrationTests {
+class BootstrapOrderingCustomPropertySourceIntegrationTests {
 
 	@Autowired
 	private ConfigurableEnvironment environment;
 
 	@Test
-	public void bootstrapPropertiesExist() {
+	void bootstrapPropertiesExist() {
 		then(this.environment.getPropertySources().contains("applicationConfig: [classpath:/custom.properties]"))
 				.isTrue();
 	}
 
 	@Test
-	public void customPropertiesDecrypted() {
+	void customPropertiesDecrypted() {
 		then(this.environment.resolvePlaceholders("${custom.foo}")).isEqualTo("bar");
 	}
 
@@ -65,11 +65,11 @@ public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 	// This is added to bootstrap context as a source in bootstrap.properties
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 
-		public static Map<String, Object> MAP = new HashMap<String, Object>(Collections.<String, Object>singletonMap(
+		static Map<String, Object> MAP = new HashMap<String, Object>(Collections.<String, Object>singletonMap(
 				"custom.foo", "{cipher}6154ca04d4bb6144d672c4e3d750b5147116dd381946d51fa44f8bc25dc256f4"));
 
 		@Override
-		public PropertySource<?> locate(Environment environment) {
+		PropertySource<?> locate(Environment environment) {
 			return new MapPropertySource("testBootstrap", MAP);
 		}
 

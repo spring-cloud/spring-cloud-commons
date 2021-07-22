@@ -45,7 +45,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class)
-public class RefreshScopeLazyIntegrationTests {
+class RefreshScopeLazyIntegrationTests {
 
 	@Autowired
 	private Service service;
@@ -57,20 +57,20 @@ public class RefreshScopeLazyIntegrationTests {
 	private org.springframework.cloud.context.scope.refresh.RefreshScope scope;
 
 	@BeforeEach
-	public void init() {
+	void init() {
 		// The RefreshScope is lazy (eager=false) so it won't have been instantiated yet
 		then(ExampleService.getInitCount()).isEqualTo(0);
 		ExampleService.reset();
 	}
 
 	@AfterEach
-	public void close() {
+	void close() {
 		ExampleService.reset();
 	}
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	void testSimpleProperties() throws Exception {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		then(this.service instanceof Advised).isTrue();
 		// Change the dynamic property source...
@@ -83,7 +83,7 @@ public class RefreshScopeLazyIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefresh() throws Exception {
+	void testRefresh() throws Exception {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
@@ -101,7 +101,7 @@ public class RefreshScopeLazyIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefreshBean() throws Exception {
+	void testRefreshBean() throws Exception {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
@@ -117,13 +117,13 @@ public class RefreshScopeLazyIntegrationTests {
 		then(ExampleService.event.getName()).isEqualTo(ScopedProxyUtils.getTargetBeanName("service"));
 	}
 
-	public interface Service {
+	interface Service {
 
 		String getMessage();
 
 	}
 
-	public static class ExampleService
+	static class ExampleService
 			implements Service, InitializingBean, DisposableBean, ApplicationListener<RefreshScopeRefreshedEvent> {
 
 		private static Log logger = LogFactory.getLog(ExampleService.class);
@@ -138,39 +138,39 @@ public class RefreshScopeLazyIntegrationTests {
 
 		private volatile long delay = 0;
 
-		public static void reset() {
+		static void reset() {
 			initCount = 0;
 			destroyCount = 0;
 			event = null;
 		}
 
-		public static int getInitCount() {
+		static int getInitCount() {
 			return initCount;
 		}
 
-		public static int getDestroyCount() {
+		static int getDestroyCount() {
 			return destroyCount;
 		}
 
-		public void setDelay(long delay) {
+		void setDelay(long delay) {
 			this.delay = delay;
 		}
 
 		@Override
-		public void afterPropertiesSet() throws Exception {
+		void afterPropertiesSet() throws Exception {
 			logger.debug("Initializing message: " + this.message);
 			initCount++;
 		}
 
 		@Override
-		public void destroy() throws Exception {
+		void destroy() throws Exception {
 			logger.debug("Destroying message: " + this.message);
 			destroyCount++;
 			this.message = null;
 		}
 
 		@Override
-		public String getMessage() {
+		String getMessage() {
 			logger.debug("Getting message: " + this.message);
 			try {
 				Thread.sleep(this.delay);
@@ -182,13 +182,13 @@ public class RefreshScopeLazyIntegrationTests {
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			logger.debug("Setting message: " + message);
 			this.message = message;
 		}
 
 		@Override
-		public void onApplicationEvent(RefreshScopeRefreshedEvent e) {
+		void onApplicationEvent(RefreshScopeRefreshedEvent e) {
 			event = e;
 		}
 
@@ -203,7 +203,7 @@ public class RefreshScopeLazyIntegrationTests {
 		private TestProperties properties;
 
 		@Bean
-		public static org.springframework.cloud.context.scope.refresh.RefreshScope refreshScope() {
+		static org.springframework.cloud.context.scope.refresh.RefreshScope refreshScope() {
 			org.springframework.cloud.context.scope.refresh.RefreshScope scope = null;
 			scope = new org.springframework.cloud.context.scope.refresh.RefreshScope();
 			scope.setEager(false);
@@ -212,7 +212,7 @@ public class RefreshScopeLazyIntegrationTests {
 
 		@Bean
 		@RefreshScope
-		public ExampleService service() {
+		ExampleService service() {
 			ExampleService service = new ExampleService();
 			service.setMessage(this.properties.getMessage());
 			service.setDelay(this.properties.getDelay());
@@ -230,20 +230,20 @@ public class RefreshScopeLazyIntegrationTests {
 		private int delay;
 
 		@ManagedAttribute
-		public String getMessage() {
+		String getMessage() {
 			return this.message;
 		}
 
-		public void setMessage(String message) {
+		void setMessage(String message) {
 			this.message = message;
 		}
 
 		@ManagedAttribute
-		public int getDelay() {
+		int getDelay() {
 			return this.delay;
 		}
 
-		public void setDelay(int delay) {
+		void setDelay(int delay) {
 			this.delay = delay;
 		}
 

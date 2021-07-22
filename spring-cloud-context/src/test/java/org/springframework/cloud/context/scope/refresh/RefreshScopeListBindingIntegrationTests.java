@@ -43,7 +43,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class, properties = { "test.messages[0]=one", "test.messages[1]=two" })
-public class RefreshScopeListBindingIntegrationTests {
+class RefreshScopeListBindingIntegrationTests {
 
 	@Autowired
 	private TestProperties properties;
@@ -56,7 +56,7 @@ public class RefreshScopeListBindingIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testAppendProperties() throws Exception {
+	void testAppendProperties() throws Exception {
 		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		then(this.properties instanceof Advised).isTrue();
 		TestPropertyValues.of("test.messages[0]:foo").applyTo(this.environment);
@@ -66,7 +66,7 @@ public class RefreshScopeListBindingIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testReplaceProperties() throws Exception {
+	void testReplaceProperties() throws Exception {
 		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		then(this.properties instanceof Advised).isTrue();
 		Map<String, Object> map = findTestProperties();
@@ -106,11 +106,11 @@ public class RefreshScopeListBindingIntegrationTests {
 
 		private List<String> messages = new ArrayList<String>();
 
-		public List<String> getMessages() {
+		List<String> getMessages() {
 			return this.messages;
 		}
 
-		public void setMessages(List<String> messages) {
+		void setMessages(List<String> messages) {
 			this.messages = messages;
 		}
 
