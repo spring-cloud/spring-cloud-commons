@@ -35,7 +35,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Spencer Gibb
  */
 // TODO: super slow. Port to @SpringBootTest
-class LifecycleMvcAutoConfigurationTests {
+public class LifecycleMvcAutoConfigurationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(Class<?> configuration, String... properties) {
 
@@ -47,57 +47,57 @@ class LifecycleMvcAutoConfigurationTests {
 	}
 
 	@Test
-	void environmentWebEndpointExtensionDisabled() {
+	public void environmentWebEndpointExtensionDisabled() {
 		beanNotCreated("writableEnvironmentEndpointWebExtension", "management.endpoint.env.enabled=false");
 	}
 
 	@Test
-	void environmentWebEndpointExtensionGloballyDisabled() {
+	public void environmentWebEndpointExtensionGloballyDisabled() {
 		beanNotCreated("writableEnvironmentEndpointWebExtension", "management.endpoints.enabled-by-default=false");
 	}
 
 	@Test
-	void environmentWebEndpointExtensionEnabled() {
+	public void environmentWebEndpointExtensionEnabled() {
 		beanCreated("writableEnvironmentEndpointWebExtension", "management.endpoint.env.enabled=true",
 				"management.endpoint.env.post.enabled=true", "management.endpoints.web.exposure.include=env");
 	}
 
 	// restartEndpoint
 	@Test
-	void restartEndpointDisabled() {
+	public void restartEndpointDisabled() {
 		beanNotCreated("restartEndpoint", "management.endpoint.restart.enabled=false");
 	}
 
 	@Test
-	void restartEndpointGloballyDisabled() {
+	public void restartEndpointGloballyDisabled() {
 		beanNotCreated("restartEndpoint", "management.endpoint.default.enabled=false");
 	}
 
 	@Test
-	void restartEndpointEnabled() {
+	public void restartEndpointEnabled() {
 		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class, RestartEndpoint::restart,
 				"management.endpoint.restart.enabled=true", "management.endpoints.web.exposure.include=restart");
 	}
 
 	// pauseEndpoint
 	@Test
-	void pauseEndpointDisabled() {
+	public void pauseEndpointDisabled() {
 		beanNotCreated("pauseEndpoint", "management.endpoint.pause.enabled=false");
 	}
 
 	@Test
-	void pauseEndpointRestartDisabled() {
+	public void pauseEndpointRestartDisabled() {
 		beanNotCreated("pauseEndpoint", "management.endpoint.restart.enabled=false",
 				"management.endpoint.pause.enabled=true");
 	}
 
 	@Test
-	void pauseEndpointGloballyDisabled() {
+	public void pauseEndpointGloballyDisabled() {
 		beanNotCreated("pauseEndpoint", "management.endpoint.default.enabled=false");
 	}
 
 	@Test
-	void pauseEndpointEnabled() {
+	public void pauseEndpointEnabled() {
 		beanCreatedAndEndpointEnabled("pauseEndpoint", RestartEndpoint.PauseEndpoint.class,
 				RestartEndpoint.PauseEndpoint::pause, "management.endpoint.restart.enabled=true",
 				"management.endpoints.web.exposure.include=restart,pause", "management.endpoint.pause.enabled=true");
@@ -105,24 +105,24 @@ class LifecycleMvcAutoConfigurationTests {
 
 	// resumeEndpoint
 	@Test
-	void resumeEndpointDisabled() {
+	public void resumeEndpointDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.restart.enabled=true",
 				"management.endpoints.web.exposure.include=restart", "management.endpoint.resume.enabled=false");
 	}
 
 	@Test
-	void resumeEndpointRestartDisabled() {
+	public void resumeEndpointRestartDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.restart.enabled=false",
 				"management.endpoints.web.exposure.include=resume", "management.endpoint.resume.enabled=true");
 	}
 
 	@Test
-	void resumeEndpointGloballyDisabled() {
+	public void resumeEndpointGloballyDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.default.enabled=false");
 	}
 
 	@Test
-	void resumeEndpointEnabled() {
+	public void resumeEndpointEnabled() {
 		beanCreatedAndEndpointEnabled("resumeEndpoint", RestartEndpoint.ResumeEndpoint.class,
 				RestartEndpoint.ResumeEndpoint::resume, "management.endpoint.restart.enabled=true",
 				"management.endpoint.resume.enabled=true", "management.endpoints.web.exposure.include=restart,resume");
