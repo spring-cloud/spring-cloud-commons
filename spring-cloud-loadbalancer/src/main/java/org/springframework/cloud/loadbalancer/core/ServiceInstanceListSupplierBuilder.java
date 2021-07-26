@@ -248,6 +248,13 @@ public final class ServiceInstanceListSupplierBuilder {
 		return this;
 	}
 
+	public ServiceInstanceListSupplierBuilder with(DelegateCreator delegateCreator) {
+		if (delegateCreator != null) {
+			creators.add(delegateCreator);
+		}
+		return this;
+	}
+
 	/**
 	 * Builds the {@link ServiceInstanceListSupplier} hierarchy.
 	 * @param context application context
