@@ -40,7 +40,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Dave Syer
  */
 @ExtendWith(OutputCaptureExtension.class)
-class RefreshAutoConfigurationTests {
+public class RefreshAutoConfigurationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(WebApplicationType type, Class<?> configuration,
 			String... properties) {
@@ -49,7 +49,7 @@ class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	void noWarnings(CapturedOutput output) {
+	public void noWarnings(CapturedOutput output) {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class)) {
 			then(context.containsBean("refreshScope")).isTrue();
 			then(output.toString()).doesNotContain("WARN");
@@ -57,7 +57,7 @@ class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	void disabled() {
+	public void disabled() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.SERVLET, Config.class,
 				"spring.cloud.refresh.enabled:false")) {
 			then(context.containsBean("refreshScope")).isFalse();
@@ -65,7 +65,7 @@ class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	void refreshables() {
+	public void refreshables() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class,
 				"config.foo=bar", "spring.cloud.refresh.refreshable:" + SealedConfigProps.class.getName())) {
 			context.getBean(SealedConfigProps.class);
@@ -74,7 +74,7 @@ class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	void extraRefreshables() {
+	public void extraRefreshables() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class,
 				"sealedconfig.foo=bar",
 				"spring.cloud.refresh.extra-refreshable:" + SealedConfigProps.class.getName())) {
@@ -84,7 +84,7 @@ class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	void neverRefreshable() {
+	public void neverRefreshable() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class,
 				"countingconfig.foo=bar",
 				"spring.cloud.refresh.never-refreshable:" + CountingConfigProps.class.getName())) {
@@ -108,11 +108,11 @@ class RefreshAutoConfigurationTests {
 
 		private boolean sealed;
 
-		String getFoo() {
+		public String getFoo() {
 			return this.foo;
 		}
 
-		void setFoo(String foo) {
+		public void setFoo(String foo) {
 			if (this.sealed) {
 				throw new IllegalStateException("Cannot set sealed property");
 			}
@@ -129,11 +129,11 @@ class RefreshAutoConfigurationTests {
 
 		private String foo;
 
-		String getFoo() {
+		public String getFoo() {
 			return this.foo;
 		}
 
-		void setFoo(String foo) {
+		public void setFoo(String foo) {
 			count.incrementAndGet();
 			this.foo = foo;
 		}
