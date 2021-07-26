@@ -29,10 +29,10 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class EnvironmentManagerTest {
+public class EnvironmentManagerTest {
 
 	@Test
-	void testCorrectEvents() {
+	public void testCorrectEvents() {
 		MockEnvironment environment = new MockEnvironment();
 		ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
 		EnvironmentManager environmentManager = new EnvironmentManager(environment);
