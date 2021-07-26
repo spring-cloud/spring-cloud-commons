@@ -31,7 +31,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = { RefreshScopeNullBeanIntegrationTests.TestConfiguration.class })
-public class RefreshScopeNullBeanIntegrationTests {
+class RefreshScopeNullBeanIntegrationTests {
 
 	@Autowired
 	private MyCustomComponent myCustomComponent;
@@ -41,7 +41,7 @@ public class RefreshScopeNullBeanIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefreshBean() {
+	void testRefreshBean() {
 		then(this.myCustomComponent.optionalService).isNotNull();
 		then(this.scope).isNotNull();
 		// ...and then refresh, so the bean is re-initialized:
@@ -52,11 +52,11 @@ public class RefreshScopeNullBeanIntegrationTests {
 
 	}
 
-	public static class MyCustomComponent {
+	static class MyCustomComponent {
 
 		private final OptionalService optionalService;
 
-		public MyCustomComponent(OptionalService optionalService) {
+		MyCustomComponent(OptionalService optionalService) {
 			this.optionalService = optionalService;
 		}
 
@@ -67,7 +67,7 @@ public class RefreshScopeNullBeanIntegrationTests {
 
 		@Bean
 		@RefreshScope
-		public OptionalService service() {
+		OptionalService service() {
 			return null;
 		}
 
@@ -81,7 +81,7 @@ public class RefreshScopeNullBeanIntegrationTests {
 		private OptionalService optionalService;
 
 		@Bean
-		public MyCustomComponent myCustomComponent() {
+		MyCustomComponent myCustomComponent() {
 			return new MyCustomComponent(this.optionalService);
 		}
 
