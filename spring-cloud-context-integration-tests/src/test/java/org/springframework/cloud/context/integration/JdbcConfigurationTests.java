@@ -31,10 +31,10 @@ import org.springframework.context.annotation.Import;
  * @author Dave Syer
  *
  */
-public class JdbcConfigurationTests {
+class JdbcConfigurationTests {
 
 	@Test
-	public void schemaApplied() {
+	void schemaApplied() {
 		new SpringApplicationBuilder(BrokenApplication.class).web(WebApplicationType.NONE)
 				.run("--spring.datasource.initialization-mode=always").close();
 	}
@@ -44,7 +44,7 @@ public class JdbcConfigurationTests {
 	@Import({ DataSourceAutoConfiguration.class, RefreshAutoConfiguration.class })
 	protected static class BrokenApplication {
 
-		public static void main(String[] args) {
+		static void main(String[] args) {
 			new SpringApplicationBuilder(BrokenApplication.class).web(WebApplicationType.NONE).run(args);
 		}
 
