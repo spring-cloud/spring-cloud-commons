@@ -45,6 +45,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
+ * @author Zhiguo Chen
  */
 public final class ServiceInstanceListSupplierBuilder {
 
@@ -245,6 +246,19 @@ public final class ServiceInstanceListSupplierBuilder {
 			return new HintBasedServiceInstanceListSupplier(delegate, properties);
 		};
 		creators.add(creator);
+		return this;
+	}
+
+	/**
+	 * Support {@link ServiceInstanceListSupplierBuilder} can be added to the expansion implementation of
+	 * {@link ServiceInstanceListSupplier} by this method.
+	 * @param delegateCreator a {@link DelegateCreator} object
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder with(DelegateCreator delegateCreator) {
+		if (delegateCreator != null) {
+			creators.add(delegateCreator);
+		}
 		return this;
 	}
 
