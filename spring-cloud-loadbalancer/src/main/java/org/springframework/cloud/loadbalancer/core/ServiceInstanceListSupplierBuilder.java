@@ -250,8 +250,8 @@ public final class ServiceInstanceListSupplierBuilder {
 	}
 
 	/**
-	 * Support {@link ServiceInstanceListSupplierBuilder} can be added to the expansion implementation of
-	 * {@link ServiceInstanceListSupplier} by this method.
+	 * Support {@link ServiceInstanceListSupplierBuilder} can be added to the expansion
+	 * implementation of {@link ServiceInstanceListSupplier} by this method.
 	 * @param delegateCreator a {@link DelegateCreator} object
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
