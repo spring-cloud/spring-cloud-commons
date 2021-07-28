@@ -48,6 +48,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  * @author Zhiguo Chen
+ * @author Sabyasachi Bhattacharya
  */
 public final class ServiceInstanceListSupplierBuilder {
 
@@ -311,7 +312,7 @@ public final class ServiceInstanceListSupplierBuilder {
 				}));
 	}
 
-	private String getUri(ServiceInstance serviceInstance, String healthCheckPath) {
+	static String getUri(ServiceInstance serviceInstance, String healthCheckPath) {
 		if (StringUtils.hasText(healthCheckPath)) {
 			String path = healthCheckPath.startsWith("/") ? healthCheckPath : "/" + healthCheckPath;
 			return serviceInstance.getUri().toString() + path;

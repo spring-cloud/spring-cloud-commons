@@ -23,15 +23,17 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplierBuilder.getUri;
 
 /**
  * A utility class for {@link ServiceInstanceListSupplier} tests.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Sabyasachi Bhattacharya
  * @since 3.0.0
  */
 final class ServiceInstanceListSuppliersTestUtils {
@@ -57,14 +59,6 @@ final class ServiceInstanceListSuppliersTestUtils {
 				return Mono.just(false);
 			}
 		});
-	}
-
-	private static String getUri(ServiceInstance serviceInstance, String healthCheckPath) {
-		if (StringUtils.hasText(healthCheckPath)) {
-			String path = healthCheckPath.startsWith("/") ? healthCheckPath : "/" + healthCheckPath;
-			return serviceInstance.getUri().toString() + path;
-		}
-		return serviceInstance.getUri().toString();
 	}
 
 }

@@ -62,6 +62,7 @@ import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSup
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko
  * @author Roman Chigvintsev
+ * @author Sabyasachi Bhattacharya
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = HealthCheckServiceInstanceListSupplierTests.TestApplication.class,
