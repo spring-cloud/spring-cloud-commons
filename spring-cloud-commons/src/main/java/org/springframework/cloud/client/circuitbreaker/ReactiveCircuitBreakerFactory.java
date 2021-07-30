@@ -20,10 +20,14 @@ package org.springframework.cloud.client.circuitbreaker;
  * Creates reactive circuit breakers.
  *
  * @author Ryan Baxter
+ * @author Andrii Bohutskyi
  */
 public abstract class ReactiveCircuitBreakerFactory<CONF, CONFB extends ConfigBuilder<CONF>>
 		extends AbstractCircuitBreakerFactory<CONF, CONFB> {
 
 	public abstract ReactiveCircuitBreaker create(String id);
 
+	public ReactiveCircuitBreaker create(String id, String groupName) {
+		return create(id);
+	}
 }
