@@ -43,13 +43,13 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
@@ -202,10 +202,8 @@ public class PropertySourceBootstrapConfiguration
 	}
 
 	private Environment environment(MutablePropertySources incoming) {
-		StandardEnvironment environment = new StandardEnvironment();
-		for (PropertySource<?> source : environment.getPropertySources()) {
-			environment.getPropertySources().remove(source.getName());
-		}
+		ConfigurableEnvironment environment = new AbstractEnvironment() {
+		};
 		for (PropertySource<?> source : incoming) {
 			environment.getPropertySources().addLast(source);
 		}
