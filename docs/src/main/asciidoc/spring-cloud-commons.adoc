@@ -92,8 +92,8 @@ By default, they cannot be overridden locally.
 If you want to let your applications override the remote properties with their own system properties or config files, the remote property source has to grant it permission by setting `spring.cloud.config.allowOverride=true` (it does not work to set this locally).
 Once that flag is set, two finer-grained settings control the location of the remote properties in relation to system properties and the application's local configuration:
 
-* `spring.cloud.config.overrideNone=true`: Override from any local property source.
-* `spring.cloud.config.overrideSystemProperties=false`: Only system properties, command line arguments, and environment variables (but not the local config files) should override the remote settings.
+* `spring.cloud.config.overrideNone=true`: Local property sources will always have higher precedence than remote settings.
+* `spring.cloud.config.overrideSystemProperties=false`: Only system properties, command line arguments, and environment variables (but not the local config files) will have higher precedence than the remote settings.
 
 === Customizing the Bootstrap Configuration
 
