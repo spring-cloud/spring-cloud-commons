@@ -27,10 +27,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplierBuilder.getUri;
+
 /**
  * A utility class for {@link ServiceInstanceListSupplier} tests.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Sabyasachi Bhattacharya
  * @since 3.0.0
  */
 final class ServiceInstanceListSuppliersTestUtils {
@@ -41,14 +44,14 @@ final class ServiceInstanceListSuppliersTestUtils {
 
 	static BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunction(WebClient webClient) {
 		return (serviceInstance, healthCheckPath) -> webClient.get()
-				.uri(UriComponentsBuilder.fromUri(serviceInstance.getUri()).path(healthCheckPath).build().toUri())
+				.uri(UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build().toUri())
 				.exchange().flatMap(clientResponse -> clientResponse.releaseBody()
 						.thenReturn(HttpStatus.OK.value() == clientResponse.rawStatusCode()));
 	}
 
 	static BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunction(RestTemplate restTemplate) {
 		return (serviceInstance, healthCheckPath) -> Mono.defer(() -> {
-			URI uri = UriComponentsBuilder.fromUri(serviceInstance.getUri()).path(healthCheckPath).build().toUri();
+			URI uri = UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build().toUri();
 			try {
 				return Mono.just(HttpStatus.OK.equals(restTemplate.getForEntity(uri, Void.class).getStatusCode()));
 			}

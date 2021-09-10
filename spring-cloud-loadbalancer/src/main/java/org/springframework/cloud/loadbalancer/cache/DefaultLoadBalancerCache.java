@@ -19,8 +19,6 @@ package org.springframework.cloud.loadbalancer.cache;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.validation.constraints.Null;
-
 import com.stoyanr.evictor.ConcurrentMapWithTimedEviction;
 import com.stoyanr.evictor.map.ConcurrentHashMapWithTimedEviction;
 import com.stoyanr.evictor.scheduler.DelayedTaskEvictionScheduler;
@@ -93,7 +91,6 @@ public class DefaultLoadBalancerCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	@Null
 	protected Object lookup(Object key) {
 		return cache.get(key);
 	}

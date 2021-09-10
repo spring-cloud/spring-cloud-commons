@@ -66,7 +66,7 @@ public class SimpleReactiveDiscoveryClientTests {
 	@Test
 	public void shouldReturnEmptyFluxForNonExistingService() {
 		Flux<ServiceInstance> instances = this.client.getInstances("undefined");
-		StepVerifier.create(instances).expectComplete();
+		StepVerifier.create(instances).expectComplete().verify();
 	}
 
 	@Test

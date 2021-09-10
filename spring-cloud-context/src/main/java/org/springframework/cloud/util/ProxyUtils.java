@@ -18,6 +18,7 @@ package org.springframework.cloud.util;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.util.Assert;
 
 /**
  * @author Ryan Baxter
@@ -30,9 +31,13 @@ public final class ProxyUtils {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T getTargetObject(Object candidate) {
+		Assert.notNull(candidate, "Candidate must not be null");
 		try {
-			if (AopUtils.isAopProxy(candidate) && (candidate instanceof Advised)) {
-				return (T) ((Advised) candidate).getTargetSource().getTarget();
+			if (AopUtils.isAopProxy(candidate) && candidate instanceof Advised) {
+				Object target = ((Advised) candidate).getTargetSource().getTarget();
+				if (target != null) {
+					return (T) getTargetObject(target);
+				}
 			}
 		}
 		catch (Exception ex) {

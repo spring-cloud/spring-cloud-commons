@@ -18,9 +18,7 @@ org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfi
 org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration
 # Spring Boot BootstrapRegistryInitializer
 org.springframework.boot.BootstrapRegistryInitializer=\
-org.springframework.cloud.bootstrap.RefreshBootstrapRegistryInitializer
-# Spring Boot Bootstrappers
-org.springframework.boot.Bootstrapper=\
+org.springframework.cloud.bootstrap.RefreshBootstrapRegistryInitializer,\
 org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper
 # Environment Post Processors
 org.springframework.boot.env.EnvironmentPostProcessor=\

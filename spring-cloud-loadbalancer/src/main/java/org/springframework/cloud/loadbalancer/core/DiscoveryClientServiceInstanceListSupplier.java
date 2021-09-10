@@ -109,7 +109,9 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 	}
 
 	private void logException(Throwable error) {
-		LOG.error(String.format("Exception occurred while retrieving instances for service %s", serviceId), error);
+		if (LOG.isErrorEnabled()) {
+			LOG.error(String.format("Exception occurred while retrieving instances for service %s", serviceId), error);
+		}
 	}
 
 }

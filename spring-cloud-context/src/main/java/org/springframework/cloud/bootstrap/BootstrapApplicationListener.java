@@ -49,13 +49,13 @@ import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySource.StubPropertySource;
-import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -141,11 +141,9 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 
 	private ConfigurableApplicationContext bootstrapServiceContext(ConfigurableEnvironment environment,
 			final SpringApplication application, String configName) {
-		StandardEnvironment bootstrapEnvironment = new StandardEnvironment();
+		ConfigurableEnvironment bootstrapEnvironment = new AbstractEnvironment() {
+		};
 		MutablePropertySources bootstrapProperties = bootstrapEnvironment.getPropertySources();
-		for (PropertySource<?> source : bootstrapProperties) {
-			bootstrapProperties.remove(source.getName());
-		}
 		String configLocation = environment.resolvePlaceholders("${spring.cloud.bootstrap.location:}");
 		String configAdditionalLocation = environment
 				.resolvePlaceholders("${spring.cloud.bootstrap.additional-location:}");

@@ -46,6 +46,7 @@ import org.springframework.cloud.loadbalancer.support.ServiceInstanceListSupplie
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -61,6 +62,7 @@ import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSup
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko
  * @author Roman Chigvintsev
+ * @author Sabyasachi Bhattacharya
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = HealthCheckServiceInstanceListSupplierTests.TestApplication.class,
@@ -529,6 +531,22 @@ class HealthCheckServiceInstanceListSupplierTests {
 				.untilAsserted(() -> Assertions.assertThat(instancesCanceled).hasValue(1));
 	}
 
+	@SuppressWarnings("ConstantConditions")
+	@Test
+	void shouldCheckInstanceWithProvidedHealthCheckPathWithQueryParams() {
+		String serviceId = "ignored-service";
+		healthCheck.getPath().put("ignored-service", "/health?someparam=somevalue");
+		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
+				false);
+		listSupplier = new HealthCheckServiceInstanceListSupplier(
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
+				healthCheckFunction(webClient));
+
+		boolean alive = listSupplier.isAlive(serviceInstance).block();
+
+		assertThat(alive).isTrue();
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	@RestController
@@ -539,7 +557,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 		}
 
 		@GetMapping("/health")
-		void healthCheck() {
+		void healthCheck(@RequestParam(value = "someparam", required = false) String param) {
 
 		}
 
