@@ -52,6 +52,12 @@
 			"name": "spring.cloud.loadbalancer.retry.enabled",
 			"description": "Enables LoadBalancer retries.",
 			"type": "java.lang.Boolean"
+		},
+		{
+			"defaultValue": false,
+			"name": "spring.cloud.loadbalancer.clients.retry.configuration.enabled",
+			"description": "Enables LoadBalancer retries configuration per client.",
+			"type": "java.lang.Boolean"
 		}
 	]
 }

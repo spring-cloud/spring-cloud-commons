@@ -468,6 +468,14 @@ For the reactive implementation, you can additionally set:
 
 For the reactive implementation, you can also implement your own `LoadBalancerRetryPolicy` to have more detailed control over the load-balanced call retries.
 
+If you would like to configure retries for specific clients, you need to set `spring.cloud.loadbalancer.clients.retry.configuration.enabled=true`.
+Then you can set properties:
+
+- `spring.cloud.loadbalancer.clients.*clientName*.retry.maxRetriesOnSameServiceInstance`
+- `spring.cloud.loadbalancer.clients.*clientName*.retry.maxRetriesOnNextServiceInstance`
+- `spring.cloud.loadbalancer.clients.*clientName*.retry.retryOnAllOperations`
+- `spring.cloud.loadbalancer.clients.*clientName*.retry.retryableStatusCodes`
+
 NOTE: For load-balanced retries, by default, we wrap the `ServiceInstanceListSupplier` bean with `RetryAwareServiceInstanceListSupplier` to select a different instance from the one previously chosen, if available. You can disable this behavior by setting the value of `spring.cloud.loadbalancer.retry.avoidPreviousInstance` to `false`.
 
 ====

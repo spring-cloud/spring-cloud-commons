@@ -23,6 +23,8 @@ import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
+import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
+import org.springframework.cloud.loadbalancer.blocking.retry.ClientBlockingLoadBalancedRetryFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
+ * @author Andrii Bohutskyi
  */
 class BlockingLoadBalancerClientAutoConfigurationTests {
 
@@ -43,7 +46,17 @@ class BlockingLoadBalancerClientAutoConfigurationTests {
 		applicationContextRunner.run(ctxt -> {
 			assertThat(ctxt).hasSingleBean(BlockingLoadBalancerClient.class);
 			assertThat(ctxt).hasSingleBean(LoadBalancedRetryFactory.class);
+			assertThat(ctxt.getBean(LoadBalancedRetryFactory.class)).isInstanceOf(BlockingLoadBalancedRetryFactory.class);
 		});
+	}
+
+	@Test
+	void enableClientRetryConfigurationShouldLoadContext() {
+		applicationContextRunner.withPropertyValues("spring.cloud.loadbalancer.clients.retry.configuration.enabled=true")
+				.run(context -> {
+					assertThat(context).hasSingleBean(LoadBalancedRetryFactory.class);
+					assertThat(context.getBean(LoadBalancedRetryFactory.class)).isInstanceOf(ClientBlockingLoadBalancedRetryFactory.class);
+				});
 	}
 
 	@Test

@@ -24,12 +24,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
+import org.springframework.cloud.client.loadbalancer.ClientLoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
+import org.springframework.cloud.loadbalancer.blocking.retry.ClientBlockingLoadBalancedRetryFactory;
 import org.springframework.cloud.loadbalancer.core.LoadBalancerServiceInstanceCookieTransformer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
@@ -70,13 +72,23 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 
 	@Configuration
 	@ConditionalOnClass(RetryTemplate.class)
-	@EnableConfigurationProperties(LoadBalancerProperties.class)
+	@EnableConfigurationProperties({ LoadBalancerProperties.class, ClientLoadBalancerProperties.class })
 	protected static class BlockingLoadBalancerRetryConfig {
 
 		@Bean
 		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.clients.retry.configuration.enabled",
+				havingValue = "false", matchIfMissing = true)
 		LoadBalancedRetryFactory loadBalancedRetryFactory(LoadBalancerProperties properties) {
 			return new BlockingLoadBalancedRetryFactory(properties);
+		}
+
+		@Bean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.clients.retry.configuration.enabled",
+				havingValue = "true")
+		LoadBalancedRetryFactory clientLoadBalancedRetryFactory(LoadBalancerProperties properties,
+				ClientLoadBalancerProperties clientProperties) {
+			return new ClientBlockingLoadBalancedRetryFactory(properties, clientProperties);
 		}
 
 	}
