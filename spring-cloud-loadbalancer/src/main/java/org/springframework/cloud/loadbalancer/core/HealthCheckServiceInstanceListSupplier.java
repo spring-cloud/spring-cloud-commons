@@ -32,6 +32,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.util.StringUtils;
 
 /**
  * A {@link ServiceInstanceListSupplier} implementation that verifies whether the
@@ -126,7 +127,11 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 	}
 
 	protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
+		boolean containsService = healthCheck.getPath().containsKey(serviceInstance.getServiceId());
 		String healthCheckPropertyValue = healthCheck.getPath().get(serviceInstance.getServiceId());
+		if (containsService && !StringUtils.hasText(healthCheckPropertyValue)) {
+			return Mono.just(true);
+		}
 		String healthCheckPath = healthCheckPropertyValue != null ? healthCheckPropertyValue : defaultHealthCheckPath;
 		return aliveFunction.apply(serviceInstance, healthCheckPath);
 	}
