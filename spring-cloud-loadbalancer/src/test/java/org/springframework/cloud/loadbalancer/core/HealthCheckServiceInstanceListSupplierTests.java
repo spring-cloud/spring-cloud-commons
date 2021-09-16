@@ -52,7 +52,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSuppliersTestUtils.healthCheckFunction;
 
@@ -110,6 +113,38 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
+		assertThat(alive).isTrue();
+	}
+
+	@Test
+	void shouldNotCheckInstanceWithNullHealthCheckPath() {
+		BiFunction<ServiceInstance, String, Mono<Boolean>> mockAliveFunction = mock(BiFunction.class);
+		String serviceId = "no-health-check-service";
+		healthCheck.getPath().put("no-health-check-service", null);
+		ServiceInstance serviceInstance = new DefaultServiceInstance("no-health-check-service-1", serviceId,
+				"127.0.0.1", port, false);
+		listSupplier = new HealthCheckServiceInstanceListSupplier(
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck, mockAliveFunction);
+
+		boolean alive = listSupplier.isAlive(serviceInstance).block();
+
+		verify(mockAliveFunction, never()).apply(any(), any());
+		assertThat(alive).isTrue();
+	}
+
+	@Test
+	void shouldNotCheckInstanceWithEmptyHealthCheckPath() {
+		BiFunction<ServiceInstance, String, Mono<Boolean>> mockAliveFunction = mock(BiFunction.class);
+		String serviceId = "no-health-check-service";
+		healthCheck.getPath().put("no-health-check-service", "");
+		ServiceInstance serviceInstance = new DefaultServiceInstance("no-health-check-service-1", serviceId,
+				"127.0.0.1", port, false);
+		listSupplier = new HealthCheckServiceInstanceListSupplier(
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck, mockAliveFunction);
+
+		boolean alive = listSupplier.isAlive(serviceInstance).block();
+
+		verify(mockAliveFunction, never()).apply(any(), any());
 		assertThat(alive).isTrue();
 	}
 
