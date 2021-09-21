@@ -73,6 +73,10 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		this.parent = parent;
 	}
 
+	public ApplicationContext getParent() {
+		return parent;
+	}
+
 	public void setConfigurations(List<C> configurations) {
 		for (C client : configurations) {
 			this.configurations.put(client.getName(), client);
