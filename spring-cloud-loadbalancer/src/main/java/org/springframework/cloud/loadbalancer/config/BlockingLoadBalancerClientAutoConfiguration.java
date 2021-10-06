@@ -27,7 +27,9 @@ import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfig
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalanceXforwardTransformer;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
+import org.springframework.cloud.loadbalancer.blocking.LoadBalancerXforwardTransformer;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
 import org.springframework.cloud.loadbalancer.core.LoadBalancerServiceInstanceCookieTransformer;
@@ -66,6 +68,13 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	public LoadBalancerServiceInstanceCookieTransformer loadBalancerServiceInstanceCookieTransformer(
 			LoadBalancerProperties properties) {
 		return new LoadBalancerServiceInstanceCookieTransformer(properties.getStickySession());
+	}
+	@Bean
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.xforwarded-add-host-proto", havingValue = "true")
+	@ConditionalOnMissingBean(LoadBalancerXforwardTransformer.class)
+	public LoadBalanceXforwardTransformer loadBalanceXforwardTransformer(
+			LoadBalancerProperties properties){
+		return new LoadBalanceXforwardTransformer();
 	}
 
 	@Configuration

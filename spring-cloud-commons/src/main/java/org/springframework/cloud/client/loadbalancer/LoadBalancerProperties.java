@@ -105,6 +105,19 @@ public class LoadBalancerProperties {
 		this.hintHeaderName = hintHeaderName;
 	}
 
+	/**
+	 * X-forwarded host and Proto.
+	 */
+	private Xforwarded xforwarded = new Xforwarded();
+
+	public void setXforwarded(Xforwarded xforwarded) {
+		this.xforwarded = xforwarded;
+	}
+
+	public Xforwarded getXforwarded() {
+		return xforwarded;
+	}
+
 	public static class StickySession {
 
 		/**
@@ -132,6 +145,23 @@ public class LoadBalancerProperties {
 
 		public void setAddServiceInstanceCookie(boolean addServiceInstanceCookie) {
 			this.addServiceInstanceCookie = addServiceInstanceCookie;
+		}
+
+	}
+
+	/**
+	 * To add X-forwarded headers.
+	 */
+	public static class Xforwarded {
+
+		private boolean addxforwarded = true;
+
+		public boolean isAddxforwarded() {
+			return addxforwarded;
+		}
+
+		public void setAddxforwarded(boolean addxforwarded) {
+			this.addxforwarded = addxforwarded;
 		}
 
 	}

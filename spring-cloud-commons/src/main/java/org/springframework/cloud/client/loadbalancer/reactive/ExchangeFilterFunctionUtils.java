@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 
@@ -56,6 +57,25 @@ public final class ExchangeFilterFunctionUtils {
 						cookies.add(instanceIdCookieName, serviceInstance.getInstanceId());
 					}
 				}).attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
+		if (transformers != null) {
+			for (LoadBalancerClientRequestTransformer transformer : transformers) {
+				clientRequest = transformer.transformRequest(clientRequest, serviceInstance);
+			}
+		}
+		return clientRequest;
+	}
+
+	static ClientRequest buildClientXforwardRequest(ClientRequest request, ServiceInstance serviceInstance,
+			List<LoadBalancerClientRequestTransformer> transformers) {
+		URI originalUrl = request.url();
+		HttpHeaders httpHeaders = request.headers();
+		httpHeaders.add("X-Forwarde-Host", originalUrl.getHost());
+		httpHeaders.add("X-Forwarded-Proto", originalUrl.getScheme());
+		ClientRequest clientRequest = ClientRequest
+				.create(request.method(), LoadBalancerUriTools.reconstructURI(serviceInstance, originalUrl))
+				.headers(headers -> headers.addAll(httpHeaders))
+				.attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
+
 		if (transformers != null) {
 			for (LoadBalancerClientRequestTransformer transformer : transformers) {
 				clientRequest = transformer.transformRequest(clientRequest, serviceInstance);
