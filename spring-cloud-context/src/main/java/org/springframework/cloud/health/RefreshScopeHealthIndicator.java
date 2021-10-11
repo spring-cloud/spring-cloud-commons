@@ -58,8 +58,10 @@ public class RefreshScopeHealthIndicator extends AbstractHealthIndicator {
 					builder.withException(errors.values().iterator().next());
 				}
 				else {
-					for (String name : errors.keySet()) {
-						builder.withDetail(name, errors.get(name));
+					for (Map.Entry<String, Exception> entry : errors.entrySet()) {
+						String name = entry.getKey();
+						Exception e = entry.getValue();
+						builder.withDetail(name, e);
 					}
 				}
 			}
