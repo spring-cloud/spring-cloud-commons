@@ -83,7 +83,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 */
 	public static URI getUri(ServiceInstance instance) {
 		String scheme = (instance.isSecure()) ? "https" : "http";
-		String uri = String.format("%s://%s:%s", scheme, instance.getHost(), instance.getPort());
+		String uri = String.format("%s://%s:%d", scheme, instance.getHost(), instance.getPort());
 		return URI.create(uri);
 	}
 
