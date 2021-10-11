@@ -73,7 +73,7 @@ public class DiscoveredResourceUnitTests {
 	@Test
 	public void verificationTriggersDiscovery() {
 
-		Link link = new Link("target", "rel");
+		Link link = Link.of("target", "rel");
 
 		when(this.provider.getServiceInstance())
 				.thenReturn(new DefaultServiceInstance("instance", "service", "localhost", 8080, false));
