@@ -30,10 +30,12 @@ import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.XForwardedHeadersTransformer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -90,6 +92,14 @@ public class LoadBalancerClientConfiguration {
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withZonePreference().withCaching()
 					.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(XForwardedHeadersTransformer.class)
+		@ConditionalOnMissingBean
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.xForwarded.enabledXforwarded", havingValue = "true")
+		public XForwardedHeadersTransformer xForwarderHeadersTransformer(LoadBalancerProperties properties) {
+			return new XForwardedHeadersTransformer(properties.getxForwarded());
 		}
 
 		@Bean
