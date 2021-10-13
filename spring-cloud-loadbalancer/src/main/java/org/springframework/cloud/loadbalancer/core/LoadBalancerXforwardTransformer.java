@@ -41,10 +41,8 @@ public class LoadBalancerXforwardTransformer implements LoadBalancerRequestTrans
 		if (instance == null) {
 			return request;
 		}
-		assert xforwardedHeaders != null;
-		if (!xforwardedHeaders.isEnableXforwarded()) {
-			return request;
-		}
+
+		// if (xforwardedHeaders.isEnableXforwarded()) {
 
 		HttpHeaders headers = request.getHeaders();
 
@@ -54,6 +52,7 @@ public class LoadBalancerXforwardTransformer implements LoadBalancerRequestTrans
 		// headers.put(HttpHeaders.X-Forwarded)
 		headers.add("X-Forwarded-Host", xforwardedHost);
 		headers.add("X-Forwarded-Proto", xproto);
+		// }
 		return request;
 	}
 
