@@ -19,9 +19,8 @@ package org.springframework.cloud.client.hypermedia;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.hateoas.Link;
@@ -30,7 +29,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.BDDAssertions.then;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,7 +59,7 @@ public class DiscoveredResourceUnitTests {
 
 	@Before
 	public void setUp() {
-		when(this.traversal.buildTraversal(Matchers.any(Traverson.class))).thenReturn(this.builder);
+		when(this.traversal.buildTraversal(any(Traverson.class))).thenReturn(this.builder);
 
 		this.resource = new DiscoveredResource(this.provider, this.traversal);
 		this.resource.setRestOperations(this.operations);
@@ -83,7 +83,7 @@ public class DiscoveredResourceUnitTests {
 
 		then(this.resource.getLink()).isEqualTo(link);
 		verify(this.provider, times(1)).getServiceInstance();
-		verify(this.traversal, times(1)).buildTraversal(Matchers.any(Traverson.class));
+		verify(this.traversal, times(1)).buildTraversal(any(Traverson.class));
 	}
 
 	@Test
