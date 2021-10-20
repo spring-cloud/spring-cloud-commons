@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.client.discovery;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -43,7 +43,7 @@ public class EnableDiscoveryClientImportSelectorTests {
 	@Mock
 	private AnnotationAttributes annotationAttributes;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		this.importSelector.setBeanClassLoader(getClass().getClassLoader());
