@@ -19,7 +19,6 @@ package org.springframework.cloud.client.hypermedia;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,6 +29,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -60,7 +60,7 @@ public class DiscoveredResourceUnitTests {
 
 	@BeforeEach
 	public void setUp() {
-		lenient().when(this.traversal.buildTraversal(ArgumentMatchers.any(Traverson.class))).thenReturn(this.builder);
+		lenient().when(this.traversal.buildTraversal(any(Traverson.class))).thenReturn(this.builder);
 
 		this.resource = new DiscoveredResource(this.provider, this.traversal);
 		this.resource.setRestOperations(this.operations);
@@ -74,7 +74,7 @@ public class DiscoveredResourceUnitTests {
 	@Test
 	public void verificationTriggersDiscovery() {
 
-		Link link = new Link("target", "rel");
+		Link link = Link.of("target", "rel");
 
 		when(this.provider.getServiceInstance())
 				.thenReturn(new DefaultServiceInstance("instance", "service", "localhost", 8080, false));
@@ -84,7 +84,7 @@ public class DiscoveredResourceUnitTests {
 
 		then(this.resource.getLink()).isEqualTo(link);
 		verify(this.provider, times(1)).getServiceInstance();
-		verify(this.traversal, times(1)).buildTraversal(ArgumentMatchers.any(Traverson.class));
+		verify(this.traversal, times(1)).buildTraversal(any(Traverson.class));
 	}
 
 	@Test
