@@ -26,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
@@ -100,8 +101,9 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
-		LoadBalancerClientFactory loadBalancerClientFactory() {
-			return new LoadBalancerClientFactory();
+		LoadBalancerClientFactory loadBalancerClientFactory(LoadBalancerProperties properties,
+				LoadBalancerClientsProperties clientsProperties) {
+			return new LoadBalancerClientFactory(properties, clientsProperties);
 		}
 
 		@Bean
@@ -113,6 +115,11 @@ class CachingServiceInstanceListSupplierTests {
 		@Bean
 		public LoadBalancerProperties loadBalancerProperties() {
 			return new LoadBalancerProperties();
+		}
+
+		@Bean
+		public LoadBalancerClientsProperties loadBalancerClientsProperties() {
+			return new LoadBalancerClientsProperties();
 		}
 
 		@Bean

@@ -17,6 +17,8 @@
 package org.springframework.cloud.loadbalancer.support;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.context.named.NamedContextFactory;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientConfiguration;
@@ -46,8 +48,15 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 	 */
 	public static final String PROPERTY_NAME = NAMESPACE + ".client.name";
 
-	public LoadBalancerClientFactory() {
+	private final LoadBalancerProperties properties;
+
+	private final LoadBalancerClientsProperties clientsProperties;
+
+	public LoadBalancerClientFactory(LoadBalancerProperties properties,
+			LoadBalancerClientsProperties clientsProperties) {
 		super(LoadBalancerClientConfiguration.class, NAMESPACE, PROPERTY_NAME);
+		this.properties = properties;
+		this.clientsProperties = clientsProperties;
 	}
 
 	public String getName(Environment environment) {
@@ -57,6 +66,17 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 	@Override
 	public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
 		return getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class);
+	}
+
+	@Override
+	public LoadBalancerProperties getProperties(String serviceId) {
+		if (!clientsProperties.containsKey(serviceId)) {
+			// no specific client properties, return default
+			return properties;
+		}
+		// because specifics are overlayed on top of defaults, everything in `properties`,
+		// unless overridden, is in `clientsProperties`
+		return clientsProperties.get(serviceId);
 	}
 
 }

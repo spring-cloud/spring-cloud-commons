@@ -63,6 +63,7 @@ class LoadBalancerClientRequestTransformerTest {
 	@BeforeEach
 	void setUp() {
 		when(factory.getInstance("testServiceId")).thenReturn(new TestReactiveLoadBalancer());
+		when(factory.getProperties(any())).thenReturn(properties);
 		when(clientRequest.method()).thenReturn(HttpMethod.GET);
 		when(clientRequest.url()).thenReturn(URI.create("http://testServiceId"));
 		when(clientRequest.headers()).thenReturn(new HttpHeaders());
@@ -75,7 +76,7 @@ class LoadBalancerClientRequestTransformerTest {
 	void transformReactorLoadBalancerExchangeFilterFunction() {
 		ArgumentCaptor<ClientRequest> captor = ArgumentCaptor.forClass(ClientRequest.class);
 		ReactorLoadBalancerExchangeFilterFunction filterFunction = new ReactorLoadBalancerExchangeFilterFunction(
-				factory, properties, Arrays.asList(new Transformer1(), new Transformer2()));
+				factory, Arrays.asList(new Transformer1(), new Transformer2()));
 		filterFunction.filter(clientRequest, next).subscribe();
 		verify(next).exchange(captor.capture());
 		HttpHeaders headers = captor.getValue().headers();
@@ -87,7 +88,7 @@ class LoadBalancerClientRequestTransformerTest {
 	void transformRetryableLoadBalancerExchangeFilterFunction() {
 		ArgumentCaptor<ClientRequest> captor = ArgumentCaptor.forClass(ClientRequest.class);
 		RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-				policy, factory, properties, Arrays.asList(new Transformer1(), new Transformer2()));
+				s -> policy, factory, Arrays.asList(new Transformer1(), new Transformer2()));
 		filterFunction.filter(clientRequest, next).subscribe();
 		verify(next).exchange(captor.capture());
 		HttpHeaders headers = captor.getValue().headers();
