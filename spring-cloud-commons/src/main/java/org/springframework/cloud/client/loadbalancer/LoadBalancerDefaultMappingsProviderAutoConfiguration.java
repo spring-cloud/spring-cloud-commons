@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Configuration;
 public class LoadBalancerDefaultMappingsProviderAutoConfiguration {
 
 	@Bean
-	public DefaultsBindHandlerAdvisor.MappingsProvider rabbitExtendedPropertiesDefaultMappingsProvider() {
+	public DefaultsBindHandlerAdvisor.MappingsProvider loadBalancerClientsDefaultsMappingsProvider() {
 		return () -> {
 			Map<ConfigurationPropertyName, ConfigurationPropertyName> mappings = new HashMap<>();
 			mappings.put(ConfigurationPropertyName.of("spring.cloud.loadbalancer.clients"),
