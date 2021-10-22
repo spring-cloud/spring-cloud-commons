@@ -21,10 +21,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
+import org.springframework.boot.context.properties.bind.BindContext;
+import org.springframework.boot.context.properties.bind.BindHandler;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
 import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
@@ -51,6 +57,8 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 	 * {@link ConfigDataEnvironmentPostProcessor}.
 	 */
 	public static final int ORDER = ConfigDataEnvironmentPostProcessor.ORDER + 1000;
+
+	private final Logger LOG = LoggerFactory.getLogger(ConfigDataMissingEnvironmentPostProcessor.class);
 
 	@Override
 	public int getOrder() {
@@ -102,7 +110,14 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 
 	private String[] getConfigImportArray(PropertySource propertySource) {
 		Binder binder = new Binder(ConfigurationPropertySource.from(propertySource));
-		return binder.bind(CONFIG_IMPORT_PROPERTY, CONFIG_DATA_LOCATION_ARRAY).orElse(new String[0]);
+		return binder.bind(CONFIG_IMPORT_PROPERTY, CONFIG_DATA_LOCATION_ARRAY, new BindHandler() {
+			@Override
+			public Object onFailure(ConfigurationPropertyName name, Bindable<?> target, BindContext context,
+					Exception error) throws Exception {
+				LOG.info("Error binding " + CONFIG_IMPORT_PROPERTY, error);
+				return new String[0];
+			}
+		}).orElse(new String[0]);
 	}
 
 	public static class ImportException extends RuntimeException {

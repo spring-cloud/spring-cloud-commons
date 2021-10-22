@@ -20,10 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.hamcrest.Matchers;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.test.util.TestPropertyValues;
@@ -32,15 +29,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Spencer Gibb
  */
 public class AutoServiceRegistrationAutoConfigurationTests {
-
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void hasAutoServiceRegistration() {
@@ -52,12 +47,12 @@ public class AutoServiceRegistrationAutoConfigurationTests {
 
 	@Test
 	public void noAutoServiceRegistrationAndFailFast() {
-		this.exception.expect(BeanCreationException.class);
-		this.exception.expectMessage(Matchers.containsString("no AutoServiceRegistration"));
-		try (AnnotationConfigApplicationContext context = setup(
-				"spring.cloud.service-registry.auto-registration.failFast=true")) {
-			assertNoBean(context);
-		}
+		assertThatThrownBy(() -> {
+			try (AnnotationConfigApplicationContext context = setup(
+					"spring.cloud.service-registry.auto-registration.failFast=true")) {
+				assertNoBean(context);
+			}
+		}).isInstanceOf(BeanCreationException.class).hasMessageContaining("no AutoServiceRegistration");
 	}
 
 	@Test

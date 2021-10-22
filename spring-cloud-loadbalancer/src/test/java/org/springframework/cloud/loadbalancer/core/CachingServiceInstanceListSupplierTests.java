@@ -17,7 +17,6 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -36,7 +35,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static java.time.Duration.ofMillis;
@@ -49,7 +47,6 @@ import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSup
  * @author Olga Maciaszek-Sharma
  */
 @SpringBootTest(classes = CachingServiceInstanceListSupplierTests.TestConfig.class)
-@ExtendWith(SpringExtension.class)
 class CachingServiceInstanceListSupplierTests {
 
 	public static final String SERVICE_ID = "test";
