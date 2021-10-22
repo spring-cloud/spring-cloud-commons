@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer;
+package org.springframework.cloud.commons.config;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,14 +34,12 @@ import org.springframework.util.CollectionUtils;
  * @since 2.1
  *
  */
-public class BindingHandlerAdvise implements ConfigurationPropertiesBindHandlerAdvisor {
+public class DefaultsBindHandlerAdvisor implements ConfigurationPropertiesBindHandlerAdvisor {
 
 	private final Map<ConfigurationPropertyName, ConfigurationPropertyName> mappings;
 
-	public BindingHandlerAdvise(Map<ConfigurationPropertyName, ConfigurationPropertyName> additionalMappings) {
+	public DefaultsBindHandlerAdvisor(Map<ConfigurationPropertyName, ConfigurationPropertyName> additionalMappings) {
 		this.mappings = new LinkedHashMap<>();
-		this.mappings.put(ConfigurationPropertyName.of("spring.cloud.loadbalancer.clients"),
-				ConfigurationPropertyName.of("spring.cloud.loadbalancer"));
 		if (!CollectionUtils.isEmpty(additionalMappings)) {
 			this.mappings.putAll(additionalMappings);
 		}

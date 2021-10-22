@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -136,8 +136,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	@Test
 	void defaultPropertiesWorks() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.sources(NoWebClientBuilder.class, ReactorLoadBalancerClientAutoConfiguration.class,
-						LoadBalancerBeanPostProcessorAutoConfiguration.class, WebClientAutoConfiguration.class)
+				.sources(OneWebClientBuilder.class, DefaulConfig.class)
 				.properties("spring.cloud.loadbalancer.health-check.initial-delay=1s",
 						"spring.cloud.loadbalancer.clients.myclient.health-check.interval=30s")
 				.run();
@@ -154,6 +153,12 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	private ConfigurableApplicationContext init(Class<?> config) {
 		return LoadBalancerTestUtils.init(config, ReactorLoadBalancerClientAutoConfiguration.class,
 				LoadBalancerBeanPostProcessorAutoConfiguration.class);
+	}
+
+	@Configuration
+	@EnableAutoConfiguration
+	protected static class DefaulConfig {
+
 	}
 
 	@Configuration

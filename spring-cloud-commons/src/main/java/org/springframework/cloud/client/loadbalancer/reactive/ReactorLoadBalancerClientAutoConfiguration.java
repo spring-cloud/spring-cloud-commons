@@ -17,9 +17,7 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -27,15 +25,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.BindingHandlerAdvise;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.Nullable;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -51,18 +45,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 @EnableConfigurationProperties({ LoadBalancerClientsProperties.class })
 public class ReactorLoadBalancerClientAutoConfiguration {
-
-	@Bean
-	public BindingHandlerAdvise BindingHandlerAdvise(@Nullable BindingHandlerAdvise.MappingsProvider[] providers) {
-		Map<ConfigurationPropertyName, ConfigurationPropertyName> additionalMappings = new HashMap<>();
-		if (!ObjectUtils.isEmpty(providers)) {
-			for (int i = 0; i < providers.length; i++) {
-				BindingHandlerAdvise.MappingsProvider mappingsProvider = providers[i];
-				additionalMappings.putAll(mappingsProvider.getDefaultMappings());
-			}
-		}
-		return new BindingHandlerAdvise(additionalMappings);
-	}
 
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "false",
