@@ -28,10 +28,10 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
+import org.springframework.cloud.loadbalancer.blocking.XForwarderHeadersTransformer;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
 import org.springframework.cloud.loadbalancer.core.LoadBalancerServiceInstanceCookieTransformer;
-import org.springframework.cloud.loadbalancer.core.LoadBalancerXforwardTransformer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +42,7 @@ import org.springframework.web.client.RestTemplate;
  * An autoconfiguration for {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Gandhimathi Velusamy
  * @since 2.1.3
  */
 @Configuration(proxyBeanMethods = false)
@@ -70,10 +71,10 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.xforwarded.enableXforwarded", havingValue = "true")
-	@ConditionalOnMissingBean(LoadBalancerXforwardTransformer.class)
-	public LoadBalancerXforwardTransformer loadBalancerXforwardTransformer(LoadBalancerProperties properties) {
-		return new LoadBalancerXforwardTransformer();
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.xforwarded.enabledXforwarded", havingValue = "true")
+	@ConditionalOnMissingBean(XForwarderHeadersTransformer.class)
+	public XForwarderHeadersTransformer xForwarderHeadersTransformer(LoadBalancerProperties properties) {
+		return new XForwarderHeadersTransformer(properties.getXforwarded());
 	}
 
 	@Configuration

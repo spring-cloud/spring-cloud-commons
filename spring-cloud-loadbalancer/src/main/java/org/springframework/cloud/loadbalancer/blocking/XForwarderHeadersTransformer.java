@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.loadbalancer.core;
+package org.springframework.cloud.loadbalancer.blocking;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
@@ -25,15 +25,16 @@ import org.springframework.http.HttpRequest;
 /**
  * To add X-Forward-Host and X-Forward-Proto Headers.
  *
- * @Author Gandhimathi
+ * @author Gandhimathi Velusamy
  */
 
-public class LoadBalancerXforwardTransformer implements LoadBalancerRequestTransformer {
+public class XForwarderHeadersTransformer implements LoadBalancerRequestTransformer {
 
 	private final LoadBalancerProperties.Xforwarded xforwardedHeaders;
 
-	public LoadBalancerXforwardTransformer() {
-		xforwardedHeaders = null;
+	public XForwarderHeadersTransformer(LoadBalancerProperties.Xforwarded xforwardedHeaders) {
+		this.xforwardedHeaders = xforwardedHeaders;
+
 	}
 
 	@Override
@@ -41,18 +42,14 @@ public class LoadBalancerXforwardTransformer implements LoadBalancerRequestTrans
 		if (instance == null) {
 			return request;
 		}
-
-		// if (xforwardedHeaders.isEnableXforwarded()) {
-
-		HttpHeaders headers = request.getHeaders();
-
-		String xforwardedHost = "";
-		xforwardedHost += request.getURI().getHost();
-		String xproto = request.getURI().getScheme();
-		// headers.put(HttpHeaders.X-Forwarded)
-		headers.add("X-Forwarded-Host", xforwardedHost);
-		headers.add("X-Forwarded-Proto", xproto);
-		// }
+		if (xforwardedHeaders.isEnabledXforwarded()) {
+			HttpHeaders headers = request.getHeaders();
+			String xforwardedHost = "";
+			xforwardedHost += request.getURI().getHost();
+			String xforwardedProto = request.getURI().getScheme();
+			headers.add("X-Forwarded-Host", xforwardedHost);
+			headers.add("X-Forwarded-Proto", xforwardedProto);
+		}
 		return request;
 	}
 

@@ -32,6 +32,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * A {@link ConfigurationProperties} bean for Spring Cloud LoadBalancer.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Gandhimathi Velusamy
  * @since 2.2.1
  */
 @ConfigurationProperties("spring.cloud.loadbalancer")
@@ -106,7 +107,7 @@ public class LoadBalancerProperties {
 	}
 
 	/**
-	 * X-forwarded host and Proto.
+	 * Enabling X-Forwarded Host and Proto headers.
 	 */
 	private Xforwarded xforwarded = new Xforwarded();
 
@@ -150,18 +151,18 @@ public class LoadBalancerProperties {
 	}
 
 	/**
-	 * To add X-forwarded headers.
+	 * To Enable X-Forwarded headers.
 	 */
 	public static class Xforwarded {
 
-		private boolean enableXforwarded = true;
+		private boolean enabledXforwarded = true;
 
-		public boolean isEnableXforwarded() {
-			return enableXforwarded;
+		public boolean isEnabledXforwarded() {
+			return enabledXforwarded;
 		}
 
 		public void setEnableXforwarded(boolean enableXforwarded) {
-			this.enableXforwarded = enableXforwarded;
+			this.enabledXforwarded = enableXforwarded;
 		}
 
 	}
