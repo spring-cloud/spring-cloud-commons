@@ -34,7 +34,6 @@ public class XForwarderHeadersTransformer implements LoadBalancerRequestTransfor
 
 	public XForwarderHeadersTransformer(LoadBalancerProperties.Xforwarded xforwardedHeaders) {
 		this.xforwardedHeaders = xforwardedHeaders;
-
 	}
 
 	@Override

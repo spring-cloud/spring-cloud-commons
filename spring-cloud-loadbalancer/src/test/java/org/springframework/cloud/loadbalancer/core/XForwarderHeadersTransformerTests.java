@@ -32,7 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for LoadBalancerX-Transformer.
+ * Tests for XForwaderHeaderTransformer .
  *
  * @author Gandhimathi Velusamy
  */
@@ -60,12 +60,12 @@ public class XForwarderHeadersTransformerTests {
 		if (xforwarded.isEnabledXforwarded()) {
 			ClientRequest newRequest = transformer.transformRequest(request, serviceInstance);
 			System.out.println(newRequest.headers());
-			String xForwardHost = newRequest.headers().getFirst("X-Forwarded-Host");
-			assert xForwardHost != null;
-			assert (xForwardHost.equals("spring.io"));
-			String xForwardProto = newRequest.headers().getFirst("X-Forwarded-Proto");
-			assert (xForwardProto != null);
-			assert (xForwardProto.equals("https"));
+			String xForwardedHost = newRequest.headers().getFirst("X-Forwarded-Host");
+			assert xForwardedHost != null;
+			assert (xForwardedHost.equals("spring.io"));
+			String xForwardedProto = newRequest.headers().getFirst("X-Forwarded-Proto");
+			assert (xForwardedProto != null);
+			assert (xForwardedProto.equals("https"));
 
 		}
 	}

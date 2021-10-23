@@ -29,7 +29,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
 /**
- * Tests for LoadBalancerX-Transformer.
+ * Tests for XForwaderHeaderTransformer.
  *
  * @author Gandhimathi Velusamy
  */
@@ -50,12 +50,12 @@ public class XForwarderHeadersTransformerTests {
 			request.setMethod(HttpMethod.GET);
 			request.setURI(new URI("http://google.com/"));
 			HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
-			String xForwardHost = newRequest.getHeaders().getFirst("X-Forwarded-Host");
-			assert xForwardHost != null;
-			assert (xForwardHost.equals("google.com"));
-			String xForwardProto = newRequest.getHeaders().getFirst("X-Forwarded-Proto");
-			assert (xForwardProto != null);
-			assert (xForwardProto.equals("http"));
+			String xForwardedHost = newRequest.getHeaders().getFirst("X-Forwarded-Host");
+			assert xForwardedHost != null;
+			assert (xForwardedHost.equals("google.com"));
+			String xForwardedProto = newRequest.getHeaders().getFirst("X-Forwarded-Proto");
+			assert (xForwardedProto != null);
+			assert (xForwardedProto.equals("http"));
 		}
 	}
 

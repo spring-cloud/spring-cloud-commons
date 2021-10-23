@@ -34,7 +34,6 @@ public class XForwarderHeadersTransformer implements LoadBalancerClientRequestTr
 
 	public XForwarderHeadersTransformer(LoadBalancerProperties.Xforwarded xforwardedHeaders) {
 		this.xforwardedHeaders = xforwardedHeaders;
-
 	}
 
 	@Override
@@ -42,7 +41,6 @@ public class XForwarderHeadersTransformer implements LoadBalancerClientRequestTr
 		if (instance == null) {
 			return request;
 		}
-
 		if (xforwardedHeaders.isEnabledXforwarded()) {
 			HttpHeaders headers = request.headers();
 			String xforwardedHost = "";
