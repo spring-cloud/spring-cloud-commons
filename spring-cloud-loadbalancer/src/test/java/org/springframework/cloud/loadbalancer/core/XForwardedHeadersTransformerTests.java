@@ -28,20 +28,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for XForwaderHeaderTransformer .
+ * Tests for XForwadedHeadersTransformer .
  *
  * @author Gandhimathi Velusamy
  */
 
-public class XForwarderHeadersTransformerTests {
+public class XForwardedHeadersTransformerTests {
 
-	private final LoadBalancerProperties.Xforwarded xforwarded = new LoadBalancerProperties().getXforwarded();
-
-	XForwarderHeadersTransformer transformer = new XForwarderHeadersTransformer(xforwarded);
+	private final LoadBalancerProperties.XForwarded xForwarded = new LoadBalancerProperties().getxForwarded();
 
 	private final ServiceInstance serviceInstance = mock(DefaultServiceInstance.class);
 
@@ -56,18 +55,22 @@ public class XForwarderHeadersTransformerTests {
 	}
 
 	@Test
-	public void shouldAppendXforwardHeaderIfEnabledXforward() throws NullPointerException {
-		if (xforwarded.isEnabledXforwarded()) {
-			ClientRequest newRequest = transformer.transformRequest(request, serviceInstance);
-			System.out.println(newRequest.headers());
-			String xForwardedHost = newRequest.headers().getFirst("X-Forwarded-Host");
-			assert xForwardedHost != null;
-			assert (xForwardedHost.equals("spring.io"));
-			String xForwardedProto = newRequest.headers().getFirst("X-Forwarded-Proto");
-			assert (xForwardedProto != null);
-			assert (xForwardedProto.equals("https"));
+	void shouldAppendXforwardedHeaderIfEnabledXforward() throws NullPointerException {
+		xForwarded.setEnabledXforwarded(true);
+		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(xForwarded);
+		ClientRequest newRequest = transformer.transformRequest(request, serviceInstance);
+		assertThat(newRequest.headers().containsKey("X-Forwarded-Host")).isTrue();
+		assertThat(newRequest.headers().getFirst("X-Forwarded-Host")).isEqualTo("spring.io");
+		assertThat(newRequest.headers().containsKey("X-Forwarded-Proto")).isTrue();
+		assertThat(newRequest.headers().getFirst("X-Forwarded-Proto")).isEqualTo("https");
+	}
 
-		}
+	@Test
+	void shouldNotAppendXforwardedHeaderIfDefault() {
+		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(xForwarded);
+		ClientRequest newRequest = transformer.transformRequest(request, serviceInstance);
+		assertThat(newRequest.headers().containsKey("X-Forwarded-Host")).isFalse();
+		assertThat(newRequest.headers().containsKey("X-Forwarded-Proto")).isFalse();
 	}
 
 }

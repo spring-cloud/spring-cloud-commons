@@ -23,17 +23,17 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
 /**
- * To add X-Forward-Host and X-Forward-Proto headers.
+ * To add X-Forwarded-Host and X-Forwarded-Proto Headers @since 3.1.0.
  *
- * @author gandhimathi Velusamy
+ * @author Gandhimathi Velusamy
  */
 
-public class XForwarderHeadersTransformer implements LoadBalancerClientRequestTransformer {
+public class XForwardedHeadersTransformer implements LoadBalancerClientRequestTransformer {
 
-	private final LoadBalancerProperties.Xforwarded xforwardedHeaders;
+	private final LoadBalancerProperties.XForwarded XForwardedHeaders;
 
-	public XForwarderHeadersTransformer(LoadBalancerProperties.Xforwarded xforwardedHeaders) {
-		this.xforwardedHeaders = xforwardedHeaders;
+	public XForwardedHeadersTransformer(LoadBalancerProperties.XForwarded XForwardedHeaders) {
+		this.XForwardedHeaders = XForwardedHeaders;
 	}
 
 	@Override
@@ -41,13 +41,13 @@ public class XForwarderHeadersTransformer implements LoadBalancerClientRequestTr
 		if (instance == null) {
 			return request;
 		}
-		if (xforwardedHeaders.isEnabledXforwarded()) {
+		if (XForwardedHeaders.isEnabledXforwarded()) {
 			HttpHeaders headers = request.headers();
-			String xforwardedHost = "";
-			xforwardedHost += request.url().getHost();
-			String xforwardedProto = request.url().getScheme();
-			headers.add("X-Forwarded-Host", xforwardedHost);
-			headers.add("X-Forwarded-Proto", xforwardedProto);
+			String xForwardedHost = "";
+			xForwardedHost += request.url().getHost();
+			String xForwardedProto = request.url().getScheme();
+			headers.add("X-Forwarded-Host", xForwardedHost);
+			headers.add("X-Forwarded-Proto", xForwardedProto);
 		}
 		return request;
 	}

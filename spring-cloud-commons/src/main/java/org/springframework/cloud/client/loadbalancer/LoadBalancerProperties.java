@@ -107,16 +107,16 @@ public class LoadBalancerProperties {
 	}
 
 	/**
-	 * Enabling X-Forwarded Host and Proto headers.
+	 * Enabling X-Forwarded Host and Proto Headers.
 	 */
-	private Xforwarded xforwarded = new Xforwarded();
+	private XForwarded xForwarded = new XForwarded();
 
-	public void setXforwarded(Xforwarded xforwarded) {
-		this.xforwarded = xforwarded;
+	public void setxForwarded(XForwarded xForwarded) {
+		this.xForwarded = xForwarded;
 	}
 
-	public Xforwarded getXforwarded() {
-		return xforwarded;
+	public XForwarded getxForwarded() {
+		return xForwarded;
 	}
 
 	public static class StickySession {
@@ -151,18 +151,18 @@ public class LoadBalancerProperties {
 	}
 
 	/**
-	 * To Enable X-Forwarded headers.
+	 * To Enable X-Forwarded Headers.
 	 */
-	public static class Xforwarded {
+	public static class XForwarded {
 
-		private boolean enabledXforwarded = true;
+		private boolean enabledXforwarded = false;
 
 		public boolean isEnabledXforwarded() {
 			return enabledXforwarded;
 		}
 
-		public void setEnableXforwarded(boolean enableXforwarded) {
-			this.enabledXforwarded = enableXforwarded;
+		public void setEnabledXforwarded(boolean enabledXforwarded) {
+			this.enabledXforwarded = enabledXforwarded;
 		}
 
 	}
