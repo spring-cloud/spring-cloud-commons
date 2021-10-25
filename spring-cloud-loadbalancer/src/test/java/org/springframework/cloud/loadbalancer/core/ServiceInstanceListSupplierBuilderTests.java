@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 public class ServiceInstanceListSupplierBuilderTests {

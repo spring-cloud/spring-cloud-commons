@@ -29,7 +29,6 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -44,7 +43,6 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.support.ServiceInstanceListSuppliers;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -67,7 +65,6 @@ import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSup
  * @author Roman Chigvintsev
  * @author Sabyasachi Bhattacharya
  */
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = HealthCheckServiceInstanceListSupplierTests.TestApplication.class,
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class HealthCheckServiceInstanceListSupplierTests {

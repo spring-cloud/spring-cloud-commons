@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.client.hypermedia;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.hateoas.Link;
@@ -32,6 +32,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,7 +41,7 @@ import static org.mockito.Mockito.when;
  * @author Oliver Gierke
  * @author Tim Ysewyn
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DiscoveredResourceUnitTests {
 
 	@Mock
@@ -57,9 +58,9 @@ public class DiscoveredResourceUnitTests {
 
 	DiscoveredResource resource;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
-		when(this.traversal.buildTraversal(any(Traverson.class))).thenReturn(this.builder);
+		lenient().when(this.traversal.buildTraversal(any(Traverson.class))).thenReturn(this.builder);
 
 		this.resource = new DiscoveredResource(this.provider, this.traversal);
 		this.resource.setRestOperations(this.operations);
