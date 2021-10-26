@@ -16,14 +16,19 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -128,16 +133,39 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		then(getFilters(builder)).isNullOrEmpty();
 	}
 
+	@Test
+	void defaultPropertiesWorks() {
+		ConfigurableApplicationContext context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+				.sources(OneWebClientBuilder.class, DefaulConfig.class)
+				.properties("spring.cloud.loadbalancer.health-check.initial-delay=1s",
+						"spring.cloud.loadbalancer.clients.myclient.health-check.interval=30s")
+				.run();
+		LoadBalancerClientsProperties properties = context.getBean(LoadBalancerClientsProperties.class);
+
+		then(properties.getClients()).containsKey("myclient");
+		LoadBalancerProperties clientProperties = properties.getClients().get("myclient");
+		// default value
+		then(clientProperties.getHealthCheck().getInitialDelay()).isEqualTo(Duration.ofSeconds(1));
+		// client specific value
+		then(clientProperties.getHealthCheck().getInterval()).isEqualTo(Duration.ofSeconds(30));
+	}
+
 	private ConfigurableApplicationContext init(Class<?> config) {
 		return LoadBalancerTestUtils.init(config, ReactorLoadBalancerClientAutoConfiguration.class,
 				LoadBalancerBeanPostProcessorAutoConfiguration.class);
 	}
 
 	@Configuration
+	@EnableAutoConfiguration
+	protected static class DefaulConfig {
+
+	}
+
+	@Configuration
 	protected static class NoWebClientBuilder {
 
 		@Bean
-		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory() {
+		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory(LoadBalancerProperties properties) {
 			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
 				@Override
 				public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
@@ -153,6 +181,11 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 				public <X> X getInstance(String name, Class<?> clazz, Class<?>... generics) {
 					throw new UnsupportedOperationException("Not implemented.");
 				}
+
+				@Override
+				public LoadBalancerProperties getProperties(String serviceId) {
+					return properties;
+				}
 			};
 		}
 
@@ -160,11 +193,6 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		LoadBalancedRetryFactory loadBalancedRetryFactory() {
 			return new LoadBalancedRetryFactory() {
 			};
-		}
-
-		@Bean
-		LoadBalancerProperties loadBalancerProperties() {
-			return new LoadBalancerProperties();
 		}
 
 	}

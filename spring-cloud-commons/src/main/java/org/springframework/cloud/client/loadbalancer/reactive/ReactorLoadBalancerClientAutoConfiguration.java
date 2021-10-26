@@ -24,9 +24,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -42,6 +43,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(WebClient.class)
 @ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
+@EnableConfigurationProperties(LoadBalancerClientsProperties.class)
 public class ReactorLoadBalancerClientAutoConfiguration {
 
 	@ConditionalOnMissingBean
@@ -49,9 +51,9 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 			matchIfMissing = true)
 	@Bean
 	public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			ObjectProvider<List<LoadBalancerClientRequestTransformer>> transformers) {
-		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory, properties,
+		return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerFactory,
 				transformers.getIfAvailable(Collections::emptyList));
 	}
 
@@ -59,18 +61,19 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true")
 	@Bean
 	public RetryableLoadBalancerExchangeFilterFunction retryableLoadBalancerExchangeFilterFunction(
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
-			LoadBalancerRetryPolicy retryPolicy,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			LoadBalancerRetryPolicy.Factory retryPolicyFactory,
 			ObjectProvider<List<LoadBalancerClientRequestTransformer>> transformers) {
-		return new RetryableLoadBalancerExchangeFilterFunction(retryPolicy, loadBalancerFactory, properties,
+		return new RetryableLoadBalancerExchangeFilterFunction(retryPolicyFactory, loadBalancerFactory,
 				transformers.getIfAvailable(Collections::emptyList));
 	}
 
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true")
 	@Bean
-	public LoadBalancerRetryPolicy loadBalancerRetryPolicy(LoadBalancerProperties properties) {
-		return new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties);
+	public LoadBalancerRetryPolicy.Factory loadBalancerRetryPolicy(
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+		return new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy.Factory(loadBalancerFactory);
 	}
 
 }

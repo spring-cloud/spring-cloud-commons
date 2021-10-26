@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import org.springframework.cglib.core.internal.Function;
 import org.springframework.http.HttpMethod;
 
 /**
@@ -54,5 +55,9 @@ public interface LoadBalancerRetryPolicy {
 	 * @return true to retry on the provided HTTP method
 	 */
 	boolean canRetryOnMethod(HttpMethod method);
+
+	interface Factory extends Function<String, LoadBalancerRetryPolicy> {
+
+	}
 
 }

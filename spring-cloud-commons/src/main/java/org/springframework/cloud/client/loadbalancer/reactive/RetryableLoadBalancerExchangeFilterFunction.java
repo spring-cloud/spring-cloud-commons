@@ -69,9 +69,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 	private static final List<Class<? extends Throwable>> exceptions = Arrays.asList(IOException.class,
 			TimeoutException.class, RetryableStatusCodeException.class);
 
-	private final LoadBalancerRetryPolicy retryPolicy;
-
-	private final LoadBalancerProperties properties;
+	private final LoadBalancerRetryPolicy.Factory retryPolicyFactory;
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
@@ -87,22 +85,26 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		this(retryPolicy, loadBalancerFactory, properties, Collections.emptyList());
 	}
 
+	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
 			List<LoadBalancerClientRequestTransformer> transformers) {
-		this.retryPolicy = retryPolicy;
+		this.retryPolicyFactory = s -> retryPolicy;
 		this.loadBalancerFactory = loadBalancerFactory;
-		this.properties = properties;
+		this.transformers = transformers;
+	}
+
+	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy.Factory retryPolicyFactory,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			List<LoadBalancerClientRequestTransformer> transformers) {
+		this.retryPolicyFactory = retryPolicyFactory;
+		this.loadBalancerFactory = loadBalancerFactory;
 		this.transformers = transformers;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public Mono<ClientResponse> filter(ClientRequest clientRequest, ExchangeFunction next) {
-		LoadBalancerRetryContext loadBalancerRetryContext = new LoadBalancerRetryContext(clientRequest);
-		Retry exchangeRetry = buildRetrySpec(properties.getRetry().getMaxRetriesOnSameServiceInstance(), true);
-		Retry filterRetry = buildRetrySpec(properties.getRetry().getMaxRetriesOnNextServiceInstance(), false);
-
 		URI originalUrl = clientRequest.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
@@ -112,6 +114,15 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 			}
 			return Mono.just(ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
+		LoadBalancerRetryContext loadBalancerRetryContext = new LoadBalancerRetryContext(clientRequest);
+		LoadBalancerProperties properties = loadBalancerFactory.getProperties(serviceId);
+
+		Retry exchangeRetry = buildRetrySpec(properties.getRetry().getMaxRetriesOnSameServiceInstance(), true,
+				properties.getRetry());
+		Retry filterRetry = buildRetrySpec(properties.getRetry().getMaxRetriesOnNextServiceInstance(), false,
+				properties.getRetry());
+		LoadBalancerRetryPolicy retryPolicy = retryPolicyFactory.apply(serviceId);
+
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
 						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
@@ -154,7 +165,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 									lbRequest, lbResponse, new ResponseData(clientResponse, requestData)))))
 					.map(clientResponse -> {
 						loadBalancerRetryContext.setClientResponse(clientResponse);
-						if (shouldRetrySameServiceInstance(loadBalancerRetryContext)) {
+						if (shouldRetrySameServiceInstance(retryPolicy, loadBalancerRetryContext)) {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug(String.format("Retrying on status code: %d",
 										clientResponse.statusCode().value()));
@@ -166,7 +177,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 					});
 		}).map(clientResponse -> {
 			loadBalancerRetryContext.setClientResponse(clientResponse);
-			if (shouldRetryNextServiceInstance(loadBalancerRetryContext)) {
+			if (shouldRetryNextServiceInstance(retryPolicy, loadBalancerRetryContext)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format("Retrying on status code: %d", clientResponse.statusCode().value()));
 				}
@@ -177,8 +188,11 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		}).retryWhen(exchangeRetry)).retryWhen(filterRetry);
 	}
 
-	private Retry buildRetrySpec(int max, boolean transientErrors) {
-		LoadBalancerProperties.Retry.Backoff backoffProperties = properties.getRetry().getBackoff();
+	private Retry buildRetrySpec(int max, boolean transientErrors, LoadBalancerProperties.Retry retry) {
+		if (!retry.isEnabled()) {
+			return Retry.max(0).filter(this::isRetryException).transientErrors(transientErrors);
+		}
+		LoadBalancerProperties.Retry.Backoff backoffProperties = retry.getBackoff();
 		if (backoffProperties.isEnabled()) {
 			return RetrySpec.backoff(max, backoffProperties.getMinBackoff()).filter(this::isRetryException)
 					.maxBackoff(backoffProperties.getMaxBackoff()).jitter(backoffProperties.getJitter())
@@ -187,7 +201,8 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		return RetrySpec.max(max).filter(this::isRetryException).transientErrors(transientErrors);
 	}
 
-	private boolean shouldRetrySameServiceInstance(LoadBalancerRetryContext loadBalancerRetryContext) {
+	private boolean shouldRetrySameServiceInstance(LoadBalancerRetryPolicy retryPolicy,
+			LoadBalancerRetryContext loadBalancerRetryContext) {
 		boolean shouldRetry = retryPolicy.retryableStatusCode(loadBalancerRetryContext.getResponseStatusCode())
 				&& retryPolicy.canRetryOnMethod(loadBalancerRetryContext.getRequestMethod())
 				&& retryPolicy.canRetrySameServiceInstance(loadBalancerRetryContext);
@@ -197,7 +212,8 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		return shouldRetry;
 	}
 
-	private boolean shouldRetryNextServiceInstance(LoadBalancerRetryContext loadBalancerRetryContext) {
+	private boolean shouldRetryNextServiceInstance(LoadBalancerRetryPolicy retryPolicy,
+			LoadBalancerRetryContext loadBalancerRetryContext) {
 		boolean shouldRetry = retryPolicy.retryableStatusCode(loadBalancerRetryContext.getResponseStatusCode())
 				&& retryPolicy.canRetryOnMethod(loadBalancerRetryContext.getRequestMethod())
 				&& retryPolicy.canRetryNextServiceInstance(loadBalancerRetryContext);

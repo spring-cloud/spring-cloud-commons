@@ -23,10 +23,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
@@ -70,13 +73,14 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 
 	@Configuration
 	@ConditionalOnClass(RetryTemplate.class)
-	@EnableConfigurationProperties(LoadBalancerProperties.class)
+	@EnableConfigurationProperties(LoadBalancerClientsProperties.class)
 	protected static class BlockingLoadBalancerRetryConfig {
 
 		@Bean
 		@ConditionalOnMissingBean
-		LoadBalancedRetryFactory loadBalancedRetryFactory(LoadBalancerProperties properties) {
-			return new BlockingLoadBalancedRetryFactory(properties);
+		LoadBalancedRetryFactory loadBalancedRetryFactory(
+				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+			return new BlockingLoadBalancedRetryFactory(loadBalancerFactory);
 		}
 
 	}

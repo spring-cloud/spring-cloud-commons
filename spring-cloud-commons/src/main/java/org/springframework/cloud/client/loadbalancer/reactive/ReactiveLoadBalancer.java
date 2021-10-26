@@ -22,6 +22,7 @@ import org.reactivestreams.Publisher;
 
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
 
@@ -52,6 +53,10 @@ public interface ReactiveLoadBalancer<T> {
 	}
 
 	interface Factory<T> {
+
+		default LoadBalancerProperties getProperties(String serviceId) {
+			return null;
+		}
 
 		ReactiveLoadBalancer<T> getInstance(String serviceId);
 

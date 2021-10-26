@@ -16,7 +16,12 @@
 
 package org.springframework.cloud.loadbalancer.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.context.named.NamedContextFactory;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientConfiguration;
@@ -36,6 +41,8 @@ import org.springframework.core.env.Environment;
 public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerClientSpecification>
 		implements ReactiveLoadBalancer.Factory<ServiceInstance> {
 
+	private static final Log log = LogFactory.getLog(LoadBalancerClientFactory.class);
+
 	/**
 	 * Property source name for load balancer.
 	 */
@@ -46,8 +53,16 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 	 */
 	public static final String PROPERTY_NAME = NAMESPACE + ".client.name";
 
+	private final LoadBalancerClientsProperties properties;
+
+	@Deprecated
 	public LoadBalancerClientFactory() {
+		this(null);
+	}
+
+	public LoadBalancerClientFactory(LoadBalancerClientsProperties properties) {
 		super(LoadBalancerClientConfiguration.class, NAMESPACE, PROPERTY_NAME);
+		this.properties = properties;
 	}
 
 	public String getName(Environment environment) {
@@ -57,6 +72,23 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 	@Override
 	public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
 		return getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class);
+	}
+
+	@Override
+	public LoadBalancerProperties getProperties(String serviceId) {
+		if (properties == null) {
+			if (log.isWarnEnabled()) {
+				log.warn("LoadBalancerClientsProperties is null. Please use the new constructor.");
+			}
+			return null;
+		}
+		if (!properties.getClients().containsKey(serviceId)) {
+			// no specific client properties, return default
+			return properties;
+		}
+		// because specifics are overlayed on top of defaults, everything in `properties`,
+		// unless overridden, is in `clientsProperties`
+		return properties.getClients().get(serviceId);
 	}
 
 }

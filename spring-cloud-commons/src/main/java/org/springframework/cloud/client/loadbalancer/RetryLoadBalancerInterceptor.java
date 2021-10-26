@@ -18,6 +18,7 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -50,19 +51,26 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 
 	private final LoadBalancerClient loadBalancer;
 
-	private final LoadBalancerProperties properties;
-
 	private final LoadBalancerRequestFactory requestFactory;
 
 	private final LoadBalancedRetryFactory lbRetryFactory;
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
+	@Deprecated
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerProperties properties,
 			LoadBalancerRequestFactory requestFactory, LoadBalancedRetryFactory lbRetryFactory,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
 		this.loadBalancer = loadBalancer;
-		this.properties = properties;
+		this.requestFactory = requestFactory;
+		this.lbRetryFactory = lbRetryFactory;
+		this.loadBalancerFactory = loadBalancerFactory;
+	}
+
+	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRequestFactory requestFactory,
+			LoadBalancedRetryFactory lbRetryFactory,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+		this.loadBalancer = loadBalancer;
 		this.requestFactory = requestFactory;
 		this.lbRetryFactory = lbRetryFactory;
 		this.loadBalancerFactory = loadBalancerFactory;
@@ -159,14 +167,17 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		if (retryListeners != null && retryListeners.length != 0) {
 			template.setListeners(retryListeners);
 		}
-		template.setRetryPolicy(!properties.getRetry().isEnabled() || retryPolicy == null ? new NeverRetryPolicy()
-				: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer, serviceName));
+		template.setRetryPolicy(
+				!loadBalancerFactory.getProperties(serviceName).getRetry().isEnabled() || retryPolicy == null
+						? new NeverRetryPolicy()
+						: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer, serviceName));
 		return template;
 	}
 
 	private String getHint(String serviceId) {
-		String defaultHint = properties.getHint().getOrDefault("default", "default");
-		String hintPropertyValue = properties.getHint().get(serviceId);
+		Map<String, String> hint = loadBalancerFactory.getProperties(serviceId).getHint();
+		String defaultHint = hint.getOrDefault("default", "default");
+		String hintPropertyValue = hint.get(serviceId);
 		return hintPropertyValue != null ? hintPropertyValue : defaultHint;
 	}
 

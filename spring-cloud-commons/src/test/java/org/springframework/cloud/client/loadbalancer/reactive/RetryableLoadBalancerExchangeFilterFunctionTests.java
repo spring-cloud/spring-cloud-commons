@@ -74,6 +74,7 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 		properties.getRetry().getRetryableStatusCodes().add(404);
 		when(clientRequest.url()).thenReturn(URI.create("http://test"));
 		when(factory.getInstance("test")).thenReturn(new TestReactiveLoadBalancer());
+		when(factory.getProperties(any())).thenReturn(properties);
 		when(clientRequest.headers()).thenReturn(new HttpHeaders());
 		when(clientRequest.cookies()).thenReturn(new HttpHeaders());
 
@@ -138,7 +139,7 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 		properties.getRetry().getRetryableStatusCodes().add(404);
 		LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties);
 		RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-				policy, factory, properties, Collections.emptyList());
+				s -> policy, factory, Collections.emptyList());
 		when(clientRequest.method()).thenReturn(HttpMethod.POST);
 		when(clientResponse.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
 		when(next.exchange(any())).thenReturn(Mono.just(clientResponse));
