@@ -43,7 +43,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(WebClient.class)
 @ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
-@EnableConfigurationProperties({ LoadBalancerClientsProperties.class })
+@EnableConfigurationProperties(LoadBalancerClientsProperties.class)
 public class ReactorLoadBalancerClientAutoConfiguration {
 
 	@ConditionalOnMissingBean

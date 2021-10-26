@@ -48,15 +48,11 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 	 */
 	public static final String PROPERTY_NAME = NAMESPACE + ".client.name";
 
-	private final LoadBalancerProperties properties;
+	private final LoadBalancerClientsProperties properties;
 
-	private final LoadBalancerClientsProperties clientsProperties;
-
-	public LoadBalancerClientFactory(LoadBalancerProperties properties,
-			LoadBalancerClientsProperties clientsProperties) {
+	public LoadBalancerClientFactory(LoadBalancerClientsProperties properties) {
 		super(LoadBalancerClientConfiguration.class, NAMESPACE, PROPERTY_NAME);
 		this.properties = properties;
-		this.clientsProperties = clientsProperties;
 	}
 
 	public String getName(Environment environment) {
@@ -70,13 +66,13 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 
 	@Override
 	public LoadBalancerProperties getProperties(String serviceId) {
-		if (!clientsProperties.containsKey(serviceId)) {
+		if (!properties.getClients().containsKey(serviceId)) {
 			// no specific client properties, return default
 			return properties;
 		}
 		// because specifics are overlayed on top of defaults, everything in `properties`,
 		// unless overridden, is in `clientsProperties`
-		return clientsProperties.get(serviceId);
+		return properties.getClients().get(serviceId);
 	}
 
 }

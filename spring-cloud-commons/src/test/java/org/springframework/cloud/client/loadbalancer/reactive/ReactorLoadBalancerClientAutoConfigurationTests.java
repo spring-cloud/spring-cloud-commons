@@ -140,14 +140,14 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 				.properties("spring.cloud.loadbalancer.health-check.initial-delay=1s",
 						"spring.cloud.loadbalancer.clients.myclient.health-check.interval=30s")
 				.run();
-		LoadBalancerClientsProperties clientsProperties = context.getBean(LoadBalancerClientsProperties.class);
+		LoadBalancerClientsProperties properties = context.getBean(LoadBalancerClientsProperties.class);
 
-		then(clientsProperties).containsKey("myclient");
-		LoadBalancerProperties properties = clientsProperties.get("myclient");
+		then(properties.getClients()).containsKey("myclient");
+		LoadBalancerProperties clientProperties = properties.getClients().get("myclient");
 		// default value
-		then(properties.getHealthCheck().getInitialDelay()).isEqualTo(Duration.ofSeconds(1));
+		then(clientProperties.getHealthCheck().getInitialDelay()).isEqualTo(Duration.ofSeconds(1));
 		// client specific value
-		then(properties.getHealthCheck().getInterval()).isEqualTo(Duration.ofSeconds(30));
+		then(clientProperties.getHealthCheck().getInterval()).isEqualTo(Duration.ofSeconds(30));
 	}
 
 	private ConfigurableApplicationContext init(Class<?> config) {
@@ -193,11 +193,6 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		LoadBalancedRetryFactory loadBalancedRetryFactory() {
 			return new LoadBalancedRetryFactory() {
 			};
-		}
-
-		@Bean
-		LoadBalancerProperties loadBalancerProperties() {
-			return new LoadBalancerProperties();
 		}
 
 	}

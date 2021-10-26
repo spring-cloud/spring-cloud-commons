@@ -25,7 +25,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
@@ -41,7 +40,7 @@ import org.springframework.core.env.Environment;
  */
 @Configuration(proxyBeanMethods = false)
 @LoadBalancerClients
-@EnableConfigurationProperties({ LoadBalancerProperties.class, LoadBalancerClientsProperties.class })
+@EnableConfigurationProperties(LoadBalancerClientsProperties.class)
 @AutoConfigureBefore({ ReactorLoadBalancerClientAutoConfiguration.class,
 		LoadBalancerBeanPostProcessorAutoConfiguration.class })
 @ConditionalOnProperty(value = "spring.cloud.loadbalancer.enabled", havingValue = "true", matchIfMissing = true)
@@ -61,9 +60,8 @@ public class LoadBalancerAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public LoadBalancerClientFactory loadBalancerClientFactory(LoadBalancerProperties properties,
-			LoadBalancerClientsProperties clientsProperties) {
-		LoadBalancerClientFactory clientFactory = new LoadBalancerClientFactory(properties, clientsProperties);
+	public LoadBalancerClientFactory loadBalancerClientFactory(LoadBalancerClientsProperties properties) {
+		LoadBalancerClientFactory clientFactory = new LoadBalancerClientFactory(properties);
 		clientFactory.setConfigurations(this.configurations.getIfAvailable(Collections::emptyList));
 		return clientFactory;
 	}

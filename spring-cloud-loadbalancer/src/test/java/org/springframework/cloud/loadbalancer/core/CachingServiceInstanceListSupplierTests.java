@@ -101,20 +101,14 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
-		LoadBalancerClientFactory loadBalancerClientFactory(LoadBalancerProperties properties,
-				LoadBalancerClientsProperties clientsProperties) {
-			return new LoadBalancerClientFactory(properties, clientsProperties);
+		LoadBalancerClientFactory loadBalancerClientFactory(LoadBalancerClientsProperties properties) {
+			return new LoadBalancerClientFactory(properties);
 		}
 
 		@Bean
 		BlockingLoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
 				LoadBalancerProperties properties) {
 			return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
-		}
-
-		@Bean
-		public LoadBalancerProperties loadBalancerProperties() {
-			return new LoadBalancerProperties();
 		}
 
 		@Bean

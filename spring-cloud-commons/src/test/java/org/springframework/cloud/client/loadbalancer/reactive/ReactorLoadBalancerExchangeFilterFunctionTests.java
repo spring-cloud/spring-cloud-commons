@@ -207,11 +207,6 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 			};
 		}
 
-		@Bean
-		LoadBalancerProperties loadBalancerProperties() {
-			return new LoadBalancerProperties();
-		}
-
 	}
 
 	protected static class TestLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {

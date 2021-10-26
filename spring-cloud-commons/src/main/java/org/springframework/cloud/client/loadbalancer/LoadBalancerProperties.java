@@ -34,7 +34,6 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * @author Olga Maciaszek-Sharma
  * @since 2.2.1
  */
-@ConfigurationProperties("spring.cloud.loadbalancer")
 public class LoadBalancerProperties {
 
 	/**
