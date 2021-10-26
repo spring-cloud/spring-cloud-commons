@@ -31,8 +31,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * @author Oleg Zhurakousky
- * @since 2.1
- *
+ * @since 3.1.0
  */
 public class DefaultsBindHandlerAdvisor implements ConfigurationPropertiesBindHandlerAdvisor {
 
