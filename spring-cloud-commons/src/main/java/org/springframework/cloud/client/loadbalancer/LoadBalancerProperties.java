@@ -29,7 +29,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
- * A {@link ConfigurationProperties} bean for Spring Cloud LoadBalancer.
+ * The base configuration bean for Spring Cloud LoadBalancer.
+ *
+ * See {@link LoadBalancerClientsProperties} for the {@link ConfigurationProperties}
+ * annotation.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.1

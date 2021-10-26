@@ -22,6 +22,12 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * A {@link ConfigurationProperties} bean for Spring Cloud Loadbalancer.
+ *
+ * Individual clients are configured via the {@link LoadBalancerClientsProperties#clients}
+ * field. Defaults and other properties are located in the {@link LoadBalancerProperties}
+ * base class.
+ *
  * @author Spencer Gibb
  * @since 3.1.0
  */
