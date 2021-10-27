@@ -23,9 +23,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 
 /**
- * To add X-Forwarded-Host and X-Forwarded-Proto Headers @since 3.1.0.
+ * To add X-Forwarded-Host and X-Forwarded-Proto Headers.
  *
  * @author Gandhimathi Velusamy
+ * @since 3.1.0
  */
 
 public class XForwardedHeadersTransformer implements LoadBalancerRequestTransformer {
@@ -43,8 +44,7 @@ public class XForwardedHeadersTransformer implements LoadBalancerRequestTransfor
 		}
 		if (XForwardedHeaders.isEnabledXforwarded()) {
 			HttpHeaders headers = request.getHeaders();
-			String xForwardedHost = "";
-			xForwardedHost += request.getURI().getHost();
+			String xForwardedHost = request.getURI().getHost();
 			String xforwardedProto = request.getURI().getScheme();
 			headers.add("X-Forwarded-Host", xForwardedHost);
 			headers.add("X-Forwarded-Proto", xforwardedProto);

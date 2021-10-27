@@ -58,10 +58,12 @@ public class XForwardedHeadersTransformerTests {
 	void shouldAppendXforwardedHeaderIfEnabledXforward() throws NullPointerException {
 		xForwarded.setEnabledXforwarded(true);
 		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(xForwarded);
+
 		ClientRequest newRequest = transformer.transformRequest(request, serviceInstance);
-		assertThat(newRequest.headers().containsKey("X-Forwarded-Host")).isTrue();
+
+		assertThat(newRequest.headers()).containsKey("X-Forwarded-Host");
 		assertThat(newRequest.headers().getFirst("X-Forwarded-Host")).isEqualTo("spring.io");
-		assertThat(newRequest.headers().containsKey("X-Forwarded-Proto")).isTrue();
+		assertThat(newRequest.headers()).containsKey("X-Forwarded-Proto");
 		assertThat(newRequest.headers().getFirst("X-Forwarded-Proto")).isEqualTo("https");
 	}
 
@@ -69,8 +71,8 @@ public class XForwardedHeadersTransformerTests {
 	void shouldNotAppendXforwardedHeaderIfDefault() {
 		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(xForwarded);
 		ClientRequest newRequest = transformer.transformRequest(request, serviceInstance);
-		assertThat(newRequest.headers().containsKey("X-Forwarded-Host")).isFalse();
-		assertThat(newRequest.headers().containsKey("X-Forwarded-Proto")).isFalse();
+		assertThat(newRequest.headers()).doesNotContainKey("X-Forwarded-Host");
+		assertThat(newRequest.headers()).doesNotContainKey("X-Forwarded-Proto");
 	}
 
 }

@@ -150,11 +150,11 @@ public class LoadBalancerProperties {
 
 	}
 
-	/**
-	 * To Enable X-Forwarded Headers.
-	 */
 	public static class XForwarded {
 
+		/**
+		 * To Enable X-Forwarded Headers.
+		 */
 		private boolean enabledXforwarded = false;
 
 		public boolean isEnabledXforwarded() {
