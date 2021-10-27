@@ -35,13 +35,17 @@ import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceList
 import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerEnvironmentPropertyUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -232,11 +236,8 @@ public class LoadBalancerClientConfiguration {
 
 		}
 
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.avoid-previous-instance", havingValue = "true",
-				matchIfMissing = true)
-		static class AvoidPreviousInstanceEnabled {
-
-		}
+		@Conditional(AvoidPreviousInstanceEnabledCondition.class)
+		static class AvoidPreviousInstanceEnabled { }
 
 	}
 
@@ -251,10 +252,17 @@ public class LoadBalancerClientConfiguration {
 
 		}
 
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.avoid-previous-instance", havingValue = "true",
-				matchIfMissing = true)
-		static class AvoidPreviousInstanceEnabled {
+		@Conditional(AvoidPreviousInstanceEnabledCondition.class)
+		static class AvoidPreviousInstanceEnabled { }
 
+	}
+
+	static class AvoidPreviousInstanceEnabledCondition implements Condition {
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils
+					.trueOrMissingForClientOrDefault(context
+							.getEnvironment(), "retry.avoid-previous-instance");
 		}
 
 	}
