@@ -155,14 +155,14 @@ public class LoadBalancerProperties {
 		/**
 		 * To Enable X-Forwarded Headers.
 		 */
-		private boolean enabledXforwarded = false;
+		private boolean enabled = false;
 
-		public boolean isEnabledXforwarded() {
-			return enabledXforwarded;
+		public boolean isEnabled() {
+			return enabled;
 		}
 
-		public void setEnabledXforwarded(boolean enabledXforwarded) {
-			this.enabledXforwarded = enabledXforwarded;
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
 		}
 
 	}

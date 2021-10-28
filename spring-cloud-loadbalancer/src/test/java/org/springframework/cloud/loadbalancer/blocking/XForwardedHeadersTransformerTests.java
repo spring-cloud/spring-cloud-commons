@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
  * @author Gandhimathi Velusamy
  */
 
-public class XForwardedHeadersTransformerTests {
+class XForwardedHeadersTransformerTests {
 
 	private final LoadBalancerProperties.XForwarded xForwarded = new LoadBalancerProperties().getxForwarded();
 
@@ -56,7 +56,7 @@ public class XForwardedHeadersTransformerTests {
 	@Test
 	void shouldAppendXforwardHeaderIfEnabledXforward() throws NullPointerException {
 		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(xForwarded);
-		xForwarded.setEnabledXforwarded(true);
+		xForwarded.setEnabled(true);
 
 		HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
 
