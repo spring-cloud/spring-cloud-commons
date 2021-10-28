@@ -32,29 +32,29 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * Tests for XForwadededHeadersTransformer.
+ * Tests for {@link XForwardedHeadersTransformer}.
  *
  * @author Gandhimathi Velusamy
+ * @author Olga Maciaszek-Sharma
  */
 
 class XForwardedHeadersTransformerTests {
 
 	private final LoadBalancerProperties.XForwarded xForwarded = new LoadBalancerProperties().getxForwarded();
 
-	private final ServiceInstance serviceInstance = mock(DefaultServiceInstance.class);
+	private final ServiceInstance serviceInstance = new DefaultServiceInstance("test1", "test", "test.org", 8080, false);
 
 	private final HttpRequest request = mock(HttpRequest.class);
 
 	@BeforeEach
 	void setUp() {
-		when(serviceInstance.getInstanceId()).thenReturn("test1");
 		when(request.getMethod()).thenReturn(HttpMethod.GET);
 		when(request.getURI()).thenReturn(create("https://google.com"));
 		when(request.getHeaders()).thenReturn(new HttpHeaders());
 	}
 
 	@Test
-	void shouldAppendXforwardHeaderIfEnabledXforward() throws NullPointerException {
+	void shouldAppendXForwardedHeadersIfEnabled() {
 		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(xForwarded);
 		xForwarded.setEnabled(true);
 
@@ -67,7 +67,7 @@ class XForwardedHeadersTransformerTests {
 	}
 
 	@Test
-	void shouldNotAppendXforwardedHeaderIfDefault() {
+	void shouldNotAppendXForwardedHeadersIfDefault() {
 		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(xForwarded);
 		HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
 		assertThat(newRequest.getHeaders()).doesNotContainKey("X-Forwarded-Host");
