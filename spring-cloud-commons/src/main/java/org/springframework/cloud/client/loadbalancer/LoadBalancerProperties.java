@@ -117,7 +117,7 @@ public class LoadBalancerProperties {
 		this.xForwarded = xForwarded;
 	}
 
-	public XForwarded getxForwarded() {
+	public XForwarded getXForwarded() {
 		return xForwarded;
 	}
 

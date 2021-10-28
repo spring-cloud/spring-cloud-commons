@@ -41,7 +41,7 @@ import static org.mockito.Mockito.when;
 
 class XForwardedHeadersTransformerTests {
 
-	private final LoadBalancerProperties.XForwarded xForwarded = new LoadBalancerProperties().getxForwarded();
+	private final LoadBalancerProperties.XForwarded xForwarded = new LoadBalancerProperties().getXForwarded();
 
 	private final ServiceInstance serviceInstance = new DefaultServiceInstance("test1", "test", "test.org", 8080, false);
 

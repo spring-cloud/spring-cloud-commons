@@ -77,7 +77,7 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.xforwarded.enabledXforwarded", havingValue = "true")
 	@ConditionalOnMissingBean(XForwardedHeadersTransformer.class)
 	public XForwardedHeadersTransformer xForwarderHeadersTransformer(LoadBalancerProperties properties) {
-		return new XForwardedHeadersTransformer(properties.getxForwarded());
+		return new XForwardedHeadersTransformer(properties.getXForwarded());
 	}
 
 	@Configuration

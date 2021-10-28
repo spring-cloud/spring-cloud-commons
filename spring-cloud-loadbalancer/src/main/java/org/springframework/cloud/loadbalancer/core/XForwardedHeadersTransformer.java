@@ -31,10 +31,10 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 
 public class XForwardedHeadersTransformer implements LoadBalancerClientRequestTransformer {
 
-	private final LoadBalancerProperties.XForwarded XForwardedHeaders;
+	private final LoadBalancerProperties.XForwarded xForwarded;
 
-	public XForwardedHeadersTransformer(LoadBalancerProperties.XForwarded XForwardedHeaders) {
-		this.XForwardedHeaders = XForwardedHeaders;
+	public XForwardedHeadersTransformer(LoadBalancerProperties.XForwarded xForwarded) {
+		this.xForwarded = xForwarded;
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class XForwardedHeadersTransformer implements LoadBalancerClientRequestTr
 		if (instance == null) {
 			return request;
 		}
-		if (XForwardedHeaders.isEnabled()) {
+		if (xForwarded.isEnabled()) {
 			HttpHeaders headers = request.headers();
 			String xForwardedHost = request.url().getHost();
 			String xForwardedProto = request.url().getScheme();
