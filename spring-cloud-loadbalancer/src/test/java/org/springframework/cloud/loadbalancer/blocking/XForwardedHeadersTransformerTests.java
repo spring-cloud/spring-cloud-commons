@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
@@ -40,9 +41,12 @@ import static org.mockito.Mockito.when;
 
 class XForwardedHeadersTransformerTests {
 
-	private final LoadBalancerProperties.XForwarded xForwarded = new LoadBalancerProperties().getXForwarded();
+	private final LoadBalancerClientFactory loadBalancerClientFactory = mock(LoadBalancerClientFactory.class);
 
-	private final ServiceInstance serviceInstance = new DefaultServiceInstance("test1", "test", "test.org", 8080, false);
+	private final LoadBalancerProperties loadBalancerProperties = new LoadBalancerProperties();
+
+	private final ServiceInstance serviceInstance = new DefaultServiceInstance("test1", "test", "test.org", 8080,
+			false);
 
 	private final HttpRequest request = mock(HttpRequest.class);
 
@@ -55,8 +59,9 @@ class XForwardedHeadersTransformerTests {
 
 	@Test
 	void shouldAppendXForwardedHeadersIfEnabled() {
-		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(xForwarded);
-		xForwarded.setEnabled(true);
+		loadBalancerProperties.getXForwarded().setEnabled(true);
+		when(loadBalancerClientFactory.getProperties("test")).thenReturn(loadBalancerProperties);
+		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(loadBalancerClientFactory);
 
 		HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
 
@@ -68,7 +73,10 @@ class XForwardedHeadersTransformerTests {
 
 	@Test
 	void shouldNotAppendXForwardedHeadersIfDefault() {
-		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(xForwarded);
+		when(loadBalancerClientFactory.getProperties("test")).thenReturn(loadBalancerProperties);
+
+		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(loadBalancerClientFactory);
+
 		HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
 		assertThat(newRequest.getHeaders()).doesNotContainKey("X-Forwarded-Host");
 		assertThat(newRequest.getHeaders()).doesNotContainKey("X-Forwarded-Proto");
