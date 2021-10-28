@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.core;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerClientRequestTransformer;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
@@ -26,15 +27,16 @@ import org.springframework.web.reactive.function.client.ClientRequest;
  * To add X-Forwarded-Host and X-Forwarded-Proto Headers.
  *
  * @author Gandhimathi Velusamy
+ * @author Olga Maciaszek-Sharma
  * @since 3.1.0
  */
 
 public class XForwardedHeadersTransformer implements LoadBalancerClientRequestTransformer {
 
-	private final LoadBalancerProperties.XForwarded xForwarded;
+	private final LoadBalancerClientFactory clientFactory;
 
-	public XForwardedHeadersTransformer(LoadBalancerProperties.XForwarded xForwarded) {
-		this.xForwarded = xForwarded;
+	public XForwardedHeadersTransformer(LoadBalancerClientFactory clientFactory) {
+		this.clientFactory = clientFactory;
 	}
 
 	@Override
@@ -42,6 +44,8 @@ public class XForwardedHeadersTransformer implements LoadBalancerClientRequestTr
 		if (instance == null) {
 			return request;
 		}
+		LoadBalancerProperties.XForwarded xForwarded = clientFactory.getProperties(instance.getServiceId())
+				.getXForwarded();
 		if (xForwarded.isEnabled()) {
 			HttpHeaders headers = request.headers();
 			String xForwardedHost = request.url().getHost();
