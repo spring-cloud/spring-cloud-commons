@@ -57,6 +57,10 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
+	/**
+	 * @deprecated in favour of
+	 * {@link RetryLoadBalancerInterceptor#RetryLoadBalancerInterceptor(LoadBalancerClient, LoadBalancerRequestFactory, LoadBalancedRetryFactory, ReactiveLoadBalancer.Factory)}
+	 */
 	@Deprecated
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerProperties properties,
 			LoadBalancerRequestFactory requestFactory, LoadBalancedRetryFactory lbRetryFactory,

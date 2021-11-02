@@ -98,7 +98,7 @@ public class LoadBalancerClientConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnBean(XForwardedHeadersTransformer.class)
+		@ConditionalOnBean({ XForwardedHeadersTransformer.class, LoadBalancerClientFactory.class })
 		@ConditionalOnMissingBean
 		@Conditional(XForwardedConfigurationCondition.class)
 		public XForwardedHeadersTransformer xForwarderHeadersTransformer(LoadBalancerClientFactory clientFactory) {

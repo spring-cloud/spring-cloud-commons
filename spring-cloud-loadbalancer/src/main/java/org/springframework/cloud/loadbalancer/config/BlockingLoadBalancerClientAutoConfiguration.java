@@ -63,9 +63,8 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	@ConditionalOnMissingBean
-	public LoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
-			LoadBalancerProperties properties) {
-		return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
+	public LoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory) {
+		return new BlockingLoadBalancerClient(loadBalancerClientFactory);
 	}
 
 	@Bean
@@ -79,6 +78,7 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@Bean
 	@Conditional(XForwardedConfigurationCondition.class)
 	@ConditionalOnMissingBean(XForwardedHeadersTransformer.class)
+	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	public XForwardedHeadersTransformer xForwarderHeadersTransformer(
 			LoadBalancerClientFactory loadBalancerClientFactory) {
 		return new XForwardedHeadersTransformer(loadBalancerClientFactory);
