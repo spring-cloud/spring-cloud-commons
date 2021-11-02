@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
@@ -42,6 +43,11 @@ class LoadBalancerServiceInstanceCookieTransformerTests {
 	ServiceInstance serviceInstance = new DefaultServiceInstance("test-01", "test", "host", 8080, false);
 
 	HttpRequest request = new MockClientHttpRequest();
+
+	@BeforeEach
+	void setUp() {
+		stickySessionProperties.setAddServiceInstanceCookie(true);
+	}
 
 	@Test
 	void shouldAddServiceInstanceCookieHeader() {
