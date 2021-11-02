@@ -82,7 +82,7 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 			}
 			return null;
 		}
-		if (!properties.getClients().containsKey(serviceId)) {
+		if (serviceId == null || !properties.getClients().containsKey(serviceId)) {
 			// no specific client properties, return default
 			return properties;
 		}

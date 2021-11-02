@@ -30,6 +30,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperti
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
+import org.springframework.cloud.loadbalancer.blocking.XForwardedHeadersTransformer;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
 import org.springframework.cloud.loadbalancer.core.LoadBalancerServiceInstanceCookieTransformer;
@@ -48,6 +49,7 @@ import org.springframework.web.client.RestTemplate;
  * An autoconfiguration for {@link BlockingLoadBalancerClient}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Gandhimathi Velusamy
  * @since 2.1.3
  */
 @Configuration(proxyBeanMethods = false)
@@ -72,6 +74,14 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	public LoadBalancerServiceInstanceCookieTransformer loadBalancerServiceInstanceCookieTransformer(
 			LoadBalancerProperties properties) {
 		return new LoadBalancerServiceInstanceCookieTransformer(properties.getStickySession());
+	}
+
+	@Bean
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.xforwarded.enabledXforwarded", havingValue = "true")
+	@ConditionalOnMissingBean(XForwardedHeadersTransformer.class)
+	public XForwardedHeadersTransformer xForwarderHeadersTransformer(
+			LoadBalancerClientFactory loadBalancerClientFactory) {
+		return new XForwardedHeadersTransformer(loadBalancerClientFactory);
 	}
 
 	@Configuration

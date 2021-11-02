@@ -35,6 +35,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  * annotation.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Gandhimathi Velusamy
  * @since 2.2.1
  */
 public class LoadBalancerProperties {
@@ -107,6 +108,19 @@ public class LoadBalancerProperties {
 		this.hintHeaderName = hintHeaderName;
 	}
 
+	/**
+	 * Enabling X-Forwarded Host and Proto Headers.
+	 */
+	private XForwarded xForwarded = new XForwarded();
+
+	public void setxForwarded(XForwarded xForwarded) {
+		this.xForwarded = xForwarded;
+	}
+
+	public XForwarded getXForwarded() {
+		return xForwarded;
+	}
+
 	public static class StickySession {
 
 		/**
@@ -134,6 +148,23 @@ public class LoadBalancerProperties {
 
 		public void setAddServiceInstanceCookie(boolean addServiceInstanceCookie) {
 			this.addServiceInstanceCookie = addServiceInstanceCookie;
+		}
+
+	}
+
+	public static class XForwarded {
+
+		/**
+		 * To Enable X-Forwarded Headers.
+		 */
+		private boolean enabled = false;
+
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
 		}
 
 	}
