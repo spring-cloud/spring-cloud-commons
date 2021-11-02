@@ -57,6 +57,9 @@ public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalance
 		}
 		LoadBalancerProperties.StickySession stickySession = factory != null
 				? factory.getProperties(instance.getServiceId()).getStickySession() : stickySessionProperties;
+		if (!stickySession.isAddServiceInstanceCookie()) {
+			return request;
+		}
 		String instanceIdCookieName = stickySession.getInstanceIdCookieName();
 		if (!StringUtils.hasText(instanceIdCookieName)) {
 			return request;
