@@ -69,7 +69,7 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 		this.properties = properties;
 	}
 
-	public String getName(Environment environment) {
+	public static String getName(Environment environment) {
 		return environment.getProperty(PROPERTY_NAME);
 	}
 

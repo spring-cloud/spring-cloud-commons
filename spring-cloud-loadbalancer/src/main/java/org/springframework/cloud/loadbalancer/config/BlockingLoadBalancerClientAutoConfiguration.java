@@ -21,7 +21,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
@@ -36,8 +35,13 @@ import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalanc
 import org.springframework.cloud.loadbalancer.blocking.retry.BlockingLoadBalancedRetryFactory;
 import org.springframework.cloud.loadbalancer.core.LoadBalancerServiceInstanceCookieTransformer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerEnvironmentPropertyUtils;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
@@ -64,8 +68,7 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.sticky-session.add-service-instance-cookie",
-			havingValue = "true")
+	@Conditional(AddServiceInstanceCookieCondition.class)
 	@ConditionalOnMissingBean(LoadBalancerServiceInstanceCookieTransformer.class)
 	public LoadBalancerServiceInstanceCookieTransformer loadBalancerServiceInstanceCookieTransformer(
 			LoadBalancerProperties properties) {
@@ -73,7 +76,7 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.xforwarded.enabledXforwarded", havingValue = "true")
+	@Conditional(XForwardedConfigurationCondition.class)
 	@ConditionalOnMissingBean(XForwardedHeadersTransformer.class)
 	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	public XForwardedHeadersTransformer xForwarderHeadersTransformer(
@@ -91,6 +94,16 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 		LoadBalancedRetryFactory loadBalancedRetryFactory(
 				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
 			return new BlockingLoadBalancedRetryFactory(loadBalancerFactory);
+		}
+
+	}
+
+	static class AddServiceInstanceCookieCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.trueForClientOrDefault(context.getEnvironment(),
+					"sticky-session.add-service-instance-cookie");
 		}
 
 	}
