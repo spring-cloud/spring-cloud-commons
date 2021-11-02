@@ -32,6 +32,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.util.StringUtils;
 
 /**
@@ -59,6 +60,11 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 
 	private final BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction;
 
+	/**
+	 * @deprecated in favour of
+	 * {@link HealthCheckServiceInstanceListSupplier#HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier, ReactiveLoadBalancer.Factory, BiFunction)}
+	 */
+	@Deprecated
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerProperties.HealthCheck healthCheck,
 			BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction) {
@@ -66,6 +72,23 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default", "/actuator/health");
 		this.aliveFunction = aliveFunction;
 		this.healthCheck = healthCheck;
+		Repeat<Object> aliveInstancesReplayRepeat = Repeat
+				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
+				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
+		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate).repeatWhen(aliveInstancesReplayRepeat)
+				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
+						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))));
+		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
+				.refCount(1);
+	}
+
+	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory,
+			BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction) {
+		super(delegate);
+		this.healthCheck = loadBalancerClientFactory.getProperties(getServiceId()).getHealthCheck();
+		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default", "/actuator/health");
+		this.aliveFunction = aliveFunction;
 		Repeat<Object> aliveInstancesReplayRepeat = Repeat
 				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
 				.fixedBackoff(healthCheck.getRefetchInstancesInterval());

@@ -26,6 +26,7 @@ import org.springframework.cloud.client.loadbalancer.HintRequestContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 
@@ -40,10 +41,21 @@ public class HintBasedServiceInstanceListSupplier extends DelegatingServiceInsta
 
 	private final LoadBalancerProperties properties;
 
+	/**
+	 * @deprecated in favour of
+	 * {@link HintBasedServiceInstanceListSupplier#HintBasedServiceInstanceListSupplier(ServiceInstanceListSupplier, ReactiveLoadBalancer.Factory)}
+	 */
+	@Deprecated
 	public HintBasedServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerProperties properties) {
 		super(delegate);
 		this.properties = properties;
+	}
+
+	public HintBasedServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
+		super(delegate);
+		this.properties = factory.getProperties(getServiceId());
 	}
 
 	@Override

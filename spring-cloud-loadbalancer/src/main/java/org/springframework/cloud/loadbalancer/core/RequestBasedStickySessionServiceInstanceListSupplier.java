@@ -27,6 +27,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -42,10 +43,21 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 
 	private final LoadBalancerProperties properties;
 
+	/**
+	 * @deprecated in favour of
+	 * {@link RequestBasedStickySessionServiceInstanceListSupplier#RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier, ReactiveLoadBalancer.Factory)}
+	 */
+	@Deprecated
 	public RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerProperties properties) {
 		super(delegate);
 		this.properties = properties;
+	}
+
+	public RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
+		super(delegate);
+		this.properties = loadBalancerClientFactory.getProperties(getServiceId());
 	}
 
 	@Override

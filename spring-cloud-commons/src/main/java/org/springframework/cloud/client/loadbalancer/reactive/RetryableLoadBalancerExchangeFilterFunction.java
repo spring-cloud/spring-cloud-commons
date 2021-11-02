@@ -85,6 +85,10 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		this(retryPolicy, loadBalancerFactory, properties, Collections.emptyList());
 	}
 
+	/**
+	 * @deprecated in favour of
+	 * {@link ReactorLoadBalancerExchangeFilterFunction#ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, List)}
+	 */
 	@Deprecated
 	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,

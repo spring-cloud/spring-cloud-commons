@@ -19,7 +19,7 @@ package org.springframework.cloud.loadbalancer.blocking;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequestTransformer;
-import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 
@@ -33,9 +33,9 @@ import org.springframework.http.HttpRequest;
 
 public class XForwardedHeadersTransformer implements LoadBalancerRequestTransformer {
 
-	private final LoadBalancerClientFactory factory;
+	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory;
 
-	public XForwardedHeadersTransformer(LoadBalancerClientFactory factory) {
+	public XForwardedHeadersTransformer(ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
 		this.factory = factory;
 	}
 
