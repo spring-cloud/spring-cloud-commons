@@ -94,7 +94,7 @@ public class LoadBalancerClientConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnBean(XForwardedHeadersTransformer.class)
+		@ConditionalOnBean({ XForwardedHeadersTransformer.class, LoadBalancerClientFactory.class })
 		@ConditionalOnMissingBean
 		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.xForwarded.enabledXforwarded", havingValue = "true")
 		public XForwardedHeadersTransformer xForwarderHeadersTransformer(LoadBalancerClientFactory clientFactory) {

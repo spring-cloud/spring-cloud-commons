@@ -23,6 +23,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequestTransformer;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -37,10 +38,16 @@ import org.springframework.util.StringUtils;
  */
 public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalancerRequestTransformer {
 
-	private final LoadBalancerProperties.StickySession stickySessionProperties;
+	private ReactiveLoadBalancer.Factory<ServiceInstance> factory;
+
+	private LoadBalancerProperties.StickySession stickySessionProperties;
 
 	public LoadBalancerServiceInstanceCookieTransformer(LoadBalancerProperties.StickySession stickySessionProperties) {
 		this.stickySessionProperties = stickySessionProperties;
+	}
+
+	public LoadBalancerServiceInstanceCookieTransformer(ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
+		this.factory = factory;
 	}
 
 	@Override
@@ -48,7 +55,9 @@ public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalance
 		if (instance == null) {
 			return request;
 		}
-		String instanceIdCookieName = stickySessionProperties.getInstanceIdCookieName();
+		LoadBalancerProperties.StickySession stickySession = factory != null
+				? factory.getProperties(instance.getServiceId()).getStickySession() : stickySessionProperties;
+		String instanceIdCookieName = stickySession.getInstanceIdCookieName();
 		if (!StringUtils.hasText(instanceIdCookieName)) {
 			return request;
 		}
