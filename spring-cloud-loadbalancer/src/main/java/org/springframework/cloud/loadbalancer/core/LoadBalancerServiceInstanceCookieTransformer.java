@@ -42,6 +42,11 @@ public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalance
 
 	private LoadBalancerProperties.StickySession stickySessionProperties;
 
+	/**
+	 * @deprecated in favour of
+	 * {@link LoadBalancerServiceInstanceCookieTransformer#LoadBalancerServiceInstanceCookieTransformer(ReactiveLoadBalancer.Factory)}
+	 */
+	@Deprecated
 	public LoadBalancerServiceInstanceCookieTransformer(LoadBalancerProperties.StickySession stickySessionProperties) {
 		this.stickySessionProperties = stickySessionProperties;
 	}

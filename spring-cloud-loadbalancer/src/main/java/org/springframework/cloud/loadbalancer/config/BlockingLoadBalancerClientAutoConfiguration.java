@@ -27,7 +27,6 @@ import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfig
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.blocking.XForwardedHeadersTransformer;
@@ -63,10 +62,11 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	}
 
 	@Bean
+	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	@ConditionalOnMissingBean(LoadBalancerServiceInstanceCookieTransformer.class)
 	public LoadBalancerServiceInstanceCookieTransformer loadBalancerServiceInstanceCookieTransformer(
-			LoadBalancerProperties properties) {
-		return new LoadBalancerServiceInstanceCookieTransformer(properties.getStickySession());
+			LoadBalancerClientFactory loadBalancerClientFactory) {
+		return new LoadBalancerServiceInstanceCookieTransformer(loadBalancerClientFactory);
 	}
 
 	@Bean
