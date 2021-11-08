@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -26,7 +27,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
  */
-class LoadBalancerRetryContext {
+public class LoadBalancerRetryContext {
 
 	private final ClientRequest request;
 
@@ -36,47 +37,91 @@ class LoadBalancerRetryContext {
 
 	private Integer retriesNextServiceInstance = 0;
 
-	LoadBalancerRetryContext(ClientRequest request) {
+	protected LoadBalancerRetryContext(ClientRequest request) {
 		this.request = request;
 	}
 
-	ClientRequest getRequest() {
+	/**
+	 * Returns the {@link ClientRequest} that is being load-balanced.
+	 * @return the request that is being load-balanced.
+	 */
+	protected ClientRequest getRequest() {
 		return request;
 	}
 
-	ClientResponse getClientResponse() {
+	/**
+	 * Returns the {@link ClientResponse} returned for load-balanced request.
+	 * @return the response for the load-balanced request.
+	 */
+	protected ClientResponse getClientResponse() {
 		return clientResponse;
 	}
 
-	void setClientResponse(ClientResponse clientResponse) {
+	/**
+	 * Sets the {@link ClientResponse} returned for load-balanced request.
+	 * @param clientResponse the response for the load-balanced request.
+	 */
+	protected void setClientResponse(ClientResponse clientResponse) {
 		this.clientResponse = clientResponse;
 	}
 
-	Integer getRetriesSameServiceInstance() {
+	/**
+	 * Returns the number of times a load-balanced request should be retried on the same
+	 * {@link ServiceInstance}.
+	 * @return the number of retries
+	 */
+	protected Integer getRetriesSameServiceInstance() {
 		return retriesSameServiceInstance;
 	}
 
-	void incrementRetriesSameServiceInstance() {
+	/**
+	 * Increments the counter for the retries executed against the same
+	 * {@link ServiceInstance}.
+	 */
+	protected void incrementRetriesSameServiceInstance() {
 		retriesSameServiceInstance++;
 	}
 
-	void resetRetriesSameServiceInstance() {
+	/**
+	 * Resets the counter for the retries executed against the same
+	 * {@link ServiceInstance}.
+	 */
+	protected void resetRetriesSameServiceInstance() {
 		retriesSameServiceInstance = 0;
 	}
 
-	Integer getRetriesNextServiceInstance() {
+	/**
+	 * Returns the number of times a load-balanced request should be retried on the next
+	 * {@link ServiceInstance}.
+	 * @return the number of retries
+	 */
+	protected Integer getRetriesNextServiceInstance() {
 		return retriesNextServiceInstance;
 	}
 
-	void incrementRetriesNextServiceInstance() {
+	/**
+	 * Increments the counter for the retries executed against the same
+	 * {@link ServiceInstance}.
+	 */
+	protected void incrementRetriesNextServiceInstance() {
 		retriesNextServiceInstance++;
 	}
 
-	Integer getResponseStatusCode() {
+	/**
+	 * Returns the status code from the {@link ClientResponse} returned for load-balanced
+	 * request.
+	 * @return the status code from the response for the load-balanced request.
+	 */
+	protected Integer getResponseStatusCode() {
 		return clientResponse.statusCode().value();
 	}
 
-	HttpMethod getRequestMethod() {
+	/**
+	 * Returns the {@link HttpMethod} of the {@link ClientRequest} that is being
+	 * load-balanced.
+	 * @return the HTTP method of the request that is being load-balanced.
+	 */
+	protected HttpMethod getRequestMethod() {
 		return request.method();
 	}
 
