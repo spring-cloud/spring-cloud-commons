@@ -30,6 +30,7 @@ import reactor.retry.Repeat;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
@@ -156,7 +157,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 			return Mono.just(true);
 		}
 		String healthCheckPath = healthCheckPropertyValue != null ? healthCheckPropertyValue : defaultHealthCheckPath;
-		return aliveFunction.apply(serviceInstance, healthCheckPath);
+		return aliveFunction.apply(updatedServiceInstance(serviceInstance), healthCheckPath);
 	}
 
 	@Override
@@ -165,6 +166,16 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 		if (healthCheckDisposable != null) {
 			healthCheckDisposable.dispose();
 		}
+	}
+
+	private ServiceInstance updatedServiceInstance(ServiceInstance serviceInstance) {
+		Integer healthCheckPort = healthCheck.getPort();
+		if (serviceInstance instanceof DefaultServiceInstance && healthCheckPort != null) {
+			return new DefaultServiceInstance(serviceInstance.getInstanceId(), serviceInstance.getServiceId(),
+					serviceInstance.getHost(), healthCheckPort, serviceInstance.isSecure(),
+					serviceInstance.getMetadata());
+		}
+		return serviceInstance;
 	}
 
 }

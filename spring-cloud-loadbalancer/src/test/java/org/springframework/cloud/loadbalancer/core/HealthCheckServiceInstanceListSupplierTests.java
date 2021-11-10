@@ -41,6 +41,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.cloud.loadbalancer.support.ServiceInstanceListSuppliers;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,6 +51,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -577,6 +579,27 @@ class HealthCheckServiceInstanceListSupplierTests {
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
 		assertThat(alive).isTrue();
+	}
+
+	@Test
+	void shouldCheckUseProvidedPortForHealthCheckRequest() {
+		Throwable exception = catchThrowable(() -> {
+			String serviceId = "ignored-service";
+			healthCheck.setPort(8888);
+			LoadBalancerProperties properties = new LoadBalancerProperties();
+			properties.setHealthCheck(healthCheck);
+			LoadBalancerClientFactory loadBalancerClientFactory = mock(LoadBalancerClientFactory.class);
+			when(loadBalancerClientFactory.getProperties(serviceId)).thenReturn(properties);
+			ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1",
+					port, false);
+			listSupplier = new HealthCheckServiceInstanceListSupplier(
+					ServiceInstanceListSuppliers.from(serviceId, serviceInstance), loadBalancerClientFactory,
+					healthCheckFunction(webClient));
+
+			listSupplier.isAlive(serviceInstance).block();
+		});
+
+		assertThat(exception).hasMessageContaining("Connection refused: /127.0.0.1:888");
 	}
 
 	@Configuration(proxyBeanMethods = false)
