@@ -186,7 +186,18 @@ public class LoadBalancerProperties {
 		 */
 		private Duration refetchInstancesInterval = Duration.ofSeconds(25);
 
+		/**
+		 * Path at which the health-check request should be made. Can be set up per
+		 * <code>serviceId</code>. A <code>default</code> value can be set up as well. If
+		 * none is set up, <code>/actuator/health</code> will be used.
+		 */
 		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
+
+		/**
+		 * Path at which the health-check request should be made. If none is set, the port
+		 * under which the requested service is available at the service instance.
+		 */
+		private Integer port;
 
 		/**
 		 * Indicates whether the instances should be refetched by the
@@ -249,6 +260,14 @@ public class LoadBalancerProperties {
 
 		public void setInterval(Duration interval) {
 			this.interval = interval;
+		}
+
+		public Integer getPort() {
+			return port;
+		}
+
+		public void setPort(Integer port) {
+			this.port = port;
 		}
 
 	}
