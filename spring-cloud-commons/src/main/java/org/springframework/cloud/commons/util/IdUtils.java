@@ -18,7 +18,6 @@ package org.springframework.cloud.commons.util;
 
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.util.StringUtils;
-import lombok.NonNull;
 
 
 /**
