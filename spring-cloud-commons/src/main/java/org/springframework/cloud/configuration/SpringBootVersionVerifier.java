@@ -105,7 +105,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 			@Override
 			public boolean isCompatible() {
 				try {
-					// since 2.4
+					// since 2.5
 					Class.forName("org.springframework.boot.context.properties.bind.Bindable.BindRestriction");
 					return true;
 				}
