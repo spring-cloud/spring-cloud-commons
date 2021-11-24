@@ -16,8 +16,12 @@
 
 package org.springframework.cloud.client.serviceregistry;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
 
@@ -33,6 +37,7 @@ import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 
 /**
@@ -51,17 +56,17 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	private final ServiceRegistry<R> serviceRegistry;
 
-	private boolean autoStartup = true;
+	private final boolean autoStartup = true;
 
-	private AtomicBoolean running = new AtomicBoolean(false);
+	private final AtomicBoolean running = new AtomicBoolean(false);
 
-	private int order = 0;
+	private final int order = 0;
+
+	private final AtomicInteger port = new AtomicInteger(0);
 
 	private ApplicationContext context;
 
 	private Environment environment;
-
-	private AtomicInteger port = new AtomicInteger(0);
 
 	private AutoServiceRegistrationProperties properties;
 
@@ -130,14 +135,43 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		// because of containerPortInitializer below
 		if (!this.running.get()) {
 			this.context.publishEvent(new InstancePreRegisteredEvent(this, getRegistration()));
+			List<RegistrationLifecycle> registrationLifecycleList = getRegistrationLifecycles();
+			registrationLifecycleList.forEach(
+					registrationLifecycle -> registrationLifecycle.postProcessBeforeStartRegister(getRegistration()));
 			register();
+			registrationLifecycleList.forEach(
+					registrationLifecycle -> registrationLifecycle.postProcessAfterStartRegister(getRegistration()));
 			if (shouldRegisterManagement()) {
+				List<RegistrationManagementLifecycle> registrationManagementLifecycles = getRegistrationManagementLifecycles();
+				registrationManagementLifecycles
+						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+								.postProcessBeforeStartRegisterManagement(getManagementRegistration()));
 				registerManagement();
+				registrationManagementLifecycles
+						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+								.postProcessAfterStartRegisterManagement(getManagementRegistration()));
+
 			}
 			this.context.publishEvent(new InstanceRegisteredEvent<>(this, getConfiguration()));
 			this.running.compareAndSet(false, true);
 		}
 
+	}
+
+	private List<RegistrationManagementLifecycle> getRegistrationManagementLifecycles() {
+		Map<String, RegistrationManagementLifecycle> registrationManagementLifecycleMap = context
+				.getBeansOfType(RegistrationManagementLifecycle.class);
+		List<RegistrationManagementLifecycle> registrationManagementLifecycles = registrationManagementLifecycleMap
+				.values().stream().sorted(Comparator.comparingInt(Ordered::getOrder)).collect(Collectors.toList());
+		return registrationManagementLifecycles;
+	}
+
+	private List<RegistrationLifecycle> getRegistrationLifecycles() {
+		Map<String, RegistrationLifecycle> registrationLifecycleMap = context
+				.getBeansOfType(RegistrationLifecycle.class);
+		List<RegistrationLifecycle> registrationLifecycleList = registrationLifecycleMap.values().stream()
+				.sorted(Comparator.comparingInt(Ordered::getOrder)).collect(Collectors.toList());
+		return registrationLifecycleList;
 	}
 
 	/**
@@ -261,9 +295,21 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	public void stop() {
 		if (this.getRunning().compareAndSet(true, false) && isEnabled()) {
+			List<RegistrationLifecycle> registrationLifecycles = getRegistrationLifecycles();
+			registrationLifecycles.forEach(
+					registrationLifecycle -> registrationLifecycle.postProcessBeforeStopRegister(getRegistration()));
 			deregister();
+			registrationLifecycles.forEach(
+					registrationLifecycle -> registrationLifecycle.postProcessAfterStopRegister(getRegistration()));
 			if (shouldRegisterManagement()) {
+				List<RegistrationManagementLifecycle> registrationManagementLifecycles = getRegistrationManagementLifecycles();
+				registrationManagementLifecycles
+						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+								.postProcessBeforeStopRegisterManagement(getManagementRegistration()));
 				deregisterManagement();
+				registrationManagementLifecycles
+						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+								.postProcessAfterStopRegisterManagement(getManagementRegistration()));
 			}
 			this.serviceRegistry.close();
 		}
