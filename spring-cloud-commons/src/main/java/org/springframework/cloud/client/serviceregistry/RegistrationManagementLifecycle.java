@@ -6,34 +6,34 @@ package org.springframework.cloud.client.serviceregistry;
  *
  * @author huifer
  */
-public interface RegistrationManagementLifecycle extends RegistrationLifecycle {
+public interface RegistrationManagementLifecycle<R extends Registration> extends RegistrationLifecycle<R> {
 
 	/**
 	 * A method executed before registering the local management service with the
 	 * {@link ServiceRegistry}.
 	 * @param registrationManagement registrationManagement
 	 */
-	void postProcessBeforeStartRegisterManagement(Registration registrationManagement);
+	void postProcessBeforeStartRegisterManagement(R registrationManagement);
 
 	/**
 	 * A method executed after registering the local management service with the
 	 * {@link ServiceRegistry}.
 	 * @param registrationManagement registrationManagement
 	 */
-	void postProcessAfterStartRegisterManagement(Registration registrationManagement);
+	void postProcessAfterStartRegisterManagement(R registrationManagement);
 
 	/**
 	 * A method executed before de-registering the management local service with the
 	 * {@link ServiceRegistry}.
 	 * @param registrationManagement registrationManagement
 	 */
-	void postProcessBeforeStopRegisterManagement(Registration registrationManagement);
+	void postProcessBeforeStopRegisterManagement(R registrationManagement);
 
 	/**
 	 * A method executed after de-registering the management local service with the
 	 * {@link ServiceRegistry}.
 	 * @param registrationManagement registrationManagement
 	 */
-	void postProcessAfterStopRegisterManagement(Registration registrationManagement);
+	void postProcessAfterStopRegisterManagement(R registrationManagement);
 
 }

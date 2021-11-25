@@ -7,7 +7,7 @@ import org.springframework.core.Ordered;
  *
  * @author huifer
  */
-public interface RegistrationLifecycle extends Ordered {
+public interface RegistrationLifecycle<R extends Registration> extends Ordered {
 
 	int DEFAULT_ORDER = 0;
 
@@ -16,27 +16,30 @@ public interface RegistrationLifecycle extends Ordered {
 	 * {@link ServiceRegistry}.
 	 * @param registration registration
 	 */
-	void postProcessBeforeStartRegister(Registration registration);
+	 void postProcessBeforeStartRegister(R registration);
 
 	/**
 	 * A method executed after registering the local service with the
 	 * {@link ServiceRegistry}.
 	 * @param registration registration
 	 */
-	void postProcessAfterStartRegister(Registration registration);
+	 void postProcessAfterStartRegister(R registration);
 
 	/**
 	 * A method executed before de-registering the local service with the
 	 * {@link ServiceRegistry}.
 	 * @param registration registration
 	 */
-	void postProcessBeforeStopRegister(Registration registration);
+	 void postProcessBeforeStopRegister(R registration);
 
 	/**
 	 * A method executed after de-registering the local service with the
 	 * {@link ServiceRegistry}.
 	 * @param registration registration
 	 */
-	void postProcessAfterStopRegister(Registration registration);
+	 void postProcessAfterStopRegister(R registration);
 
+	default int getOrder() {
+		return DEFAULT_ORDER;
+	}
 }
