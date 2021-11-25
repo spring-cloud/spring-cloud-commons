@@ -117,7 +117,7 @@ public class IdUtilsTests {
 	@Test
 	public void testServiceIdDefaults() {
 		this.env.setProperty("cachedrandom.application.value", "123abc");
-		then("application:0:123abc").isEqualTo(IdUtils.getResolvedServiceId(this.env));
+		then("application::0:123abc").isEqualTo(IdUtils.getResolvedServiceId(this.env));
 	}
 
 	@Test
@@ -125,7 +125,8 @@ public class IdUtilsTests {
 		env.setProperty("vcap.application.name", "vcapname");
 		env.setProperty("vcap.application.instance_index", "vcapindex");
 		env.setProperty("vcap.application.instance_id", "vcapid");
-		then("vcapname:vcapindex:vcapid").isEqualTo(IdUtils.getResolvedServiceId(env));
+		env.setProperty("spring.profiles.active", "123profile");
+		then("vcapname:123profile:vcapindex:vcapid").isEqualTo(IdUtils.getResolvedServiceId(env));
 	}
 
 	@Test
@@ -133,7 +134,8 @@ public class IdUtilsTests {
 		env.setProperty("spring.application.name", "springname");
 		env.setProperty("spring.application.index", "springindex");
 		env.setProperty("cachedrandom.springname.value", "123abc");
-		then("springname:springindex:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
+		env.setProperty("spring.profiles.active", "123profile");
+		then("springname:123profile:springindex:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
 	}
 
 	@Test
@@ -141,7 +143,8 @@ public class IdUtilsTests {
 		env.setProperty("spring.application.name", "springname");
 		env.setProperty("server.port", "1234");
 		env.setProperty("cachedrandom.springname.value", "123abc");
-		then("springname:1234:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
+		env.setProperty("spring.profiles.active", "123profile");
+		then("springname:123profile:1234:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
 	}
 
 }
