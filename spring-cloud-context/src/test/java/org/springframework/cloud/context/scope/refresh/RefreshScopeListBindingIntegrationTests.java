@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.Advised;
@@ -57,7 +56,6 @@ public class RefreshScopeListBindingIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	@Disabled("caused by https://github.com/spring-projects/spring-boot/issues/28776")
 	public void testAppendProperties() throws Exception {
 		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		then(this.properties instanceof Advised).isTrue();

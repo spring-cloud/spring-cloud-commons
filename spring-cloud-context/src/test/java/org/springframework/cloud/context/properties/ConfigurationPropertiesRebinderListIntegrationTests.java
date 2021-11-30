@@ -56,7 +56,6 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	@Disabled("caused by https://github.com/spring-projects/spring-boot/issues/28776")
 	public void testAppendProperties() {
 		then(this.properties.getMessages()).containsOnly("one", "two");
 		TestPropertyValues.of("messages[0]:foo").applyTo(this.environment);

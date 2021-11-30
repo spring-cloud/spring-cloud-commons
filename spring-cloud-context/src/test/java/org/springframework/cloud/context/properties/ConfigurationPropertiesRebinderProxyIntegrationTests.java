@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +55,6 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	@Disabled("caused by https://github.com/spring-projects/spring-boot/issues/28776")
 	public void testAppendProperties() throws Exception {
 		// This comes out as a String not Integer if the rebinder processes the proxy
 		// instead of the target
