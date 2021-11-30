@@ -16,10 +16,14 @@
 
 package org.springframework.cloud.configuration;
 
+import java.util.Objects;
+
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.util.StringUtils;
 
 /**
  * @author Marcin Grzejszczak
+ * @author Olga Maciaszek-Sharma
  */
 final class VerificationResult {
 
@@ -49,6 +53,31 @@ final class VerificationResult {
 
 	boolean isNotCompatible() {
 		return StringUtils.hasText(this.description) || StringUtils.hasText(this.action);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof VerificationResult)) {
+			return false;
+		}
+		VerificationResult that = (VerificationResult) o;
+		return description.equals(that.description) && action.equals(that.action);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(description, action);
+	}
+
+	@Override
+	public String toString() {
+		ToStringCreator toStringCreator = new ToStringCreator(this);
+		toStringCreator.append("description", description);
+		toStringCreator.append("action", action);
+		return toStringCreator.toString();
 	}
 
 }
