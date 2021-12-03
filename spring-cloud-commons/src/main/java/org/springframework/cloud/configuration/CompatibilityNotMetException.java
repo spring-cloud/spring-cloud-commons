@@ -16,12 +16,14 @@
 
 package org.springframework.cloud.configuration;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * Exception thrown when the current setup is not compatible.
  *
  * @author Marcin Grzejszczak
+ * @author Olga Maciaszek-Sharma
  * @since 1.3.6
  */
 class CompatibilityNotMetException extends RuntimeException {
@@ -29,6 +31,8 @@ class CompatibilityNotMetException extends RuntimeException {
 	final List<VerificationResult> results;
 
 	CompatibilityNotMetException(List<VerificationResult> results) {
+		super("Spring Cloud/ Spring Boot version compatibility checks have failed: "
+				+ Arrays.toString(results.toArray()));
 		this.results = results;
 	}
 
