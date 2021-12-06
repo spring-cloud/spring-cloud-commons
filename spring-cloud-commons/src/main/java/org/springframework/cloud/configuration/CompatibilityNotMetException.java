@@ -31,7 +31,8 @@ class CompatibilityNotMetException extends RuntimeException {
 	final List<VerificationResult> results;
 
 	CompatibilityNotMetException(List<VerificationResult> results) {
-		super("Spring Cloud/ Spring Boot version compatibility checks have failed: " + Arrays.toString(results.toArray()));
+		super("Spring Cloud/ Spring Boot version compatibility checks have failed: "
+				+ Arrays.toString(results.toArray()));
 		this.results = results;
 	}
 
