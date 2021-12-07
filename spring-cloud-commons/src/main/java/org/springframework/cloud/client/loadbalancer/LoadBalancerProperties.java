@@ -29,12 +29,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
- * A {@link ConfigurationProperties} bean for Spring Cloud LoadBalancer.
+ * The base configuration bean for Spring Cloud LoadBalancer.
+ *
+ * See {@link LoadBalancerClientsProperties} for the {@link ConfigurationProperties}
+ * annotation.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Gandhimathi Velusamy
  * @since 2.2.1
  */
-@ConfigurationProperties("spring.cloud.loadbalancer")
 public class LoadBalancerProperties {
 
 	/**
@@ -105,6 +108,19 @@ public class LoadBalancerProperties {
 		this.hintHeaderName = hintHeaderName;
 	}
 
+	/**
+	 * Enabling X-Forwarded Host and Proto Headers.
+	 */
+	private XForwarded xForwarded = new XForwarded();
+
+	public void setxForwarded(XForwarded xForwarded) {
+		this.xForwarded = xForwarded;
+	}
+
+	public XForwarded getXForwarded() {
+		return xForwarded;
+	}
+
 	public static class StickySession {
 
 		/**
@@ -136,6 +152,23 @@ public class LoadBalancerProperties {
 
 	}
 
+	public static class XForwarded {
+
+		/**
+		 * To Enable X-Forwarded Headers.
+		 */
+		private boolean enabled = false;
+
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
+	}
+
 	public static class HealthCheck {
 
 		/**
@@ -153,7 +186,18 @@ public class LoadBalancerProperties {
 		 */
 		private Duration refetchInstancesInterval = Duration.ofSeconds(25);
 
+		/**
+		 * Path at which the health-check request should be made. Can be set up per
+		 * <code>serviceId</code>. A <code>default</code> value can be set up as well. If
+		 * none is set up, <code>/actuator/health</code> will be used.
+		 */
 		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
+
+		/**
+		 * Path at which the health-check request should be made. If none is set, the port
+		 * under which the requested service is available at the service instance.
+		 */
+		private Integer port;
 
 		/**
 		 * Indicates whether the instances should be refetched by the
@@ -216,6 +260,14 @@ public class LoadBalancerProperties {
 
 		public void setInterval(Duration interval) {
 			this.interval = interval;
+		}
+
+		public Integer getPort() {
+			return port;
+		}
+
+		public void setPort(Integer port) {
+			this.port = port;
 		}
 
 	}

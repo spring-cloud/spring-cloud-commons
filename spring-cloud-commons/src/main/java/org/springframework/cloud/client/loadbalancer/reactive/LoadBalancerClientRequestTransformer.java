@@ -30,7 +30,7 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 public interface LoadBalancerClientRequestTransformer {
 
 	/**
-	 * Order for the load balancer request tranformer.
+	 * Order for the {@link LoadBalancerClientRequestTransformer}.
 	 */
 	int DEFAULT_ORDER = 0;
 

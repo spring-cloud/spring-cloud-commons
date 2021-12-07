@@ -34,14 +34,19 @@ import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.XForwardedHeadersTransformer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerEnvironmentPropertyUtils;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -75,8 +80,7 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations", havingValue = "default",
-				matchIfMissing = true)
+		@Conditional(DefaultConfigurationCondition.class)
 		public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withCaching().build(context);
@@ -85,7 +89,7 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations", havingValue = "zone-preference")
+		@Conditional(ZonePreferenceConfigurationCondition.class)
 		public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withZonePreference().withCaching()
@@ -93,9 +97,16 @@ public class LoadBalancerClientConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnBean({ XForwardedHeadersTransformer.class, LoadBalancerClientFactory.class })
+		@ConditionalOnMissingBean
+		public XForwardedHeadersTransformer xForwarderHeadersTransformer(LoadBalancerClientFactory clientFactory) {
+			return new XForwardedHeadersTransformer(clientFactory);
+		}
+
+		@Bean
 		@ConditionalOnBean({ ReactiveDiscoveryClient.class, WebClient.Builder.class })
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations", havingValue = "health-check")
+		@Conditional(HealthCheckConfigurationCondition.class)
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withHealthChecks().build(context);
@@ -104,8 +115,7 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
-				havingValue = "request-based-sticky-session")
+		@Conditional(RequestBasedStickySessionConfigurationCondition.class)
 		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withRequestBasedStickySession()
@@ -115,8 +125,7 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
-				havingValue = "same-instance-preference")
+		@Conditional(SameInstancePreferenceConfigurationCondition.class)
 		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withSameInstancePreference()
@@ -133,8 +142,7 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(DiscoveryClient.class)
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations", havingValue = "default",
-				matchIfMissing = true)
+		@Conditional(DefaultConfigurationCondition.class)
 		public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withCaching().build(context);
@@ -143,7 +151,7 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(DiscoveryClient.class)
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations", havingValue = "zone-preference")
+		@Conditional(ZonePreferenceConfigurationCondition.class)
 		public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withZonePreference()
@@ -153,7 +161,7 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean({ DiscoveryClient.class, RestTemplate.class })
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations", havingValue = "health-check")
+		@Conditional(HealthCheckConfigurationCondition.class)
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withBlockingHealthChecks()
@@ -163,8 +171,7 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(DiscoveryClient.class)
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
-				havingValue = "request-based-sticky-session")
+		@Conditional(RequestBasedStickySessionConfigurationCondition.class)
 		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withRequestBasedStickySession()
@@ -174,8 +181,7 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(DiscoveryClient.class)
 		@ConditionalOnMissingBean
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.configurations",
-				havingValue = "same-instance-preference")
+		@Conditional(SameInstancePreferenceConfigurationCondition.class)
 		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withSameInstancePreference()
@@ -232,8 +238,7 @@ public class LoadBalancerClientConfiguration {
 
 		}
 
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.avoid-previous-instance", havingValue = "true",
-				matchIfMissing = true)
+		@Conditional(AvoidPreviousInstanceEnabledCondition.class)
 		static class AvoidPreviousInstanceEnabled {
 
 		}
@@ -251,10 +256,69 @@ public class LoadBalancerClientConfiguration {
 
 		}
 
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.avoid-previous-instance", havingValue = "true",
-				matchIfMissing = true)
+		@Conditional(AvoidPreviousInstanceEnabledCondition.class)
 		static class AvoidPreviousInstanceEnabled {
 
+		}
+
+	}
+
+	static class AvoidPreviousInstanceEnabledCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.trueOrMissingForClientOrDefault(context.getEnvironment(),
+					"retry.avoid-previous-instance");
+		}
+
+	}
+
+	static class DefaultConfigurationCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToOrMissingForClientOrDefault(context.getEnvironment(),
+					"configurations", "default");
+		}
+
+	}
+
+	static class ZonePreferenceConfigurationCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"configurations", "zone-preference");
+		}
+
+	}
+
+	static class HealthCheckConfigurationCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"configurations", "health-check");
+		}
+
+	}
+
+	static class RequestBasedStickySessionConfigurationCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"configurations", "request-based-sticky-session");
+		}
+
+	}
+
+	static class SameInstancePreferenceConfigurationCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"configurations", "same-instance-preference");
 		}
 
 	}

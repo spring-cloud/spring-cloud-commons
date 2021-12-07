@@ -188,7 +188,7 @@ class LoadBalancerTests {
 		@Bean
 		public RoundRobinLoadBalancer roundRobinContextLoadBalancer(LoadBalancerClientFactory clientFactory,
 				Environment env) {
-			String serviceId = clientFactory.getName(env);
+			String serviceId = LoadBalancerClientFactory.getName(env);
 			return new RoundRobinLoadBalancer(
 					clientFactory.getLazyProvider(serviceId, ServiceInstanceListSupplier.class), serviceId, -1);
 		}

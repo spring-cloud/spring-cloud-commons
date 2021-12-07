@@ -54,15 +54,20 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoa
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
-	private final LoadBalancerClientFactory loadBalancerClientFactory;
+	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
 
-	private final LoadBalancerProperties properties;
-
+	/**
+	 * @deprecated in favour of
+	 * {@link BlockingLoadBalancerClient#BlockingLoadBalancerClient(ReactiveLoadBalancer.Factory)}
+	 */
+	@Deprecated
 	public BlockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
 			LoadBalancerProperties properties) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
-		this.properties = properties;
+	}
 
+	public BlockingLoadBalancerClient(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
+		this.loadBalancerClientFactory = loadBalancerClientFactory;
 	}
 
 	@Override
@@ -155,6 +160,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	}
 
 	private String getHint(String serviceId) {
+		LoadBalancerProperties properties = loadBalancerClientFactory.getProperties(serviceId);
 		String defaultHint = properties.getHint().getOrDefault("default", "default");
 		String hintPropertyValue = properties.getHint().get(serviceId);
 		return hintPropertyValue != null ? hintPropertyValue : defaultHint;

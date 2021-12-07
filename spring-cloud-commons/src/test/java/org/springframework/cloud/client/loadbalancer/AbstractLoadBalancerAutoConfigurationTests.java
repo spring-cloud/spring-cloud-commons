@@ -103,8 +103,8 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		}
 
 		@Bean
-		ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory() {
-			return new TestLoadBalancerFactory();
+		ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory(LoadBalancerProperties properties) {
+			return new TestLoadBalancerFactory(properties);
 		}
 
 	}
@@ -176,6 +176,12 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 	private static class TestLoadBalancerFactory implements ReactiveLoadBalancer.Factory<ServiceInstance> {
 
+		private final LoadBalancerProperties properties;
+
+		TestLoadBalancerFactory(LoadBalancerProperties properties) {
+			this.properties = properties;
+		}
+
 		@Override
 		public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
 			throw new UnsupportedOperationException("Not implemented.");
@@ -189,6 +195,11 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		@Override
 		public Map getInstances(String name, Class type) {
 			throw new UnsupportedOperationException("Not implemented.");
+		}
+
+		@Override
+		public LoadBalancerProperties getProperties(String serviceId) {
+			return properties;
 		}
 
 	}

@@ -16,10 +16,11 @@
 
 package org.springframework.cloud.loadbalancer.blocking.retry;
 
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryPolicy;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.ServiceInstanceChooser;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 
 /**
@@ -31,15 +32,15 @@ import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalanc
  */
 public class BlockingLoadBalancedRetryFactory implements LoadBalancedRetryFactory {
 
-	private final LoadBalancerProperties loadBalancerProperties;
+	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	public BlockingLoadBalancedRetryFactory(LoadBalancerProperties loadBalancerProperties) {
-		this.loadBalancerProperties = loadBalancerProperties;
+	public BlockingLoadBalancedRetryFactory(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+		this.loadBalancerFactory = loadBalancerFactory;
 	}
 
 	@Override
 	public LoadBalancedRetryPolicy createRetryPolicy(String serviceId, ServiceInstanceChooser serviceInstanceChooser) {
-		return new BlockingLoadBalancedRetryPolicy(loadBalancerProperties);
+		return new BlockingLoadBalancedRetryPolicy(loadBalancerFactory.getProperties(serviceId));
 	}
 
 }

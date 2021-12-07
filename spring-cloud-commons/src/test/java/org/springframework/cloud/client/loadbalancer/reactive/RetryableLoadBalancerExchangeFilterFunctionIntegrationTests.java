@@ -228,7 +228,8 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		}
 
 		@Bean
-		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory(DiscoveryClient discoveryClient) {
+		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory(DiscoveryClient discoveryClient,
+				LoadBalancerProperties properties) {
 			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
 
 				private final TestLoadBalancerLifecycle testLoadBalancerLifecycle = new TestLoadBalancerLifecycle();
@@ -256,12 +257,12 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 				public <X> X getInstance(String name, Class<?> clazz, Class<?>... generics) {
 					return null;
 				}
-			};
-		}
 
-		@Bean
-		LoadBalancerProperties loadBalancerProperties() {
-			return new LoadBalancerProperties();
+				@Override
+				public LoadBalancerProperties getProperties(String serviceId) {
+					return properties;
+				}
+			};
 		}
 
 		@Bean

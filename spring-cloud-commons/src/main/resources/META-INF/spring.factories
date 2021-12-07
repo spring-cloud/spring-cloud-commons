@@ -9,6 +9,7 @@ org.springframework.cloud.client.discovery.simple.reactive.SimpleReactiveDiscove
 org.springframework.cloud.client.hypermedia.CloudHypermediaAutoConfiguration,\
 org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration,\
 org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration,\
+org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration,\
 org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration,\
 org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration,\
 org.springframework.cloud.client.serviceregistry.ServiceRegistryAutoConfiguration,\
@@ -16,7 +17,8 @@ org.springframework.cloud.commons.httpclient.HttpClientConfiguration,\
 org.springframework.cloud.commons.util.UtilAutoConfiguration,\
 org.springframework.cloud.configuration.CompatibilityVerifierAutoConfiguration,\
 org.springframework.cloud.client.serviceregistry.AutoServiceRegistrationAutoConfiguration,\
-org.springframework.cloud.commons.security.ResourceServerTokenRelayAutoConfiguration
+org.springframework.cloud.commons.security.ResourceServerTokenRelayAutoConfiguration,\
+org.springframework.cloud.commons.config.CommonsConfigAutoConfiguration
 # Environment Post Processors
 org.springframework.boot.env.EnvironmentPostProcessor=\
 org.springframework.cloud.client.HostInfoEnvironmentPostProcessor

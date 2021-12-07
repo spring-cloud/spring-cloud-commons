@@ -61,8 +61,6 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
-	private final LoadBalancerProperties properties;
-
 	private final List<LoadBalancerClientRequestTransformer> transformers;
 
 	/**
@@ -77,10 +75,20 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 		this(loadBalancerFactory, properties, Collections.emptyList());
 	}
 
+	/**
+	 * @deprecated in favour of
+	 * {@link ReactorLoadBalancerExchangeFilterFunction#ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, List)}
+	 */
+	@Deprecated
 	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			LoadBalancerProperties properties, List<LoadBalancerClientRequestTransformer> transformers) {
 		this.loadBalancerFactory = loadBalancerFactory;
-		this.properties = properties;
+		this.transformers = transformers;
+	}
+
+	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+			List<LoadBalancerClientRequestTransformer> transformers) {
+		this.loadBalancerFactory = loadBalancerFactory;
 		this.transformers = transformers;
 	}
 
@@ -99,7 +107,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 				.getSupportedLifecycleProcessors(
 						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
 						RequestDataContext.class, ResponseData.class, ServiceInstance.class);
-		String hint = getHint(serviceId, properties.getHint());
+		String hint = getHint(serviceId, loadBalancerFactory.getProperties(serviceId).getHint());
 		RequestData requestData = new RequestData(clientRequest);
 		DefaultRequest<RequestDataContext> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData, hint));
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
@@ -120,7 +128,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 				LOG.debug(String.format("LoadBalancer has retrieved the instance for service %s: %s", serviceId,
 						instance.getUri()));
 			}
-			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
+			LoadBalancerProperties.StickySession stickySessionProperties = loadBalancerFactory.getProperties(serviceId)
+					.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
 					stickySessionProperties.getInstanceIdCookieName(),
 					stickySessionProperties.isAddServiceInstanceCookie(), transformers);
