@@ -46,25 +46,25 @@ public class ServiceRegistryEndpoint {
 		this.registration = registration;
 	}
 
-    @WriteOperation
-    public WebEndpointResponse<?> setStatus(String status) {
-        Assert.notNull(status, "status may not by null");
+	@WriteOperation
+	public WebEndpointResponse<?> setStatus(String status) {
+		Assert.notNull(status, "status may not by null");
 
-        if (this.registration == null) {
-            return new WebEndpointResponse<>("no registration found", HttpStatus.NOT_FOUND.value());
-        }
+		if (this.registration == null) {
+			return new WebEndpointResponse<>("no registration found", HttpStatus.NOT_FOUND.value());
+		}
 
-        this.serviceRegistry.setStatus(this.registration, status);
-        return new WebEndpointResponse<>();
-    }
+		this.serviceRegistry.setStatus(this.registration, status);
+		return new WebEndpointResponse<>();
+	}
 
     @ReadOperation
-    public WebEndpointResponse getStatus() {
-        if (this.registration == null) {
-            return new WebEndpointResponse<>("no registration found", HttpStatus.NOT_FOUND.value());
-        }
+	public WebEndpointResponse getStatus() {
+		if (this.registration == null) {
+			return new WebEndpointResponse<>("no registration found", HttpStatus.NOT_FOUND.value());
+		}
 
-        return new WebEndpointResponse<>(this.serviceRegistry.getStatus(this.registration));
-    }
+		return new WebEndpointResponse<>(this.serviceRegistry.getStatus(this.registration));
+	}
 
 }
