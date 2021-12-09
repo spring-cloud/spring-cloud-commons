@@ -58,7 +58,7 @@ public class ServiceRegistryEndpoint {
 		return new WebEndpointResponse<>();
 	}
 
-    @ReadOperation
+	@ReadOperation
 	public WebEndpointResponse getStatus() {
 		if (this.registration == null) {
 			return new WebEndpointResponse<>("no registration found", HttpStatus.NOT_FOUND.value());
