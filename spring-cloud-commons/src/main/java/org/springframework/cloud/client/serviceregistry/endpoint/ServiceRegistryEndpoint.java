@@ -19,10 +19,10 @@ package org.springframework.cloud.client.serviceregistry.endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
+import org.springframework.boot.actuate.endpoint.web.WebEndpointResponse;
 import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.cloud.client.serviceregistry.ServiceRegistry;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 
 /**
@@ -47,24 +47,24 @@ public class ServiceRegistryEndpoint {
 	}
 
 	@WriteOperation
-	public ResponseEntity<?> setStatus(String status) {
+	public WebEndpointResponse<?> setStatus(String status) {
 		Assert.notNull(status, "status may not by null");
 
 		if (this.registration == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no registration found");
+			return new WebEndpointResponse<>("no registration found", HttpStatus.NOT_FOUND.value());
 		}
 
 		this.serviceRegistry.setStatus(this.registration, status);
-		return ResponseEntity.ok().build();
+		return new WebEndpointResponse<>();
 	}
 
 	@ReadOperation
-	public ResponseEntity getStatus() {
+	public WebEndpointResponse getStatus() {
 		if (this.registration == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("no registration found");
+			return new WebEndpointResponse<>("no registration found", HttpStatus.NOT_FOUND.value());
 		}
 
-		return ResponseEntity.ok().body(this.serviceRegistry.getStatus(this.registration));
+		return new WebEndpointResponse<>(this.serviceRegistry.getStatus(this.registration));
 	}
 
 }
