@@ -27,6 +27,7 @@ import java.util.Objects;
  * @author Spencer Gibb
  * @author Tim Ysewyn
  * @author Charu Covindane
+ * @author Neil Powell
  */
 public class DefaultServiceInstance implements ServiceInstance {
 
@@ -79,14 +80,13 @@ public class DefaultServiceInstance implements ServiceInstance {
 	/**
 	 * Creates a URI from the given ServiceInstance's host:port.
 	 * @param instance the ServiceInstance.
-	 * @return URI of the form (secure)?https:http + "host:port" or "host" if port not
-	 * valid (<=0).
+	 * @return URI of the form (secure)?https:http + "host:port" or "host" (port<=0).
 	 */
 	public static URI getUri(ServiceInstance instance) {
 		String scheme = (instance.isSecure()) ? "https" : "http";
 		String uri = (instance.getPort() > 0)
-				? String.format("%s://%s:%s", scheme, instance.getHost(), instance.getPort())
-				: String.format("%s://%s", scheme, instance.getHost());
+			? String.format("%s://%s:%s", scheme, instance.getHost(), instance.getPort())
+			: String.format("%s://%s", scheme, instance.getHost());
 		return URI.create(uri);
 	}
 
@@ -97,32 +97,32 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	@Override
 	public Map<String, String> getMetadata() {
-		return this.metadata;
+		return metadata;
 	}
 
 	@Override
 	public String getInstanceId() {
-		return this.instanceId;
+		return instanceId;
 	}
 
 	@Override
 	public String getServiceId() {
-		return this.serviceId;
+		return serviceId;
 	}
 
 	@Override
 	public String getHost() {
-		return this.host;
+		return host;
 	}
 
 	@Override
 	public int getPort() {
-		return this.port;
+		return port;
 	}
 
 	@Override
 	public boolean isSecure() {
-		return this.secure;
+		return secure;
 	}
 
 	public void setInstanceId(String instanceId) {
@@ -153,9 +153,8 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	@Override
 	public String toString() {
-		return "DefaultServiceInstance{" + "instanceId='" + this.instanceId + '\'' + ", serviceId='" + this.serviceId
-				+ '\'' + ", host='" + this.host + '\'' + ", port=" + this.port + ", secure=" + this.secure
-				+ ", metadata=" + this.metadata + '}';
+		return "DefaultServiceInstance{" + "instanceId='" + instanceId + '\'' + ", serviceId='" + serviceId + '\''
+				+ ", host='" + host + '\'' + ", port=" + port + ", secure=" + secure + ", metadata=" + metadata + '}';
 	}
 
 	@Override
@@ -167,14 +166,14 @@ public class DefaultServiceInstance implements ServiceInstance {
 			return false;
 		}
 		DefaultServiceInstance that = (DefaultServiceInstance) o;
-		return this.port == that.port && this.secure == that.secure && Objects.equals(this.instanceId, that.instanceId)
-				&& Objects.equals(this.serviceId, that.serviceId) && Objects.equals(this.host, that.host)
-				&& Objects.equals(this.metadata, that.metadata);
+		return port == that.port && secure == that.secure && Objects.equals(instanceId, that.instanceId)
+				&& Objects.equals(serviceId, that.serviceId) && Objects.equals(host, that.host)
+				&& Objects.equals(metadata, that.metadata);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.instanceId, this.serviceId, this.host, this.port, this.secure, this.metadata);
+		return Objects.hash(instanceId, serviceId, host, port, secure, metadata);
 	}
 
 }

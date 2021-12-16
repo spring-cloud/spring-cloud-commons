@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 
@@ -32,6 +33,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Biju Kunjummen
  * @author Charu Covindane
+ * @author Neil Powell
  */
 public class SimpleDiscoveryClientTests {
 
@@ -42,10 +44,8 @@ public class SimpleDiscoveryClientTests {
 		SimpleDiscoveryProperties simpleDiscoveryProperties = new SimpleDiscoveryProperties();
 
 		Map<String, List<DefaultServiceInstance>> map = new HashMap<>();
-		DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null,
-				"host1", 8080, false);
-		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null,
-				"host2", 0, true);
+		DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null, "host1", 8080, false);
+		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null, "host2", 0, true);
 		map.put("service1", Arrays.asList(service1Inst1, service1Inst2));
 		simpleDiscoveryProperties.setInstances(map);
 		simpleDiscoveryProperties.init();
@@ -54,8 +54,7 @@ public class SimpleDiscoveryClientTests {
 
 	@Test
 	public void shouldBeAbleToRetrieveServiceDetailsByName() {
-		List<ServiceInstance> instances = this.simpleDiscoveryClient
-				.getInstances("service1");
+		List<ServiceInstance> instances = this.simpleDiscoveryClient.getInstances("service1");
 		then(instances.size()).isEqualTo(2);
 		then(instances.get(0).getServiceId()).isEqualTo("service1");
 		then(instances.get(0).getHost()).isEqualTo("host1");
@@ -67,8 +66,7 @@ public class SimpleDiscoveryClientTests {
 
 	@Test
 	public void shouldSupportUriWithoutPort() {
-		List<ServiceInstance> instances = this.simpleDiscoveryClient
-				.getInstances("service1");
+		List<ServiceInstance> instances = this.simpleDiscoveryClient.getInstances("service1");
 		then(instances.size()).isEqualTo(2);
 		then(instances.get(1).getServiceId()).isEqualTo("service1");
 		then(instances.get(1).getHost()).isEqualTo("host2");
