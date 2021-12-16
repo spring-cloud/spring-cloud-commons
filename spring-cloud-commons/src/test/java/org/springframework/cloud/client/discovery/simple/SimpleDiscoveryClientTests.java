@@ -24,7 +24,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 
@@ -43,8 +42,10 @@ public class SimpleDiscoveryClientTests {
 		SimpleDiscoveryProperties simpleDiscoveryProperties = new SimpleDiscoveryProperties();
 
 		Map<String, List<DefaultServiceInstance>> map = new HashMap<>();
-		DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null, "host1", 8080, false);
-		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null, "host2", 8443, true);
+		DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null,
+				"host1", 8080, false);
+		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null,
+				"host2", 0, true);
 		map.put("service1", Arrays.asList(service1Inst1, service1Inst2));
 		simpleDiscoveryProperties.setInstances(map);
 		simpleDiscoveryProperties.init();
@@ -53,7 +54,8 @@ public class SimpleDiscoveryClientTests {
 
 	@Test
 	public void shouldBeAbleToRetrieveServiceDetailsByName() {
-		List<ServiceInstance> instances = this.simpleDiscoveryClient.getInstances("service1");
+		List<ServiceInstance> instances = this.simpleDiscoveryClient
+				.getInstances("service1");
 		then(instances.size()).isEqualTo(2);
 		then(instances.get(0).getServiceId()).isEqualTo("service1");
 		then(instances.get(0).getHost()).isEqualTo("host1");
@@ -61,6 +63,19 @@ public class SimpleDiscoveryClientTests {
 		then(instances.get(0).getUri()).isEqualTo(URI.create("http://host1:8080"));
 		then(instances.get(0).isSecure()).isEqualTo(false);
 		then(instances.get(0).getMetadata()).isNotNull();
+	}
+
+	@Test
+	public void shouldSupportUriWithoutPort() {
+		List<ServiceInstance> instances = this.simpleDiscoveryClient
+				.getInstances("service1");
+		then(instances.size()).isEqualTo(2);
+		then(instances.get(1).getServiceId()).isEqualTo("service1");
+		then(instances.get(1).getHost()).isEqualTo("host2");
+		then(instances.get(1).getPort()).isEqualTo(0);
+		then(instances.get(1).getUri()).isEqualTo(URI.create("https://host2"));
+		then(instances.get(1).isSecure()).isEqualTo(true);
+		then(instances.get(1).getMetadata()).isNotNull();
 	}
 
 }
