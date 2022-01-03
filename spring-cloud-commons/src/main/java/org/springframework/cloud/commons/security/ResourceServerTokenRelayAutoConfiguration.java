@@ -26,20 +26,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.oauth2.client.OAuth2ClientContext;
-import org.springframework.security.oauth2.config.annotation.web.configuration.OAuth2ClientConfiguration;
-import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfiguration;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -61,17 +52,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  *
  */
 @Configuration(proxyBeanMethods = false)
-@AutoConfigureAfter(OAuth2AutoConfiguration.class)
+// @AutoConfigureAfter(OAuth2AutoConfiguration.class)
 @ResourceServerTokenRelayAutoConfiguration.ConditionalOnOAuth2ClientInResourceServer
-@ConditionalOnClass(ResourceServerConfiguration.class)
+// @ConditionalOnClass(ResourceServerConfiguration.class)
 @ConditionalOnWebApplication
 @ConditionalOnProperty(value = "spring.cloud.mvc.token-relay.enabled", matchIfMissing = true)
 public class ResourceServerTokenRelayAutoConfiguration {
 
-	@Bean
-	public AccessTokenContextRelay accessTokenContextRelay(OAuth2ClientContext context) {
-		return new AccessTokenContextRelay(context);
-	}
+	/*
+	 * @Bean public AccessTokenContextRelay accessTokenContextRelay(OAuth2ClientContext
+	 * context) { return new AccessTokenContextRelay(context); }
+	 */
 
 	/**
 	 * A {@link WebMvcConfigurer} for the access token interceptor.
@@ -90,7 +81,7 @@ public class ResourceServerTokenRelayAutoConfiguration {
 			registry.addInterceptor(new HandlerInterceptor() {
 				@Override
 				public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-					accessTokenContextRelay.copyToken();
+					// accessTokenContextRelay.copyToken();
 					return true;
 				}
 			});
@@ -112,15 +103,15 @@ public class ResourceServerTokenRelayAutoConfiguration {
 			super(ConfigurationPhase.REGISTER_BEAN);
 		}
 
-		@ConditionalOnBean(ResourceServerConfiguration.class)
-		static class Server {
-
-		}
-
-		@ConditionalOnBean(OAuth2ClientConfiguration.class)
-		static class Client {
-
-		}
+		/*
+		 * @ConditionalOnBean(ResourceServerConfiguration.class) static class Server {
+		 *
+		 * }
+		 *
+		 * @ConditionalOnBean(OAuth2ClientConfiguration.class) static class Client {
+		 *
+		 * }
+		 */
 
 	}
 

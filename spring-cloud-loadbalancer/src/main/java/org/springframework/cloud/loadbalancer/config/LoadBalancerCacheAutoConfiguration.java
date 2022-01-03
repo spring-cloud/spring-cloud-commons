@@ -75,7 +75,6 @@ public class LoadBalancerCacheAutoConfiguration {
 
 		private static final Log LOG = LogFactory.getLog(LoadBalancerCaffeineWarnLogger.class);
 
-
 		@Override
 		public void afterPropertiesSet() {
 			if (LOG.isWarnEnabled()) {

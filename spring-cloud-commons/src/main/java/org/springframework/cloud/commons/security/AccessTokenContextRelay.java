@@ -16,14 +16,6 @@
 
 package org.springframework.cloud.commons.security;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.OAuth2ClientContext;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
-
 /**
  * Convenience class for relaying an access token from the {@link SecurityContext} to the
  * {@link OAuth2ClientContext}. If successful then subsequent calls to an
@@ -38,35 +30,27 @@ import org.springframework.security.oauth2.provider.authentication.OAuth2Authent
  */
 public class AccessTokenContextRelay {
 
-	private OAuth2ClientContext context;
-
-	public AccessTokenContextRelay(OAuth2ClientContext context) {
-		this.context = context;
-	}
-
-	/**
-	 * Attempt to copy an access token from the security context into the oauth2 context.
-	 * @return true if the token was copied
-	 */
-	public boolean copyToken() {
-		if (context.getAccessToken() == null) {
-			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			if (authentication != null) {
-				Object details = authentication.getDetails();
-				if (details instanceof OAuth2AuthenticationDetails) {
-					OAuth2AuthenticationDetails holder = (OAuth2AuthenticationDetails) details;
-					String token = holder.getTokenValue();
-					DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken(token);
-					String tokenType = holder.getTokenType();
-					if (tokenType != null) {
-						accessToken.setTokenType(tokenType);
-					}
-					context.setAccessToken(accessToken);
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+	/*
+	 * private OAuth2ClientContext context;
+	 *
+	 * public AccessTokenContextRelay(OAuth2ClientContext context) { this.context =
+	 * context; }
+	 *
+	 *//**
+		 * Attempt to copy an access token from the security context into the oauth2
+		 * context.
+		 * @return true if the token was copied
+		 *//*
+			 * public boolean copyToken() { if (context.getAccessToken() == null) {
+			 * Authentication authentication =
+			 * SecurityContextHolder.getContext().getAuthentication(); if (authentication
+			 * != null) { Object details = authentication.getDetails(); if (details
+			 * instanceof OAuth2AuthenticationDetails) { OAuth2AuthenticationDetails
+			 * holder = (OAuth2AuthenticationDetails) details; String token =
+			 * holder.getTokenValue(); DefaultOAuth2AccessToken accessToken = new
+			 * DefaultOAuth2AccessToken(token); String tokenType = holder.getTokenType();
+			 * if (tokenType != null) { accessToken.setTokenType(tokenType); }
+			 * context.setAccessToken(accessToken); return true; } } } return false; }
+			 */
 
 }

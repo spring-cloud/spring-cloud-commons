@@ -155,7 +155,7 @@
 				<artifactId>spring-cloud-test-support</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
+			<!--<dependency>
 				<groupId>org.springframework.security.oauth.boot</groupId>
 				<artifactId>spring-security-oauth2-autoconfigure</artifactId>
 				<version>${spring-security-oauth2-autoconfigure.version}</version>
@@ -169,7 +169,7 @@
 						<artifactId>spring-boot-autoconfigure</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
+			</dependency>-->
 		</dependencies>
 	</dependencyManagement>
 	<modules>

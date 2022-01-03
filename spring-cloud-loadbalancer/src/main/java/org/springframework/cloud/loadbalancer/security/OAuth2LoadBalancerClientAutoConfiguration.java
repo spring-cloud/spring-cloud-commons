@@ -16,45 +16,35 @@
 
 package org.springframework.cloud.loadbalancer.security;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoRestTemplateCustomizer;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor;
 import org.springframework.cloud.client.loadbalancer.RetryLoadBalancerInterceptor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 
 /**
  * @author Dave Syer
  *
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(OAuth2RestTemplate.class)
+// @ConditionalOnClass(OAuth2RestTemplate.class)
 @ConditionalOnProperty("spring.cloud.oauth2.load-balanced.enabled")
-@AutoConfigureAfter(OAuth2AutoConfiguration.class)
+// @AutoConfigureAfter(OAuth2AutoConfiguration.class)
 public class OAuth2LoadBalancerClientAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnBean(LoadBalancerInterceptor.class)
 	protected static class UserInfoLoadBalancerConfig {
 
-		@Bean
-		public UserInfoRestTemplateCustomizer loadBalancedUserInfoRestTemplateCustomizer(
-				final LoadBalancerInterceptor loadBalancerInterceptor) {
-			return restTemplate -> {
-				List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
-				interceptors.add(loadBalancerInterceptor);
-				restTemplate.setInterceptors(interceptors);
-			};
-		}
+		/*
+		 * @Bean public UserInfoRestTemplateCustomizer
+		 * loadBalancedUserInfoRestTemplateCustomizer( final LoadBalancerInterceptor
+		 * loadBalancerInterceptor) { return restTemplate -> {
+		 * List<ClientHttpRequestInterceptor> interceptors = new
+		 * ArrayList<>(restTemplate.getInterceptors());
+		 * interceptors.add(loadBalancerInterceptor);
+		 * restTemplate.setInterceptors(interceptors); }; }
+		 */
 
 	}
 
@@ -62,18 +52,18 @@ public class OAuth2LoadBalancerClientAutoConfiguration {
 	@ConditionalOnBean(RetryLoadBalancerInterceptor.class)
 	protected static class UserInfoRetryLoadBalancerConfig {
 
-		@Bean
-		public UserInfoRestTemplateCustomizer retryLoadBalancedUserInfoRestTemplateCustomizer(
-				final RetryLoadBalancerInterceptor loadBalancerInterceptor) {
-			return new UserInfoRestTemplateCustomizer() {
-				@Override
-				public void customize(OAuth2RestTemplate restTemplate) {
-					List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
-					interceptors.add(loadBalancerInterceptor);
-					restTemplate.setInterceptors(interceptors);
-				}
-			};
-		}
+		/*
+		 * @Bean public UserInfoRestTemplateCustomizer
+		 * retryLoadBalancedUserInfoRestTemplateCustomizer( final
+		 * RetryLoadBalancerInterceptor loadBalancerInterceptor) { return new
+		 * UserInfoRestTemplateCustomizer() {
+		 *
+		 * @Override public void customize(OAuth2RestTemplate restTemplate) {
+		 * List<ClientHttpRequestInterceptor> interceptors = new
+		 * ArrayList<>(restTemplate.getInterceptors());
+		 * interceptors.add(loadBalancerInterceptor);
+		 * restTemplate.setInterceptors(interceptors); } }; }
+		 */
 
 	}
 
