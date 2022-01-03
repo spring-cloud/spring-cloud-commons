@@ -139,10 +139,6 @@ public class TlsProperties {
 		return trustStorePassword.toCharArray();
 	}
 
-	@Deprecated
-	public void postConstruct() {
-	}
-
 	private String storeTypeOf(Resource resource) {
 		String extension = fileExtensionOf(resource);
 		String type = EXTENSION_STORE_TYPES.get(extension);

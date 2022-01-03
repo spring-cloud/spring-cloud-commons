@@ -16,12 +16,11 @@
 
 package org.springframework.cloud.context.properties;
 
-import javax.annotation.PostConstruct;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -143,7 +142,7 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 	}
 
 	@ConfigurationProperties
-	protected static class TestProperties {
+	protected static class TestProperties implements InitializingBean {
 
 		private String message;
 
@@ -171,8 +170,8 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 			this.delay = delay;
 		}
 
-		@PostConstruct
-		public void init() {
+		@Override
+		public void afterPropertiesSet() {
 			this.count++;
 		}
 

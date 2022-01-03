@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.client.serviceregistry;
 
-import javax.annotation.PostConstruct;
-
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +28,7 @@ import org.springframework.context.annotation.Import;
 @Configuration(proxyBeanMethods = false)
 @Import(AutoServiceRegistrationConfiguration.class)
 @ConditionalOnProperty(value = "spring.cloud.service-registry.auto-registration.enabled", matchIfMissing = true)
-public class AutoServiceRegistrationAutoConfiguration {
+public class AutoServiceRegistrationAutoConfiguration implements InitializingBean {
 
 	@Autowired(required = false)
 	private AutoServiceRegistration autoServiceRegistration;
@@ -37,8 +36,8 @@ public class AutoServiceRegistrationAutoConfiguration {
 	@Autowired
 	private AutoServiceRegistrationProperties properties;
 
-	@PostConstruct
-	protected void init() {
+	@Override
+	public void afterPropertiesSet() {
 		if (this.autoServiceRegistration == null && this.properties.isFailFast()) {
 			throw new IllegalStateException(
 					"Auto Service Registration has " + "been requested, but there is no AutoServiceRegistration bean");

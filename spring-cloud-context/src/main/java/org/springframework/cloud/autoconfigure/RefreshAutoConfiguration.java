@@ -20,11 +20,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -152,13 +151,13 @@ public class RefreshAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(name = "javax.persistence.EntityManagerFactory")
-	protected static class JpaInvokerConfiguration implements LoadTimeWeaverAware {
+	protected static class JpaInvokerConfiguration implements LoadTimeWeaverAware, InitializingBean {
 
 		@Autowired
 		private ListableBeanFactory beanFactory;
 
-		@PostConstruct
-		public void init() {
+		@Override
+		public void afterPropertiesSet() {
 			String cls = "org.springframework.boot.autoconfigure.jdbc.DataSourceInitializerInvoker";
 			if (this.beanFactory.containsBean(cls)) {
 				this.beanFactory.getBean(cls);

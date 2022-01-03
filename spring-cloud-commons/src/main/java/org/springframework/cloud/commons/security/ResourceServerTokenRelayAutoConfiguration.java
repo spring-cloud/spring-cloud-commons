@@ -22,8 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -40,9 +40,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.config.annotation.web.configuration.OAuth2ClientConfiguration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfiguration;
+import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**
  * Adds an MVC interceptor for relaying OAuth2 access tokens into the client context (if
@@ -87,18 +87,13 @@ public class ResourceServerTokenRelayAutoConfiguration {
 
 		@Override
 		public void addInterceptors(InterceptorRegistry registry) {
-			registry.addInterceptor(
-
-					new HandlerInterceptorAdapter() {
-						@Override
-						public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-								Object handler) throws Exception {
-							accessTokenContextRelay.copyToken();
-							return true;
-						}
-					}
-
-			);
+			registry.addInterceptor(new HandlerInterceptor() {
+				@Override
+				public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+					accessTokenContextRelay.copyToken();
+					return true;
+				}
+			});
 		}
 
 	}

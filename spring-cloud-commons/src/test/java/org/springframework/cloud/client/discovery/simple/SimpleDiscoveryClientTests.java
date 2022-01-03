@@ -47,7 +47,7 @@ public class SimpleDiscoveryClientTests {
 		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null, "host2", 8443, true);
 		map.put("service1", Arrays.asList(service1Inst1, service1Inst2));
 		simpleDiscoveryProperties.setInstances(map);
-		simpleDiscoveryProperties.init();
+		simpleDiscoveryProperties.afterPropertiesSet();
 		this.simpleDiscoveryClient = new SimpleDiscoveryClient(simpleDiscoveryProperties);
 	}
 

@@ -16,13 +16,12 @@
 
 package org.springframework.cloud.loadbalancer.config;
 
-import javax.annotation.PostConstruct;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.stoyanr.evictor.ConcurrentMapWithTimedEviction;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
@@ -72,12 +71,13 @@ public class LoadBalancerCacheAutoConfiguration {
 
 	}
 
-	static class LoadBalancerCaffeineWarnLogger {
+	static class LoadBalancerCaffeineWarnLogger implements InitializingBean {
 
 		private static final Log LOG = LogFactory.getLog(LoadBalancerCaffeineWarnLogger.class);
 
-		@PostConstruct
-		void logWarning() {
+
+		@Override
+		public void afterPropertiesSet() {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("Spring Cloud LoadBalancer is currently working with the default cache. "
 						+ "While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production."

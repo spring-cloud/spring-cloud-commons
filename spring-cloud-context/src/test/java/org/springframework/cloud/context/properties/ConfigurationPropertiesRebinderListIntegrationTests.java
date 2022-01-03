@@ -19,11 +19,10 @@ package org.springframework.cloud.context.properties;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -120,7 +119,7 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 	}
 
 	@ConfigurationProperties
-	protected static class TestProperties {
+	protected static class TestProperties implements InitializingBean {
 
 		private List<String> messages;
 
@@ -138,8 +137,8 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 			return this.count;
 		}
 
-		@PostConstruct
-		public void init() {
+		@Override
+		public void afterPropertiesSet() {
 			this.count++;
 		}
 

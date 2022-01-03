@@ -20,8 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -40,7 +39,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
  */
 
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
-public class SimpleDiscoveryProperties {
+public class SimpleDiscoveryProperties implements InitializingBean {
 
 	private Map<String, List<DefaultServiceInstance>> instances = new HashMap<>();
 
@@ -73,8 +72,8 @@ public class SimpleDiscoveryProperties {
 		this.order = order;
 	}
 
-	@PostConstruct
-	public void init() {
+	@Override
+	public void afterPropertiesSet() {
 		for (String key : this.instances.keySet()) {
 			for (DefaultServiceInstance instance : this.instances.get(key)) {
 				instance.setServiceId(key);

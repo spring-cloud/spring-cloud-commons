@@ -7,7 +7,6 @@ org.springframework.cloud.client.discovery.composite.reactive.ReactiveCompositeD
 org.springframework.cloud.client.discovery.simple.SimpleDiscoveryClientAutoConfiguration,\
 org.springframework.cloud.client.discovery.simple.reactive.SimpleReactiveDiscoveryClientAutoConfiguration,\
 org.springframework.cloud.client.hypermedia.CloudHypermediaAutoConfiguration,\
-org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration,\
 org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration,\
 org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration,\
 org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration,\
