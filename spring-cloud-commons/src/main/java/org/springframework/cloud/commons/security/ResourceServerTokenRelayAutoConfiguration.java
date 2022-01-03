@@ -53,7 +53,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 @Configuration(proxyBeanMethods = false)
 // @AutoConfigureAfter(OAuth2AutoConfiguration.class)
-@ResourceServerTokenRelayAutoConfiguration.ConditionalOnOAuth2ClientInResourceServer
+//@ResourceServerTokenRelayAutoConfiguration.ConditionalOnOAuth2ClientInResourceServer
 // @ConditionalOnClass(ResourceServerConfiguration.class)
 @ConditionalOnWebApplication
 @ConditionalOnProperty(value = "spring.cloud.mvc.token-relay.enabled", matchIfMissing = true)
@@ -73,8 +73,8 @@ public class ResourceServerTokenRelayAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	public static class ResourceServerTokenRelayRegistrationAutoConfiguration implements WebMvcConfigurer {
 
-		@Autowired
-		AccessTokenContextRelay accessTokenContextRelay;
+		//@Autowired
+		//AccessTokenContextRelay accessTokenContextRelay;
 
 		@Override
 		public void addInterceptors(InterceptorRegistry registry) {
