@@ -54,7 +54,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 // @AutoConfigureAfter(OAuth2AutoConfiguration.class)
 // @ResourceServerTokenRelayAutoConfiguration.ConditionalOnOAuth2ClientInResourceServer
 // @ConditionalOnClass(ResourceServerConfiguration.class)
-@ConditionalOnWebApplication
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(value = "spring.cloud.mvc.token-relay.enabled", matchIfMissing = true)
 public class ResourceServerTokenRelayAutoConfiguration {
 
