@@ -19,7 +19,6 @@ package org.springframework.cloud.client;
 import java.util.LinkedHashMap;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
@@ -36,8 +35,8 @@ import org.springframework.core.env.MapPropertySource;
  */
 public class HostInfoEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
-	// Before ConfigFileApplicationListener
-	private int order = ConfigFileApplicationListener.DEFAULT_ORDER - 1;
+	// Before BootstrapConfigFileApplicationListener
+	private int order = Ordered.HIGHEST_PRECEDENCE + 9;
 
 	@Override
 	public int getOrder() {

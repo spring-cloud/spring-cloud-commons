@@ -45,7 +45,7 @@ public class RestartIntegrationTests {
 	public void testRestartTwice() throws Exception {
 
 		this.context = SpringApplication.run(TestConfiguration.class, "--management.endpoint.restart.enabled=true",
-				"--server.port=0", "--spring.config.use-legacy-processing=true",
+				"--server.port=0", "--spring.cloud.bootstrap.enabled=true",
 				"--management.endpoints.web.exposure.include=restart", "--spring.liveBeansView.mbeanDomain=livebeans");
 
 		RestartEndpoint endpoint = this.context.getBean(RestartEndpoint.class);

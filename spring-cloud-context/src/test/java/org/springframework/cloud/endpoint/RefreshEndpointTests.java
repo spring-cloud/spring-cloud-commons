@@ -72,7 +72,7 @@ public class RefreshEndpointTests {
 	@Disabled // FIXME: legacy
 	public void keysComputedWhenAdded() throws Exception {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
-				.properties("spring.config.use-legacy-processing=true", "spring.cloud.bootstrap.name:none").run();
+				.properties("spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		this.context.getEnvironment().setActiveProfiles("local");
@@ -86,7 +86,7 @@ public class RefreshEndpointTests {
 	@Disabled // FIXME: legacy
 	public void keysComputedWhenOveridden() throws Exception {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
-				.properties("spring.config.use-legacy-processing=true", "spring.cloud.bootstrap.name:none").run();
+				.properties("spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		this.context.getEnvironment().setActiveProfiles("override");
@@ -99,7 +99,7 @@ public class RefreshEndpointTests {
 	@Test
 	public void keysComputedWhenChangesInExternalProperties() throws Exception {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
-				.properties("spring.cloud.bootstrap.name:none", "spring.config.use-legacy-processing=true").run();
+				.properties("spring.cloud.bootstrap.name:none", "spring.cloud.bootstrap.enabled=true").run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		TestPropertyValues.of("spring.cloud.bootstrap.sources=" + ExternalPropertySourceLocator.class.getName())

@@ -39,7 +39,7 @@ import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = Application.class,
-		properties = { "spring.config.use-legacy-processing=true", "spring.cloud.bootstrap.name:ordering" })
+		properties = { "spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name:ordering" })
 public class BootstrapOrderingCustomOverrideSystemPropertiesIntegrationTests {
 
 	@Autowired

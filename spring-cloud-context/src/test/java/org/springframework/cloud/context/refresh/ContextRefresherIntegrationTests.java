@@ -34,7 +34,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class,
-		properties = { "spring.datasource.hikari.read-only=false", "spring.config.use-legacy-processing=true" })
+		properties = { "spring.datasource.hikari.read-only=false", "spring.cloud.bootstrap.enabled=true" })
 public class ContextRefresherIntegrationTests {
 
 	@Autowired

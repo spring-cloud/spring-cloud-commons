@@ -37,7 +37,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-@SpringBootTest(classes = TestConfiguration.class, properties = "spring.config.use-legacy-processing=true")
+@SpringBootTest(classes = TestConfiguration.class, properties = "spring.cloud.bootstrap.enabled=true")
 public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 
 	@Autowired

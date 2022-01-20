@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -36,6 +35,7 @@ import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
+import org.springframework.cloud.bootstrap.BootstrapConfigFileApplicationListener;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.context.ApplicationContextInitializer;
@@ -239,7 +239,7 @@ public class PropertySourceBootstrapConfiguration
 		}
 		else {
 			Collections.addAll(profiles, getProfilesForValue(
-					propertySource.getProperty(ConfigFileApplicationListener.INCLUDE_PROFILES_PROPERTY)));
+					propertySource.getProperty(BootstrapConfigFileApplicationListener.INCLUDE_PROFILES_PROPERTY)));
 		}
 		return profiles;
 	}

@@ -40,7 +40,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-@SpringBootTest(classes = TestConfiguration.class, properties = "spring.config.use-legacy-processing=true")
+@SpringBootTest(classes = TestConfiguration.class, properties = "spring.cloud.bootstrap.enabled=true")
 @ActiveProfiles("config")
 public class ConfigurationPropertiesRebinderIntegrationTests {
 

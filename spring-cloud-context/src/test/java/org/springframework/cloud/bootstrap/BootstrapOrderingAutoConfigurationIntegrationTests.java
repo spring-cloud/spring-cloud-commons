@@ -29,7 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = Application.class,
-		properties = { "encrypt.key:deadbeef", "spring.config.use-legacy-processing=true" })
+		properties = { "encrypt.key:deadbeef", "spring.cloud.bootstrap.enabled=true" })
 @ActiveProfiles("encrypt")
 public class BootstrapOrderingAutoConfigurationIntegrationTests {
 

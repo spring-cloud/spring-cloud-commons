@@ -22,5 +22,6 @@ org.springframework.cloud.bootstrap.RefreshBootstrapRegistryInitializer,\
 org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper
 # Environment Post Processors
 org.springframework.boot.env.EnvironmentPostProcessor=\
+org.springframework.cloud.bootstrap.BootstrapConfigFileApplicationListener,\
 org.springframework.cloud.bootstrap.encrypt.DecryptEnvironmentPostProcessor,\
 org.springframework.cloud.util.random.CachedRandomPropertySourceEnvironmentPostProcessor

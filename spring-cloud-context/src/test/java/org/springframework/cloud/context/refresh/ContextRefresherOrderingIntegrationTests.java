@@ -41,7 +41,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(properties = "spring.config.use-legacy-processing=true")
+@SpringBootTest(properties = "spring.cloud.bootstrap.enabled=true")
 @DirtiesContext
 public class ContextRefresherOrderingIntegrationTests {
 

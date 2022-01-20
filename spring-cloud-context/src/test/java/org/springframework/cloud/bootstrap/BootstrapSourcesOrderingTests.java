@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration.firstToBeCreated;
 
-@SpringBootTest(classes = Application.class, properties = "spring.config.use-legacy-processing=true")
+@SpringBootTest(classes = Application.class, properties = "spring.cloud.bootstrap.enabled=true")
 public class BootstrapSourcesOrderingTests {
 
 	@Test
