@@ -22,8 +22,8 @@ import org.springframework.context.ApplicationEvent;
  * Event to be published after the local service instance registers itself with a
  * discovery service.
  *
- * @author Spencer Gibb
  * @param <T> - type of configuration
+ * @author Spencer Gibb
  */
 @SuppressWarnings("serial")
 public class InstanceRegisteredEvent<T> extends ApplicationEvent {

@@ -36,8 +36,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-@SpringBootTest(classes = Application.class, properties = { "encrypt.key:deadbeef",
-		"spring.cloud.bootstrap.name:custom", "spring.cloud.bootstrap.enabled=true" })
+@SpringBootTest(classes = Application.class,
+		properties = { "encrypt.key:deadbeef", "spring.cloud.bootstrap.name:custom",
+				"spring.cloud.bootstrap.enabled=true" })
 @ActiveProfiles("encrypt")
 public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 

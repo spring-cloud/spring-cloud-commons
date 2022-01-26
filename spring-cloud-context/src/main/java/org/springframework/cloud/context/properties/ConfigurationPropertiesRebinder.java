@@ -44,8 +44,8 @@ import org.springframework.util.StringUtils;
  * re-initialized, the changes are available immediately to any component that is using
  * the <code>@ConfigurationProperties</code> bean.
  *
- * @see RefreshScope for a deeper and optionally more focused refresh of bean components.
  * @author Dave Syer
+ * @see RefreshScope for a deeper and optionally more focused refresh of bean components.
  *
  */
 @Component
