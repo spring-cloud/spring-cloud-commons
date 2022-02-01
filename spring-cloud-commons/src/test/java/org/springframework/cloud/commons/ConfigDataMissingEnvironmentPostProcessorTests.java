@@ -17,13 +17,18 @@
 package org.springframework.cloud.commons;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.mock.env.MockPropertySource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
@@ -31,6 +36,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Ryan Baxter
  */
+@ExtendWith(OutputCaptureExtension.class)
 public class ConfigDataMissingEnvironmentPostProcessorTests {
 
 	@Test
@@ -90,6 +96,18 @@ public class ConfigDataMissingEnvironmentPostProcessorTests {
 		SpringApplication app = mock(SpringApplication.class);
 		TestConfigDataMissingEnvironmentPostProcessor processor = new TestConfigDataMissingEnvironmentPostProcessor();
 		assertThatCode(() -> processor.postProcessEnvironment(environment, app)).doesNotThrowAnyException();
+	}
+
+	@Test
+	void importHandlesNullConfigurationPropertySource(CapturedOutput output) {
+		MockEnvironment environment = new MockEnvironment();
+		ConfigurationPropertySources.attach(environment);
+		environment.setProperty("spring.config.import[0]", "configserver:http://localhost:8888");
+		environment.setProperty("spring.config.import[1]", "file:./app.properties");
+		SpringApplication app = mock(SpringApplication.class);
+		TestConfigDataMissingEnvironmentPostProcessor processor = new TestConfigDataMissingEnvironmentPostProcessor();
+		assertThatCode(() -> processor.postProcessEnvironment(environment, app)).doesNotThrowAnyException();
+		assertThat(output).doesNotContain("Error binding spring.config.import");
 	}
 
 	public class TestConfigDataMissingEnvironmentPostProcessor extends ConfigDataMissingEnvironmentPostProcessor {
