@@ -53,6 +53,8 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 
 	private static final Bindable<String[]> CONFIG_DATA_LOCATION_ARRAY = Bindable.of(String[].class);
 
+	private static final String[] EMPTY_ARRAY = new String[0];
+
 	/**
 	 * Order of post processor, set to run after
 	 * {@link ConfigDataEnvironmentPostProcessor}.
@@ -110,15 +112,19 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 	}
 
 	private String[] getConfigImportArray(PropertySource propertySource) {
-		Binder binder = new Binder(ConfigurationPropertySource.from(propertySource));
+		ConfigurationPropertySource configurationPropertySource = ConfigurationPropertySource.from(propertySource);
+		if (configurationPropertySource == null) {
+			return EMPTY_ARRAY;
+		}
+		Binder binder = new Binder(configurationPropertySource);
 		return binder.bind(CONFIG_IMPORT_PROPERTY, CONFIG_DATA_LOCATION_ARRAY, new BindHandler() {
 			@Override
 			public Object onFailure(ConfigurationPropertyName name, Bindable<?> target, BindContext context,
 					Exception error) throws Exception {
 				LOG.info("Error binding " + CONFIG_IMPORT_PROPERTY, error);
-				return new String[0];
+				return EMPTY_ARRAY;
 			}
-		}).orElse(new String[0]);
+		}).orElse(EMPTY_ARRAY);
 	}
 
 	public static class ImportException extends RuntimeException {
