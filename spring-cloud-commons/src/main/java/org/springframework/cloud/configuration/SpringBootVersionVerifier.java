@@ -36,6 +36,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<String, CompatibilityPredicate>() {
 		{
 			this.put("2.6", is2_6());
+			this.put("2.7", is2_7());
 		}
 	};
 
@@ -83,6 +84,29 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 				try {
 					// since 2.6
 					Class.forName("org.springframework.boot.autoconfigure.data.redis.ClientResourcesBuilderCustomizer");
+					return true;
+				}
+				catch (ClassNotFoundException e) {
+					return false;
+				}
+
+			}
+		};
+	}
+
+	CompatibilityPredicate is2_7() {
+		return new CompatibilityPredicate() {
+
+			@Override
+			public String toString() {
+				return "Predicate for Boot 2.7";
+			}
+
+			@Override
+			public boolean isCompatible() {
+				try {
+					// since 2.7
+					Class.forName("org.springframework.boot.autoconfigure.amqp.RabbitStreamTemplateConfigurer");
 					return true;
 				}
 				catch (ClassNotFoundException e) {
