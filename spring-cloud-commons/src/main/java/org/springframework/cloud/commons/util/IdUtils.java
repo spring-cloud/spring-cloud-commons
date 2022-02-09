@@ -29,6 +29,7 @@ public final class IdUtils {
 	// @checkstyle:off
 	public static final String DEFAULT_SERVICE_ID_STRING = "${vcap.application.name:${spring.application.name:application}}:${vcap.application.instance_index:${spring.application.index:${local.server.port:${server.port:0}}}}:${vcap.application.instance_id:${cachedrandom.${vcap.application.name:${spring.application.name:application}}.value}}";
 
+	public static final String DEFAULT_SERVICE_ID_WITH_ACTIVE_PROFILES_STRING = "${vcap.application.name:${spring.application.name:application}:${spring.profiles.active}}:${vcap.application.instance_index:${spring.application.index:${local.server.port:${server.port:0}}}}:${vcap.application.instance_id:${cachedrandom.${vcap.application.name:${spring.application.name:application}}.value}}";
 	// @checkstyle:on
 
 	private IdUtils() {
@@ -64,15 +65,33 @@ public final class IdUtils {
 	 * @return A unique id that can be used to uniquely identify a service
 	 */
 	public static String getResolvedServiceId(PropertyResolver resolver) {
-		return resolver.resolvePlaceholders(getUnresolvedServiceId());
+		final String unresolvedServiceId;
+		// addition of active profiles at the 2nd position of the service ID breaks backwards-compatibility,
+		// so we fall back to the old implementation in case no profiles are active
+		if (StringUtils.hasText(resolver.getProperty("spring.profiles.active"))) {
+			unresolvedServiceId = getUnresolvedServiceIdWithActiveProfiles();
+		} else {
+			unresolvedServiceId = getUnresolvedServiceId();
+		}
+		return resolver.resolvePlaceholders(unresolvedServiceId);
 	}
 
 	/**
-	 * Gets an the unresolved service id.
-	 * @return The combination of properties to create a unique service id
+	 * Gets the unresolved template for the service id <i>without active profiles.</i>
+	 *
+	 * @return The combination of properties to create a unique service id.
 	 */
 	public static String getUnresolvedServiceId() {
 		return DEFAULT_SERVICE_ID_STRING;
+	}
+
+	/**
+	 * Gets the unresolved template for the service id including active profiles.
+	 *
+	 * @return The combination of properties to create a unique service id.
+	 */
+	public static String getUnresolvedServiceIdWithActiveProfiles() {
+		return DEFAULT_SERVICE_ID_WITH_ACTIVE_PROFILES_STRING;
 	}
 
 	public static String combineParts(String firstPart, String separator, String secondPart) {
