@@ -115,6 +115,11 @@ public class IdUtilsTests {
 	}
 
 	@Test
+	public void testUnresolvedServiceIdWithActiveProfiles() {
+		then(IdUtils.DEFAULT_SERVICE_ID_WITH_ACTIVE_PROFILES_STRING).isEqualTo(IdUtils.getUnresolvedServiceIdWithActiveProfiles());
+	}
+
+	@Test
 	public void testServiceIdDefaults() {
 		this.env.setProperty("cachedrandom.application.value", "123abc");
 		then("application:0:123abc").isEqualTo(IdUtils.getResolvedServiceId(this.env));
@@ -142,6 +147,36 @@ public class IdUtilsTests {
 		env.setProperty("server.port", "1234");
 		env.setProperty("cachedrandom.springname.value", "123abc");
 		then("springname:1234:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
+
+		// ensure that for spring.profiles.active, empty string value is equivalent to not being set at all
+		env.setProperty("spring.profiles.active", "");
+		then("springname:1234:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
 	}
 
+	@Test
+	public void testVCAPServiceIdWithActiveProfile() {
+		env.setProperty("vcap.application.name", "vcapname");
+		env.setProperty("vcap.application.instance_index", "vcapindex");
+		env.setProperty("vcap.application.instance_id", "vcapid");
+		env.setProperty("spring.profiles.active", "123profile");
+		then("vcapname:vcapindex:vcapid").isEqualTo(IdUtils.getResolvedServiceId(env));
+	}
+
+	@Test
+	public void testSpringServiceIdWithActiveProfile() {
+		env.setProperty("spring.application.name", "springname");
+		env.setProperty("spring.application.index", "springindex");
+		env.setProperty("cachedrandom.springname.value", "123abc");
+		env.setProperty("spring.profiles.active", "123profile");
+		then("springname:123profile:springindex:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
+	}
+
+	@Test
+	public void testServerPortServiceIdWithActiveProfile() {
+		env.setProperty("spring.application.name", "springname");
+		env.setProperty("server.port", "1234");
+		env.setProperty("cachedrandom.springname.value", "123abc");
+		env.setProperty("spring.profiles.active", "123profile");
+		then("springname:123profile:1234:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
+	}
 }
