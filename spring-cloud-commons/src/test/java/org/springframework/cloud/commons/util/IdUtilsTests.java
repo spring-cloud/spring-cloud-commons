@@ -116,7 +116,8 @@ public class IdUtilsTests {
 
 	@Test
 	public void testUnresolvedServiceIdWithActiveProfiles() {
-		then(IdUtils.DEFAULT_SERVICE_ID_WITH_ACTIVE_PROFILES_STRING).isEqualTo(IdUtils.getUnresolvedServiceIdWithActiveProfiles());
+		then(IdUtils.DEFAULT_SERVICE_ID_WITH_ACTIVE_PROFILES_STRING)
+				.isEqualTo(IdUtils.getUnresolvedServiceIdWithActiveProfiles());
 	}
 
 	@Test
@@ -148,7 +149,8 @@ public class IdUtilsTests {
 		env.setProperty("cachedrandom.springname.value", "123abc");
 		then("springname:1234:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
 
-		// ensure that for spring.profiles.active, empty string value is equivalent to not being set at all
+		// ensure that for spring.profiles.active, empty string value is equivalent to not
+		// being set at all
 		env.setProperty("spring.profiles.active", "");
 		then("springname:1234:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
 	}
@@ -179,4 +181,5 @@ public class IdUtilsTests {
 		env.setProperty("spring.profiles.active", "123profile");
 		then("springname:123profile:1234:123abc").isEqualTo(IdUtils.getResolvedServiceId(env));
 	}
+
 }
