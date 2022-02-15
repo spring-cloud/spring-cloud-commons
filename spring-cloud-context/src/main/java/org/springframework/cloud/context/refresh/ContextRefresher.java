@@ -135,17 +135,21 @@ public abstract class ContextRefresher {
 
 	private Map<String, Object> changes(Map<String, Object> before, Map<String, Object> after) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		for (String key : before.keySet()) {
+		for (Map.Entry<String, Object> entry : before.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
 			if (!after.containsKey(key)) {
 				result.put(key, null);
 			}
-			else if (!equal(before.get(key), after.get(key))) {
+			else if (!equal(value, after.get(key))) {
 				result.put(key, after.get(key));
 			}
 		}
-		for (String key : after.keySet()) {
+		for (Map.Entry<String, Object> entry : after.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
 			if (!before.containsKey(key)) {
-				result.put(key, after.get(key));
+				result.put(key, value);
 			}
 		}
 		return result;

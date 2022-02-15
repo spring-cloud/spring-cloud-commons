@@ -19,6 +19,7 @@ package org.springframework.cloud.commons.util;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.util.StringUtils;
 
+
 /**
  * @author Spencer Gibb
  */
@@ -98,7 +99,11 @@ public final class IdUtils {
 	public static String combineParts(String firstPart, String separator, String secondPart) {
 		String combined = null;
 		if (firstPart != null && secondPart != null) {
-			combined = firstPart + separator + secondPart;
+			if (separator != null) {
+				combined = firstPart + separator + secondPart;
+			} else {
+				combined = firstPart + secondPart;
+			}
 		}
 		else if (firstPart != null) {
 			combined = firstPart;

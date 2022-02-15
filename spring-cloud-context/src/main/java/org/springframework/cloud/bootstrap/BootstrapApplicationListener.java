@@ -230,9 +230,10 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 				if (target instanceof MapPropertySource && target != source && source instanceof MapPropertySource) {
 					Map<String, Object> targetMap = ((MapPropertySource) target).getSource();
 					Map<String, Object> map = ((MapPropertySource) source).getSource();
-					for (String key : map.keySet()) {
+					for (Map.Entry<String, Object> entry : map.entrySet()) {
+						String key = entry.getKey();
 						if (!target.containsProperty(key)) {
-							targetMap.put(key, map.get(key));
+							targetMap.put(key, entry.getValue());
 						}
 					}
 				}
