@@ -70,7 +70,7 @@ public class SimpleDiscoveryClientTests {
 		then(instances.get(1).getUri()).isEqualTo(URI.create("https://host2:443"));
 		then(instances.get(1).isSecure()).isEqualTo(true);
 		then(instances.get(1).getMetadata()).isNotNull();
-		
+
 		then(instances.get(2).getServiceId()).isEqualTo("service1");
 		then(instances.get(2).getHost()).isEqualTo("host3");
 		then(instances.get(2).getPort()).isEqualTo(0);
