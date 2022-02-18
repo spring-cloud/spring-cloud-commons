@@ -41,9 +41,9 @@ public class DefaultOkHttpClientFactoryTest {
 		ConnectionPool pool = poolFactory.create(4, 5, TimeUnit.DAYS);
 		OkHttpClient httpClient = okHttpClientFactory.createBuilder(true).connectTimeout(2, TimeUnit.MILLISECONDS)
 				.readTimeout(3, TimeUnit.HOURS).followRedirects(true).connectionPool(pool).build();
-		int connectTimeout = getField(httpClient, "connectTimeout");
+		int connectTimeout = getField(httpClient, "connectTimeoutMillis");
 		then(connectTimeout).isEqualTo(2);
-		int readTimeout = getField(httpClient, "readTimeout");
+		int readTimeout = getField(httpClient, "readTimeoutMillis");
 		then(readTimeout).isEqualTo(TimeUnit.HOURS.toMillis(3));
 		boolean followRedirects = getField(httpClient, "followRedirects");
 		then(followRedirects).isTrue();

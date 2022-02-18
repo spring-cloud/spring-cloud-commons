@@ -80,13 +80,14 @@ public class DefaultServiceInstance implements ServiceInstance {
 	/**
 	 * Creates a URI from the given ServiceInstance's host:port.
 	 * @param instance the ServiceInstance.
-	 * @return URI of the form (secure)?https:http + "host:port". Scheme port default used if port not set.
+	 * @return URI of the form (secure)?https:http + "host:port". Scheme port default used
+	 * if port not set.
 	 */
 	public static URI getUri(ServiceInstance instance) {
 		String scheme = (instance.isSecure()) ? "https" : "http";
 		int port = instance.getPort();
 		if (port <= 0) {
-		    port = (instance.isSecure()) ? 443 : 80;
+			port = (instance.isSecure()) ? 443 : 80;
 		}
 		String uri = String.format("%s://%s:%s", scheme, instance.getHost(), port);
 		return URI.create(uri);
