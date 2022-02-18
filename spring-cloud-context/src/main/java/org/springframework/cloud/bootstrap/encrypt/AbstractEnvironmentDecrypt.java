@@ -35,7 +35,7 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 /**
  * Abstract class that handles decrypting and merging of PropertySources.
  */
-public class AbstractEnvironmentDecrypt {
+public abstract class AbstractEnvironmentDecrypt {
 
 	private static final Pattern COLLECTION_PROPERTY = Pattern.compile("(\\S+)?\\[(\\d+)\\](\\.\\S+)?");
 
