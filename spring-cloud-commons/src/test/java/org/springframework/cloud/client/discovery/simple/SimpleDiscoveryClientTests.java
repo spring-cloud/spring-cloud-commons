@@ -33,6 +33,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Biju Kunjummen
  * @author Charu Covindane
+ * @author Neil Powell
  */
 public class SimpleDiscoveryClientTests {
 
@@ -44,8 +45,9 @@ public class SimpleDiscoveryClientTests {
 
 		Map<String, List<DefaultServiceInstance>> map = new HashMap<>();
 		DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null, "host1", 8080, false);
-		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null, "host2", 8443, true);
-		map.put("service1", Arrays.asList(service1Inst1, service1Inst2));
+		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null, "host2", 0, true);
+		DefaultServiceInstance service1Inst3 = new DefaultServiceInstance(null, null, "host3", 0, false);
+		map.put("service1", Arrays.asList(service1Inst1, service1Inst2, service1Inst3));
 		simpleDiscoveryProperties.setInstances(map);
 		simpleDiscoveryProperties.afterPropertiesSet();
 		this.simpleDiscoveryClient = new SimpleDiscoveryClient(simpleDiscoveryProperties);
@@ -54,13 +56,27 @@ public class SimpleDiscoveryClientTests {
 	@Test
 	public void shouldBeAbleToRetrieveServiceDetailsByName() {
 		List<ServiceInstance> instances = this.simpleDiscoveryClient.getInstances("service1");
-		then(instances.size()).isEqualTo(2);
+		then(instances.size()).isEqualTo(3);
 		then(instances.get(0).getServiceId()).isEqualTo("service1");
 		then(instances.get(0).getHost()).isEqualTo("host1");
 		then(instances.get(0).getPort()).isEqualTo(8080);
 		then(instances.get(0).getUri()).isEqualTo(URI.create("http://host1:8080"));
 		then(instances.get(0).isSecure()).isEqualTo(false);
 		then(instances.get(0).getMetadata()).isNotNull();
+
+		then(instances.get(1).getServiceId()).isEqualTo("service1");
+		then(instances.get(1).getHost()).isEqualTo("host2");
+		then(instances.get(1).getPort()).isEqualTo(0);
+		then(instances.get(1).getUri()).isEqualTo(URI.create("https://host2:443"));
+		then(instances.get(1).isSecure()).isEqualTo(true);
+		then(instances.get(1).getMetadata()).isNotNull();
+		
+		then(instances.get(2).getServiceId()).isEqualTo("service1");
+		then(instances.get(2).getHost()).isEqualTo("host3");
+		then(instances.get(2).getPort()).isEqualTo(0);
+		then(instances.get(2).getUri()).isEqualTo(URI.create("http://host3:80"));
+		then(instances.get(2).isSecure()).isEqualTo(false);
+		then(instances.get(2).getMetadata()).isNotNull();
 	}
 
 }
