@@ -16,16 +16,11 @@
 
 package org.springframework.cloud.commons.httpclient;
 
-import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
-
-import javax.net.ssl.HostnameVerifier;
 
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
 import org.junit.jupiter.api.Test;
-
-import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
@@ -41,23 +36,11 @@ public class DefaultOkHttpClientFactoryTest {
 		ConnectionPool pool = poolFactory.create(4, 5, TimeUnit.DAYS);
 		OkHttpClient httpClient = okHttpClientFactory.createBuilder(true).connectTimeout(2, TimeUnit.MILLISECONDS)
 				.readTimeout(3, TimeUnit.HOURS).followRedirects(true).connectionPool(pool).build();
-		int connectTimeout = getField(httpClient, "connectTimeout");
-		then(connectTimeout).isEqualTo(2);
-		int readTimeout = getField(httpClient, "readTimeout");
-		then(readTimeout).isEqualTo(TimeUnit.HOURS.toMillis(3));
-		boolean followRedirects = getField(httpClient, "followRedirects");
-		then(followRedirects).isTrue();
-		ConnectionPool poolFromClient = getField(httpClient, "connectionPool");
-		then(poolFromClient).isEqualTo(pool);
-		HostnameVerifier hostnameVerifier = getField(httpClient, "hostnameVerifier");
-		then(OkHttpClientFactory.TrustAllHostnames.class.isInstance(hostnameVerifier)).isTrue();
-	}
-
-	protected <T> T getField(Object target, String name) {
-		Field field = ReflectionUtils.findField(target.getClass(), name);
-		ReflectionUtils.makeAccessible(field);
-		Object value = ReflectionUtils.getField(field, target);
-		return (T) value;
+		then(httpClient.connectTimeoutMillis()).isEqualTo(2);
+		then(httpClient.readTimeoutMillis()).isEqualTo(TimeUnit.HOURS.toMillis(3));
+		then(httpClient.followRedirects()).isTrue();
+		then(httpClient.connectionPool()).isEqualTo(pool);
+		then(OkHttpClientFactory.TrustAllHostnames.class.isInstance(httpClient.hostnameVerifier())).isTrue();
 	}
 
 }
