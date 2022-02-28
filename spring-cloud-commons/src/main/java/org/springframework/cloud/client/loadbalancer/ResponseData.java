@@ -23,7 +23,6 @@ import java.util.Objects;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -40,7 +39,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
  */
 public class ResponseData {
 
-	private final HttpStatus httpStatus;
+	private final Integer httpStatus;
 
 	private final HttpHeaders headers;
 
@@ -48,7 +47,7 @@ public class ResponseData {
 
 	private final RequestData requestData;
 
-	public ResponseData(HttpStatus httpStatus, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
+	public ResponseData(Integer httpStatus, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
 			RequestData requestData) {
 		this.httpStatus = httpStatus;
 		this.headers = headers;
@@ -57,19 +56,19 @@ public class ResponseData {
 	}
 
 	public ResponseData(ClientResponse response, RequestData requestData) {
-		this(response.statusCode(), response.headers().asHttpHeaders(), response.cookies(), requestData);
+		this(response.rawStatusCode(), response.headers().asHttpHeaders(), response.cookies(), requestData);
 	}
 
 	public ResponseData(ServerHttpResponse response, RequestData requestData) {
-		this(response.getStatusCode(), response.getHeaders(), response.getCookies(), requestData);
+		this(response.getRawStatusCode(), response.getHeaders(), response.getCookies(), requestData);
 	}
 
 	public ResponseData(ClientHttpResponse clientHttpResponse, RequestData requestData) throws IOException {
-		this(clientHttpResponse.getStatusCode(), clientHttpResponse.getHeaders(),
+		this(clientHttpResponse.getRawStatusCode(), clientHttpResponse.getHeaders(),
 				buildCookiesFromHeaders(clientHttpResponse.getHeaders()), requestData);
 	}
 
-	public HttpStatus getHttpStatus() {
+	public Integer getHttpStatus() {
 		return httpStatus;
 	}
 
