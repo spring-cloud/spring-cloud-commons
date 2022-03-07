@@ -32,7 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * @author jizhuozhi
+ * @author Zhuozhi JI
  */
 class RoundRobinLoadBalancerTest {
 
