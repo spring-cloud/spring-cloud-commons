@@ -26,7 +26,6 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.loadbalancer.support.SimpleObjectProvider;
 
 import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Integer.MIN_VALUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -38,22 +37,7 @@ import static org.mockito.Mockito.when;
 class RoundRobinLoadBalancerTest {
 
 	@Test
-	void shouldOrderEnforcedWhenPositive() {
-		assertOrderEnforced(0);
-	}
-
-	@Test
-	void shouldOrderEnforcedWhenNegative() {
-		assertOrderEnforced(MIN_VALUE);
-	}
-
-	@Test
-	void shouldOrderEnforcedWhenPositiveOverflow() {
-		assertOrderEnforced(MAX_VALUE);
-	}
-
-	@SuppressWarnings("all")
-	void assertOrderEnforced(int seed) {
+	void shouldEnforceOrderWhenPositiveOverflow() {
 		List<ServiceInstance> instances = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
 			ServiceInstance instance = mock(ServiceInstance.class);
@@ -65,13 +49,11 @@ class RoundRobinLoadBalancerTest {
 		when(supplier.get(any())).thenReturn(Flux.just(instances));
 
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(new SimpleObjectProvider<>(supplier),
-				"shouldStartFromZeroWhenPositiveOverflow", seed);
+				"shouldStartFromZeroWhenPositiveOverflow", MAX_VALUE);
 
 		for (int i = 0; i < 10; i++) {
-			int instanceId = ((seed + 1 + i) & MAX_VALUE) % instances.size();
 			ServiceInstance chosen = loadBalancer.choose().block().getServer();
-			assertThat(chosen.getInstanceId()).isEqualTo(instanceId + "");
+			assertThat(chosen.getInstanceId()).isEqualTo(i + "");
 		}
 	}
-
 }
