@@ -36,6 +36,7 @@ import org.springframework.cloud.client.loadbalancer.Response;
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
+ * @author Zhuozhi JI
  */
 public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
@@ -98,8 +99,11 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 			}
 			return new EmptyResponse();
 		}
-		// TODO: enforce order?
-		int pos = Math.abs(this.position.incrementAndGet());
+
+		int pos = this.position.incrementAndGet();
+		if (pos < 0) {
+			pos = pos & Integer.MAX_VALUE;
+		}
 
 		ServiceInstance instance = instances.get(pos % instances.size());
 
