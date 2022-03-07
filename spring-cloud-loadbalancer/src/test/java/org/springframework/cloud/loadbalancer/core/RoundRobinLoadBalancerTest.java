@@ -56,4 +56,5 @@ class RoundRobinLoadBalancerTest {
 			assertThat(chosen.getInstanceId()).isEqualTo(i + "");
 		}
 	}
+
 }
