@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.discovery.health;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
@@ -72,7 +73,11 @@ public class DiscoveryCompositeHealthContributor implements CompositeHealthContr
 	}
 
 	private HealthIndicator asHealthIndicator(DiscoveryHealthIndicator indicator) {
-		return (indicator != null) ? () -> indicator.health() : null;
+		return (indicator != null) ? indicator::health : null;
+	}
+
+	public Map<String, DiscoveryHealthIndicator> getIndicators() {
+		return Collections.unmodifiableMap(indicators);
 	}
 
 }
