@@ -66,7 +66,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 
 	private static final Log LOG = LogFactory.getLog(RetryableLoadBalancerExchangeFilterFunction.class);
 
-	private static final List<Class<? extends Throwable>> exceptions = Arrays.asList(IOException.class,
+	private static final List<Class<? extends Throwable>> typesThatTriggerRetry = Arrays.asList(IOException.class,
 			TimeoutException.class, RetryableStatusCodeException.class);
 
 	private final LoadBalancerRetryPolicy.Factory retryPolicyFactory;
@@ -229,10 +229,15 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 	}
 
 	private boolean isRetryException(Throwable throwable) {
-		return exceptions.stream()
-				.anyMatch(exception -> exception.isInstance(throwable)
-						|| throwable != null && exception.isInstance(throwable.getCause())
-						|| Exceptions.isRetryExhausted(throwable));
+		if (throwable == null) {
+			return false;
+		}
+		return isInstanceOfRetryType(throwable) || isInstanceOfRetryType(throwable.getCause())
+				|| Exceptions.isRetryExhausted(throwable);
+	}
+
+	private boolean isInstanceOfRetryType(Throwable throwable) {
+		return typesThatTriggerRetry.stream().anyMatch(type -> type.isInstance(throwable));
 	}
 
 	protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<RetryableRequestContext> request) {
