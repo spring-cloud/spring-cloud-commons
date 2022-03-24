@@ -51,7 +51,9 @@
 |spring.cloud.loadbalancer.retry.enabled |  | Enables LoadBalancer retries.
 |spring.cloud.loadbalancer.retry.max-retries-on-next-service-instance | `1` | Number of retries to be executed on the next `ServiceInstance`. A `ServiceInstance` is chosen before each retry call.
 |spring.cloud.loadbalancer.retry.max-retries-on-same-service-instance | `0` | umber of retries to be executed on the same `ServiceInstance`.
+|spring.cloud.loadbalancer.retry.retry-on-all-exceptions | `false` | Indicates retries should be attempted for all exceptions, not only those specified in `retryableExceptions`.
 |spring.cloud.loadbalancer.retry.retry-on-all-operations | `false` | Indicates retries should be attempted on operations other than `HttpMethod.GET`}.
+|spring.cloud.loadbalancer.retry.retryable-exceptions | `{}` | A `Set` of `Throwable` classes that should trigger a retry.
 |spring.cloud.loadbalancer.retry.retryable-status-codes | `{}` | A `Set` of status codes that should trigger a retry.
 |spring.cloud.loadbalancer.service-discovery.timeout |  | String representation of Duration of the timeout for calls to service discovery.
 |spring.cloud.loadbalancer.sticky-session |  | Properties for LoadBalancer sticky-session.
