@@ -197,7 +197,7 @@ public class LoadBalancerProperties {
 		private Map<String, String> path = new LinkedCaseInsensitiveMap<>();
 
 		/**
-		 * Path at which the health-check request should be made. If none is set, the port
+		 * Port at which the health-check request should be made. If none is set, the port
 		 * under which the requested service is available at the service instance.
 		 */
 		private Integer port;
