@@ -79,7 +79,7 @@ public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeEx
 		}
 
 		@Override
-		public InputStream getBody() throws IOException {
+		public InputStream getBody() {
 			return new ByteArrayInputStream(this.body);
 		}
 

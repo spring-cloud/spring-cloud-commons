@@ -54,6 +54,9 @@ public class InterceptorRetryPolicy implements RetryPolicy {
 
 	@Override
 	public boolean canRetry(RetryContext context) {
+		if (!policy.retryableException(context.getLastThrowable())) {
+			return false;
+		}
 		LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
 		if (lbContext.getRetryCount() == 0 && lbContext.getServiceInstance() == null) {
 			// We haven't even tried to make the request yet so return true so we do
