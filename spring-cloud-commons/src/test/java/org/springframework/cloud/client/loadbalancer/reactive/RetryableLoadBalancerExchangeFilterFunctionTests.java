@@ -180,8 +180,7 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 	@Test
 	void shouldRetryOnConfiguredException() {
-		properties.getRetry()
-				.setRetryableExceptions(new HashSet<>(Collections.singletonList(TestException.class)));
+		properties.getRetry().setRetryableExceptions(new HashSet<>(Collections.singletonList(TestException.class)));
 		when(clientRequest.method()).thenReturn(HttpMethod.GET);
 		when(next.exchange(any())).thenThrow(new TestException());
 
@@ -195,8 +194,7 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 	@Test
 	void shouldRetryOnRetryableStatusCodeExceptionEvenWhenCustomExceptionsConfigured() {
-		properties.getRetry()
-				.setRetryableExceptions(new HashSet<>(Collections.singletonList(TestException.class)));
+		properties.getRetry().setRetryableExceptions(new HashSet<>(Collections.singletonList(TestException.class)));
 		when(clientRequest.method()).thenReturn(HttpMethod.GET);
 		when(next.exchange(any())).thenThrow(new RetryableStatusCodeException());
 
@@ -208,6 +206,8 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 		inOrder.verify(next, times(2)).exchange(any());
 	}
 
-	protected static class TestException extends RuntimeException { }
+	protected static class TestException extends RuntimeException {
+
+	}
 
 }

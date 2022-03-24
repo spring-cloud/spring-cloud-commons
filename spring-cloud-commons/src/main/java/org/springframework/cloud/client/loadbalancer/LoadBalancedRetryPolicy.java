@@ -20,6 +20,7 @@ package org.springframework.cloud.client.loadbalancer;
  * Retry logic to use for the {@link LoadBalancerClient}.
  *
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 public interface LoadBalancedRetryPolicy {
 
