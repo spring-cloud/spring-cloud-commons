@@ -50,6 +50,16 @@ public class RetryableExchangeFilterFunctionLoadBalancerRetryPolicy implements L
 	}
 
 	@Override
+	public boolean retryableException(Throwable throwable) {
+		if (properties.getRetry().isRetryOnAllExceptions()) {
+			return true;
+		}
+		return properties.getRetry().getRetryableExceptions().stream()
+				.anyMatch(exception -> exception.isInstance(throwable)
+						|| throwable != null && exception.isInstance(throwable.getCause()));
+	}
+
+	@Override
 	public boolean canRetryOnMethod(HttpMethod method) {
 		return HttpMethod.GET.equals(method) || properties.getRetry().isRetryOnAllOperations();
 	}

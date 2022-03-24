@@ -23,6 +23,6 @@ package org.springframework.cloud.client.loadbalancer.reactive;
  * @author Olga Maciaszek-Sharma
  * @since 3.0.0
  */
-class RetryableStatusCodeException extends IllegalStateException {
+public class RetryableStatusCodeException extends IllegalStateException {
 
 }

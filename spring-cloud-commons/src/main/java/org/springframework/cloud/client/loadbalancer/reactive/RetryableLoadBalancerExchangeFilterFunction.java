@@ -16,13 +16,10 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,9 +62,6 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ExchangeFil
 public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalancedExchangeFilterFunction {
 
 	private static final Log LOG = LogFactory.getLog(RetryableLoadBalancerExchangeFilterFunction.class);
-
-	private static final List<Class<? extends Throwable>> exceptions = Arrays.asList(IOException.class,
-			TimeoutException.class, RetryableStatusCodeException.class);
 
 	private final LoadBalancerRetryPolicy.Factory retryPolicyFactory;
 
@@ -121,11 +115,11 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		LoadBalancerRetryContext loadBalancerRetryContext = new LoadBalancerRetryContext(clientRequest);
 		LoadBalancerProperties properties = loadBalancerFactory.getProperties(serviceId);
 
-		Retry exchangeRetry = buildRetrySpec(properties.getRetry().getMaxRetriesOnSameServiceInstance(), true,
-				properties.getRetry());
-		Retry filterRetry = buildRetrySpec(properties.getRetry().getMaxRetriesOnNextServiceInstance(), false,
-				properties.getRetry());
 		LoadBalancerRetryPolicy retryPolicy = retryPolicyFactory.apply(serviceId);
+		Retry exchangeRetry = buildRetrySpec(properties.getRetry().getMaxRetriesOnSameServiceInstance(), true,
+				properties.getRetry(), retryPolicy);
+		Retry filterRetry = buildRetrySpec(properties.getRetry().getMaxRetriesOnNextServiceInstance(), false,
+				properties.getRetry(), retryPolicy);
 
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
 				.getSupportedLifecycleProcessors(
@@ -192,17 +186,21 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		}).retryWhen(exchangeRetry)).retryWhen(filterRetry);
 	}
 
-	private Retry buildRetrySpec(int max, boolean transientErrors, LoadBalancerProperties.Retry retry) {
+	private Retry buildRetrySpec(int max, boolean transientErrors, LoadBalancerProperties.Retry retry,
+			LoadBalancerRetryPolicy retryPolicy) {
 		if (!retry.isEnabled()) {
-			return Retry.max(0).filter(this::isRetryException).transientErrors(transientErrors);
+			return Retry.max(0).filter(throwable -> isRetryException(throwable, retryPolicy))
+					.transientErrors(transientErrors);
 		}
 		LoadBalancerProperties.Retry.Backoff backoffProperties = retry.getBackoff();
 		if (backoffProperties.isEnabled()) {
-			return RetrySpec.backoff(max, backoffProperties.getMinBackoff()).filter(this::isRetryException)
+			return RetrySpec.backoff(max, backoffProperties.getMinBackoff())
+					.filter(throwable -> isRetryException(throwable, retryPolicy))
 					.maxBackoff(backoffProperties.getMaxBackoff()).jitter(backoffProperties.getJitter())
 					.transientErrors(transientErrors);
 		}
-		return RetrySpec.max(max).filter(this::isRetryException).transientErrors(transientErrors);
+		return RetrySpec.max(max).filter(throwable -> isRetryException(throwable, retryPolicy))
+				.transientErrors(transientErrors);
 	}
 
 	private boolean shouldRetrySameServiceInstance(LoadBalancerRetryPolicy retryPolicy,
@@ -228,11 +226,10 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		return shouldRetry;
 	}
 
-	private boolean isRetryException(Throwable throwable) {
-		return exceptions.stream()
-				.anyMatch(exception -> exception.isInstance(throwable)
-						|| throwable != null && exception.isInstance(throwable.getCause())
-						|| Exceptions.isRetryExhausted(throwable));
+	private boolean isRetryException(Throwable throwable, LoadBalancerRetryPolicy retryPolicy) {
+		return retryPolicy.retryableException(throwable)
+				|| (throwable != null && retryPolicy.retryableException(throwable.getCause()))
+				|| Exceptions.isRetryExhausted(throwable);
 	}
 
 	protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<RetryableRequestContext> request) {

@@ -19,6 +19,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashSet;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -150,6 +151,63 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 		inOrder.verify(next, times(2)).exchange(any());
 		inOrder.verify(factory, times(1)).getInstance(any());
 		inOrder.verify(next, times(2)).exchange(any());
+	}
+
+	@Test
+	void shouldNotRetryNotConfiguredException() {
+		when(clientRequest.method()).thenReturn(HttpMethod.GET);
+		when(next.exchange(any())).thenThrow(new TestException());
+
+		filterFunction.filter(clientRequest, next).subscribe();
+
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(1)).exchange(any());
+	}
+
+	@Test
+	void shouldRetryOnNotConfiguredExceptionWhenRetryOnAllExceptions() {
+		properties.getRetry().setRetryOnAllExceptions(true);
+		when(clientRequest.method()).thenReturn(HttpMethod.GET);
+		when(next.exchange(any())).thenThrow(new TestException());
+
+		filterFunction.filter(clientRequest, next).subscribe();
+
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+	}
+
+	@Test
+	void shouldRetryOnConfiguredException() {
+		properties.getRetry().setRetryableExceptions(new HashSet<>(Collections.singletonList(TestException.class)));
+		when(clientRequest.method()).thenReturn(HttpMethod.GET);
+		when(next.exchange(any())).thenThrow(new TestException());
+
+		filterFunction.filter(clientRequest, next).subscribe();
+
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+	}
+
+	@Test
+	void shouldRetryOnRetryableStatusCodeExceptionEvenWhenCustomExceptionsConfigured() {
+		properties.getRetry().setRetryableExceptions(new HashSet<>(Collections.singletonList(TestException.class)));
+		when(clientRequest.method()).thenReturn(HttpMethod.GET);
+		when(next.exchange(any())).thenThrow(new RetryableStatusCodeException());
+
+		filterFunction.filter(clientRequest, next).subscribe();
+
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+	}
+
+	protected static class TestException extends RuntimeException {
+
 	}
 
 }

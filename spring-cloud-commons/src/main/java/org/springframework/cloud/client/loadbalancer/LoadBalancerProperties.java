@@ -16,10 +16,13 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.io.IOException;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import reactor.util.retry.RetryBackoffSpec;
 
@@ -283,6 +286,12 @@ public class LoadBalancerProperties {
 		private boolean retryOnAllOperations = false;
 
 		/**
+		 * Indicates retries should be attempted for all exceptions, not only those
+		 * specified in {@code retryableExceptions}.
+		 */
+		private boolean retryOnAllExceptions = false;
+
+		/**
 		 * Number of retries to be executed on the same <code>ServiceInstance</code>.
 		 */
 		private int maxRetriesOnSameServiceInstance = 0;
@@ -297,6 +306,13 @@ public class LoadBalancerProperties {
 		 * A {@link Set} of status codes that should trigger a retry.
 		 */
 		private Set<Integer> retryableStatusCodes = new HashSet<>();
+
+		/**
+		 * A {@link Set} of {@link Throwable} classes that should trigger a retry.
+		 */
+		private Set<Class<? extends Throwable>> retryableExceptions = new HashSet<>(
+				Arrays.asList(IOException.class, TimeoutException.class, RetryableStatusCodeException.class,
+						org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class));
 
 		/**
 		 * Properties for Reactor Retry backoffs in Spring Cloud LoadBalancer.
@@ -352,12 +368,30 @@ public class LoadBalancerProperties {
 			this.retryableStatusCodes = retryableStatusCodes;
 		}
 
+		public Set<Class<? extends Throwable>> getRetryableExceptions() {
+			return retryableExceptions;
+		}
+
+		public void setRetryableExceptions(Set<Class<? extends Throwable>> retryableExceptions) {
+			retryableExceptions
+					.add(org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
+			this.retryableExceptions = retryableExceptions;
+		}
+
 		public Backoff getBackoff() {
 			return backoff;
 		}
 
 		public void setBackoff(Backoff backoff) {
 			this.backoff = backoff;
+		}
+
+		public boolean isRetryOnAllExceptions() {
+			return retryOnAllExceptions;
+		}
+
+		public void setRetryOnAllExceptions(boolean retryOnAllExceptions) {
+			this.retryOnAllExceptions = retryOnAllExceptions;
 		}
 
 		public static class Backoff {

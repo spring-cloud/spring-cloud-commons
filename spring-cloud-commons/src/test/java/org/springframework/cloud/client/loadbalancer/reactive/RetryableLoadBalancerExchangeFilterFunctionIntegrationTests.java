@@ -101,7 +101,6 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 	void loadBalancerLifecycleCallbacksExecuted() {
 		final String callbackTestHint = "callbackTestHint";
 		loadBalancerProperties.getHint().put("testservice", "callbackTestHint");
-		final String result = "callbackTestResult";
 
 		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice")
 				.filter(this.loadBalancerFunction).build().get().uri("/callback").exchange().block();

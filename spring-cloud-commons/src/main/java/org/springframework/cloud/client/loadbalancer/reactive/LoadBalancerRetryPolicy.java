@@ -50,6 +50,13 @@ public interface LoadBalancerRetryPolicy {
 	boolean retryableStatusCode(int statusCode);
 
 	/**
+	 * Return <code>true</code> to retry if the provided exception is thrown.
+	 * @param exception the {@link Throwable} to evaluate
+	 * @return true to retry on the provided exception
+	 */
+	boolean retryableException(Throwable exception);
+
+	/**
 	 * Return <code>true</code> to retry on the provided HTTP method.
 	 * @param method the HTTP request method
 	 * @return true to retry on the provided HTTP method

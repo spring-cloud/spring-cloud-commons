@@ -20,6 +20,7 @@ package org.springframework.cloud.client.loadbalancer;
  * Retry logic to use for the {@link LoadBalancerClient}.
  *
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 public interface LoadBalancedRetryPolicy {
 
@@ -64,5 +65,12 @@ public interface LoadBalancedRetryPolicy {
 	 * @return True if a retry should be attempted; false to just return the response.
 	 */
 	boolean retryableStatusCode(int statusCode);
+
+	/**
+	 * Return <code>true</code> to retry if the provided exception is thrown.
+	 * @param exception the {@link Throwable} to evaluate
+	 * @return true to retry on the provided exception
+	 */
+	boolean retryableException(Throwable exception);
 
 }
