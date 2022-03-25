@@ -175,20 +175,8 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_manifest() {
-		try {
-			verifyCurrentVersionFromManifest("3.0");
-			verifyCurrentVersionFromManifest("3.0.x");
-		}
-		catch (AssertionError e) {
-			if (e.getMessage() != null && e.getMessage().contains("2.7.")) {
-				// we're likely running a boot 2.7 compatibility test, try 2.7
-				verifyCurrentVersionFromManifest("2.7");
-				verifyCurrentVersionFromManifest("2.7.x");
-			}
-			else {
-				throw e;
-			}
-		}
+		verifyCurrentVersionFromManifest("3.0");
+		verifyCurrentVersionFromManifest("3.0.x");
 	}
 
 	private void verifyCurrentVersionFromManifest(String version) {

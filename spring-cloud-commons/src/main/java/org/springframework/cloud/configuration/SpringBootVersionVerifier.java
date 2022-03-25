@@ -80,14 +80,16 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 			@Override
 			public boolean isCompatible() {
-				// try {
-				// since 3.0
-				// FIXME: find class or method in boot that is new in 3.0
-				// Class.forName("org.springframework.boot.autoconfigure.data.redis.ClientResourcesBuilderCustomizer");
-				return true;
-				/*
-				 * } catch (ClassNotFoundException e) { return false; }
-				 */
+				try {
+					// since 3.0
+					Class.forName(
+							"org.springframework.boot.context.properties.ConfigurationPropertiesBindConstructorProvider");
+					return true;
+
+				}
+				catch (ClassNotFoundException e) {
+					return false;
+				}
 
 			}
 		};
