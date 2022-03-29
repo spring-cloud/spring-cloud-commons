@@ -164,9 +164,11 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 					.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
 							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
 									CompletionContext.Status.FAILED, throwable, lbRequest, lbResponse))))
-					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-									lbRequest, lbResponse, new ResponseData(clientResponse, requestData)))))
+					.doOnSuccess(
+							clientResponse -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(
+									new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse,
+											buildResponseData(requestData, clientResponse,
+													properties.isUseRawStatusCodeInResponseData())))))
 					.map(clientResponse -> {
 						loadBalancerRetryContext.setClientResponse(clientResponse);
 						if (shouldRetrySameServiceInstance(retryPolicy, loadBalancerRetryContext)) {
@@ -190,6 +192,14 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 			return clientResponse;
 
 		}).retryWhen(exchangeRetry)).retryWhen(filterRetry);
+	}
+
+	private ResponseData buildResponseData(RequestData requestData, ClientResponse clientResponse,
+			boolean useRawStatusCodes) {
+		if (useRawStatusCodes) {
+			return new ResponseData(requestData, clientResponse);
+		}
+		return new ResponseData(clientResponse, requestData);
 	}
 
 	private Retry buildRetrySpec(int max, boolean transientErrors, LoadBalancerProperties.Retry retry) {
