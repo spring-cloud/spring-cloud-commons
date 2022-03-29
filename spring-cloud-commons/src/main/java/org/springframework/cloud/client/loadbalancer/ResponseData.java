@@ -50,6 +50,10 @@ public class ResponseData {
 
 	private final Integer rawHttpStatus;
 
+	/**
+	 * @deprecated for removal; new constructors will be added in 4.x
+	 */
+	@Deprecated
 	public ResponseData(HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies, RequestData requestData,
 			Integer rawHttpStatus) {
 		this.httpStatus = null;
@@ -59,6 +63,10 @@ public class ResponseData {
 		this.requestData = requestData;
 	}
 
+	/**
+	 * @deprecated for removal; new constructors will be added in 4.x
+	 */
+	@Deprecated
 	public ResponseData(HttpStatus httpStatus, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
 			RequestData requestData) {
 		this.httpStatus = httpStatus;
@@ -68,6 +76,10 @@ public class ResponseData {
 		this.requestData = requestData;
 	}
 
+	/**
+	 * @deprecated for removal; new constructors will be added in 4.x
+	 */
+	@Deprecated
 	public ResponseData(ClientResponse response, RequestData requestData) {
 		this(response.statusCode(), response.headers().asHttpHeaders(), response.cookies(), requestData);
 	}
@@ -75,10 +87,18 @@ public class ResponseData {
 	// Done this way to maintain backwards compatibility while allowing switching to raw
 	// HTTPStatus
 	// Will be removed in `4.x`
+	/**
+	 * @deprecated for removal; new constructors will be added in 4.x
+	 */
+	@Deprecated
 	public ResponseData(RequestData requestData, ClientResponse response) {
 		this(response.headers().asHttpHeaders(), response.cookies(), requestData, response.rawStatusCode());
 	}
 
+	/**
+	 * @deprecated for removal; new constructors will be added in 4.x
+	 */
+	@Deprecated
 	public ResponseData(ServerHttpResponse response, RequestData requestData) {
 		this(response.getStatusCode(), response.getHeaders(), response.getCookies(), requestData);
 	}
@@ -86,10 +106,18 @@ public class ResponseData {
 	// Done this way to maintain backwards compatibility while allowing switching to raw
 	// HTTPStatus
 	// Will be removed in `4.x`
+	/**
+	 * @deprecated for removal; new constructors will be added in 4.x
+	 */
+	@Deprecated
 	public ResponseData(RequestData requestData, ServerHttpResponse response) {
 		this(response.getHeaders(), response.getCookies(), requestData, response.getRawStatusCode());
 	}
 
+	/**
+	 * @deprecated for removal; new constructors will be added in 4.x
+	 */
+	@Deprecated
 	public ResponseData(ClientHttpResponse clientHttpResponse, RequestData requestData) throws IOException {
 		this(clientHttpResponse.getStatusCode(), clientHttpResponse.getHeaders(),
 				buildCookiesFromHeaders(clientHttpResponse.getHeaders()), requestData);
@@ -98,6 +126,10 @@ public class ResponseData {
 	// Done this way to maintain backwards compatibility while allowing switching to raw
 	// HTTPStatus
 	// Will be removed in `4.x`
+	/**
+	 * @deprecated for removal; new constructors will be added in 4.x
+	 */
+	@Deprecated
 	public ResponseData(RequestData requestData, ClientHttpResponse clientHttpResponse) throws IOException {
 		this(clientHttpResponse.getHeaders(), buildCookiesFromHeaders(clientHttpResponse.getHeaders()), requestData,
 				clientHttpResponse.getRawStatusCode());
