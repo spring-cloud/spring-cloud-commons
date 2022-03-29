@@ -1218,20 +1218,28 @@ One type of bean that it may be useful to register using <<custom-loadbalancer-c
 
 The `LoadBalancerLifecycle` beans provide callback methods, named `onStart(Request<RC> request)`, `onStartRequest(Request<RC> request, Response<T> lbResponse)` and `onComplete(CompletionContext<RES, T, RC> completionContext)`, that you should implement to specify what actions should take place before and after load-balancing.
 
-`onStart(Request<RC> request)` takes a `Request` object as a parameter. It contains data that is used to select an appropriate instance, including the downstream client request and <<spring-cloud-loadbalancer-hints,hint>>. `onStartRequest` also takes the `Request` object and, additionally, the `Response<T>` object as parameters.  On the other hand, a `CompletionContext` object is provided to the `onComplete(CompletionContext<RES, T, RC> completionContext)` method. It contains the LoadBalancer `Response`, including the selected service instance, the `Status` of the request executed against that service instance and (if available) the response returned to the downstream client, and (if an exception has occurred) the corresponding `Throwable`.
+`onStart(Request<RC> request)` takes a `Request` object as a parameter.
+It contains data that is used to select an appropriate instance, including the downstream client request and <<spring-cloud-loadbalancer-hints,hint>>. `onStartRequest` also takes the `Request` object and, additionally, the `Response<T>` object as parameters.
+On the other hand, a `CompletionContext` object is provided to the `onComplete(CompletionContext<RES, T, RC> completionContext)` method.
+It contains the LoadBalancer `Response`, including the selected service instance, the `Status` of the request executed against that service instance and (if available) the response returned to the downstream client, and (if an exception has occurred) the corresponding `Throwable`.
 
 The `supports(Class requestContextClass, Class responseClass,
-Class serverTypeClass)` method can be used to determine whether the processor in question handles objects of provided types. If not overridden by the user, it returns `true`.
+Class serverTypeClass)` method can be used to determine whether the processor in question handles objects of provided types.
+If not overridden by the user, it returns `true`.
 
 NOTE: In the preceding method calls, `RC` means `RequestContext` type, `RES` means client response type, and `T` means returned server type.
+
+WARNING: If you are using custom HTTP status codes, you will be getting exceptions.
+In order to prevent this, you can set the value of `spring.cloud.loadbalancer.use-raw-status-code-in-response-data`.
+It will cause raw status codes to be used instead of `HttpStatus` enums.
+The `httpStatus` field in `ResponseData` will then be used, but you'll be able to get the raw status code from the `rawHttpStatus` field.
 
 [[loadbalancer-micrometer-stats-lifecycle]]
 === Spring Cloud LoadBalancer Statistics
 
 We provide a `LoadBalancerLifecycle` bean called `MicrometerStatsLoadBalancerLifecycle`, which uses Micrometer to provide statistics for load-balanced calls.
 
-In order to get this bean added to your application context,
-set the value of the `spring.cloud.loadbalancer.stats.micrometer.enabled` to `true` and have a `MeterRegistry` available (for example, by adding https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html[Spring Boot Actuator] to your project).
+In order to get this bean added to your application context, set the value of the `spring.cloud.loadbalancer.stats.micrometer.enabled` to `true` and have a `MeterRegistry` available (for example, by adding https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html[Spring Boot Actuator] to your project).
 
 `MicrometerStatsLoadBalancerLifecycle` registers the following meters in `MeterRegistry`:
 

@@ -48,9 +48,21 @@ public class ResponseData {
 
 	private final RequestData requestData;
 
+	private final Integer rawHttpStatus;
+
+	public ResponseData(HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies, RequestData requestData,
+			Integer rawHttpStatus) {
+		this.httpStatus = null;
+		this.rawHttpStatus = rawHttpStatus;
+		this.headers = headers;
+		this.cookies = cookies;
+		this.requestData = requestData;
+	}
+
 	public ResponseData(HttpStatus httpStatus, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
 			RequestData requestData) {
 		this.httpStatus = httpStatus;
+		this.rawHttpStatus = httpStatus != null ? httpStatus.value() : null;
 		this.headers = headers;
 		this.cookies = cookies;
 		this.requestData = requestData;
@@ -60,13 +72,35 @@ public class ResponseData {
 		this(response.statusCode(), response.headers().asHttpHeaders(), response.cookies(), requestData);
 	}
 
+	// Done this way to maintain backwards compatibility while allowing switching to raw
+	// HTTPStatus
+	// Will be removed in `4.x`
+	public ResponseData(RequestData requestData, ClientResponse response) {
+		this(response.headers().asHttpHeaders(), response.cookies(), requestData, response.rawStatusCode());
+	}
+
 	public ResponseData(ServerHttpResponse response, RequestData requestData) {
 		this(response.getStatusCode(), response.getHeaders(), response.getCookies(), requestData);
+	}
+
+	// Done this way to maintain backwards compatibility while allowing switching to raw
+	// HTTPStatus
+	// Will be removed in `4.x`
+	public ResponseData(RequestData requestData, ServerHttpResponse response) {
+		this(response.getHeaders(), response.getCookies(), requestData, response.getRawStatusCode());
 	}
 
 	public ResponseData(ClientHttpResponse clientHttpResponse, RequestData requestData) throws IOException {
 		this(clientHttpResponse.getStatusCode(), clientHttpResponse.getHeaders(),
 				buildCookiesFromHeaders(clientHttpResponse.getHeaders()), requestData);
+	}
+
+	// Done this way to maintain backwards compatibility while allowing switching to raw
+	// HTTPStatus
+	// Will be removed in `4.x`
+	public ResponseData(RequestData requestData, ClientHttpResponse clientHttpResponse) throws IOException {
+		this(clientHttpResponse.getHeaders(), buildCookiesFromHeaders(clientHttpResponse.getHeaders()), requestData,
+				clientHttpResponse.getRawStatusCode());
 	}
 
 	public HttpStatus getHttpStatus() {
@@ -83,6 +117,10 @@ public class ResponseData {
 
 	public RequestData getRequestData() {
 		return requestData;
+	}
+
+	public Integer getRawHttpStatus() {
+		return rawHttpStatus;
 	}
 
 	@Override
@@ -113,7 +151,7 @@ public class ResponseData {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(httpStatus, headers, cookies, requestData);
+		return Objects.hash(httpStatus, headers, cookies, requestData, rawHttpStatus);
 	}
 
 	@Override
@@ -126,7 +164,8 @@ public class ResponseData {
 		}
 		ResponseData that = (ResponseData) o;
 		return httpStatus == that.httpStatus && Objects.equals(headers, that.headers)
-				&& Objects.equals(cookies, that.cookies) && Objects.equals(requestData, that.requestData);
+				&& Objects.equals(cookies, that.cookies) && Objects.equals(requestData, that.requestData)
+				&& Objects.equals(rawHttpStatus, that.rawHttpStatus);
 	}
 
 }
