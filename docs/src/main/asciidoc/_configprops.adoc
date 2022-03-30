@@ -59,6 +59,7 @@
 |spring.cloud.loadbalancer.sticky-session |  | Properties for LoadBalancer sticky-session.
 |spring.cloud.loadbalancer.sticky-session.add-service-instance-cookie | `false` | Indicates whether a cookie with the newly selected instance should be added by LoadBalancer.
 |spring.cloud.loadbalancer.sticky-session.instance-id-cookie-name | `sc-lb-instance-id` | The name of the cookie holding the preferred instance id.
+|spring.cloud.loadbalancer.use-raw-status-code-in-response-data | `false` | Indicates that raw status codes should be used in {@link ResponseData}.
 |spring.cloud.loadbalancer.x-forwarded |  | Enabling X-Forwarded Host and Proto Headers.
 |spring.cloud.loadbalancer.x-forwarded.enabled | `false` | To Enable X-Forwarded Headers.
 |spring.cloud.loadbalancer.zone |  | Spring Cloud LoadBalancer zone.
