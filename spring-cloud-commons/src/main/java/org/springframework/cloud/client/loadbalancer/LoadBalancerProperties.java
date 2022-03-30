@@ -71,11 +71,6 @@ public class LoadBalancerProperties {
 	 */
 	private StickySession stickySession = new StickySession();
 
-	/**
-	 * Indicates that raw status codes should be used in {@link ResponseData}.
-	 */
-	private boolean useRawStatusCodeInResponseData;
-
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
 	}
@@ -127,14 +122,6 @@ public class LoadBalancerProperties {
 
 	public XForwarded getXForwarded() {
 		return xForwarded;
-	}
-
-	public boolean isUseRawStatusCodeInResponseData() {
-		return useRawStatusCodeInResponseData;
-	}
-
-	public void setUseRawStatusCodeInResponseData(boolean useRawStatusCodeInResponseData) {
-		this.useRawStatusCodeInResponseData = useRawStatusCodeInResponseData;
 	}
 
 	public static class StickySession {

@@ -96,8 +96,7 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 				.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, new DefaultResponse(serviceInstance)));
 		try {
 			T response = request.apply(serviceInstance);
-			LoadBalancerProperties properties = loadBalancerClientFactory.getProperties(serviceId);
-			Object clientResponse = getClientResponse(response, properties.isUseRawStatusCodeInResponseData());
+			Object clientResponse = getClientResponse(response);
 			supportedLifecycleProcessors
 					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
 							lbRequest, defaultResponse, clientResponse)));
@@ -116,16 +115,13 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		return null;
 	}
 
-	private <T> Object getClientResponse(T response, boolean useRawStatusCodes) {
+	private <T> Object getClientResponse(T response) {
 		ClientHttpResponse clientHttpResponse = null;
 		if (response instanceof ClientHttpResponse) {
 			clientHttpResponse = (ClientHttpResponse) response;
 		}
 		if (clientHttpResponse != null) {
 			try {
-				if (useRawStatusCodes) {
-					return new ResponseData(null, clientHttpResponse);
-				}
 				return new ResponseData(clientHttpResponse, null);
 			}
 			catch (IOException ignored) {

@@ -128,8 +128,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 				LOG.debug(String.format("LoadBalancer has retrieved the instance for service %s: %s", serviceId,
 						instance.getUri()));
 			}
-			LoadBalancerProperties properties = loadBalancerFactory.getProperties(serviceId);
-			LoadBalancerProperties.StickySession stickySessionProperties = properties.getStickySession();
+			LoadBalancerProperties.StickySession stickySessionProperties = loadBalancerFactory.getProperties(serviceId)
+					.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
 					stickySessionProperties.getInstanceIdCookieName(),
 					stickySessionProperties.isAddServiceInstanceCookie(), transformers);
@@ -140,17 +140,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 									CompletionContext.Status.FAILED, throwable, lbRequest, lbResponse))))
 					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
 							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-									lbRequest, lbResponse, buildResponseData(requestData, clientResponse,
-											properties.isUseRawStatusCodeInResponseData())))));
+									lbRequest, lbResponse, new ResponseData(clientResponse, requestData)))));
 		});
-	}
-
-	private ResponseData buildResponseData(RequestData requestData, ClientResponse clientResponse,
-			boolean useRawStatusCodes) {
-		if (useRawStatusCodes) {
-			return new ResponseData(requestData, clientResponse);
-		}
-		return new ResponseData(clientResponse, requestData);
 	}
 
 	protected Mono<Response<ServiceInstance>> choose(String serviceId, Request<RequestDataContext> request) {
