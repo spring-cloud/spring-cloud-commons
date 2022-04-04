@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Zhuozhi JI
  */
-class RoundRobinLoadBalancerTest {
+class RoundRobinLoadBalancerTests {
 
 	@Test
 	void shouldOrderEnforcedWhenPositive() {
