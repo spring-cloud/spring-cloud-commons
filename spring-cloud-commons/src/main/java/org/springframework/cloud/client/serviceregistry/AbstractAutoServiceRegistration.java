@@ -90,6 +90,7 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		this.properties = properties;
 		this.registrationManagementLifecycles = registrationManagementLifecycles;
 		this.registrationLifecycles = registrationLifecycles;
+		this.registrationLifecycles.add(new DefaultRegistrationLifecycle<>());
 	}
 
 	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry,
