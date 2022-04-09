@@ -16,30 +16,31 @@ public interface RegistrationLifecycle<R extends Registration> extends Ordered {
 	 * {@link ServiceRegistry}.
 	 * @param registration registration
 	 */
-	 void postProcessBeforeStartRegister(R registration);
+	void postProcessBeforeStartRegister(R registration);
 
 	/**
 	 * A method executed after registering the local service with the
 	 * {@link ServiceRegistry}.
 	 * @param registration registration
 	 */
-	 void postProcessAfterStartRegister(R registration);
+	void postProcessAfterStartRegister(R registration);
 
 	/**
 	 * A method executed before de-registering the local service with the
 	 * {@link ServiceRegistry}.
 	 * @param registration registration
 	 */
-	 void postProcessBeforeStopRegister(R registration);
+	void postProcessBeforeStopRegister(R registration);
 
 	/**
 	 * A method executed after de-registering the local service with the
 	 * {@link ServiceRegistry}.
 	 * @param registration registration
 	 */
-	 void postProcessAfterStopRegister(R registration);
+	void postProcessAfterStopRegister(R registration);
 
 	default int getOrder() {
 		return DEFAULT_ORDER;
 	}
+
 }

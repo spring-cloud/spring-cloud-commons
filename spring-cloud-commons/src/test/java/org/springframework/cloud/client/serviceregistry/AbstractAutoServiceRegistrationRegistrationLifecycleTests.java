@@ -21,11 +21,11 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * AbstractAutoServiceRegistrationRegistrationLifecycleTests
+ *
  * @author huifer
  */
 @SpringBootTest(classes = AbstractAutoServiceRegistrationRegistrationLifecycleTests.Config.class)
 public class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
-
 
 	@Autowired
 	@Qualifier("testAutoServiceRegistration")
@@ -41,10 +41,10 @@ public class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 		autoRegistration.stop();
 	}
 
+	public static class RegistrationLifecycleImpl
+			implements RegistrationLifecycle<TestRegistrationLifecycleRegistration> {
 
-	public static class RegistrationLifecycleImpl implements RegistrationLifecycle<TestRegistrationLifecycleRegistration> {
 		private static final Logger log = LoggerFactory.getLogger(RegistrationLifecycleImpl.class);
-
 
 		@Override
 		public void postProcessBeforeStartRegister(TestRegistrationLifecycleRegistration registration) {
@@ -74,42 +74,49 @@ public class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 			Assert.assertEquals(registration.getMetadata().get("is_start"), "false");
 			registration.getMetadata().putIfAbsent("is_stop", "true");
 		}
-	}
 
+	}
 
 	@EnableAutoConfiguration
 	@Configuration(proxyBeanMethods = false)
 	public static class Config {
 
 		@Bean(value = "testAutoServiceRegistration")
-		public TestAutoServiceRegistrationLifecycle testAutoServiceRegistration(AutoServiceRegistrationProperties properties) {
+		public TestAutoServiceRegistrationLifecycle testAutoServiceRegistration(
+				AutoServiceRegistrationProperties properties) {
 			List<RegistrationLifecycle<TestRegistrationLifecycleRegistration>> registrationLifecycles = new ArrayList<>();
 			registrationLifecycles.add(new RegistrationLifecycleImpl());
-			TestAutoServiceRegistrationLifecycle testAutoServiceRegistrationLifecycle = new TestAutoServiceRegistrationLifecycle(properties, registrationLifecycles);
+			TestAutoServiceRegistrationLifecycle testAutoServiceRegistrationLifecycle = new TestAutoServiceRegistrationLifecycle(
+					properties, registrationLifecycles);
 			return testAutoServiceRegistrationLifecycle;
 		}
 
 	}
 
-	public static class TestAutoServiceRegistrationLifecycle extends AbstractAutoServiceRegistration<TestRegistrationLifecycleRegistration> {
+	public static class TestAutoServiceRegistrationLifecycle
+			extends AbstractAutoServiceRegistration<TestRegistrationLifecycleRegistration> {
+
 		private final int port = 0;
+
 		TestRegistrationLifecycleRegistration testRegistrationLifecycleRegistration = new TestRegistrationLifecycleRegistration();
 
 		protected TestAutoServiceRegistrationLifecycle() {
 			super(new TestRegistrationLifecycleServiceRegistration());
 		}
 
-
 		public TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties) {
 			super(new TestRegistrationLifecycleServiceRegistration(), properties);
 		}
 
 		public TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties,
-				List<RegistrationManagementLifecycle<TestRegistrationLifecycleRegistration>> registrationManagementLifecycles, List<RegistrationLifecycle<TestRegistrationLifecycleRegistration>> registrationLifecycles) {
-			super(new TestRegistrationLifecycleServiceRegistration(), properties, registrationManagementLifecycles, registrationLifecycles);
+				List<RegistrationManagementLifecycle<TestRegistrationLifecycleRegistration>> registrationManagementLifecycles,
+				List<RegistrationLifecycle<TestRegistrationLifecycleRegistration>> registrationLifecycles) {
+			super(new TestRegistrationLifecycleServiceRegistration(), properties, registrationManagementLifecycles,
+					registrationLifecycles);
 		}
 
-		public TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties, List<RegistrationLifecycle<TestRegistrationLifecycleRegistration>> registrationLifecycles) {
+		public TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties,
+				List<RegistrationLifecycle<TestRegistrationLifecycleRegistration>> registrationLifecycles) {
 			super(new TestRegistrationLifecycleServiceRegistration(), properties, registrationLifecycles);
 		}
 
@@ -142,9 +149,12 @@ public class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 		protected boolean isEnabled() {
 			return true;
 		}
+
 	}
 
-	public static class TestRegistrationLifecycleServiceRegistration implements ServiceRegistry<TestRegistrationLifecycleRegistration> {
+	public static class TestRegistrationLifecycleServiceRegistration
+			implements ServiceRegistry<TestRegistrationLifecycleRegistration> {
+
 		private boolean registered = false;
 
 		private boolean deregistered = false;
@@ -191,6 +201,7 @@ public class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 		boolean isDeregistered() {
 			return deregistered;
 		}
+
 	}
 
 	public static class TestRegistrationLifecycleRegistration implements Registration {
