@@ -20,7 +20,7 @@ package org.springframework.cloud.client.serviceregistry;
  * Service registration life cycle. This life cycle is only related to
  * ManagementRegistration.
  *
- * @author huifer
+ * @author Zen Huifer
  */
 public interface RegistrationManagementLifecycle<R extends Registration> extends RegistrationLifecycle<R> {
 

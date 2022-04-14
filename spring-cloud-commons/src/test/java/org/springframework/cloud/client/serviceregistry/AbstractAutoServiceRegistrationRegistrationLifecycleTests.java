@@ -35,29 +35,26 @@ import org.springframework.context.annotation.Configuration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * AbstractAutoServiceRegistrationRegistrationLifecycleTests
- *
- * @author huifer
+ * @author Zen Huifer
  */
 @SpringBootTest(classes = AbstractAutoServiceRegistrationRegistrationLifecycleTests.Config.class)
-public class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
+class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 
 	@Autowired
 	@Qualifier("testAutoServiceRegistration")
 	private TestAutoServiceRegistrationLifecycle autoRegistration;
 
 	@Test
-	public void startTest() {
+	void startTest() {
 		autoRegistration.start();
 	}
 
 	@Test
-	public void stopTest() {
+	void stopTest() {
 		autoRegistration.stop();
 	}
 
-	public static class RegistrationLifecycleImpl
-			implements RegistrationLifecycle<TestRegistrationLifecycleRegistration> {
+	static class RegistrationLifecycleImpl implements RegistrationLifecycle<TestRegistrationLifecycleRegistration> {
 
 		@Override
 		public void postProcessBeforeStartRegister(TestRegistrationLifecycleRegistration registration) {
@@ -106,7 +103,7 @@ public class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 
 	}
 
-	public static class TestAutoServiceRegistrationLifecycle
+	static class TestAutoServiceRegistrationLifecycle
 			extends AbstractAutoServiceRegistration<TestRegistrationLifecycleRegistration> {
 
 		private final int port = 0;
@@ -117,18 +114,18 @@ public class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 			super(new TestRegistrationLifecycleServiceRegistration());
 		}
 
-		public TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties) {
+		TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties) {
 			super(new TestRegistrationLifecycleServiceRegistration(), properties);
 		}
 
-		public TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties,
+		TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties,
 				List<RegistrationManagementLifecycle<TestRegistrationLifecycleRegistration>> registrationManagementLifecycles,
 				List<RegistrationLifecycle<TestRegistrationLifecycleRegistration>> registrationLifecycles) {
 			super(new TestRegistrationLifecycleServiceRegistration(), properties, registrationManagementLifecycles,
 					registrationLifecycles);
 		}
 
-		public TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties,
+		TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties,
 				List<RegistrationLifecycle<TestRegistrationLifecycleRegistration>> registrationLifecycles) {
 			super(new TestRegistrationLifecycleServiceRegistration(), properties, registrationLifecycles);
 		}

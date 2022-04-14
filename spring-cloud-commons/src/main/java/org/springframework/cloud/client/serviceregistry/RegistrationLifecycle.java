@@ -19,9 +19,10 @@ package org.springframework.cloud.client.serviceregistry;
 import org.springframework.core.Ordered;
 
 /**
- * Service registration life cycle. This life cycle is only related to Registration.
+ * Service registration life cycle. This life cycle is only related to
+ * {@link Registration}.
  *
- * @author huifer
+ * @author Zen Huifer
  */
 public interface RegistrationLifecycle<R extends Registration> extends Ordered {
 
