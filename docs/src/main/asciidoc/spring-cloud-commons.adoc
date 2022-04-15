@@ -447,7 +447,7 @@ Then, `ReactiveLoadBalancer` is used underneath.
 
 A load-balanced `RestTemplate` can be configured to retry failed requests.
 By default, this logic is disabled.
-For the non-reactive version (with `RestTemplate`), you can enable it by adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath. For the reactive version (with `WebTestClient), you need to set `spring.cloud.loadbalancer.retry.enabled=true`.
+For the non-reactive version (with `RestTemplate`), you can enable it by adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath. For the reactive version (with `WebTestClient`), you need to set `spring.cloud.loadbalancer.retry.enabled=true`.
 
 If you would like to disable the retry logic with Spring Retry or Reactive Retry on the classpath, you can set `spring.cloud.loadbalancer.retry.enabled=false`.
 
