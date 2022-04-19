@@ -18,12 +18,20 @@ package org.springframework.cloud.context.named;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
@@ -37,6 +45,10 @@ public class NamedContextFactoryTests {
 		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
 		parent.register(BaseConfig.class);
 		parent.refresh();
+		testChildContexts(parent);
+	}
+
+	private void testChildContexts(GenericApplicationContext parent) {
 		TestClientFactory factory = new TestClientFactory();
 		factory.setApplicationContext(parent);
 		factory.setConfigurations(Arrays.asList(getSpec("foo", FooConfig.class), getSpec("bar", BarConfig.class)));
@@ -79,6 +91,10 @@ public class NamedContextFactoryTests {
 		then(fooContext.getClassLoader()).as("foo context classloader does not match parent")
 				.isSameAs(parent.getClassLoader());
 
+		then(fooContext.getBeanFactory().getBeanClassLoader())
+				.as("foo context bean factory classloader does not match parent")
+				.isSameAs(parent.getBeanFactory().getBeanClassLoader());
+
 		Assertions.assertThat(fooContext).hasFieldOrPropertyWithValue("customClassLoader", true);
 
 		factory.destroy();
@@ -88,8 +104,38 @@ public class NamedContextFactoryTests {
 		then(barContext.isActive()).as("bar context wasn't closed").isFalse();
 	}
 
+	@Test
+	public void testBadThreadContextClassLoader() throws InterruptedException, ExecutionException, TimeoutException {
+
+		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
+		parent.setClassLoader(ClassUtils.getDefaultClassLoader());
+		parent.register(BaseConfig.class);
+		parent.refresh();
+
+		ExecutorService es = Executors.newSingleThreadExecutor(r -> {
+			Thread t = new Thread(r);
+			t.setContextClassLoader(new ThrowingClassLoader());
+			return t;
+		});
+
+		es.submit(() -> this.testChildContexts(parent)).get(5, TimeUnit.SECONDS);
+	}
+
 	private TestSpec getSpec(String name, Class<?> configClass) {
 		return new TestSpec(name, new Class[] { configClass });
+	}
+
+	static class ThrowingClassLoader extends ClassLoader {
+
+		ThrowingClassLoader() {
+			super("Throwing classloader", null);
+		}
+
+		@Override
+		public Class<?> loadClass(String name) throws ClassNotFoundException {
+			throw new ClassNotFoundException(name);
+		}
+
 	}
 
 	static class TestClientFactory extends NamedContextFactory<TestSpec> {
@@ -147,6 +193,7 @@ public class NamedContextFactoryTests {
 
 	}
 
+	@ConditionalOnClass(Object.class)
 	static class FooConfig {
 
 		@Bean

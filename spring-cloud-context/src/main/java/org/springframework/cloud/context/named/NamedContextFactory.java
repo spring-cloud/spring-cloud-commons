@@ -29,9 +29,11 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.MapPropertySource;
@@ -110,7 +112,25 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	}
 
 	protected AnnotationConfigApplicationContext createContext(String name) {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		AnnotationConfigApplicationContext context;
+		if (this.parent != null) {
+			// jdk11 issue
+			// https://github.com/spring-cloud/spring-cloud-netflix/issues/3101
+			// https://github.com/spring-cloud/spring-cloud-openfeign/issues/475
+			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+			if (parent instanceof ConfigurableApplicationContext) {
+				beanFactory.setBeanClassLoader(
+						((ConfigurableApplicationContext) parent).getBeanFactory().getBeanClassLoader());
+			}
+			else {
+				beanFactory.setBeanClassLoader(parent.getClassLoader());
+			}
+			context = new AnnotationConfigApplicationContext(beanFactory);
+			context.setClassLoader(this.parent.getClassLoader());
+		}
+		else {
+			context = new AnnotationConfigApplicationContext();
+		}
 		if (this.configurations.containsKey(name)) {
 			for (Class<?> configuration : this.configurations.get(name).getConfiguration()) {
 				context.register(configuration);
@@ -129,9 +149,6 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		if (this.parent != null) {
 			// Uses Environment from parent as well as beans
 			context.setParent(this.parent);
-			// jdk11 issue
-			// https://github.com/spring-cloud/spring-cloud-netflix/issues/3101
-			context.setClassLoader(this.parent.getClassLoader());
 		}
 		context.setDisplayName(generateDisplayName(name));
 		context.refresh();
