@@ -28,6 +28,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
+import org.springframework.cloud.client.loadbalancer.HttpRequestLoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycle;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerLifecycleValidator;
@@ -36,10 +37,14 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerRequest;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequestAdapter;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.RequestData;
+import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
+import org.springframework.cloud.client.loadbalancer.TimedRequestContext;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.ReflectionUtils;
 
@@ -68,8 +73,8 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	@Override
 	public <T> T execute(String serviceId, LoadBalancerRequest<T> request) throws IOException {
 		String hint = getHint(serviceId);
-		LoadBalancerRequestAdapter<T, DefaultRequestContext> lbRequest = new LoadBalancerRequestAdapter<>(request,
-				new DefaultRequestContext(request, hint));
+		LoadBalancerRequestAdapter<T, TimedRequestContext> lbRequest = new LoadBalancerRequestAdapter<>(request,
+				buildRequestContext(request, hint));
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = getSupportedLifecycleProcessors(serviceId);
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
@@ -79,6 +84,17 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 			throw new IllegalStateException("No instances available for " + serviceId);
 		}
 		return execute(serviceId, serviceInstance, lbRequest);
+	}
+
+	private <T> TimedRequestContext buildRequestContext(LoadBalancerRequest<T> delegate, String hint) {
+		if (delegate instanceof HttpRequestLoadBalancerRequest) {
+			HttpRequest request = ((HttpRequestLoadBalancerRequest) delegate).getHttpRequest();
+			if (request != null) {
+				RequestData requestData = new RequestData(request);
+				return new RequestDataContext(requestData, hint);
+			}
+		}
+		return new DefaultRequestContext(delegate, hint);
 	}
 
 	@Override
