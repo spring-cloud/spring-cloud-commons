@@ -41,11 +41,8 @@ public class AsyncLoadBalancerInterceptor implements AsyncClientHttpRequestInter
 			final AsyncClientHttpRequestExecution execution) throws IOException {
 		final URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
-		return this.loadBalancer.execute(serviceName, instance -> {
-			HttpRequest serviceRequest = new ServiceRequestWrapper(request, instance,
-					AsyncLoadBalancerInterceptor.this.loadBalancer);
-			return execution.executeAsync(serviceRequest, body);
-		});
+		return this.loadBalancer.execute(serviceName, new DefaultAsyncLoadBalancerRequest(loadBalancer,
+				new DefaultAsyncLoadBalancerRequest.ClientHttpRequestData(request, body, execution)));
 	}
 
 }
