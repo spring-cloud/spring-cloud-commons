@@ -45,6 +45,7 @@ import org.springframework.core.env.Environment;
  *
  * @param <R> Registration type passed to the {@link ServiceRegistry}.
  * @author Spencer Gibb
+ * @author Zen Huifer
  */
 public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		implements AutoServiceRegistration, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {

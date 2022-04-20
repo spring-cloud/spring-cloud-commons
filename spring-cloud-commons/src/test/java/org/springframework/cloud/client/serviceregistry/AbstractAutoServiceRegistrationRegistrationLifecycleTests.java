@@ -91,7 +91,7 @@ class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 
 	@EnableAutoConfiguration
 	@Configuration(proxyBeanMethods = false)
-	public static class Config {
+	 static class Config {
 
 		@Bean
 		public TestAutoServiceRegistrationLifecycle testAutoServiceRegistration(
@@ -162,17 +162,17 @@ class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 
 	}
 
-	public static class TestRegistrationLifecycleServiceRegistration
-			implements ServiceRegistry<TestRegistrationLifecycleRegistration> {
+	 static class TestRegistrationLifecycleServiceRegistration
+			 implements ServiceRegistry<TestRegistrationLifecycleRegistration> {
 
-		private boolean registered = false;
+		 private boolean registered = false;
 
-		private boolean deregistered = false;
+		 private boolean deregistered = false;
 
-		@Override
-		public void register(TestRegistrationLifecycleRegistration registration) {
-			if (registration == null) {
-				throw new NullPointerException();
+		 @Override public void register(
+				 TestRegistrationLifecycleRegistration registration) {
+			 if (registration == null) {
+				 throw new NullPointerException();
 			}
 			if (!(registration instanceof TestRegistrationLifecycleRegistration)) {
 				this.registered = true;
@@ -214,7 +214,7 @@ class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 
 	}
 
-	public static class TestRegistrationLifecycleRegistration implements Registration {
+	 static class TestRegistrationLifecycleRegistration implements Registration {
 
 		private final Map<String, String> metadata = new HashMap<>(8);
 
