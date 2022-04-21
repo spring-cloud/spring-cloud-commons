@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * @author Rob Worsnop
+ * @author Olga Maciaszek-Sharma
  */
 public class AsyncLoadBalancerInterceptor implements AsyncClientHttpRequestInterceptor {
 
@@ -41,7 +42,7 @@ public class AsyncLoadBalancerInterceptor implements AsyncClientHttpRequestInter
 			final AsyncClientHttpRequestExecution execution) throws IOException {
 		final URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
-		return this.loadBalancer.execute(serviceName, new DefaultAsyncLoadBalancerRequest(loadBalancer,
+		return loadBalancer.execute(serviceName, new DefaultAsyncLoadBalancerRequest(loadBalancer,
 				new DefaultAsyncLoadBalancerRequest.ClientHttpRequestData(request, body, execution)));
 	}
 

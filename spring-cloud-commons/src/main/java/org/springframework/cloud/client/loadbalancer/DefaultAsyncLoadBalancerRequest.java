@@ -23,7 +23,10 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
+ * Default {@link LoadBalancerRequest} implementation for async use-cases.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.1.2
  */
 class DefaultAsyncLoadBalancerRequest implements HttpRequestLoadBalancerRequest<ListenableFuture<ClientHttpResponse>> {
 
