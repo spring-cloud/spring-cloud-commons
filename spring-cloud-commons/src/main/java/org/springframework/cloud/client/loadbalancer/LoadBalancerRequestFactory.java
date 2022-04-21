@@ -51,8 +51,8 @@ public class LoadBalancerRequestFactory {
 
 	public LoadBalancerRequest<ClientHttpResponse> createRequest(final HttpRequest request, final byte[] body,
 			final ClientHttpRequestExecution execution) {
-		return new DefaultLoadBalancerRequest(loadBalancer, transformers,
-				new DefaultLoadBalancerRequest.ClientHttpRequestData(request, body, execution));
+		return new BlockingLoadBalancerRequest(loadBalancer, transformers,
+				new BlockingLoadBalancerRequest.ClientHttpRequestData(request, body, execution));
 	}
 
 }
