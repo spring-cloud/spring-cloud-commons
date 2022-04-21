@@ -16,43 +16,33 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import java.util.List;
-
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.AsyncClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * Default {@link LoadBalancerRequest} implementation.
+ * Default {@link LoadBalancerRequest} implementation for async use-cases.
  *
  * @author Olga Maciaszek-Sharma
  * @since 3.1.2
  */
-class DefaultLoadBalancerRequest implements HttpRequestLoadBalancerRequest<ClientHttpResponse> {
+class AsyncLoadBalancerRequest implements HttpRequestLoadBalancerRequest<ListenableFuture<ClientHttpResponse>> {
 
 	private final LoadBalancerClient loadBalancer;
 
-	private final List<LoadBalancerRequestTransformer> transformers;
-
 	private final ClientHttpRequestData clientHttpRequestData;
 
-	DefaultLoadBalancerRequest(LoadBalancerClient loadBalancer, List<LoadBalancerRequestTransformer> transformers,
-			ClientHttpRequestData clientHttpRequestData) {
+	AsyncLoadBalancerRequest(LoadBalancerClient loadBalancer, ClientHttpRequestData clientHttpRequestData) {
 		this.loadBalancer = loadBalancer;
-		this.transformers = transformers;
 		this.clientHttpRequestData = clientHttpRequestData;
 	}
 
 	@Override
-	public ClientHttpResponse apply(ServiceInstance instance) throws Exception {
+	public ListenableFuture<ClientHttpResponse> apply(ServiceInstance instance) throws Exception {
 		HttpRequest serviceRequest = new ServiceRequestWrapper(clientHttpRequestData.request, instance, loadBalancer);
-		if (this.transformers != null) {
-			for (LoadBalancerRequestTransformer transformer : this.transformers) {
-				serviceRequest = transformer.transformRequest(serviceRequest, instance);
-			}
-		}
-		return clientHttpRequestData.execution.execute(serviceRequest, clientHttpRequestData.body);
+		return clientHttpRequestData.execution.executeAsync(serviceRequest, clientHttpRequestData.body);
 	}
 
 	@Override
@@ -66,9 +56,9 @@ class DefaultLoadBalancerRequest implements HttpRequestLoadBalancerRequest<Clien
 
 		private final byte[] body;
 
-		private final ClientHttpRequestExecution execution;
+		private final AsyncClientHttpRequestExecution execution;
 
-		ClientHttpRequestData(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) {
+		ClientHttpRequestData(HttpRequest request, byte[] body, AsyncClientHttpRequestExecution execution) {
 			this.request = request;
 			this.body = body;
 			this.execution = execution;
