@@ -37,6 +37,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Spencer Gibb
+ * @author Tommy Karlsson
  */
 public class NamedContextFactoryTests {
 
@@ -105,8 +106,7 @@ public class NamedContextFactoryTests {
 	}
 
 	@Test
-	public void testBadThreadContextClassLoader() throws InterruptedException, ExecutionException, TimeoutException {
-
+	void testBadThreadContextClassLoader() throws InterruptedException, ExecutionException, TimeoutException {
 		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
 		parent.setClassLoader(ClassUtils.getDefaultClassLoader());
 		parent.register(BaseConfig.class);
@@ -128,7 +128,7 @@ public class NamedContextFactoryTests {
 	static class ThrowingClassLoader extends ClassLoader {
 
 		ThrowingClassLoader() {
-			super("Throwing classloader", null);
+			super(null);
 		}
 
 		@Override

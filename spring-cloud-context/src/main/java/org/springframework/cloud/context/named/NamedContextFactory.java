@@ -47,6 +47,7 @@ import org.springframework.core.env.MapPropertySource;
  * @param <C> specification
  * @author Spencer Gibb
  * @author Dave Syer
+ * @author Tommy Karlsson
  */
 // TODO: add javadoc
 public abstract class NamedContextFactory<C extends NamedContextFactory.Specification>
