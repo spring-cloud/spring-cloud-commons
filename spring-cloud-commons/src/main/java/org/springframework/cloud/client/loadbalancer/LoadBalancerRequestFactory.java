@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpRequest;
@@ -28,13 +29,14 @@ import org.springframework.http.client.ClientHttpResponse;
  * to the intercepted {@link HttpRequest}.
  *
  * @author William Tran
+ * @author Olga Maciaszek-Sharma
  *
  */
 public class LoadBalancerRequestFactory {
 
-	private LoadBalancerClient loadBalancer;
+	private final LoadBalancerClient loadBalancer;
 
-	private List<LoadBalancerRequestTransformer> transformers;
+	private final List<LoadBalancerRequestTransformer> transformers;
 
 	public LoadBalancerRequestFactory(LoadBalancerClient loadBalancer,
 			List<LoadBalancerRequestTransformer> transformers) {
@@ -44,19 +46,13 @@ public class LoadBalancerRequestFactory {
 
 	public LoadBalancerRequestFactory(LoadBalancerClient loadBalancer) {
 		this.loadBalancer = loadBalancer;
+		transformers = new ArrayList<>();
 	}
 
 	public LoadBalancerRequest<ClientHttpResponse> createRequest(final HttpRequest request, final byte[] body,
 			final ClientHttpRequestExecution execution) {
-		return instance -> {
-			HttpRequest serviceRequest = new ServiceRequestWrapper(request, instance, this.loadBalancer);
-			if (this.transformers != null) {
-				for (LoadBalancerRequestTransformer transformer : this.transformers) {
-					serviceRequest = transformer.transformRequest(serviceRequest, instance);
-				}
-			}
-			return execution.execute(serviceRequest, body);
-		};
+		return new BlockingLoadBalancerRequest(loadBalancer, transformers,
+				new BlockingLoadBalancerRequest.ClientHttpRequestData(request, body, execution));
 	}
 
 }
