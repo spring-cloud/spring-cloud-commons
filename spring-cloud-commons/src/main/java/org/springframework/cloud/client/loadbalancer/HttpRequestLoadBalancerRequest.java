@@ -19,7 +19,10 @@ package org.springframework.cloud.client.loadbalancer;
 import org.springframework.http.HttpRequest;
 
 /**
+ * Represents a {@link LoadBalancerRequest} created on top of an {@link HttpRequest}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.1.2
  */
 public interface HttpRequestLoadBalancerRequest<T> extends LoadBalancerRequest<T> {
 

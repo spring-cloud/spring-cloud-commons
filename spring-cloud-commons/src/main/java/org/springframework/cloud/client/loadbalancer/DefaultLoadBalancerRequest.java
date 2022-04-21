@@ -24,7 +24,10 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
+ * Default {@link LoadBalancerRequest} implementation.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 3.1.2
  */
 class DefaultLoadBalancerRequest implements HttpRequestLoadBalancerRequest<ClientHttpResponse> {
 
