@@ -31,20 +31,24 @@ public class StandardScopeCache implements ScopeCache {
 
 	private final ConcurrentMap<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
+	@Override
 	public Object remove(String name) {
 		return this.cache.remove(name);
 	}
 
+	@Override
 	public Collection<Object> clear() {
 		Collection<Object> values = new ArrayList<Object>(this.cache.values());
 		this.cache.clear();
 		return values;
 	}
 
+	@Override
 	public Object get(String name) {
 		return this.cache.get(name);
 	}
 
+	@Override
 	public Object put(String name, Object value) {
 		Object result = this.cache.putIfAbsent(name, value);
 		if (result != null) {
