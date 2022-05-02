@@ -29,6 +29,7 @@
 		<bintray.package>commons</bintray.package>
 		<evictor.version>1.0.0</evictor.version>
 		<spring-security-oauth2-autoconfigure.version>2.4.3</spring-security-oauth2-autoconfigure.version>
+		<jmh.version>1.35</jmh.version>
 	</properties>
 	<build>
 		<plugins>
@@ -170,6 +171,16 @@
 					</exclusion>
 				</exclusions>
 			</dependency>-->
+			<dependency>
+				<groupId>org.openjdk.jmh</groupId>
+				<artifactId>jmh-core</artifactId>
+				<version>${jmh.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openjdk.jmh</groupId>
+				<artifactId>jmh-generator-annprocess</artifactId>
+				<version>${jmh.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<modules>

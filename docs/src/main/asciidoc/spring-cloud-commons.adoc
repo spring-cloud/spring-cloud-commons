@@ -846,9 +846,9 @@ of compatible Spring Boot versions.
 == Spring Cloud LoadBalancer
 
 Spring Cloud provides its own client-side load-balancer abstraction and implementation. For the load-balancing
-mechanism, `ReactiveLoadBalancer` interface has been added and a *Round-Robin-based* and *Random* implementations
+mechanism, `ReactiveLoadBalancer` interface has been added and a *Round-Robin-based*, *Weighted* and *Random* implementations
 have been provided for it. In order to get instances to select from reactive `ServiceInstanceListSupplier`
-is used. Currently we support a service-discovery-based implementation of `ServiceInstanceListSupplier`
+is used. Currently, we support a service-discovery-based implementation of `ServiceInstanceListSupplier`
 that retrieves available instances from Service Discovery using a <<discovery-client, Discovery Client>> available in the classpath.
 
 TIP: It is possible to disable Spring Cloud LoadBalancer by setting the value of `spring.cloud.loadbalancer.enabled` to `false`.
@@ -875,7 +875,28 @@ public class CustomLoadBalancerConfiguration {
 }
 ----
 
+In addition, you can also choose to switch to WeightedRandomLoadBalancer:
+
+[[weighted-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+    @Bean
+    ReactorLoadBalancer<ServiceInstance> weightedLoadBalancer(Environment environment,
+            LoadBalancerClientFactory loadBalancerClientFactory) {
+        String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
+        return new WeightedLoadBalancer(loadBalancerClientFactory
+                .getLazyProvider(name, ServiceInstanceListSupplier.class),
+                name);
+    }
+}
+----
+
 NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` configuration arguments should either not be annotated with `@Configuration` or be outside component scan scope.
+
+WARNING: `WeightedLoadBalancer` will modify the current weight of `ServiceInstance` to ensure that the next `choose` can
+pick a lower weight instance, so you should ensure that the same instance for the same instanceId every time `choose`.
 
 === Spring Cloud LoadBalancer integrations
 
