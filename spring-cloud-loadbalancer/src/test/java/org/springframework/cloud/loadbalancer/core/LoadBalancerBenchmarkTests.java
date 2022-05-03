@@ -57,10 +57,13 @@ public class LoadBalancerBenchmarkTests {
 
 	RoundRobinLoadBalancer roundRobinLoadBalancer;
 
+	RandomLoadBalancer randomLoadBalancer;
+
 	@Setup
 	public void prepare() {
 		weightedLoadBalancer = weightedLoadBalancer();
 		roundRobinLoadBalancer = roundRobinLoadBalancer();
+		randomLoadBalancer = randomLoadBalancer();
 	}
 
 	@Benchmark
@@ -71,6 +74,11 @@ public class LoadBalancerBenchmarkTests {
 	@Benchmark
 	public void roundRobinLoadBalancerChoose() {
 		roundRobinLoadBalancer.choose().block();
+	}
+
+	@Benchmark
+	public void randomLoadBalancerChoose() {
+		randomLoadBalancer.choose().block();
 	}
 
 	@Test
@@ -118,5 +126,20 @@ public class LoadBalancerBenchmarkTests {
 		ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider =
 				new SimpleObjectProvider<>(supplier);
 		return new RoundRobinLoadBalancer(serviceInstanceListSupplierProvider, UUID.randomUUID().toString());
+	}
+
+	RandomLoadBalancer randomLoadBalancer() {
+		List<ServiceInstance> instances = IntStream.rangeClosed(1, hostCount).mapToObj(i -> {
+			DefaultServiceInstance instance = new DefaultServiceInstance();
+			instance.setInstanceId(i + "");
+			return instance;
+		}).collect(Collectors.toList());
+
+		SameInstancePreferenceServiceInstanceListSupplier supplier = mock(
+				SameInstancePreferenceServiceInstanceListSupplier.class);
+		when(supplier.get(any())).thenReturn(Flux.just(instances));
+		ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider =
+				new SimpleObjectProvider<>(supplier);
+		return new RandomLoadBalancer(serviceInstanceListSupplierProvider, UUID.randomUUID().toString());
 	}
 }
