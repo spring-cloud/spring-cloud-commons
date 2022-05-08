@@ -72,6 +72,7 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 		return serviceInstanceResponse;
 	}
 
+	@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 	private Response<ServiceInstance> getInstanceResponse(List<ServiceInstance> instances) {
 		if (instances.isEmpty()) {
 			if (log.isWarnEnabled()) {
@@ -88,20 +89,24 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 			// TODO should we check whether instance of WeightedServiceInstance?
 			WeightedServiceInstance weightedServiceInstance = (WeightedServiceInstance) instance;
 			int weight = weightedServiceInstance.getWeight();
-			int currentWeight = weightedServiceInstance.getCurrentWeight();
+			int currentWeight;
 
-			currentWeight += weight;
 			total += weight;
-			weightedServiceInstance.setCurrentWeight(currentWeight);
 
-			if (best == null || currentWeight > bestCurrentWeight) {
-				best = weightedServiceInstance;
-				bestCurrentWeight = currentWeight;
+			synchronized (weightedServiceInstance) {
+				currentWeight = weightedServiceInstance.getCurrentWeight() + weight;
+				weightedServiceInstance.setCurrentWeight(currentWeight);
 			}
+
+			if (best == null || currentWeight > best.getCurrentWeight()) {
+				best = weightedServiceInstance;
+			}
+
 		}
 
-		bestCurrentWeight -= total;
-		best.setCurrentWeight(bestCurrentWeight);
+		synchronized (best) {
+			best.setCurrentWeight(best.getCurrentWeight() - total);
+		}
 
 		return new DefaultResponse(best);
 	}
