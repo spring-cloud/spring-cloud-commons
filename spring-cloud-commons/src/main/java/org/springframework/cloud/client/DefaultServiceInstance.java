@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.springframework.cloud.commons.util.NumUtils.parseOrDefault;
-
 /**
  * Default implementation of {@link ServiceInstance} and {@link WeightedServiceInstance}.
  *
@@ -34,8 +32,6 @@ import static org.springframework.cloud.commons.util.NumUtils.parseOrDefault;
  * @author Zhuozhi Ji
  */
 public class DefaultServiceInstance implements ServiceInstance, WeightedServiceInstance {
-
-	private static final int DEFAULT_INSTANCE_WEIGHT = 100;
 
 	private String instanceId;
 
@@ -85,7 +81,7 @@ public class DefaultServiceInstance implements ServiceInstance, WeightedServiceI
 	 */
 	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
 			Map<String, String> metadata) {
-		this(instanceId, serviceId, host, port, secure, metadata, getInstanceWeightFromMetadata(metadata));
+		this(instanceId, serviceId, host, port, secure, metadata, 0);
 	}
 
 	/**
@@ -100,13 +96,6 @@ public class DefaultServiceInstance implements ServiceInstance, WeightedServiceI
 	}
 
 	public DefaultServiceInstance() {
-	}
-
-	private static int getInstanceWeightFromMetadata(Map<String, String> metadata) {
-		if (metadata == null || metadata.isEmpty()) {
-			return DEFAULT_INSTANCE_WEIGHT;
-		}
-		return parseOrDefault(metadata.get("weight"), DEFAULT_INSTANCE_WEIGHT);
 	}
 
 	/**
