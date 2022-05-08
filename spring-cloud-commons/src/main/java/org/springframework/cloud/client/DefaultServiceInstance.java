@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.springframework.cloud.commons.util.NumUtils.parseOrDefault;
 
@@ -52,7 +53,7 @@ public class DefaultServiceInstance implements ServiceInstance, WeightedServiceI
 
 	private int weight;
 
-	private transient int currentWeight;
+	private final AtomicInteger currentWeight = new AtomicInteger(0);
 
 	/**
 	 * @param instanceId the id of the instance.
@@ -72,7 +73,6 @@ public class DefaultServiceInstance implements ServiceInstance, WeightedServiceI
 		this.secure = secure;
 		this.metadata = metadata;
 		this.weight = weight;
-		this.currentWeight = 0;
 	}
 
 	/**
@@ -161,7 +161,7 @@ public class DefaultServiceInstance implements ServiceInstance, WeightedServiceI
 	}
 
 	@Override
-	public int getCurrentWeight() {
+	public AtomicInteger getCurrentWeight() {
 		return currentWeight;
 	}
 
@@ -198,11 +198,6 @@ public class DefaultServiceInstance implements ServiceInstance, WeightedServiceI
 
 	public void setWeight(int weight) {
 		this.weight = weight;
-	}
-
-	@Override
-	public void setCurrentWeight(int currentWeight) {
-		this.currentWeight = currentWeight;
 	}
 
 	@Override
