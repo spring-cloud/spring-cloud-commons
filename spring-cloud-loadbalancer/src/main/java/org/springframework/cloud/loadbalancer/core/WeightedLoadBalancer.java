@@ -93,6 +93,7 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 			total += weight;
 			currentWeight = weightedServiceInstance.getCurrentWeight().addAndGet(weight);
 
+			// Use bestCurrentWeight to ensure strictly increasing
 			if (best == null || currentWeight > bestCurrentWeight) {
 				best = weightedServiceInstance;
 				bestCurrentWeight = currentWeight;
