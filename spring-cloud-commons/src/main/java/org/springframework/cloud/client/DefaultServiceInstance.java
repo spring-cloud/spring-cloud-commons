@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Default implementation of {@link ServiceInstance} and {@link WeightedServiceInstance}.
+ * Default implementation of {@link ServiceInstance}.
  *
  * @author Spencer Gibb
  * @author Tim Ysewyn
@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Neil Powell
  * @author Zhuozhi Ji
  */
-public class DefaultServiceInstance implements ServiceInstance, WeightedServiceInstance {
+public class DefaultServiceInstance implements ServiceInstance {
 
 	private String instanceId;
 
