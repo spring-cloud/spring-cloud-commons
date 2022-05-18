@@ -18,8 +18,8 @@ package org.springframework.cloud.context.scope.thread;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.cloud.context.scope.ScopeCache;
 
@@ -29,9 +29,9 @@ import org.springframework.cloud.context.scope.ScopeCache;
  */
 public class ThreadLocalScopeCache implements ScopeCache {
 
-	private ThreadLocal<ConcurrentMap<String, Object>> data = new ThreadLocal<ConcurrentMap<String, Object>>() {
-		protected ConcurrentMap<String, Object> initialValue() {
-			return new ConcurrentHashMap<String, Object>();
+	private ThreadLocal<Map<String, Object>> data = new ThreadLocal<Map<String, Object>>() {
+		protected Map<String, Object> initialValue() {
+			return new HashMap<String, Object>();
 		}
 	};
 
@@ -40,7 +40,7 @@ public class ThreadLocalScopeCache implements ScopeCache {
 	}
 
 	public Collection<Object> clear() {
-		ConcurrentMap<String, Object> map = this.data.get();
+		Map<String, Object> map = this.data.get();
 		Collection<Object> values = new ArrayList<Object>(map.values());
 		map.clear();
 		return values;
