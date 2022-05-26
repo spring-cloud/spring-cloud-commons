@@ -72,6 +72,9 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	private List<RegistrationLifecycle<R>> registrationLifecycles = new ArrayList<>();
 
+	/**
+	 * @deprecated This function is deprecated and can be replaced by another constructor
+	 */
 	@Deprecated
 	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry) {
 		this.serviceRegistry = serviceRegistry;
@@ -100,13 +103,13 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		this.registrationLifecycles = registrationLifecycles;
 	}
 
-	public void addRegistrationManagementLifecycles(
-			List<RegistrationManagementLifecycle<R>> registrationManagementLifecycles) {
-		this.registrationManagementLifecycles.addAll(registrationManagementLifecycles);
+	public void addRegistrationManagementLifecycle(
+			RegistrationManagementLifecycle<R> registrationManagementLifecycle) {
+		this.registrationManagementLifecycles.add(registrationManagementLifecycle);
 	}
 
-	public void addRegistrationLifecycles(List<RegistrationLifecycle<R>> registrationLifecycles) {
-		this.registrationLifecycles.addAll(registrationLifecycles);
+	public void addRegistrationLifecycle(RegistrationLifecycle<R> registrationLifecycle) {
+		this.registrationLifecycles.add(registrationLifecycle);
 	}
 
 	protected ApplicationContext getContext() {
