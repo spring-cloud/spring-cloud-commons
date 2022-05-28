@@ -49,7 +49,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private int weight;
 
-	private AtomicInteger currentWeight = new AtomicInteger(0);
+	private final AtomicInteger currentWeight = new AtomicInteger(0);
 
 	/**
 	 * @param instanceId the id of the instance.
@@ -173,10 +173,6 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	public void setPort(int port) {
 		this.port = port;
-	}
-
-	public void setCurrentWeight(AtomicInteger currentWeight) {
-		this.currentWeight = currentWeight;
 	}
 
 	public void setUri(URI uri) {

@@ -41,6 +41,7 @@ import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.loadbalancer.support.SimpleObjectProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -167,7 +168,7 @@ class WeightedLoadBalancerTests {
 			DefaultServiceInstance instance = new DefaultServiceInstance();
 			instance.setInstanceId(i + "");
 			instance.setWeight(weights[i]);
-			instance.setCurrentWeight(new AtomicInteger(RANDOM.nextInt(weights[i])));
+			instance.getCurrentWeight().set(RANDOM.nextInt(weights[i]));
 			instances.add(instance);
 		}
 		return instances;
