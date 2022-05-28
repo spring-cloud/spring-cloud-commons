@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +26,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -49,6 +51,8 @@ import static org.mockito.Mockito.when;
 class WeightedLoadBalancerTests {
 
 	static final double DELTA = 1e-6;
+
+	static final Random RANDOM = new SecureRandom();
 
 	@Test
 	void shouldGetEmptyResponseWhenEmptyServiceInstanceList() {
@@ -163,6 +167,7 @@ class WeightedLoadBalancerTests {
 			DefaultServiceInstance instance = new DefaultServiceInstance();
 			instance.setInstanceId(i + "");
 			instance.setWeight(weights[i]);
+			instance.setCurrentWeight(new AtomicInteger(RANDOM.nextInt(weights[i])));
 			instances.add(instance);
 		}
 		return instances;
