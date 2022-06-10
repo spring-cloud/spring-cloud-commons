@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Param;
@@ -49,6 +50,7 @@ import static org.mockito.Mockito.when;
  * @author Zhuozhi Ji
  */
 @State(Scope.Thread)
+@EnabledIfSystemProperty(named = "slowTests", matches = "true")
 public class LoadBalancerBenchmarkTests {
 
 	@Param({ "1", "10", "100", "1000", "10000" })
