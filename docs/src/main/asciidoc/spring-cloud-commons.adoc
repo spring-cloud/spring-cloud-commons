@@ -896,7 +896,7 @@ public class CustomLoadBalancerConfiguration {
 NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` configuration arguments should either not be annotated with `@Configuration` or be outside component scan scope.
 
 WARNING: `WeightedLoadBalancer` will modify the current weight of `ServiceInstance` to ensure that the next `choose` can
-pick a lower weight instance, so you should ensure that the same instance for the same instanceId every time `choose`.
+pick a lower weight instance, so you should ensure that the same instance for the same instanceId every time `choose` is called.
 
 === Spring Cloud LoadBalancer integrations
 
