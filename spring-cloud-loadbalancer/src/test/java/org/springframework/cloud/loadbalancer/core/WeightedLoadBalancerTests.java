@@ -26,7 +26,6 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -41,7 +40,6 @@ import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.loadbalancer.support.SimpleObjectProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -116,7 +114,8 @@ class WeightedLoadBalancerTests {
 		checkPercentage(weights, distribution);
 	}
 
-	void assertMeetsExceptedPercentageWithConcurrency(int[] weights, int total, int threads) throws InterruptedException {
+	void assertMeetsExceptedPercentageWithConcurrency(int[] weights, int total, int threads)
+			throws InterruptedException {
 		WeightedLoadBalancer loadBalancer = weightedLoadBalancer(weights);
 
 		CountDownLatch countDownLatch = new CountDownLatch(threads);

@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
 @State(Scope.Thread)
 public class LoadBalancerBenchmarkTests {
 
-	@Param({"1", "10", "100", "1000", "10000"})
+	@Param({ "1", "10", "100", "1000", "10000" })
 	int hostCount;
 
 	WeightedLoadBalancer weightedLoadBalancer;
@@ -102,15 +102,10 @@ public class LoadBalancerBenchmarkTests {
 
 	@Test
 	void runBenchmarks() throws RunnerException {
-		Options options = new OptionsBuilder()
-				.include(this.getClass().getName())
-				.mode(Mode.Throughput)
-				.warmupTime(TimeValue.seconds(1))
-				.warmupIterations(5)
-				.measurementTime(TimeValue.seconds(1))
-				.measurementIterations(5)
-				.forks(1)
-				.shouldDoGC(false)    // we don't need gc pause
+		Options options = new OptionsBuilder().include(this.getClass().getName()).mode(Mode.Throughput)
+				.warmupTime(TimeValue.seconds(1)).warmupIterations(5).measurementTime(TimeValue.seconds(1))
+				.measurementIterations(5).forks(1).shouldDoGC(false) // we don't need gc
+																		// pause
 				.build();
 
 		new Runner(options).run();
@@ -127,8 +122,8 @@ public class LoadBalancerBenchmarkTests {
 		SameInstancePreferenceServiceInstanceListSupplier supplier = mock(
 				SameInstancePreferenceServiceInstanceListSupplier.class);
 		when(supplier.get(any())).thenReturn(Flux.just(instances));
-		ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider =
-				new SimpleObjectProvider<>(supplier);
+		ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider = new SimpleObjectProvider<>(
+				supplier);
 		return new WeightedLoadBalancer(serviceInstanceListSupplierProvider, UUID.randomUUID().toString());
 	}
 
@@ -142,8 +137,8 @@ public class LoadBalancerBenchmarkTests {
 		SameInstancePreferenceServiceInstanceListSupplier supplier = mock(
 				SameInstancePreferenceServiceInstanceListSupplier.class);
 		when(supplier.get(any())).thenReturn(Flux.just(instances));
-		ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider =
-				new SimpleObjectProvider<>(supplier);
+		ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider = new SimpleObjectProvider<>(
+				supplier);
 		return new RoundRobinLoadBalancer(serviceInstanceListSupplierProvider, UUID.randomUUID().toString());
 	}
 
@@ -157,8 +152,9 @@ public class LoadBalancerBenchmarkTests {
 		SameInstancePreferenceServiceInstanceListSupplier supplier = mock(
 				SameInstancePreferenceServiceInstanceListSupplier.class);
 		when(supplier.get(any())).thenReturn(Flux.just(instances));
-		ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider =
-				new SimpleObjectProvider<>(supplier);
+		ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider = new SimpleObjectProvider<>(
+				supplier);
 		return new RandomLoadBalancer(serviceInstanceListSupplierProvider, UUID.randomUUID().toString());
 	}
+
 }
