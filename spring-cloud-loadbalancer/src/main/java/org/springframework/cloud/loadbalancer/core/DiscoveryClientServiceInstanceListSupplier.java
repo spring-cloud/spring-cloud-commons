@@ -19,6 +19,9 @@ package org.springframework.cloud.loadbalancer.core;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +44,7 @@ import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientF
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
  * @author Rod Catter
+ * @author Lucas Lee
  * @since 2.2.0
  */
 public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstanceListSupplier {
@@ -50,18 +54,33 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 	 */
 	public static final String SERVICE_DISCOVERY_TIMEOUT = "spring.cloud.loadbalancer.service-discovery.timeout";
 
+	/**
+	 * Property of the interval to refresh service instance list.
+	 */
+	public static final String SERVICE_DISCOVERY_REFRESH_INTERVAL = "spring.cloud.loadbalancer.service-discovery.refresh-interval";
+
 	private static final Log LOG = LogFactory.getLog(DiscoveryClientServiceInstanceListSupplier.class);
 
 	private Duration timeout = Duration.ofSeconds(30);
+
+	private Duration refreshInterval = Duration.ofSeconds(30);
 
 	private final String serviceId;
 
 	private final Flux<List<ServiceInstance>> serviceInstances;
 
+	private DiscoveryClient delegate;
+
+	private List<ServiceInstance> serviceInstanceList = null;
+
+	private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
+
 	public DiscoveryClientServiceInstanceListSupplier(DiscoveryClient delegate, Environment environment) {
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
 		resolveTimeout(environment);
-		this.serviceInstances = Flux.defer(() -> Mono.fromCallable(() -> delegate.getInstances(serviceId)))
+		initServiceInstanceList(delegate, environment);
+
+		this.serviceInstances = Flux.defer(() -> Mono.fromCallable(() -> serviceInstanceList))
 				.timeout(timeout, Flux.defer(() -> {
 					logTimeout();
 					return Flux.just(new ArrayList<>());
@@ -69,6 +88,19 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 					logException(error);
 					return Flux.just(new ArrayList<>());
 				});
+	}
+
+	private void initServiceInstanceList(DiscoveryClient delegate, Environment environment) {
+		resolveRefreshInterval(environment);
+		this.delegate = delegate;
+
+		Runnable refreshServiceInstanceList = () -> {
+			this.serviceInstanceList = this.delegate.getInstances(this.serviceId);
+		};
+		refreshServiceInstanceList.run();
+
+		scheduledExecutorService.scheduleAtFixedRate(refreshServiceInstanceList, refreshInterval.getSeconds(),
+				refreshInterval.getSeconds(), TimeUnit.SECONDS);
 	}
 
 	public DiscoveryClientServiceInstanceListSupplier(ReactiveDiscoveryClient delegate, Environment environment) {
@@ -98,6 +130,13 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 		String providedTimeout = environment.getProperty(SERVICE_DISCOVERY_TIMEOUT);
 		if (providedTimeout != null) {
 			timeout = DurationStyle.detectAndParse(providedTimeout);
+		}
+	}
+
+	private void resolveRefreshInterval(Environment environment) {
+		String providedRefreshInterval = environment.getProperty(SERVICE_DISCOVERY_REFRESH_INTERVAL);
+		if (providedRefreshInterval != null) {
+			refreshInterval = DurationStyle.detectAndParse(providedRefreshInterval);
 		}
 	}
 
