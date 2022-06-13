@@ -51,44 +51,16 @@ import static org.mockito.Mockito.when;
  */
 @State(Scope.Thread)
 @EnabledIfSystemProperty(named = "slowTests", matches = "true")
-public class LoadBalancerBenchmarkTests {
+public class RandomLoadBalancerBenchmarkTests {
 
 	@Param({ "1", "10", "100", "1000", "10000" })
 	int hostCount;
-
-	WeightedLoadBalancer weightedLoadBalancer;
-
-	RoundRobinLoadBalancer roundRobinLoadBalancer;
 
 	RandomLoadBalancer randomLoadBalancer;
 
 	@Setup
 	public void prepare() {
-		weightedLoadBalancer = weightedLoadBalancer();
-		roundRobinLoadBalancer = roundRobinLoadBalancer();
 		randomLoadBalancer = randomLoadBalancer();
-	}
-
-	@Benchmark
-	public void weightedLoadBalancerChoose() {
-		weightedLoadBalancer.choose().block();
-	}
-
-	@Benchmark
-	@Threads(Threads.MAX)
-	public void weightedLoadBalancerChooseConcurrently() {
-		weightedLoadBalancer.choose().block();
-	}
-
-	@Benchmark
-	public void roundRobinLoadBalancerChoose() {
-		roundRobinLoadBalancer.choose().block();
-	}
-
-	@Benchmark
-	@Threads(Threads.MAX)
-	public void roundRobinLoadBalancerChooseConcurrently() {
-		roundRobinLoadBalancer.choose().block();
 	}
 
 	@Benchmark
@@ -111,37 +83,6 @@ public class LoadBalancerBenchmarkTests {
 				.build();
 
 		new Runner(options).run();
-	}
-
-	WeightedLoadBalancer weightedLoadBalancer() {
-		List<ServiceInstance> instances = IntStream.rangeClosed(1, hostCount).mapToObj(i -> {
-			DefaultServiceInstance instance = new DefaultServiceInstance();
-			instance.setInstanceId(i + "");
-			instance.setWeight(i);
-			return instance;
-		}).collect(Collectors.toList());
-
-		SameInstancePreferenceServiceInstanceListSupplier supplier = mock(
-				SameInstancePreferenceServiceInstanceListSupplier.class);
-		when(supplier.get(any())).thenReturn(Flux.just(instances));
-		ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider = new SimpleObjectProvider<>(
-				supplier);
-		return new WeightedLoadBalancer(serviceInstanceListSupplierProvider, UUID.randomUUID().toString());
-	}
-
-	RoundRobinLoadBalancer roundRobinLoadBalancer() {
-		List<ServiceInstance> instances = IntStream.rangeClosed(1, hostCount).mapToObj(i -> {
-			DefaultServiceInstance instance = new DefaultServiceInstance();
-			instance.setInstanceId(i + "");
-			return instance;
-		}).collect(Collectors.toList());
-
-		SameInstancePreferenceServiceInstanceListSupplier supplier = mock(
-				SameInstancePreferenceServiceInstanceListSupplier.class);
-		when(supplier.get(any())).thenReturn(Flux.just(instances));
-		ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider = new SimpleObjectProvider<>(
-				supplier);
-		return new RoundRobinLoadBalancer(serviceInstanceListSupplierProvider, UUID.randomUUID().toString());
 	}
 
 	RandomLoadBalancer randomLoadBalancer() {
