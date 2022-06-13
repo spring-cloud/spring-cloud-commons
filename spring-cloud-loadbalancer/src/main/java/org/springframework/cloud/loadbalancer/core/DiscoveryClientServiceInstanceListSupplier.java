@@ -71,7 +71,7 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 
 	private DiscoveryClient delegate;
 
-	private List<ServiceInstance> serviceInstanceList = null;
+	private volatile List<ServiceInstance> serviceInstanceList = null;
 
 	private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1);
 
@@ -97,6 +97,13 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 		Runnable refreshServiceInstanceList = () -> {
 			this.serviceInstanceList = this.delegate.getInstances(this.serviceId);
 		};
+		if (this.serviceInstanceList == null) {
+			synchronized (this) {
+				if (this.serviceInstanceList == null) {
+					refreshServiceInstanceList.run();
+				}
+			}
+		}
 		refreshServiceInstanceList.run();
 
 		scheduledExecutorService.scheduleAtFixedRate(refreshServiceInstanceList, refreshInterval.getSeconds(),
