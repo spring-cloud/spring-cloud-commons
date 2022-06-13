@@ -79,8 +79,8 @@ public class LoadBalancerCacheAutoConfiguration {
 		@PostConstruct
 		void logWarning() {
 			if (LOG.isWarnEnabled()) {
-				LOG.warn("Spring Cloud LoadBalancer is currently working with the default cache. "
-						+ "While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production."
+				LOG.warn("Spring Cloud LoadBalancer is currently working without cache. "
+						+ "It's highly recommended to use Caffeine cache in production."
 						+ "You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.");
 			}
 		}
