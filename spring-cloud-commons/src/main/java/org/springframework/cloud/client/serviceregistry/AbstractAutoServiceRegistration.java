@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.serviceregistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,6 +44,7 @@ import org.springframework.core.env.Environment;
  *
  * @param <R> Registration type passed to the {@link ServiceRegistry}.
  * @author Spencer Gibb
+ * @author Zen Huifer
  */
 public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		implements AutoServiceRegistration, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
@@ -50,20 +53,27 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	private final ServiceRegistry<R> serviceRegistry;
 
-	private boolean autoStartup = true;
+	private final boolean autoStartup = true;
 
-	private AtomicBoolean running = new AtomicBoolean(false);
+	private final AtomicBoolean running = new AtomicBoolean(false);
 
-	private int order = 0;
+	private final int order = 0;
+
+	private final AtomicInteger port = new AtomicInteger(0);
 
 	private ApplicationContext context;
 
 	private Environment environment;
 
-	private AtomicInteger port = new AtomicInteger(0);
-
 	private AutoServiceRegistrationProperties properties;
 
+	private List<RegistrationManagementLifecycle<R>> registrationManagementLifecycles = new ArrayList<>();
+
+	private List<RegistrationLifecycle<R>> registrationLifecycles = new ArrayList<>();
+
+	/**
+	 * @deprecated This function is deprecated and can be replaced by another constructor
+	 */
 	@Deprecated
 	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry) {
 		this.serviceRegistry = serviceRegistry;
@@ -73,6 +83,32 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 			AutoServiceRegistrationProperties properties) {
 		this.serviceRegistry = serviceRegistry;
 		this.properties = properties;
+	}
+
+	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry,
+			AutoServiceRegistrationProperties properties,
+			List<RegistrationManagementLifecycle<R>> registrationManagementLifecycles,
+			List<RegistrationLifecycle<R>> registrationLifecycles) {
+		this.serviceRegistry = serviceRegistry;
+		this.properties = properties;
+		this.registrationManagementLifecycles = registrationManagementLifecycles;
+		this.registrationLifecycles = registrationLifecycles;
+	}
+
+	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry,
+			AutoServiceRegistrationProperties properties, List<RegistrationLifecycle<R>> registrationLifecycles) {
+		this.serviceRegistry = serviceRegistry;
+		this.properties = properties;
+		this.registrationLifecycles = registrationLifecycles;
+	}
+
+	public void addRegistrationManagementLifecycle(
+			RegistrationManagementLifecycle<R> registrationManagementLifecycle) {
+		this.registrationManagementLifecycles.add(registrationManagementLifecycle);
+	}
+
+	public void addRegistrationLifecycle(RegistrationLifecycle<R> registrationLifecycle) {
+		this.registrationLifecycles.add(registrationLifecycle);
 	}
 
 	protected ApplicationContext getContext() {
@@ -129,9 +165,20 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		// because of containerPortInitializer below
 		if (!this.running.get()) {
 			this.context.publishEvent(new InstancePreRegisteredEvent(this, getRegistration()));
+			registrationLifecycles.forEach(
+					registrationLifecycle -> registrationLifecycle.postProcessBeforeStartRegister(getRegistration()));
 			register();
+			this.registrationLifecycles.forEach(
+					registrationLifecycle -> registrationLifecycle.postProcessAfterStartRegister(getRegistration()));
 			if (shouldRegisterManagement()) {
-				registerManagement();
+				this.registrationManagementLifecycles
+						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+								.postProcessBeforeStartRegisterManagement(getManagementRegistration()));
+				this.registerManagement();
+				registrationManagementLifecycles
+						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+								.postProcessAfterStartRegisterManagement(getManagementRegistration()));
+
 			}
 			this.context.publishEvent(new InstanceRegisteredEvent<>(this, getConfiguration()));
 			this.running.compareAndSet(false, true);
@@ -260,9 +307,20 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	public void stop() {
 		if (this.getRunning().compareAndSet(true, false) && isEnabled()) {
+
+			this.registrationLifecycles.forEach(
+					registrationLifecycle -> registrationLifecycle.postProcessBeforeStopRegister(getRegistration()));
 			deregister();
+			this.registrationLifecycles.forEach(
+					registrationLifecycle -> registrationLifecycle.postProcessAfterStopRegister(getRegistration()));
 			if (shouldRegisterManagement()) {
+				this.registrationManagementLifecycles
+						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+								.postProcessBeforeStopRegisterManagement(getManagementRegistration()));
 				deregisterManagement();
+				this.registrationManagementLifecycles
+						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+								.postProcessAfterStopRegisterManagement(getManagementRegistration()));
 			}
 			this.serviceRegistry.close();
 		}
