@@ -18,7 +18,7 @@ package org.springframework.cloud.client.serviceregistry;
 
 /**
  * Service registration life cycle. This life cycle is only related to
- * {@link  org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration#getManagementRegistration()}.
+ * {@link org.springframework.cloud.client.serviceregistry.AbstractAutoServiceRegistration#getManagementRegistration()}.
  *
  * @author Zen Huifer
  */
