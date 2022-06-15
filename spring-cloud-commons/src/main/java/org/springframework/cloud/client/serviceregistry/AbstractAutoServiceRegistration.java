@@ -102,7 +102,8 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		this.registrationLifecycles = registrationLifecycles;
 	}
 
-	public void addRegistrationManagementLifecycle(RegistrationManagementLifecycle<R> registrationManagementLifecycle) {
+	public void addRegistrationManagementLifecycle(
+			RegistrationManagementLifecycle<R> registrationManagementLifecycle) {
 		this.registrationManagementLifecycles.add(registrationManagementLifecycle);
 	}
 
