@@ -24,6 +24,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.WeightedServiceInstance;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.Request;
@@ -79,18 +80,19 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 			return new EmptyResponse();
 		}
 
-		ServiceInstance best = null;
+		WeightedServiceInstance best = null;
 		int bestCurrentWeight = 0;
 		int total = 0;
 
 		for (ServiceInstance instance : instances) {
-			int weight = instance.getWeight();
-			int currentWeight = instance.getCurrentWeight().addAndGet(weight);
+			WeightedServiceInstance weighted = (WeightedServiceInstance) instance;
+			int weight = weighted.getWeight();
+			int currentWeight = weighted.getCurrentWeight().addAndGet(weight);
 			total += weight;
 
-			// Use bestCurrentWeight to ensure strictly increasing
+			// Use bestCurrentWeight to ensure strictly increasing.
 			if (best == null || currentWeight > bestCurrentWeight) {
-				best = instance;
+				best = weighted;
 				bestCurrentWeight = currentWeight;
 			}
 		}

@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Neil Powell
  * @author Zhuozhi Ji
  */
-public class DefaultServiceInstance implements ServiceInstance {
+public class DefaultServiceInstance implements ServiceInstance, WeightedServiceInstance {
 
 	private String instanceId;
 

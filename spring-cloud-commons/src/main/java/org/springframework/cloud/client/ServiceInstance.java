@@ -18,7 +18,6 @@ package org.springframework.cloud.client;
 
 import java.net.URI;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Represents an instance of a service in a discovery system.
@@ -71,20 +70,6 @@ public interface ServiceInstance {
 	 */
 	default String getScheme() {
 		return null;
-	}
-
-	/**
-	 * @return The raw weight of the service instance.
-	 */
-	default int getWeight() {
-		return 0;
-	}
-
-	/**
-	 * @return The current weight of the service instance.
-	 */
-	default AtomicInteger getCurrentWeight() {
-		return new AtomicInteger(0);
 	}
 
 }
