@@ -58,12 +58,12 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
-	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
-	 * @param serviceId id of the service for which to choose an instance
-	 * @param weightFunction a function for calculating the weight of instance
+	 *                                            {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 * @param serviceId                           id of the service for which to choose an instance
+	 * @param weightFunction                      a function for calculating the weight of instance
 	 */
 	public WeightedLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
-			String serviceId, ToIntFunction<ServiceInstance> weightFunction) {
+								String serviceId, ToIntFunction<ServiceInstance> weightFunction) {
 		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
 		this.serviceId = serviceId;
 		this.weightFunction = weightFunction;
@@ -71,11 +71,11 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
-	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
-	 * @param serviceId id of the service for which to choose an instance
+	 *                                            {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 * @param serviceId                           id of the service for which to choose an instance
 	 */
 	public WeightedLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
-			String serviceId) {
+								String serviceId) {
 		this(serviceInstanceListSupplierProvider, serviceId, null);
 	}
 
@@ -89,7 +89,7 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 	}
 
 	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,
-			List<ServiceInstance> serviceInstances) {
+															  List<ServiceInstance> serviceInstances) {
 		Response<ServiceInstance> serviceInstanceResponse = getInstanceResponse(serviceInstances);
 		if (supplier instanceof SelectedInstanceCallback && serviceInstanceResponse.hasServer()) {
 			((SelectedInstanceCallback) supplier).selectedServiceInstance(serviceInstanceResponse.getServer());

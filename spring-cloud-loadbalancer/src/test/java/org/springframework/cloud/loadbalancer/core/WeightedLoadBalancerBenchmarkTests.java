@@ -53,14 +53,18 @@ import static org.mockito.Mockito.when;
 @EnabledIfSystemProperty(named = "slowTests", matches = "true")
 public class WeightedLoadBalancerBenchmarkTests {
 
-	@Param({ "1", "10", "100", "1000", "10000" })
+	@Param({"1", "10", "100", "1000", "10000"})
 	int hostCount;
 
 	WeightedLoadBalancer weightedLoadBalancer;
 
+	WeightedLoadBalancer metadataWeightedLoadBalancer;
+
 	@Setup
 	public void prepare() {
 		weightedLoadBalancer = weightedLoadBalancer();
+		metadataWeightedLoadBalancer = weightedLoadBalancer();
+		metadataWeightedLoadBalancer.weightFunction = WeightedLoadBalancer::metadataWeightFunction;
 	}
 
 	@Benchmark
@@ -74,12 +78,23 @@ public class WeightedLoadBalancerBenchmarkTests {
 		weightedLoadBalancer.choose().block();
 	}
 
+	@Benchmark
+	public void metadataWeightedLoadBalancerChoose() {
+		metadataWeightedLoadBalancer.choose().block();
+	}
+
+	@Benchmark
+	@Threads(Threads.MAX)
+	public void metadataWeightedLoadBalancerChooseConcurrently() {
+		metadataWeightedLoadBalancer.choose().block();
+	}
+
 	@Test
 	void runBenchmarks() throws RunnerException {
 		Options options = new OptionsBuilder().include(this.getClass().getName()).mode(Mode.Throughput)
 				.warmupTime(TimeValue.seconds(1)).warmupIterations(5).measurementTime(TimeValue.seconds(1))
 				.measurementIterations(5).forks(1).shouldDoGC(false) // we don't need gc
-																		// pause
+				// pause
 				.build();
 
 		new Runner(options).run();
@@ -90,6 +105,7 @@ public class WeightedLoadBalancerBenchmarkTests {
 			DefaultServiceInstance instance = new DefaultServiceInstance();
 			instance.setInstanceId(i + "");
 			instance.setWeight(i);
+			instance.getMetadata().put("weight", i + "");
 			return instance;
 		}).collect(Collectors.toList());
 
