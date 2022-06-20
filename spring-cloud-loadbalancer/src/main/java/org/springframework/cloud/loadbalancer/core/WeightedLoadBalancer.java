@@ -140,9 +140,6 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 	}
 
 	AtomicInteger calculateCurrentWeight(ServiceInstance serviceInstance, int weight) {
-		if (serviceInstance instanceof WeightedServiceInstance) {
-			return ((WeightedServiceInstance) serviceInstance).getCurrentWeight();
-		}
 		return currentWeightMap.computeIfAbsent(serviceInstance.getInstanceId(),
 				k -> new AtomicInteger(ThreadLocalRandom.current().nextInt(Math.abs(weight) + 1)));
 	}

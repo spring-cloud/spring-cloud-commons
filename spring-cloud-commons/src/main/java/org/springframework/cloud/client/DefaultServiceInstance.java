@@ -20,7 +20,6 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Default implementation of {@link ServiceInstance}.
@@ -48,8 +47,6 @@ public class DefaultServiceInstance implements ServiceInstance, WeightedServiceI
 	private URI uri;
 
 	private int weight;
-
-	private final AtomicInteger currentWeight = new AtomicInteger(0);
 
 	/**
 	 * @param instanceId the id of the instance.
@@ -150,11 +147,6 @@ public class DefaultServiceInstance implements ServiceInstance, WeightedServiceI
 	}
 
 	@Override
-	public AtomicInteger getCurrentWeight() {
-		return currentWeight;
-	}
-
-	@Override
 	public boolean isSecure() {
 		return secure;
 	}
@@ -193,7 +185,7 @@ public class DefaultServiceInstance implements ServiceInstance, WeightedServiceI
 	public String toString() {
 		return "DefaultServiceInstance{" + "instanceId='" + instanceId + '\'' + ", serviceId='" + serviceId + '\''
 				+ ", host='" + host + '\'' + ", port=" + port + ", secure=" + secure + ", metadata=" + metadata
-				+ ", weight=" + weight + ", currentWeight=" + currentWeight + '}';
+				+ ", weight=" + weight + '}';
 	}
 
 	@Override
