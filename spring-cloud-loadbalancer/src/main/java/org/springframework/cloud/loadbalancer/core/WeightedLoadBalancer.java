@@ -17,6 +17,11 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.ToIntFunction;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,9 +44,30 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 
 	private static final Log log = LogFactory.getLog(WeightedLoadBalancer.class);
 
+	private static final int DEFAULT_WEIGHT = 1;
+
+	private static final String METADATA_WEIGHT_KEY = "weight";
+
+	final Map<String, AtomicInteger> currentWeightMap = new ConcurrentHashMap<>();
+
 	final String serviceId;
 
 	ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
+
+	ToIntFunction<ServiceInstance> weightFunction;
+
+	/**
+	 * @param serviceInstanceListSupplierProvider a provider of
+	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 * @param serviceId id of the service for which to choose an instance
+	 * @param weightFunction a function for calculating the weight of instance
+	 */
+	public WeightedLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+			String serviceId, ToIntFunction<ServiceInstance> weightFunction) {
+		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
+		this.serviceId = serviceId;
+		this.weightFunction = weightFunction;
+	}
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
@@ -50,8 +76,7 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 	 */
 	public WeightedLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId) {
-		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
-		this.serviceId = serviceId;
+		this(serviceInstanceListSupplierProvider, serviceId, null);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -80,26 +105,57 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 			return new EmptyResponse();
 		}
 
-		WeightedServiceInstance best = null;
-		int bestCurrentWeight = 0;
+		ServiceInstance best = null;
+		AtomicInteger bestCurrentWeight = null;
+		int bestUpdatedCurrentWeight = 0;
 		int total = 0;
 
 		for (ServiceInstance instance : instances) {
-			WeightedServiceInstance weighted = (WeightedServiceInstance) instance;
-			int weight = weighted.getWeight();
-			int currentWeight = weighted.getCurrentWeight().addAndGet(weight);
+			int weight = calculateWeight(instance);
+			AtomicInteger currentWeight = calculateCurrentWeight(instance, weight);
+			int updatedCurrentWeight = currentWeight.addAndGet(weight);
 			total += weight;
 
-			// Use bestCurrentWeight to ensure strictly increasing.
-			if (best == null || currentWeight > bestCurrentWeight) {
-				best = weighted;
+			// Use bestUpdatedCurrentWeight to ensure strictly increasing.
+			if (best == null || updatedCurrentWeight > bestUpdatedCurrentWeight) {
+				best = instance;
 				bestCurrentWeight = currentWeight;
+				bestUpdatedCurrentWeight = updatedCurrentWeight;
 			}
 		}
 
-		best.getCurrentWeight().addAndGet(-total);
+		bestCurrentWeight.getAndAdd(-total);
 
 		return new DefaultResponse(best);
+	}
+
+	int calculateWeight(ServiceInstance serviceInstance) {
+		if (weightFunction != null) {
+			return weightFunction.applyAsInt(serviceInstance);
+		}
+		if (serviceInstance instanceof WeightedServiceInstance) {
+			return ((WeightedServiceInstance) serviceInstance).getWeight();
+		}
+		return metadataWeightFunction(serviceInstance);
+	}
+
+	AtomicInteger calculateCurrentWeight(ServiceInstance serviceInstance, int weight) {
+		if (serviceInstance instanceof WeightedServiceInstance) {
+			return ((WeightedServiceInstance) serviceInstance).getCurrentWeight();
+		}
+		return currentWeightMap.computeIfAbsent(serviceInstance.getInstanceId(),
+				k -> new AtomicInteger(ThreadLocalRandom.current().nextInt(Math.abs(weight) + 1)));
+	}
+
+	static int metadataWeightFunction(ServiceInstance serviceInstance) {
+		Map<String, String> metadata = serviceInstance.getMetadata();
+		if (metadata != null) {
+			String weightValue = metadata.get(METADATA_WEIGHT_KEY);
+			if (weightValue != null) {
+				return Integer.parseInt(weightValue);
+			}
+		}
+		return DEFAULT_WEIGHT;
 	}
 
 }
