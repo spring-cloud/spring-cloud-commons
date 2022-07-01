@@ -35,11 +35,6 @@
 			"type": "java.lang.Boolean"
 		},
 		{
-			"name": "spring.cloud.loadbalancer.eager-load.enabled",
-			"description": "Enables eager load of clients context.",
-			"type": "java.lang.Boolean"
-		},
-		{
 			"name": "spring.cloud.loadbalancer.eager-load.clients",
 			"description": "Names of the clients.",
 			"type": "java.util.List"

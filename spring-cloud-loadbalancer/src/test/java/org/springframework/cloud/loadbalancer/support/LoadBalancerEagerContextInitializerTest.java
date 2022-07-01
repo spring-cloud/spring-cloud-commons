@@ -16,29 +16,25 @@
 
 package org.springframework.cloud.loadbalancer.support;
 
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Andrii Bohutskyi
  */
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = {
-		LoadBalancerAutoConfiguration.class,
-		LoadBalancerEagerContextInitializerTest.SomeTestConfig.class
-})
+@SpringBootTest(
+		classes = { LoadBalancerAutoConfiguration.class, LoadBalancerEagerContextInitializerTest.SomeTestConfig.class })
 class LoadBalancerEagerContextInitializerTest {
 
 	private static final String LOAD_BALANCER = "testLoadBalancer";
@@ -58,7 +54,7 @@ class LoadBalancerEagerContextInitializerTest {
 	static class SomeTestConfig {
 
 		@Bean
-		public LoadBalancerEagerContextInitializer loadBalancerEagerContextInitializer(
+		public LoadBalancerEagerContextInitializer testLoadBalancerEagerContextInitializer(
 				LoadBalancerClientFactory factory) {
 			return new LoadBalancerEagerContextInitializer(factory, Collections.singletonList(LOAD_BALANCER));
 		}
@@ -78,12 +74,14 @@ class LoadBalancerEagerContextInitializerTest {
 
 		private static final AtomicInteger COUNT = new AtomicInteger();
 
-		public LoadBalancerCounter() {
+		LoadBalancerCounter() {
 			COUNT.incrementAndGet();
 		}
 
 		public static int getCount() {
 			return COUNT.get();
 		}
+
 	}
+
 }

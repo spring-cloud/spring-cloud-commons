@@ -25,7 +25,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author Andrii Bohutskyi
  */
 @ConfigurationProperties("spring.cloud.loadbalancer.eager-load")
-public class LoadbalancerEagerLoadProperties {
+public class LoadBalancerEagerLoadProperties {
 
 	private List<String> clients = new ArrayList<>();
 
@@ -36,4 +36,5 @@ public class LoadbalancerEagerLoadProperties {
 	public void setClients(List<String> clients) {
 		this.clients = clients;
 	}
+
 }

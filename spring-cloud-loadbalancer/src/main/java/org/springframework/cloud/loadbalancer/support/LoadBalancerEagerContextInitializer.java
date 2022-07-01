@@ -16,10 +16,10 @@
 
 package org.springframework.cloud.loadbalancer.support;
 
+import java.util.List;
+
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
-
-import java.util.List;
 
 /**
  * @author Andrii Bohutskyi
@@ -37,11 +37,7 @@ public class LoadBalancerEagerContextInitializer implements ApplicationListener<
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-		warnUpFunction();
-	}
-
-	private void warnUpFunction() {
-		this.serviceNames.forEach(factory::getInstance);
+		serviceNames.forEach(factory::getInstance);
 	}
 
 }

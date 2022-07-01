@@ -853,6 +853,12 @@ that retrieves available instances from Service Discovery using a <<discovery-cl
 
 TIP: It is possible to disable Spring Cloud LoadBalancer by setting the value of `spring.cloud.loadbalancer.enabled` to `false`.
 
+=== Eager loading of LoadBalancer contexts
+
+Spring Cloud LoadBalancer creates a separate Spring child context for each service id. By default, these contexts are initialised lazily, whenever the first request for a service id is being load-balanced.
+
+You can choose to load those contexts eagerly. In order to do that, specify the service ids for which you want to do eager load using the `spring.cloud-loadbalancer.eager-load.clients` property.
+
 === Switching between the load-balancing algorithms
 
 The `ReactiveLoadBalancer` implementation that is used by default is `RoundRobinLoadBalancer`. To switch to a different implementation, either for selected services or all of them, you can use the <<custom-loadbalancer-configuration, custom LoadBalancer configurations mechanism>>.
