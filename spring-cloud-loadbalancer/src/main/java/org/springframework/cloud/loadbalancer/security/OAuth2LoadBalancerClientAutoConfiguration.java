@@ -40,6 +40,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 @ConditionalOnClass(OAuth2RestTemplate.class)
 @ConditionalOnProperty("spring.cloud.oauth2.load-balanced.enabled")
 @AutoConfigureAfter(OAuth2AutoConfiguration.class)
+@Deprecated // spring-security-oauth2 reached EOL
 public class OAuth2LoadBalancerClientAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
