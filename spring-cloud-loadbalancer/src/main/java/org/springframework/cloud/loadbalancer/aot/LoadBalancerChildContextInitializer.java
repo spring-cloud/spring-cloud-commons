@@ -17,7 +17,6 @@
 package org.springframework.cloud.loadbalancer.aot;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -88,14 +87,15 @@ public class LoadBalancerChildContextInitializer
 				&& registeredBean.getBeanFactory().equals(applicationBeanFactory))) {
 			return null;
 		}
-		List<ChildContextMappings.Entry> contextsMap = ChildContextMappings.getChildContexts(context);
-		Set<ConfigurableApplicationContext> childContextAotContributions = contextsMap.stream()
+		// TODO: add context ids from properties
+		Set<String> contextIds = loadBalancerClientFactory.getConfigurations().keySet();
+		Set<ConfigurableApplicationContext> childContextAotContributions = contextIds.stream()
 				.map(this::buildChildContext).collect(Collectors.toSet());
 		return new AotContribution(childContextAotContributions);
 	}
 
-	private ConfigurableApplicationContext buildChildContext(ChildContextMappings.Entry entry) {
-		ConfigurableApplicationContext childContext = loadBalancerClientFactory.buildContext(entry.name());
+	private ConfigurableApplicationContext buildChildContext(String contextId) {
+		ConfigurableApplicationContext childContext = loadBalancerClientFactory.buildContext(contextId);
 		registerBeans(childContext);
 		return childContext;
 	}
@@ -130,7 +130,9 @@ public class LoadBalancerChildContextInitializer
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			ApplicationContextAotGenerator contextAotGenerator = new ApplicationContextAotGenerator();
 			Map<String, ClassName> generatedInitializerClassNames = childContexts.stream().map(childContext -> {
-				GenerationContext childGenerationContext = generationContext.withName(childContext.getDisplayName());
+				String name = childContext.getDisplayName();
+				name = name.replaceAll("[-]", "_");
+				GenerationContext childGenerationContext = generationContext.withName(name);
 				ClassName initializerClassName = contextAotGenerator.generateApplicationContext(childContext,
 						childGenerationContext);
 				return Map.entry(childContext.getDisplayName(), initializerClassName);
@@ -143,7 +145,7 @@ public class LoadBalancerChildContextInitializer
 						builder.addParameter(LoadBalancerChildContextInitializer.class, "instance");
 						builder.returns(LoadBalancerChildContextInitializer.class);
 						builder.addStatement(
-								"Map<String, ApplicationContextInitializer<? extends ConfigurableApplicationContext> applicationContextInitializer> initializers = new HashMap();");
+								"Map<String, ApplicationContextInitializer<? extends ConfigurableApplicationContext>> initializers = new HashMap()");
 						generatedInitializerClassNames.keySet()
 								.forEach(contextId -> builder.addStatement("initializers.put($S, new $L())", contextId,
 										generatedInitializerClassNames.get(contextId)));

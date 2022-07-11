@@ -215,6 +215,10 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		return BeanFactoryUtils.beansOfTypeIncludingAncestors(context, type);
 	}
 
+	public Map<String, C> getConfigurations() {
+		return configurations;
+	}
+
 	/**
 	 * Specification with name and configuration.
 	 */
