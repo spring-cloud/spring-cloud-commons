@@ -49,7 +49,6 @@ import org.springframework.core.env.MapPropertySource;
  * @author Dave Syer
  * @author Tommy Karlsson
  */
-// TODO: add javadoc
 public abstract class NamedContextFactory<C extends NamedContextFactory.Specification>
 		implements DisposableBean, ApplicationContextAware {
 
@@ -112,7 +111,30 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		return this.contexts.get(name);
 	}
 
-	protected AnnotationConfigApplicationContext createContext(String name) {
+	public AnnotationConfigApplicationContext createContext(String name) {
+		AnnotationConfigApplicationContext context = buildContext(name);
+		registerBeans(name, context);
+		context.refresh();
+		return context;
+	}
+
+	public void registerBeans(String name, AnnotationConfigApplicationContext context) {
+		if (this.configurations.containsKey(name)) {
+			for (Class<?> configuration : this.configurations.get(name).getConfiguration()) {
+				context.register(configuration);
+			}
+		}
+		for (Map.Entry<String, C> entry : this.configurations.entrySet()) {
+			if (entry.getKey().startsWith("default.")) {
+				for (Class<?> configuration : entry.getValue().getConfiguration()) {
+					context.register(configuration);
+				}
+			}
+		}
+		context.register(PropertyPlaceholderAutoConfiguration.class, this.defaultConfigType);
+	}
+
+	public AnnotationConfigApplicationContext buildContext(String name) {
 		AnnotationConfigApplicationContext context;
 		if (this.parent != null) {
 			// jdk11 issue
@@ -132,27 +154,15 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		else {
 			context = new AnnotationConfigApplicationContext();
 		}
-		if (this.configurations.containsKey(name)) {
-			for (Class<?> configuration : this.configurations.get(name).getConfiguration()) {
-				context.register(configuration);
-			}
-		}
-		for (Map.Entry<String, C> entry : this.configurations.entrySet()) {
-			if (entry.getKey().startsWith("default.")) {
-				for (Class<?> configuration : entry.getValue().getConfiguration()) {
-					context.register(configuration);
-				}
-			}
-		}
-		context.register(PropertyPlaceholderAutoConfiguration.class, this.defaultConfigType);
-		context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(this.propertySourceName,
-				Collections.<String, Object>singletonMap(this.propertyName, name)));
+		// TODO: can it be done in this order?
+		context.getEnvironment().getPropertySources().addFirst(
+				new MapPropertySource(this.propertySourceName, Collections.singletonMap(this.propertyName, name)));
+		// TODO: can it be done in this order?
 		if (this.parent != null) {
 			// Uses Environment from parent as well as beans
 			context.setParent(this.parent);
 		}
 		context.setDisplayName(generateDisplayName(name));
-		context.refresh();
 		return context;
 	}
 

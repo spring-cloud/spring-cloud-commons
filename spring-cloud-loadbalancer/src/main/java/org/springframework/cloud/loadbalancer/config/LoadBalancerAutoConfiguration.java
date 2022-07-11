@@ -30,8 +30,10 @@ import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPo
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
+import org.springframework.cloud.loadbalancer.aot.LoadBalancerChildContextInitializer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerEagerContextInitializer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -48,12 +50,6 @@ import org.springframework.core.env.Environment;
 @ConditionalOnProperty(value = "spring.cloud.loadbalancer.enabled", havingValue = "true", matchIfMissing = true)
 public class LoadBalancerAutoConfiguration {
 
-	private final ObjectProvider<List<LoadBalancerClientSpecification>> configurations;
-
-	public LoadBalancerAutoConfiguration(ObjectProvider<List<LoadBalancerClientSpecification>> configurations) {
-		this.configurations = configurations;
-	}
-
 	@Bean
 	@ConditionalOnMissingBean
 	public LoadBalancerZoneConfig zoneConfig(Environment environment) {
@@ -62,9 +58,10 @@ public class LoadBalancerAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public LoadBalancerClientFactory loadBalancerClientFactory(LoadBalancerClientsProperties properties) {
+	public LoadBalancerClientFactory loadBalancerClientFactory(LoadBalancerClientsProperties properties,
+			ObjectProvider<List<LoadBalancerClientSpecification>> configurations) {
 		LoadBalancerClientFactory clientFactory = new LoadBalancerClientFactory(properties);
-		clientFactory.setConfigurations(this.configurations.getIfAvailable(Collections::emptyList));
+		clientFactory.setConfigurations(configurations.getIfAvailable(Collections::emptyList));
 		return clientFactory;
 	}
 
@@ -72,6 +69,12 @@ public class LoadBalancerAutoConfiguration {
 	public LoadBalancerEagerContextInitializer loadBalancerEagerContextInitializer(
 			LoadBalancerClientFactory clientFactory, LoadBalancerEagerLoadProperties properties) {
 		return new LoadBalancerEagerContextInitializer(clientFactory, properties.getClients());
+	}
+
+	@Bean
+	LoadBalancerChildContextInitializer loadBalancerChildContextInitializer(
+			LoadBalancerClientFactory loadBalancerClientFactory, ApplicationContext parentContext) {
+		return new LoadBalancerChildContextInitializer(loadBalancerClientFactory, parentContext);
 	}
 
 }
