@@ -101,7 +101,7 @@ public class LoadBalancerChildContextInitializer
 	}
 
 	@SuppressWarnings("unchecked")
-	LoadBalancerChildContextInitializer withApplicationContextInitializers(
+	public LoadBalancerChildContextInitializer withApplicationContextInitializers(
 			Map<String, ApplicationContextInitializer<? extends ConfigurableApplicationContext>> applicationContextInitializers) {
 		Map<String, ApplicationContextInitializer<ConfigurableApplicationContext>> convertedInitializers = new HashMap<>();
 		applicationContextInitializers.keySet()
