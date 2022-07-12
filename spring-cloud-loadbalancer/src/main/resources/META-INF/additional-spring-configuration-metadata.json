@@ -33,6 +33,11 @@
 			"name": "spring.cloud.loadbalancer.enabled",
 			"description": "Enables Spring Cloud LoadBalancer.",
 			"type": "java.lang.Boolean"
+		},
+		{
+			"name": "spring.cloud.loadbalancer.eager-load.clients",
+			"description": "Names of the clients.",
+			"type": "java.util.List"
 		}
 	]
 }
