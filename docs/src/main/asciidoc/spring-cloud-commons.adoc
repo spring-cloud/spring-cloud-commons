@@ -901,8 +901,34 @@ public class CustomLoadBalancerConfiguration {
 
 NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` configuration arguments should either not be annotated with `@Configuration` or be outside component scan scope.
 
-WARNING: `WeightedLoadBalancer` will modify the current weight of `ServiceInstance` to ensure that the next `choose` can
-pick a lower weight instance, so you should ensure that the same instance for the same instanceId every time `choose` is called.
+=== WeightedLoadBalancer
+
+By default, `WeightedLoadBalancer` parses instance weight from metadata (for example, `eureka.instance.metadata-map.weight`).
+You can specify the weight calculation strategy by setting the `weightFunction` (implementing `ToIntFunction<ServiceInstance>` interface).
+
+For example, you can set `weightFunction` to implement slow-start load balancing that gradually increases the weight over time.
+[[slowstart-weightFunction-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+    static final long MAX_WEIGHT = 100;
+
+    @Bean
+    ReactorLoadBalancer<ServiceInstance> weightedLoadBalancer(Environment environment,
+            LoadBalancerClientFactory loadBalancerClientFactory) {
+        String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
+        return new WeightedLoadBalancer(
+                loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class),
+                name,
+                weightFunction(System.currentTimeMillis()));
+    }
+
+    ToIntFunction<ServiceInstance> slowStartWeightFunction(long startTime) {
+        return serviceInstance -> (int) Math.min(System.currentTimeMillis() - startTime, MAX_WEIGHT);
+    }
+}
+----
 
 === Spring Cloud LoadBalancer integrations
 
