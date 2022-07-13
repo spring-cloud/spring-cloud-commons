@@ -37,6 +37,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.MapPropertySource;
+import org.springframework.util.Assert;
 
 /**
  * Creates a set of child contexts that allows a set of Specifications to define the beans
@@ -109,6 +110,14 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 			}
 		}
 		return this.contexts.get(name);
+	}
+
+	public void addContext(String contextId, ConfigurableApplicationContext context) {
+		Assert.notNull(contextId, "contextId cannot be null.");
+		Assert.notNull(context, "context cannot be null.");
+		Assert.isInstanceOf(AnnotationConfigApplicationContext.class, context,
+				"context has to be an instance of " + AnnotationConfigApplicationContext.class.getSimpleName());
+		contexts.put(contextId, (AnnotationConfigApplicationContext) context);
 	}
 
 	public AnnotationConfigApplicationContext createContext(String name) {

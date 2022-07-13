@@ -17,6 +17,7 @@
 package org.springframework.cloud.loadbalancer.aot;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.aot.BeanRegistrationExcludeFilter;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
@@ -70,8 +72,10 @@ public class LoadBalancerChildContextInitializer
 	private void registerBeans(ConfigurableApplicationContext childContext) {
 		if (!applicationContextInitializers.isEmpty()) {
 			applicationContextInitializers.keySet().stream()
-					.filter(contextId -> contextId.equals(childContext.getDisplayName()))
-					.forEach(contextId -> applicationContextInitializers.get(contextId).initialize(childContext));
+					.filter(contextId -> contextId.equals(childContext.getDisplayName())).forEach(contextId -> {
+						applicationContextInitializers.get(contextId).initialize(childContext);
+						loadBalancerClientFactory.addContext(contextId, childContext);
+					});
 			return;
 		}
 		loadBalancerClientFactory.registerBeans(childContext.getDisplayName(),
@@ -88,9 +92,15 @@ public class LoadBalancerChildContextInitializer
 			return null;
 		}
 		// TODO: add context ids from properties
-		Set<String> contextIds = loadBalancerClientFactory.getConfigurations().keySet();
-		Set<ConfigurableApplicationContext> childContextAotContributions = contextIds.stream()
-				.map(this::buildChildContext).collect(Collectors.toSet());
+		Set<String> contextIds = new HashSet<>();
+		Map<String, LoadBalancerClientSpecification> configurations = loadBalancerClientFactory.getConfigurations();
+		Set<String> contextIdsFromConfig = configurations.keySet().stream().filter(key -> !key.startsWith("default."))
+				.collect(Collectors.toSet());
+		contextIds.addAll(contextIdsFromConfig);
+		contextIds.add("default");
+		Map<String, ConfigurableApplicationContext> childContextAotContributions = contextIds.stream()
+				.map(contextId -> Map.entry(contextId, buildChildContext(contextId)))
+				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
 		return new AotContribution(childContextAotContributions);
 	}
 
@@ -119,23 +129,25 @@ public class LoadBalancerChildContextInitializer
 
 	private static class AotContribution implements BeanRegistrationAotContribution {
 
-		private final Set<GenericApplicationContext> childContexts;
+		private final Map<String, GenericApplicationContext> childContexts;
 
-		AotContribution(Set<ConfigurableApplicationContext> childContexts) {
-			this.childContexts = childContexts.stream().filter(GenericApplicationContext.class::isInstance)
-					.map(GenericApplicationContext.class::cast).collect(Collectors.toSet());
+		AotContribution(Map<String, ConfigurableApplicationContext> childContexts) {
+			this.childContexts = childContexts.entrySet().stream()
+					.filter(entry -> entry.getValue() instanceof GenericApplicationContext)
+					.map(entry -> Map.entry(entry.getKey(), (GenericApplicationContext) entry.getValue()))
+					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		}
 
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
 			ApplicationContextAotGenerator contextAotGenerator = new ApplicationContextAotGenerator();
-			Map<String, ClassName> generatedInitializerClassNames = childContexts.stream().map(childContext -> {
-				String name = childContext.getDisplayName();
+			Map<String, ClassName> generatedInitializerClassNames = childContexts.entrySet().stream().map(entry -> {
+				String name = entry.getValue().getDisplayName();
 				name = name.replaceAll("[-]", "_");
 				GenerationContext childGenerationContext = generationContext.withName(name);
-				ClassName initializerClassName = contextAotGenerator.generateApplicationContext(childContext,
+				ClassName initializerClassName = contextAotGenerator.generateApplicationContext(entry.getValue(),
 						childGenerationContext);
-				return Map.entry(childContext.getDisplayName(), initializerClassName);
+				return Map.entry(entry.getKey(), initializerClassName);
 			}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 			GeneratedMethod postProcessorMethod = beanRegistrationCode.getMethodGenerator()
 					.generateMethod("addChildContextInitializer").using(builder -> {
