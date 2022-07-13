@@ -102,7 +102,7 @@ public class LoadBalancerChildContextInitializer
 
 	@SuppressWarnings("unchecked")
 	public LoadBalancerChildContextInitializer withApplicationContextInitializers(
-			Map<String, ApplicationContextInitializer<? extends ConfigurableApplicationContext>> applicationContextInitializers) {
+			Map<String, Object> applicationContextInitializers) {
 		Map<String, ApplicationContextInitializer<ConfigurableApplicationContext>> convertedInitializers = new HashMap<>();
 		applicationContextInitializers.keySet()
 				.forEach(contextId -> convertedInitializers.put(contextId,
@@ -144,8 +144,7 @@ public class LoadBalancerChildContextInitializer
 						builder.addParameter(RegisteredBean.class, "registeredBean");
 						builder.addParameter(LoadBalancerChildContextInitializer.class, "instance");
 						builder.returns(LoadBalancerChildContextInitializer.class);
-						builder.addStatement(
-								"Map<String, ApplicationContextInitializer<? extends ConfigurableApplicationContext>> initializers = new HashMap()");
+						builder.addStatement("$T<String, Object> initializers = new $T<>()", Map.class, HashMap.class);
 						generatedInitializerClassNames.keySet()
 								.forEach(contextId -> builder.addStatement("initializers.put($S, new $L())", contextId,
 										generatedInitializerClassNames.get(contextId)));
