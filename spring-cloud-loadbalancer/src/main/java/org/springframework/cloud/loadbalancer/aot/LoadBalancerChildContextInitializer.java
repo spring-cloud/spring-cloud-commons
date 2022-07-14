@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.aot;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,10 +34,12 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.aot.BeanRegistrationExcludeFilter;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
@@ -47,8 +50,8 @@ import org.springframework.util.Assert;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class LoadBalancerChildContextInitializer
-		implements BeanRegistrationAotProcessor, BeanRegistrationExcludeFilter {
+public class LoadBalancerChildContextInitializer implements BeanRegistrationAotProcessor, BeanRegistrationExcludeFilter,
+		ApplicationListener<WebServerInitializedEvent> {
 
 	private final ApplicationContext applicationContext;
 
@@ -69,19 +72,6 @@ public class LoadBalancerChildContextInitializer
 		this.applicationContextInitializers = applicationContextInitializers;
 	}
 
-	private void registerBeans(ConfigurableApplicationContext childContext) {
-		if (!applicationContextInitializers.isEmpty()) {
-			applicationContextInitializers.keySet().stream()
-					.filter(contextId -> contextId.equals(childContext.getDisplayName())).forEach(contextId -> {
-						applicationContextInitializers.get(contextId).initialize(childContext);
-						loadBalancerClientFactory.addContext(contextId, childContext);
-					});
-			return;
-		}
-		loadBalancerClientFactory.registerBeans(childContext.getDisplayName(),
-				(AnnotationConfigApplicationContext) childContext);
-	}
-
 	@Override
 	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 		Assert.isInstanceOf(ConfigurableApplicationContext.class, applicationContext);
@@ -91,22 +81,39 @@ public class LoadBalancerChildContextInitializer
 				&& registeredBean.getBeanFactory().equals(applicationBeanFactory))) {
 			return null;
 		}
-		// TODO: add context ids from properties
 		Set<String> contextIds = new HashSet<>();
-		Map<String, LoadBalancerClientSpecification> configurations = loadBalancerClientFactory.getConfigurations();
-		Set<String> contextIdsFromConfig = configurations.keySet().stream().filter(key -> !key.startsWith("default."))
-				.collect(Collectors.toSet());
-		contextIds.addAll(contextIdsFromConfig);
-		contextIds.add("default");
+		contextIds.addAll(getContextIdsFromConfig());
+		contextIds.addAll(getEagerLoadContextIds());
 		Map<String, ConfigurableApplicationContext> childContextAotContributions = contextIds.stream()
 				.map(contextId -> Map.entry(contextId, buildChildContext(contextId)))
-				.collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		return new AotContribution(childContextAotContributions);
 	}
 
+	private Set<String> getContextIdsFromConfig() {
+		Map<String, LoadBalancerClientSpecification> configurations = loadBalancerClientFactory.getConfigurations();
+		Set<String> contextIdsFromConfig = configurations.keySet().stream().filter(key -> !key.startsWith("default."))
+				.collect(Collectors.toSet());
+		return contextIdsFromConfig;
+	}
+
+	private Set<String> getEagerLoadContextIds() {
+		Set<String> contextIds = new HashSet<>();
+		String pattern = "spring.cloud.loadbalancer.eager-load.clients[{0}]";
+		for (int i = 0;; i++) {
+			String propertyName = MessageFormat.format(pattern, i);
+			String property = applicationContext.getEnvironment().getProperty(propertyName);
+			if (property == null) {
+				break;
+			}
+			contextIds.add(property);
+		}
+		return contextIds;
+	}
+
 	private ConfigurableApplicationContext buildChildContext(String contextId) {
-		ConfigurableApplicationContext childContext = loadBalancerClientFactory.buildContext(contextId);
-		registerBeans(childContext);
+		AnnotationConfigApplicationContext childContext = loadBalancerClientFactory.buildContext(contextId);
+		loadBalancerClientFactory.registerBeans(childContext.getDisplayName(), childContext);
 		return childContext;
 	}
 
@@ -125,6 +132,18 @@ public class LoadBalancerChildContextInitializer
 	@Override
 	public boolean isExcluded(RegisteredBean registeredBean) {
 		return false;
+	}
+
+	@Override
+	public void onApplicationEvent(WebServerInitializedEvent event) {
+		if (applicationContext.equals(event.getApplicationContext())) {
+			applicationContextInitializers.keySet().forEach(contextId -> {
+				ConfigurableApplicationContext childContext = loadBalancerClientFactory.buildContext(contextId);
+				applicationContextInitializers.get(contextId).initialize(childContext);
+				loadBalancerClientFactory.addContext(contextId, childContext);
+				childContext.refresh();
+			});
+		}
 	}
 
 	private static class AotContribution implements BeanRegistrationAotContribution {
@@ -164,7 +183,6 @@ public class LoadBalancerChildContextInitializer
 					});
 			beanRegistrationCode.addInstancePostProcessor(
 					MethodReference.ofStatic(beanRegistrationCode.getClassName(), postProcessorMethod.getName()));
-			System.out.println("test");
 		}
 
 	}
