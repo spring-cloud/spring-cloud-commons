@@ -58,13 +58,9 @@ public class WeightedLoadBalancerBenchmarkTests {
 
 	WeightedLoadBalancer weightedLoadBalancer;
 
-	WeightedLoadBalancer metadataWeightedLoadBalancer;
-
 	@Setup
 	public void prepare() {
 		weightedLoadBalancer = weightedLoadBalancer();
-		metadataWeightedLoadBalancer = weightedLoadBalancer();
-		metadataWeightedLoadBalancer.weightFunction = WeightedLoadBalancer::metadataWeightFunction;
 	}
 
 	@Benchmark
@@ -76,17 +72,6 @@ public class WeightedLoadBalancerBenchmarkTests {
 	@Threads(Threads.MAX)
 	public void weightedLoadBalancerChooseConcurrently() {
 		weightedLoadBalancer.choose().block();
-	}
-
-	@Benchmark
-	public void metadataWeightedLoadBalancerChoose() {
-		metadataWeightedLoadBalancer.choose().block();
-	}
-
-	@Benchmark
-	@Threads(Threads.MAX)
-	public void metadataWeightedLoadBalancerChooseConcurrently() {
-		metadataWeightedLoadBalancer.choose().block();
 	}
 
 	@Test
