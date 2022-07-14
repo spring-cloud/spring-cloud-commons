@@ -18,6 +18,7 @@ package org.springframework.cloud.loadbalancer.core;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,9 +48,13 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 
 	private static final String METADATA_WEIGHT_KEY = "weight";
 
+	static final int MAX_PEEK_SIZE = 100;
+
 	final Map<String, AtomicInteger> currentWeightMap = new ConcurrentHashMap<>();
 
 	final String serviceId;
+
+	final AtomicInteger position;
 
 	ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
 
@@ -57,24 +62,38 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
-	 *                                            {@link ServiceInstanceListSupplier} that will be used to get available instances
-	 * @param serviceId                           id of the service for which to choose an instance
-	 * @param weightFunction                      a function for calculating the weight of instance
+	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 * @param serviceId id of the service for which to choose an instance
+	 * @param weightFunction a function for calculating the weight of instance
+	 * @param seedPosition the initial position used to peek the element with the largest
+	 * weight
 	 */
 	public WeightedLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
-								String serviceId, ToIntFunction<ServiceInstance> weightFunction) {
+			String serviceId, ToIntFunction<ServiceInstance> weightFunction, int seedPosition) {
 		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
 		this.serviceId = serviceId;
 		this.weightFunction = weightFunction;
+		this.position = new AtomicInteger(seedPosition);
 	}
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
-	 *                                            {@link ServiceInstanceListSupplier} that will be used to get available instances
-	 * @param serviceId                           id of the service for which to choose an instance
+	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 * @param serviceId id of the service for which to choose an instance
+	 * @param weightFunction a function for calculating the weight of instance
 	 */
 	public WeightedLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
-								String serviceId) {
+			String serviceId, ToIntFunction<ServiceInstance> weightFunction) {
+		this(serviceInstanceListSupplierProvider, serviceId, weightFunction, new Random().nextInt(1000));
+	}
+
+	/**
+	 * @param serviceInstanceListSupplierProvider a provider of
+	 * {@link ServiceInstanceListSupplier} that will be used to get available instances
+	 * @param serviceId id of the service for which to choose an instance
+	 */
+	public WeightedLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
+			String serviceId) {
 		this(serviceInstanceListSupplierProvider, serviceId, null);
 	}
 
@@ -88,7 +107,7 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 	}
 
 	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,
-															  List<ServiceInstance> serviceInstances) {
+			List<ServiceInstance> serviceInstances) {
 		Response<ServiceInstance> serviceInstanceResponse = getInstanceResponse(serviceInstances);
 		if (supplier instanceof SelectedInstanceCallback && serviceInstanceResponse.hasServer()) {
 			((SelectedInstanceCallback) supplier).selectedServiceInstance(serviceInstanceResponse.getServer());
@@ -109,7 +128,14 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 		int bestUpdatedCurrentWeight = 0;
 		int total = 0;
 
-		for (ServiceInstance instance : instances) {
+		// Ignore the sign bit, this allows pos to loop sequentially from 0 to
+		// Integer.MAX_VALUE
+		int pos = this.position.incrementAndGet() & Integer.MAX_VALUE;
+
+		int size = Math.min(instances.size(), MAX_PEEK_SIZE);
+
+		for (int i = 0; i < size; i++) {
+			ServiceInstance instance = instances.get((pos + i) % instances.size());
 			int weight = calculateWeight(instance);
 			AtomicInteger currentWeight = calculateCurrentWeight(instance, weight);
 			int updatedCurrentWeight = currentWeight.addAndGet(weight);
@@ -123,7 +149,9 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 			}
 		}
 
-		bestCurrentWeight.getAndAdd(-total);
+		if (bestCurrentWeight != null) {
+			bestCurrentWeight.getAndAdd(-total);
+		}
 
 		return new DefaultResponse(best);
 	}

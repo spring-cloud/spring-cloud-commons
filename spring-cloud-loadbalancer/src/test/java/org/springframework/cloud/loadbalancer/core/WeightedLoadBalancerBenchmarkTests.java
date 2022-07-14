@@ -53,7 +53,7 @@ import static org.mockito.Mockito.when;
 @EnabledIfSystemProperty(named = "slowTests", matches = "true")
 public class WeightedLoadBalancerBenchmarkTests {
 
-	@Param({"1", "10", "100", "1000", "10000"})
+	@Param({ "1", "10", "100", "1000", "10000" })
 	int hostCount;
 
 	WeightedLoadBalancer weightedLoadBalancer;
