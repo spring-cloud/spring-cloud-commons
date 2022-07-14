@@ -50,7 +50,7 @@ class WeightedLoadBalancerTests {
 
 	static final double STRICT_DELTA = 1e-6;
 
-	static final double LOOSE_DELTA = 1e-2;
+	static final double LOOSE_DELTA = 1e-3;
 
 	@Test
 	void shouldGetEmptyResponseWhenEmptyServiceInstanceList() {
@@ -63,7 +63,7 @@ class WeightedLoadBalancerTests {
 	void shouldMeetsExpectedPercentageOfSame() throws InterruptedException {
 		int[] weights = IntStream.iterate(1, i -> i).limit(10).toArray();
 		int total = Arrays.stream(weights).sum();
-		assertMeetsExceptedPercentage(weights, total, STRICT_DELTA);
+		assertMeetsExceptedPercentage(weights, total);
 		assertMeetsExceptedPercentageWithConcurrency(weights, total, Runtime.getRuntime().availableProcessors());
 	}
 
@@ -71,7 +71,7 @@ class WeightedLoadBalancerTests {
 	void shouldMeetsExpectedPercentageOfIncreasing() throws InterruptedException {
 		int[] weights = IntStream.iterate(1, i -> i + 1).limit(10).toArray();
 		int total = Arrays.stream(weights).sum();
-		assertMeetsExceptedPercentage(weights, total, STRICT_DELTA);
+		assertMeetsExceptedPercentage(weights, total);
 		assertMeetsExceptedPercentageWithConcurrency(weights, total, Runtime.getRuntime().availableProcessors());
 	}
 
@@ -79,7 +79,7 @@ class WeightedLoadBalancerTests {
 	void shouldMeetsExpectedPercentageOfPow2() throws InterruptedException {
 		int[] weights = IntStream.iterate(1, i -> i + 1).map(i -> 1 << (i - 1)).limit(10).toArray();
 		int total = Arrays.stream(weights).sum();
-		assertMeetsExceptedPercentage(weights, total, STRICT_DELTA);
+		assertMeetsExceptedPercentage(weights, total);
 		assertMeetsExceptedPercentageWithConcurrency(weights, total, Runtime.getRuntime().availableProcessors());
 	}
 
@@ -87,7 +87,7 @@ class WeightedLoadBalancerTests {
 	void shouldMeetsExpectedPercentageOfPrimes() throws InterruptedException {
 		int[] weights = IntStream.iterate(1, i -> i + 1).filter(WeightedLoadBalancerTests::isPrime).limit(10).toArray();
 		int total = Arrays.stream(weights).sum();
-		assertMeetsExceptedPercentage(weights, total, STRICT_DELTA);
+		assertMeetsExceptedPercentage(weights, total);
 		assertMeetsExceptedPercentageWithConcurrency(weights, total, Runtime.getRuntime().availableProcessors());
 	}
 
@@ -96,15 +96,20 @@ class WeightedLoadBalancerTests {
 		Random random = new Random();
 		int[] weights = IntStream.iterate(1, i -> i + 1).map(i -> random.nextInt(100)).limit(10).toArray();
 		int total = Arrays.stream(weights).sum();
-		assertMeetsExceptedPercentage(weights, total, STRICT_DELTA);
+		assertMeetsExceptedPercentage(weights, total);
 		assertMeetsExceptedPercentageWithConcurrency(weights, total, Runtime.getRuntime().availableProcessors());
 	}
 
 	@Test
 	void shouldMeetsExpectedPercentageOfLargeSlice() throws InterruptedException {
-		int[] weights = IntStream.iterate(1, i -> i + 1).limit(2 * WeightedLoadBalancer.MAX_PEEK_SIZE).toArray();
+		int[] partial = IntStream.iterate(1, i -> i + 1).limit(10).toArray();
+		int[] weights = Arrays.copyOf(partial, WeightedLoadBalancer.MAX_CHOOSE_SAMPLES);
+		for (int i = partial.length; i < weights.length; i += partial.length) {
+			System.arraycopy(partial, 0, weights, i, partial.length);
+		}
+
 		int total = Arrays.stream(weights).sum();
-		assertMeetsExceptedPercentage(weights, total, LOOSE_DELTA);
+		assertMeetsExceptedPercentage(weights, total);
 		assertMeetsExceptedPercentageWithConcurrency(weights, total, Runtime.getRuntime().availableProcessors());
 	}
 
@@ -117,7 +122,7 @@ class WeightedLoadBalancerTests {
 		return false;
 	}
 
-	void assertMeetsExceptedPercentage(int[] weights, int total, double delta) {
+	void assertMeetsExceptedPercentage(int[] weights, int total) {
 		WeightedLoadBalancer loadBalancer = weightedLoadBalancer(weights);
 
 		long[] distribution = new long[weights.length];
@@ -126,7 +131,7 @@ class WeightedLoadBalancerTests {
 			distribution[Integer.parseInt(instance.getInstanceId())]++;
 		}
 
-		checkPercentage(weights, distribution, delta);
+		checkPercentage(weights, distribution, STRICT_DELTA);
 	}
 
 	void assertMeetsExceptedPercentageWithConcurrency(int[] weights, int total, int threads)
@@ -148,8 +153,7 @@ class WeightedLoadBalancerTests {
 			});
 		}
 		countDownLatch.await();
-		checkPercentage(weights, Arrays.stream(distribution).mapToLong(AtomicLong::get).toArray(),
-				WeightedLoadBalancerTests.LOOSE_DELTA);
+		checkPercentage(weights, Arrays.stream(distribution).mapToLong(AtomicLong::get).toArray(), LOOSE_DELTA);
 	}
 
 	void checkPercentage(int[] weights, long[] distribution, double delta) {
@@ -160,10 +164,7 @@ class WeightedLoadBalancerTests {
 		for (int i = 0; i < weights.length; i++) {
 			double percentageWeight = 1.0 * weights[i] / totalWeight;
 			double percentageDistribution = 1.0 * distribution[i] / totalDistribution;
-			if (!(Math.abs(percentageWeight - percentageDistribution) <= delta)) {
-				System.out.println(Math.abs(percentageWeight - percentageDistribution));
-			}
-			assertThat(Math.abs(percentageWeight - percentageDistribution) <= delta).isTrue();
+			assertThat(Math.abs(percentageWeight - percentageDistribution)).isLessThanOrEqualTo(delta);
 		}
 	}
 

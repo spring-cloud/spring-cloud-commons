@@ -48,7 +48,17 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 
 	private static final String METADATA_WEIGHT_KEY = "weight";
 
-	static final int MAX_PEEK_SIZE = 100;
+	/**
+	 * Maximum number of samples each time an instance with the largest weight is chosen.
+	 * <p>
+	 * This value is a trade-off between weight distribution accuracy and performance. The
+	 * larger this value is, the more accurate the distribution will be, but the
+	 * corresponding performance will be worse. After modifying this value, unit tests
+	 * must be performed to ensure the accuracy of weight distribution, and
+	 * micro-benchmark tests must be performed to ensure that the performance impact is
+	 * within an acceptable range.
+	 */
+	static final int MAX_CHOOSE_SAMPLES = 100;
 
 	final Map<String, AtomicInteger> currentWeightMap = new ConcurrentHashMap<>();
 
@@ -132,7 +142,7 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 		// Integer.MAX_VALUE
 		int pos = this.position.incrementAndGet() & Integer.MAX_VALUE;
 
-		int size = Math.min(instances.size(), MAX_PEEK_SIZE);
+		int size = Math.min(instances.size(), MAX_CHOOSE_SAMPLES);
 
 		for (int i = 0; i < size; i++) {
 			ServiceInstance instance = instances.get((pos + i) % instances.size());
