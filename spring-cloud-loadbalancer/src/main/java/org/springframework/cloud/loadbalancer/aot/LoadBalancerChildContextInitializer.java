@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.aot;
 
-import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,6 +34,8 @@ import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.aot.BeanRegistrationExcludeFilter;
 import org.springframework.beans.factory.support.RegisteredBean;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
@@ -92,23 +94,14 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 
 	private Set<String> getContextIdsFromConfig() {
 		Map<String, LoadBalancerClientSpecification> configurations = loadBalancerClientFactory.getConfigurations();
-		Set<String> contextIdsFromConfig = configurations.keySet().stream().filter(key -> !key.startsWith("default."))
+		return configurations.keySet().stream().filter(key -> !key.startsWith("default."))
 				.collect(Collectors.toSet());
-		return contextIdsFromConfig;
 	}
 
 	private Set<String> getEagerLoadContextIds() {
-		Set<String> contextIds = new HashSet<>();
-		String pattern = "spring.cloud.loadbalancer.eager-load.clients[{0}]";
-		for (int i = 0;; i++) {
-			String propertyName = MessageFormat.format(pattern, i);
-			String property = applicationContext.getEnvironment().getProperty(propertyName);
-			if (property == null) {
-				break;
-			}
-			contextIds.add(property);
-		}
-		return contextIds;
+		return Binder.get(applicationContext.getEnvironment())
+				.bind("spring.cloud.loadbalancer.eager-load.clients", Bindable.setOf(String.class))
+				.orElse(Collections.emptySet());
 	}
 
 	private ConfigurableApplicationContext buildChildContext(String contextId) {
