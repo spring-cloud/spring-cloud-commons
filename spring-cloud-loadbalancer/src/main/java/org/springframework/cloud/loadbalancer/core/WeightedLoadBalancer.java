@@ -138,14 +138,13 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 		int bestUpdatedCurrentWeight = 0;
 		int total = 0;
 
-		// Ignore the sign bit, this allows pos to loop sequentially from 0 to
-		// Integer.MAX_VALUE
-		int pos = this.position.incrementAndGet() & Integer.MAX_VALUE;
-
+		int pos = this.position.incrementAndGet();
 		int size = Math.min(instances.size(), MAX_CHOOSE_SAMPLES);
 
 		for (int i = 0; i < size; i++) {
-			ServiceInstance instance = instances.get((pos + i) % instances.size());
+			int peek = ((pos + i) & Integer.MAX_VALUE) % instances.size();
+			ServiceInstance instance = instances.get(peek);
+
 			int weight = calculateWeight(instance);
 			AtomicInteger currentWeight = calculateCurrentWeight(instance, weight);
 			int updatedCurrentWeight = currentWeight.addAndGet(weight);
