@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
@@ -48,6 +49,7 @@ public class SimpleDiscoveryProperties implements InitializingBean {
 	 * properties explicitly if they are exporting data (e.g. metrics) that need to be
 	 * identified by the service instance.
 	 */
+	@NestedConfigurationProperty
 	private DefaultServiceInstance local = new DefaultServiceInstance(null, null, null, 0, false);
 
 	private int order = DiscoveryClient.DEFAULT_ORDER;
