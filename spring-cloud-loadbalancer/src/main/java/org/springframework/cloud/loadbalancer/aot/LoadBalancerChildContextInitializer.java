@@ -43,7 +43,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.javapoet.ClassName;
@@ -59,7 +58,7 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 
 	private final LoadBalancerClientFactory loadBalancerClientFactory;
 
-	private final Map<String, ApplicationContextInitializer<ConfigurableApplicationContext>> applicationContextInitializers;
+	private final Map<String, ApplicationContextInitializer<GenericApplicationContext>> applicationContextInitializers;
 
 	public LoadBalancerChildContextInitializer(LoadBalancerClientFactory loadBalancerClientFactory,
 			ApplicationContext applicationContext) {
@@ -68,7 +67,7 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 
 	public LoadBalancerChildContextInitializer(LoadBalancerClientFactory loadBalancerClientFactory,
 			ApplicationContext applicationContext,
-			Map<String, ApplicationContextInitializer<ConfigurableApplicationContext>> applicationContextInitializers) {
+			Map<String, ApplicationContextInitializer<GenericApplicationContext>> applicationContextInitializers) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 		this.applicationContext = applicationContext;
 		this.applicationContextInitializers = applicationContextInitializers;
@@ -86,7 +85,7 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 		Set<String> contextIds = new HashSet<>();
 		contextIds.addAll(getContextIdsFromConfig());
 		contextIds.addAll(getEagerLoadContextIds());
-		Map<String, ConfigurableApplicationContext> childContextAotContributions = contextIds.stream()
+		Map<String, GenericApplicationContext> childContextAotContributions = contextIds.stream()
 				.map(contextId -> Map.entry(contextId, buildChildContext(contextId)))
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		return new AotContribution(childContextAotContributions);
@@ -94,8 +93,7 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 
 	private Set<String> getContextIdsFromConfig() {
 		Map<String, LoadBalancerClientSpecification> configurations = loadBalancerClientFactory.getConfigurations();
-		return configurations.keySet().stream().filter(key -> !key.startsWith("default."))
-				.collect(Collectors.toSet());
+		return configurations.keySet().stream().filter(key -> !key.startsWith("default.")).collect(Collectors.toSet());
 	}
 
 	private Set<String> getEagerLoadContextIds() {
@@ -104,8 +102,8 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 				.orElse(Collections.emptySet());
 	}
 
-	private ConfigurableApplicationContext buildChildContext(String contextId) {
-		AnnotationConfigApplicationContext childContext = loadBalancerClientFactory.buildContext(contextId);
+	private GenericApplicationContext buildChildContext(String contextId) {
+		GenericApplicationContext childContext = loadBalancerClientFactory.buildContext(contextId);
 		loadBalancerClientFactory.registerBeans(childContext.getDisplayName(), childContext);
 		return childContext;
 	}
@@ -113,10 +111,10 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 	@SuppressWarnings("unchecked")
 	public LoadBalancerChildContextInitializer withApplicationContextInitializers(
 			Map<String, Object> applicationContextInitializers) {
-		Map<String, ApplicationContextInitializer<ConfigurableApplicationContext>> convertedInitializers = new HashMap<>();
+		Map<String, ApplicationContextInitializer<GenericApplicationContext>> convertedInitializers = new HashMap<>();
 		applicationContextInitializers.keySet()
 				.forEach(contextId -> convertedInitializers.put(contextId,
-						(ApplicationContextInitializer<ConfigurableApplicationContext>) applicationContextInitializers
+						(ApplicationContextInitializer<GenericApplicationContext>) applicationContextInitializers
 								.get(contextId)));
 		return new LoadBalancerChildContextInitializer(loadBalancerClientFactory, applicationContext,
 				convertedInitializers);
@@ -131,7 +129,7 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 	public void onApplicationEvent(WebServerInitializedEvent event) {
 		if (applicationContext.equals(event.getApplicationContext())) {
 			applicationContextInitializers.keySet().forEach(contextId -> {
-				ConfigurableApplicationContext childContext = loadBalancerClientFactory.buildContext(contextId);
+				GenericApplicationContext childContext = loadBalancerClientFactory.buildContext(contextId);
 				applicationContextInitializers.get(contextId).initialize(childContext);
 				loadBalancerClientFactory.addContext(contextId, childContext);
 				childContext.refresh();
@@ -143,10 +141,9 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 
 		private final Map<String, GenericApplicationContext> childContexts;
 
-		AotContribution(Map<String, ConfigurableApplicationContext> childContexts) {
-			this.childContexts = childContexts.entrySet().stream()
-					.filter(entry -> entry.getValue() instanceof GenericApplicationContext)
-					.map(entry -> Map.entry(entry.getKey(), (GenericApplicationContext) entry.getValue()))
+		AotContribution(Map<String, GenericApplicationContext> childContexts) {
+			this.childContexts = childContexts.entrySet().stream().filter(entry -> entry.getValue() != null)
+					.map(entry -> Map.entry(entry.getKey(), entry.getValue()))
 					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		}
 
@@ -161,18 +158,18 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 						childGenerationContext);
 				return Map.entry(entry.getKey(), initializerClassName);
 			}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-			GeneratedMethod postProcessorMethod = beanRegistrationCode.getMethodGenerator()
-					.generateMethod("addChildContextInitializer").using(builder -> {
-						builder.addJavadoc("Use AOT child context management initialization");
-						builder.addModifiers(Modifier.PRIVATE, Modifier.STATIC);
-						builder.addParameter(RegisteredBean.class, "registeredBean");
-						builder.addParameter(LoadBalancerChildContextInitializer.class, "instance");
-						builder.returns(LoadBalancerChildContextInitializer.class);
-						builder.addStatement("$T<String, Object> initializers = new $T<>()", Map.class, HashMap.class);
+			GeneratedMethod postProcessorMethod = beanRegistrationCode.getMethods().add("addChildContextInitializer",
+					method -> {
+						method.addJavadoc("Use AOT child context management initialization")
+								.addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+								.addParameter(RegisteredBean.class, "registeredBean")
+								.addParameter(LoadBalancerChildContextInitializer.class, "instance")
+								.returns(LoadBalancerChildContextInitializer.class)
+								.addStatement("$T<String, Object> initializers = new $T<>()", Map.class, HashMap.class);
 						generatedInitializerClassNames.keySet()
-								.forEach(contextId -> builder.addStatement("initializers.put($S, new $L())", contextId,
+								.forEach(contextId -> method.addStatement("initializers.put($S, new $L())", contextId,
 										generatedInitializerClassNames.get(contextId)));
-						builder.addStatement("return instance.withApplicationContextInitializers(initializers)");
+						method.addStatement("return instance.withApplicationContextInitializers(initializers)");
 					});
 			beanRegistrationCode.addInstancePostProcessor(
 					MethodReference.ofStatic(beanRegistrationCode.getClassName(), postProcessorMethod.getName()));

@@ -86,8 +86,8 @@ public class NamedContextFactoryTests {
 		then(barBazes.size()).as("barBazes size was wrong").isEqualTo(2);
 
 		// get the contexts before destroy() to verify these are the old ones
-		AnnotationConfigApplicationContext fooContext = factory.getContext("foo");
-		AnnotationConfigApplicationContext barContext = factory.getContext("bar");
+		GenericApplicationContext fooContext = factory.getContext("foo");
+		GenericApplicationContext barContext = factory.getContext("bar");
 
 		then(fooContext.getClassLoader()).as("foo context classloader does not match parent")
 				.isSameAs(parent.getClassLoader());
