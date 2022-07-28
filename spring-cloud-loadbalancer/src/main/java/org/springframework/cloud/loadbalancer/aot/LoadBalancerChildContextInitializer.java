@@ -32,7 +32,6 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
 import org.springframework.beans.factory.aot.BeanRegistrationCode;
-import org.springframework.beans.factory.aot.BeanRegistrationExcludeFilter;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -51,8 +50,8 @@ import org.springframework.util.Assert;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class LoadBalancerChildContextInitializer implements BeanRegistrationAotProcessor, BeanRegistrationExcludeFilter,
-		ApplicationListener<WebServerInitializedEvent> {
+public class LoadBalancerChildContextInitializer
+		implements BeanRegistrationAotProcessor, ApplicationListener<WebServerInitializedEvent> {
 
 	private final ApplicationContext applicationContext;
 
@@ -121,7 +120,7 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 	}
 
 	@Override
-	public boolean isExcluded(RegisteredBean registeredBean) {
+	public boolean isBeanExcludedFromAotProcessing() {
 		return false;
 	}
 
