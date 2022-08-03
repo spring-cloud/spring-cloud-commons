@@ -18,8 +18,8 @@ package org.springframework.cloud.client.hypermedia;
 
 import java.net.URI;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.hateoas.Link;
@@ -42,7 +42,7 @@ public class DiscoveredResource implements RemoteResource {
 
 	private final TraversalDefinition traversal;
 
-	private final Logger log = LoggerFactory.getLogger(DiscoveredResource.class);
+	private static final Log LOG = LogFactory.getLog(DiscoveredResource.class);
 
 	private RestOperations restOperations = new RestTemplate();
 
@@ -104,16 +104,16 @@ public class DiscoveredResource implements RemoteResource {
 
 			String uri = link.expand().getHref();
 
-			this.log.debug("Verifying link pointing to {}…", uri);
+			LOG.debug("Verifying link pointing to " + uri);
 			this.restOperations.headForHeaders(uri);
-			this.log.debug("Successfully verified link!");
+			LOG.debug("Successfully verified link!");
 
 			return link;
 
 		}
 		catch (RestClientException o_O) {
 
-			this.log.debug("Verification failed, marking as outdated!");
+			LOG.debug("Verification failed, marking as outdated!");
 			return null;
 		}
 	}
@@ -131,12 +131,12 @@ public class DiscoveredResource implements RemoteResource {
 			URI uri = service.getUri();
 			String serviceId = service.getServiceId();
 
-			this.log.debug("Discovered {} system at {}. Discovering resource…", serviceId, uri);
+			LOG.debug("Discovered " + serviceId + " system at " + uri + ". Discovering resource…");
 
 			Traverson traverson = new Traverson(uri, MediaTypes.HAL_JSON);
 			Link link = this.traversal.buildTraversal(traverson).asTemplatedLink();
 
-			this.log.debug("Found link pointing to {}.", link.getHref());
+			LOG.debug("Found link pointing to " + link.getHref());
 
 			return link;
 
@@ -144,7 +144,7 @@ public class DiscoveredResource implements RemoteResource {
 		catch (RuntimeException o_O) {
 
 			this.link = null;
-			this.log.debug("Target system unavailable. Got: ", o_O.getMessage());
+			LOG.debug("Target system unavailable. Got: " + o_O.getMessage());
 
 			return null;
 		}

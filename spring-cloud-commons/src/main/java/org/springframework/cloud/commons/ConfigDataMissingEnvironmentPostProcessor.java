@@ -21,8 +21,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
@@ -61,7 +61,7 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 	 */
 	public static final int ORDER = ConfigDataEnvironmentPostProcessor.ORDER + 1000;
 
-	private final Logger LOG = LoggerFactory.getLogger(ConfigDataMissingEnvironmentPostProcessor.class);
+	private static final Log LOG = LogFactory.getLog(ConfigDataMissingEnvironmentPostProcessor.class);
 
 	@Override
 	public int getOrder() {
