@@ -148,13 +148,12 @@ public class LoadBalancerChildContextInitializer
 
 		@Override
 		public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {
-			ApplicationContextAotGenerator contextAotGenerator = new ApplicationContextAotGenerator();
 			Map<String, ClassName> generatedInitializerClassNames = childContexts.entrySet().stream().map(entry -> {
 				String name = entry.getValue().getDisplayName();
 				name = name.replaceAll("[-]", "_");
 				GenerationContext childGenerationContext = generationContext.withName(name);
-				ClassName initializerClassName = contextAotGenerator.generateApplicationContext(entry.getValue(),
-						childGenerationContext);
+				ClassName initializerClassName = new ApplicationContextAotGenerator()
+						.processAheadOfTime(entry.getValue(), childGenerationContext);
 				return Map.entry(entry.getKey(), initializerClassName);
 			}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 			GeneratedMethod postProcessorMethod = beanRegistrationCode.getMethods().add("addChildContextInitializer",
