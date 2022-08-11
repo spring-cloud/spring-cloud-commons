@@ -166,7 +166,8 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 			context.setClassLoader(parent.getClassLoader());
 		}
 		else {
-			context = new GenericApplicationContext();
+			context = AotDetector.useGeneratedArtifacts() ? new GenericApplicationContext()
+					: new AnnotationConfigApplicationContext();
 		}
 		context.getEnvironment().getPropertySources().addFirst(
 				new MapPropertySource(this.propertySourceName, Collections.singletonMap(this.propertyName, name)));
