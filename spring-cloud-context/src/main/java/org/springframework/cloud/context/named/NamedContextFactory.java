@@ -52,6 +52,7 @@ import org.springframework.util.Assert;
  * @author Spencer Gibb
  * @author Dave Syer
  * @author Tommy Karlsson
+ * @author Olga Maciaszek-Sharma
  */
 public abstract class NamedContextFactory<C extends NamedContextFactory.Specification>
 		implements DisposableBean, ApplicationContextAware {

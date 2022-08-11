@@ -38,6 +38,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Spencer Gibb
  * @author Tommy Karlsson
+ * @author Olga Maciaszek-Sharma
  */
 public class NamedContextFactoryTests {
 
