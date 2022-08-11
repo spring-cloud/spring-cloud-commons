@@ -167,10 +167,8 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		else {
 			context = new GenericApplicationContext();
 		}
-		// TODO: can it be done in this order?
 		context.getEnvironment().getPropertySources().addFirst(
 				new MapPropertySource(this.propertySourceName, Collections.singletonMap(this.propertyName, name)));
-		// TODO: can it be done in this order?
 		if (this.parent != null) {
 			// Uses Environment from parent as well as beans
 			context.setParent(this.parent);

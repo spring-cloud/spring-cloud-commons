@@ -48,6 +48,9 @@ import org.springframework.javapoet.ClassName;
 import org.springframework.util.Assert;
 
 /**
+ * A {@link BeanRegistrationAotProcessor} that creates an {@link AotContribution} for
+ * LoadBalancer child contexts.
+ *
  * @author Olga Maciaszek-Sharma
  */
 public class LoadBalancerChildContextInitializer
@@ -103,7 +106,7 @@ public class LoadBalancerChildContextInitializer
 
 	private GenericApplicationContext buildChildContext(String contextId) {
 		GenericApplicationContext childContext = loadBalancerClientFactory.buildContext(contextId);
-		loadBalancerClientFactory.registerBeans(childContext.getDisplayName(), childContext);
+		loadBalancerClientFactory.registerBeans(contextId, childContext);
 		return childContext;
 	}
 
