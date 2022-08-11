@@ -4,15 +4,14 @@
 	"https://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
 	<suppress files=".*TestBootstrapConfiguration.*" checks="JavadocVariable"/>
-	<suppress files=".*BootstrapConfigurationTests.*" checks="JavadocStyle"/>
-	<suppress files=".*BootstrapConfigurationTests.*" checks="JavadocVariable"/>
 	<suppress files=".*TestHigherPriorityBootstrapConfiguration.*" checks="HideUtilityClassConstructor"/>
 	<suppress files=".*TestHigherPriorityBootstrapConfiguration.*" checks="JavadocVariable"/>
-	<suppress files=".*RefreshScopeConfigurationTests.*" checks="JavadocStyle"/>
 	<suppress files=".*RefreshScopeConfigurationTests.*" checks="JavadocMethod"/>
-	<suppress files=".*RefreshScopeConfigurationTests.*" checks="JavadocVariable"/>
-	<suppress files=".*RefreshAutoConfigurationTests.*" checks="JavadocVariable"/>
 	<suppress files=".*RefreshAutoConfigurationMoreClassPathTests.*" checks="JavadocVariable"/>
 	<suppress files=".*EnvironmentDecryptApplicationInitializerTests.*" checks="JavadocVariable"/>
 	<suppress files=".*CachingServiceInstanceListSupplierTests.*" checks="RegexpSinglelineJava"/>
+	<suppress files=".*Tests.*" checks="JavadocStyle"/>
+	<suppress files=".*Tests.*" checks="JavadocVariable"/>
+	<suppress files=".*Tests.*" checks="JavadocMethod"/>
+	<suppress files=".*Tests.*" checks="HideUtilityClassConstructor"/>
 </suppressions>

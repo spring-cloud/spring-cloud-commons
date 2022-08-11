@@ -72,7 +72,7 @@ public class LoadBalancerClientConfigurationRegistrar implements ImportBeanDefin
 			}
 			registerClientConfiguration(registry, name, attrs.get("defaultConfiguration"));
 		}
-		Map<String, Object> client = metadata.getAnnotationAttributes(LoadBalancerClient.class.getName(), true);
+		Map<String, Object> client = metadata.getAnnotationAttributes(LoadBalancerClient.class.getName());
 		String name = getClientName(client);
 		if (name != null) {
 			registerClientConfiguration(registry, name, client.get("configuration"));
