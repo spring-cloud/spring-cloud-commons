@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Represents a weighted instance of a service in a discovery system.
  *
@@ -27,5 +29,10 @@ public interface WeightedServiceInstance extends ServiceInstance {
 	 * @return The raw weight of the service instance.
 	 */
 	int getWeight();
+
+	/**
+	 * @return The current weight of the service instance.
+	 */
+	AtomicInteger getCurrentWeight();
 
 }
