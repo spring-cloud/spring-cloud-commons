@@ -26,6 +26,7 @@ import java.util.function.ToIntFunction;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -61,7 +62,7 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 	 */
 	static final int MAX_CHOOSE_SAMPLES = 100;
 
-	final Map<String, AtomicInteger> currentWeightMap = new ConcurrentHashMap<>();
+	final Map<String, AtomicInteger> currentWeightMap = new ConcurrentReferenceHashMap<>();
 
 	final String serviceId;
 
