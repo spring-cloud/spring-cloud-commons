@@ -186,7 +186,7 @@ class WeightedLoadBalancerTests {
 		for (int i = 0; i < weights.length; i++) {
 			DefaultServiceInstance instance = new DefaultServiceInstance();
 			instance.setInstanceId(i + "");
-			instance.getMetadata().put("weight", String.valueOf(weights[i]));
+			instance.setWeight(weights[i]);
 			instances.add(instance);
 		}
 		return instances;

@@ -30,6 +30,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.WeightedServiceInstance;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.Request;
@@ -168,6 +169,9 @@ public class WeightedLoadBalancer implements ReactorServiceInstanceLoadBalancer 
 	int calculateWeight(ServiceInstance serviceInstance) {
 		if (weightFunction != null) {
 			return weightFunction.applyAsInt(serviceInstance);
+		}
+		if (serviceInstance instanceof WeightedServiceInstance) {
+			return ((WeightedServiceInstance) serviceInstance).getWeight();
 		}
 		return metadataWeightFunction(serviceInstance);
 	}

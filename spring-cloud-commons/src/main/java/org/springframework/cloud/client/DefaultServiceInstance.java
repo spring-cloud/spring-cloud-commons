@@ -28,8 +28,9 @@ import java.util.Objects;
  * @author Tim Ysewyn
  * @author Charu Covindane
  * @author Neil Powell
+ * @author Zhuozhi Ji
  */
-public class DefaultServiceInstance implements ServiceInstance {
+public class DefaultServiceInstance implements ServiceInstance, WeightedServiceInstance {
 
 	private String instanceId;
 
@@ -45,6 +46,28 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private URI uri;
 
+	private int weight;
+
+	/**
+	 * @param instanceId the id of the instance.
+	 * @param serviceId the id of the service.
+	 * @param host the host where the service instance can be found.
+	 * @param port the port on which the service is running.
+	 * @param secure indicates whether or not the connection needs to be secure.
+	 * @param metadata a map containing metadata.
+	 * @param weight weight of the instance.
+	 */
+	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
+			Map<String, String> metadata, int weight) {
+		this.instanceId = instanceId;
+		this.serviceId = serviceId;
+		this.host = host;
+		this.port = port;
+		this.secure = secure;
+		this.metadata = metadata;
+		this.weight = weight;
+	}
+
 	/**
 	 * @param instanceId the id of the instance.
 	 * @param serviceId the id of the service.
@@ -55,12 +78,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 */
 	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
 			Map<String, String> metadata) {
-		this.instanceId = instanceId;
-		this.serviceId = serviceId;
-		this.host = host;
-		this.port = port;
-		this.secure = secure;
-		this.metadata = metadata;
+		this(instanceId, serviceId, host, port, secure, metadata, 0);
 	}
 
 	/**
@@ -124,6 +142,11 @@ public class DefaultServiceInstance implements ServiceInstance {
 	}
 
 	@Override
+	public int getWeight() {
+		return weight;
+	}
+
+	@Override
 	public boolean isSecure() {
 		return secure;
 	}
@@ -154,10 +177,15 @@ public class DefaultServiceInstance implements ServiceInstance {
 		}
 	}
 
+	public void setWeight(int weight) {
+		this.weight = weight;
+	}
+
 	@Override
 	public String toString() {
 		return "DefaultServiceInstance{" + "instanceId='" + instanceId + '\'' + ", serviceId='" + serviceId + '\''
-				+ ", host='" + host + '\'' + ", port=" + port + ", secure=" + secure + ", metadata=" + metadata + '}';
+				+ ", host='" + host + '\'' + ", port=" + port + ", secure=" + secure + ", metadata=" + metadata
+				+ ", weight=" + weight + '}';
 	}
 
 	@Override

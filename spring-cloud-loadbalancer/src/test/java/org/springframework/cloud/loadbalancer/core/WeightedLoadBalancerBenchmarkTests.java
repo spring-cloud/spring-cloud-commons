@@ -89,6 +89,7 @@ public class WeightedLoadBalancerBenchmarkTests {
 		List<ServiceInstance> instances = IntStream.rangeClosed(1, hostCount).mapToObj(i -> {
 			DefaultServiceInstance instance = new DefaultServiceInstance();
 			instance.setInstanceId(i + "");
+			instance.setWeight(i);
 			instance.getMetadata().put("weight", i + "");
 			return instance;
 		}).collect(Collectors.toList());
