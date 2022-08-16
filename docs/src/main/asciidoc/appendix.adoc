@@ -12,3 +12,5 @@ NOTE: Property contributions can come from additional jar files on your classpat
 Also, you can define your own properties.
 
 include::_configprops.adoc[]
+
+include::_observability.adoc[]
