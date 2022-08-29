@@ -16,9 +16,11 @@
 
 package org.springframework.cloud.autoconfigure;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.autoconfigure.endpoint.condition.ConditionalOnAvailableEndpoint;
 import org.springframework.boot.actuate.autoconfigure.env.EnvironmentEndpointAutoConfiguration;
 import org.springframework.boot.actuate.autoconfigure.env.EnvironmentEndpointProperties;
+import org.springframework.boot.actuate.endpoint.SanitizingFunction;
 import org.springframework.boot.actuate.env.EnvironmentEndpoint;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -60,20 +62,17 @@ public class WritableEnvironmentEndpointAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	@ConditionalOnAvailableEndpoint
-	public WritableEnvironmentEndpoint writableEnvironmentEndpoint(Environment environment) {
-		WritableEnvironmentEndpoint endpoint = new WritableEnvironmentEndpoint(environment);
-		String[] keysToSanitize = this.properties.getKeysToSanitize();
-		if (keysToSanitize != null) {
-			endpoint.setKeysToSanitize(keysToSanitize);
-		}
-		return endpoint;
+	public WritableEnvironmentEndpoint writableEnvironmentEndpoint(Environment environment,
+			ObjectProvider<SanitizingFunction> sanitizingFunctions) {
+		return new WritableEnvironmentEndpoint(environment, sanitizingFunctions, this.properties.getShowValues());
 	}
 
 	@Bean
 	@ConditionalOnAvailableEndpoint
 	public WritableEnvironmentEndpointWebExtension writableEnvironmentEndpointWebExtension(
 			WritableEnvironmentEndpoint endpoint, EnvironmentManager environment) {
-		return new WritableEnvironmentEndpointWebExtension(endpoint, environment);
+		return new WritableEnvironmentEndpointWebExtension(endpoint, environment, this.properties.getShowValues(),
+				this.properties.getRoles());
 	}
 
 }

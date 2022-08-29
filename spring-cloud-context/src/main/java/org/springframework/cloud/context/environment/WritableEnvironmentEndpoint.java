@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.context.environment;
 
+import org.springframework.boot.actuate.endpoint.SanitizingFunction;
+import org.springframework.boot.actuate.endpoint.Show;
 import org.springframework.boot.actuate.env.EnvironmentEndpoint;
 import org.springframework.core.env.Environment;
 
@@ -28,8 +30,9 @@ import org.springframework.core.env.Environment;
  */
 public class WritableEnvironmentEndpoint extends EnvironmentEndpoint {
 
-	public WritableEnvironmentEndpoint(Environment environment) {
-		super(environment);
+	public WritableEnvironmentEndpoint(Environment environment, Iterable<SanitizingFunction> sanitizingFunctions,
+			Show showValues) {
+		super(environment, sanitizingFunctions, showValues);
 	}
 
 }

@@ -18,7 +18,9 @@ package org.springframework.cloud.context.environment;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
+import org.springframework.boot.actuate.endpoint.Show;
 import org.springframework.boot.actuate.endpoint.annotation.DeleteOperation;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.boot.actuate.endpoint.web.annotation.EndpointWebExtension;
@@ -36,9 +38,9 @@ public class WritableEnvironmentEndpointWebExtension extends EnvironmentEndpoint
 
 	private EnvironmentManager environment;
 
-	public WritableEnvironmentEndpointWebExtension(WritableEnvironmentEndpoint endpoint,
-			EnvironmentManager environment) {
-		super(endpoint);
+	public WritableEnvironmentEndpointWebExtension(WritableEnvironmentEndpoint endpoint, EnvironmentManager environment,
+			Show showValues, Set<String> roles) {
+		super(endpoint, showValues, roles);
 		this.environment = environment;
 	}
 
