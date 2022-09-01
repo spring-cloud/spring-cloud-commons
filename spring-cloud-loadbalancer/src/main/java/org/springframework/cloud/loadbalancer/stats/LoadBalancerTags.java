@@ -44,8 +44,7 @@ final class LoadBalancerTags {
 		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
 		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance));
 		Object clientResponse = completionContext.getClientResponse();
-		if (clientResponse instanceof ResponseData) {
-			ResponseData responseData = (ResponseData) clientResponse;
+		if (clientResponse instanceof ResponseData responseData) {
 			RequestData requestData = responseData.getRequestData();
 			if (requestData != null) {
 				tags = tags.and(valueOrUnknown("method", requestData.getHttpMethod()),
@@ -67,7 +66,7 @@ final class LoadBalancerTags {
 
 	// In keeping with the way null HttpStatus is handled in Actuator
 	private static int statusValue(ResponseData responseData) {
-		return responseData.getHttpStatus() != null ? responseData.getHttpStatus() : 200;
+		return responseData.getHttpStatus() != null ? responseData.getHttpStatus().value() : 200;
 	}
 
 	private static String getPath(RequestData requestData) {

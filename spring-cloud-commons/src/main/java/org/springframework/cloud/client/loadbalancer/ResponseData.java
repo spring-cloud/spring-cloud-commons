@@ -23,6 +23,7 @@ import java.util.Objects;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -39,7 +40,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
  */
 public class ResponseData {
 
-	private final Integer httpStatus;
+	private final HttpStatusCode httpStatus;
 
 	private final HttpHeaders headers;
 
@@ -47,7 +48,7 @@ public class ResponseData {
 
 	private final RequestData requestData;
 
-	public ResponseData(Integer httpStatus, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
+	public ResponseData(HttpStatusCode httpStatus, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
 			RequestData requestData) {
 		this.httpStatus = httpStatus;
 		this.headers = headers;
@@ -56,19 +57,19 @@ public class ResponseData {
 	}
 
 	public ResponseData(ClientResponse response, RequestData requestData) {
-		this(response.rawStatusCode(), response.headers().asHttpHeaders(), response.cookies(), requestData);
+		this(response.statusCode(), response.headers().asHttpHeaders(), response.cookies(), requestData);
 	}
 
 	public ResponseData(ServerHttpResponse response, RequestData requestData) {
-		this(response.getRawStatusCode(), response.getHeaders(), response.getCookies(), requestData);
+		this(response.getStatusCode(), response.getHeaders(), response.getCookies(), requestData);
 	}
 
 	public ResponseData(ClientHttpResponse clientHttpResponse, RequestData requestData) throws IOException {
-		this(clientHttpResponse.getRawStatusCode(), clientHttpResponse.getHeaders(),
+		this(clientHttpResponse.getStatusCode(), clientHttpResponse.getHeaders(),
 				buildCookiesFromHeaders(clientHttpResponse.getHeaders()), requestData);
 	}
 
-	public Integer getHttpStatus() {
+	public HttpStatusCode getHttpStatus() {
 		return httpStatus;
 	}
 
@@ -120,10 +121,9 @@ public class ResponseData {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof ResponseData)) {
+		if (!(o instanceof ResponseData that)) {
 			return false;
 		}
-		ResponseData that = (ResponseData) o;
 		return httpStatus == that.httpStatus && Objects.equals(headers, that.headers)
 				&& Objects.equals(cookies, that.cookies) && Objects.equals(requestData, that.requestData);
 	}

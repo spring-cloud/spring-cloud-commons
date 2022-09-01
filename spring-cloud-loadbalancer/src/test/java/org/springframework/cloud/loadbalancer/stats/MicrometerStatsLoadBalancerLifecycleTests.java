@@ -62,7 +62,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
 		Response<ServiceInstance> lbResponse = new DefaultResponse(
 				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
-		ResponseData responseData = new ResponseData(HttpStatus.OK.value(), new HttpHeaders(),
+		ResponseData responseData = new ResponseData(HttpStatus.OK, new HttpHeaders(),
 				new MultiValueMapAdapter<>(new HashMap<>()), requestData);
 		statsLifecycle.onStartRequest(lbRequest, lbResponse);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
@@ -121,7 +121,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		Request<Object> lbRequest = new DefaultRequest<>(new StatsTestContext());
 		Response<ServiceInstance> lbResponse = new DefaultResponse(
 				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
-		ResponseData responseData = new ResponseData(HttpStatus.OK.value(), new HttpHeaders(),
+		ResponseData responseData = new ResponseData(HttpStatus.OK, new HttpHeaders(),
 				new MultiValueMapAdapter<>(new HashMap<>()), null);
 		statsLifecycle.onStartRequest(lbRequest, lbResponse);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
