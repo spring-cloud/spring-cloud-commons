@@ -232,4 +232,5 @@ class WeightedServiceInstanceListSupplierTest {
 		metadata.put("weight", weight.toString());
 		return metadata;
 	}
+
 }

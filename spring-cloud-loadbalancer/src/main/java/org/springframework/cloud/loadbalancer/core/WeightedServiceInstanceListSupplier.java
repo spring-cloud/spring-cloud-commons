@@ -27,7 +27,6 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
 
-
 /**
  * A {@link ServiceInstanceListSupplier} implementation that uses weights to expand the
  * instances provided by delegate.
@@ -76,7 +75,8 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 					return DEFAULT_WEIGHT;
 				}
 				return weight;
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format(
 							"Exception occurred during apply weight function to instance %s, using %d as default",
@@ -95,8 +95,10 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 
 		List<ServiceInstance> newInstances = new ArrayList<>(total / gcd);
 
-		// use iterator for some implementation of the List that not supports RandomAccess,
-		// but weights is supported, so use a local variable `i` to get the current position.
+		// use iterator for some implementation of the List that not supports
+		// RandomAccess,
+		// but weights is supported, so use a local variable `i` to get the current
+		// position.
 		int i = 0;
 		for (ServiceInstance instance : instances) {
 			weights[i] /= gcd;
@@ -130,4 +132,5 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 		}
 		return a;
 	}
+
 }
