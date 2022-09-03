@@ -74,6 +74,11 @@ public class RequestData {
 				new HashMap<>());
 	}
 
+	public RequestData(ServerHttpRequest request, Map<String, Object> attributes) {
+		this(request.getMethod(), request.getURI(), request.getHeaders(), buildCookies(request.getCookies()),
+				attributes);
+	}
+	
 	private static MultiValueMap<String, String> buildCookies(MultiValueMap<String, HttpCookie> cookies) {
 		HttpHeaders newCookies = new HttpHeaders();
 		if (cookies != null) {
