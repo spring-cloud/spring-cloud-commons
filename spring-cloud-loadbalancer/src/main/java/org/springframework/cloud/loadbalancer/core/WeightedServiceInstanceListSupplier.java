@@ -96,9 +96,8 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 		List<ServiceInstance> newInstances = new ArrayList<>(total / gcd);
 
 		// use iterator for some implementation of the List that not supports
-		// RandomAccess,
-		// but weights is supported, so use a local variable `i` to get the current
-		// position.
+		// RandomAccess, but `weights` is supported, so use a local variable `i`
+		// to get the current position.
 		int i = 0;
 		for (ServiceInstance instance : instances) {
 			weights[i] /= gcd;
