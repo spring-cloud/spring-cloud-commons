@@ -82,10 +82,10 @@ enum CircuitBreakerDocumentedObservation implements DocumentedObservation {
 		 */
 		OBJECT_TYPE {
 			@Override
-			public String getKeyName() {
+			public String asString() {
 				return "spring.cloud.circuitbreaker.type";
 			}
-		}
+		};
 
 	}
 
