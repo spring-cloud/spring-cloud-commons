@@ -181,7 +181,6 @@ public class RetryLoadBalancerInterceptorTests {
 		HttpRequest request = mock(HttpRequest.class);
 		when(request.getURI()).thenReturn(new URI("http://foo"));
 		InputStream notFoundStream = mock(InputStream.class);
-		when(notFoundStream.read(any(byte[].class))).thenReturn(-1);
 		ClientHttpResponse clientHttpResponseNotFound = new MockClientHttpResponse(notFoundStream,
 				HttpStatus.NOT_FOUND);
 		ClientHttpResponse clientHttpResponseOk = new MockClientHttpResponse(new byte[] {}, HttpStatus.OK);

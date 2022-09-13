@@ -27,7 +27,6 @@ import javax.lang.model.element.Modifier;
 
 import org.springframework.aot.generate.GeneratedMethod;
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.aot.generate.MethodReference;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
@@ -172,8 +171,7 @@ public class LoadBalancerChildContextInitializer
 										generatedInitializerClassNames.get(contextId)));
 						method.addStatement("return instance.withApplicationContextInitializers(initializers)");
 					});
-			beanRegistrationCode.addInstancePostProcessor(
-					MethodReference.ofStatic(beanRegistrationCode.getClassName(), postProcessorMethod.getName()));
+			beanRegistrationCode.addInstancePostProcessor(postProcessorMethod.toMethodReference());
 		}
 
 	}

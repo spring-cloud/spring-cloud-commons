@@ -18,6 +18,7 @@ package org.springframework.cloud.client.circuitbreaker.observation;
 
 import io.micrometer.common.docs.KeyName;
 import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationConvention;
 import io.micrometer.observation.docs.DocumentedObservation;
 
 enum CircuitBreakerDocumentedObservation implements DocumentedObservation {
@@ -27,7 +28,7 @@ enum CircuitBreakerDocumentedObservation implements DocumentedObservation {
 	 */
 	CIRCUIT_BREAKER_SUPPLIER_OBSERVATION {
 		@Override
-		public Class<? extends Observation.ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
+		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
 			return DefaultCircuitBreakerObservationConvention.class;
 		}
 
@@ -54,7 +55,7 @@ enum CircuitBreakerDocumentedObservation implements DocumentedObservation {
 	 */
 	CIRCUIT_BREAKER_FUNCTION_OBSERVATION {
 		@Override
-		public Class<? extends Observation.ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
+		public Class<? extends ObservationConvention<? extends Observation.Context>> getDefaultConvention() {
 			return DefaultCircuitBreakerObservationConvention.class;
 		}
 
@@ -82,10 +83,10 @@ enum CircuitBreakerDocumentedObservation implements DocumentedObservation {
 		 */
 		OBJECT_TYPE {
 			@Override
-			public String getKeyName() {
+			public String asString() {
 				return "spring.cloud.circuitbreaker.type";
 			}
-		}
+		};
 
 	}
 

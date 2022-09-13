@@ -17,15 +17,15 @@
 package org.springframework.cloud.client.circuitbreaker.observation;
 
 import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationConvention;
 
 /**
- * {@link Observation.ObservationConvention} for {@link CircuitBreakerObservationContext}.
+ * {@link ObservationConvention} for {@link CircuitBreakerObservationContext}.
  *
  * @author Marcin Grzejszczak
  * @since 4.0.0
  */
-public interface CircuitBreakerObservationConvention
-		extends Observation.ObservationConvention<CircuitBreakerObservationContext> {
+public interface CircuitBreakerObservationConvention extends ObservationConvention<CircuitBreakerObservationContext> {
 
 	@Override
 	default boolean supportsContext(Observation.Context context) {
