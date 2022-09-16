@@ -1399,3 +1399,62 @@ token relay anywhere where a `RestTemplate` would.
 == Configuration Properties
 
 To see the list of all Spring Cloud Commons related configuration properties please check link:appendix.html[the Appendix page].
+
+== Spring Cloud Request Hedging
+=== Introduction
+Request hedging is a mechanism to improve performance of idempotent requests with large worst-case response times. It
+does this by automatically retrying after the original request has been active for some configurable amount of time,
+usually based on a quantile of the request's typical response time. Unlike timing out the request and retrying, request
+hedging will keep the original requests and return the first request to succeed. This trades off a small percentage
+of additional network traffic to reduce the long-tail latency.
+
+=== Usage
+You can configure a `WebClient` to do request hedging by creating a `HedgerPolicy` `@Bean` and use the `@Hedged`
+qualifier. The `HedgerPolicy` allows you to specify how long to wait before executing the extra requests, a maximum
+number of extra requests to create. Most users will want the `LatencyPercentileHedgerPolicy`, which executes new
+requests when the previous ones have exceeded some percentile of the historical latency.
+
+This example shows a typical usage:
+
+====
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+    @Bean
+    LatencyPercentileHedgerPolicy hedgerPolicy() {
+    	return new LatencyPercentileHedgerPolicy(
+            3, // Maximum extra requests to execute
+            0.95 // Percentile of latency to wait before executing an additional request
+    	);
+    }
+
+    @Bean
+    HedgerPolicyFactory hedgerPolicyFactory(LatencyPercentileHedgerPolicy policy) {
+    	return new LatencyPercentileHedgerPolicyFactory(policy);
+    }
+
+    @Hedged
+    @Bean
+    WebClient.Builder webClientBuilder() {
+        return WebClient.builder();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private WebClient.Builder webClientBuilder;
+
+    public Mono<String> doOtherStuff() {
+        return webClientBuilder.build().get().uri("http://www.example.com/")
+        				.retrieve().bodyToMono(String.class);
+    }
+}
+----
+====
+
+=== Reporting
+Hedging also provides a `HedgerListener`. A hedged service request could involve more than one actual HTTP request. The
+listener provides a mechanism to track each individual HTTP request. For example if we wanted to track latencies,
+we might want to track each HTTP request separately rather than the unified whole. These listeners can be provided to
+the `HedgerPolicyFactory`.
