@@ -1,0 +1,5 @@
+org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration
+org.springframework.cloud.autoconfigure.LifecycleMvcEndpointAutoConfiguration
+org.springframework.cloud.autoconfigure.RefreshAutoConfiguration
+org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration
+org.springframework.cloud.autoconfigure.WritableEnvironmentEndpointAutoConfiguration

@@ -1,0 +1,5 @@
+org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration
+org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration
+org.springframework.cloud.loadbalancer.config.LoadBalancerCacheAutoConfiguration
+org.springframework.cloud.loadbalancer.security.OAuth2LoadBalancerClientAutoConfiguration
+org.springframework.cloud.loadbalancer.config.LoadBalancerStatsAutoConfiguration
