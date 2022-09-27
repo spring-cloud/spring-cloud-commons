@@ -78,7 +78,7 @@ public class RequestData {
 		this(request.getMethod(), request.getURI(), request.getHeaders(), buildCookies(request.getCookies()),
 				attributes);
 	}
-	
+
 	private static MultiValueMap<String, String> buildCookies(MultiValueMap<String, HttpCookie> cookies) {
 		HttpHeaders newCookies = new HttpHeaders();
 		if (cookies != null) {
