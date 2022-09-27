@@ -28,6 +28,7 @@ import org.springframework.http.HttpRequest;
  *
  * @author Gandhimathi Velusamy
  * @author Olga Maciaszek-Sharma
+ * @author junjie shen(沈俊杰)
  * @since 3.1.0
  */
 
@@ -48,9 +49,9 @@ public class XForwardedHeadersTransformer implements LoadBalancerRequestTransfor
 		if (xForwarded.isEnabled()) {
 			HttpHeaders headers = request.getHeaders();
 			String xForwardedHost = request.getURI().getHost();
-			String xforwardedProto = request.getURI().getScheme();
+			String xForwardedProto = request.getURI().getScheme();
 			headers.add("X-Forwarded-Host", xForwardedHost);
-			headers.add("X-Forwarded-Proto", xforwardedProto);
+			headers.add("X-Forwarded-Proto", xForwardedProto);
 		}
 		return request;
 	}
