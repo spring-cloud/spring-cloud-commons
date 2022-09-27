@@ -56,7 +56,6 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
  * @author BaoLin Zhu
- * @author changjin wei(魏昌进)
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnDiscoveryEnabled
@@ -98,7 +97,7 @@ public class LoadBalancerClientConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnBean(LoadBalancerClientFactory.class)
+		@ConditionalOnBean({ XForwardedHeadersTransformer.class, LoadBalancerClientFactory.class })
 		@ConditionalOnMissingBean
 		public XForwardedHeadersTransformer xForwarderHeadersTransformer(LoadBalancerClientFactory clientFactory) {
 			return new XForwardedHeadersTransformer(clientFactory);
