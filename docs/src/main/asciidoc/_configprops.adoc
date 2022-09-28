@@ -12,13 +12,13 @@
 |spring.cloud.discovery.client.health-indicator.include-description | `+++false+++` | 
 |spring.cloud.discovery.client.health-indicator.use-services-query | `+++true+++` | Whether or not the indicator should use {@link DiscoveryClient#getServices} to check its health. When set to {@code false} the indicator instead uses the lighter {@link DiscoveryClient#probe()}. This can be helpful in large deployments where the number of services returned makes the operation unnecessarily heavy.
 |spring.cloud.discovery.client.simple.instances |  | 
-|spring.cloud.discovery.client.simple.local.host |  |
-|spring.cloud.discovery.client.simple.local.instance-id |  |
-|spring.cloud.discovery.client.simple.local.metadata |  |
-|spring.cloud.discovery.client.simple.local.port | `+++0+++` |
-|spring.cloud.discovery.client.simple.local.service-id |  |
-|spring.cloud.discovery.client.simple.local.uri |  |
-|spring.cloud.discovery.client.simple.order |  |
+|spring.cloud.discovery.client.simple.local.host |  | 
+|spring.cloud.discovery.client.simple.local.instance-id |  | 
+|spring.cloud.discovery.client.simple.local.metadata |  | 
+|spring.cloud.discovery.client.simple.local.port | `+++0+++` | 
+|spring.cloud.discovery.client.simple.local.service-id |  | 
+|spring.cloud.discovery.client.simple.local.uri |  | 
+|spring.cloud.discovery.client.simple.order |  | 
 |spring.cloud.discovery.enabled | `+++true+++` | Enables discovery client health indicators.
 |spring.cloud.features.enabled | `+++true+++` | Enables the features endpoint.
 |spring.cloud.httpclientfactories.apache.enabled | `+++true+++` | Enables creation of Apache Http Client factory beans.
