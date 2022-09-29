@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * Convenience annotation to put a <code>@Bean</code> definition in
@@ -42,9 +43,11 @@ import org.springframework.context.annotation.ScopedProxyMode;
 public @interface RefreshScope {
 
 	/**
+	 * Alias for {@link Scope#proxyMode}.
 	 * @see Scope#proxyMode()
 	 * @return proxy mode
 	 */
+	@AliasFor(annotation = Scope.class)
 	ScopedProxyMode proxyMode() default ScopedProxyMode.TARGET_CLASS;
 
 }
