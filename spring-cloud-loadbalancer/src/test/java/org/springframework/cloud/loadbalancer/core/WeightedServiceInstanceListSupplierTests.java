@@ -35,7 +35,7 @@ import static org.springframework.cloud.loadbalancer.core.WeightedServiceInstanc
  *
  * @author Zhuozhi Ji
  */
-class WeightedServiceInstanceListSupplierTest {
+class WeightedServiceInstanceListSupplierTests {
 
 	private final DiscoveryClientServiceInstanceListSupplier delegate = mock(
 			DiscoveryClientServiceInstanceListSupplier.class);
