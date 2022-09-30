@@ -50,7 +50,7 @@ class WeightedServiceInstanceListSupplierTest {
 	}
 
 	@Test
-	void shouldSameAsWeightsRatioWhenGcdOfWeightsIs1() {
+	void shouldBeSameAsWeightsRatioWhenGcdOfWeightsIs1() {
 		ServiceInstance one = serviceInstance("test-1", buildWeightMetadata(1));
 		ServiceInstance two = serviceInstance("test-2", buildWeightMetadata(2));
 		ServiceInstance three = serviceInstance("test-3", buildWeightMetadata(3));
@@ -67,7 +67,7 @@ class WeightedServiceInstanceListSupplierTest {
 	}
 
 	@Test
-	void shouldSameAsWeightsRatioWhenGcdOfWeightsIs10() {
+	void shouldBeSameAsWeightsRatioWhenGcdOfWeightsIs10() {
 		ServiceInstance one = serviceInstance("test-1", buildWeightMetadata(10));
 		ServiceInstance two = serviceInstance("test-2", buildWeightMetadata(20));
 		ServiceInstance three = serviceInstance("test-3", buildWeightMetadata(30));
