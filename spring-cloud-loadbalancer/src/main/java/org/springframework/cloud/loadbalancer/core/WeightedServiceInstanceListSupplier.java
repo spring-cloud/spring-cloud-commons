@@ -16,15 +16,16 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.cloud.client.ServiceInstance;
-import reactor.core.publisher.Flux;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Flux;
+
+import org.springframework.cloud.client.ServiceInstance;
 
 /**
  * A {@link ServiceInstanceListSupplier} implementation that uses weights to expand the
@@ -74,7 +75,8 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 					return DEFAULT_WEIGHT;
 				}
 				return weight;
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format(
 							"Exception occurred during apply weight function to instance %s, using %d as default",

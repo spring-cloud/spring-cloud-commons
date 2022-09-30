@@ -16,13 +16,19 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Test;
-import org.springframework.cloud.client.DefaultServiceInstance;
-import org.springframework.cloud.client.ServiceInstance;
 import reactor.core.publisher.Flux;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.cloud.client.ServiceInstance;
 
 import static java.util.stream.Collectors.summingInt;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -141,7 +147,8 @@ class WeightedServiceInstanceListSupplierTests {
 		ServiceInstance three = serviceInstance("test-3", Collections.emptyMap());
 
 		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(one, two, three)));
-		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate, instance -> -1);
+		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate,
+				instance -> -1);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = serviceInstances.stream()
