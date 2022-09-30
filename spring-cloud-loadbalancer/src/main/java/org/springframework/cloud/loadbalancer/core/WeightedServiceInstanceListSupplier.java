@@ -16,16 +16,15 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.cloud.client.ServiceInstance;
+import reactor.core.publisher.Flux;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Flux;
-
-import org.springframework.cloud.client.ServiceInstance;
 
 /**
  * A {@link ServiceInstanceListSupplier} implementation that uses weights to expand the
@@ -75,8 +74,7 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 					return DEFAULT_WEIGHT;
 				}
 				return weight;
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format(
 							"Exception occurred during apply weight function to instance %s, using %d as default",
@@ -86,13 +84,16 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 			}
 		}).toArray();
 
-		int gcd = weights[0];
-		int total = weights[0];
-		for (int i = 1; i < weights.length; i++) {
-			gcd = gcd(gcd, weights[i]);
-			total += weights[i];
+		// Calculate the gcd of weights and the total number of elements after expansion.
+		int gcd = 0;
+		int total = 0;
+		for (int weight : weights) {
+			gcd = gcd(gcd, weight);
+			total += weight;
 		}
 
+		// Because scaling by the gcd does not affect the distribution,
+		// we can reduce memory usage by this way.
 		List<ServiceInstance> newInstances = new ArrayList<>(total / gcd);
 
 		// use iterator for some implementation of the List that not supports
@@ -100,8 +101,8 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 		// to get the current position.
 		int i = 0;
 		for (ServiceInstance instance : instances) {
-			weights[i] /= gcd;
-			for (int weight = 0; weight < weights[i]; weight++) {
+			int w = weights[i] / gcd;
+			for (int j = 0; j < w; j++) {
 				newInstances.add(instance);
 			}
 			i++;
@@ -119,6 +120,8 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 				return Integer.parseInt(weightValue);
 			}
 		}
+		// using default weight when metadata is missing or
+		// weight is not specified
 		return DEFAULT_WEIGHT;
 	}
 
