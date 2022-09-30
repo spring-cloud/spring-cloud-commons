@@ -22,7 +22,9 @@ import org.springframework.cloud.client.ServiceInstance;
 import reactor.core.publisher.Flux;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.summingInt;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -57,15 +59,8 @@ class WeightedServiceInstanceListSupplierTest {
 		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
-		Map<String, Integer> counter = new HashMap<>();
-		for (ServiceInstance serviceInstance : serviceInstances) {
-			counter.compute(serviceInstance.getInstanceId(), (k, v) -> {
-				if (v == null) {
-					return 1;
-				}
-				return v + 1;
-			});
-		}
+		Map<String, Integer> counter = serviceInstances.stream()
+				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", 1);
 		assertThat(counter).containsEntry("test-2", 2);
 		assertThat(counter).containsEntry("test-3", 3);
@@ -81,15 +76,8 @@ class WeightedServiceInstanceListSupplierTest {
 		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
-		Map<String, Integer> counter = new HashMap<>();
-		for (ServiceInstance serviceInstance : serviceInstances) {
-			counter.compute(serviceInstance.getInstanceId(), (k, v) -> {
-				if (v == null) {
-					return 1;
-				}
-				return v + 1;
-			});
-		}
+		Map<String, Integer> counter = serviceInstances.stream()
+				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", 1);
 		assertThat(counter).containsEntry("test-2", 2);
 		assertThat(counter).containsEntry("test-3", 3);
@@ -105,15 +93,8 @@ class WeightedServiceInstanceListSupplierTest {
 		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
-		Map<String, Integer> counter = new HashMap<>();
-		for (ServiceInstance serviceInstance : serviceInstances) {
-			counter.compute(serviceInstance.getInstanceId(), (k, v) -> {
-				if (v == null) {
-					return 1;
-				}
-				return v + 1;
-			});
-		}
+		Map<String, Integer> counter = serviceInstances.stream()
+				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", 3);
@@ -129,15 +110,8 @@ class WeightedServiceInstanceListSupplierTest {
 		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
-		Map<String, Integer> counter = new HashMap<>();
-		for (ServiceInstance serviceInstance : serviceInstances) {
-			counter.compute(serviceInstance.getInstanceId(), (k, v) -> {
-				if (v == null) {
-					return 1;
-				}
-				return v + 1;
-			});
-		}
+		Map<String, Integer> counter = serviceInstances.stream()
+				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", DEFAULT_WEIGHT);
@@ -153,15 +127,8 @@ class WeightedServiceInstanceListSupplierTest {
 		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate, instance -> 0);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
-		Map<String, Integer> counter = new HashMap<>();
-		for (ServiceInstance serviceInstance : serviceInstances) {
-			counter.compute(serviceInstance.getInstanceId(), (k, v) -> {
-				if (v == null) {
-					return 1;
-				}
-				return v + 1;
-			});
-		}
+		Map<String, Integer> counter = serviceInstances.stream()
+				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", DEFAULT_WEIGHT);
@@ -177,15 +144,8 @@ class WeightedServiceInstanceListSupplierTest {
 		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate, instance -> -1);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
-		Map<String, Integer> counter = new HashMap<>();
-		for (ServiceInstance serviceInstance : serviceInstances) {
-			counter.compute(serviceInstance.getInstanceId(), (k, v) -> {
-				if (v == null) {
-					return 1;
-				}
-				return v + 1;
-			});
-		}
+		Map<String, Integer> counter = serviceInstances.stream()
+				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", DEFAULT_WEIGHT);
@@ -203,15 +163,8 @@ class WeightedServiceInstanceListSupplierTest {
 		});
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
-		Map<String, Integer> counter = new HashMap<>();
-		for (ServiceInstance serviceInstance : serviceInstances) {
-			counter.compute(serviceInstance.getInstanceId(), (k, v) -> {
-				if (v == null) {
-					return 1;
-				}
-				return v + 1;
-			});
-		}
+		Map<String, Integer> counter = serviceInstances.stream()
+				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", DEFAULT_WEIGHT);
