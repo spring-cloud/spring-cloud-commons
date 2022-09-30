@@ -16,18 +16,12 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
-
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import reactor.core.publisher.Flux;
+
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -45,7 +39,7 @@ class WeightedServiceInstanceListSupplierTest {
 			DiscoveryClientServiceInstanceListSupplier.class);
 
 	@Test
-	void shouldReturnEmptyWhenDelegateReturnEmpty() {
+	void shouldReturnEmptyWhenDelegateReturnedEmpty() {
 		when(delegate.get()).thenReturn(Flux.just(Collections.emptyList()));
 		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate);
 
@@ -54,7 +48,7 @@ class WeightedServiceInstanceListSupplierTest {
 	}
 
 	@Test
-	void shouldSameAsWeightsRatioWhenGcdIs1() {
+	void shouldSameAsWeightsRatioWhenGcdOfWeightsIs1() {
 		ServiceInstance one = serviceInstance("test-1", buildWeightMetadata(1));
 		ServiceInstance two = serviceInstance("test-2", buildWeightMetadata(2));
 		ServiceInstance three = serviceInstance("test-3", buildWeightMetadata(3));
@@ -78,7 +72,7 @@ class WeightedServiceInstanceListSupplierTest {
 	}
 
 	@Test
-	void shouldSameAsWeightsRatioWhenGcdIs10() {
+	void shouldSameAsWeightsRatioWhenGcdOfWeightsIs10() {
 		ServiceInstance one = serviceInstance("test-1", buildWeightMetadata(10));
 		ServiceInstance two = serviceInstance("test-2", buildWeightMetadata(20));
 		ServiceInstance three = serviceInstance("test-3", buildWeightMetadata(30));
@@ -150,7 +144,7 @@ class WeightedServiceInstanceListSupplierTest {
 	}
 
 	@Test
-	void shouldUseDefaultWeightWhenWeightedFunctionReturnZero() {
+	void shouldUseDefaultWeightWhenWeightedFunctionReturnedZero() {
 		ServiceInstance one = serviceInstance("test-1", Collections.emptyMap());
 		ServiceInstance two = serviceInstance("test-2", Collections.emptyMap());
 		ServiceInstance three = serviceInstance("test-3", Collections.emptyMap());
@@ -174,7 +168,7 @@ class WeightedServiceInstanceListSupplierTest {
 	}
 
 	@Test
-	void shouldUseDefaultWeightWhenWeightedFunctionReturnNegative() {
+	void shouldUseDefaultWeightWhenWeightedFunctionReturnedNegative() {
 		ServiceInstance one = serviceInstance("test-1", Collections.emptyMap());
 		ServiceInstance two = serviceInstance("test-2", Collections.emptyMap());
 		ServiceInstance three = serviceInstance("test-3", Collections.emptyMap());
@@ -198,7 +192,7 @@ class WeightedServiceInstanceListSupplierTest {
 	}
 
 	@Test
-	void shouldUseDefaultWeightWhenWeightedFunctionThrowsException() {
+	void shouldUseDefaultWeightWhenWeightedFunctionThrownException() {
 		ServiceInstance one = serviceInstance("test-1", Collections.emptyMap());
 		ServiceInstance two = serviceInstance("test-2", Collections.emptyMap());
 		ServiceInstance three = serviceInstance("test-3", Collections.emptyMap());
