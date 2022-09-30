@@ -47,7 +47,7 @@ class WeightedServiceInstanceListSupplierTest {
 	@Test
 	void shouldReturnEmptyWhenDelegateReturnEmpty() {
 		when(delegate.get()).thenReturn(Flux.just(Collections.emptyList()));
-		var supplier = new WeightedServiceInstanceListSupplier(delegate);
+		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		assertThat(serviceInstances).isEmpty();
@@ -55,12 +55,12 @@ class WeightedServiceInstanceListSupplierTest {
 
 	@Test
 	void shouldSameAsWeightsRatioWhenGcdIs1() {
-		var one = serviceInstance("test-1", buildWeightMetadata(1));
-		var two = serviceInstance("test-2", buildWeightMetadata(2));
-		var three = serviceInstance("test-3", buildWeightMetadata(3));
+		ServiceInstance one = serviceInstance("test-1", buildWeightMetadata(1));
+		ServiceInstance two = serviceInstance("test-2", buildWeightMetadata(2));
+		ServiceInstance three = serviceInstance("test-3", buildWeightMetadata(3));
 
 		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(one, two, three)));
-		var supplier = new WeightedServiceInstanceListSupplier(delegate);
+		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = new HashMap<>();
@@ -79,12 +79,12 @@ class WeightedServiceInstanceListSupplierTest {
 
 	@Test
 	void shouldSameAsWeightsRatioWhenGcdIs10() {
-		var one = serviceInstance("test-1", buildWeightMetadata(10));
-		var two = serviceInstance("test-2", buildWeightMetadata(20));
-		var three = serviceInstance("test-3", buildWeightMetadata(30));
+		ServiceInstance one = serviceInstance("test-1", buildWeightMetadata(10));
+		ServiceInstance two = serviceInstance("test-2", buildWeightMetadata(20));
+		ServiceInstance three = serviceInstance("test-3", buildWeightMetadata(30));
 
 		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(one, two, three)));
-		var supplier = new WeightedServiceInstanceListSupplier(delegate);
+		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = new HashMap<>();
@@ -103,12 +103,12 @@ class WeightedServiceInstanceListSupplierTest {
 
 	@Test
 	void shouldUseDefaultWeightWhenWeightNotSpecified() {
-		var one = serviceInstance("test-1", Collections.emptyMap());
-		var two = serviceInstance("test-2", Collections.emptyMap());
-		var three = serviceInstance("test-3", buildWeightMetadata(3));
+		ServiceInstance one = serviceInstance("test-1", Collections.emptyMap());
+		ServiceInstance two = serviceInstance("test-2", Collections.emptyMap());
+		ServiceInstance three = serviceInstance("test-3", buildWeightMetadata(3));
 
 		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(one, two, three)));
-		var supplier = new WeightedServiceInstanceListSupplier(delegate);
+		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = new HashMap<>();
@@ -127,12 +127,12 @@ class WeightedServiceInstanceListSupplierTest {
 
 	@Test
 	void shouldUseDefaultWeightWhenWeightIsNotNumber() {
-		var one = serviceInstance("test-1", buildWeightMetadata("Foo"));
-		var two = serviceInstance("test-2", buildWeightMetadata("Bar"));
-		var three = serviceInstance("test-3", buildWeightMetadata("Baz"));
+		ServiceInstance one = serviceInstance("test-1", buildWeightMetadata("Foo"));
+		ServiceInstance two = serviceInstance("test-2", buildWeightMetadata("Bar"));
+		ServiceInstance three = serviceInstance("test-3", buildWeightMetadata("Baz"));
 
 		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(one, two, three)));
-		var supplier = new WeightedServiceInstanceListSupplier(delegate);
+		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = new HashMap<>();
@@ -151,12 +151,12 @@ class WeightedServiceInstanceListSupplierTest {
 
 	@Test
 	void shouldUseDefaultWeightWhenWeightedFunctionReturnZero() {
-		var one = serviceInstance("test-1", Collections.emptyMap());
-		var two = serviceInstance("test-2", Collections.emptyMap());
-		var three = serviceInstance("test-3", Collections.emptyMap());
+		ServiceInstance one = serviceInstance("test-1", Collections.emptyMap());
+		ServiceInstance two = serviceInstance("test-2", Collections.emptyMap());
+		ServiceInstance three = serviceInstance("test-3", Collections.emptyMap());
 
 		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(one, two, three)));
-		var supplier = new WeightedServiceInstanceListSupplier(delegate, instance -> 0);
+		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate, instance -> 0);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = new HashMap<>();
@@ -175,12 +175,12 @@ class WeightedServiceInstanceListSupplierTest {
 
 	@Test
 	void shouldUseDefaultWeightWhenWeightedFunctionReturnNegative() {
-		var one = serviceInstance("test-1", Collections.emptyMap());
-		var two = serviceInstance("test-2", Collections.emptyMap());
-		var three = serviceInstance("test-3", Collections.emptyMap());
+		ServiceInstance one = serviceInstance("test-1", Collections.emptyMap());
+		ServiceInstance two = serviceInstance("test-2", Collections.emptyMap());
+		ServiceInstance three = serviceInstance("test-3", Collections.emptyMap());
 
 		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(one, two, three)));
-		var supplier = new WeightedServiceInstanceListSupplier(delegate, instance -> -1);
+		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate, instance -> -1);
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = new HashMap<>();
@@ -199,12 +199,12 @@ class WeightedServiceInstanceListSupplierTest {
 
 	@Test
 	void shouldUseDefaultWeightWhenWeightedFunctionThrowsException() {
-		var one = serviceInstance("test-1", Collections.emptyMap());
-		var two = serviceInstance("test-2", Collections.emptyMap());
-		var three = serviceInstance("test-3", Collections.emptyMap());
+		ServiceInstance one = serviceInstance("test-1", Collections.emptyMap());
+		ServiceInstance two = serviceInstance("test-2", Collections.emptyMap());
+		ServiceInstance three = serviceInstance("test-3", Collections.emptyMap());
 
 		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(one, two, three)));
-		var supplier = new WeightedServiceInstanceListSupplier(delegate, instance -> {
+		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate, instance -> {
 			throw new RuntimeException();
 		});
 
