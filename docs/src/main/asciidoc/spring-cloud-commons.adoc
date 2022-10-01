@@ -934,7 +934,45 @@ To enable weighted load-balancing, we provide the `WeightedServiceInstanceListSu
 By default, we will try to read and parse the weight from the metadata map (the key is `weight`),
 if the weight is not specified in the metadata map, then we will default the weight of this instance to be `1`.
 
+You could use this sample configuration to set it up:
+
+[[weighted-custom-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withWeighted()
+					.withCaching()
+					.build(context);
+	}
+}
+----
+
 NOTE: You can also customize the weight calculation logic by providing `WeightFunction`.
+
+You could use this sample configuration to make all instances have a random weight:
+
+[[random-weight-weighted-custom-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withWeighted(instance -> ThreadLocalRandom.current().nextInt(1, 101))
+					.withCaching()
+					.build(context);
+	}
+}
+----
 
 === Zone-Based Load-Balancing
 
