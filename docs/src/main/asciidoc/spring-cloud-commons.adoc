@@ -928,6 +928,14 @@ to `false`.
 
 WARNING: Although the basic, non-cached, implementation is useful for prototyping and testing, it's much less efficient than the cached versions, so we recommend always using the cached version in production. If the caching is already done by the `DiscoveryClient` implementation, for example `EurekaDiscoveryClient`, the load-balancer caching should be disabled to prevent double caching.
 
+=== Weighted Load-Balancing
+
+To enable weighted load-balancing, we provide the `WeightedServiceInstanceListSupplier`. We use `WeightFunction` to calculate the weight of instance.
+By default, we will try to read and parse the weight from the metadata map (the key is `weight`),
+if the weight is not specified in the metadata map, then we will default the weight of this instance to be `1`.
+
+NOTE: You can also customize the weight calculation logic by providing `WeightFunction`.
+
 === Zone-Based Load-Balancing
 
 To enable zone-based load-balancing, we provide the `ZonePreferenceServiceInstanceListSupplier`.
