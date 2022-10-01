@@ -86,7 +86,8 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 			}
 		}).toArray();
 
-		// Calculate the gcd of weights and the total number of elements after expansion.
+		// Calculate the greatest common divisor (GCD) of weights and the total number of
+		// elements after expansion.
 		int gcd = 0;
 		int total = 0;
 		for (int weight : weights) {
