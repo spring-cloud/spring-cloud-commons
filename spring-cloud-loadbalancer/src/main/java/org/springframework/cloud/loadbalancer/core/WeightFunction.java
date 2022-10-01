@@ -19,11 +19,23 @@ package org.springframework.cloud.loadbalancer.core;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
+ * Represents a function that calculate the weight of the given service instance.
+ *
+ * <p>
+ * This is a functional interface whose functional method is
+ * {@link #apply(ServiceInstance)}.
+ *
  * @author Zhuozhi Ji
+ * @see java.util.function.ToIntFunction
  */
 @FunctionalInterface
 public interface WeightFunction {
 
+	/**
+	 * Applies this function to the given service instance.
+	 * @param instance the service instance
+	 * @return the weight of service instance
+	 */
 	int apply(ServiceInstance instance);
 
 }
