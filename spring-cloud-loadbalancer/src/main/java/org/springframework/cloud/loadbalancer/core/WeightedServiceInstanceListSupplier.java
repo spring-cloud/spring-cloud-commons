@@ -91,7 +91,7 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 		int gcd = 0;
 		int total = 0;
 		for (int weight : weights) {
-			gcd = gcd(gcd, weight);
+			gcd = greatestCommonDivisor(gcd, weight);
 			total += weight;
 		}
 
@@ -128,7 +128,7 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 		return DEFAULT_WEIGHT;
 	}
 
-	static int gcd(int a, int b) {
+	static int greatestCommonDivisor(int a, int b) {
 		int r;
 		while (b != 0) {
 			r = a % b;
