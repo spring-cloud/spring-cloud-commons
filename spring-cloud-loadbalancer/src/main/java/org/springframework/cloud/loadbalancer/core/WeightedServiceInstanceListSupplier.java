@@ -104,8 +104,8 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 		// to get the current position.
 		int i = 0;
 		for (ServiceInstance instance : instances) {
-			int w = weights[i] / gcd;
-			for (int j = 0; j < w; j++) {
+			int weight = weights[i] / gcd;
+			for (int j = 0; j < weight; j++) {
 				newInstances.add(instance);
 			}
 			i++;
