@@ -928,6 +928,53 @@ to `false`.
 
 WARNING: Although the basic, non-cached, implementation is useful for prototyping and testing, it's much less efficient than the cached versions, so we recommend always using the cached version in production. If the caching is already done by the `DiscoveryClient` implementation, for example `EurekaDiscoveryClient`, the load-balancer caching should be disabled to prevent double caching.
 
+=== Weighted Load-Balancing
+
+To enable weighted load-balancing, we provide the `WeightedServiceInstanceListSupplier`. We use `WeightFunction` to calculate the weight of each instance.
+By default, we try to read and parse the weight from the metadata map (the key is `weight`).
+
+If the weight is not specified in the metadata map, we default the weight of this instance to be 1.
+
+You could use this sample configuration to set it up:
+
+[[weighted-custom-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withWeighted()
+					.withCaching()
+					.build(context);
+	}
+}
+----
+
+NOTE: You can also customize the weight calculation logic by providing `WeightFunction`.
+
+You can use this sample configuration to make all instances have a random weight:
+
+[[random-weight-weighted-custom-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withWeighted(instance -> ThreadLocalRandom.current().nextInt(1, 101))
+					.withCaching()
+					.build(context);
+	}
+}
+----
+
 === Zone-Based Load-Balancing
 
 To enable zone-based load-balancing, we provide the `ZonePreferenceServiceInstanceListSupplier`.

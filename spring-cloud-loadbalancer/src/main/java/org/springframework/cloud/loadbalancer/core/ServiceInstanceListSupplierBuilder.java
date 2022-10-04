@@ -50,6 +50,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Olga Maciaszek-Sharma
  * @author Zhiguo Chen
  * @author Sabyasachi Bhattacharya
+ * @author Zhuozhi Ji
  */
 public final class ServiceInstanceListSupplierBuilder {
 
@@ -108,6 +109,31 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withBase(ServiceInstanceListSupplier supplier) {
 		this.baseCreator = context -> supplier;
+		return this;
+	}
+
+	/**
+	 * Adds a {@link WeightedServiceInstanceListSupplier} to the
+	 * {@link ServiceInstanceListSupplier} hierarchy.
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withWeighted() {
+		DelegateCreator creator = (context, delegate) -> new WeightedServiceInstanceListSupplier(delegate);
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
+	 * Adds a {@link WeightedServiceInstanceListSupplier} that uses user-provided
+	 * {@link WeightFunction} instance to the {@link ServiceInstanceListSupplier}
+	 * hierarchy.
+	 * @param weightFunction a user-provided {@link WeightFunction} instance
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withWeighted(WeightFunction weightFunction) {
+		DelegateCreator creator = (context, delegate) -> new WeightedServiceInstanceListSupplier(delegate,
+				weightFunction);
+		this.creators.add(creator);
 		return this;
 	}
 
