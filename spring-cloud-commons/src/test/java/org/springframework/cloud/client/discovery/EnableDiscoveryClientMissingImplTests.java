@@ -29,7 +29,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * Tests that if <code>@EnableDiscoveryClient</code> is used, but there is no
- * implementation on the classpath, then fail
+ * implementation on the classpath, then fail.
  *
  * @author Spencer Gibb
  */

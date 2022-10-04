@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
- * Tests for mapping properties to instances in {@link SimpleDiscoveryClient}
+ * Tests for mapping properties to instances in {@link SimpleDiscoveryClient}.
  *
  * @author Biju Kunjummen
  */

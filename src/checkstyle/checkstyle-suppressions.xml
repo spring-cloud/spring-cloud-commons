@@ -5,14 +5,16 @@
 <suppressions>
 	<suppress files=".*TestBootstrapConfiguration.*" checks="JavadocVariable"/>
 	<suppress files=".*BootstrapConfigurationTests.*" checks="JavadocStyle"/>
-	<suppress files=".*BootstrapConfigurationTests.*" checks="JavadocVariable"/>
+	<suppress files=".*Tests.*" checks="JavadocVariable"/>
+	<suppress files=".*TestConfigDataLocationResolver.*" checks="JavadocVariable"/>
+	<suppress files=".*TestEnvPostProcessor.*" checks="JavadocVariable"/>
 	<suppress files=".*TestHigherPriorityBootstrapConfiguration.*" checks="HideUtilityClassConstructor"/>
+	<suppress files=".*CustomHttpClientBuilderConfigurationTests.*" checks="HideUtilityClassConstructor"/>
+	<suppress files=".*DefaultHttpClientConfigurationTests.*" checks="HideUtilityClassConstructor"/>
+	<suppress files=".*CustomOkHttpClientBuilderConfigurationTests.*" checks="HideUtilityClassConstructor"/>
+	<suppress files=".*CustomHttpClientConfigurationTests.*" checks="HideUtilityClassConstructor"/>
 	<suppress files=".*TestHigherPriorityBootstrapConfiguration.*" checks="JavadocVariable"/>
 	<suppress files=".*RefreshScopeConfigurationTests.*" checks="JavadocStyle"/>
 	<suppress files=".*RefreshScopeConfigurationTests.*" checks="JavadocMethod"/>
-	<suppress files=".*RefreshScopeConfigurationTests.*" checks="JavadocVariable"/>
-	<suppress files=".*RefreshAutoConfigurationTests.*" checks="JavadocVariable"/>
-	<suppress files=".*RefreshAutoConfigurationMoreClassPathTests.*" checks="JavadocVariable"/>
-	<suppress files=".*EnvironmentDecryptApplicationInitializerTests.*" checks="JavadocVariable"/>
 	<suppress files=".*CachingServiceInstanceListSupplierTests.*" checks="RegexpSinglelineJava"/>
 </suppressions>
