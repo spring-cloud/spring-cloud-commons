@@ -33,7 +33,7 @@ import static org.springframework.cloud.client.discovery.composite.CompositeDisc
 
 /**
  * Tests for the support of ordered {@link DiscoveryClient} instances in
- * {@link CompositeDiscoveryClient}
+ * {@link CompositeDiscoveryClient}.
  *
  * @author Olga Maciaszek-Sharma
  */

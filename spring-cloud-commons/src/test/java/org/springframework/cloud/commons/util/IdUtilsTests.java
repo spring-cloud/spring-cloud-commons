@@ -25,6 +25,8 @@ import org.springframework.mock.env.MockEnvironment;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
+ * Tests for {@link IdUtils}.
+ *
  * @author Spencer Gibb
  */
 public class IdUtilsTests {

@@ -29,7 +29,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.cloud.client.discovery.composite.CompositeDiscoveryClientTestsConfig.CUSTOM_SERVICE_ID;
 
 /**
- * Tests for behavior of Composite Discovery Client
+ * Tests for behavior of Composite Discovery Client.
  *
  * @author Biju Kunjummen
  */

@@ -80,7 +80,7 @@ The `bootstrap.yml` (or `.properties`) location can be specified by setting `spr
 
 Those properties behave like the `spring.config.*` variants with the same name.
 With `spring.cloud.bootstrap.location` the default locations are replaced and only the specified ones are used.
-To add locations to the list of default ones, `spring.cloud.bootstrap.additional-location` could be used.
+To add locations to the list of default ones, `spring.cloud.bootstrap.additional-location` can be used.
 In fact, they are used to set up the bootstrap `ApplicationContext` by setting those properties in its `Environment`.
 If there is an active profile (from `spring.profiles.active` or through the `Environment` API in the context you are building), properties in that profile get loaded as well, the same as in a regular Spring Boot app -- for example, from `bootstrap-development.properties` for a `development` profile.
 
@@ -162,7 +162,7 @@ When an `EnvironmentChangeEvent` is observed, it has a list of key values that h
 * Set the logger levels for any properties in `logging.level.*`.
 
 Note that the Spring Cloud Config Client does not, by default, poll for changes in the `Environment`.
-Generally, we would not recommend that approach for detecting changes (although you could set it up with a
+Generally, we would not recommend that approach for detecting changes (although you can set it up with a
 `@Scheduled` annotation).
 If you have a scaled-out client application, it is better to broadcast the `EnvironmentChangeEvent` to all the instances instead of having them polling for changes (for example, by using the https://github.com/spring-cloud/spring-cloud-bus[Spring Cloud Bus]).
 
@@ -935,7 +935,7 @@ By default, we try to read and parse the weight from the metadata map (the key i
 
 If the weight is not specified in the metadata map, we default the weight of this instance to be 1.
 
-You could use this sample configuration to set it up:
+You can use this sample configuration to set it up:
 
 [[weighted-custom-loadbalancer-configuration]]
 [source,java,indent=0]
@@ -994,7 +994,7 @@ In order to use the zone-based load-balancing approach, you will have to instant
 We use delegates to work with `ServiceInstanceListSupplier` beans.
 We suggest passing a `DiscoveryClientServiceInstanceListSupplier` delegate in the constructor of `ZonePreferenceServiceInstanceListSupplier` and, in turn, wrapping the latter with a `CachingServiceInstanceListSupplier` to leverage <<loadbalancer-caching, LoadBalancer caching mechanism>>.
 
-You could use this sample configuration to set it up:
+You can use this sample configuration to set it up:
 
 [[zoned-based-custom-loadbalancer-configuration]]
 [source,java,indent=0]
@@ -1045,7 +1045,7 @@ In order to use the health-check scheduler approach, you will have to instantiat
 We use delegates to work with `ServiceInstanceListSupplier` beans.
 We suggest passing a `DiscoveryClientServiceInstanceListSupplier` delegate in the constructor of `HealthCheckServiceInstanceListSupplier`.
 
-You could use this sample configuration to set it up:
+You can use this sample configuration to set it up:
 
 [[health-check-based-custom-loadbalancer-configuration]]
 [source,java,indent=0]
@@ -1140,7 +1140,7 @@ If no hint is set, either by the header or by properties, all service instances 
 
 While filtering, `HintBasedServiceInstanceListSupplier` looks for service instances that have a matching value set under the `hint` key in their `metadataMap`. If no matching instances are found, all instances provided by the delegate are returned.
 
-You could use the following sample configuration to set it up:
+You can use the following sample configuration to set it up:
 
 [[hints-based-custom-loadbalancer-configuration]]
 [source,java,indent=0]
@@ -1333,7 +1333,7 @@ The per-client configuration properties work for most of the properties, apart f
 - `spring.cloud.loadbalancer.cache.enabled` - globally enables or disables LoadBalancer caching. If you enable it globally, you can still disable caching for specific clients by creating a <<custom-loadbalancer-configuration, custom configuration>> that does not include the `CachingServiceInstanceListSupplier` in the `ServiceInstanceListSupplier` delegates hierarchy, but not the other way round.
 - `spring.cloud.loadbalancer.stats.micrometer.enabled` - globally enables or disables LoadBalancer Micrometer metrics
 
-NOTE: For the properties where maps where already used, where you could specify a different value per-client without using the `clients` keyword (for example, `hints`, `health-check.path`), we have kept that behaviour in order to keep the library backwards compatible. It will be modified in the next major release.
+NOTE: For the properties where maps where already used, where you can specify a different value per-client without using the `clients` keyword (for example, `hints`, `health-check.path`), we have kept that behaviour in order to keep the library backwards compatible. It will be modified in the next major release.
 
 ===  AOT and native image support
 
@@ -1393,7 +1393,7 @@ tokens (i.e. it is using the `security.oauth2.user-info-uri`
 configuration), then you can simply create an `OAuth2RestTemplate`
 using an autowired `OAuth2ClientContext` (it will be populated by the
 authentication process before it hits the backend code). Equivalently
-(with Spring Boot 1.4), you could inject a
+(with Spring Boot 1.4), you can inject a
 `UserInfoRestTemplateFactory` and grab its `OAuth2RestTemplate` in
 your configuration. For example:
 
@@ -1416,7 +1416,7 @@ with Spring Security Cloud any `OAuth2RestOperations` that the user
 creates from an `@Autowired` `OAuth2Context` will also forward
 tokens. This feature is implemented by default as an MVC handler
 interceptor, so it only works in Spring MVC. If you are not using MVC
-you could use a custom filter or AOP interceptor wrapping an
+you can use a custom filter or AOP interceptor wrapping an
 `AccessTokenContextRelay` to provide the same feature.
 
 Here's a basic

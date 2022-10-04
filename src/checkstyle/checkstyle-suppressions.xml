@@ -4,6 +4,10 @@
 	"https://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
 	<suppress files=".*TestBootstrapConfiguration.*" checks="JavadocVariable"/>
+	<suppress files=".*BootstrapConfigurationTests.*" checks="JavadocStyle"/>
+	<suppress files=".*Tests.*" checks="JavadocVariable"/>
+	<suppress files=".*TestConfigDataLocationResolver.*" checks="JavadocVariable"/>
+	<suppress files=".*TestEnvPostProcessor.*" checks="JavadocVariable"/>
 	<suppress files=".*TestHigherPriorityBootstrapConfiguration.*" checks="HideUtilityClassConstructor"/>
 	<suppress files=".*TestHigherPriorityBootstrapConfiguration.*" checks="JavadocVariable"/>
 	<suppress files=".*RefreshScopeConfigurationTests.*" checks="JavadocMethod"/>
