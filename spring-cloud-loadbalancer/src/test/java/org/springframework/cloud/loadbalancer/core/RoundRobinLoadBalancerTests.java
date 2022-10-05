@@ -59,7 +59,7 @@ class RoundRobinLoadBalancerTests {
 		ServiceInstanceListSupplier supplier = mock(ServiceInstanceListSupplier.class);
 		when(supplier.get(any())).thenReturn(Flux.just(Collections.singletonList(new DefaultServiceInstance())));
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(new SimpleObjectProvider<>(supplier),
-				"shouldStartFromZeroWhenPositiveOverflow", 0);
+				"shouldNotMovePositionIfOnlyOneInstance", 0);
 		loadBalancer.choose().block();
 		assertThat(loadBalancer.position).hasValue(0);
 		loadBalancer.choose().block();
