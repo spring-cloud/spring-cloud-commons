@@ -100,6 +100,12 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 			return new EmptyResponse();
 		}
 
+		// Do not move position when there is only 1 instance, especially some suppliers
+		// have already filtered instances
+		if (instances.size() == 1) {
+			return new DefaultResponse(instances.get(0));
+		}
+
 		// Ignore the sign bit, this allows pos to loop sequentially from 0 to
 		// Integer.MAX_VALUE
 		int pos = this.position.incrementAndGet() & Integer.MAX_VALUE;
