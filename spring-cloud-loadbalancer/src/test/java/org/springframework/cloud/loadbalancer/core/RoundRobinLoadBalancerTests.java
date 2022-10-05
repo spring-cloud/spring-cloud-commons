@@ -17,6 +17,7 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,7 @@ class RoundRobinLoadBalancerTests {
 	@Test
 	void shouldNotMovePositionIfOnlyOneInstance() {
 		ServiceInstanceListSupplier supplier = mock(ServiceInstanceListSupplier.class);
-		when(supplier.get(any())).thenReturn(Flux.just(List.of(new DefaultServiceInstance())));
+		when(supplier.get(any())).thenReturn(Flux.just(Collections.singletonList(new DefaultServiceInstance())));
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(new SimpleObjectProvider<>(supplier),
 				"shouldStartFromZeroWhenPositiveOverflow", 0);
 		loadBalancer.choose().block();
