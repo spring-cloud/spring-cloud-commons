@@ -22,6 +22,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.loadbalancer.support.SimpleObjectProvider;
 
@@ -50,6 +51,18 @@ class RoundRobinLoadBalancerTests {
 	@Test
 	void shouldOrderEnforcedWhenPositiveOverflow() {
 		assertOrderEnforced(MAX_VALUE);
+	}
+
+	@Test
+	void shouldNotMovePositionIfOnlyOneInstance() {
+		ServiceInstanceListSupplier supplier = mock(ServiceInstanceListSupplier.class);
+		when(supplier.get(any())).thenReturn(Flux.just(List.of(new DefaultServiceInstance())));
+		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(new SimpleObjectProvider<>(supplier),
+				"shouldStartFromZeroWhenPositiveOverflow", 0);
+		loadBalancer.choose().block();
+		assertThat(loadBalancer.position).hasValue(0);
+		loadBalancer.choose().block();
+		assertThat(loadBalancer.position).hasValue(0);
 	}
 
 	@SuppressWarnings("all")
