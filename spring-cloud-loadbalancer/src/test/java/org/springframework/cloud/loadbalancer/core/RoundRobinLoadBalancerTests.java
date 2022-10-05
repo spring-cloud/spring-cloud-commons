@@ -60,8 +60,10 @@ class RoundRobinLoadBalancerTests {
 		when(supplier.get(any())).thenReturn(Flux.just(Collections.singletonList(new DefaultServiceInstance())));
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(new SimpleObjectProvider<>(supplier),
 				"shouldNotMovePositionIfOnlyOneInstance", 0);
+
 		loadBalancer.choose().block();
 		assertThat(loadBalancer.position).hasValue(0);
+
 		loadBalancer.choose().block();
 		assertThat(loadBalancer.position).hasValue(0);
 	}
