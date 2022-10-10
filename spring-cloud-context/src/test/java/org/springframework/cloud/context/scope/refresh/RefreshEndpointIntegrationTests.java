@@ -24,23 +24,25 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.scope.refresh.RefreshEndpointIntegrationTests.ClientApp;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -62,10 +64,15 @@ public class RefreshEndpointIntegrationTests {
 	@Test
 	public void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
-		template.exchange(
+		ResponseEntity<String> envResponse = template.exchange(
 				getUrlEncodedEntity("http://localhost:" + this.port + BASE_PATH + "/env", "message", "Hello Dave!"),
 				String.class);
-		template.postForObject("http://localhost:" + this.port + BASE_PATH + "/refresh", null, String.class);
+		assertThat(envResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity request = new HttpEntity(headers);
+		ResponseEntity<String> refreshResponse = template.postForEntity("http://localhost:" + this.port + BASE_PATH + "/refresh", request, String.class);
+		assertThat(refreshResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String message = template.getForObject("http://localhost:" + this.port + "/", String.class);
 		then(message).isEqualTo("Hello Dave!");
 	}
@@ -85,12 +92,8 @@ public class RefreshEndpointIntegrationTests {
 	@EnableAutoConfiguration
 	protected static class ClientApp {
 
-		public static void main(String[] args) {
-			SpringApplication.run(ClientApp.class, args);
-		}
-
 		@Bean
-		@RefreshScope
+		@org.springframework.cloud.context.config.annotation.RefreshScope
 		public Controller controller() {
 			return new Controller();
 		}
