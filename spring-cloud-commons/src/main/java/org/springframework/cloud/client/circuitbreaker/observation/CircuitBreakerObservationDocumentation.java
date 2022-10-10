@@ -19,9 +19,9 @@ package org.springframework.cloud.client.circuitbreaker.observation;
 import io.micrometer.common.docs.KeyName;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationConvention;
-import io.micrometer.observation.docs.DocumentedObservation;
+import io.micrometer.observation.docs.ObservationDocumentation;
 
-enum CircuitBreakerDocumentedObservation implements DocumentedObservation {
+enum CircuitBreakerObservationDocumentation implements ObservationDocumentation {
 
 	/**
 	 * Observation created when we wrap a Supplier passed to the CircuitBreaker.
@@ -76,7 +76,7 @@ enum CircuitBreakerDocumentedObservation implements DocumentedObservation {
 		// }
 	};
 
-	enum LowCardinalityTags implements KeyName {
+	public enum LowCardinalityTags implements KeyName {
 
 		/**
 		 * Defines the type of wrapped lambda.

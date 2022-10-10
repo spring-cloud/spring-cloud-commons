@@ -28,11 +28,14 @@ import io.micrometer.common.KeyValues;
  */
 public class DefaultCircuitBreakerObservationConvention implements CircuitBreakerObservationConvention {
 
-	static final DefaultCircuitBreakerObservationConvention INSTANCE = new DefaultCircuitBreakerObservationConvention();
+	/**
+	 * Don't know why this needs to be public.
+	 */
+	public static final DefaultCircuitBreakerObservationConvention INSTANCE = new DefaultCircuitBreakerObservationConvention();
 
 	@Override
 	public KeyValues getLowCardinalityKeyValues(CircuitBreakerObservationContext context) {
-		return KeyValues.of(CircuitBreakerDocumentedObservation.LowCardinalityTags.OBJECT_TYPE
+		return KeyValues.of(CircuitBreakerObservationDocumentation.LowCardinalityTags.OBJECT_TYPE
 				.withValue(context.getType().name().toLowerCase(Locale.ROOT)));
 	}
 

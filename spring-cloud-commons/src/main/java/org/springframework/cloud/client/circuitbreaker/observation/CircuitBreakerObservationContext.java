@@ -29,7 +29,7 @@ public class CircuitBreakerObservationContext extends Observation.Context {
 	private final Type type;
 
 	/**
-	 * Creates a new instance of {@link CircuitBreakerDocumentedObservation}.
+	 * Creates a new instance of {@link CircuitBreakerObservationDocumentation}.
 	 * @param type type of wrapped object
 	 */
 	public CircuitBreakerObservationContext(Type type) {
