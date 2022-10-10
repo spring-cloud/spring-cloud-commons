@@ -24,7 +24,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,8 +49,11 @@ public class WebfluxRefreshEndpointIntegrationTests {
 	@Test
 	public void webAccess() throws Exception {
 		TestRestTemplate template = new TestRestTemplate();
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity request = new HttpEntity(headers);
 		ResponseEntity<String> entity = template.postForEntity("http://localhost:" + this.port + BASE_PATH + "/refresh",
-				null, String.class);
+				request, String.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
