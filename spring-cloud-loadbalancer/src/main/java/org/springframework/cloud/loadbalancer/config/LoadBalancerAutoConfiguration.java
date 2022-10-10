@@ -72,7 +72,7 @@ public class LoadBalancerAutoConfiguration {
 	}
 
 	@Bean
-	LoadBalancerChildContextInitializer loadBalancerChildContextInitializer(
+	static LoadBalancerChildContextInitializer loadBalancerChildContextInitializer(
 			LoadBalancerClientFactory loadBalancerClientFactory, ApplicationContext parentContext) {
 		return new LoadBalancerChildContextInitializer(loadBalancerClientFactory, parentContext);
 	}
