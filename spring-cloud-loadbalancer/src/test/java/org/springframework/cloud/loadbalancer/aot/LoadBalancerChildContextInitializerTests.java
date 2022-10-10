@@ -28,8 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.aot.AotDetector;
 import org.springframework.aot.test.generate.TestGenerationContext;
-import org.springframework.aot.test.generate.compile.CompileWithTargetClassAccess;
-import org.springframework.aot.test.generate.compile.TestCompiler;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
 import org.springframework.boot.context.annotation.UserConfigurations;
@@ -47,6 +45,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.test.tools.CompileWithForkedClassLoader;
+import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.javapoet.ClassName;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -70,7 +70,7 @@ public class LoadBalancerChildContextInitializerTests {
 	}
 
 	@Test
-	@CompileWithTargetClassAccess
+	@CompileWithForkedClassLoader
 	@SuppressWarnings("unchecked")
 	void shouldStartLBChildContextsFromAotContributions(CapturedOutput output) {
 		WebApplicationContextRunner contextRunner = new WebApplicationContextRunner(
@@ -84,7 +84,7 @@ public class LoadBalancerChildContextInitializerTests {
 					(GenericApplicationContext) context.getSourceApplicationContext(), generationContext);
 			generationContext.writeGeneratedContent();
 			TestCompiler compiler = TestCompiler.forSystem();
-			compiler.withFiles(generationContext.getGeneratedFiles()).compile(compiled -> {
+			compiler.with(generationContext).compile(compiled -> {
 				ServletWebServerApplicationContext freshApplicationContext = new ServletWebServerApplicationContext();
 				ApplicationContextInitializer<GenericApplicationContext> initializer = compiled
 						.getInstance(ApplicationContextInitializer.class, className.toString());
