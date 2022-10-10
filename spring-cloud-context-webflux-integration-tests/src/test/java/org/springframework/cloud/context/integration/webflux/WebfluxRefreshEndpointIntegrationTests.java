@@ -34,9 +34,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * @author Dave Syer
  *
  */
-@SpringBootTest(classes = RefreshEndpointIntegrationTests.ClientApp.class,
+@SpringBootTest(classes = WebfluxRefreshEndpointIntegrationTests.ClientApp.class,
 		properties = { "management.endpoints.web.exposure.include=*" }, webEnvironment = RANDOM_PORT)
-public class RefreshEndpointIntegrationTests {
+public class WebfluxRefreshEndpointIntegrationTests {
 
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
 
