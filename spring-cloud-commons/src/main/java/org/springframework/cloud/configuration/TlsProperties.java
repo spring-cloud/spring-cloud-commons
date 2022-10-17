@@ -19,6 +19,7 @@ package org.springframework.cloud.configuration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.core.io.Resource;
 
@@ -46,6 +47,8 @@ public class TlsProperties {
 	private String trustStoreType;
 
 	private String trustStorePassword = "";
+
+	private Set<TLS> tlsVersions = Set.of(TLS.V_1_2, TLS.V_1_3);
 
 	private static Map<String, String> extTypes() {
 		Map<String, String> result = new HashMap<>();
@@ -137,6 +140,14 @@ public class TlsProperties {
 
 	public char[] trustStorePassword() {
 		return trustStorePassword.toCharArray();
+	}
+
+	public Set<TLS> getTlsVersions() {
+		return tlsVersions;
+	}
+
+	public void setTlsVersions(Set<TLS> tlsVersions) {
+		this.tlsVersions = tlsVersions;
 	}
 
 	private String storeTypeOf(Resource resource) {
