@@ -27,9 +27,9 @@ public final class IdUtils {
 	private static final String SEPARATOR = ":";
 
 	// @checkstyle:off
-	public static final String DEFAULT_SERVICE_ID_STRING = "${vcap.application.name:${spring.application.name:application}}:${vcap.application.instance_index:${spring.application.index:${local.server.port:${server.port:0}}}}:${vcap.application.instance_id:${cachedrandom.${vcap.application.name:${spring.application.name:application}}.value}}";
+	public static final String DEFAULT_SERVICE_ID_STRING = "${vcap.application.name:${spring.application.name:application}}:${vcap.application.instance_index:${spring.application.index:${local.server.port:${server.port:8080}}}}:${vcap.application.instance_id:${cachedrandom.${vcap.application.name:${spring.application.name:application}}.value}}";
 
-	public static final String DEFAULT_SERVICE_ID_WITH_ACTIVE_PROFILES_STRING = "${vcap.application.name:${spring.application.name:application}:${spring.profiles.active}}:${vcap.application.instance_index:${spring.application.index:${local.server.port:${server.port:0}}}}:${vcap.application.instance_id:${cachedrandom.${vcap.application.name:${spring.application.name:application}}.value}}";
+	public static final String DEFAULT_SERVICE_ID_WITH_ACTIVE_PROFILES_STRING = "${vcap.application.name:${spring.application.name:application}:${spring.profiles.active}}:${vcap.application.instance_index:${spring.application.index:${local.server.port:${server.port:8080}}}}:${vcap.application.instance_id:${cachedrandom.${vcap.application.name:${spring.application.name:application}}.value}}";
 
 	// @checkstyle:on
 
