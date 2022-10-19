@@ -83,7 +83,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 				try {
 					// since 3.0
 					Class.forName(
-							"org.springframework.boot.context.properties.ConfigurationPropertiesBindConstructorProvider");
+							"org.springframework.boot.autoconfigure.logging.ConditionEvaluationReportLoggingListener");
 					return true;
 
 				}
