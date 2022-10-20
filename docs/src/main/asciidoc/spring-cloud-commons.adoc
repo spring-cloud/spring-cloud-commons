@@ -1335,7 +1335,7 @@ The per-client configuration properties work for most of the properties, apart f
 
 NOTE: For the properties where maps where already used, where you can specify a different value per-client without using the `clients` keyword (for example, `hints`, `health-check.path`), we have kept that behaviour in order to keep the library backwards compatible. It will be modified in the next major release.
 
-===  AOT and native image support
+===  AOT and Native Image Support
 
 Since `4.0.0`, Spring Cloud LoadBalancer supports Spring AOT transformations and native images. However, to use this feature, you need to explicitly define your LoadBalancerClient service IDs. You can do so by using the `value` or `name` attributes of the `@LoadBalancerClient` annotation or as values of the `spring.cloud.loadbalancer.eager-load.clients` property.
 
