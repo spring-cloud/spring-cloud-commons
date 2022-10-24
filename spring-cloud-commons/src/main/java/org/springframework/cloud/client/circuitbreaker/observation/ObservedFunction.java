@@ -33,13 +33,13 @@ class ObservedFunction<T> implements Function<Throwable, T> {
 
 	private final Observation observation;
 
-	// TODO: Move out contextual name with the next micrometer release
 	ObservedFunction(CircuitBreakerObservationConvention customConvention, CircuitBreakerObservationContext context,
 			String conextualName, ObservationRegistry observationRegistry, Function<Throwable, T> toRun) {
 		this.delegate = toRun;
-		this.observation = CircuitBreakerObservationDocumentation.CIRCUIT_BREAKER_SUPPLIER_OBSERVATION.observation(
-				customConvention, DefaultCircuitBreakerObservationConvention.INSTANCE, () -> context,
-				observationRegistry);
+		this.observation = CircuitBreakerObservationDocumentation.CIRCUIT_BREAKER_SUPPLIER_OBSERVATION
+				.observation(customConvention, DefaultCircuitBreakerObservationConvention.INSTANCE, () -> context,
+						observationRegistry)
+				.parentObservation(observationRegistry.getCurrentObservation());
 		this.observation.contextualName(conextualName);
 	}
 

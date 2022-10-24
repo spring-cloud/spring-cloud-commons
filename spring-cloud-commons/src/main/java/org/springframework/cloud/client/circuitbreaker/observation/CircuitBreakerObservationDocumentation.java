@@ -42,11 +42,10 @@ enum CircuitBreakerObservationDocumentation implements ObservationDocumentation 
 			return "spring.cloud.circuitbreaker";
 		}
 
-		// TODO: Move this to convention with the next micrometer release
-		// @Override
-		// public String getContextualName() {
-		// return "circuit-breaker";
-		// }
+		@Override
+		public String getContextualName() {
+			return "circuit-breaker";
+		}
 	},
 
 	/**
@@ -69,11 +68,10 @@ enum CircuitBreakerObservationDocumentation implements ObservationDocumentation 
 			return "spring.cloud.circuitbreaker";
 		}
 
-		// TODO: Move this to convention with the next micrometer release
-		// @Override
-		// public String getContextualName() {
-		// return "circuit-breaker fallback";
-		// }
+		@Override
+		public String getContextualName() {
+			return "circuit-breaker fallback";
+		}
 	};
 
 	public enum LowCardinalityTags implements KeyName {
