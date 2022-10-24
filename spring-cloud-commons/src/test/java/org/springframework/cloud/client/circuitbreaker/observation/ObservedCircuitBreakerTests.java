@@ -16,19 +16,14 @@
 
 package org.springframework.cloud.client.circuitbreaker.observation;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import io.micrometer.common.KeyValues;
 import io.micrometer.observation.Observation;
-import io.micrometer.observation.ObservationHandler;
-import io.micrometer.observation.ObservationRegistry;
 import io.micrometer.observation.tck.ObservationContextAssert;
 import io.micrometer.observation.tck.TestObservationRegistry;
 import io.micrometer.observation.tck.TestObservationRegistryAssert;
-import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
@@ -89,9 +84,7 @@ class ObservedCircuitBreakerTests {
 
 	@Test
 	void should_wrap_circuit_breaker_with_fallback_in_observation() {
-		ObservationRegistry registry = ObservationRegistry.create();
-		MyHandler myHandler = new MyHandler();
-		registry.observationConfig().observationHandler(myHandler);
+		TestObservationRegistry registry = TestObservationRegistry.create();
 		CircuitBreaker delegate = new CircuitBreaker() {
 			@Override
 			public <T> T run(Supplier<T> toRun, Function<Throwable, T> fallback) {
@@ -105,39 +98,25 @@ class ObservedCircuitBreakerTests {
 		};
 		ObservedCircuitBreaker circuitBreaker = new ObservedCircuitBreaker(delegate, registry);
 
-		String result = circuitBreaker.run(() -> {
+		Observation parent = Observation.createNotStarted("parent", registry);
+		String result = parent.observe(() -> circuitBreaker.run(() -> {
 			throw new IllegalStateException("BOOM!");
-		}, throwable -> "goodbye");
+		}, throwable -> "goodbye"));
 
 		then(result).isEqualTo("goodbye");
-		List<Observation.Context> contexts = myHandler.contexts;
 
-		// TODO: Convert to usage of test registry assert with the next micrometer release
-		BDDAssertions.then(contexts).hasSize(2);
-		BDDAssertions.then(contexts.get(0))
-				.satisfies(context -> ObservationContextAssert.then(context)
-						.hasNameEqualTo("spring.cloud.circuitbreaker").hasContextualNameEqualTo("circuit-breaker")
-						.hasLowCardinalityKeyValue("spring.cloud.circuitbreaker.type", "supplier"));
-		BDDAssertions.then(contexts.get(1)).satisfies(context -> ObservationContextAssert.then(context)
-				.hasNameEqualTo("spring.cloud.circuitbreaker").hasContextualNameEqualTo("circuit-breaker fallback")
-				.hasLowCardinalityKeyValue("spring.cloud.circuitbreaker.type", "function"));
-	}
-
-	// TODO: Convert to usage of test registry assert with the next micrometer release
-	static class MyHandler implements ObservationHandler<Observation.Context> {
-
-		List<Observation.Context> contexts = new ArrayList<>();
-
-		@Override
-		public void onStop(Observation.Context context) {
-			this.contexts.add(context);
-		}
-
-		@Override
-		public boolean supportsContext(Observation.Context context) {
-			return true;
-		}
-
+		TestObservationRegistryAssert.then(registry).hasNumberOfObservationsEqualTo(3)
+				.hasHandledContextsThatSatisfy(contexts -> {
+					ObservationContextAssert.then(contexts.get(0)).hasNameEqualTo("parent");
+					ObservationContextAssert.then(contexts.get(1)).hasNameEqualTo("spring.cloud.circuitbreaker")
+							.hasContextualNameEqualTo("circuit-breaker")
+							.hasLowCardinalityKeyValue("spring.cloud.circuitbreaker.type", "supplier")
+							.hasParentObservationEqualTo(parent);
+					ObservationContextAssert.then(contexts.get(2)).hasNameEqualTo("spring.cloud.circuitbreaker")
+							.hasContextualNameEqualTo("circuit-breaker fallback")
+							.hasLowCardinalityKeyValue("spring.cloud.circuitbreaker.type", "function")
+							.hasParentObservationEqualTo(parent);
+				});
 	}
 
 }

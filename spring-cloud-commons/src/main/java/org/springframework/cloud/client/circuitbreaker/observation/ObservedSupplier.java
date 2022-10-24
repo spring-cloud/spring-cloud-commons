@@ -33,13 +33,13 @@ class ObservedSupplier<T> implements Supplier<T> {
 
 	private final Observation observation;
 
-	// TODO: Move out contextual name with the next micrometer release
 	ObservedSupplier(CircuitBreakerObservationConvention customConvention, CircuitBreakerObservationContext context,
 			String contextualName, ObservationRegistry observationRegistry, Supplier<T> toRun) {
 		this.delegate = toRun;
-		this.observation = CircuitBreakerObservationDocumentation.CIRCUIT_BREAKER_SUPPLIER_OBSERVATION.observation(
-				customConvention, DefaultCircuitBreakerObservationConvention.INSTANCE, () -> context,
-				observationRegistry);
+		this.observation = CircuitBreakerObservationDocumentation.CIRCUIT_BREAKER_SUPPLIER_OBSERVATION
+				.observation(customConvention, DefaultCircuitBreakerObservationConvention.INSTANCE, () -> context,
+						observationRegistry)
+				.parentObservation(observationRegistry.getCurrentObservation());
 		this.observation.contextualName(contextualName);
 	}
 
