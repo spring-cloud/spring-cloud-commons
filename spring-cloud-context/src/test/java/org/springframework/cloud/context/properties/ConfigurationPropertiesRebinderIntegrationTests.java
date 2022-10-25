@@ -72,12 +72,12 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testRefreshInParent() throws Exception {
-		then(this.config.getName()).isEqualTo("main");
+		then(this.config.getName()).isEqualTo("parent");
 		// Change the dynamic property source...
 		TestPropertyValues.of("config.name=foo").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:
 		this.rebinder.rebind();
-		then(this.config.getName()).isEqualTo("foo");
+		then(this.config.getName()).isEqualTo("parent");
 	}
 
 	@Test
