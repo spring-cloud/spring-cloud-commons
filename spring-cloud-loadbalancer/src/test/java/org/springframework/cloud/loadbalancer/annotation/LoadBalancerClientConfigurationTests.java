@@ -26,7 +26,15 @@ import org.springframework.cloud.client.discovery.composite.reactive.ReactiveCom
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerCacheAutoConfiguration;
-import org.springframework.cloud.loadbalancer.core.*;
+import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.DelegatingServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.HealthCheckServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.RequestBasedStickySessionServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.WeightedServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.ZonePreferenceServiceInstanceListSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.support.RetryTemplate;
