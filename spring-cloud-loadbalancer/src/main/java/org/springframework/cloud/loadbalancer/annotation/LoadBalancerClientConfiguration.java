@@ -57,6 +57,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Tim Ysewyn
  * @author BaoLin Zhu
  * @author changjin wei(魏昌进)
+ * @author Zhuozhi Ji
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnDiscoveryEnabled
@@ -133,6 +134,14 @@ public class LoadBalancerClientConfiguration {
 					.build(context);
 		}
 
+		@Bean
+		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(WeightedConfigurationCondition.class)
+		public ServiceInstanceListSupplier weightedServiceInstanceListSupplier(ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withWeighted().build(context);
+		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -187,6 +196,14 @@ public class LoadBalancerClientConfiguration {
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withSameInstancePreference()
 					.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(WeightedConfigurationCondition.class)
+		public ServiceInstanceListSupplier weightedServiceInstanceListSupplier(ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withWeighted().build(context);
 		}
 
 	}
@@ -320,6 +337,16 @@ public class LoadBalancerClientConfiguration {
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
 					"configurations", "same-instance-preference");
+		}
+
+	}
+
+	static class WeightedConfigurationCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"configurations", "weighted");
 		}
 
 	}
