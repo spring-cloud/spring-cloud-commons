@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.cloud.context.scope.GenericScope;
@@ -128,6 +129,20 @@ public class RefreshScope extends GenericScope
 				}
 			}
 		}
+	}
+
+	/**
+	 * WARNING: This method refreshes beans from any context in the hierarchy using the
+	 * main application context.
+	 * @param type bean type to rebind.
+	 * @return true, if successful.
+	 */
+	public boolean refresh(Class type) {
+		String[] beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.context, type);
+		if (beanNamesForType.length > 0) {
+			return refresh(beanNamesForType[0]);
+		}
+		return false;
 	}
 
 	@ManagedOperation(description = "Dispose of the current instance of bean name "

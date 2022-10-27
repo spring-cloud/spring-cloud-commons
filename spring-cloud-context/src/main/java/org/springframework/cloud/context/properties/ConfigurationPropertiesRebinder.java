@@ -21,8 +21,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
@@ -92,35 +94,58 @@ public class ConfigurationPropertiesRebinder
 		ApplicationContext appContext = this.applicationContext;
 		while (appContext != null) {
 			if (appContext.containsLocalBean(name)) {
-				try {
-					Object bean = appContext.getBean(name);
-					if (AopUtils.isAopProxy(bean)) {
-						bean = ProxyUtils.getTargetObject(bean);
-					}
-					if (bean != null) {
-						// TODO: determine a more general approach to fix this.
-						// see
-						// https://github.com/spring-cloud/spring-cloud-commons/issues/571
-						if (getNeverRefreshable().contains(bean.getClass().getName())) {
-							return false; // ignore
-						}
-						appContext.getAutowireCapableBeanFactory().destroyBean(bean);
-						appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
-						return true;
-					}
-				}
-				catch (RuntimeException e) {
-					this.errors.put(name, e);
-					throw e;
-				}
-				catch (Exception e) {
-					this.errors.put(name, e);
-					throw new IllegalStateException("Cannot rebind to " + name, e);
-				}
+				return rebind(name, appContext);
 			}
 			else {
 				appContext = appContext.getParent();
 			}
+		}
+		return false;
+	}
+
+	/**
+	 * WARNING: This method rebinds beans from any context in the hierarchy using the main
+	 * application context.
+	 * @param type bean type to rebind.
+	 * @return true, if successful.
+	 */
+	public boolean rebind(Class type) {
+		String[] beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.applicationContext, type);
+		if (beanNamesForType.length > 0) {
+			String name = beanNamesForType[0];
+			if (ScopedProxyUtils.isScopedTarget(name)) {
+				name = ScopedProxyUtils.getOriginalBeanName(name);
+			}
+			return rebind(name, this.applicationContext);
+		}
+		return false;
+	}
+
+	private boolean rebind(String name, ApplicationContext appContext) {
+		try {
+			Object bean = appContext.getBean(name);
+			if (AopUtils.isAopProxy(bean)) {
+				bean = ProxyUtils.getTargetObject(bean);
+			}
+			if (bean != null) {
+				// TODO: determine a more general approach to fix this.
+				// see
+				// https://github.com/spring-cloud/spring-cloud-commons/issues/571
+				if (getNeverRefreshable().contains(bean.getClass().getName())) {
+					return false; // ignore
+				}
+				appContext.getAutowireCapableBeanFactory().destroyBean(bean);
+				appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
+				return true;
+			}
+		}
+		catch (RuntimeException e) {
+			this.errors.put(name, e);
+			throw e;
+		}
+		catch (Exception e) {
+			this.errors.put(name, e);
+			throw new IllegalStateException("Cannot rebind to " + name, e);
 		}
 		return false;
 	}
