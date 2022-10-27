@@ -935,7 +935,7 @@ By default, we try to read and parse the weight from the metadata map (the key i
 
 If the weight is not specified in the metadata map, we default the weight of this instance to be 1.
 
-You can configure it either by setting the value of `spring.cloud.loadbalancer.configurations` to `weighted` or by providing your own `ServiceInstanceListSupplier` bean -- for example:
+You can configure it either by setting the value of `spring.cloud.loadbalancer.configurations` to `weighted` or by providing your own `ServiceInstanceListSupplier` bean, for example:
 
 [[weighted-custom-loadbalancer-configuration]]
 [source,java,indent=0]
