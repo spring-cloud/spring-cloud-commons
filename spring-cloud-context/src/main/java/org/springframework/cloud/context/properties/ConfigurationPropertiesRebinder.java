@@ -104,7 +104,8 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	/**
-	 * WARNING: This method rebinds beans from any context in the hierarchy using the main application context.
+	 * WARNING: This method rebinds beans from any context in the hierarchy using the main
+	 * application context.
 	 * @param type bean type to rebind.
 	 * @return true, if successful.
 	 */

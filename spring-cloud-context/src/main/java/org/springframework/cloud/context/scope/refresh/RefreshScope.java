@@ -132,7 +132,8 @@ public class RefreshScope extends GenericScope
 	}
 
 	/**
-	 * WARNING: This method refreshes beans from any context in the hierarchy using the main application context.
+	 * WARNING: This method refreshes beans from any context in the hierarchy using the
+	 * main application context.
 	 * @param type bean type to rebind.
 	 * @return true, if successful.
 	 */
