@@ -35,7 +35,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 	private SmoothServiceInstanceSelector selector;
 
-	private int position;
+	private volatile int position;
 
 	/* for testing */ ServiceInstance[] expanded;
 
