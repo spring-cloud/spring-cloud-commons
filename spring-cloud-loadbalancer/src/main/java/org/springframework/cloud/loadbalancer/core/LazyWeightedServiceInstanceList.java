@@ -22,7 +22,8 @@ import java.util.List;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A {@link List} implementation that weighted and lazy fills {@link ServiceInstance}.
+ * A {@link List} implementation that lazily fills weighted {@link ServiceInstance}
+ * objects.
  *
  * @author Zhuozhi Ji
  * @see WeightedServiceInstanceListSupplier
@@ -50,17 +51,17 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 	private void init() {
 		// Calculate the greatest common divisor (GCD) of weights, max weight and the
 		// total number of elements after expansion.
-		int gcd = 0;
+		int greatestCommonDivisor = 0;
 		int max = 0;
 		int total = 0;
 		for (int weight : weights) {
-			gcd = greatestCommonDivisor(gcd, weight);
+			greatestCommonDivisor = greatestCommonDivisor(greatestCommonDivisor, weight);
 			max = Math.max(max, weight);
 			total += weight;
 		}
-		this.selector = new SmoothServiceInstanceSelector(instances, weights, max, gcd);
-		this.position = 0;
-		this.expanded = new ServiceInstance[total / gcd];
+		selector = new SmoothServiceInstanceSelector(instances, weights, max, greatestCommonDivisor);
+		position = 0;
+		expanded = new ServiceInstance[total / greatestCommonDivisor];
 	}
 
 	@Override

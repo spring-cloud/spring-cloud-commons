@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LazyWeightedServiceInstanceListTest {
 
 	@Test
-	void shouldSizeIsSumOfRatio() {
+	void shouldCreateListWithSizeEqualToSumofRatio() {
 		List<ServiceInstance> serviceInstances = new ArrayList<>();
 		int[] weights = new int[10];
 		for (int i = 0; i < 10; i++) {
@@ -59,7 +59,7 @@ class LazyWeightedServiceInstanceListTest {
 	}
 
 	@Test
-	void shouldAllElementsAreNullIfNotAccessed() {
+	void shouldFillListWithAllNullElementsIfNotAccessed() {
 		List<ServiceInstance> serviceInstances = new ArrayList<>();
 		int[] weights = new int[10];
 		for (int i = 0; i < 10; i++) {
@@ -75,7 +75,7 @@ class LazyWeightedServiceInstanceListTest {
 	}
 
 	@Test
-	void shouldAllElementsAreFilledIfGreaterPositionIsAccessed() {
+	void shouldFillAllElementsIfGreaterPositionAccessed() {
 		List<ServiceInstance> serviceInstances = new ArrayList<>();
 		int[] weights = new int[10];
 		for (int i = 0; i < 10; i++) {
@@ -92,7 +92,7 @@ class LazyWeightedServiceInstanceListTest {
 	}
 
 	@Test
-	void shouldAllElementsAreFilledCorrectlyIfConcurrentRandomAccess() throws InterruptedException {
+	void shouldFillAllElementsCorrectlyIfConcurrentRandomAccess() throws InterruptedException {
 		List<ServiceInstance> serviceInstances = new ArrayList<>();
 		int[] weights = new int[10];
 		for (int i = 0; i < 10; i++) {
