@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -86,33 +84,7 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 			}
 		}).toArray();
 
-		// Calculate the greatest common divisor (GCD) of weights and the total number of
-		// elements after expansion.
-		int gcd = 0;
-		int total = 0;
-		for (int weight : weights) {
-			gcd = greatestCommonDivisor(gcd, weight);
-			total += weight;
-		}
-
-		// Because scaling by the gcd does not affect the distribution,
-		// we can reduce memory usage by this way.
-		List<ServiceInstance> newInstances = new ArrayList<>(total / gcd);
-
-		// use iterator for some implementation of the List that not supports
-		// RandomAccess, but `weights` is supported, so use a local variable `i`
-		// to get the current position.
-		int i = 0;
-		for (ServiceInstance instance : instances) {
-			int weight = weights[i] / gcd;
-			for (int j = 0; j < weight; j++) {
-				newInstances.add(instance);
-			}
-			i++;
-		}
-
-		Collections.shuffle(newInstances);
-		return newInstances;
+		return new LazyWeightedServiceInstanceList(instances, weights);
 	}
 
 	static int metadataWeightFunction(ServiceInstance serviceInstance) {
@@ -126,16 +98,6 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 		// using default weight when metadata is missing or
 		// weight is not specified
 		return DEFAULT_WEIGHT;
-	}
-
-	static int greatestCommonDivisor(int a, int b) {
-		int r;
-		while (b != 0) {
-			r = a % b;
-			a = b;
-			b = r;
-		}
-		return a;
 	}
 
 }
