@@ -214,6 +214,11 @@ Specifically, anything that depends on those beans cannot rely on them being upd
 In that case, it is rebuilt on a refresh and its dependencies are re-injected.
 At that point, they are re-initialized from the refreshed `@Configuration`).
 
+NOTE:  Removing a configuration value and then performing a refresh will not update the presence of the configuration value.
+The configuration property must be present in order to update the value after a refresh.  If you are relying on the presence of
+a value in your application you might want to switch your logic to rely on its absence instead.  Another option would be to rely
+on the value changing rather than not being present in the application's configuration.
+
 === Encryption and Decryption
 
 Spring Cloud has an `Environment` pre-processor for decrypting property values locally.
