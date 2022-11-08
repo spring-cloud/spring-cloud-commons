@@ -38,31 +38,29 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 public class DiscoveryCompositeHealthContributorTests {
 
 	@Test
-	public void createWhenIndicatorsAreNullThrowsException() throws Exception {
+	public void createWhenIndicatorsAreNullThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new DiscoveryCompositeHealthContributor(null))
 				.withMessage("'indicators' must not be null");
 	}
 
 	@Test
-	public void getContributorReturnsContributor() throws Exception {
+	public void getContributorReturnsContributor() {
 		TestDiscoveryHealthIndicator indicator = new TestDiscoveryHealthIndicator("test", Health.up().build());
-		DiscoveryCompositeHealthContributor composite = new DiscoveryCompositeHealthContributor(
-				Arrays.asList(indicator));
+		DiscoveryCompositeHealthContributor composite = new DiscoveryCompositeHealthContributor(List.of(indicator));
 		HealthIndicator adapted = (HealthIndicator) composite.getContributor("test");
 		assertThat(adapted).isNotNull();
 		assertThat(adapted.health()).isSameAs(indicator.health());
 	}
 
 	@Test
-	public void getContributorWhenMissingReturnsNull() throws Exception {
+	public void getContributorWhenMissingReturnsNull() {
 		TestDiscoveryHealthIndicator indicator = new TestDiscoveryHealthIndicator("test", Health.up().build());
-		DiscoveryCompositeHealthContributor composite = new DiscoveryCompositeHealthContributor(
-				Arrays.asList(indicator));
+		DiscoveryCompositeHealthContributor composite = new DiscoveryCompositeHealthContributor(List.of(indicator));
 		assertThat((HealthIndicator) composite.getContributor("missing")).isNull();
 	}
 
 	@Test
-	public void iteratorIteratesNamedContributors() throws Exception {
+	public void iteratorIteratesNamedContributors() {
 		TestDiscoveryHealthIndicator indicator1 = new TestDiscoveryHealthIndicator("test1", Health.up().build());
 		TestDiscoveryHealthIndicator indicator2 = new TestDiscoveryHealthIndicator("test2", Health.down().build());
 		DiscoveryCompositeHealthContributor composite = new DiscoveryCompositeHealthContributor(

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.context.scope.refresh;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -77,17 +76,14 @@ public class RefreshScopeScaleTests {
 		final CountDownLatch latch = new CountDownLatch(n);
 		Future<String> result = null;
 		for (int i = 0; i < n; i++) {
-			result = this.executor.submit(new Callable<String>() {
-				@Override
-				public String call() throws Exception {
-					logger.debug("Background started.");
-					try {
-						return RefreshScopeScaleTests.this.service.getMessage();
-					}
-					finally {
-						latch.countDown();
-						logger.debug("Background done.");
-					}
+			result = this.executor.submit(() -> {
+				logger.debug("Background started.");
+				try {
+					return RefreshScopeScaleTests.this.service.getMessage();
+				}
+				finally {
+					latch.countDown();
+					logger.debug("Background done.");
 				}
 			});
 		}

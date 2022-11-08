@@ -188,8 +188,6 @@ class TestServiceInstance implements ServiceInstance {
 
 	private String scheme = "http";
 
-	private String host = "test.example";
-
 	private int port = 8080;
 
 	private boolean secure;
@@ -218,6 +216,7 @@ class TestServiceInstance implements ServiceInstance {
 
 	@Override
 	public String getHost() {
+		String host = "test.example";
 		return host;
 	}
 

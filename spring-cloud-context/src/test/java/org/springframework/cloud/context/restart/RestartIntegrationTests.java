@@ -42,7 +42,7 @@ public class RestartIntegrationTests {
 	}
 
 	@Test
-	public void testRestartTwice() throws Exception {
+	public void testRestartTwice() {
 
 		this.context = SpringApplication.run(TestConfiguration.class, "--management.endpoint.restart.enabled=true",
 				"--server.port=0", "--spring.cloud.bootstrap.enabled=true",

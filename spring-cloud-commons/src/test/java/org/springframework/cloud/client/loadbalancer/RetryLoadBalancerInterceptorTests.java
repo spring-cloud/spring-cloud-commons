@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.quality.Strictness;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -90,7 +92,7 @@ public class RetryLoadBalancerInterceptorTests {
 		lbRequestFactory = mock(LoadBalancerRequestFactory.class);
 		properties = new LoadBalancerProperties();
 		properties.getRetry().setRetryOnAllExceptions(true);
-		lbFactory = mock(ReactiveLoadBalancer.Factory.class, withSettings().lenient());
+		lbFactory = mock(ReactiveLoadBalancer.Factory.class, withSettings().strictness(Strictness.LENIENT));
 		when(lbFactory.getProperties(any())).thenReturn(properties);
 	}
 
@@ -115,9 +117,7 @@ public class RetryLoadBalancerInterceptorTests {
 
 		when(lbRequestFactory.createRequest(any(), any(), any())).thenReturn(mock(LoadBalancerRequest.class));
 
-		Assertions.assertThrows(IOException.class, () -> {
-			interceptor.intercept(request, body, execution);
-		});
+		Assertions.assertThrows(IOException.class, () -> interceptor.intercept(request, body, execution));
 		verify(lbRequestFactory).createRequest(request, body, execution);
 	}
 
@@ -130,9 +130,7 @@ public class RetryLoadBalancerInterceptorTests {
 				loadBalancedRetryFactory, lbFactory);
 		byte[] body = new byte[] {};
 		ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-		Assertions.assertThrows(IllegalStateException.class, () -> {
-			interceptor.intercept(request, body, execution);
-		});
+		Assertions.assertThrows(IllegalStateException.class, () -> interceptor.intercept(request, body, execution));
 	}
 
 	@Test
@@ -287,9 +285,7 @@ public class RetryLoadBalancerInterceptorTests {
 				new MyLoadBalancedRetryFactory(policy), lbFactory);
 		byte[] body = new byte[] {};
 		ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-		Assertions.assertThrows(IOException.class, () -> {
-			interceptor.intercept(request, body, execution);
-		});
+		Assertions.assertThrows(IOException.class, () -> interceptor.intercept(request, body, execution));
 		verify(lbRequestFactory).createRequest(request, body, execution);
 	}
 
@@ -369,9 +365,8 @@ public class RetryLoadBalancerInterceptorTests {
 				new MyLoadBalancedRetryFactory(policy, backOffPolicy, new RetryListener[] { myRetryListener }),
 				lbFactory);
 		ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-		Assertions.assertThrows(TerminatedRetryException.class, () -> {
-			interceptor.intercept(request, new byte[] {}, execution);
-		});
+		Assertions.assertThrows(TerminatedRetryException.class,
+				() -> interceptor.intercept(request, new byte[] {}, execution));
 	}
 
 	@Test
@@ -445,22 +440,12 @@ public class RetryLoadBalancerInterceptorTests {
 
 		@Override
 		public BackOffPolicy createBackOffPolicy(String service) {
-			if (backOffPolicy == null) {
-				return new NoBackOffPolicy();
-			}
-			else {
-				return backOffPolicy;
-			}
+			return Objects.requireNonNullElseGet(backOffPolicy, NoBackOffPolicy::new);
 		}
 
 		@Override
 		public RetryListener[] createRetryListeners(String service) {
-			if (retryListeners == null) {
-				return new RetryListener[0];
-			}
-			else {
-				return retryListeners;
-			}
+			return Objects.requireNonNullElseGet(retryListeners, () -> new RetryListener[0]);
 		}
 
 	}

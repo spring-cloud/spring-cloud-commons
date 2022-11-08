@@ -74,7 +74,7 @@ public class OAuth2LoadBalancerClientAutoConfigurationTests {
 
 	@Test
 	@Ignore
-	public void userInfoLoadBalancedNoRetry() throws Exception {
+	public void userInfoLoadBalancedNoRetry() {
 		this.context = new SpringApplicationBuilder(ClientConfiguration.class).properties("spring.config.name=test",
 				"server.port=0", "security.oauth2.resource.userInfoUri:https://nosuchservice",
 				"spring.cloud.oauth2.load-balanced.enabled=true").run();

@@ -55,10 +55,9 @@ public class DefaultResponse implements Response<ServiceInstance> {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof DefaultResponse)) {
+		if (!(o instanceof DefaultResponse that)) {
 			return false;
 		}
-		DefaultResponse that = (DefaultResponse) o;
 		return Objects.equals(serviceInstance, that.serviceInstance);
 	}
 

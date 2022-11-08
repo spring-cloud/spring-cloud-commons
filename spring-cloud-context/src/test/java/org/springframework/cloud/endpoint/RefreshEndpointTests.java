@@ -70,7 +70,7 @@ public class RefreshEndpointTests {
 
 	@Test
 	@Disabled // FIXME: legacy
-	public void keysComputedWhenAdded() throws Exception {
+	public void keysComputedWhenAdded() {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
 				.properties("spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
@@ -84,7 +84,7 @@ public class RefreshEndpointTests {
 
 	@Test
 	@Disabled // FIXME: legacy
-	public void keysComputedWhenOveridden() throws Exception {
+	public void keysComputedWhenOveridden() {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
 				.properties("spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
@@ -97,7 +97,7 @@ public class RefreshEndpointTests {
 	}
 
 	@Test
-	public void keysComputedWhenChangesInExternalProperties() throws Exception {
+	public void keysComputedWhenChangesInExternalProperties() {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
 				.properties("spring.cloud.bootstrap.name:none", "spring.cloud.bootstrap.enabled=true").run();
 		RefreshScope scope = new RefreshScope();
@@ -111,7 +111,7 @@ public class RefreshEndpointTests {
 	}
 
 	@Test
-	public void springMainSourcesEmptyInRefreshCycle() throws Exception {
+	public void springMainSourcesEmptyInRefreshCycle() {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
 				.properties("spring.cloud.bootstrap.name:none").run();
 		RefreshScope scope = new RefreshScope();
@@ -128,7 +128,7 @@ public class RefreshEndpointTests {
 	}
 
 	@Test
-	public void eventsPublishedInOrder() throws Exception {
+	public void eventsPublishedInOrder() {
 		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
 				.run();
 		RefreshScope scope = new RefreshScope();
@@ -170,7 +170,7 @@ public class RefreshEndpointTests {
 	@Configuration(proxyBeanMethods = false)
 	protected static class Empty implements SmartApplicationListener {
 
-		private List<ApplicationEvent> events = new ArrayList<ApplicationEvent>();
+		private List<ApplicationEvent> events = new ArrayList<>();
 
 		@Override
 		public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
@@ -192,8 +192,7 @@ public class RefreshEndpointTests {
 
 		@Override
 		public PropertySource<?> locate(Environment environment) {
-			return new MapPropertySource("external",
-					Collections.<String, Object>singletonMap("external.message", "I'm External"));
+			return new MapPropertySource("external", Collections.singletonMap("external.message", "I'm External"));
 		}
 
 	}

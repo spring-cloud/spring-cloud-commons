@@ -190,7 +190,7 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 
 		@Override
 		public void initialize(GenericApplicationContext context) {
-			context.registerBean(PostProcessor.class, () -> new PostProcessor());
+			context.registerBean(PostProcessor.class, PostProcessor::new);
 		}
 
 	}

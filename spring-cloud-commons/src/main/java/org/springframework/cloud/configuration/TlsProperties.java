@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.configuration;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.core.io.Resource;
@@ -48,13 +46,8 @@ public class TlsProperties {
 	private String trustStorePassword = "";
 
 	private static Map<String, String> extTypes() {
-		Map<String, String> result = new HashMap<>();
 
-		result.put("p12", "PKCS12");
-		result.put("pfx", "PKCS12");
-		result.put("jks", "JKS");
-
-		return Collections.unmodifiableMap(result);
+		return Map.of("p12", "PKCS12", "pfx", "PKCS12", "jks", "JKS");
 	}
 
 	public boolean isEnabled() {

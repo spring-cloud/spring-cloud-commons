@@ -63,8 +63,7 @@ class DiscoveryClientBasedReactiveLoadBalancer implements ReactiveLoadBalancer<S
 	public Publisher<Response<ServiceInstance>> choose(Request request) {
 
 		List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
-		if (request.getContext() instanceof RetryableRequestContext) {
-			RetryableRequestContext context = (RetryableRequestContext) request.getContext();
+		if (request.getContext() instanceof RetryableRequestContext context) {
 			if (context.getPreviousServiceInstance() != null) {
 				List<ServiceInstance> instancesCopy = discoveryClient.getInstances(serviceId);
 				instancesCopy.remove(context.getPreviousServiceInstance());

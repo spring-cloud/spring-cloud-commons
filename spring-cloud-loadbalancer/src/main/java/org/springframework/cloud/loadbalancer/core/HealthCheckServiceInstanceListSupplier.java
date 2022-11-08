@@ -17,7 +17,6 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -77,8 +76,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
 				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
 		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate).repeatWhen(aliveInstancesReplayRepeat)
-				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
-						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))));
+				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(alive -> List.copyOf(alive)));
 		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
 				.refCount(1);
 	}
@@ -94,8 +92,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
 				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
 		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate).repeatWhen(aliveInstancesReplayRepeat)
-				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
-						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))));
+				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(alive -> List.copyOf(alive)));
 		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
 				.refCount(1);
 	}

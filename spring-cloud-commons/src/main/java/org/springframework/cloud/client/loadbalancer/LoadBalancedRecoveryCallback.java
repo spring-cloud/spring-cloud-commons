@@ -45,8 +45,7 @@ public abstract class LoadBalancedRecoveryCallback<T, R> implements RecoveryCall
 	public T recover(RetryContext context) throws Exception {
 		Throwable lastThrowable = context.getLastThrowable();
 		if (lastThrowable != null) {
-			if (lastThrowable instanceof RetryableStatusCodeException) {
-				RetryableStatusCodeException ex = (RetryableStatusCodeException) lastThrowable;
+			if (lastThrowable instanceof RetryableStatusCodeException ex) {
 				return createResponse((R) ex.getResponse(), ex.getUri());
 			}
 			else if (lastThrowable instanceof Exception) {

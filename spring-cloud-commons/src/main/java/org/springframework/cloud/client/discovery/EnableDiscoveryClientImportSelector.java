@@ -52,8 +52,7 @@ public class EnableDiscoveryClientImportSelector extends SpringFactoryImportSele
 		}
 		else {
 			Environment env = getEnvironment();
-			if (ConfigurableEnvironment.class.isInstance(env)) {
-				ConfigurableEnvironment configEnv = (ConfigurableEnvironment) env;
+			if (env instanceof ConfigurableEnvironment configEnv) {
 				LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 				map.put("spring.cloud.service-registry.auto-registration.enabled", false);
 				MapPropertySource propertySource = new MapPropertySource("springCloudDiscoveryClient", map);

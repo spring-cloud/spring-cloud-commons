@@ -106,7 +106,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		URI originalUrl = clientRequest.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
-			String message = String.format("Request URI does not contain a valid hostname: %s", originalUrl.toString());
+			String message = String.format("Request URI does not contain a valid hostname: %s", originalUrl);
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(message);
 			}

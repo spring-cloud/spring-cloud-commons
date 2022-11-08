@@ -166,7 +166,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 		@Bean
 		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory(LoadBalancerProperties properties) {
-			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
+			return new ReactiveLoadBalancer.Factory<>() {
 				@Override
 				public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
 					return new TestReactiveLoadBalancer();
@@ -211,7 +211,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 			return new TestService(loadBalancedWebClientBuilder());
 		}
 
-		private final class TestService {
+		private static final class TestService {
 
 			public final WebClient webClient;
 

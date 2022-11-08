@@ -141,10 +141,9 @@ public class RequestData {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof RequestData)) {
+		if (!(o instanceof RequestData that)) {
 			return false;
 		}
-		RequestData that = (RequestData) o;
 		return httpMethod == that.httpMethod && Objects.equals(url, that.url) && Objects.equals(headers, that.headers)
 				&& Objects.equals(cookies, that.cookies) && Objects.equals(attributes, that.attributes);
 	}

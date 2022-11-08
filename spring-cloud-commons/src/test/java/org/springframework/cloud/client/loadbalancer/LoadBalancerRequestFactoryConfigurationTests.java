@@ -60,11 +60,9 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 	@Mock
 	private ServiceInstance instance;
 
-	private byte[] body = new byte[] {};
+	private final byte[] body = new byte[] {};
 
 	private ArgumentCaptor<HttpRequest> httpRequestCaptor;
-
-	private LoadBalancerRequestFactory lbReqFactory;
 
 	private LoadBalancerRequest<?> lbRequest;
 
@@ -78,8 +76,8 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 				.properties("spring.aop.proxyTargetClass=true").sources(config, LoadBalancerAutoConfiguration.class)
 				.run();
 
-		this.lbReqFactory = context.getBean(LoadBalancerRequestFactory.class);
-		this.lbRequest = this.lbReqFactory.createRequest(this.request, this.body, this.execution);
+		LoadBalancerRequestFactory lbReqFactory = context.getBean(LoadBalancerRequestFactory.class);
+		this.lbRequest = lbReqFactory.createRequest(this.request, this.body, this.execution);
 		return context;
 	}
 

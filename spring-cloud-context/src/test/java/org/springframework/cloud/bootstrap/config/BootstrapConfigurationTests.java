@@ -33,7 +33,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration;
-import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.CompositePropertySource;
@@ -108,12 +107,9 @@ public class BootstrapConfigurationTests {
 	public void bootstrapPropertiesAvailableInInitializer() {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class)
-				.initializers(new ApplicationContextInitializer<ConfigurableApplicationContext>() {
-					@Override
-					public void initialize(ConfigurableApplicationContext applicationContext) {
-						// This property is defined in bootstrap.properties
-						then(applicationContext.getEnvironment().getProperty("info.name")).isEqualTo("child");
-					}
+				.initializers(applicationContext -> {
+					// This property is defined in bootstrap.properties
+					then(applicationContext.getEnvironment().getProperty("info.name")).isEqualTo("child");
 				}).run();
 		then(this.context.getEnvironment().getPropertySources()
 				.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap"))
@@ -144,10 +140,9 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void failsOnPropertySource() {
 		System.setProperty("expected.fail", "true");
-		Throwable throwable = Assertions.assertThrows(RuntimeException.class, () -> {
-			this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-					.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class).run();
-		});
+		Throwable throwable = Assertions.assertThrows(RuntimeException.class,
+				() -> this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+						.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class).run());
 		then(throwable.getMessage().equals("Planned"));
 	}
 
@@ -201,8 +196,8 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideNone", "true");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
 		ConfigurableEnvironment environment = new StandardEnvironment();
-		environment.getPropertySources().addLast(
-				new MapPropertySource("last", Collections.<String, Object>singletonMap("bootstrap.foo", "splat")));
+		environment.getPropertySources()
+				.addLast(new MapPropertySource("last", Collections.singletonMap("bootstrap.foo", "splat")));
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.properties("spring.cloud.bootstrap.enabled=true").environment(environment)
 				.sources(BareConfiguration.class).run();
@@ -415,7 +410,7 @@ public class BootstrapConfigurationTests {
 	// This is added to bootstrap context as a source in bootstrap.properties
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 
-		public static Map<String, Object> MAP = new HashMap<String, Object>(
+		public static Map<String, Object> MAP = new HashMap<>(
 				Collections.<String, Object>singletonMap("bootstrap.foo", "bar"));
 
 		private String name;
@@ -456,9 +451,9 @@ public class BootstrapConfigurationTests {
 	// This is added to bootstrap context as a source in bootstrap.properties
 	protected static class CompositePropertySourceConfiguration implements PropertySourceLocator {
 
-		public static Map<String, Object> MAP1 = new HashMap<String, Object>();
+		public static Map<String, Object> MAP1 = new HashMap<>();
 
-		public static Map<String, Object> MAP2 = new HashMap<String, Object>();
+		public static Map<String, Object> MAP2 = new HashMap<>();
 
 		public CompositePropertySourceConfiguration() {
 			MAP1.put("list.foo[0]", "hello");

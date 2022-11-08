@@ -54,7 +54,7 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	public void testSimpleProperties() {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo").applyTo(this.environment);
@@ -65,7 +65,7 @@ public class ConfigurationPropertiesRebinderRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefresh() throws Exception {
+	public void testRefresh() {
 		then(this.properties.getCount()).isEqualTo(1);
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		then(this.properties.getCount()).isEqualTo(1);

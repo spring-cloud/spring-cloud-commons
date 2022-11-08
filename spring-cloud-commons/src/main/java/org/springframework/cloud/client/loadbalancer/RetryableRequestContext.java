@@ -66,13 +66,12 @@ public class RetryableRequestContext extends RequestDataContext {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof RetryableRequestContext)) {
+		if (!(o instanceof RetryableRequestContext context)) {
 			return false;
 		}
 		if (!super.equals(o)) {
 			return false;
 		}
-		RetryableRequestContext context = (RetryableRequestContext) o;
 		return Objects.equals(previousServiceInstance, context.previousServiceInstance);
 	}
 

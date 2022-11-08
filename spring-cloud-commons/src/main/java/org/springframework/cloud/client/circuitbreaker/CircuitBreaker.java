@@ -30,7 +30,7 @@ public interface CircuitBreaker {
 		return run(toRun, throwable -> {
 			throw new NoFallbackAvailableException("No fallback available.", throwable);
 		});
-	};
+	}
 
 	<T> T run(Supplier<T> toRun, Function<Throwable, T> fallback);
 

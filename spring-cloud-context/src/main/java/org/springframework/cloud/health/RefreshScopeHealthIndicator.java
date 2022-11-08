@@ -44,7 +44,7 @@ public class RefreshScopeHealthIndicator extends AbstractHealthIndicator {
 	}
 
 	@Override
-	protected void doHealthCheck(Builder builder) throws Exception {
+	protected void doHealthCheck(Builder builder) {
 		RefreshScope refreshScope = this.scope.getIfAvailable();
 		if (refreshScope != null) {
 			Map<String, Exception> errors = new HashMap<>(refreshScope.getErrors());

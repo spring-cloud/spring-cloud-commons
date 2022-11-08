@@ -101,7 +101,7 @@ public class EnvironmentManagerIntegrationTests {
 
 	@Test
 	public void coreWebExtensionAvailable() throws Exception {
-		this.mvc.perform(get(BASE_PATH + "/env/" + UUID.randomUUID().toString())).andExpect(status().isNotFound());
+		this.mvc.perform(get(BASE_PATH + "/env/" + UUID.randomUUID())).andExpect(status().isNotFound());
 	}
 
 	@Test

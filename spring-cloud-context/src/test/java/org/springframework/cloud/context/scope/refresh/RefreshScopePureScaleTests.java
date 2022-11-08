@@ -18,7 +18,6 @@ package org.springframework.cloud.context.scope.refresh;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -72,25 +71,19 @@ public class RefreshScopePureScaleTests {
 		final CountDownLatch latch = new CountDownLatch(n);
 		List<Future<String>> results = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
-			results.add(this.executor.submit(new Callable<String>() {
-				@Override
-				public String call() throws Exception {
-					logger.debug("Background started.");
-					try {
-						return RefreshScopePureScaleTests.this.service.getMessage();
-					}
-					finally {
-						latch.countDown();
-						logger.debug("Background done.");
-					}
+			results.add(this.executor.submit(() -> {
+				logger.debug("Background started.");
+				try {
+					return RefreshScopePureScaleTests.this.service.getMessage();
+				}
+				finally {
+					latch.countDown();
+					logger.debug("Background done.");
 				}
 			}));
-			this.executor.submit(new Runnable() {
-				@Override
-				public void run() {
-					logger.debug("Refreshing.");
-					RefreshScopePureScaleTests.this.scope.refreshAll();
-				}
+			this.executor.submit(() -> {
+				logger.debug("Refreshing.");
+				RefreshScopePureScaleTests.this.scope.refreshAll();
 			});
 		}
 		then(latch.await(15000, TimeUnit.MILLISECONDS)).isTrue();

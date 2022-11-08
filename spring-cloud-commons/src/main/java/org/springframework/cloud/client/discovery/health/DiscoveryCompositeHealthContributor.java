@@ -57,7 +57,7 @@ public class DiscoveryCompositeHealthContributor implements CompositeHealthContr
 	}
 
 	private NamedContributor<HealthContributor> asNamedContributor(DiscoveryHealthIndicator indicator) {
-		return new NamedContributor<HealthContributor>() {
+		return new NamedContributor<>() {
 
 			@Override
 			public String getName() {

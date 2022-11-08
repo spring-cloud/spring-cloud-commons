@@ -82,7 +82,7 @@ public class LoadBalancerClientSpecification implements NamedContextFactory.Spec
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.name, this.configuration);
+		return Objects.hash(this.name, Arrays.hashCode(this.configuration));
 	}
 
 }

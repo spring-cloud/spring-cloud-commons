@@ -126,7 +126,7 @@ public class GenericScope
 
 	@Override
 	public void destroy() {
-		List<Throwable> errors = new ArrayList<Throwable>();
+		List<Throwable> errors = new ArrayList<>();
 		Collection<BeanLifecycleWrapper> wrappers = this.cache.clear();
 		for (BeanLifecycleWrapper wrapper : wrappers) {
 			try {
@@ -243,8 +243,7 @@ public class GenericScope
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 		for (String name : registry.getBeanDefinitionNames()) {
 			BeanDefinition definition = registry.getBeanDefinition(name);
-			if (definition instanceof RootBeanDefinition) {
-				RootBeanDefinition root = (RootBeanDefinition) definition;
+			if (definition instanceof RootBeanDefinition root) {
 				if (root.getDecoratedDefinition() != null && root.hasBeanClass()
 						&& root.getBeanClass() == ScopedProxyFactoryBean.class) {
 					if (getName().equals(root.getDecoratedDefinition().getBeanDefinition().getScope())) {
@@ -321,7 +320,7 @@ public class GenericScope
 
 		public Collection<BeanLifecycleWrapper> clear() {
 			Collection<Object> values = this.cache.clear();
-			Collection<BeanLifecycleWrapper> wrappers = new LinkedHashSet<BeanLifecycleWrapper>();
+			Collection<BeanLifecycleWrapper> wrappers = new LinkedHashSet<>();
 			for (Object object : values) {
 				wrappers.add((BeanLifecycleWrapper) object);
 			}
@@ -448,8 +447,7 @@ public class GenericScope
 		public void setBeanFactory(BeanFactory beanFactory) {
 			super.setBeanFactory(beanFactory);
 			Object proxy = getObject();
-			if (proxy instanceof Advised) {
-				Advised advised = (Advised) proxy;
+			if (proxy instanceof Advised advised) {
 				advised.addAdvice(0, this);
 			}
 		}
@@ -479,8 +477,7 @@ public class GenericScope
 			Lock lock = readWriteLock.readLock();
 			lock.lock();
 			try {
-				if (proxy instanceof Advised) {
-					Advised advised = (Advised) proxy;
+				if (proxy instanceof Advised advised) {
 					ReflectionUtils.makeAccessible(method);
 					return ReflectionUtils.invokeMethod(method, advised.getTargetSource().getTarget(),
 							invocation.getArguments());

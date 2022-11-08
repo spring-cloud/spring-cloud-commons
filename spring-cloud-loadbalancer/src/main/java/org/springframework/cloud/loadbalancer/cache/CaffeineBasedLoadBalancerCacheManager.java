@@ -37,7 +37,7 @@ public class CaffeineBasedLoadBalancerCacheManager extends CaffeineCacheManager 
 
 	public CaffeineBasedLoadBalancerCacheManager(String cacheName, LoadBalancerCacheProperties properties) {
 		super(cacheName);
-		if (!StringUtils.isEmpty(properties.getCaffeine().getSpec())) {
+		if (StringUtils.hasText(properties.getCaffeine().getSpec())) {
 			setCacheSpecification(properties.getCaffeine().getSpec());
 		}
 		else {

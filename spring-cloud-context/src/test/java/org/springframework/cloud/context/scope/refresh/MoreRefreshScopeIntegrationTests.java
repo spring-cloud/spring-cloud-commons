@@ -68,7 +68,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	public void testSimpleProperties() {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		then(this.service instanceof Advised).isTrue();
 		// Change the dynamic property source...
@@ -81,7 +81,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefresh() throws Exception {
+	public void testRefresh() {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
@@ -98,7 +98,7 @@ public class MoreRefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefreshFails() throws Exception {
+	public void testRefreshFails() {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		TestPropertyValues.of("message:Foo", "delay:foo").applyTo(this.environment);

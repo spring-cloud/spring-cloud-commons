@@ -90,8 +90,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 		RetryTemplate template = createRetryTemplate(serviceName, request, retryPolicy);
 		return template.execute(context -> {
 			ServiceInstance serviceInstance = null;
-			if (context instanceof LoadBalancedRetryContext) {
-				LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
+			if (context instanceof LoadBalancedRetryContext lbContext) {
 				serviceInstance = lbContext.getServiceInstance();
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format("Retrieved service instance from LoadBalancedRetryContext: %s",
@@ -109,8 +108,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 							+ "Reattempting service instance selection");
 				}
 				ServiceInstance previousServiceInstance = null;
-				if (context instanceof LoadBalancedRetryContext) {
-					LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
+				if (context instanceof LoadBalancedRetryContext lbContext) {
 					previousServiceInstance = lbContext.getPreviousServiceInstance();
 				}
 				DefaultRequest<RetryableRequestContext> lbRequest = new DefaultRequest<>(
@@ -120,8 +118,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format("Selected service instance: %s", serviceInstance));
 				}
-				if (context instanceof LoadBalancedRetryContext) {
-					LoadBalancedRetryContext lbContext = (LoadBalancedRetryContext) context;
+				if (context instanceof LoadBalancedRetryContext lbContext) {
 					lbContext.setServiceInstance(serviceInstance);
 				}
 				Response<ServiceInstance> lbResponse = new DefaultResponse(serviceInstance);
@@ -139,7 +136,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 					new RetryableRequestContext(null, new RequestData(request), hint));
 			ServiceInstance finalServiceInstance = serviceInstance;
 			ClientHttpResponse response = loadBalancer.execute(serviceName, finalServiceInstance, lbRequest);
-			int statusCode = response.getRawStatusCode();
+			int statusCode = response.getStatusCode().value();
 			if (retryPolicy != null && retryPolicy.retryableStatusCode(statusCode)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(String.format("Retrying on status code: %d", statusCode));

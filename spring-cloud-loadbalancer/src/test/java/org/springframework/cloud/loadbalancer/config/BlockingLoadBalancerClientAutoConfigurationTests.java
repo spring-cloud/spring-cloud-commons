@@ -48,9 +48,8 @@ class BlockingLoadBalancerClientAutoConfigurationTests {
 
 	@Test
 	public void worksWithoutSpringWeb() {
-		applicationContextRunner.withClassLoader(new FilteredClassLoader(RestTemplate.class)).run(context -> {
-			assertThat(context).doesNotHaveBean(BlockingLoadBalancerClient.class);
-		});
+		applicationContextRunner.withClassLoader(new FilteredClassLoader(RestTemplate.class))
+				.run(context -> assertThat(context).doesNotHaveBean(BlockingLoadBalancerClient.class));
 	}
 
 }

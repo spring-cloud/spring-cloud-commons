@@ -44,23 +44,23 @@ public class ClientHttpResponseStatusCodeExceptionTest {
 		ClientHttpResponseStatusCodeException exp = new ClientHttpResponseStatusCodeException("service", response,
 				response.getStatusText().getBytes());
 		ClientHttpResponse expResponse = exp.getResponse();
-		then(expResponse.getRawStatusCode()).isEqualTo(response.getRawStatusCode());
+		then(expResponse.getStatusCode().value()).isEqualTo(response.getRawStatusCode());
 		then(expResponse.getStatusText()).isEqualTo(response.getStatusText());
 		then(expResponse.getHeaders()).isEqualTo(response.getHeaders());
 		then(new String(StreamUtils.copyToByteArray(expResponse.getBody()))).isEqualTo(response.getStatusText());
 	}
 
-	class MyClientHttpResponse extends AbstractClientHttpResponse {
+	static class MyClientHttpResponse extends AbstractClientHttpResponse {
 
 		private boolean closed = false;
 
 		@Override
-		public int getRawStatusCode() throws IOException {
+		public int getRawStatusCode() {
 			return 200;
 		}
 
 		@Override
-		public String getStatusText() throws IOException {
+		public String getStatusText() {
 			return "foo";
 		}
 

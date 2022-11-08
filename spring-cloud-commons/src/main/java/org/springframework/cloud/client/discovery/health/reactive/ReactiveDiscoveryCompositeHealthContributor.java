@@ -54,7 +54,7 @@ public class ReactiveDiscoveryCompositeHealthContributor implements CompositeRea
 	}
 
 	private NamedContributor<ReactiveHealthContributor> asNamedContributor(ReactiveDiscoveryHealthIndicator indicator) {
-		return new NamedContributor<ReactiveHealthContributor>() {
+		return new NamedContributor<>() {
 
 			@Override
 			public String getName() {

@@ -135,10 +135,7 @@ public class BootstrapConfigFileApplicationListener
 	private static final Set<String> LOAD_FILTERED_PROPERTY;
 
 	static {
-		Set<String> filteredProperties = new HashSet<>();
-		filteredProperties.add("spring.profiles.active");
-		filteredProperties.add("spring.profiles.include");
-		LOAD_FILTERED_PROPERTY = Collections.unmodifiableSet(filteredProperties);
+		LOAD_FILTERED_PROPERTY = Set.of("spring.profiles.active", "spring.profiles.include");
 	}
 
 	/**

@@ -18,6 +18,7 @@ package org.springframework.cloud.client.actuator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -152,16 +153,16 @@ public class FeaturesEndpoint implements ApplicationContextAware {
 
 			Feature feature = (Feature) o;
 
-			if (this.type != null ? !this.type.equals(feature.type) : feature.type != null) {
+			if (!Objects.equals(this.type, feature.type)) {
 				return false;
 			}
-			if (this.name != null ? !this.name.equals(feature.name) : feature.name != null) {
+			if (!Objects.equals(this.name, feature.name)) {
 				return false;
 			}
-			if (this.version != null ? !this.version.equals(feature.version) : feature.version != null) {
+			if (!Objects.equals(this.version, feature.version)) {
 				return false;
 			}
-			return this.vendor != null ? this.vendor.equals(feature.vendor) : feature.vendor == null;
+			return Objects.equals(this.vendor, feature.vendor);
 		}
 
 		@Override

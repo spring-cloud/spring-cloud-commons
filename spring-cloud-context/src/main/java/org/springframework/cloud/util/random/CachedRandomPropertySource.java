@@ -40,7 +40,7 @@ public class CachedRandomPropertySource extends PropertySource<PropertySource> {
 
 	CachedRandomPropertySource(PropertySource randomValuePropertySource, Map<String, Map<String, Object>> cache) {
 		super(NAME, randomValuePropertySource);
-		this.cache = cache;
+		CachedRandomPropertySource.cache = cache;
 	}
 
 	@Override

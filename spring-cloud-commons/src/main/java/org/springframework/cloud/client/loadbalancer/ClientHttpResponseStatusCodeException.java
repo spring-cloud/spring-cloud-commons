@@ -43,7 +43,7 @@ public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeEx
 	 */
 	public ClientHttpResponseStatusCodeException(String serviceId, ClientHttpResponse response, byte[] body)
 			throws IOException {
-		super(serviceId, response.getRawStatusCode(), response, null);
+		super(serviceId, response.getStatusCode().value(), response, null);
 		this.response = new ClientHttpResponseWrapper(response, body);
 	}
 
@@ -65,7 +65,7 @@ public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeEx
 
 		@Override
 		public int getRawStatusCode() throws IOException {
-			return this.response.getRawStatusCode();
+			return this.response.getStatusCode().value();
 		}
 
 		@Override

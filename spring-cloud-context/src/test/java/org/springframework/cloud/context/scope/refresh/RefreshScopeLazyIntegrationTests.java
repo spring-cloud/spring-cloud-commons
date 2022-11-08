@@ -70,7 +70,7 @@ public class RefreshScopeLazyIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	public void testSimpleProperties() {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		then(this.service instanceof Advised).isTrue();
 		// Change the dynamic property source...
@@ -83,7 +83,7 @@ public class RefreshScopeLazyIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefresh() throws Exception {
+	public void testRefresh() {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
@@ -101,7 +101,7 @@ public class RefreshScopeLazyIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefreshBean() throws Exception {
+	public void testRefreshBean() {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...

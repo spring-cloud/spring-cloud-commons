@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.client.discovery.health;
 
-import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -87,7 +87,7 @@ public class DiscoveryClientHealthIndicatorTests {
 		public DiscoveryClient discoveryClient() {
 			DiscoveryClient mock = mock(DiscoveryClient.class);
 			given(mock.description()).willReturn("TestDiscoveryClient");
-			given(mock.getServices()).willReturn(Arrays.asList("TestService1"));
+			given(mock.getServices()).willReturn(List.of("TestService1"));
 			return mock;
 		}
 
