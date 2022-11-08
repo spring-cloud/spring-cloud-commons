@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2022 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.cloud.client;
 
 import java.net.URI;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -29,19 +28,14 @@ import java.util.Objects;
  * @author Tim Ysewyn
  * @author Charu Covindane
  * @author Neil Powell
- * @author Olga Maciaszek-Sharma
  */
 public class DefaultServiceInstance implements ServiceInstance {
-
-	private final List<String> secureSchemes = List.of("https", "wss");
 
 	private String instanceId;
 
 	private String serviceId;
 
 	private String host;
-
-	private String scheme;
 
 	private int port;
 
@@ -61,27 +55,12 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 */
 	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
 			Map<String, String> metadata) {
-		this(instanceId, serviceId, host, port, secure, metadata, secure ? "https" : "http");
-	}
-
-	/**
-	 * @param instanceId the id of the instance.
-	 * @param serviceId the id of the service.
-	 * @param host the host where the service instance can be found.
-	 * @param port the port on which the service is running.
-	 * @param secure indicates whether or not the connection needs to be secure.
-	 * @param metadata a map containing metadata.
-	 * @param scheme the protocol used to connect to the service instance.
-	 */
-	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
-			Map<String, String> metadata, String scheme) {
 		this.instanceId = instanceId;
 		this.serviceId = serviceId;
 		this.host = host;
 		this.port = port;
 		this.secure = secure;
 		this.metadata = metadata;
-		this.scheme = scheme;
 	}
 
 	/**
@@ -99,26 +78,13 @@ public class DefaultServiceInstance implements ServiceInstance {
 	}
 
 	/**
-	 * @param instanceId the id of the instance.
-	 * @param serviceId the id of the service.
-	 * @param host the host where the service instance can be found.
-	 * @param port the port on which the service is running.
-	 * @param secure indicates whether or not the connection needs to be secure.
-	 * @param scheme the protocol used to connect to the service instance.
-	 */
-	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
-			String scheme) {
-		this(instanceId, serviceId, host, port, secure, new LinkedHashMap<>(), scheme);
-	}
-
-	/**
 	 * Creates a URI from the given ServiceInstance's host:port.
 	 * @param instance the ServiceInstance.
 	 * @return URI of the form (secure)?https:http + "host:port". Scheme port default used
 	 * if port not set.
 	 */
 	public static URI getUri(ServiceInstance instance) {
-		String scheme = instance.getScheme();
+		String scheme = (instance.isSecure()) ? "https" : "http";
 		int port = instance.getPort();
 		if (port <= 0) {
 			port = (instance.isSecure()) ? 443 : 80;
@@ -182,8 +148,8 @@ public class DefaultServiceInstance implements ServiceInstance {
 		this.uri = uri;
 		this.host = this.uri.getHost();
 		this.port = this.uri.getPort();
-		scheme = this.uri.getScheme();
-		if (secureSchemes.contains(scheme)) {
+		String scheme = this.uri.getScheme();
+		if ("https".equals(scheme)) {
 			this.secure = true;
 		}
 	}
@@ -211,11 +177,6 @@ public class DefaultServiceInstance implements ServiceInstance {
 	@Override
 	public int hashCode() {
 		return Objects.hash(instanceId, serviceId, host, port, secure, metadata);
-	}
-
-	@Override
-	public String getScheme() {
-		return scheme;
 	}
 
 }
