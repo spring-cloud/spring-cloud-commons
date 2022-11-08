@@ -53,13 +53,11 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 
 	private final LoadBalancerProperties properties = new LoadBalancerProperties();
 
-	private final LoadBalancerRetryPolicy policy = new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(
-			properties);
-
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
 
 	private final RetryableLoadBalancerExchangeFilterFunction filterFunction = new RetryableLoadBalancerExchangeFilterFunction(
-			policy, factory, properties, Collections.emptyList());
+			new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy.Factory(factory), factory,
+			Collections.emptyList());
 
 	private final ClientRequest clientRequest = mock(ClientRequest.class);
 

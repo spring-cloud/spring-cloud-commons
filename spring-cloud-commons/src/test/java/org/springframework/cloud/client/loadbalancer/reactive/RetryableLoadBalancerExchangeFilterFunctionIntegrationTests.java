@@ -265,10 +265,11 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 		}
 
 		@Bean
-		RetryableLoadBalancerExchangeFilterFunction exchangeFilterFunction(LoadBalancerProperties properties,
+		RetryableLoadBalancerExchangeFilterFunction exchangeFilterFunction(
 				ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
 			return new RetryableLoadBalancerExchangeFilterFunction(
-					new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy(properties), factory, properties);
+					new RetryableExchangeFilterFunctionLoadBalancerRetryPolicy.Factory(factory), factory,
+					Collections.emptyList());
 		}
 
 	}

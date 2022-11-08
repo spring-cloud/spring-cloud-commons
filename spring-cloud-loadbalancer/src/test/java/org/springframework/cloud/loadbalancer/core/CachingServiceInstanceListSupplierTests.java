@@ -40,6 +40,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import static java.time.Duration.ofMillis;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.springframework.cloud.loadbalancer.core.LoadBalancerTestUtils.buildLoadBalancerClientFactory;
 import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSuppliersTestUtils.healthCheckFunction;
 
 /**
@@ -108,7 +109,7 @@ class CachingServiceInstanceListSupplierTests {
 		@Bean
 		BlockingLoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
 				LoadBalancerProperties properties) {
-			return new BlockingLoadBalancerClient(loadBalancerClientFactory, properties);
+			return new BlockingLoadBalancerClient(loadBalancerClientFactory);
 		}
 
 		@Bean
@@ -128,7 +129,7 @@ class CachingServiceInstanceListSupplierTests {
 			DiscoveryClientServiceInstanceListSupplier firstDelegate = new DiscoveryClientServiceInstanceListSupplier(
 					discoveryClient, context.getEnvironment());
 			HealthCheckServiceInstanceListSupplier delegate = new TestHealthCheckServiceInstanceListSupplier(
-					firstDelegate, loadBalancerProperties.getHealthCheck(), webClientBuilder.build());
+					firstDelegate, loadBalancerProperties, webClientBuilder.build());
 			delegate.afterPropertiesSet();
 			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
 					.getBeanProvider(LoadBalancerCacheManager.class);
@@ -138,8 +139,9 @@ class CachingServiceInstanceListSupplierTests {
 		private static class TestHealthCheckServiceInstanceListSupplier extends HealthCheckServiceInstanceListSupplier {
 
 			TestHealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-					LoadBalancerProperties.HealthCheck healthCheck, WebClient webClient) {
-				super(delegate, healthCheck, healthCheckFunction(webClient));
+					LoadBalancerProperties properties, WebClient webClient) {
+				super(delegate, buildLoadBalancerClientFactory(delegate.getServiceId(), properties),
+						healthCheckFunction(webClient));
 			}
 
 			@Override

@@ -38,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.loadbalancer.core.LoadBalancerTestUtils.buildLoadBalancerClientFactory;
 
 /**
  * Tests for {@link HintBasedServiceInstanceListSupplier}.
@@ -45,6 +46,8 @@ import static org.mockito.Mockito.when;
  * @author Olga Maciaszek-Sharma
  */
 class HintBasedServiceInstanceListSupplierTests {
+
+	private static final String SERVICE_ID = "test";
 
 	private final DiscoveryClientServiceInstanceListSupplier delegate = mock(
 			DiscoveryClientServiceInstanceListSupplier.class);
@@ -54,8 +57,7 @@ class HintBasedServiceInstanceListSupplierTests {
 	private final RequestDataContext requestContext = new RequestDataContext(
 			new RequestData(new MockClientHttpRequest()));
 
-	private final HintBasedServiceInstanceListSupplier supplier = new HintBasedServiceInstanceListSupplier(delegate,
-			properties);
+	private HintBasedServiceInstanceListSupplier supplier;
 
 	private final ServiceInstance first = serviceInstance("test-1", buildHintMetadata("test1"));
 
@@ -67,6 +69,9 @@ class HintBasedServiceInstanceListSupplierTests {
 	void setUp() {
 		properties.setHintHeaderName("X-Test");
 		when(delegate.get(any())).thenReturn(Flux.just(Arrays.asList(first, second, third)));
+		when(delegate.getServiceId()).thenReturn(SERVICE_ID);
+		supplier = new HintBasedServiceInstanceListSupplier(delegate,
+				buildLoadBalancerClientFactory(SERVICE_ID, properties));
 	}
 
 	@Test
@@ -130,7 +135,7 @@ class HintBasedServiceInstanceListSupplierTests {
 	}
 
 	private DefaultServiceInstance serviceInstance(String instanceId, Map<String, String> metadata) {
-		return new DefaultServiceInstance(instanceId, "test", "http://test.test", 9080, false, metadata);
+		return new DefaultServiceInstance(instanceId, SERVICE_ID, "http://test.test", 9080, false, metadata);
 	}
 
 	private Map<String, String> buildHintMetadata(String zone) {

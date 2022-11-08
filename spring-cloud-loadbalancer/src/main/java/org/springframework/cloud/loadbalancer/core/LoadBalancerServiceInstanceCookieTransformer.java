@@ -50,8 +50,8 @@ public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalance
 			return request;
 		}
 		LoadBalancerProperties.StickySession stickySession = factory != null
-				? factory.getProperties(instance.getServiceId())
-				.getStickySession() : new LoadBalancerProperties.StickySession();
+				? factory.getProperties(instance.getServiceId()).getStickySession()
+				: new LoadBalancerProperties.StickySession();
 		if (!stickySession.isAddServiceInstanceCookie()) {
 			return request;
 		}
