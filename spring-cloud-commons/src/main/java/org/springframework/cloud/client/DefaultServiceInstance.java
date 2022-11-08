@@ -17,8 +17,8 @@
 package org.springframework.cloud.client;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -32,6 +32,8 @@ import java.util.Objects;
  * @author Olga Maciaszek-Sharma
  */
 public class DefaultServiceInstance implements ServiceInstance {
+
+	private final List<String> secureSchemes = List.of("https", "wss");
 
 	private String instanceId;
 
@@ -48,6 +50,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	private Map<String, String> metadata = new LinkedHashMap<>();
 
 	private URI uri;
+
 
 	/**
 	 * @param instanceId the id of the instance.
@@ -181,7 +184,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 		this.host = this.uri.getHost();
 		this.port = this.uri.getPort();
 		scheme = this.uri.getScheme();
-		if (Arrays.asList("https", "wss").contains(scheme)) {
+		if (secureSchemes.contains(scheme)) {
 			this.secure = true;
 		}
 	}
