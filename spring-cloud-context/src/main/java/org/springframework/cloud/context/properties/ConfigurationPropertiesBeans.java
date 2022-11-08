@@ -57,9 +57,7 @@ public class ConfigurationPropertiesBeans implements BeanPostProcessor, Applicat
 			this.beanFactory = (ConfigurableListableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
 		}
 		if (applicationContext.getParent() != null && applicationContext.getParent()
-				.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory) {
-			ConfigurableListableBeanFactory listable = (ConfigurableListableBeanFactory) applicationContext.getParent()
-					.getAutowireCapableBeanFactory();
+				.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory listable) {
 			String[] names = listable.getBeanNamesForType(ConfigurationPropertiesBeans.class);
 			if (names.length == 1) {
 				this.parent = (ConfigurationPropertiesBeans) listable.getBean(names[0]);
@@ -105,7 +103,7 @@ public class ConfigurationPropertiesBeans implements BeanPostProcessor, Applicat
 	}
 
 	public Set<String> getBeanNames() {
-		return new HashSet<String>(this.beans.keySet());
+		return new HashSet<>(this.beans.keySet());
 	}
 
 }

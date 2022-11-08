@@ -56,10 +56,7 @@ public class DefaultOkHttpClientFactory implements OkHttpClientFactory {
 				this.builder.sslSocketFactory(disabledSSLSocketFactory, disabledTrustManager);
 				this.builder.hostnameVerifier(new TrustAllHostnames());
 			}
-			catch (NoSuchAlgorithmException e) {
-				LOG.warn("Error setting SSLSocketFactory in OKHttpClient", e);
-			}
-			catch (KeyManagementException e) {
+			catch (NoSuchAlgorithmException | KeyManagementException e) {
 				LOG.warn("Error setting SSLSocketFactory in OKHttpClient", e);
 			}
 		}

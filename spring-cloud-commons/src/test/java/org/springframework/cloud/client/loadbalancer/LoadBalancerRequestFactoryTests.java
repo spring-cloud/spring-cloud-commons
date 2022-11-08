@@ -96,7 +96,7 @@ public class LoadBalancerRequestFactoryTests {
 
 	@Test
 	public void testOneTransformer() throws Exception {
-		List<LoadBalancerRequestTransformer> transformers = Arrays.asList(this.transformer1);
+		List<LoadBalancerRequestTransformer> transformers = List.of(this.transformer1);
 		when(this.transformer1.transformRequest(any(ServiceRequestWrapper.class), eq(this.instance)))
 				.thenReturn(this.transformedRequest1);
 

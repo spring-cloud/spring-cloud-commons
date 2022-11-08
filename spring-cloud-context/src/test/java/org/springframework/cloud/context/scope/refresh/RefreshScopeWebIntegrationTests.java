@@ -55,13 +55,13 @@ public class RefreshScopeWebIntegrationTests {
 	private ConfigurableListableBeanFactory beanFactory;
 
 	@Test
-	public void scopeOnBeanDefinition() throws Exception {
+	public void scopeOnBeanDefinition() {
 		then(this.beanFactory.getBeanDefinition(ScopedProxyUtils.getTargetBeanName("application")).getScope())
 				.isEqualTo("refresh");
 	}
 
 	@Test
-	public void beanAccess() throws Exception {
+	public void beanAccess() {
 		this.application.hello();
 		this.environmentManager.setProperty("message", "Hello Dave!");
 		this.scope.refreshAll();

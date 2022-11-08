@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.hypermedia;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.springframework.scheduling.config.ContextLifecycleScheduledTaskRegistrar;
@@ -52,13 +53,8 @@ public class RemoteResourceRefresher extends ContextLifecycleScheduledTaskRegist
 	public void afterPropertiesSet() {
 
 		for (final RemoteResource resource : this.discoveredResources) {
-			addFixedDelayTask(new IntervalTask(new Runnable() {
-
-				@Override
-				public void run() {
-					resource.verifyOrDiscover();
-				}
-			}, this.fixedDelay, this.initialDelay));
+			addFixedDelayTask(new IntervalTask(resource::verifyOrDiscover, Duration.ofMillis(fixedDelay),
+					Duration.ofMillis(initialDelay)));
 		}
 
 		super.afterPropertiesSet();

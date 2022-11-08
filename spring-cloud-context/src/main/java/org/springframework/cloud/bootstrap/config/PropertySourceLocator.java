@@ -17,7 +17,6 @@
 package org.springframework.cloud.bootstrap.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +51,7 @@ public interface PropertySourceLocator {
 		if (propertySource == null) {
 			return Collections.emptyList();
 		}
-		if (CompositePropertySource.class.isInstance(propertySource)) {
+		if (propertySource instanceof CompositePropertySource) {
 			Collection<PropertySource<?>> sources = ((CompositePropertySource) propertySource).getPropertySources();
 			List<PropertySource<?>> filteredSources = new ArrayList<>();
 			for (PropertySource<?> p : sources) {
@@ -63,7 +62,7 @@ public interface PropertySourceLocator {
 			return filteredSources;
 		}
 		else {
-			return Arrays.asList(propertySource);
+			return List.of(propertySource);
 		}
 	}
 

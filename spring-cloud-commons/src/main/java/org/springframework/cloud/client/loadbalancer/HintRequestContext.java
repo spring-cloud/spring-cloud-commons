@@ -72,10 +72,9 @@ public class HintRequestContext implements TimedRequestContext {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof HintRequestContext)) {
+		if (!(o instanceof HintRequestContext that)) {
 			return false;
 		}
-		HintRequestContext that = (HintRequestContext) o;
 		return Objects.equals(hint, that.hint);
 	}
 

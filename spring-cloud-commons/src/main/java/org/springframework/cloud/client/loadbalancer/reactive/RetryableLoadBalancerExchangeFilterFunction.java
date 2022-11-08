@@ -17,7 +17,6 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -69,29 +68,6 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 
 	private final List<LoadBalancerClientRequestTransformer> transformers;
 
-	/**
-	 * @deprecated Deprecated in favor of
-	 * {@link #RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy, ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}.
-	 */
-	@Deprecated
-	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties) {
-		this(retryPolicy, loadBalancerFactory, properties, Collections.emptyList());
-	}
-
-	/**
-	 * @deprecated in favour of
-	 * {@link ReactorLoadBalancerExchangeFilterFunction#ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, List)}
-	 */
-	@Deprecated
-	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy retryPolicy,
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, LoadBalancerProperties properties,
-			List<LoadBalancerClientRequestTransformer> transformers) {
-		this.retryPolicyFactory = s -> retryPolicy;
-		this.loadBalancerFactory = loadBalancerFactory;
-		this.transformers = transformers;
-	}
-
 	public RetryableLoadBalancerExchangeFilterFunction(LoadBalancerRetryPolicy.Factory retryPolicyFactory,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			List<LoadBalancerClientRequestTransformer> transformers) {
@@ -106,7 +82,7 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 		URI originalUrl = clientRequest.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
-			String message = String.format("Request URI does not contain a valid hostname: %s", originalUrl.toString());
+			String message = String.format("Request URI does not contain a valid hostname: %s", originalUrl);
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(message);
 			}

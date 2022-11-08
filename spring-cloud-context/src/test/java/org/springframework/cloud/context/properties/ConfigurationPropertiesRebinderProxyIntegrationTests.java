@@ -55,7 +55,7 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testAppendProperties() throws Exception {
+	public void testAppendProperties() {
 		// This comes out as a String not Integer if the rebinder processes the proxy
 		// instead of the target
 		then(this.properties.getExpiry().get("one")).isEqualTo(new Integer(168));

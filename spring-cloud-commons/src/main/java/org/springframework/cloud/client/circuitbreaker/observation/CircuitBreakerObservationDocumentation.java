@@ -84,7 +84,7 @@ enum CircuitBreakerObservationDocumentation implements ObservationDocumentation 
 			public String asString() {
 				return "spring.cloud.circuitbreaker.type";
 			}
-		};
+		}
 
 	}
 

@@ -60,16 +60,10 @@ public class TestBootstrapConfiguration {
 
 	@Bean
 	public ApplicationContextInitializer<ConfigurableApplicationContext> customInitializer() {
-		return new ApplicationContextInitializer<ConfigurableApplicationContext>() {
-
-			@Override
-			public void initialize(ConfigurableApplicationContext applicationContext) {
-				ConfigurableEnvironment environment = applicationContext.getEnvironment();
-				environment.getPropertySources().addLast(
-						new MapPropertySource("customProperties", Collections.<String, Object>singletonMap("custom.foo",
-								environment.resolvePlaceholders("${spring.application.name:bar}"))));
-			}
-
+		return applicationContext -> {
+			ConfigurableEnvironment environment = applicationContext.getEnvironment();
+			environment.getPropertySources().addLast(new MapPropertySource("customProperties", Collections
+					.singletonMap("custom.foo", environment.resolvePlaceholders("${spring.application.name:bar}"))));
 		};
 	}
 

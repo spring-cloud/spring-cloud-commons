@@ -51,7 +51,7 @@ public class ConfigurationPropertiesRebinderLifecycleIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefresh() throws Exception {
+	public void testRefresh() {
 		then(this.properties.getCount()).isEqualTo(0);
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...

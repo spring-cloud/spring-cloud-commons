@@ -74,7 +74,7 @@ public class CachedRandomPropertySourceTests {
 
 	private HashMap<String, Map<String, Object>> createCache(HashMap<String, AtomicInteger> keyCount,
 			HashMap<Map<String, Object>, String> typeToKeyLookup, HashMap<String, AtomicInteger> typeCount) {
-		return new HashMap<String, Map<String, Object>>() {
+		return new HashMap<>() {
 			@Override
 			public Map<String, Object> computeIfAbsent(String key,
 					Function<? super String, ? extends Map<String, Object>> mappingFunction) {
@@ -96,7 +96,7 @@ public class CachedRandomPropertySourceTests {
 
 	private HashMap<String, Object> createTypeCache(HashMap<Map<String, Object>, String> typeToKeyLookup,
 			HashMap<String, AtomicInteger> typeCount) {
-		return new HashMap<String, Object>() {
+		return new HashMap<>() {
 			@Override
 			public Object computeIfAbsent(String key, Function<? super String, ?> mappingFunction) {
 				if (!containsKey(key)) {

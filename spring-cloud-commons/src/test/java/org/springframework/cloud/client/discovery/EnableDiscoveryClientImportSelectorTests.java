@@ -45,7 +45,7 @@ public class EnableDiscoveryClientImportSelectorTests {
 
 	@BeforeEach
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
+		MockitoAnnotations.openMocks(this);
 		this.importSelector.setBeanClassLoader(getClass().getClassLoader());
 		this.importSelector.setEnvironment(this.environment);
 	}

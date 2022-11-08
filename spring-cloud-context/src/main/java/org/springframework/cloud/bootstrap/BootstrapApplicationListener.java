@@ -288,7 +288,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		if (application.getAllSources().contains(BootstrapMarkerConfiguration.class)) {
 			return;
 		}
-		application.addPrimarySources(Arrays.asList(BootstrapMarkerConfiguration.class));
+		application.addPrimarySources(List.of(BootstrapMarkerConfiguration.class));
 		@SuppressWarnings("rawtypes")
 		Set target = new LinkedHashSet<>(application.getInitializers());
 		target.addAll(getOrderedBeansOfType(context, ApplicationContextInitializer.class));
@@ -315,13 +315,12 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 				initializers.add(ini);
 			}
 		}
-		ArrayList<ApplicationContextInitializer<?>> target = new ArrayList<ApplicationContextInitializer<?>>(
-				initializers);
+		ArrayList<ApplicationContextInitializer<?>> target = new ArrayList<>(initializers);
 		application.setInitializers(target);
 	}
 
 	private <T> List<T> getOrderedBeansOfType(ListableBeanFactory context, Class<T> type) {
-		List<T> result = new ArrayList<T>();
+		List<T> result = new ArrayList<>();
 		for (String name : context.getBeanNamesForType(type)) {
 			result.add(context.getBean(name, type));
 		}
@@ -375,8 +374,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 
 		private void reorderSources(ConfigurableEnvironment environment) {
 			PropertySource<?> removed = environment.getPropertySources().remove(DEFAULT_PROPERTIES);
-			if (removed instanceof ExtendedDefaultPropertySource) {
-				ExtendedDefaultPropertySource defaultProperties = (ExtendedDefaultPropertySource) removed;
+			if (removed instanceof ExtendedDefaultPropertySource defaultProperties) {
 				environment.getPropertySources()
 						.addLast(new MapPropertySource(DEFAULT_PROPERTIES, defaultProperties.getSource()));
 				for (PropertySource<?> source : defaultProperties.getPropertySources().getPropertySources()) {
@@ -428,7 +426,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 			if (propertySource instanceof MapPropertySource) {
 				return (Map<String, Object>) propertySource.getSource();
 			}
-			return new LinkedHashMap<String, Object>();
+			return new LinkedHashMap<>();
 		}
 
 		public CompositePropertySource getPropertySources() {

@@ -173,7 +173,7 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		@Bean
 		ReactiveLoadBalancer.Factory<ServiceInstance> reactiveLoadBalancerFactory(DiscoveryClient discoveryClient,
 				LoadBalancerProperties properties) {
-			return new ReactiveLoadBalancer.Factory<ServiceInstance>() {
+			return new ReactiveLoadBalancer.Factory<>() {
 
 				private final TestLoadBalancerLifecycle testLoadBalancerLifecycle = new TestLoadBalancerLifecycle();
 

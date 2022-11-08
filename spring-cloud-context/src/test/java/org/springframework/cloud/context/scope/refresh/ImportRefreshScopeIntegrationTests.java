@@ -43,7 +43,7 @@ public class ImportRefreshScopeIntegrationTests {
 	private ExampleService service;
 
 	@Test
-	public void testSimpleProperties() throws Exception {
+	public void testSimpleProperties() {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		then(this.beanFactory.getBeanDefinition(ScopedProxyUtils.getTargetBeanName("service")).getScope())
 				.isEqualTo("refresh");

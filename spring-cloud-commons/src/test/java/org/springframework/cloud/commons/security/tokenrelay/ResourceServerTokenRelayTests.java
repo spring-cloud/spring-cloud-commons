@@ -72,7 +72,7 @@ public class ResourceServerTokenRelayTests {
 	AccessTokenContextRelay accessTokenContextRelay;
 
 	@Test
-	public void tokenRelayJWT() throws Exception {
+	public void tokenRelayJWT() {
 
 		mockServerToReceiveRelay.expect(requestTo("https://example.com/test"))
 				.andExpect(header("authorization", AUTH_HEADER_TO_BE_RELAYED))
@@ -82,7 +82,7 @@ public class ResourceServerTokenRelayTests {
 		ResponseEntity<String> exchange = testRestTemplate.exchange("/token-relay", HttpMethod.GET, authorizationHeader,
 				String.class);
 
-		assertThat(exchange.getStatusCodeValue()).isEqualTo(HttpStatus.OK.value());
+		assertThat(exchange.getStatusCode().value()).isEqualTo(HttpStatus.OK.value());
 		assertThat(exchange.getBody()).isEqualTo(TEST_RESPONSE);
 
 		mockServerToReceiveRelay.verify();
@@ -92,7 +92,7 @@ public class ResourceServerTokenRelayTests {
 	private HttpEntity<String> createAuthorizationHeader() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Authorization", AUTH_HEADER_TO_BE_RELAYED);
-		return new HttpEntity<String>("parameters", headers);
+		return new HttpEntity<>("parameters", headers);
 
 	}
 

@@ -96,7 +96,7 @@ class LoadBalancerClientRequestTransformerTest {
 		assertThat(headers.getFirst("X-InstanceId")).isEqualTo("testServiceId");
 	}
 
-	class Transformer1 implements LoadBalancerClientRequestTransformer {
+	static class Transformer1 implements LoadBalancerClientRequestTransformer {
 
 		@Override
 		public ClientRequest transformRequest(ClientRequest request, ServiceInstance instance) {
@@ -105,7 +105,7 @@ class LoadBalancerClientRequestTransformerTest {
 
 	}
 
-	class Transformer2 implements LoadBalancerClientRequestTransformer {
+	static class Transformer2 implements LoadBalancerClientRequestTransformer {
 
 		@Override
 		public ClientRequest transformRequest(ClientRequest request, ServiceInstance instance) {

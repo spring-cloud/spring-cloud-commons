@@ -66,8 +66,8 @@ public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 	// This is added to bootstrap context as a source in bootstrap.properties
 	protected static class PropertySourceConfiguration implements PropertySourceLocator {
 
-		public static Map<String, Object> MAP = new HashMap<String, Object>(Collections.<String, Object>singletonMap(
-				"custom.foo", "{cipher}6154ca04d4bb6144d672c4e3d750b5147116dd381946d51fa44f8bc25dc256f4"));
+		public static Map<String, Object> MAP = new HashMap<>(Collections.<String, Object>singletonMap("custom.foo",
+				"{cipher}6154ca04d4bb6144d672c4e3d750b5147116dd381946d51fa44f8bc25dc256f4"));
 
 		@Override
 		public PropertySource<?> locate(Environment environment) {

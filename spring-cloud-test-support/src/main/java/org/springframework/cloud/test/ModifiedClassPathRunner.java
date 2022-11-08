@@ -90,8 +90,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 	@Override
 	protected Object createTest() throws Exception {
 		ModifiedClassPathTestClass testClass = (ModifiedClassPathTestClass) getTestClass();
-		return testClass
-				.doWithModifiedClassPathThreadContextClassLoader(() -> ModifiedClassPathRunner.super.createTest());
+		return testClass.doWithModifiedClassPathThreadContextClassLoader(ModifiedClassPathRunner.super::createTest);
 	}
 
 	private URLClassLoader createTestClassLoader(Class<?> testClass) throws Exception {
@@ -113,7 +112,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 		return extractedUrls.toArray(new URL[0]);
 	}
 
-	private Stream<URL> doExtractUrls(ClassLoader classLoader) throws Exception {
+	private Stream<URL> doExtractUrls(ClassLoader classLoader) {
 		if (classLoader instanceof URLClassLoader) {
 			return Stream.of(((URLClassLoader) classLoader).getURLs());
 		}
@@ -180,9 +179,8 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 	private URL[] processUrls(URL[] urls, Class<?> testClass) throws Exception {
 		MergedAnnotations annotations = MergedAnnotations.from(testClass, SearchStrategy.TYPE_HIERARCHY);
 		ClassPathEntryFilter filter = new ClassPathEntryFilter(annotations.get(ClassPathExclusions.class));
-		List<URL> processedUrls = new ArrayList<>();
 		List<URL> additionalUrls = getAdditionalUrls(annotations.get(ClassPathOverrides.class));
-		processedUrls.addAll(additionalUrls);
+		List<URL> processedUrls = new ArrayList<>(additionalUrls);
 		for (URL url : urls) {
 			if (!filter.isExcluded(url)) {
 				processedUrls.add(url);
@@ -206,7 +204,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 		DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
 		LocalRepository localRepository = new LocalRepository(System.getProperty("user.home") + "/.m2/repository");
 		session.setLocalRepositoryManager(repositorySystem.newLocalRepositoryManager(session, localRepository));
-		CollectRequest collectRequest = new CollectRequest(null, Arrays.asList(
+		CollectRequest collectRequest = new CollectRequest(null, Collections.singletonList(
 				new RemoteRepository.Builder("central", "default", "https://repo.maven.apache.org/maven2").build()));
 
 		collectRequest.setDependencies(createDependencies(coordinates));
@@ -236,7 +234,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 
 		private final AntPathMatcher matcher = new AntPathMatcher();
 
-		private ClassPathEntryFilter(MergedAnnotation<ClassPathExclusions> annotation) throws Exception {
+		private ClassPathEntryFilter(MergedAnnotation<ClassPathExclusions> annotation) {
 			this.exclusions = new ArrayList<>();
 			this.exclusions.add("log4j-*.jar");
 			if (annotation.isPresent()) {

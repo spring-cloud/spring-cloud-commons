@@ -68,7 +68,7 @@ public class SSHContextFactoryTests {
 	}
 
 	private static File saveCert(KeyAndCert keyCert) throws Exception {
-		return saveKeyStore(keyCert.subject(), () -> keyCert.storeCert());
+		return saveKeyStore(keyCert.subject(), keyCert::storeCert);
 	}
 
 	private static File saveKeyStore(String prefix, KeyStoreSupplier func) throws Exception {

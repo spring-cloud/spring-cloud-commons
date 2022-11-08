@@ -59,10 +59,9 @@ public class DefaultRequest<T> implements Request<T> {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof DefaultRequest)) {
+		if (!(o instanceof DefaultRequest<?> that)) {
 			return false;
 		}
-		DefaultRequest<?> that = (DefaultRequest<?>) o;
 		return Objects.equals(context, that.context);
 	}
 

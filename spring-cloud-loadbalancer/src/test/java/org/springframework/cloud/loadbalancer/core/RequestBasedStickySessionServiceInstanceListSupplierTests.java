@@ -32,13 +32,13 @@ import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.loadbalancer.core.LoadBalancerTestUtils.buildLoadBalancerClientFactory;
 
 /**
  * Tests for {@link RequestBasedStickySessionServiceInstanceListSupplier}.
@@ -47,17 +47,17 @@ import static org.mockito.Mockito.when;
  */
 class RequestBasedStickySessionServiceInstanceListSupplierTests {
 
+	private static final String SERVICE_ID = "test";
+
 	private final DiscoveryClientServiceInstanceListSupplier delegate = mock(
 			DiscoveryClientServiceInstanceListSupplier.class);
 
 	private final LoadBalancerProperties properties = new LoadBalancerProperties();
 
 	private final RequestBasedStickySessionServiceInstanceListSupplier supplier = new RequestBasedStickySessionServiceInstanceListSupplier(
-			delegate, properties);
+			delegate, buildLoadBalancerClientFactory(SERVICE_ID, properties));
 
 	private final ClientRequest clientRequest = mock(ClientRequest.class);
-
-	private final ServerHttpRequest serverHttpRequest = mock(ServerHttpRequest.class);
 
 	private final ServiceInstance first = serviceInstance("test-1");
 
@@ -118,7 +118,7 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 	}
 
 	private DefaultServiceInstance serviceInstance(String instanceId) {
-		return new DefaultServiceInstance(instanceId, "test", "http://test.test", 9080, false);
+		return new DefaultServiceInstance(instanceId, SERVICE_ID, "http://test.test", 9080, false);
 	}
 
 }

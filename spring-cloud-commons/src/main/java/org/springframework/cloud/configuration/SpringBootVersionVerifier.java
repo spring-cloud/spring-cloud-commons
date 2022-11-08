@@ -33,7 +33,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	private static final Log log = LogFactory.getLog(SpringBootVersionVerifier.class);
 
-	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<String, CompatibilityPredicate>() {
+	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<>() {
 		{
 			this.put("3.0", is3_0());
 		}
@@ -105,11 +105,12 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 	}
 
 	private String action() {
-		return String.format("Change Spring Boot version to one of the following versions %s .\n"
-				+ "You can find the latest Spring Boot versions here [%s]. \n"
-				+ "If you want to learn more about the Spring Cloud Release train compatibility, you "
-				+ "can visit this page [%s] and check the [Release Trains] section.\n"
-				+ "If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]",
+		return String.format(
+				"""
+						Change Spring Boot version to one of the following versions %s .
+						You can find the latest Spring Boot versions here [%s].\s
+						If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [%s] and check the [Release Trains] section.
+						If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]""",
 				this.acceptedVersions, "https://spring.io/projects/spring-boot#learn",
 				"https://spring.io/projects/spring-cloud#overview");
 	}

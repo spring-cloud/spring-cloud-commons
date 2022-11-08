@@ -70,7 +70,7 @@ public class RefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	public void testSimpleProperties() {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		then(this.service instanceof Advised).isTrue();
 		// Change the dynamic property source...
@@ -83,7 +83,7 @@ public class RefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefresh() throws Exception {
+	public void testRefresh() {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
@@ -101,7 +101,7 @@ public class RefreshScopeIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefreshBean() throws Exception {
+	public void testRefreshBean() {
 		then(this.service.getMessage()).isEqualTo("Hello scope!");
 		String id1 = this.service.toString();
 		// Change the dynamic property source...
@@ -121,10 +121,8 @@ public class RefreshScopeIntegrationTests {
 	// see gh-349
 	@Test
 	@DirtiesContext
-	public void testCheckedException() throws Exception {
-		Assertions.assertThrows(ServiceException.class, () -> {
-			this.service.throwsException();
-		});
+	public void testCheckedException() {
+		Assertions.assertThrows(ServiceException.class, () -> this.service.throwsException());
 	}
 
 	public interface Service {
@@ -169,13 +167,13 @@ public class RefreshScopeIntegrationTests {
 		}
 
 		@Override
-		public void afterPropertiesSet() throws Exception {
+		public void afterPropertiesSet() {
 			logger.debug("Initializing message: " + this.message);
 			initCount++;
 		}
 
 		@Override
-		public void destroy() throws Exception {
+		public void destroy() {
 			logger.debug("Destroying message: " + this.message);
 			destroyCount++;
 			this.message = null;

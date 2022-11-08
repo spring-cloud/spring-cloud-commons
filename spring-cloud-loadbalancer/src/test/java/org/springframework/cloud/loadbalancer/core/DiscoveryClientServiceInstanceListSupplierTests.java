@@ -17,6 +17,7 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.time.Duration;
+import java.util.Collections;
 
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -104,7 +105,7 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 		StepVerifier.withVirtualTime(() -> {
 			supplier = new DiscoveryClientServiceInstanceListSupplier(reactiveDiscoveryClient, environment);
 			return supplier.get();
-		}).expectSubscription().expectNext(Lists.emptyList()).thenCancel().verify(VERIFICATION_TIMEOUT);
+		}).expectSubscription().expectNext(Collections.emptyList()).thenCancel().verify(VERIFICATION_TIMEOUT);
 	}
 
 	@Test
@@ -112,7 +113,7 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 		environment.setProperty(SERVICE_DISCOVERY_TIMEOUT, "100ms");
 		when(reactiveDiscoveryClient.getInstances(SERVICE_ID)).thenReturn(Flux.never());
 		StepVerifier.create(new DiscoveryClientServiceInstanceListSupplier(reactiveDiscoveryClient, environment).get())
-				.expectSubscription().expectNext(Lists.emptyList()).thenCancel().verify(VERIFICATION_TIMEOUT);
+				.expectSubscription().expectNext(Collections.emptyList()).thenCancel().verify(VERIFICATION_TIMEOUT);
 	}
 
 	@Test
@@ -151,7 +152,7 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 		StepVerifier.withVirtualTime(() -> {
 			supplier = new DiscoveryClientServiceInstanceListSupplier(discoveryClient, environment);
 			return supplier.get();
-		}).expectSubscription().expectNext(Lists.emptyList()).thenCancel().verify(VERIFICATION_TIMEOUT);
+		}).expectSubscription().expectNext(Collections.emptyList()).thenCancel().verify(VERIFICATION_TIMEOUT);
 	}
 
 	@Test
@@ -161,7 +162,7 @@ class DiscoveryClientServiceInstanceListSupplierTests {
 		when(discoveryClient.getInstances(SERVICE_ID)).thenAnswer(new AnswersWithDelay(200, new Returns(
 				Lists.list(instance("1host", false), instance("2host-secure", true), instance("3host", false)))));
 		StepVerifier.create(new DiscoveryClientServiceInstanceListSupplier(discoveryClient, environment).get())
-				.expectSubscription().expectNext(Lists.emptyList()).thenCancel().verify(VERIFICATION_TIMEOUT);
+				.expectSubscription().expectNext(Collections.emptyList()).thenCancel().verify(VERIFICATION_TIMEOUT);
 	}
 
 }

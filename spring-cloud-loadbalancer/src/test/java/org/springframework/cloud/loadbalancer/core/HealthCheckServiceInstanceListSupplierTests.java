@@ -57,6 +57,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.loadbalancer.core.LoadBalancerTestUtils.buildLoadBalancerClientFactory;
 import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSuppliersTestUtils.healthCheckFunction;
 
 /**
@@ -82,13 +83,13 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
-	private LoadBalancerProperties.HealthCheck healthCheck;
+	private LoadBalancerProperties properties;
 
 	private HealthCheckServiceInstanceListSupplier listSupplier;
 
 	@BeforeEach
 	void setUp() {
-		healthCheck = new LoadBalancerProperties.HealthCheck();
+		properties = new LoadBalancerProperties();
 	}
 
 	@AfterEach
@@ -103,12 +104,12 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@Test
 	void shouldCheckInstanceWithProvidedHealthCheckPath() {
 		String serviceId = "ignored-service";
-		healthCheck.getPath().put("ignored-service", "/health");
+		properties.getHealthCheck().getPath().put("ignored-service", "/health");
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
 				false);
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
-				healthCheckFunction(webClient));
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance),
+				buildLoadBalancerClientFactory(serviceId, properties), healthCheckFunction(webClient));
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -119,11 +120,12 @@ class HealthCheckServiceInstanceListSupplierTests {
 	void shouldNotCheckInstanceWithNullHealthCheckPath() {
 		BiFunction<ServiceInstance, String, Mono<Boolean>> mockAliveFunction = mock(BiFunction.class);
 		String serviceId = "no-health-check-service";
-		healthCheck.getPath().put("no-health-check-service", null);
+		properties.getHealthCheck().getPath().put("no-health-check-service", null);
 		ServiceInstance serviceInstance = new DefaultServiceInstance("no-health-check-service-1", serviceId,
 				"127.0.0.1", port, false);
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck, mockAliveFunction);
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance),
+				buildLoadBalancerClientFactory(serviceId, properties), mockAliveFunction);
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -135,11 +137,12 @@ class HealthCheckServiceInstanceListSupplierTests {
 	void shouldNotCheckInstanceWithEmptyHealthCheckPath() {
 		BiFunction<ServiceInstance, String, Mono<Boolean>> mockAliveFunction = mock(BiFunction.class);
 		String serviceId = "no-health-check-service";
-		healthCheck.getPath().put("no-health-check-service", "");
+		properties.getHealthCheck().getPath().put("no-health-check-service", "");
 		ServiceInstance serviceInstance = new DefaultServiceInstance("no-health-check-service-1", serviceId,
 				"127.0.0.1", port, false);
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck, mockAliveFunction);
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance),
+				buildLoadBalancerClientFactory(serviceId, properties), mockAliveFunction);
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -151,12 +154,12 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@Test
 	void shouldCheckInstanceWithProvidedHealthCheckPathWithRestTemplate() {
 		String serviceId = "ignored-service";
-		healthCheck.getPath().put("ignored-service", "/health");
+		properties.getHealthCheck().getPath().put("ignored-service", "/health");
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
 				false, "http");
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
-				healthCheckFunction(restTemplate));
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance),
+				buildLoadBalancerClientFactory(serviceId, properties), healthCheckFunction(restTemplate));
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -170,8 +173,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
 				false);
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
-				healthCheckFunction(webClient));
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance),
+				buildLoadBalancerClientFactory(serviceId, properties), healthCheckFunction(webClient));
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -184,10 +187,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 		String serviceId = "ignored-service";
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
 				false);
-		healthCheck.getPath().put(serviceId, "/test");
+		properties.getHealthCheck().getPath().put(serviceId, "/test");
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
-				healthCheckFunction(webClient));
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance),
+				buildLoadBalancerClientFactory(serviceId, properties), healthCheckFunction(webClient));
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -200,10 +203,10 @@ class HealthCheckServiceInstanceListSupplierTests {
 		String serviceId = "ignored-service";
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
 				false);
-		healthCheck.getPath().put(serviceId, "/test");
+		properties.getHealthCheck().getPath().put(serviceId, "/test");
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
-				healthCheckFunction(restTemplate));
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance),
+				buildLoadBalancerClientFactory(serviceId, properties), healthCheckFunction(restTemplate));
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -212,7 +215,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldReturnOnlyAliveService() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
@@ -228,8 +231,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.doReturn(Mono.just(true)).when(mock).isAlive(serviceInstance1);
 			Mockito.doReturn(Mono.just(false)).when(mock).isAlive(serviceInstance2);
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-					healthCheckFunction(webClient)) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return mock.isAlive(serviceInstance);
@@ -237,13 +240,14 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list(serviceInstance1))
-				.expectNoEvent(healthCheck.getInterval()).thenCancel().verify(VERIFY_TIMEOUT);
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNext(Lists.list(serviceInstance1)).expectNoEvent(properties.getHealthCheck().getInterval())
+				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldEmitOnEachAliveServiceInBatch() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
@@ -258,8 +262,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.doReturn(Mono.just(true)).when(mock).isAlive(serviceInstance1);
 			Mockito.doReturn(Mono.just(true)).when(mock).isAlive(serviceInstance2);
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-					healthCheckFunction(webClient)) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return mock.isAlive(serviceInstance);
@@ -267,14 +271,14 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list(serviceInstance1))
-				.expectNext(Lists.list(serviceInstance1, serviceInstance2)).expectNoEvent(healthCheck.getInterval())
-				.thenCancel().verify(VERIFY_TIMEOUT);
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNext(Lists.list(serviceInstance1)).expectNext(Lists.list(serviceInstance1, serviceInstance2))
+				.expectNoEvent(properties.getHealthCheck().getInterval()).thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldNotFailIfIsAliveReturnsError() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
@@ -289,8 +293,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.doReturn(Mono.just(true)).when(mock).isAlive(serviceInstance1);
 			Mockito.doReturn(Mono.error(new RuntimeException("boom"))).when(mock).isAlive(serviceInstance2);
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-					healthCheckFunction(webClient)) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return mock.isAlive(serviceInstance);
@@ -298,13 +302,14 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list(serviceInstance1))
-				.expectNoEvent(healthCheck.getInterval()).thenCancel().verify(VERIFY_TIMEOUT);
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNext(Lists.list(serviceInstance1)).expectNoEvent(properties.getHealthCheck().getInterval())
+				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldEmitAllInstancesIfAllIsAliveChecksFailed() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
@@ -314,8 +319,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
 			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			Mockito.when(delegate.get()).thenReturn(Flux.just(Lists.list(serviceInstance1, serviceInstance2)));
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-					healthCheckFunction(webClient)) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					if (serviceInstance == serviceInstance1) {
@@ -328,13 +333,13 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list())
-				.expectNoEvent(healthCheck.getInterval()).thenCancel().verify(VERIFY_TIMEOUT);
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay()).expectNext(Lists.list())
+				.expectNoEvent(properties.getHealthCheck().getInterval()).thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldMakeInitialDaleyAfterPropertiesSet() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
 
@@ -342,8 +347,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
 			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			Mockito.when(delegate.get()).thenReturn(Flux.just(Lists.list(serviceInstance1)));
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-					healthCheckFunction(webClient)) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return Mono.just(true);
@@ -353,13 +358,14 @@ class HealthCheckServiceInstanceListSupplierTests {
 			listSupplier.afterPropertiesSet();
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list(serviceInstance1))
-				.expectNoEvent(healthCheck.getInterval()).thenCancel().verify(VERIFY_TIMEOUT);
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNext(Lists.list(serviceInstance1)).expectNoEvent(properties.getHealthCheck().getInterval())
+				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldRepeatIsAliveChecksIndefinitely() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
@@ -374,8 +380,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.doReturn(Mono.just(false), Mono.just(true)).when(mock).isAlive(serviceInstance1);
 			Mockito.doReturn(Mono.error(new RuntimeException("boom"))).when(mock).isAlive(serviceInstance2);
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-					healthCheckFunction(webClient)) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return mock.isAlive(serviceInstance);
@@ -383,15 +389,15 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list())
-				.expectNoEvent(healthCheck.getInterval()).expectNext(Lists.list(serviceInstance1))
-				.expectNoEvent(healthCheck.getInterval()).expectNext(Lists.list(serviceInstance1)).thenCancel()
-				.verify(VERIFY_TIMEOUT);
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay()).expectNext(Lists.list())
+				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
+				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
+				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldTimeoutIsAliveCheck() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
 
@@ -403,8 +409,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			HealthCheckServiceInstanceListSupplier mock = mock(HealthCheckServiceInstanceListSupplier.class);
 			Mockito.when(mock.isAlive(serviceInstance1)).thenReturn(Mono.never(), Mono.just(true));
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-					healthCheckFunction(webClient)) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return mock.isAlive(serviceInstance);
@@ -412,15 +418,16 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNoEvent(healthCheck.getInterval())
-				.expectNext(Lists.list()).expectNoEvent(healthCheck.getInterval())
-				.expectNext(Lists.list(serviceInstance1)).expectNoEvent(healthCheck.getInterval())
-				.expectNext(Lists.list(serviceInstance1)).thenCancel().verify(VERIFY_TIMEOUT);
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list())
+				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
+				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
+				.thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldUpdateInstances() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
@@ -431,11 +438,11 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			Flux<List<ServiceInstance>> instances = Flux.just(Lists.list(serviceInstance1))
 					.concatWith(Flux.just(Lists.list(serviceInstance1, serviceInstance2))
-							.delayElements(healthCheck.getInterval().dividedBy(2)));
+							.delayElements(properties.getHealthCheck().getInterval().dividedBy(2)));
 			Mockito.when(delegate.get()).thenReturn(instances);
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-					healthCheckFunction(webClient)) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return Mono.just(true);
@@ -443,19 +450,20 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list(serviceInstance1))
-				.thenAwait(healthCheck.getInterval().dividedBy(2)).expectNext(Lists.list(serviceInstance1))
-				.expectNext(Lists.list(serviceInstance1, serviceInstance2)).expectNoEvent(healthCheck.getInterval())
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNext(Lists.list(serviceInstance1))
+				.thenAwait(properties.getHealthCheck().getInterval().dividedBy(2))
 				.expectNext(Lists.list(serviceInstance1)).expectNext(Lists.list(serviceInstance1, serviceInstance2))
-				.thenCancel().verify(VERIFY_TIMEOUT);
+				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
+				.expectNext(Lists.list(serviceInstance1, serviceInstance2)).thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldRefetchInstances() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
-		healthCheck.setRepeatHealthCheck(false);
-		healthCheck.setRefetchInstancesInterval(Duration.ofSeconds(1));
-		healthCheck.setRefetchInstances(true);
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setRepeatHealthCheck(false);
+		properties.getHealthCheck().setRefetchInstancesInterval(Duration.ofSeconds(1));
+		properties.getHealthCheck().setRefetchInstances(true);
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
@@ -463,27 +471,29 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 		StepVerifier.withVirtualTime(() -> {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
+			when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			when(delegate.get()).thenReturn(Flux.just(Collections.singletonList(serviceInstance1)))
 					.thenReturn(Flux.just(Collections.singletonList(serviceInstance2)));
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-					healthCheckFunction(webClient)) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return Mono.just(true);
 				}
 			};
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list(serviceInstance1))
-				.thenAwait(healthCheck.getRefetchInstancesInterval()).expectNext(Lists.list(serviceInstance2))
-				.thenCancel().verify(VERIFY_TIMEOUT);
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNext(Lists.list(serviceInstance1))
+				.thenAwait(properties.getHealthCheck().getRefetchInstancesInterval())
+				.expectNext(Lists.list(serviceInstance2)).thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldRefetchInstancesWithRepeatingHealthCheck() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
-		healthCheck.setRepeatHealthCheck(true);
-		healthCheck.setRefetchInstancesInterval(Duration.ofSeconds(1));
-		healthCheck.setRefetchInstances(true);
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setRepeatHealthCheck(true);
+		properties.getHealthCheck().setRefetchInstancesInterval(Duration.ofSeconds(1));
+		properties.getHealthCheck().setRefetchInstances(true);
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
 		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
@@ -491,24 +501,27 @@ class HealthCheckServiceInstanceListSupplierTests {
 
 		StepVerifier.withVirtualTime(() -> {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
+			when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			when(delegate.get()).thenReturn(Flux.just(Collections.singletonList(serviceInstance1)))
 					.thenReturn(Flux.just(Collections.singletonList(serviceInstance2)));
 			BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunc = healthCheckFunction(webClient);
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck, healthCheckFunc) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunc) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return Mono.just(true);
 				}
 			};
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list(serviceInstance1))
-				.thenAwait(healthCheck.getRefetchInstancesInterval()).expectNext(Lists.list(serviceInstance2))
-				.thenCancel().verify(VERIFY_TIMEOUT);
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNext(Lists.list(serviceInstance1))
+				.thenAwait(properties.getHealthCheck().getRefetchInstancesInterval())
+				.expectNext(Lists.list(serviceInstance2)).thenCancel().verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
 	void shouldCacheResultIfAfterPropertiesSetInvoked() {
-		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
 
@@ -519,8 +532,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			Mockito.when(delegate.get()).thenReturn(Flux.just(Lists.list(serviceInstance1)));
 
-			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-					healthCheckFunction(webClient)) {
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
 				@Override
 				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
 					return Mono.just(true);
@@ -535,8 +548,9 @@ class HealthCheckServiceInstanceListSupplierTests {
 			listSupplier.afterPropertiesSet();
 
 			return listSupplier.get().take(1).concatWith(listSupplier.get().take(1));
-		}).expectSubscription().expectNoEvent(healthCheck.getInitialDelay()).expectNext(Lists.list(serviceInstance1))
-				.expectNext(Lists.list(serviceInstance1)).thenCancel().verify(VERIFY_TIMEOUT);
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNext(Lists.list(serviceInstance1)).expectNext(Lists.list(serviceInstance1)).thenCancel()
+				.verify(VERIFY_TIMEOUT);
 
 		Assertions.assertThat(emitCounter).hasValue(1);
 	}
@@ -550,8 +564,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 		Mockito.when(delegate.get()).thenReturn(Flux.<List<ServiceInstance>>never()
 				.doOnSubscribe(subscription -> subscribed.set(true)).doOnCancel(instancesCanceled::incrementAndGet));
 
-		listSupplier = new HealthCheckServiceInstanceListSupplier(delegate, healthCheck,
-				healthCheckFunction(webClient));
+		listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+				buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient));
 
 		listSupplier.afterPropertiesSet();
 
@@ -569,12 +583,12 @@ class HealthCheckServiceInstanceListSupplierTests {
 	@Test
 	void shouldCheckInstanceWithProvidedHealthCheckPathWithQueryParams() {
 		String serviceId = "ignored-service";
-		healthCheck.getPath().put("ignored-service", "/health?someparam=somevalue");
+		properties.getHealthCheck().getPath().put("ignored-service", "/health?someparam=somevalue");
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
 				false);
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
-				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
-				healthCheckFunction(webClient));
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance),
+				buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient));
 
 		boolean alive = listSupplier.isAlive(serviceInstance).block();
 
@@ -585,9 +599,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 	void shouldCheckUseProvidedPortForHealthCheckRequest() {
 		Throwable exception = catchThrowable(() -> {
 			String serviceId = "ignored-service";
-			healthCheck.setPort(8888);
-			LoadBalancerProperties properties = new LoadBalancerProperties();
-			properties.setHealthCheck(healthCheck);
+			properties.getHealthCheck().setPort(8888);
 			LoadBalancerClientFactory loadBalancerClientFactory = mock(LoadBalancerClientFactory.class);
 			when(loadBalancerClientFactory.getProperties(serviceId)).thenReturn(properties);
 			ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1",

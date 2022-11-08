@@ -37,8 +37,7 @@ public class CommonsConfigAutoConfiguration {
 			@Nullable DefaultsBindHandlerAdvisor.MappingsProvider[] providers) {
 		Map<ConfigurationPropertyName, ConfigurationPropertyName> additionalMappings = new HashMap<>();
 		if (!ObjectUtils.isEmpty(providers)) {
-			for (int i = 0; i < providers.length; i++) {
-				DefaultsBindHandlerAdvisor.MappingsProvider mappingsProvider = providers[i];
+			for (DefaultsBindHandlerAdvisor.MappingsProvider mappingsProvider : providers) {
 				additionalMappings.putAll(mappingsProvider.getDefaultMappings());
 			}
 		}

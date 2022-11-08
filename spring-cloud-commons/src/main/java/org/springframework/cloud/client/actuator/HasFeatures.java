@@ -36,11 +36,11 @@ public class HasFeatures {
 	}
 
 	public static HasFeatures abstractFeatures(Class<?>... abstractFeatures) {
-		return new HasFeatures(Arrays.asList(abstractFeatures), Collections.<NamedFeature>emptyList());
+		return new HasFeatures(Arrays.asList(abstractFeatures), Collections.emptyList());
 	}
 
 	public static HasFeatures namedFeatures(NamedFeature... namedFeatures) {
-		return new HasFeatures(Collections.<Class<?>>emptyList(), Arrays.asList(namedFeatures));
+		return new HasFeatures(Collections.emptyList(), Arrays.asList(namedFeatures));
 	}
 
 	public static HasFeatures namedFeature(String name, Class<?> type) {

@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.bootstrap.encrypt;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ public class EncryptorFactoryTests {
 	@Test
 	public void testWithRsaPrivateKey() throws Exception {
 		String key = StreamUtils.copyToString(new ClassPathResource("/example-test-rsa-private-key").getInputStream(),
-				Charset.forName("ASCII"));
+				StandardCharsets.US_ASCII);
 
 		TextEncryptor encryptor = new EncryptorFactory().create(key);
 		String toEncrypt = "sample text to encrypt";
@@ -47,11 +47,11 @@ public class EncryptorFactoryTests {
 
 	@Test
 	public void testWithInvalidRsaPrivateKey() {
-		String key = "-----BEGIN RSA PRIVATE KEY-----\n"
-				+ "MIIEowIBAAKCAQEAwClFgrRa/PUHPIJr9gvIPL6g6Rjp/TVZmVNOf2fL96DYbkj5\n";
-		Assertions.assertThrows(RuntimeException.class, () -> {
-			new EncryptorFactory().create(key);
-		});
+		String key = """
+				-----BEGIN RSA PRIVATE KEY-----
+				MIIEowIBAAKCAQEAwClFgrRa/PUHPIJr9gvIPL6g6Rjp/TVZmVNOf2fL96DYbkj5
+				""";
+		Assertions.assertThrows(RuntimeException.class, () -> new EncryptorFactory().create(key));
 	}
 
 }

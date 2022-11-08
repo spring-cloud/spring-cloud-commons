@@ -53,27 +53,27 @@ public class CustomHttpClientConfigurationTests {
 	OkHttpClientConnectionPoolFactory okHttpClientConnectionPoolFactory;
 
 	@Test
-	public void connManFactory() throws Exception {
+	public void connManFactory() {
 		then(ApacheHttpClientConnectionManagerFactory.class.isInstance(this.connectionManagerFactory)).isTrue();
 		then(CustomApplication.MyApacheHttpClientConnectionManagerFactory.class
 				.isInstance(this.connectionManagerFactory)).isTrue();
 	}
 
 	@Test
-	public void apacheHttpClientFactory() throws Exception {
+	public void apacheHttpClientFactory() {
 		then(ApacheHttpClientFactory.class.isInstance(this.httpClientFactory)).isTrue();
 		then(CustomApplication.MyApacheHttpClientFactory.class.isInstance(this.httpClientFactory)).isTrue();
 	}
 
 	@Test
-	public void connectionPoolFactory() throws Exception {
+	public void connectionPoolFactory() {
 		then(OkHttpClientConnectionPoolFactory.class.isInstance(this.okHttpClientConnectionPoolFactory)).isTrue();
 		then(CustomApplication.MyOkHttpConnectionPoolFactory.class.isInstance(this.okHttpClientConnectionPoolFactory))
 				.isTrue();
 	}
 
 	@Test
-	public void okHttpClientFactory() throws Exception {
+	public void okHttpClientFactory() {
 		then(OkHttpClientFactory.class.isInstance(this.okHttpClientFactory)).isTrue();
 		then(CustomApplication.MyOkHttpClientFactory.class.isInstance(this.okHttpClientFactory)).isTrue();
 	}

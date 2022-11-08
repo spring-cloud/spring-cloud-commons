@@ -27,6 +27,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.cloud.loadbalancer.core.LoadBalancerTestUtils.buildLoadBalancerClientFactory;
 
 /**
  * Tests for {@link LoadBalancerServiceInstanceCookieTransformer}.
@@ -35,18 +36,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class LoadBalancerServiceInstanceCookieTransformerTests {
 
-	LoadBalancerProperties.StickySession stickySessionProperties = new LoadBalancerProperties().getStickySession();
+	private static final String SERVICE_ID = "test";
+
+	LoadBalancerProperties properties = new LoadBalancerProperties();
 
 	LoadBalancerServiceInstanceCookieTransformer transformer = new LoadBalancerServiceInstanceCookieTransformer(
-			stickySessionProperties);
+			buildLoadBalancerClientFactory(SERVICE_ID, properties));
 
-	ServiceInstance serviceInstance = new DefaultServiceInstance("test-01", "test", "host", 8080, false);
+	ServiceInstance serviceInstance = new DefaultServiceInstance("test-01", SERVICE_ID, "host", 8080, false);
 
 	HttpRequest request = new MockClientHttpRequest();
 
 	@BeforeEach
 	void setUp() {
-		stickySessionProperties.setAddServiceInstanceCookie(true);
+		properties.getStickySession().setAddServiceInstanceCookie(true);
 	}
 
 	@Test
@@ -76,7 +79,7 @@ class LoadBalancerServiceInstanceCookieTransformerTests {
 
 	@Test
 	void shouldReturnPassedRequestWhenNullServiceInstanceCookieName() {
-		stickySessionProperties.setInstanceIdCookieName(null);
+		properties.getStickySession().setInstanceIdCookieName(null);
 		HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
 
 		assertThat(newRequest.getHeaders()).doesNotContainKey(HttpHeaders.COOKIE);
@@ -84,7 +87,7 @@ class LoadBalancerServiceInstanceCookieTransformerTests {
 
 	@Test
 	void shouldReturnPassedRequestWhenEmptyServiceInstanceCookieName() {
-		stickySessionProperties.setInstanceIdCookieName("");
+		properties.getStickySession().setInstanceIdCookieName("");
 		HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
 
 		assertThat(newRequest.getHeaders()).doesNotContainKey(HttpHeaders.COOKIE);

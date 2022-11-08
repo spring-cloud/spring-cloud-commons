@@ -48,7 +48,7 @@ public class ContextRefresherIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testSimpleProperties() throws Exception {
+	public void testSimpleProperties() {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		this.properties.setMessage("Foo");
@@ -58,7 +58,7 @@ public class ContextRefresherIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testRefreshBean() throws Exception {
+	public void testRefreshBean() {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		// Change the dynamic property source...
 		this.properties.setMessage("Foo");
@@ -69,7 +69,7 @@ public class ContextRefresherIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testUpdateHikari() throws Exception {
+	public void testUpdateHikari() {
 		then(this.properties.getMessage()).isEqualTo("Hello scope!");
 		TestPropertyValues.of("spring.datasource.hikari.read-only=true").applyTo(this.environment);
 		// ...and then refresh, so the bean is re-initialized:

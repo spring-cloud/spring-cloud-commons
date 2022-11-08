@@ -17,7 +17,6 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -63,29 +62,6 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 
 	private final List<LoadBalancerClientRequestTransformer> transformers;
 
-	/**
-	 * @param loadBalancerFactory the loadbalancer factory
-	 * @param properties the properties for SC LoadBalancer
-	 * @deprecated Deprecated in favor of
-	 * {@link #ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, LoadBalancerProperties, List)}.
-	 */
-	@Deprecated
-	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
-			LoadBalancerProperties properties) {
-		this(loadBalancerFactory, properties, Collections.emptyList());
-	}
-
-	/**
-	 * @deprecated in favour of
-	 * {@link ReactorLoadBalancerExchangeFilterFunction#ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory, List)}
-	 */
-	@Deprecated
-	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
-			LoadBalancerProperties properties, List<LoadBalancerClientRequestTransformer> transformers) {
-		this.loadBalancerFactory = loadBalancerFactory;
-		this.transformers = transformers;
-	}
-
 	public ReactorLoadBalancerExchangeFilterFunction(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
 			List<LoadBalancerClientRequestTransformer> transformers) {
 		this.loadBalancerFactory = loadBalancerFactory;
@@ -97,7 +73,7 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 		URI originalUrl = clientRequest.url();
 		String serviceId = originalUrl.getHost();
 		if (serviceId == null) {
-			String message = String.format("Request URI does not contain a valid hostname: %s", originalUrl.toString());
+			String message = String.format("Request URI does not contain a valid hostname: %s", originalUrl);
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(message);
 			}

@@ -55,15 +55,6 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 
 	private final LoadBalancerClientsProperties properties;
 
-	/**
-	 * @deprecated in favour of
-	 * {@link LoadBalancerClientFactory#LoadBalancerClientFactory(LoadBalancerClientsProperties)}
-	 */
-	@Deprecated
-	public LoadBalancerClientFactory() {
-		this(null);
-	}
-
 	public LoadBalancerClientFactory(LoadBalancerClientsProperties properties) {
 		super(LoadBalancerClientConfiguration.class, NAMESPACE, PROPERTY_NAME);
 		this.properties = properties;

@@ -56,7 +56,7 @@ public class RefreshScopeListBindingIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testAppendProperties() throws Exception {
+	public void testAppendProperties() {
 		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		then(this.properties instanceof Advised).isTrue();
 		TestPropertyValues.of("test.messages[0]:foo").applyTo(this.environment);
@@ -66,7 +66,7 @@ public class RefreshScopeListBindingIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void testReplaceProperties() throws Exception {
+	public void testReplaceProperties() {
 		then("[one, two]").isEqualTo(this.properties.getMessages().toString());
 		then(this.properties instanceof Advised).isTrue();
 		Map<String, Object> map = findTestProperties();
@@ -104,7 +104,7 @@ public class RefreshScopeListBindingIntegrationTests {
 	@ManagedResource
 	protected static class TestProperties {
 
-		private List<String> messages = new ArrayList<String>();
+		private List<String> messages = new ArrayList<>();
 
 		public List<String> getMessages() {
 			return this.messages;

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.configuration;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -37,7 +36,7 @@ public class CompatibilityVerifierProperties {
 	 * the patch version if you don't want to specify a concrete value. Example:
 	 * {@code 3.4.x}
 	 */
-	private List<String> compatibleBootVersions = Arrays.asList("3.0.x");
+	private List<String> compatibleBootVersions = List.of("3.0.x");
 
 	public boolean isEnabled() {
 		return this.enabled;

@@ -47,8 +47,7 @@ public class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
 
 	@Override
 	public String[] getPropertyNames() {
-		Set<String> names = new LinkedHashSet<>();
-		names.addAll(Arrays.asList(this.delegate.getPropertyNames()));
+		Set<String> names = new LinkedHashSet<>(Arrays.asList(this.delegate.getPropertyNames()));
 
 		return StringUtils.toStringArray(names);
 	}

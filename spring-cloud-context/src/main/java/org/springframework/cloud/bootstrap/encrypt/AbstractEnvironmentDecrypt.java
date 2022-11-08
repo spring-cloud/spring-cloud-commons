@@ -94,11 +94,10 @@ public abstract class AbstractEnvironmentDecrypt {
 			}
 
 		}
-		else if (source instanceof EnumerablePropertySource) {
+		else if (source instanceof EnumerablePropertySource<?> enumerable) {
 			Map<String, Object> otherCollectionProperties = new LinkedHashMap<>();
 			boolean sourceHasDecryptedCollection = false;
 
-			EnumerablePropertySource<?> enumerable = (EnumerablePropertySource<?>) source;
 			for (String key : enumerable.getPropertyNames()) {
 				Object property = source.getProperty(key);
 				if (property != null) {

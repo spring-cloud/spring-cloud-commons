@@ -63,7 +63,7 @@ public class RefreshScopeConfigurationTests {
 	 * See gh-43
 	 */
 	@Test
-	public void configurationWithRefreshScope() throws Exception {
+	public void configurationWithRefreshScope() {
 		this.context = new AnnotationConfigApplicationContext(Application.class,
 				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);
@@ -77,7 +77,7 @@ public class RefreshScopeConfigurationTests {
 	}
 
 	@Test
-	public void refreshScopeOnBean() throws Exception {
+	public void refreshScopeOnBean() {
 		this.context = new AnnotationConfigApplicationContext(ClientApp.class,
 				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);
@@ -89,7 +89,7 @@ public class RefreshScopeConfigurationTests {
 	}
 
 	@Test
-	public void refreshScopeOnNested() throws Exception {
+	public void refreshScopeOnNested() {
 		this.context = new AnnotationConfigApplicationContext(NestedApp.class,
 				PropertyPlaceholderAutoConfiguration.class, RefreshAutoConfiguration.class,
 				LifecycleMvcEndpointAutoConfiguration.class);

@@ -51,7 +51,7 @@ public class KeyAndCert {
 	}
 
 	public String subject() {
-		String dn = certificate.getSubjectDN().getName();
+		String dn = certificate.getSubjectX500Principal().getName();
 		int index = dn.indexOf('=');
 		return dn.substring(index + 1);
 	}

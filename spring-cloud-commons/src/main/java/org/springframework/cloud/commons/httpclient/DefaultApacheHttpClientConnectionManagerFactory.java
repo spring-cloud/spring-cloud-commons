@@ -19,7 +19,6 @@ package org.springframework.cloud.commons.httpclient;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.TimeUnit;
 
@@ -68,10 +67,7 @@ public class DefaultApacheHttpClientConnectionManagerFactory implements ApacheHt
 				registryBuilder.register(HTTPS_SCHEME,
 						new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE));
 			}
-			catch (NoSuchAlgorithmException e) {
-				LOG.warn("Error creating SSLContext", e);
-			}
-			catch (KeyManagementException e) {
+			catch (NoSuchAlgorithmException | KeyManagementException e) {
 				LOG.warn("Error creating SSLContext", e);
 			}
 		}
@@ -88,14 +84,14 @@ public class DefaultApacheHttpClientConnectionManagerFactory implements ApacheHt
 		return connectionManager;
 	}
 
-	class DisabledValidationTrustManager implements X509TrustManager {
+	static class DisabledValidationTrustManager implements X509TrustManager {
 
 		@Override
-		public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+		public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
 		}
 
 		@Override
-		public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+		public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
 		}
 
 		@Override

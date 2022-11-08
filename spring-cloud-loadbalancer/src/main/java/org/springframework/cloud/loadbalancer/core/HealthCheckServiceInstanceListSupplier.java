@@ -17,7 +17,6 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -61,28 +60,6 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 
 	private final BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction;
 
-	/**
-	 * @deprecated in favour of
-	 * {@link HealthCheckServiceInstanceListSupplier#HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier, ReactiveLoadBalancer.Factory, BiFunction)}
-	 */
-	@Deprecated
-	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			LoadBalancerProperties.HealthCheck healthCheck,
-			BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction) {
-		super(delegate);
-		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default", "/actuator/health");
-		this.aliveFunction = aliveFunction;
-		this.healthCheck = healthCheck;
-		Repeat<Object> aliveInstancesReplayRepeat = Repeat
-				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
-				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
-		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate).repeatWhen(aliveInstancesReplayRepeat)
-				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
-						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))));
-		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
-				.refCount(1);
-	}
-
 	public HealthCheckServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory,
 			BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction) {
@@ -94,8 +71,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
 				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
 		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate).repeatWhen(aliveInstancesReplayRepeat)
-				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
-						.map(alive -> Collections.unmodifiableList(new ArrayList<>(alive))));
+				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(alive -> List.copyOf(alive)));
 		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
 				.refCount(1);
 	}

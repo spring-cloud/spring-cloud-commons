@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
 public class DefaultApacheHttpClientFactoryTests {
 
 	@Test
-	public void createClient() throws Exception {
+	public void createClient() {
 		final RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(100).setConnectTimeout(200)
 				.setCookieSpec(CookieSpecs.IGNORE_COOKIES).build();
 		CloseableHttpClient httpClient = new DefaultApacheHttpClientFactory(HttpClientBuilder.create()).createBuilder()

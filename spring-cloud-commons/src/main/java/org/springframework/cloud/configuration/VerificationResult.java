@@ -60,10 +60,9 @@ final class VerificationResult {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof VerificationResult)) {
+		if (!(o instanceof VerificationResult that)) {
 			return false;
 		}
-		VerificationResult that = (VerificationResult) o;
 		return description.equals(that.description) && action.equals(that.action);
 	}
 

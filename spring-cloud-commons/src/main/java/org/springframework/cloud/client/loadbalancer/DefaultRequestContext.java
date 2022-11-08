@@ -62,10 +62,9 @@ public class DefaultRequestContext extends HintRequestContext {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof DefaultRequestContext)) {
+		if (!(o instanceof DefaultRequestContext that)) {
 			return false;
 		}
-		DefaultRequestContext that = (DefaultRequestContext) o;
 		return Objects.equals(clientRequest, that.clientRequest);
 	}
 

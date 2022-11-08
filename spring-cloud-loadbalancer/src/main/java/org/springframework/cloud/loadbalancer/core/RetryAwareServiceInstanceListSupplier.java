@@ -49,10 +49,9 @@ public class RetryAwareServiceInstanceListSupplier extends DelegatingServiceInst
 
 	@Override
 	public Flux<List<ServiceInstance>> get(Request request) {
-		if (!(request.getContext() instanceof RetryableRequestContext)) {
+		if (!(request.getContext() instanceof RetryableRequestContext context)) {
 			return delegate.get(request);
 		}
-		RetryableRequestContext context = (RetryableRequestContext) request.getContext();
 		ServiceInstance previousServiceInstance = context.getPreviousServiceInstance();
 		if (previousServiceInstance == null) {
 			return delegate.get(request);

@@ -165,8 +165,7 @@ class LoadBalancerTests {
 		@SuppressWarnings("rawtypes")
 		@Override
 		public Mono<Response<ServiceInstance>> choose(Request request) {
-			if (request.getContext() instanceof DefaultRequestContext) {
-				DefaultRequestContext requestContext = (DefaultRequestContext) request.getContext();
+			if (request.getContext() instanceof DefaultRequestContext requestContext) {
 				return Mono.just(new DefaultResponse(instance(requestContext.getHint(), "host", false)));
 			}
 			return Mono.empty();

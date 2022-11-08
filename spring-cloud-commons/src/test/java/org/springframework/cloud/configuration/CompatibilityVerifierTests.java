@@ -36,8 +36,7 @@ public class CompatibilityVerifierTests {
 
 	@Test
 	public void should_not_print_the_report_when_no_errors_were_found(CapturedOutput output) {
-		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(
-				new ArrayList<CompatibilityVerifier>());
+		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(new ArrayList<>());
 
 		verifier.verifyDependencies();
 
@@ -47,18 +46,8 @@ public class CompatibilityVerifierTests {
 	@Test
 	public void should_print_the_report_when_errors_were_found() {
 		List<CompatibilityVerifier> list = new ArrayList<>();
-		list.add(new CompatibilityVerifier() {
-			@Override
-			public VerificationResult verify() {
-				return VerificationResult.notCompatible("Wrong Boot version", "Use Boot version 1.2");
-			}
-		});
-		list.add(new CompatibilityVerifier() {
-			@Override
-			public VerificationResult verify() {
-				return VerificationResult.notCompatible("Wrong JDK version", "Use JDK 25");
-			}
-		});
+		list.add(() -> VerificationResult.notCompatible("Wrong Boot version", "Use Boot version 1.2"));
+		list.add(() -> VerificationResult.notCompatible("Wrong JDK version", "Use JDK 25"));
 		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(list);
 
 		try {

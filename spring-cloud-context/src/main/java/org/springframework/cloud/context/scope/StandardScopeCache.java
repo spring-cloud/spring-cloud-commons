@@ -29,14 +29,14 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class StandardScopeCache implements ScopeCache {
 
-	private final ConcurrentMap<String, Object> cache = new ConcurrentHashMap<String, Object>();
+	private final ConcurrentMap<String, Object> cache = new ConcurrentHashMap<>();
 
 	public Object remove(String name) {
 		return this.cache.remove(name);
 	}
 
 	public Collection<Object> clear() {
-		Collection<Object> values = new ArrayList<Object>(this.cache.values());
+		Collection<Object> values = new ArrayList<>(this.cache.values());
 		this.cache.clear();
 		return values;
 	}

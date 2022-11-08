@@ -43,17 +43,6 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 
 	private final LoadBalancerProperties properties;
 
-	/**
-	 * @deprecated in favour of
-	 * {@link RequestBasedStickySessionServiceInstanceListSupplier#RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier, ReactiveLoadBalancer.Factory)}
-	 */
-	@Deprecated
-	public RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			LoadBalancerProperties properties) {
-		super(delegate);
-		this.properties = properties;
-	}
-
 	public RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		super(delegate);
@@ -94,8 +83,8 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 		for (ServiceInstance serviceInstance : serviceInstances) {
 			if (cookie.equals(serviceInstance.getInstanceId())) {
 				if (LOG.isDebugEnabled()) {
-					LOG.debug(String.format("Returning the service instance: %s. Found for cookie: %s",
-							serviceInstance.toString(), cookie));
+					LOG.debug(String.format("Returning the service instance: %s. Found for cookie: %s", serviceInstance,
+							cookie));
 				}
 				return Collections.singletonList(serviceInstance);
 			}

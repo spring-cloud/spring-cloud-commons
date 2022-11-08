@@ -134,7 +134,7 @@ public abstract class ContextRefresher {
 	}
 
 	private Map<String, Object> changes(Map<String, Object> before, Map<String, Object> after) {
-		Map<String, Object> result = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<>();
 		for (String key : before.keySet()) {
 			if (!after.containsKey(key)) {
 				result.put(key, null);
@@ -162,8 +162,8 @@ public abstract class ContextRefresher {
 	}
 
 	private Map<String, Object> extract(MutablePropertySources propertySources) {
-		Map<String, Object> result = new HashMap<String, Object>();
-		List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
+		Map<String, Object> result = new HashMap<>();
+		List<PropertySource<?>> sources = new ArrayList<>();
 		for (PropertySource<?> source : propertySources) {
 			sources.add(0, source);
 		}
@@ -178,7 +178,7 @@ public abstract class ContextRefresher {
 	private void extract(PropertySource<?> parent, Map<String, Object> result) {
 		if (parent instanceof CompositePropertySource) {
 			try {
-				List<PropertySource<?>> sources = new ArrayList<PropertySource<?>>();
+				List<PropertySource<?>> sources = new ArrayList<>();
 				for (PropertySource<?> source : ((CompositePropertySource) parent).getPropertySources()) {
 					sources.add(0, source);
 				}
