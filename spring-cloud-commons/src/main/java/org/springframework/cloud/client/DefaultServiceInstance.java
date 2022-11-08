@@ -51,7 +51,6 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private URI uri;
 
-
 	/**
 	 * @param instanceId the id of the instance.
 	 * @param serviceId the id of the service.
