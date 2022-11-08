@@ -71,13 +71,6 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	private List<RegistrationLifecycle<R>> registrationLifecycles = new ArrayList<>();
 
-	/**
-	 * @deprecated This function is deprecated and can be replaced by another constructor
-	 */
-	@Deprecated
-	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry) {
-		this.serviceRegistry = serviceRegistry;
-	}
 
 	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry,
 			AutoServiceRegistrationProperties properties) {

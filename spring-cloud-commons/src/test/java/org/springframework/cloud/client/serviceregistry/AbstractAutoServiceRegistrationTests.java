@@ -240,7 +240,7 @@ public class AbstractAutoServiceRegistrationTests {
 		}
 
 		protected TestAutoServiceRegistration() {
-			super(new TestServiceRegistry());
+			super(new TestServiceRegistry(), new AutoServiceRegistrationProperties());
 		}
 
 		@Override

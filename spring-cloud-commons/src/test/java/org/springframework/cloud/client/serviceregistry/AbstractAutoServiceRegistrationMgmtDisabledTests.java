@@ -168,7 +168,7 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 		}
 
 		protected TestAutoServiceRegistration() {
-			super(new TestServiceRegistry());
+			super(new TestServiceRegistry(), new AutoServiceRegistrationProperties());
 		}
 
 		@Override

@@ -111,7 +111,7 @@ class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 		TestRegistrationLifecycleRegistration testRegistrationLifecycleRegistration = new TestRegistrationLifecycleRegistration();
 
 		protected TestAutoServiceRegistrationLifecycle() {
-			super(new TestRegistrationLifecycleServiceRegistration());
+			super(new TestRegistrationLifecycleServiceRegistration(), new AutoServiceRegistrationProperties());
 		}
 
 		TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties) {
