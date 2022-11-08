@@ -153,7 +153,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 		String serviceId = "ignored-service";
 		healthCheck.getPath().put("ignored-service", "/health");
 		ServiceInstance serviceInstance = new DefaultServiceInstance("ignored-service-1", serviceId, "127.0.0.1", port,
-				false);
+				false, "http");
 		listSupplier = new HealthCheckServiceInstanceListSupplier(
 				ServiceInstanceListSuppliers.from(serviceId, serviceInstance), healthCheck,
 				healthCheckFunction(restTemplate));

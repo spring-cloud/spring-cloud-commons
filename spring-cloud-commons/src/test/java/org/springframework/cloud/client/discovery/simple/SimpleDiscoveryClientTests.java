@@ -34,6 +34,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Biju Kunjummen
  * @author Charu Covindane
  * @author Neil Powell
+ * @author Olga Maciaszek-Sharma
  */
 public class SimpleDiscoveryClientTests {
 
@@ -47,7 +48,8 @@ public class SimpleDiscoveryClientTests {
 		DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null, "host1", 8080, false);
 		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null, "host2", 0, true);
 		DefaultServiceInstance service1Inst3 = new DefaultServiceInstance(null, null, "host3", 0, false);
-		map.put("service1", Arrays.asList(service1Inst1, service1Inst2, service1Inst3));
+		DefaultServiceInstance service1Inst4 = new DefaultServiceInstance(null, null, "host4", 8443, true);
+		map.put("service1", Arrays.asList(service1Inst1, service1Inst2, service1Inst3, service1Inst4));
 		simpleDiscoveryProperties.setInstances(map);
 		simpleDiscoveryProperties.afterPropertiesSet();
 		this.simpleDiscoveryClient = new SimpleDiscoveryClient(simpleDiscoveryProperties);
@@ -56,7 +58,7 @@ public class SimpleDiscoveryClientTests {
 	@Test
 	public void shouldBeAbleToRetrieveServiceDetailsByName() {
 		List<ServiceInstance> instances = this.simpleDiscoveryClient.getInstances("service1");
-		then(instances.size()).isEqualTo(3);
+		then(instances.size()).isEqualTo(4);
 		then(instances.get(0).getServiceId()).isEqualTo("service1");
 		then(instances.get(0).getHost()).isEqualTo("host1");
 		then(instances.get(0).getPort()).isEqualTo(8080);
@@ -77,6 +79,13 @@ public class SimpleDiscoveryClientTests {
 		then(instances.get(2).getUri()).isEqualTo(URI.create("http://host3:80"));
 		then(instances.get(2).isSecure()).isEqualTo(false);
 		then(instances.get(2).getMetadata()).isNotNull();
+
+		then(instances.get(3).getServiceId()).isEqualTo("service1");
+		then(instances.get(3).getHost()).isEqualTo("host4");
+		then(instances.get(3).getPort()).isEqualTo(8443);
+		then(instances.get(3).getUri()).isEqualTo(URI.create("https://host4:8443"));
+		then(instances.get(3).isSecure()).isEqualTo(true);
+		then(instances.get(3).getMetadata()).isNotNull();
 	}
 
 }
