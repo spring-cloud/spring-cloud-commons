@@ -40,17 +40,6 @@ public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalance
 
 	private ReactiveLoadBalancer.Factory<ServiceInstance> factory;
 
-	private LoadBalancerProperties.StickySession stickySessionProperties;
-
-	/**
-	 * @deprecated in favour of
-	 * {@link LoadBalancerServiceInstanceCookieTransformer#LoadBalancerServiceInstanceCookieTransformer(ReactiveLoadBalancer.Factory)}
-	 */
-	@Deprecated
-	public LoadBalancerServiceInstanceCookieTransformer(LoadBalancerProperties.StickySession stickySessionProperties) {
-		this.stickySessionProperties = stickySessionProperties;
-	}
-
 	public LoadBalancerServiceInstanceCookieTransformer(ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
 		this.factory = factory;
 	}
@@ -61,7 +50,8 @@ public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalance
 			return request;
 		}
 		LoadBalancerProperties.StickySession stickySession = factory != null
-				? factory.getProperties(instance.getServiceId()).getStickySession() : stickySessionProperties;
+				? factory.getProperties(instance.getServiceId())
+				.getStickySession() : new LoadBalancerProperties.StickySession();
 		if (!stickySession.isAddServiceInstanceCookie()) {
 			return request;
 		}

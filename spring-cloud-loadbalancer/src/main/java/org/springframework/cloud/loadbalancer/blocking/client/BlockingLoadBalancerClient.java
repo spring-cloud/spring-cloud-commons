@@ -61,16 +61,6 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
 
-	/**
-	 * @deprecated in favour of
-	 * {@link BlockingLoadBalancerClient#BlockingLoadBalancerClient(ReactiveLoadBalancer.Factory)}
-	 */
-	@Deprecated
-	public BlockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
-			LoadBalancerProperties properties) {
-		this.loadBalancerClientFactory = loadBalancerClientFactory;
-	}
-
 	public BlockingLoadBalancerClient(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 	}

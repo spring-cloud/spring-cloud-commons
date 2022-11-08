@@ -43,17 +43,6 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 
 	private final LoadBalancerProperties properties;
 
-	/**
-	 * @deprecated in favour of
-	 * {@link RequestBasedStickySessionServiceInstanceListSupplier#RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier, ReactiveLoadBalancer.Factory)}
-	 */
-	@Deprecated
-	public RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			LoadBalancerProperties properties) {
-		super(delegate);
-		this.properties = properties;
-	}
-
 	public RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		super(delegate);
