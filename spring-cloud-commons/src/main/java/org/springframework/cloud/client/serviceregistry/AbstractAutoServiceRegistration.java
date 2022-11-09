@@ -71,7 +71,6 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	private List<RegistrationLifecycle<R>> registrationLifecycles = new ArrayList<>();
 
-
 	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry,
 			AutoServiceRegistrationProperties properties) {
 		this.serviceRegistry = serviceRegistry;
