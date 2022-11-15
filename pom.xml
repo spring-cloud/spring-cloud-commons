@@ -69,6 +69,19 @@
 			<plugin>
 				<groupId>org.basepom.maven</groupId>
 				<artifactId>duplicate-finder-maven-plugin</artifactId>
+				<configuration>
+					<ignoredDependencies>
+						<dependency>
+							<groupId>org.apache.httpcomponents</groupId>
+							<artifactId>httpclient</artifactId>
+							<optional>true</optional>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.httpcomponents.client5</groupId>
+							<artifactId>httpclient5</artifactId>
+						</dependency>
+					</ignoredDependencies>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

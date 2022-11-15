@@ -25,7 +25,7 @@ import java.security.UnrecoverableKeyException;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
 
 import org.springframework.core.io.Resource;
 
