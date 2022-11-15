@@ -26,7 +26,7 @@ import org.apache.http.conn.HttpClientConnectionManager;
  *
  * @author Ryan Baxter
  */
-public interface ApacheHttpClientConnectionManagerFactory {
+public interface ApacheHttpClientConnectionManagerFactory<T, R> {
 
 	/**
 	 * Scheme for HTTP based communication.
@@ -49,7 +49,7 @@ public interface ApacheHttpClientConnectionManagerFactory {
 	 * manager.
 	 * @return A new {@link HttpClientConnectionManager}.
 	 */
-	HttpClientConnectionManager newConnectionManager(boolean disableSslValidation, int maxTotalConnections,
-			int maxConnectionsPerRoute, long timeToLive, TimeUnit timeUnit, RegistryBuilder registryBuilder);
+	T newConnectionManager(boolean disableSslValidation, int maxTotalConnections, int maxConnectionsPerRoute,
+			long timeToLive, TimeUnit timeUnit, R registryBuilder);
 
 }

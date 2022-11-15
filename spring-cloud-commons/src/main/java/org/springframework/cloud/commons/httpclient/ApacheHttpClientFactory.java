@@ -24,13 +24,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
  *
  * @author Ryan Baxter
  */
-public interface ApacheHttpClientFactory {
+public interface ApacheHttpClientFactory<T> {
 
 	/**
 	 * Creates an {@link HttpClientBuilder} that can be used to create a new
 	 * {@link CloseableHttpClient}.
 	 * @return A {@link HttpClientBuilder}.
 	 */
-	HttpClientBuilder createBuilder();
+	T createBuilder();
 
 }

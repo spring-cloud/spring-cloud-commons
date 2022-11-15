@@ -47,13 +47,13 @@ public class DefaultHttpClientConfigurationTests {
 	@Test
 	public void connManFactory() {
 		then(ApacheHttpClientConnectionManagerFactory.class.isInstance(this.connectionManagerFactory)).isTrue();
-		then(DefaultApacheHttpClientConnectionManagerFactory.class.isInstance(this.connectionManagerFactory)).isTrue();
+		then(DefaultApacheHttpClient5ConnectionManagerFactory.class.isInstance(this.connectionManagerFactory)).isTrue();
 	}
 
 	@Test
 	public void apacheHttpClientFactory() {
 		then(ApacheHttpClientFactory.class.isInstance(this.httpClientFactory)).isTrue();
-		then(DefaultApacheHttpClientFactory.class.isInstance(this.httpClientFactory)).isTrue();
+		then(DefaultApacheHttpClient5Factory.class.isInstance(this.httpClientFactory)).isTrue();
 	}
 
 	@Test

@@ -122,7 +122,8 @@ class CustomApplication {
 
 	}
 
-	static class MyApacheHttpClientConnectionManagerFactory implements ApacheHttpClientConnectionManagerFactory {
+	static class MyApacheHttpClientConnectionManagerFactory
+			implements ApacheHttpClientConnectionManagerFactory<HttpClientConnectionManager, RegistryBuilder> {
 
 		@Override
 		public HttpClientConnectionManager newConnectionManager(boolean disableSslValidation, int maxTotalConnections,

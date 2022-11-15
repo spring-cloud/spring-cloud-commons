@@ -32,11 +32,13 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Ryan Baxter
  */
-@SpringBootTest(classes = CustomHttpClientBuilderApplication.class)
+@SpringBootTest(classes = CustomHttpClientBuilderApplication.class,
+		properties = { "spring.cloud.httpclientfactories.apache5.enabled=false",
+				"spring.cloud.httpclientfactories.apache.enabled=true" })
 public class CustomHttpClientBuilderConfigurationTests {
 
 	@Autowired
-	ApacheHttpClientFactory apacheHttpClientFactory;
+	ApacheHttpClientFactory<HttpClientBuilder> apacheHttpClientFactory;
 
 	@Test
 	public void testCustomBuilder() {

@@ -17,7 +17,7 @@
 package org.springframework.cloud.commons.httpclient;
 
 import okhttp3.OkHttpClient;
-import org.apache.http.client.HttpClient;
+import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -33,8 +33,34 @@ import org.springframework.context.annotation.Configuration;
 public class HttpClientConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.apache.enabled", matchIfMissing = true)
+	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.apache5.enabled", matchIfMissing = true)
 	@ConditionalOnClass(HttpClient.class)
+	static class ApacheHttpClient5Configuration {
+
+		@Bean
+		@ConditionalOnMissingBean
+		public ApacheHttpClientConnectionManagerFactory connManFactory5() {
+			return new DefaultApacheHttpClient5ConnectionManagerFactory();
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public org.apache.hc.client5.http.impl.classic.HttpClientBuilder apacheHttpClient5Builder() {
+			return org.apache.hc.client5.http.impl.classic.HttpClientBuilder.create();
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public ApacheHttpClientFactory apacheHttpClientFactory(
+				org.apache.hc.client5.http.impl.classic.HttpClientBuilder builder) {
+			return new DefaultApacheHttpClient5Factory(builder);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnProperty(name = "spring.cloud.httpclientfactories.apache.enabled")
+	@ConditionalOnClass(org.apache.http.client.HttpClient.class)
 	static class ApacheHttpClientConfiguration {
 
 		@Bean

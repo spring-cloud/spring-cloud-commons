@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,16 @@
 
 package org.springframework.cloud.commons.httpclient;
 
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
 /**
- * Default implementation of {@link ApacheHttpClientFactory}.
- *
  * @author Ryan Baxter
  */
-@Deprecated
-public class DefaultApacheHttpClientFactory implements ApacheHttpClientFactory<HttpClientBuilder> {
+public class DefaultApacheHttpClient5Factory implements ApacheHttpClientFactory<HttpClientBuilder> {
 
 	private HttpClientBuilder builder;
 
-	public DefaultApacheHttpClientFactory(HttpClientBuilder builder) {
+	public DefaultApacheHttpClient5Factory(HttpClientBuilder builder) {
 		this.builder = builder;
 	}
 

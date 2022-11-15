@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,26 +28,23 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.HttpClientConnectionManager;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.util.TimeValue;
 
 /**
- * Default implementation of {@link ApacheHttpClientConnectionManagerFactory}.
- *
  * @author Ryan Baxter
- * @author Michael Wirth
  */
-@Deprecated
-public class DefaultApacheHttpClientConnectionManagerFactory
+public class DefaultApacheHttpClient5ConnectionManagerFactory
 		implements ApacheHttpClientConnectionManagerFactory<HttpClientConnectionManager, RegistryBuilder> {
 
-	private static final Log LOG = LogFactory.getLog(DefaultApacheHttpClientConnectionManagerFactory.class);
+	private static final Log LOG = LogFactory.getLog(DefaultApacheHttpClient5ConnectionManagerFactory.class);
 
 	public HttpClientConnectionManager newConnectionManager(boolean disableSslValidation, int maxTotalConnections,
 			int maxConnectionsPerRoute) {
@@ -79,7 +76,7 @@ public class DefaultApacheHttpClientConnectionManagerFactory
 		final Registry<ConnectionSocketFactory> registry = registryBuilder.build();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(registry, null,
-				null, null, timeToLive, timeUnit);
+				null, TimeValue.of(timeToLive, timeUnit));
 		connectionManager.setMaxTotal(maxTotalConnections);
 		connectionManager.setDefaultMaxPerRoute(maxConnectionsPerRoute);
 
