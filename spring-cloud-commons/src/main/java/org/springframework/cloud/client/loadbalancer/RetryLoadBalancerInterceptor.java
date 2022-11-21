@@ -133,6 +133,7 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 											new RetryableRequestContext(null, new RequestData(request), hint)),
 									lbResponse)));
 				}
+				throw new IllegalStateException("No instances available for " + serviceName);
 			}
 			LoadBalancerRequestAdapter<ClientHttpResponse, RetryableRequestContext> lbRequest = new LoadBalancerRequestAdapter<>(
 					requestFactory.createRequest(request, body, execution),
