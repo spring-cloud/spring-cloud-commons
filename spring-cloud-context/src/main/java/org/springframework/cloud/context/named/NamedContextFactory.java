@@ -18,6 +18,7 @@ package org.springframework.cloud.context.named;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigRegistry;
@@ -57,6 +59,8 @@ import org.springframework.util.Assert;
 public abstract class NamedContextFactory<C extends NamedContextFactory.Specification>
 		implements DisposableBean, ApplicationContextAware {
 
+	private final Map<String, ApplicationContextInitializer<GenericApplicationContext>> applicationContextInitializers;
+
 	private final String propertySourceName;
 
 	private final String propertyName;
@@ -70,9 +74,15 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	private Class<?> defaultConfigType;
 
 	public NamedContextFactory(Class<?> defaultConfigType, String propertySourceName, String propertyName) {
+		this(defaultConfigType, propertySourceName, propertyName, new HashMap<>());
+	}
+
+	public NamedContextFactory(Class<?> defaultConfigType, String propertySourceName, String propertyName,
+			Map<String, ApplicationContextInitializer<GenericApplicationContext>> applicationContextInitializers) {
 		this.defaultConfigType = defaultConfigType;
 		this.propertySourceName = propertySourceName;
 		this.propertyName = propertyName;
+		this.applicationContextInitializers = applicationContextInitializers;
 	}
 
 	@Override
@@ -116,14 +126,14 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		return this.contexts.get(name);
 	}
 
-	public void addContext(String contextId, GenericApplicationContext context) {
-		Assert.notNull(contextId, "contextId cannot be null.");
-		Assert.notNull(context, "context cannot be null.");
-		contexts.put(contextId, context);
-	}
-
 	public GenericApplicationContext createContext(String name) {
 		GenericApplicationContext context = buildContext(name);
+		// there's an AOT initializer for this context
+		if (applicationContextInitializers.get(name) != null) {
+			applicationContextInitializers.get(name).initialize(context);
+			context.refresh();
+			return context;
+		}
 		registerBeans(name, context);
 		context.refresh();
 		return context;

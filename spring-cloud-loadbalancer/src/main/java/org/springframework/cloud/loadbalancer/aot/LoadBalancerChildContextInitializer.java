@@ -34,12 +34,9 @@ import org.springframework.beans.factory.aot.BeanRegistrationCode;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.aot.ApplicationContextAotGenerator;
 import org.springframework.context.support.GenericApplicationContext;
@@ -47,31 +44,21 @@ import org.springframework.javapoet.ClassName;
 import org.springframework.util.Assert;
 
 /**
- * A {@link BeanRegistrationAotProcessor} that creates an {@link AotContribution} for
- * LoadBalancer child contexts.
+ * A {@link BeanRegistrationAotProcessor} that creates an
+ * {@link BeanRegistrationAotContribution} for LoadBalancer child contexts.
  *
  * @author Olga Maciaszek-Sharma
  */
-public class LoadBalancerChildContextInitializer
-		implements BeanRegistrationAotProcessor, ApplicationListener<WebServerInitializedEvent> {
+public class LoadBalancerChildContextInitializer implements BeanRegistrationAotProcessor {
 
 	private final ApplicationContext applicationContext;
 
 	private final LoadBalancerClientFactory loadBalancerClientFactory;
 
-	private final Map<String, ApplicationContextInitializer<GenericApplicationContext>> applicationContextInitializers;
-
 	public LoadBalancerChildContextInitializer(LoadBalancerClientFactory loadBalancerClientFactory,
 			ApplicationContext applicationContext) {
-		this(loadBalancerClientFactory, applicationContext, new HashMap<>());
-	}
-
-	public LoadBalancerChildContextInitializer(LoadBalancerClientFactory loadBalancerClientFactory,
-			ApplicationContext applicationContext,
-			Map<String, ApplicationContextInitializer<GenericApplicationContext>> applicationContextInitializers) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 		this.applicationContext = applicationContext;
-		this.applicationContextInitializers = applicationContextInitializers;
 	}
 
 	@Override
@@ -79,7 +66,7 @@ public class LoadBalancerChildContextInitializer
 		Assert.isInstanceOf(ConfigurableApplicationContext.class, applicationContext);
 		ConfigurableApplicationContext context = ((ConfigurableApplicationContext) applicationContext);
 		BeanFactory applicationBeanFactory = context.getBeanFactory();
-		if (!(registeredBean.getBeanClass().equals(getClass())
+		if (!(registeredBean.getBeanClass().equals(LoadBalancerClientFactory.class)
 				&& registeredBean.getBeanFactory().equals(applicationBeanFactory))) {
 			return null;
 		}
@@ -109,35 +96,6 @@ public class LoadBalancerChildContextInitializer
 		return childContext;
 	}
 
-	@SuppressWarnings("unchecked")
-	public LoadBalancerChildContextInitializer withApplicationContextInitializers(
-			Map<String, Object> applicationContextInitializers) {
-		Map<String, ApplicationContextInitializer<GenericApplicationContext>> convertedInitializers = new HashMap<>();
-		applicationContextInitializers.keySet()
-				.forEach(contextId -> convertedInitializers.put(contextId,
-						(ApplicationContextInitializer<GenericApplicationContext>) applicationContextInitializers
-								.get(contextId)));
-		return new LoadBalancerChildContextInitializer(loadBalancerClientFactory, applicationContext,
-				convertedInitializers);
-	}
-
-	@Override
-	public boolean isBeanExcludedFromAotProcessing() {
-		return false;
-	}
-
-	@Override
-	public void onApplicationEvent(WebServerInitializedEvent event) {
-		if (applicationContext.equals(event.getApplicationContext())) {
-			applicationContextInitializers.keySet().forEach(contextId -> {
-				GenericApplicationContext childContext = loadBalancerClientFactory.buildContext(contextId);
-				applicationContextInitializers.get(contextId).initialize(childContext);
-				loadBalancerClientFactory.addContext(contextId, childContext);
-				childContext.refresh();
-			});
-		}
-	}
-
 	private static class AotContribution implements BeanRegistrationAotContribution {
 
 		private final Map<String, GenericApplicationContext> childContexts;
@@ -163,8 +121,8 @@ public class LoadBalancerChildContextInitializer
 						method.addJavadoc("Use AOT child context management initialization")
 								.addModifiers(Modifier.PRIVATE, Modifier.STATIC)
 								.addParameter(RegisteredBean.class, "registeredBean")
-								.addParameter(LoadBalancerChildContextInitializer.class, "instance")
-								.returns(LoadBalancerChildContextInitializer.class)
+								.addParameter(LoadBalancerClientFactory.class, "instance")
+								.returns(LoadBalancerClientFactory.class)
 								.addStatement("$T<String, Object> initializers = new $T<>()", Map.class, HashMap.class);
 						generatedInitializerClassNames.keySet()
 								.forEach(contextId -> method.addStatement("initializers.put($S, new $L())", contextId,

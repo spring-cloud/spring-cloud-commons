@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.loadbalancer.support;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,6 +30,8 @@ import org.springframework.cloud.context.named.NamedContextFactory;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.Environment;
 
 /**
@@ -56,7 +61,13 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 	private final LoadBalancerClientsProperties properties;
 
 	public LoadBalancerClientFactory(LoadBalancerClientsProperties properties) {
-		super(LoadBalancerClientConfiguration.class, NAMESPACE, PROPERTY_NAME);
+		super(LoadBalancerClientConfiguration.class, NAMESPACE, PROPERTY_NAME, new HashMap<>());
+		this.properties = properties;
+	}
+
+	public LoadBalancerClientFactory(LoadBalancerClientsProperties properties,
+			Map<String, ApplicationContextInitializer<GenericApplicationContext>> applicationContextInitializers) {
+		super(LoadBalancerClientConfiguration.class, NAMESPACE, PROPERTY_NAME, applicationContextInitializers);
 		this.properties = properties;
 	}
 
@@ -84,6 +95,17 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 		// because specifics are overlayed on top of defaults, everything in `properties`,
 		// unless overridden, is in `clientsProperties`
 		return properties.getClients().get(serviceId);
+	}
+
+	@SuppressWarnings("unchecked")
+	public LoadBalancerClientFactory withApplicationContextInitializers(
+			Map<String, Object> applicationContextInitializers) {
+		Map<String, ApplicationContextInitializer<GenericApplicationContext>> convertedInitializers = new HashMap<>();
+		applicationContextInitializers.keySet()
+				.forEach(contextId -> convertedInitializers.put(contextId,
+						(ApplicationContextInitializer<GenericApplicationContext>) applicationContextInitializers
+								.get(contextId)));
+		return new LoadBalancerClientFactory(properties, convertedInitializers);
 	}
 
 }
