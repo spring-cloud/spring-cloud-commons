@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.loadbalancer.aot;
 
+import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.apache.commons.logging.Log;
@@ -37,9 +39,11 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebApplicationContext;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerExchangeFilterFunction;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +53,7 @@ import org.springframework.core.test.tools.CompileWithForkedClassLoader;
 import org.springframework.core.test.tools.TestCompiler;
 import org.springframework.javapoet.ClassName;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -95,6 +100,8 @@ public class LoadBalancerChildContextInitializerTests {
 						"Instantiating bean from default custom config");
 				TestPropertyValues.of(AotDetector.AOT_ENABLED + "=true")
 						.applyToSystemProperties(freshApplicationContext::refresh);
+				WebClient webClient = freshApplicationContext.getBean(WebClient.class);
+				webClient.get().uri(URI.create("http://test-2/")).retrieve().bodyToMono(String.class).subscribe();
 				assertThat(output).contains("Instantiating bean from Test 2 custom config",
 						"Instantiating bean from default custom config");
 			});
@@ -110,6 +117,17 @@ public class LoadBalancerChildContextInitializerTests {
 	@LoadBalancerClients(value = { @LoadBalancerClient(value = "test-2", configuration = Test2Configuration.class),
 			@LoadBalancerClient("test_3") }, defaultConfiguration = DefaultConfiguration.class)
 	public static class TestLoadBalancerConfiguration {
+
+		@Bean
+		ReactorLoadBalancerExchangeFilterFunction exchangeFilterFunction(
+				LoadBalancerClientFactory loadBalancerClientFactory) {
+			return new ReactorLoadBalancerExchangeFilterFunction(loadBalancerClientFactory, new ArrayList<>());
+		}
+
+		@Bean
+		WebClient webClient(ReactorLoadBalancerExchangeFilterFunction lbFunction) {
+			return WebClient.builder().filter(lbFunction).build();
+		}
 
 	}
 
