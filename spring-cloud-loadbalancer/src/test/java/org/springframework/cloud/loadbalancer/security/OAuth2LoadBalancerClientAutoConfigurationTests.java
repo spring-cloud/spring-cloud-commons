@@ -19,12 +19,16 @@ package org.springframework.cloud.loadbalancer.security;
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.test.ClassPathExclusions;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Dave Syer
  *
@@ -47,6 +51,36 @@ public class OAuth2LoadBalancerClientAutoConfigurationTests {
 		if (this.context != null) {
 			this.context.close();
 		}
+	}
+
+	@Test
+	@Disabled
+	public void userInfoNotLoadBalanced() {
+		this.context = new SpringApplicationBuilder(ClientConfiguration.class).properties("spring.config.name=test",
+				"server.port=0", "security.oauth2.resource.userInfoUri:https://example.com").run();
+
+		assertThat(this.context.containsBean("loadBalancedUserInfoRestTemplateCustomizer")).isFalse();
+		assertThat(this.context.containsBean("retryLoadBalancedUserInfoRestTemplateCustomizer")).isFalse();
+	}
+
+	@Test
+	@Disabled
+	public void userInfoLoadBalancedNoRetry() {
+		this.context = new SpringApplicationBuilder(ClientConfiguration.class).properties("spring.config.name=test",
+				"server.port=0", "security.oauth2.resource.userInfoUri:https://nosuchservice",
+				"spring.cloud.oauth2.load-balanced.enabled=true").run();
+
+		assertThat(this.context.containsBean("loadBalancedUserInfoRestTemplateCustomizer")).isTrue();
+		assertThat(this.context.containsBean("retryLoadBalancedUserInfoRestTemplateCustomizer")).isFalse();
+
+		/*
+		 * OAuth2RestTemplate template =
+		 * this.context.getBean(UserInfoRestTemplateFactory.class).getUserInfoRestTemplate
+		 * (); ClientHttpRequest request = template.getRequestFactory().createRequest(new
+		 * URI("https://nosuchservice"), HttpMethod.GET);
+		 * expected.expectMessage("No instances available for nosuchservice");
+		 * request.execute();
+		 */
 	}
 
 	@EnableAutoConfiguration
