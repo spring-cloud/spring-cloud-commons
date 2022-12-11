@@ -18,15 +18,13 @@ package org.springframework.cloud.bootstrap.encrypt;
 
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.test.ClassPathExclusions;
-import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -34,20 +32,19 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Ryan Baxter
  */
-@RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions({ "spring-security-rsa*.jar" })
 public class RsaDisabledTests {
 
 	private ConfigurableApplicationContext context;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 				.sources(EncryptionBootstrapConfiguration.class).web(WebApplicationType.NONE)
 				.properties("encrypt.key:mykey", "encrypt.rsa.strong:true", "encrypt.rsa.salt:foobar").run();
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		if (this.context != null) {
 			this.context.close();

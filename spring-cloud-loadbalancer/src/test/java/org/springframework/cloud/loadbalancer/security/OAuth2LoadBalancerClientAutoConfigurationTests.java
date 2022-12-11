@@ -17,37 +17,24 @@
 package org.springframework.cloud.loadbalancer.security;
 
 import org.apache.catalina.webresources.TomcatURLStreamHandlerFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.test.ClassPathExclusions;
-import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Dave Syer
  *
  */
-@RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions("spring-retry-*.jar")
 public class OAuth2LoadBalancerClientAutoConfigurationTests {
 
 	private ConfigurableApplicationContext context;
 
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
-
-	@Before
+	@BeforeEach
 	public void before() {
 		// FIXME: why do I need to do this? (fails in maven build without it.
 		// https://stackoverflow.com/questions/28911560/tomcat-8-embedded-error-org-apache-catalina-core-containerbase-a-child-con
@@ -55,41 +42,11 @@ public class OAuth2LoadBalancerClientAutoConfigurationTests {
 		TomcatURLStreamHandlerFactory.disable();
 	}
 
-	@After
+	@AfterEach
 	public void close() {
 		if (this.context != null) {
 			this.context.close();
 		}
-	}
-
-	@Test
-	@Ignore
-	public void userInfoNotLoadBalanced() {
-		this.context = new SpringApplicationBuilder(ClientConfiguration.class).properties("spring.config.name=test",
-				"server.port=0", "security.oauth2.resource.userInfoUri:https://example.com").run();
-
-		assertThat(this.context.containsBean("loadBalancedUserInfoRestTemplateCustomizer")).isFalse();
-		assertThat(this.context.containsBean("retryLoadBalancedUserInfoRestTemplateCustomizer")).isFalse();
-	}
-
-	@Test
-	@Ignore
-	public void userInfoLoadBalancedNoRetry() {
-		this.context = new SpringApplicationBuilder(ClientConfiguration.class).properties("spring.config.name=test",
-				"server.port=0", "security.oauth2.resource.userInfoUri:https://nosuchservice",
-				"spring.cloud.oauth2.load-balanced.enabled=true").run();
-
-		assertThat(this.context.containsBean("loadBalancedUserInfoRestTemplateCustomizer")).isTrue();
-		assertThat(this.context.containsBean("retryLoadBalancedUserInfoRestTemplateCustomizer")).isFalse();
-
-		/*
-		 * OAuth2RestTemplate template =
-		 * this.context.getBean(UserInfoRestTemplateFactory.class).getUserInfoRestTemplate
-		 * (); ClientHttpRequest request = template.getRequestFactory().createRequest(new
-		 * URI("https://nosuchservice"), HttpMethod.GET);
-		 * expected.expectMessage("No instances available for nosuchservice");
-		 * request.execute();
-		 */
 	}
 
 	@EnableAutoConfiguration

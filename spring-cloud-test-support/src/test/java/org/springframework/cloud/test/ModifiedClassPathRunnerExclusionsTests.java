@@ -17,8 +17,7 @@
 package org.springframework.cloud.test;
 
 import org.hamcrest.Matcher;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.isA;
@@ -28,7 +27,6 @@ import static org.hamcrest.CoreMatchers.isA;
  *
  * @author Andy Wilkinson
  */
-@RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions("hibernate-validator-*.jar")
 public class ModifiedClassPathRunnerExclusionsTests {
 

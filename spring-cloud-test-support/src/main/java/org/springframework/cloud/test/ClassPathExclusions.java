@@ -21,6 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+
 /**
  * Taken from Spring Boot test utils. https://github.com/spring-projects/spring-boot/blob/
  * 1.4.x/spring-boot/src/test/java/org/springframework/boot/testutil/ClassPathExclusions.java
@@ -28,6 +30,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@ExtendWith(ModifiedClassPathExtension.class)
 public @interface ClassPathExclusions {
 
 	/**
