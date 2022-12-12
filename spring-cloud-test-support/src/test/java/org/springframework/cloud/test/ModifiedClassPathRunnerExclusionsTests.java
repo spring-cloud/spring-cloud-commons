@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.isA;
 
 /**
- * Tests for {@link ModifiedClassPathRunner} excluding entries from the class path.
+ * Tests for {@link ModifiedClassPathExtension} excluding entries from the class path.
  *
  * @author Andy Wilkinson
  */

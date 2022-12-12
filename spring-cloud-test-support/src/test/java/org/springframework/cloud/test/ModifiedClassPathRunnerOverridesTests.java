@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Tests for {@link ModifiedClassPathRunner} overriding entries on the class path.
+ * Tests for {@link ModifiedClassPathExtension} overriding entries on the class path.
  *
  * @author Andy Wilkinson
  */
