@@ -199,6 +199,21 @@ public final class ServiceInstanceListSupplierBuilder {
 	}
 
 	/**
+	 * Adds a {@link ZonePreferenceServiceInstanceListSupplier} to the
+	 * {@link ServiceInstanceListSupplier} hierarchy.
+	 * @param zoneName desired zone for zone preference
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withZonePreference(String zoneName) {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerZoneConfig zoneConfig = new LoadBalancerZoneConfig(zoneName);
+			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
 	 * Adds a {@link RequestBasedStickySessionServiceInstanceListSupplier} to the
 	 * {@link ServiceInstanceListSupplier} hierarchy.
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
