@@ -22,7 +22,7 @@
 		<maven-deploy-plugin-default.phase>none</maven-deploy-plugin-default.phase>
 
 		<!-- Observability -->
-		<micrometer-docs-generator.version>1.0.0-M5</micrometer-docs-generator.version>
+		<micrometer-docs-generator.version>1.0.0</micrometer-docs-generator.version>
 		<micrometer-docs-generator.inputPath>${maven.multiModuleProjectDirectory}/spring-cloud-commons/</micrometer-docs-generator.inputPath>
 		<micrometer-docs-generator.inclusionPattern>.*</micrometer-docs-generator.inclusionPattern>
 		<micrometer-docs-generator.outputPath>${maven.multiModuleProjectDirectory}/target/</micrometer-docs-generator.outputPath>
