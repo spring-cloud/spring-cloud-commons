@@ -90,15 +90,7 @@
 							<dependency>
 								<groupId>io.micrometer
 								</groupId>
-								<artifactId>micrometer-docs-generator-spans</artifactId>
-								<version>${micrometer-docs-generator.version}
-								</version>
-								<type>jar</type>
-							</dependency>
-							<dependency>
-								<groupId>io.micrometer
-								</groupId>
-								<artifactId>micrometer-docs-generator-metrics</artifactId>
+								<artifactId>micrometer-docs-generator</artifactId>
 								<version>${micrometer-docs-generator.version}
 								</version>
 								<type>jar</type>
