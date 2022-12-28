@@ -17,22 +17,19 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.AbstractList;
+import java.util.ArrayDeque;
 import java.util.List;
+import java.util.Queue;
 
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A {@link List} implementation that lazily fills weighted {@link ServiceInstance}
- * objects.
+ * A {@link List} implementation that weighted and lazy fills {@link ServiceInstance}.
  *
  * @author Zhuozhi Ji
  * @see WeightedServiceInstanceListSupplier
  */
 class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
-
-	private final List<ServiceInstance> instances;
-
-	private final int[] weights;
 
 	private SmoothServiceInstanceSelector selector;
 
@@ -43,35 +40,30 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 	private final Object expandingLock = new Object();
 
 	LazyWeightedServiceInstanceList(List<ServiceInstance> instances, int[] weights) {
-		this.instances = instances;
-		this.weights = weights;
-		this.init();
+		this.init(instances, weights);
 	}
 
-	private void init() {
-		// Calculate the greatest common divisor (GCD) of weights, max weight and the
+	private void init(List<ServiceInstance> instances, int[] weights) {
+		// Calculate the greatest common divisor (GCD) of weights, and the
 		// total number of elements after expansion.
-		int greatestCommonDivisor = 0;
-		int max = 0;
+		int gcd = 0;
 		int total = 0;
 		for (int weight : weights) {
-			greatestCommonDivisor = greatestCommonDivisor(greatestCommonDivisor, weight);
-			max = Math.max(max, weight);
+			gcd = greatestCommonDivisor(gcd, weight);
 			total += weight;
 		}
-		selector = new SmoothServiceInstanceSelector(instances, weights, max, greatestCommonDivisor);
-		position = 0;
-		expanded = new ServiceInstance[total / greatestCommonDivisor];
+		this.selector = new SmoothServiceInstanceSelector(instances, weights, gcd);
+		this.position = 0;
+		this.expanded = new ServiceInstance[total / gcd];
 	}
 
 	@Override
 	public ServiceInstance get(int index) {
-		if (index < position) {
-			return expanded[index];
-		}
-		synchronized (expandingLock) {
-			for (; position <= index && position < expanded.length; position++) {
-				expanded[position] = selector.next();
+		if (index >= position) {
+			synchronized (expandingLock) {
+				for (; position <= index && position < expanded.length; position++) {
+					expanded[position] = selector.next();
+				}
 			}
 		}
 		return expanded[index];
@@ -94,42 +86,72 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 	static class SmoothServiceInstanceSelector {
 
+		static final int MODE_LIST = 0;
+
+		static final int MODE_QUEUE = 1;
+
 		final List<ServiceInstance> instances;
 
 		final int[] weights;
 
-		final int maxWeight;
+		final Queue<Entry> queue;
 
 		final int gcd;
 
+		int mode;
+
 		int position;
 
-		int currentWeight;
-
-		SmoothServiceInstanceSelector(List<ServiceInstance> instances, int[] weights, int maxWeight, int gcd) {
+		SmoothServiceInstanceSelector(List<ServiceInstance> instances, int[] weights, int gcd) {
 			this.instances = instances;
 			this.weights = weights;
-			this.maxWeight = maxWeight;
+			this.queue = new ArrayDeque<>(instances.size());
 			this.gcd = gcd;
-			this.currentWeight = 0;
+			this.mode = MODE_LIST;
+			this.position = 0;
 		}
 
 		ServiceInstance next() {
-			// The weight of all instances is greater than 0, so it must be able to exit
-			// the loop.
-			while (true) {
-				for (int picked = position; picked < weights.length; picked++) {
-					if (weights[picked] > currentWeight) {
-						position = picked + 1;
-						return instances.get(picked);
-					}
+			if (mode == MODE_LIST) {
+				ServiceInstance instance = instances.get(position);
+				int weight = weights[position];
+				position++;
+				if (position == instances.size()) {
+					mode = MODE_QUEUE;
+					position = 0;
 				}
-				position = 0;
-				currentWeight = currentWeight + gcd;
-				if (currentWeight >= maxWeight) {
-					currentWeight = 0;
+				weight = weight - gcd;
+				if (weight > 0) {
+					queue.add(new Entry(instance, weight));
 				}
+				return instance;
 			}
+			else {
+				if (queue.isEmpty()) {
+					mode = MODE_LIST;
+					return next(); // only recursive once.
+				}
+
+				Entry entry = queue.poll();
+				entry.weight = entry.weight - gcd;
+				if (entry.weight > 0) {
+					queue.add(entry);
+				}
+				return entry.instance;
+			}
+		}
+
+		static class Entry {
+
+			final ServiceInstance instance;
+
+			int weight;
+
+			Entry(ServiceInstance instance, int weight) {
+				this.instance = instance;
+				this.weight = weight;
+			}
+
 		}
 
 	}
