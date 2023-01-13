@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -42,9 +43,9 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * An AutoConfiguration that automatically enables caching when when Spring Boot, and
- * Spring Framework Cache support are present. If Caffeine is present in the classpath, it
- * will be used for loadbalancer caching. If not, a default cache will be used.
+ * An AutoConfiguration that automatically enables caching when Spring Boot, and Spring
+ * Framework Cache support are present. If Caffeine is present in the classpath, it will
+ * be used for loadbalancer caching. If not, a default cache will be used.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
@@ -56,8 +57,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ CacheManager.class, CacheAutoConfiguration.class })
 @AutoConfigureAfter(CacheAutoConfiguration.class)
-@ConditionalOnProperty(value = "spring.cloud.loadbalancer.cache.enabled", matchIfMissing = true)
 @EnableConfigurationProperties(LoadBalancerCacheProperties.class)
+@Conditional(LoadBalancerCacheAutoConfiguration.OnLoadBalancerCachingEnabledCondition.class)
 public class LoadBalancerCacheAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
@@ -124,6 +125,24 @@ public class LoadBalancerCacheAutoConfiguration {
 
 		@ConditionalOnMissingClass("org.springframework.cache.caffeine.CaffeineCacheManager")
 		static class CaffeineCacheManagerClassMissing {
+
+		}
+
+	}
+
+	static final class OnLoadBalancerCachingEnabledCondition extends AllNestedConditions {
+
+		OnLoadBalancerCachingEnabledCondition() {
+			super(ConfigurationPhase.REGISTER_BEAN);
+		}
+
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.enabled", havingValue = "true", matchIfMissing = true)
+		static class LoadBalancerEnabled {
+
+		}
+
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.cache.enabled", matchIfMissing = true)
+		static class LoadBalancerCacheEnabled {
 
 		}
 
