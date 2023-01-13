@@ -21,6 +21,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.AsyncLoadBalancerAutoConfiguration;
@@ -52,6 +53,7 @@ import org.springframework.web.client.RestTemplate;
 @AutoConfigureBefore({ org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration.class,
 		AsyncLoadBalancerAutoConfiguration.class })
 @ConditionalOnClass(RestTemplate.class)
+@ConditionalOnProperty(value = "spring.cloud.loadbalancer.enabled", havingValue = "true", matchIfMissing = true)
 public class BlockingLoadBalancerClientAutoConfiguration {
 
 	@Bean
