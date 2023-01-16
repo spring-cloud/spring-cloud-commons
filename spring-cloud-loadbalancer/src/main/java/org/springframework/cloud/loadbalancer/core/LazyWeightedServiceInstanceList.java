@@ -139,6 +139,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 				if (entry.weight > 0) {
 					queue.add(entry);
 				}
+
 				return entry.instance;
 			}
 		}
