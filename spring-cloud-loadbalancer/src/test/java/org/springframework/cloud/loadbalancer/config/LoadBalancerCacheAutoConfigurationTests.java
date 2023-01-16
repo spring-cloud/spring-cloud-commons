@@ -171,6 +171,16 @@ class LoadBalancerCacheAutoConfigurationTests {
 		});
 	}
 
+	@Test
+	void shouldNotInstantiateDefaultLoadBalancerCacheIfLoadBalancingDisabled() {
+		noCaffeineRunner().withPropertyValues("spring.cloud.loadbalancer.enabled=false")
+				.withUserConfiguration(TestConfiguration.class).run(context -> {
+					assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+					assertThat(context.getBean("cacheManager")).isInstanceOf(ConcurrentMapCacheManager.class);
+					assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
+				});
+	}
+
 	private ApplicationContextRunner baseApplicationRunner() {
 		return new ApplicationContextRunner().withConfiguration(
 				AutoConfigurations.of(CacheAutoConfiguration.class, LoadBalancerCacheAutoConfiguration.class));
