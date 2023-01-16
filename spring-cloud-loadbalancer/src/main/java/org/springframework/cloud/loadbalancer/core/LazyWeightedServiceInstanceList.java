@@ -24,7 +24,8 @@ import java.util.Queue;
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
- * A {@link List} implementation that weighted and lazy fills {@link ServiceInstance}.
+ * A {@link List} implementation that lazily fills weighted {@link ServiceInstance}
+ * objects.
  *
  * @author Zhuozhi Ji
  * @see WeightedServiceInstanceListSupplier
