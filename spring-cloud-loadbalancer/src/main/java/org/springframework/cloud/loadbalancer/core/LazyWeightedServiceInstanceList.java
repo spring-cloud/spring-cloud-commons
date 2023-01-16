@@ -31,30 +31,27 @@ import org.springframework.cloud.client.ServiceInstance;
  */
 class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
-	private SmoothServiceInstanceSelector selector;
+	private final InterleavedWeightedServiceInstanceSelector selector;
 
 	private volatile int position;
 
-	/* for testing */ ServiceInstance[] expanded;
+	/* for testing */ final ServiceInstance[] expanded;
 
 	private final Object expandingLock = new Object();
 
 	LazyWeightedServiceInstanceList(List<ServiceInstance> instances, int[] weights) {
-		this.init(instances, weights);
-	}
-
-	private void init(List<ServiceInstance> instances, int[] weights) {
 		// Calculate the greatest common divisor (GCD) of weights, and the
 		// total number of elements after expansion.
-		int gcd = 0;
+		int greatestCommonDivisor = 0;
 		int total = 0;
 		for (int weight : weights) {
-			gcd = greatestCommonDivisor(gcd, weight);
+			greatestCommonDivisor = greatestCommonDivisor(greatestCommonDivisor, weight);
 			total += weight;
 		}
-		this.selector = new SmoothServiceInstanceSelector(instances, weights, gcd);
-		this.position = 0;
-		this.expanded = new ServiceInstance[total / gcd];
+		selector = new InterleavedWeightedServiceInstanceSelector(instances.toArray(new ServiceInstance[0]), weights,
+				greatestCommonDivisor);
+		position = 0;
+		expanded = new ServiceInstance[total / greatestCommonDivisor];
 	}
 
 	@Override
@@ -84,56 +81,60 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 		return a;
 	}
 
-	static class SmoothServiceInstanceSelector {
+	static class InterleavedWeightedServiceInstanceSelector {
 
 		static final int MODE_LIST = 0;
 
 		static final int MODE_QUEUE = 1;
 
-		final List<ServiceInstance> instances;
+		final ServiceInstance[] instances;
 
 		final int[] weights;
 
-		final Queue<Entry> queue;
+		final int greatestCommonDivisor;
 
-		final int gcd;
+		final Queue<Entry> queue;
 
 		int mode;
 
 		int position;
 
-		SmoothServiceInstanceSelector(List<ServiceInstance> instances, int[] weights, int gcd) {
+		InterleavedWeightedServiceInstanceSelector(ServiceInstance[] instances, int[] weights,
+				int greatestCommonDivisor) {
 			this.instances = instances;
 			this.weights = weights;
-			this.queue = new ArrayDeque<>(instances.size());
-			this.gcd = gcd;
-			this.mode = MODE_LIST;
-			this.position = 0;
+			this.greatestCommonDivisor = greatestCommonDivisor;
+			queue = new ArrayDeque<>(instances.length);
+			mode = MODE_LIST;
+			position = 0;
 		}
 
 		ServiceInstance next() {
 			if (mode == MODE_LIST) {
-				ServiceInstance instance = instances.get(position);
+				ServiceInstance instance = instances[position];
 				int weight = weights[position];
-				position++;
-				if (position == instances.size()) {
-					mode = MODE_QUEUE;
-					position = 0;
-				}
-				weight = weight - gcd;
+
+				weight = weight - greatestCommonDivisor;
 				if (weight > 0) {
 					queue.add(new Entry(instance, weight));
 				}
+
+				position++;
+				if (position == instances.length) {
+					mode = MODE_QUEUE;
+					position = 0;
+				}
+
 				return instance;
 			}
 			else {
 				if (queue.isEmpty()) {
 					mode = MODE_LIST;
-					return next(); // only recursive once.
+					return next();
 				}
 
 				Entry entry = queue.poll();
-				entry.weight = entry.weight - gcd;
+				entry.weight = entry.weight - greatestCommonDivisor;
 				if (entry.weight > 0) {
 					queue.add(entry);
 				}
