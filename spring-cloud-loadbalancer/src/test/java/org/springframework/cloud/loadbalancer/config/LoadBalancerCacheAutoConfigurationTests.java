@@ -38,7 +38,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Olga Maciaszek-Sharma
  */
-
 class LoadBalancerCacheAutoConfigurationTests {
 
 	@Test
