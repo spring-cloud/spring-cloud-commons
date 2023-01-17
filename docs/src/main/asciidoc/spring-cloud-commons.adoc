@@ -635,7 +635,7 @@ public class MyClass {
 The Spring WebFlux can work with both reactive and non-reactive `WebClient` configurations, as the topics describe:
 
 * <<webflux-with-reactive-loadbalancer>>
-* <<load-balancer-exchange-filter-functionload-balancer-exchange-filter-function>>
+* <<load-balancer-exchange-filter-function>>
 
 [[webflux-with-reactive-loadbalancer]]
 ==== Spring WebFlux `WebClient` with `ReactorLoadBalancerExchangeFilterFunction`
