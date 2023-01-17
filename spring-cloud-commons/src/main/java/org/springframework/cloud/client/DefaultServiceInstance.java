@@ -143,7 +143,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	
+
 	public void setSecure(boolean secure) {
 		this.secure = secure;
 	}

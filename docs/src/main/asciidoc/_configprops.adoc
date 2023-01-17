@@ -16,6 +16,7 @@
 |spring.cloud.discovery.client.simple.local.instance-id |  | 
 |spring.cloud.discovery.client.simple.local.metadata |  | 
 |spring.cloud.discovery.client.simple.local.port | `+++0+++` | 
+|spring.cloud.discovery.client.simple.local.secure | `+++false+++` | 
 |spring.cloud.discovery.client.simple.local.service-id |  | 
 |spring.cloud.discovery.client.simple.local.uri |  | 
 |spring.cloud.discovery.client.simple.order |  | 
@@ -56,7 +57,7 @@
 |spring.cloud.loadbalancer.retry.backoff.min-backoff | `+++5 ms+++` | Used to set `RetryBackoffSpec#minBackoff`.
 |spring.cloud.loadbalancer.retry.enabled | `+++true+++` | Enables LoadBalancer retries.
 |spring.cloud.loadbalancer.retry.max-retries-on-next-service-instance | `+++1+++` | Number of retries to be executed on the next `ServiceInstance`. A `ServiceInstance` is chosen before each retry call.
-|spring.cloud.loadbalancer.retry.max-retries-on-same-service-instance | `+++0+++` | umber of retries to be executed on the same `ServiceInstance`.
+|spring.cloud.loadbalancer.retry.max-retries-on-same-service-instance | `+++0+++` | Number of retries to be executed on the same `ServiceInstance`.
 |spring.cloud.loadbalancer.retry.retry-on-all-exceptions | `+++false+++` | Indicates retries should be attempted for all exceptions, not only those specified in `retryableExceptions`.
 |spring.cloud.loadbalancer.retry.retry-on-all-operations | `+++false+++` | Indicates retries should be attempted on operations other than `HttpMethod.GET`}.
 |spring.cloud.loadbalancer.retry.retryable-exceptions | `+++{}+++` | A `Set` of `Throwable` classes that should trigger a retry.

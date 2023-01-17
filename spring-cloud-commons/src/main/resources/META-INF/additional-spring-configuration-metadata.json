@@ -126,7 +126,7 @@
 		{
 			"name": "spring.cloud.loadbalancer.retry.max-retries-on-same-service-instance",
 			"defaultValue": 0,
-			"description": "umber of retries to be executed on the same `ServiceInstance`.",
+			"description": "Number of retries to be executed on the same `ServiceInstance`.",
 			"type": "java.lang.Integer"
 		},
 		{
