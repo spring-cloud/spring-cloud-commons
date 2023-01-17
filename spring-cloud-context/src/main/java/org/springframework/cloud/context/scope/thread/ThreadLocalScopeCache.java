@@ -31,10 +31,12 @@ public class ThreadLocalScopeCache implements ScopeCache {
 
 	private ThreadLocal<ConcurrentMap<String, Object>> data = ThreadLocal.withInitial(ConcurrentHashMap::new);
 
+	@Override
 	public Object remove(String name) {
 		return this.data.get().remove(name);
 	}
 
+	@Override
 	public Collection<Object> clear() {
 		ConcurrentMap<String, Object> map = this.data.get();
 		Collection<Object> values = new ArrayList<>(map.values());
@@ -42,10 +44,12 @@ public class ThreadLocalScopeCache implements ScopeCache {
 		return values;
 	}
 
+	@Override
 	public Object get(String name) {
 		return this.data.get().get(name);
 	}
 
+	@Override
 	public Object put(String name, Object value) {
 		Object result = this.data.get().putIfAbsent(name, value);
 		if (result != null) {
