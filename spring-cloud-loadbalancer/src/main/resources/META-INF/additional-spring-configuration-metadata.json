@@ -33,6 +33,12 @@
 			"name": "spring.cloud.loadbalancer.enabled",
 			"description": "Enables Spring Cloud LoadBalancer.",
 			"type": "java.lang.Boolean"
+		},
+		{
+			"defaultValue": "false",
+			"name": "spring.cloud.loadbalancer.stats.micrometer.enabled",
+			"description": "Enables Spring Cloud LoadBalancer Micrometer stats.",
+			"type": "java.lang.Boolean"
 		}
 	]
 }
