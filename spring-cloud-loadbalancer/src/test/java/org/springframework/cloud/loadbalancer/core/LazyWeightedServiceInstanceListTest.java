@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LazyWeightedServiceInstanceListTest {
 
 	@Test
-	void shouldCreateListWithSizeEqualToSumofRatio() {
+	void shouldCreateListWithSizeEqualToSumOfRatio() {
 		List<ServiceInstance> serviceInstances = new ArrayList<>();
 		int[] weights = new int[10];
 		for (int i = 0; i < 10; i++) {

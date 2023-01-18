@@ -144,6 +144,10 @@ public class DefaultServiceInstance implements ServiceInstance {
 		this.port = port;
 	}
 
+	public void setSecure(boolean secure) {
+		this.secure = secure;
+	}
+
 	public void setUri(URI uri) {
 		this.uri = uri;
 		this.host = this.uri.getHost();

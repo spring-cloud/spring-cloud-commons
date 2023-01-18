@@ -38,7 +38,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Olga Maciaszek-Sharma
  */
-
 class LoadBalancerCacheAutoConfigurationTests {
 
 	@Test
@@ -169,6 +168,16 @@ class LoadBalancerCacheAutoConfigurationTests {
 			assertThat(context.getBean("cacheManager")).isInstanceOf(ConcurrentMapCacheManager.class);
 			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
 		});
+	}
+
+	@Test
+	void shouldNotInstantiateDefaultLoadBalancerCacheIfLoadBalancingDisabled() {
+		noCaffeineRunner().withPropertyValues("spring.cloud.loadbalancer.enabled=false")
+				.withUserConfiguration(TestConfiguration.class).run(context -> {
+					assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+					assertThat(context.getBean("cacheManager")).isInstanceOf(ConcurrentMapCacheManager.class);
+					assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
+				});
 	}
 
 	private ApplicationContextRunner baseApplicationRunner() {

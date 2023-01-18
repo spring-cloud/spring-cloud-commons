@@ -38,6 +38,12 @@
 			"name": "spring.cloud.loadbalancer.eager-load.clients",
 			"description": "Names of the clients.",
 			"type": "java.util.List"
+		},
+		{
+			"defaultValue": "false",
+			"name": "spring.cloud.loadbalancer.stats.micrometer.enabled",
+			"description": "Enables Spring Cloud LoadBalancer Micrometer stats.",
+			"type": "java.lang.Boolean"
 		}
 	]
 }

@@ -42,10 +42,6 @@ enum CircuitBreakerObservationDocumentation implements ObservationDocumentation 
 			return "spring.cloud.circuitbreaker";
 		}
 
-		@Override
-		public String getContextualName() {
-			return "circuit-breaker";
-		}
 	},
 
 	/**
@@ -68,10 +64,6 @@ enum CircuitBreakerObservationDocumentation implements ObservationDocumentation 
 			return "spring.cloud.circuitbreaker";
 		}
 
-		@Override
-		public String getContextualName() {
-			return "circuit-breaker fallback";
-		}
 	};
 
 	public enum LowCardinalityTags implements KeyName {
