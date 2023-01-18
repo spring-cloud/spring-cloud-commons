@@ -94,6 +94,9 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	@Override
 	public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request)
 			throws IOException {
+		if (serviceInstance == null) {
+			throw new IllegalArgumentException("Service Instance cannot be null");
+		}
 		DefaultResponse defaultResponse = new DefaultResponse(serviceInstance);
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = getSupportedLifecycleProcessors(serviceId);
 		Request lbRequest = request instanceof Request ? (Request) request : new DefaultRequest<>();

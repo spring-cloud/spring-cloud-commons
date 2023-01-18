@@ -63,6 +63,7 @@
 |spring.cloud.loadbalancer.retry.retryable-exceptions | `+++{}+++` | A `Set` of `Throwable` classes that should trigger a retry.
 |spring.cloud.loadbalancer.retry.retryable-status-codes | `+++{}+++` | A `Set` of status codes that should trigger a retry.
 |spring.cloud.loadbalancer.service-discovery.timeout |  | String representation of Duration of the timeout for calls to service discovery.
+|spring.cloud.loadbalancer.stats.micrometer.enabled | `+++false+++` | Enables Spring Cloud LoadBalancer Micrometer stats.
 |spring.cloud.loadbalancer.sticky-session.add-service-instance-cookie | `+++false+++` | Indicates whether a cookie with the newly selected instance should be added by LoadBalancer.
 |spring.cloud.loadbalancer.sticky-session.instance-id-cookie-name | `+++sc-lb-instance-id+++` | The name of the cookie holding the preferred instance id.
 |spring.cloud.loadbalancer.x-forwarded.enabled | `+++false+++` | To Enable X-Forwarded Headers.
