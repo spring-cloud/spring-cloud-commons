@@ -32,9 +32,9 @@ import org.springframework.cloud.client.ServiceInstance;
  */
 class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
-	private final InterleavedWeightedServiceInstanceSelector selector;
+	private final O1ServiceInstanceSelector selector;
 
-	private volatile int position;
+	private volatile int position = 0;
 
 	/* for testing */ final ServiceInstance[] expanded;
 
@@ -49,9 +49,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 			greatestCommonDivisor = greatestCommonDivisor(greatestCommonDivisor, weight);
 			total += weight;
 		}
-		selector = new InterleavedWeightedServiceInstanceSelector(instances.toArray(new ServiceInstance[0]), weights,
-				greatestCommonDivisor);
-		position = 0;
+		selector = new O1ServiceInstanceSelector(instances, weights, greatestCommonDivisor);
 		expanded = new ServiceInstance[total / greatestCommonDivisor];
 	}
 
@@ -82,66 +80,44 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 		return a;
 	}
 
-	static class InterleavedWeightedServiceInstanceSelector {
+	static class O1ServiceInstanceSelector {
 
-		static final int MODE_LIST = 0;
+		Queue<Entry> active = new ArrayDeque<>();
 
-		static final int MODE_QUEUE = 1;
+		Queue<Entry> expired = new ArrayDeque<>();
 
-		final ServiceInstance[] instances;
-
-		final int[] weights;
-
-		final int greatestCommonDivisor;
-
-		final Queue<Entry> queue;
-
-		int mode;
-
-		int position;
-
-		InterleavedWeightedServiceInstanceSelector(ServiceInstance[] instances, int[] weights,
-				int greatestCommonDivisor) {
-			this.instances = instances;
-			this.weights = weights;
-			this.greatestCommonDivisor = greatestCommonDivisor;
-			queue = new ArrayDeque<>(instances.length);
-			mode = MODE_LIST;
-			position = 0;
+		O1ServiceInstanceSelector(List<ServiceInstance> instances, int[] weights, int greatestCommonDivisor) {
+			// use iterator for some implementation of the List that not supports
+			// RandomAccess, but `weights` is supported, so use a local variable `i`
+			// to get the current position.
+			int i = 0;
+			for (ServiceInstance instance : instances) {
+				active.add(new Entry(instance, weights[i] / greatestCommonDivisor));
+				i++;
+			}
 		}
 
 		ServiceInstance next() {
-			if (mode == MODE_LIST) {
-				ServiceInstance instance = instances[position];
-				int weight = weights[position];
+			if (active.isEmpty()) {
+				Queue<Entry> temp = active;
+				active = expired;
+				expired = temp;
+			}
 
-				weight = weight - greatestCommonDivisor;
-				if (weight > 0) {
-					queue.add(new Entry(instance, weight));
-				}
+			Entry entry = active.poll();
+			if (entry == null) {
+				return null;
+			}
 
-				position++;
-				if (position == instances.length) {
-					mode = MODE_QUEUE;
-					position = 0;
-				}
-
-				return instance;
+			entry.remainder--;
+			if (entry.remainder == 0) {
+				entry.remainder = entry.weight;
+				expired.offer(entry);
 			}
 			else {
-				if (queue.isEmpty()) {
-					mode = MODE_LIST;
-					return next();
-				}
-
-				Entry entry = queue.poll();
-				entry.weight = entry.weight - greatestCommonDivisor;
-				if (entry.weight > 0) {
-					queue.add(entry);
-				}
-
-				return entry.instance;
+				active.offer(entry);
 			}
+			return entry.instance;
 		}
 
 		static class Entry {
@@ -150,9 +126,12 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 			int weight;
 
+			int remainder;
+
 			Entry(ServiceInstance instance, int weight) {
 				this.instance = instance;
 				this.weight = weight;
+				remainder = weight;
 			}
 
 		}
