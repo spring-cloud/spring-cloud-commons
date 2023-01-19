@@ -124,7 +124,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 			final ServiceInstance instance;
 
-			int weight;
+			final int weight;
 
 			int remainder;
 
