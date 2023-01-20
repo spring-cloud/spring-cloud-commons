@@ -82,17 +82,19 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 	static class O1ServiceInstanceSelector {
 
-		Queue<Entry> active = new ArrayDeque<>();
+		Queue<Entry> active;
 
-		Queue<Entry> expired = new ArrayDeque<>();
+		Queue<Entry> expired;
 
 		O1ServiceInstanceSelector(List<ServiceInstance> instances, int[] weights, int greatestCommonDivisor) {
-			// use iterator for some implementation of the List that not supports
+			active = new ArrayDeque<>(instances.size());
+			expired = new ArrayDeque<>(instances.size());
+			// Use iterator for some implementation of the List that not supports
 			// RandomAccess, but `weights` is supported, so use a local variable `i`
 			// to get the current position.
 			int i = 0;
 			for (ServiceInstance instance : instances) {
-				active.add(new Entry(instance, weights[i] / greatestCommonDivisor));
+				active.offer(new Entry(instance, weights[i] / greatestCommonDivisor));
 				i++;
 			}
 		}
@@ -106,6 +108,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 			Entry entry = active.poll();
 			if (entry == null) {
+				// Never touched!
 				return null;
 			}
 
