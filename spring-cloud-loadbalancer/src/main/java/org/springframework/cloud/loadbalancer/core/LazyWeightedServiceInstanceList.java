@@ -32,13 +32,13 @@ import org.springframework.cloud.client.ServiceInstance;
  */
 class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
-	private final O1ServiceInstanceSelector selector;
-
-	private volatile int position = 0;
-
 	/* for testing */ final ServiceInstance[] expanded;
 
 	private final Object expandingLock = new Object();
+
+	private final O1ServiceInstanceSelector selector;
+
+	private volatile int position = 0;
 
 	LazyWeightedServiceInstanceList(List<ServiceInstance> instances, int[] weights) {
 		// Calculate the greatest common divisor (GCD) of weights, and the
@@ -49,8 +49,8 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 			greatestCommonDivisor = greatestCommonDivisor(greatestCommonDivisor, weight);
 			total += weight;
 		}
-		selector = new O1ServiceInstanceSelector(instances, weights, greatestCommonDivisor);
 		expanded = new ServiceInstance[total / greatestCommonDivisor];
+		selector = new O1ServiceInstanceSelector(instances, weights, greatestCommonDivisor);
 	}
 
 	@Override
