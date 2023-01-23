@@ -16,20 +16,17 @@
 
 package org.springframework.cloud.client.discovery;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.test.ClassPathExclusions;
-import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-@RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions({ "spring-boot-actuator-autoconfigure-*" })
 public class ManagementServerPortUtilsTests {
 

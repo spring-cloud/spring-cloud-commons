@@ -16,14 +16,12 @@
 
 package org.springframework.cloud.client.serviceregistry;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.test.ClassPathExclusions;
-import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,7 +30,6 @@ import static org.assertj.core.api.Assertions.fail;
 /**
  * @author Spencer Gibb
  */
-@RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions({ "spring-boot-actuator-*.jar", "spring-boot-starter-actuator-*.jar" })
 public class ServiceRegistryAutoConfigurationTests {
 

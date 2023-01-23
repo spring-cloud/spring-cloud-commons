@@ -21,14 +21,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+
 /**
- * Annotation used in combination with {@link ModifiedClassPathRunner} to override entries
+ * Annotation used in combination with {@link ModifiedClassPathExtension} to override entries
  * on the classpath.
  *
  * @author Andy Wilkinson
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
+@ExtendWith(ModifiedClassPathExtension.class)
 public @interface ClassPathOverrides {
 
 	/**

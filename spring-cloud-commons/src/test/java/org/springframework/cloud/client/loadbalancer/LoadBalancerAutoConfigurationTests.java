@@ -18,10 +18,7 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.util.List;
 
-import org.junit.runner.RunWith;
-
 import org.springframework.cloud.test.ClassPathExclusions;
-import org.springframework.cloud.test.ModifiedClassPathRunner;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,7 +27,6 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Spencer Gibb
  */
-@RunWith(ModifiedClassPathRunner.class)
 @ClassPathExclusions({ "spring-retry-*.jar", "spring-boot-starter-aop-*.jar" })
 public class LoadBalancerAutoConfigurationTests extends AbstractLoadBalancerAutoConfigurationTests {
 
