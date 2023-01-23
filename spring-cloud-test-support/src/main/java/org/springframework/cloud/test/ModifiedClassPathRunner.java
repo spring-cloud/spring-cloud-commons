@@ -59,7 +59,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
- * @deprecated Replaced by {@link ModifiedClassPathExtension}
  *
  * A custom {@link BlockJUnit4ClassRunner} that runs tests using a modified class path.
  * Entries are excluded from the class path using
@@ -69,6 +68,7 @@ import org.springframework.util.StringUtils;
  * the thread context class loader while the test is being run.
  *
  * @author Andy Wilkinson
+ * @deprecated Replaced by {@link ModifiedClassPathExtension}
  */
 
 @Deprecated
