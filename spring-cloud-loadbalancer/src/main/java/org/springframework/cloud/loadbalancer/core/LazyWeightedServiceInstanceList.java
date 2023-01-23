@@ -36,7 +36,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 	private final Object expandingLock = new Object();
 
-	private final O1ServiceInstanceSelector selector;
+	private O1ServiceInstanceSelector selector;
 
 	private volatile int position = 0;
 
@@ -59,6 +59,9 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 			synchronized (expandingLock) {
 				for (; position <= index && position < expanded.length; position++) {
 					expanded[position] = selector.next();
+				}
+				if (position == expanded.length) {
+					selector = null; // for gc
 				}
 			}
 		}
