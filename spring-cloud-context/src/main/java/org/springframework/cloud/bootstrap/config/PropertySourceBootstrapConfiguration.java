@@ -119,14 +119,13 @@ public class PropertySourceBootstrapConfiguration
 				}
 			}
 			insertPropertySources(propertySources, composite);
-			reinitializeLoggingSystem(environment, logConfig, logFile);
+			reinitializeLoggingSystem(environment);
 			setLogLevels(applicationContext, environment);
 			handleIncludedProfiles(environment);
 		}
 	}
 
-	private void reinitializeLoggingSystem(ConfigurableEnvironment environment, String oldLogConfig,
-			LogFile oldLogFile) {
+	private void reinitializeLoggingSystem(ConfigurableEnvironment environment) {
 		Map<String, Object> props = Binder.get(environment).bind("logging", Bindable.mapOf(String.class, Object.class))
 				.orElseGet(Collections::emptyMap);
 		if (!props.isEmpty()) {
