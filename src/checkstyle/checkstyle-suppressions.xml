@@ -17,4 +17,5 @@
 	<suppress files=".*RefreshScopeConfigurationTests.*" checks="JavadocStyle"/>
 	<suppress files=".*RefreshScopeConfigurationTests.*" checks="JavadocMethod"/>
 	<suppress files=".*CachingServiceInstanceListSupplierTests.*" checks="RegexpSinglelineJava"/>
+	<suppress files=".*ReactiveDiscoveryClient.*" checks="JavadocVariable"/>
 </suppressions>

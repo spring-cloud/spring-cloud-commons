@@ -16,7 +16,10 @@
 
 package org.springframework.cloud.client.discovery;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.Ordered;
@@ -26,8 +29,11 @@ import org.springframework.core.Ordered;
  * Eureka or consul.io.
  *
  * @author Tim Ysewyn
+ * @author Olga Maciaszek-Sharma
  */
 public interface ReactiveDiscoveryClient extends Ordered {
+
+	Log LOG = LogFactory.getLog(ReactiveDiscoveryClient.class);
 
 	/**
 	 * Default order of the discovery client.
@@ -60,9 +66,33 @@ public interface ReactiveDiscoveryClient extends Ordered {
 	 * <p>
 	 * The default implementation simply calls {@link #getServices()} - client
 	 * implementations can override with a lighter weight operation if they choose to.
+	 * @deprecated in favour of {@link ReactiveDiscoveryClient#reactiveProbe()}. This
+	 * method should not be used as is, as it contains a bug - the method called within
+	 * returns a {@link Flux}, which is not accessible for subscription or blocking from
+	 * within. We are leaving it with a deprecation in order not to bring downstream
+	 * implementations.
 	 */
+	@Deprecated
 	default void probe() {
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("ReactiveDiscoveryClient#probe has been called. If you're calling this method directly, "
+					+ "use ReactiveDiscoveryClient#reactiveProbe instead.");
+		}
 		getServices();
+	}
+
+	/**
+	 * Can be used to verify the client is still valid and able to make calls.
+	 * <p>
+	 * A successful invocation with no exception thrown implies the client is able to make
+	 * calls.
+	 * <p>
+	 * The default implementation simply calls {@link #getServices()} and wraps it with a
+	 * {@link Mono} - client implementations can override with a lighter weight operation
+	 * if they choose to.
+	 */
+	default Mono<Void> reactiveProbe() {
+		return Mono.fromRunnable(this::probe);
 	}
 
 	/**

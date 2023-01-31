@@ -35,12 +35,12 @@ import org.springframework.core.Ordered;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Tim Ysewyn
  * @author Chris Bono
+ * @author Olga Maciaszek-Sharma
  */
 @ExtendWith(MockitoExtension.class)
 class ReactiveDiscoveryClientHealthIndicatorTests {
@@ -78,6 +78,7 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 	@Test
 	public void shouldReturnUpStatusWhenNotUsingServicesQueryAndProbeSucceeds() {
 		when(properties.isUseServicesQuery()).thenReturn(false);
+		when(discoveryClient.reactiveProbe()).thenReturn(Mono.fromRunnable(() -> discoveryClient.getServices()));
 		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), "")).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
@@ -89,8 +90,9 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 	@Test
 	public void shouldReturnDownStatusWhenNotUsingServicesQueryAndProbeFails() {
 		when(properties.isUseServicesQuery()).thenReturn(false);
+		when(discoveryClient.reactiveProbe()).thenReturn(Mono.fromRunnable(() -> discoveryClient.getServices()));
 		RuntimeException ex = new RuntimeException("something went wrong");
-		doThrow(ex).when(discoveryClient).probe();
+		when(discoveryClient.getServices()).thenThrow(ex);
 		Health expectedHealth = Health.down(ex).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));

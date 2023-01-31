@@ -33,20 +33,20 @@ import org.springframework.core.Ordered;
 import static java.util.Collections.emptyList;
 
 /**
- * A health indicator which indicates whether or not the discovery client has been
- * initialized.
+ * A health indicator which indicates whether the discovery client has been initialized.
  *
  * @author Tim Ysewyn
  * @author Chris Bono
+ * @author Olga Maciaszek-Sharma
  */
 public class ReactiveDiscoveryClientHealthIndicator
 		implements ReactiveDiscoveryHealthIndicator, Ordered, ApplicationListener<InstanceRegisteredEvent<?>> {
 
+	private static final Log LOG = LogFactory.getLog(ReactiveDiscoveryClientHealthIndicator.class);
+
 	private final ReactiveDiscoveryClient discoveryClient;
 
 	private final DiscoveryClientHealthIndicatorProperties properties;
-
-	private final Log log = LogFactory.getLog(ReactiveDiscoveryClientHealthIndicator.class);
 
 	private AtomicBoolean discoveryInitialized = new AtomicBoolean(false);
 
@@ -60,14 +60,14 @@ public class ReactiveDiscoveryClientHealthIndicator
 
 	@Override
 	public void onApplicationEvent(InstanceRegisteredEvent<?> event) {
-		if (this.discoveryInitialized.compareAndSet(false, true)) {
-			this.log.debug("Discovery Client has been initialized");
+		if (discoveryInitialized.compareAndSet(false, true)) {
+			LOG.debug("Discovery Client has been initialized");
 		}
 	}
 
 	@Override
 	public Mono<Health> health() {
-		if (this.discoveryInitialized.get()) {
+		if (discoveryInitialized.get()) {
 			return doHealthCheck();
 		}
 		else {
@@ -78,38 +78,39 @@ public class ReactiveDiscoveryClientHealthIndicator
 
 	private Mono<Health> doHealthCheck() {
 		// @formatter:off
-		return Mono.just(this.properties.isUseServicesQuery())
+		return Mono.just(properties.isUseServicesQuery())
 				.flatMap(useServices -> useServices ? doHealthCheckWithServices() : doHealthCheckWithProbe())
 				.onErrorResume(exception -> {
-					this.log.error("Error", exception);
+					if (LOG.isErrorEnabled()) {
+						LOG.error("Error", exception);
+					}
 					return Mono.just(Health.down().withException(exception).build());
 				});
 		// @formatter:on
 	}
 
 	private Mono<Health> doHealthCheckWithProbe() {
-		// @formatter:off
-		return Mono.justOrEmpty(this.discoveryClient)
-				.flatMap(client -> {
-					client.probe();
-					return Mono.just(client);
-				})
-				.map(client -> {
-					String description = (this.properties.isIncludeDescription()) ? client.description() : "";
-					return Health.status(new Status("UP", description)).build();
-				});
-		// @formatter:on
+		return discoveryClient.reactiveProbe().doOnError(exception -> {
+			if (LOG.isErrorEnabled()) {
+				LOG.error("Probe has failed " + exception);
+			}
+		}).then(buildHealthUp(discoveryClient));
+	}
+
+	private Mono<Health> buildHealthUp(ReactiveDiscoveryClient discoveryClient) {
+		String description = (properties.isIncludeDescription()) ? discoveryClient.description() : "";
+		return Mono.just(Health.status(new Status("UP", description)).build());
 	}
 
 	private Mono<Health> doHealthCheckWithServices() {
 		// @formatter:off
-		return Mono.justOrEmpty(this.discoveryClient)
+		return Mono.justOrEmpty(discoveryClient)
 				.flatMapMany(ReactiveDiscoveryClient::getServices)
 				.collectList()
 				.defaultIfEmpty(emptyList())
 				.map(services -> {
-					String description = (this.properties.isIncludeDescription()) ?
-						this.discoveryClient.description() : "";
+					String description = (properties.isIncludeDescription()) ?
+						discoveryClient.description() : "";
 					return Health.status(new Status("UP", description))
 						.withDetail("services", services).build();
 				});
@@ -123,7 +124,7 @@ public class ReactiveDiscoveryClientHealthIndicator
 
 	@Override
 	public int getOrder() {
-		return this.order;
+		return order;
 	}
 
 	public void setOrder(int order) {
