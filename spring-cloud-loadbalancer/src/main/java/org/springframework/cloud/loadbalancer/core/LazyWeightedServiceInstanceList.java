@@ -36,7 +36,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 	private final Object expandingLock = new Object();
 
-	private O1ServiceInstanceSelector selector;
+	private WeightedServiceInstanceSelector selector;
 
 	private volatile int position = 0;
 
@@ -50,7 +50,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 			total += weight;
 		}
 		expanded = new ServiceInstance[total / greatestCommonDivisor];
-		selector = new O1ServiceInstanceSelector(instances, weights, greatestCommonDivisor);
+		selector = new WeightedServiceInstanceSelector(instances, weights, greatestCommonDivisor);
 	}
 
 	@Override
@@ -83,13 +83,13 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 		return a;
 	}
 
-	static class O1ServiceInstanceSelector {
+	static class WeightedServiceInstanceSelector {
 
 		Queue<Entry> active;
 
 		Queue<Entry> expired;
 
-		O1ServiceInstanceSelector(List<ServiceInstance> instances, int[] weights, int greatestCommonDivisor) {
+		WeightedServiceInstanceSelector(List<ServiceInstance> instances, int[] weights, int greatestCommonDivisor) {
 			active = new ArrayDeque<>(instances.size());
 			expired = new ArrayDeque<>(instances.size());
 			// Use iterator for some implementation of the List that not supports
@@ -111,7 +111,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 			Entry entry = active.poll();
 			if (entry == null) {
-				// Never touched!
+				// Suppress warnings, never touched!
 				return null;
 			}
 
