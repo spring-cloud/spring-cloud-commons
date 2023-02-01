@@ -92,7 +92,7 @@ public interface ReactiveDiscoveryClient extends Ordered {
 	 * if they choose to.
 	 */
 	default Mono<Void> reactiveProbe() {
-		return Mono.fromRunnable(this::probe);
+		return getServices().then();
 	}
 
 	/**
