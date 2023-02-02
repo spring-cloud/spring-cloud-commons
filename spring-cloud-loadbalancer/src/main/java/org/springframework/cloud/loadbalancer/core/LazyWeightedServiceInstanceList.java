@@ -32,13 +32,13 @@ import org.springframework.cloud.client.ServiceInstance;
  */
 class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
-	private final InterleavedWeightedServiceInstanceSelector selector;
-
-	private volatile int position;
-
 	/* for testing */ final ServiceInstance[] expanded;
 
 	private final Object expandingLock = new Object();
+
+	private WeightedServiceInstanceSelector selector;
+
+	private volatile int position = 0;
 
 	LazyWeightedServiceInstanceList(List<ServiceInstance> instances, int[] weights) {
 		// Calculate the greatest common divisor (GCD) of weights, and the
@@ -49,10 +49,8 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 			greatestCommonDivisor = greatestCommonDivisor(greatestCommonDivisor, weight);
 			total += weight;
 		}
-		selector = new InterleavedWeightedServiceInstanceSelector(instances.toArray(new ServiceInstance[0]), weights,
-				greatestCommonDivisor);
-		position = 0;
 		expanded = new ServiceInstance[total / greatestCommonDivisor];
+		selector = new WeightedServiceInstanceSelector(instances, weights, greatestCommonDivisor);
 	}
 
 	@Override
@@ -61,6 +59,9 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 			synchronized (expandingLock) {
 				for (; position <= index && position < expanded.length; position++) {
 					expanded[position] = selector.next();
+				}
+				if (position == expanded.length) {
+					selector = null; // for gc
 				}
 			}
 		}
@@ -82,77 +83,61 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 		return a;
 	}
 
-	static class InterleavedWeightedServiceInstanceSelector {
+	static class WeightedServiceInstanceSelector {
 
-		static final int MODE_LIST = 0;
+		Queue<Entry> active;
 
-		static final int MODE_QUEUE = 1;
+		Queue<Entry> expired;
 
-		final ServiceInstance[] instances;
-
-		final int[] weights;
-
-		final int greatestCommonDivisor;
-
-		final Queue<Entry> queue;
-
-		int mode;
-
-		int position;
-
-		InterleavedWeightedServiceInstanceSelector(ServiceInstance[] instances, int[] weights,
-				int greatestCommonDivisor) {
-			this.instances = instances;
-			this.weights = weights;
-			this.greatestCommonDivisor = greatestCommonDivisor;
-			queue = new ArrayDeque<>(instances.length);
-			mode = MODE_LIST;
-			position = 0;
+		WeightedServiceInstanceSelector(List<ServiceInstance> instances, int[] weights, int greatestCommonDivisor) {
+			active = new ArrayDeque<>(instances.size());
+			expired = new ArrayDeque<>(instances.size());
+			// Use iterator for some implementation of the List that not supports
+			// RandomAccess, but `weights` is supported, so use a local variable `i`
+			// to get the current position.
+			int i = 0;
+			for (ServiceInstance instance : instances) {
+				active.offer(new Entry(instance, weights[i] / greatestCommonDivisor));
+				i++;
+			}
 		}
 
 		ServiceInstance next() {
-			if (mode == MODE_LIST) {
-				ServiceInstance instance = instances[position];
-				int weight = weights[position];
+			if (active.isEmpty()) {
+				Queue<Entry> temp = active;
+				active = expired;
+				expired = temp;
+			}
 
-				weight = weight - greatestCommonDivisor;
-				if (weight > 0) {
-					queue.add(new Entry(instance, weight));
-				}
+			Entry entry = active.poll();
+			if (entry == null) {
+				// Suppress warnings, never touched!
+				return null;
+			}
 
-				position++;
-				if (position == instances.length) {
-					mode = MODE_QUEUE;
-					position = 0;
-				}
-
-				return instance;
+			entry.remainder--;
+			if (entry.remainder == 0) {
+				entry.remainder = entry.weight;
+				expired.offer(entry);
 			}
 			else {
-				if (queue.isEmpty()) {
-					mode = MODE_LIST;
-					return next();
-				}
-
-				Entry entry = queue.poll();
-				entry.weight = entry.weight - greatestCommonDivisor;
-				if (entry.weight > 0) {
-					queue.add(entry);
-				}
-
-				return entry.instance;
+				active.offer(entry);
 			}
+			return entry.instance;
 		}
 
 		static class Entry {
 
 			final ServiceInstance instance;
 
-			int weight;
+			final int weight;
+
+			int remainder;
 
 			Entry(ServiceInstance instance, int weight) {
 				this.instance = instance;
 				this.weight = weight;
+				remainder = weight;
 			}
 
 		}
