@@ -92,7 +92,7 @@ public class ReactiveDiscoveryClientHealthIndicator
 	private Mono<Health> doHealthCheckWithProbe() {
 		return discoveryClient.reactiveProbe().doOnError(exception -> {
 			if (LOG.isErrorEnabled()) {
-				LOG.error("Probe has failed " + exception);
+				LOG.error("Probe has failed.", exception);
 			}
 		}).then(buildHealthUp(discoveryClient));
 	}
