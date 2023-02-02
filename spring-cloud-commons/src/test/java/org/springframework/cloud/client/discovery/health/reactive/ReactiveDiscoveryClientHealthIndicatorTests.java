@@ -27,6 +27,8 @@ import reactor.test.StepVerifier;
 
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.Status;
+import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicatorProperties;
@@ -35,12 +37,12 @@ import org.springframework.core.Ordered;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Tim Ysewyn
  * @author Chris Bono
+ * @author Olga Maciaszek-Sharma
  */
 @ExtendWith(MockitoExtension.class)
 class ReactiveDiscoveryClientHealthIndicatorTests {
@@ -78,6 +80,9 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 	@Test
 	public void shouldReturnUpStatusWhenNotUsingServicesQueryAndProbeSucceeds() {
 		when(properties.isUseServicesQuery()).thenReturn(false);
+		ReactiveDiscoveryClient discoveryClient = new TestDiscoveryClient();
+		ReactiveDiscoveryClientHealthIndicator indicator = new ReactiveDiscoveryClientHealthIndicator(discoveryClient,
+				properties);
 		Health expectedHealth = Health.status(new Status(Status.UP.getCode(), "")).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
@@ -88,10 +93,10 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 
 	@Test
 	public void shouldReturnDownStatusWhenNotUsingServicesQueryAndProbeFails() {
-		when(properties.isUseServicesQuery()).thenReturn(false);
-		RuntimeException ex = new RuntimeException("something went wrong");
-		doThrow(ex).when(discoveryClient).probe();
-		Health expectedHealth = Health.down(ex).build();
+		ExceptionThrowingDiscoveryClient discoveryClient = new ExceptionThrowingDiscoveryClient();
+		ReactiveDiscoveryClientHealthIndicator indicator = new ReactiveDiscoveryClientHealthIndicator(discoveryClient,
+				properties);
+		Health expectedHealth = Health.down(discoveryClient.exception).build();
 
 		indicator.onApplicationEvent(new InstanceRegisteredEvent<>(this, null));
 		Mono<Health> health = indicator.health();
@@ -138,6 +143,46 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 		Mono<Health> health = indicator.health();
 
 		StepVerifier.create(health).expectNext(expectedHealth).expectComplete().verify();
+	}
+
+	static class TestDiscoveryClient implements ReactiveDiscoveryClient {
+
+		@Override
+		public String description() {
+			return "Test";
+		}
+
+		@Override
+		public Flux<ServiceInstance> getInstances(String serviceId) {
+			return Flux.just(new DefaultServiceInstance());
+		}
+
+		@Override
+		public Flux<String> getServices() {
+			return Flux.just("Test");
+		}
+
+	}
+
+	static class ExceptionThrowingDiscoveryClient implements ReactiveDiscoveryClient {
+
+		RuntimeException exception = new RuntimeException("something went wrong");
+
+		@Override
+		public String description() {
+			return "Exception";
+		}
+
+		@Override
+		public Flux<ServiceInstance> getInstances(String serviceId) {
+			throw new RuntimeException("Test!");
+		}
+
+		@Override
+		public Flux<String> getServices() {
+			throw new RuntimeException("something went wrong");
+		}
+
 	}
 
 }
