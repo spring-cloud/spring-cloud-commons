@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.SpringBootVersion;
+import org.springframework.boot.autoconfigure.validation.ValidationConfigurationCustomizer;
 import org.springframework.util.StringUtils;
 
 /**
@@ -36,6 +37,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<>() {
 		{
 			this.put("3.0", is3_0());
+			this.put("3.1", is3_1());
 		}
 	};
 
@@ -88,6 +90,30 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 				}
 				catch (ClassNotFoundException e) {
+					return false;
+				}
+
+			}
+		};
+	}
+
+	CompatibilityPredicate is3_1() {
+		return new CompatibilityPredicate() {
+
+			@Override
+			public String toString() {
+				return "Predicate for Boot 3.1";
+			}
+
+			@Override
+			public boolean isCompatible() {
+				try {
+					// since 3.1
+					ValidationConfigurationCustomizer.class.getMethod("setIgnoreRegistrationFailure", boolean.class);
+					return true;
+
+				}
+				catch (NoSuchMethodException e) {
 					return false;
 				}
 
