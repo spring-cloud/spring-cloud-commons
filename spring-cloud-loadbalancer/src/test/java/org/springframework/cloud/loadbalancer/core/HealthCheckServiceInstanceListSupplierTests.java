@@ -277,6 +277,39 @@ class HealthCheckServiceInstanceListSupplierTests {
 	}
 
 	@Test
+	void shouldEmitOnEntireBatchOfInstancesWhenUpdateDisabled() {
+		LoadBalancerProperties.HealthCheck healthCheck = properties.getHealthCheck();
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		healthCheck.setUpdateResultsList(false);
+		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
+				port, false);
+		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
+				port, false);
+
+		StepVerifier.withVirtualTime(() -> {
+			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
+			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
+			Mockito.when(delegate.get()).thenReturn(Flux.just(Lists.list(serviceInstance1, serviceInstance2)));
+
+			HealthCheckServiceInstanceListSupplier mock = mock(HealthCheckServiceInstanceListSupplier.class);
+			Mockito.doReturn(Mono.just(true)).when(mock).isAlive(serviceInstance1);
+			Mockito.doReturn(Mono.just(true)).when(mock).isAlive(serviceInstance2);
+
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
+				@Override
+				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
+					return mock.isAlive(serviceInstance);
+				}
+			};
+
+			return listSupplier.get();
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNext(Lists.list(serviceInstance1, serviceInstance2))
+				.expectNoEvent(properties.getHealthCheck().getInterval()).thenCancel().verify(VERIFY_TIMEOUT);
+	}
+
+	@Test
 	void shouldNotFailIfIsAliveReturnsError() {
 		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
@@ -455,6 +488,41 @@ class HealthCheckServiceInstanceListSupplierTests {
 				.thenAwait(properties.getHealthCheck().getInterval().dividedBy(2))
 				.expectNext(Lists.list(serviceInstance1)).expectNext(Lists.list(serviceInstance1, serviceInstance2))
 				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
+				.expectNext(Lists.list(serviceInstance1, serviceInstance2)).thenCancel().verify(VERIFY_TIMEOUT);
+	}
+
+	@Test
+	void shouldReturnAllInstancesWhenUpdateDisabled() {
+		LoadBalancerProperties.HealthCheck healthCheck = properties.getHealthCheck();
+		healthCheck.setInitialDelay(Duration.ofSeconds(1));
+		healthCheck.setUpdateResultsList(false);
+		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
+				port, false);
+		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
+				port, false);
+
+		StepVerifier.withVirtualTime(() -> {
+			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
+			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
+			Flux<List<ServiceInstance>> instances = Flux.just(Lists.list(serviceInstance1))
+					.concatWith(Flux.just(Lists.list(serviceInstance1, serviceInstance2))
+							.delayElements(properties.getHealthCheck().getInterval().dividedBy(2)));
+			Mockito.when(delegate.get()).thenReturn(instances);
+
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunction(webClient)) {
+				@Override
+				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
+					return Mono.just(true);
+				}
+			};
+
+			return listSupplier.get();
+		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
+				.expectNext(Lists.list(serviceInstance1))
+				.thenAwait(properties.getHealthCheck().getInterval().dividedBy(2))
+				.expectNext(Lists.list(serviceInstance1, serviceInstance2))
+				.expectNoEvent(properties.getHealthCheck().getInterval())
 				.expectNext(Lists.list(serviceInstance1, serviceInstance2)).thenCancel().verify(VERIFY_TIMEOUT);
 	}
 

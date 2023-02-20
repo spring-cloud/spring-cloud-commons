@@ -27,6 +27,7 @@ import java.util.concurrent.TimeoutException;
 import reactor.util.retry.RetryBackoffSpec;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -217,6 +218,14 @@ public class LoadBalancerProperties {
 		 */
 		private boolean repeatHealthCheck = true;
 
+		/**
+		 * Indicates whether the {@code healthCheckFlux} should emit on each alive
+		 * {@link ServiceInstance} that has been retrieved. If set to {@code false}, the
+		 * entire alive instances sequence is first collected into a list and only then
+		 * emitted.
+		 */
+		private boolean updateResultsList = true;
+
 		public boolean getRefetchInstances() {
 			return refetchInstances;
 		}
@@ -271,6 +280,14 @@ public class LoadBalancerProperties {
 
 		public void setPort(Integer port) {
 			this.port = port;
+		}
+
+		public boolean isUpdateResultsList() {
+			return updateResultsList;
+		}
+
+		public void setUpdateResultsList(boolean updateResultsList) {
+			this.updateResultsList = updateResultsList;
 		}
 
 	}

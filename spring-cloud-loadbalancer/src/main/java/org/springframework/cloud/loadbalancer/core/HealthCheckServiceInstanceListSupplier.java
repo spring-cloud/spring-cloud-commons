@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,10 +114,13 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 				checks.add(alive);
 			}
 			List<ServiceInstance> result = new ArrayList<>();
-			return Flux.merge(checks).map(alive -> {
-				result.add(alive);
-				return result;
-			}).defaultIfEmpty(result);
+			if (healthCheck.isUpdateResultsList()) {
+				return Flux.merge(checks).map(alive -> {
+					result.add(alive);
+					return result;
+				}).defaultIfEmpty(result);
+			}
+			return Flux.merge(checks).collectList();
 		}).repeatWhen(healthCheckFluxRepeat);
 	}
 
