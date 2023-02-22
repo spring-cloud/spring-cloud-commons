@@ -139,7 +139,8 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnMissingBean
 		@Conditional(WeightedConfigurationCondition.class)
 		public ServiceInstanceListSupplier weightedServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withWeighted().build(context);
+			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withWeighted().withCaching()
+					.build(context);
 		}
 
 	}
@@ -203,7 +204,8 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnMissingBean
 		@Conditional(WeightedConfigurationCondition.class)
 		public ServiceInstanceListSupplier weightedServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withWeighted().build(context);
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withWeighted().withCaching()
+					.build(context);
 		}
 
 	}
