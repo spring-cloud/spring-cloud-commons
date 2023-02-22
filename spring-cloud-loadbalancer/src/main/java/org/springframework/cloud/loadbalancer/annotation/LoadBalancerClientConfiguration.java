@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withRequestBasedStickySession()
-					.build(context);
+					.withCaching().build(context);
 		}
 
 		@Bean
@@ -131,7 +131,7 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withSameInstancePreference()
-					.build(context);
+					.withCaching().build(context);
 		}
 
 		@Bean
@@ -185,7 +185,7 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withRequestBasedStickySession()
-					.build(context);
+					.withCaching().build(context);
 		}
 
 		@Bean
@@ -195,7 +195,7 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withSameInstancePreference()
-					.build(context);
+					.withCaching().build(context);
 		}
 
 		@Bean
