@@ -73,6 +73,15 @@ public class CompositeDiscoveryClient implements DiscoveryClient {
 		return new ArrayList<>(services);
 	}
 
+	@Override
+	public void probe() {
+		if (this.discoveryClients != null) {
+			for (DiscoveryClient discoveryClient: this.discoveryClients) {
+				discoveryClient.probe();
+			}
+		}
+	}
+
 	public List<DiscoveryClient> getDiscoveryClients() {
 		return this.discoveryClients;
 	}
