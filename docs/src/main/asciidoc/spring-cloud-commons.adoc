@@ -1045,6 +1045,8 @@ the value of the `spring.cloud.loadbalancer.health-check.path.default` property.
 
 TIP: If you rely on the default path (`/actuator/health`), make sure you add `spring-boot-starter-actuator` to your collaborator's dependencies, unless you are planning to add such an endpoint on your own.
 
+TIP: By default, the `healthCheckFlux` will emit on each alive `ServiceInstance` that has been retrieved. You can modify this behaviour by setting the value of `spring.cloud.loadbalancer.health-check.update-results-list` to `false`. If this property is set to `false`, the entire alive instances sequence is first collected into a list and only then emitted, which ensures the flux does not emit values in between the health-check intervals set in properties.
+
 In order to use the health-check scheduler approach, you will have to instantiate a `HealthCheckServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.
 
 We use delegates to work with `ServiceInstanceListSupplier` beans.
