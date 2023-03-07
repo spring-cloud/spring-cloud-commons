@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.loadbalancer.config;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +38,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Spencer Gibb
@@ -51,14 +53,12 @@ import org.springframework.core.env.Environment;
 @ConditionalOnProperty(value = "spring.cloud.loadbalancer.enabled", havingValue = "true", matchIfMissing = true)
 public class LoadBalancerAutoConfiguration {
 
-	private static final String ZONE_SPLITTER_COMMA = ",";
-
 	@Bean
 	@ConditionalOnMissingBean
 	public LoadBalancerZoneConfig zoneConfig(Environment environment) {
 		return new LoadBalancerZoneConfig(environment.getProperty("spring.cloud.loadbalancer.zone"),
-				List.of(environment.getProperty("spring.cloud.loadbalancer.secondary-zones", "")
-						.split(ZONE_SPLITTER_COMMA)));
+				Arrays.stream(StringUtils.commaDelimitedListToStringArray(environment.getProperty("spring.cloud.loadbalancer.secondary-zones", "")))
+						.toList());
 	}
 
 	@ConditionalOnMissingBean
