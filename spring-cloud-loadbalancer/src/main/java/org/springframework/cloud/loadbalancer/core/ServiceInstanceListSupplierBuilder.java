@@ -51,6 +51,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Zhiguo Chen
  * @author Sabyasachi Bhattacharya
  * @author Zhuozhi Ji
+ * @author Jiwon Jeon
  */
 public final class ServiceInstanceListSupplierBuilder {
 
@@ -234,6 +235,24 @@ public final class ServiceInstanceListSupplierBuilder {
 		DelegateCreator creator = (context, delegate) -> {
 			LoadBalancerZoneConfig zoneConfig = new LoadBalancerZoneConfig(zoneName);
 			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
+	 * Adds a {@link MultiAZFailoverServiceInstanceListSupplier} to the
+	 * {@link ServiceInstanceListSupplier} hierarchy.
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withMultiAZFailover() {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerZoneConfig zoneConfig = context.getBean(LoadBalancerZoneConfig.class);
+			LoadBalancerCacheManager cacheManager = context.getBean(LoadBalancerCacheManager.class);
+			LoadBalancerCacheDataManager cacheDataManager = new MultiAZFailoverLoadBalancerCacheDataManager(
+					cacheManager);
+
+			return new MultiAZFailoverServiceInstanceListSupplier(delegate, cacheDataManager, zoneConfig);
 		};
 		this.creators.add(creator);
 		return this;
