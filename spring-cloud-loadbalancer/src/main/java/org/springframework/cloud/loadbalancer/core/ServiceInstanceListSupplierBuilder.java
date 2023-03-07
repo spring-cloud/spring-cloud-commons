@@ -248,7 +248,15 @@ public final class ServiceInstanceListSupplierBuilder {
 	public ServiceInstanceListSupplierBuilder withMultiAZFailover() {
 		DelegateCreator creator = (context, delegate) -> {
 			LoadBalancerZoneConfig zoneConfig = context.getBean(LoadBalancerZoneConfig.class);
-			LoadBalancerCacheManager cacheManager = context.getBean(LoadBalancerCacheManager.class);
+			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context.getBeanProvider(LoadBalancerCacheManager.class);
+			if (cacheManagerProvider.getIfAvailable() == null) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn("Cannot enable caching so that Multi-AZ Failover will be disabled.");
+				}
+				return delegate;
+			}
+
+			LoadBalancerCacheManager cacheManager = cacheManagerProvider.getIfAvailable();
 			LoadBalancerCacheDataManager cacheDataManager = new MultiAZFailoverLoadBalancerCacheDataManager(
 					cacheManager);
 
