@@ -169,7 +169,7 @@ public class BootstrapConfigFileApplicationListener
 	public static final int DEFAULT_ORDER =
 			// This listener needs to run after the `ConfigDataEnvironmentPostProcessor` to
 			// make sure the `Environment.activeProfiles` are correctly set
-			ConfigDataEnvironmentPostProcessor.ORDER + 1;
+			Math.addExact(ConfigDataEnvironmentPostProcessor.ORDER, 1);
 
 	private final Log logger;
 
