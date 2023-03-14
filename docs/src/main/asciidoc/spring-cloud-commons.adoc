@@ -562,8 +562,8 @@ public class MyConfiguration {
 }
 
 public class MyClass {
-@Autowired
-private RestTemplate restTemplate;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Autowired
     @LoadBalanced
