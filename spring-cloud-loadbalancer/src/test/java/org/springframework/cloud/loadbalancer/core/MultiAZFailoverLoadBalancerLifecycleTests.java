@@ -31,9 +31,13 @@ import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
 import org.springframework.cloud.loadbalancer.config.MultiAZFailoverLoadBalancerLifecycle;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -74,9 +78,43 @@ class MultiAZFailoverLoadBalancerLifecycleTests {
 	}
 
 	@Test
-	void shouldAddInstanceIntoCacheWhenTheInstanceFailed() {
+	void shouldAddInstanceIntoCacheWhenTheInstanceConnectionFailed() {
 		final CompletionContext completionContext = new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
 				CompletionContext.Status.FAILED, getRequest(), new DefaultResponse(getServiceInstance()));
+
+		lifecycle.onComplete(completionContext);
+
+		assertNull(completionContext.getClientResponse());
+
+		verify(cacheDataManager, times(1)).putInstance(any(ServiceInstance.class));
+	}
+
+	@Test
+	void shouldNotAddInstanceIntoCacheWhenHeartbeat404() {
+		final var request = getRequest();
+		final CompletionContext completionContext = new CompletionContext(
+				CompletionContext.Status.FAILED,
+				request,
+				new DefaultResponse(getServiceInstance()),
+				new ResponseData(HttpStatus.NOT_FOUND, new HttpHeaders(), new LinkedMultiValueMap<>(), request.getContext()
+						.getClientRequest())
+		);
+
+		lifecycle.onComplete(completionContext);
+
+		verify(cacheDataManager, never()).putInstance(any(ServiceInstance.class));
+	}
+
+	@Test
+	void shouldAddInstanceIntoCacheWhen5xxErrorOccurred() {
+		final var request = getRequest();
+		final CompletionContext completionContext = new CompletionContext(
+				CompletionContext.Status.FAILED,
+				request,
+				new DefaultResponse(getServiceInstance()),
+				new ResponseData(HttpStatus.BAD_GATEWAY, new HttpHeaders(), new LinkedMultiValueMap<>(), request.getContext()
+						.getClientRequest())
+		);
 
 		lifecycle.onComplete(completionContext);
 

@@ -64,6 +64,7 @@ public class MultiAZFailoverLoadBalancerLifecycle
 	public void onComplete(CompletionContext<ResponseData, ServiceInstance, RequestContext> completionContext) {
 		final CompletionContext.Status status = completionContext.status();
 		final ServiceInstance instance = completionContext.getLoadBalancerResponse().getServer();
+		final ResponseData clientResponse = completionContext.getClientResponse();
 
 		if (CompletionContext.Status.DISCARD.equals(status)) {
 			if (LOG.isWarnEnabled()) {
@@ -72,7 +73,8 @@ public class MultiAZFailoverLoadBalancerLifecycle
 
 			cacheDataManager.clear();
 		}
-		else if (CompletionContext.Status.FAILED.equals(status)) {
+		else if (CompletionContext.Status.FAILED.equals(status)
+				&& (clientResponse == null || clientResponse.getHttpStatus().is5xxServerError())) {
 			if (LOG.isErrorEnabled()) {
 				LOG.error(String.format("Requesting to [%s] failed", instance));
 			}
