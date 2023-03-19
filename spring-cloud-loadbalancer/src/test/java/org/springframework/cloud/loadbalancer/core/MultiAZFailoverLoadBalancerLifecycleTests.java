@@ -90,7 +90,7 @@ class MultiAZFailoverLoadBalancerLifecycleTests {
 	}
 
 	@Test
-	void shouldNotAddInstanceIntoCacheWhenHeartbeat404() {
+	void shouldNotAddInstanceIntoCacheWhen4xxError() {
 		final var request = getRequest();
 		final CompletionContext completionContext = new CompletionContext(
 				CompletionContext.Status.FAILED,
