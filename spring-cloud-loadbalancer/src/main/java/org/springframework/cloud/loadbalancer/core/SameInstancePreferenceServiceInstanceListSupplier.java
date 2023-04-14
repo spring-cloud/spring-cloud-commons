@@ -30,6 +30,7 @@ import org.springframework.cloud.client.ServiceInstance;
  * chosen instance if it's available.
  *
  * @author Olga Maciaszek-Sharma
+ * @author hjk181
  * @since 2.2.7
  */
 public class SameInstancePreferenceServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier
@@ -72,6 +73,7 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 
 	@Override
 	public void selectedServiceInstance(ServiceInstance serviceInstance) {
+		super.selectedServiceInstance(serviceInstance);
 		if (previouslyReturnedInstance == null || !previouslyReturnedInstance.equals(serviceInstance)) {
 			previouslyReturnedInstance = serviceInstance;
 		}

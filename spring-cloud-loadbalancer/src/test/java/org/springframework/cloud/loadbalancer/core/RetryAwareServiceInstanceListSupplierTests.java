@@ -27,11 +27,16 @@ import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
 import org.springframework.cloud.loadbalancer.support.ServiceInstanceListSuppliers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Tests for {@link RetryAwareServiceInstanceListSupplier}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author hjk181
  */
 class RetryAwareServiceInstanceListSupplierTests {
 
@@ -78,4 +83,12 @@ class RetryAwareServiceInstanceListSupplierTests {
 		assertThat(returnedInstances).containsExactly(firstInstance);
 	}
 
+	@Test
+	void shouldCallSelectedServiceInstanceOnItsDelegate() {
+		ServiceInstance firstInstance = instance(serviceId, "1host", false);
+		TestSelectedServiceInstanceSupplier delegate = mock(TestSelectedServiceInstanceSupplier.class);
+		DelegatingServiceInstanceListSupplier supplier = new RetryAwareServiceInstanceListSupplier(delegate);
+		supplier.selectedServiceInstance(firstInstance);
+		verify(delegate, times(1)).selectedServiceInstance(any(ServiceInstance.class));
+	}
 }
