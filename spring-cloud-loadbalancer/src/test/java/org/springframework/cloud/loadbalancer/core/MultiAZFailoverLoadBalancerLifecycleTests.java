@@ -37,7 +37,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -84,7 +84,7 @@ class MultiAZFailoverLoadBalancerLifecycleTests {
 
 		lifecycle.onComplete(completionContext);
 
-		assertNull(completionContext.getClientResponse());
+		assertThat(completionContext.getClientResponse()).isNull();
 
 		verify(cacheDataManager, times(1)).putInstance(any(ServiceInstance.class));
 	}
