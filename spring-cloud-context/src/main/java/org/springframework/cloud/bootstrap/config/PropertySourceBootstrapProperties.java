@@ -46,6 +46,19 @@ public class PropertySourceBootstrapProperties {
 	 */
 	private boolean overrideNone = false;
 
+	/**
+	 * Flag to initialize bootstrap configuration on context refresh event. Default false.
+	 */
+	private boolean initializeOnContextRefresh = false;
+
+	public boolean isInitializeOnContextRefresh() {
+		return initializeOnContextRefresh;
+	}
+
+	public void setInitializeOnContextRefresh(boolean initializeOnContextRefresh) {
+		this.initializeOnContextRefresh = initializeOnContextRefresh;
+	}
+
 	public boolean isOverrideNone() {
 		return this.overrideNone;
 	}
