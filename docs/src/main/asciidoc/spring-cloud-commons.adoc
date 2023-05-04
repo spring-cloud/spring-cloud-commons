@@ -54,6 +54,10 @@ The additional property sources are:
 An example would be properties from the Spring Cloud Config Server.
 See "`<<customizing-bootstrap-property-sources>>`" for how to customize the contents of this property source.
 
+NOTE:  Prior to Spring Cloud 2021.0.7 `PropertySourceLocators` (including the ones for Spring Cloud Config) were run during
+the main application context and not in the Bootstrap context.  You can force `PropertySourceLocators` to be run during the
+Bootstrap context by setting `spring.cloud.config.initialize-on-context-refresh=true` in `bootstrap.[properties | yaml]`.
+
 * "`applicationConfig: [classpath:bootstrap.yml]`" (and related files if Spring profiles are active): If you have a `bootstrap.yml` (or `.properties`), those properties are used to configure the bootstrap context.
 Then they get added to the child context when its parent is set.
 They have lower precedence than the `application.yml` (or `.properties`) and any other property sources that are added to the child as a normal part of the process of creating a Spring Boot application.
@@ -145,6 +149,12 @@ If you create a jar with this class in it and then add a `META-INF/spring.factor
 org.springframework.cloud.bootstrap.BootstrapConfiguration=sample.custom.CustomPropertySourceLocator
 ----
 ====
+
+As of Spring Cloud 2021.0.8, Spring Cloud will now call `PropertySourceLocators` twice.  The first fetch
+will retrieve any property sources without any profiles.  These property sources will have the opportunity to
+activate profiles using `spring.profiles.active`.  After the main application context starts `PropertySourceLocators`
+will be called a second time, this time with any active profiles allowing `PropertySourceLocators` to locate
+any additional `PropertySources` with profiles.
 
 === Logging Configuration
 
