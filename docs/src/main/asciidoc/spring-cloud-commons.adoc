@@ -54,7 +54,7 @@ The additional property sources are:
 An example would be properties from the Spring Cloud Config Server.
 See "`<<customizing-bootstrap-property-sources>>`" for how to customize the contents of this property source.
 
-NOTE:  Prior to Spring Cloud 2021.0.8 `PropertySourceLocators` (including the ones for Spring Cloud Config) were run during
+NOTE:  Prior to Spring Cloud 2022.0.3 `PropertySourceLocators` (including the ones for Spring Cloud Config) were run during
 the main application context and not in the Bootstrap context.  You can force `PropertySourceLocators` to be run during the
 Bootstrap context by setting `spring.cloud.config.initialize-on-context-refresh=true` in `bootstrap.[properties | yaml]`.
 
@@ -150,7 +150,7 @@ org.springframework.cloud.bootstrap.BootstrapConfiguration=sample.custom.CustomP
 ----
 ====
 
-As of Spring Cloud 2021.0.8, Spring Cloud will now call `PropertySourceLocators` twice.  The first fetch
+As of Spring Cloud 2022.0.3, Spring Cloud will now call `PropertySourceLocators` twice.  The first fetch
 will retrieve any property sources without any profiles.  These property sources will have the opportunity to
 activate profiles using `spring.profiles.active`.  After the main application context starts `PropertySourceLocators`
 will be called a second time, this time with any active profiles allowing `PropertySourceLocators` to locate
