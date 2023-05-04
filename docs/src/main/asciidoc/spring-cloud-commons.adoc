@@ -54,7 +54,7 @@ The additional property sources are:
 An example would be properties from the Spring Cloud Config Server.
 See "`<<customizing-bootstrap-property-sources>>`" for how to customize the contents of this property source.
 
-NOTE:  Prior to Spring Cloud 2021.0.7 `PropertySourceLocators` (including the ones for Spring Cloud Config) were run during
+NOTE:  Prior to Spring Cloud 2021.0.8 `PropertySourceLocators` (including the ones for Spring Cloud Config) were run during
 the main application context and not in the Bootstrap context.  You can force `PropertySourceLocators` to be run during the
 Bootstrap context by setting `spring.cloud.config.initialize-on-context-refresh=true` in `bootstrap.[properties | yaml]`.
 
