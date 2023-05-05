@@ -248,6 +248,10 @@ For a Spring Boot Actuator application, some additional management endpoints are
 * `/actuator/restart` to close the `ApplicationContext` and restart it (disabled by default).
 * `/actuator/pause` and `/actuator/resume` for calling the `Lifecycle` methods (`stop()` and `start()` on the `ApplicationContext`).
 
+NOTE: While enabling the `POST` method for `/actuator/env` endpoint can provide flexibility and convenience in managing your application environment variables,
+it's critical to ensure that the endpoint is secured and monitored to prevent potential security risks.
+Add a `spring-boot-starter-security` dependency to configure access control for the actuator’s endpoint.
+
 NOTE: If you disable the `/actuator/restart` endpoint then the `/actuator/pause` and `/actuator/resume` endpoints
 will also be disabled since they are just a special case of `/actuator/restart`.
 
