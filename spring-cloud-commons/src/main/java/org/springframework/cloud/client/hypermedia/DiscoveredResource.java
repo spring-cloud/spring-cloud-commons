@@ -131,7 +131,7 @@ public class DiscoveredResource implements RemoteResource {
 			URI uri = service.getUri();
 			String serviceId = service.getServiceId();
 
-			this.log.debug("Discovered {} system at {}. Discovering resource", serviceId, uri);
+			this.log.debug("Discovered {} system at {}. Discovering resource...", serviceId, uri);
 
 			Traverson traverson = new Traverson(uri, MediaTypes.HAL_JSON);
 			Link link = this.traversal.buildTraversal(traverson).asTemplatedLink();
