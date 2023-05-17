@@ -104,14 +104,14 @@ public class DiscoveredResource implements RemoteResource {
 
 			String uri = link.expand().getHref();
 
-			this.log.debug("Verifying link pointing to {}…", uri);
+			this.log.debug("Verifying link pointing to {}...", uri);
 			this.restOperations.headForHeaders(uri);
 			this.log.debug("Successfully verified link!");
 
 			return link;
 
 		}
-		catch (RestClientException o_O) {
+		catch (RestClientException e) {
 
 			this.log.debug("Verification failed, marking as outdated!");
 			return null;
@@ -131,7 +131,7 @@ public class DiscoveredResource implements RemoteResource {
 			URI uri = service.getUri();
 			String serviceId = service.getServiceId();
 
-			this.log.debug("Discovered {} system at {}. Discovering resource…", serviceId, uri);
+			this.log.debug("Discovered {} system at {}. Discovering resource", serviceId, uri);
 
 			Traverson traverson = new Traverson(uri, MediaTypes.HAL_JSON);
 			Link link = this.traversal.buildTraversal(traverson).asTemplatedLink();
@@ -141,10 +141,10 @@ public class DiscoveredResource implements RemoteResource {
 			return link;
 
 		}
-		catch (RuntimeException o_O) {
+		catch (RuntimeException e) {
 
 			this.link = null;
-			this.log.debug("Target system unavailable. Got: ", o_O.getMessage());
+			this.log.debug("Target system unavailable. Got: ", e.getMessage());
 
 			return null;
 		}

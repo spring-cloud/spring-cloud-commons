@@ -53,7 +53,7 @@ public class DynamicServiceInstanceProvider implements ServiceInstanceProvider {
 			return instances.isEmpty() ? null : instances.get(0);
 
 		}
-		catch (RuntimeException o_O) {
+		catch (RuntimeException e) {
 			return null;
 		}
 	}
