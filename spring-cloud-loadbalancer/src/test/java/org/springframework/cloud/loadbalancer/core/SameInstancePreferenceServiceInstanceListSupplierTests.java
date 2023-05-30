@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
  * Tests for {@link SameInstancePreferenceServiceInstanceListSupplier}.
  *
  * @author Olga Maciaszek-Sharma
- * @author hjk181
+ * @author Jürgen Kreitler
  */
 class SameInstancePreferenceServiceInstanceListSupplierTests {
 

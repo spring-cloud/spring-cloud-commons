@@ -20,7 +20,7 @@ package org.springframework.cloud.loadbalancer.core;
  * Test supplier interface extending {@link ServiceInstanceListSupplier} and {@link SelectedInstanceCallback}.
  * Useful if you need to verify certain behavior happened on a mock for example.
  *
- * @author hjk181
+ * @author Jürgen Kreitler
  */
 public interface TestSelectedServiceInstanceSupplier extends ServiceInstanceListSupplier, SelectedInstanceCallback {
 }

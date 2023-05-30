@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author Zhuozhi JI
- * @author hjk181
+ * @author Jürgen Kreitler
  */
 class RoundRobinLoadBalancerTests {
 

@@ -30,7 +30,7 @@ import org.springframework.cloud.client.ServiceInstance;
  * chosen instance if it's available.
  *
  * @author Olga Maciaszek-Sharma
- * @author hjk181
+ * @author Jürgen Kreitler
  * @since 2.2.7
  */
 public class SameInstancePreferenceServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier

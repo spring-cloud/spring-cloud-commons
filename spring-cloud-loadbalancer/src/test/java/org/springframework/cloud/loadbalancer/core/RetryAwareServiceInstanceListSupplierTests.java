@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
  * Tests for {@link RetryAwareServiceInstanceListSupplier}.
  *
  * @author Olga Maciaszek-Sharma
- * @author hjk181
+ * @author Jürgen Kreitler
  */
 class RetryAwareServiceInstanceListSupplierTests {
 

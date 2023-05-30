@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
- * @author hjk181
+ * @author Jürgen Kreitler
  */
 public abstract class DelegatingServiceInstanceListSupplier
 		implements ServiceInstanceListSupplier, SelectedInstanceCallback, InitializingBean, DisposableBean {
