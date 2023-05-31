@@ -294,6 +294,13 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		target.addAll(getOrderedBeansOfType(context, ApplicationContextInitializer.class));
 		application.setInitializers(target);
 		addBootstrapDecryptInitializer(application);
+
+		// Get the active profiles from the bootstrap context and set them in main
+		// application
+		// environment. This allows any profiles activated during bootstrap to be
+		// activated when
+		// config data runs in the main application context.
+		environment.setActiveProfiles(context.getEnvironment().getActiveProfiles());
 	}
 
 	@SuppressWarnings("unchecked")

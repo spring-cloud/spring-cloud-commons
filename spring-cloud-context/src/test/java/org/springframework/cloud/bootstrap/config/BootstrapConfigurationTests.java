@@ -32,9 +32,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
 import org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -76,11 +78,20 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void pickupOnlyExternalBootstrapProperties() {
 		String externalPropertiesPath = getExternalProperties();
+		pickupOnlyExternalBootstrapProperties("spring.cloud.bootstrap.location=" + externalPropertiesPath,
+				"spring.config.use-legacy-processing=true");
+	}
 
+	@Test
+	public void pickupOnlyExternalBootstrapPropertiesWithAppListener() {
+		String externalPropertiesPath = getExternalProperties();
+		pickupOnlyExternalBootstrapProperties("spring.cloud.bootstrap.location=" + externalPropertiesPath,
+				"spring.config.use-legacy-processing=true", "spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void pickupOnlyExternalBootstrapProperties(String... properties) {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.location=" + externalPropertiesPath,
-						"spring.cloud.bootstrap.enabled=true")
-				.run();
+				.properties(properties).run();
 		then(this.context.getEnvironment().getProperty("info.name")).isEqualTo("externalPropertiesInfoName");
 		then(this.context.getEnvironment().getProperty("info.desc")).isNull();
 		then(this.context.getEnvironment().getPropertySources()
@@ -91,11 +102,22 @@ public class BootstrapConfigurationTests {
 	@Test
 	public void pickupAdditionalExternalBootstrapProperties() {
 		String externalPropertiesPath = getExternalProperties();
+		pickupAdditionalExternalBootstrapProperties(
+				"spring.cloud.bootstrap.additional-location=" + externalPropertiesPath,
+				"spring.config.use-legacy-processing=true");
+	}
 
+	@Test
+	public void pickupAdditionalExternalBootstrapPropertiesWithAppListener() {
+		String externalPropertiesPath = getExternalProperties();
+		pickupAdditionalExternalBootstrapProperties(
+				"spring.cloud.bootstrap.additional-location=" + externalPropertiesPath,
+				"spring.config.use-legacy-processing=true", "spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void pickupAdditionalExternalBootstrapProperties(String... properties) {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.additional-location=" + externalPropertiesPath,
-						"spring.cloud.bootstrap.enabled=true")
-				.run();
+				.properties(properties).run();
 		then(this.context.getEnvironment().getProperty("info.name")).isEqualTo("externalPropertiesInfoName");
 		then(this.context.getEnvironment().getProperty("info.desc")).isEqualTo("defaultPropertiesInfoDesc");
 		then(this.context.getEnvironment().getPropertySources()
@@ -105,9 +127,18 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void bootstrapPropertiesAvailableInInitializer() {
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class)
-				.initializers(applicationContext -> {
+		bootstrapPropertiesAvailableInInitializer("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void bootstrapPropertiesAvailableInInitializerWithAppContext() {
+		bootstrapPropertiesAvailableInInitializer("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void bootstrapPropertiesAvailableInInitializer(String... properties) {
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.sources(BareConfiguration.class).initializers(applicationContext -> {
 					// This property is defined in bootstrap.properties
 					then(applicationContext.getEnvironment().getProperty("info.name")).isEqualTo("child");
 				}).run();
@@ -128,9 +159,19 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void picksUpAdditionalPropertySource() {
+		picksUpAdditionalPropertySource("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void picksUpAdditionalPropertySourceWithAppContext() {
+		picksUpAdditionalPropertySource("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void picksUpAdditionalPropertySource(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.sources(BareConfiguration.class).run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 		then(this.context.getEnvironment().getPropertySources()
 				.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap"))
@@ -139,34 +180,77 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void failsOnPropertySource() {
+		failsOnPropertySource("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void failsOnPropertySourceWithAppContext() {
+		failsOnPropertySource("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void failsOnPropertySource(String... properties) {
 		System.setProperty("expected.fail", "true");
-		Throwable throwable = Assertions.assertThrows(RuntimeException.class,
-				() -> this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-						.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class).run());
+		Throwable throwable = Assertions.assertThrows(RuntimeException.class, () -> {
+			this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+					.sources(BareConfiguration.class).run();
+		});
 		then(throwable.getMessage().equals("Planned"));
 	}
 
 	@Test
 	public void overrideSystemPropertySourceByDefault() {
+		overrideSystemPropertySourceByDefault("spring.config.use-legacy-processing=true");
+
+	}
+
+	@Test
+	public void overrideSystemPropertySourceByDefaultWithAppContext() {
+		overrideSystemPropertySourceByDefault("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+
+	}
+
+	private void overrideSystemPropertySourceByDefault(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.sources(BareConfiguration.class).run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 	}
 
 	@Test
 	public void systemPropertyOverrideFalse() {
+		systemPropertyOverrideFalse("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void systemPropertyOverrideFalseWithAppContext() {
+		systemPropertyOverrideFalse("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void systemPropertyOverrideFalse(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.sources(BareConfiguration.class).run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("system");
 	}
 
 	@Test
 	public void systemPropertyOverrideWhenOverrideDisallowed() {
+		systemPropertyOverrideWhenOverrideDisallowed("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void systemPropertyOverrideWhenOverrideDisallowedWithAppContext() {
+		systemPropertyOverrideWhenOverrideDisallowed("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void systemPropertyOverrideWhenOverrideDisallowed(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
 		// If spring.cloud.config.allowOverride=false is in the remote property sources
@@ -174,42 +258,71 @@ public class BootstrapConfigurationTests {
 		// their own remote property source.
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "false");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.sources(BareConfiguration.class).run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 	}
 
 	@Test
 	public void systemPropertyOverrideFalseWhenOverrideAllowed() {
+		systemPropertyOverrideFalseWhenOverrideAllowed("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void systemPropertyOverrideFalseWhenOverrideAllowedWithAppContext() {
+		systemPropertyOverrideFalseWhenOverrideAllowed("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void systemPropertyOverrideFalseWhenOverrideAllowed(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.sources(BareConfiguration.class).run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("system");
 	}
 
 	@Test
 	public void overrideAllWhenOverrideAllowed() {
+		overrideAllWhenOverrideAllowed("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void overrideAllWhenOverrideAllowedWithAppContext() {
+		overrideAllWhenOverrideAllowed("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void overrideAllWhenOverrideAllowed(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideNone", "true");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
 		ConfigurableEnvironment environment = new StandardEnvironment();
-		environment.getPropertySources()
-				.addLast(new MapPropertySource("last", Collections.singletonMap("bootstrap.foo", "splat")));
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.cloud.bootstrap.enabled=true").environment(environment)
-				.sources(BareConfiguration.class).run();
+		environment.getPropertySources().addLast(
+				new MapPropertySource("last", Collections.<String, Object>singletonMap("bootstrap.foo", "splat")));
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.environment(environment).sources(BareConfiguration.class).run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("splat");
 	}
 
 	@Test
 	public void applicationNameInBootstrapAndMain() {
+		applicationNameInBootstrapAndMain("spring.cloud.bootstrap.name:other",
+				"spring.config.use-legacy-processing=true", "spring.config.name:plain");
+	}
+
+	@Test
+	public void applicationNameInBootstrapAndMainWithAppContext() {
+		applicationNameInBootstrapAndMain("spring.cloud.bootstrap.name:other",
+				"spring.config.use-legacy-processing=true", "spring.config.name:plain",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void applicationNameInBootstrapAndMain(String... properties) {
 		System.setProperty("expected.name", "main");
-		this.context = new SpringApplicationBuilder()
-				.web(WebApplicationType.NONE).properties("spring.cloud.bootstrap.name:other",
-						"spring.cloud.bootstrap.enabled=true", "spring.config.name:plain")
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
 				.sources(BareConfiguration.class).run();
 		then(this.context.getEnvironment().getProperty("spring.application.name")).isEqualTo("app");
 		// The parent is called "main" because spring.application.name is specified in
@@ -223,10 +336,20 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void applicationNameNotInBootstrap() {
+		applicationNameNotInBootstrap("spring.cloud.bootstrap.name:application",
+				"spring.config.use-legacy-processing=true", "spring.config.name:other");
+	}
+
+	@Test
+	public void applicationNameNotInBootstrapWithAppContext() {
+		applicationNameNotInBootstrap("spring.cloud.bootstrap.name:application",
+				"spring.config.use-legacy-processing=true", "spring.config.name:other",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void applicationNameNotInBootstrap(String... properties) {
 		System.setProperty("expected.name", "main");
-		this.context = new SpringApplicationBuilder()
-				.web(WebApplicationType.NONE).properties("spring.cloud.bootstrap.name:application",
-						"spring.cloud.bootstrap.enabled=true", "spring.config.name:other")
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
 				.sources(BareConfiguration.class).run();
 		then(this.context.getEnvironment().getProperty("spring.application.name")).isEqualTo("main");
 		// The parent has no name because spring.application.name is not
@@ -236,9 +359,18 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void applicationNameOnlyInBootstrap() {
+		applicationNameOnlyInBootstrap("spring.cloud.bootstrap.name:other", "spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void applicationNameOnlyInBootstrapWithAppContext() {
+		applicationNameOnlyInBootstrap("spring.cloud.bootstrap.name:other", "spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void applicationNameOnlyInBootstrap(String... properties) {
 		System.setProperty("expected.name", "main");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.cloud.bootstrap.name:other", "spring.cloud.bootstrap.enabled=true")
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
 				.sources(BareConfiguration.class).run();
 		// The main context is called "main" because spring.application.name is specified
 		// in other.properties (and not in the main config file)
@@ -251,10 +383,20 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void environmentEnrichedOnceWhenSharedWithChildContext() {
+		environmentEnrichedOnceWhenSharedWithChildContext("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void environmentEnrichedOnceWhenSharedWithChildContextWithAppContext() {
+		environmentEnrichedOnceWhenSharedWithChildContext("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void environmentEnrichedOnceWhenSharedWithChildContext(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.enabled=true").environment(new StandardEnvironment())
-				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
+		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class).properties(properties)
+				.environment(new StandardEnvironment()).child(BareConfiguration.class).web(WebApplicationType.NONE)
+				.run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 		then(this.context.getParent().getEnvironment()).isEqualTo(this.context.getEnvironment());
 		MutablePropertySources sources = this.context.getEnvironment().getPropertySources();
@@ -266,11 +408,20 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void onlyOneBootstrapContext() {
+		onlyOneBootstrapContext("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void onlyOneBootstrapContextWithAppContext() {
+		onlyOneBootstrapContext("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void onlyOneBootstrapContext(String... properties) {
 		TestHigherPriorityBootstrapConfiguration.count.set(0);
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.enabled=true").child(BareConfiguration.class)
-				.web(WebApplicationType.NONE).run();
+		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class).properties(properties)
+				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
 		then(TestHigherPriorityBootstrapConfiguration.count.get()).isEqualTo(1);
 		then(this.context.getParent()).isNotNull();
 		then(this.context.getParent().getParent().getId()).isEqualTo("bootstrap");
@@ -280,9 +431,18 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void listOverride() {
-		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.enabled=true").child(BareConfiguration.class)
-				.web(WebApplicationType.NONE).run();
+		listOverride("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void listOverrideWithAppContext() {
+		listOverride("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void listOverride(String... properties) {
+		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class).properties(properties)
+				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
 		ListProperties listProperties = new ListProperties();
 		Binder.get(this.context.getEnvironment()).bind("list", Bindable.ofInstance(listProperties));
 		then(listProperties.getFoo().size()).isEqualTo(1);
@@ -291,10 +451,20 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void bootstrapContextSharedBySiblings() {
+		bootstrapContextSharedBySiblings("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void bootstrapContextSharedBySiblingsWithAppContext() {
+		bootstrapContextSharedBySiblings("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void bootstrapContextSharedBySiblings(String... properties) {
 		TestHigherPriorityBootstrapConfiguration.count.set(0);
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		SpringApplicationBuilder builder = new SpringApplicationBuilder()
-				.properties("spring.cloud.bootstrap.enabled=true").sources(BareConfiguration.class);
+		SpringApplicationBuilder builder = new SpringApplicationBuilder().properties(properties)
+				.sources(BareConfiguration.class);
 		this.sibling = builder.child(BareConfiguration.class).properties("spring.application.name=sibling")
 				.web(WebApplicationType.NONE).run();
 		this.context = builder.child(BareConfiguration.class).properties("spring.application.name=context")
@@ -314,10 +484,19 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void environmentEnrichedInParentContext() {
+		environmentEnrichedInParentContext("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void environmentEnrichedInParentContextWithAppContext() {
+		environmentEnrichedInParentContext("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void environmentEnrichedInParentContext(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.enabled=true").child(BareConfiguration.class)
-				.web(WebApplicationType.NONE).run();
+		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class).properties(properties)
+				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 		then(this.context.getParent().getEnvironment()).isNotSameAs(this.context.getEnvironment());
 		then(this.context.getEnvironment().getPropertySources()
@@ -336,7 +515,7 @@ public class BootstrapConfigurationTests {
 		ConfigurableApplicationContext parent = new SpringApplicationBuilder().sources(BareConfiguration.class)
 				.profiles("parent").web(WebApplicationType.NONE).run();
 		this.context = new SpringApplicationBuilder(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.enabled=true").profiles("child").parent(parent)
+				.properties("spring.config.use-legacy-processing=true").profiles("child").parent(parent)
 				.web(WebApplicationType.NONE).run();
 		then(this.context.getParent().getEnvironment()).isNotSameAs(this.context.getEnvironment());
 		// The ApplicationContext merges profiles (profiles and property sources), see
@@ -360,26 +539,120 @@ public class BootstrapConfigurationTests {
 
 	@Test
 	public void includeProfileFromBootstrapPropertySource() {
+		includeProfileFromBootstrapPropertySource("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void includeProfileFromBootstrapPropertySourceWithAppContext() {
+		includeProfileFromBootstrapPropertySource("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void includeProfileFromBootstrapPropertySource(String... properties) {
 		PropertySourceConfiguration.MAP.put("spring.profiles.include", "bar,baz");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.properties("spring.cloud.bootstrap.enabled=true").profiles("foo").sources(BareConfiguration.class)
-				.run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.profiles("foo").sources(BareConfiguration.class).run();
 		then(this.context.getEnvironment().acceptsProfiles("baz")).isTrue();
 		then(this.context.getEnvironment().acceptsProfiles("bar")).isTrue();
 	}
 
 	@Test
+	public void activeProfileFromBootstrapPropertySource() {
+		activeProfileFromBootstrapPropertySource("spring.config.use-legacy-processing=true");
+		then(this.context.getEnvironment().getActiveProfiles()).contains("foo");
+	}
+
+	@Test
+	public void activeProfileFromBootstrapPropertySourceWithAppContext() {
+		activeProfileFromBootstrapPropertySource("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+		then(this.context.getEnvironment().getActiveProfiles()).doesNotContain("after");
+		then(this.context.getEnvironment().getActiveProfiles()).contains("baz", "bar", "foo");
+	}
+
+	private void activeProfileFromBootstrapPropertySource(String... properties) {
+		PropertySourceConfiguration.MAP.put("spring.profiles.active", "bar,baz");
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.profiles("foo").sources(BareConfiguration.class).run();
+		then(this.context.getEnvironment().acceptsProfiles("baz", "bar", "foo")).isTrue();
+
+	}
+
+	@Test
+	public void activeAndIncludeProfileFromBootstrapPropertySource() {
+		activeAndIncludeProfileFromBootstrapPropertySource("spring.config.use-legacy-processing=true");
+	}
+
+	@Test
+	public void activeAndIncludeProfileFromBootstrapPropertySourceWithAppContext() {
+		activeAndIncludeProfileFromBootstrapPropertySource("spring.config.use-legacy-processing=true",
+				"spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void activeAndIncludeProfileFromBootstrapPropertySource(String... properties) {
+		PropertySourceConfiguration.MAP.put("spring.profiles.active", "bar,baz");
+		PropertySourceConfiguration.MAP.put("spring.profiles.include", "bar,baz,hello");
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.profiles("foo").sources(BareConfiguration.class).run();
+		then(this.context.getEnvironment().acceptsProfiles("baz", "bar", "hello", "foo")).isTrue();
+		then(this.context.getEnvironment().getActiveProfiles()).contains("baz", "bar", "foo", "hello");
+	}
+
+	@Test
+	public void activeAndIncludeProfileFromBootstrapPropertySourceWithReplacement() {
+		activeAndIncludeProfileFromBootstrapPropertySourceWithReplacement("spring.config.use-legacy-processing=true",
+				"barreplacement=bar");
+	}
+
+	@Test
+	public void activeAndIncludeProfileFromBootstrapPropertySourceWithReplacementWithAppContext() {
+		activeAndIncludeProfileFromBootstrapPropertySourceWithReplacement("spring.config.use-legacy-processing=true",
+				"barreplacement=bar", "spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void activeAndIncludeProfileFromBootstrapPropertySourceWithReplacement(String... properties) {
+		PropertySourceConfiguration.MAP.put("spring.profiles.active", "${barreplacement},baz");
+		PropertySourceConfiguration.MAP.put("spring.profiles.include", "${barreplacement},baz,hello");
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.profiles("foo").sources(BareConfiguration.class).run();
+		then(this.context.getEnvironment().acceptsProfiles("baz", "bar", "hello", "foo")).isTrue();
+		then(this.context.getEnvironment().getActiveProfiles()).contains("baz", "bar", "foo", "hello");
+	}
+
+	@Test
 	public void includeProfileFromBootstrapProperties() {
+		includeProfileFromBootstrapProperties("spring.config.use-legacy-processing=true",
+				"spring.cloud.bootstrap.name=local");
+	}
+
+	@Test
+	public void includeProfileFromBootstrapPropertiesWithAppContext() {
+		includeProfileFromBootstrapProperties("spring.config.use-legacy-processing=true",
+				"spring.cloud.bootstrap.name=local", "spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void includeProfileFromBootstrapProperties(String... properties) {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name=local").run();
+				.properties(properties).run();
 		then(this.context.getEnvironment().acceptsProfiles("local")).isTrue();
 		then(this.context.getEnvironment().getProperty("added")).isEqualTo("Hello added!");
 	}
 
 	@Test
 	public void nonEnumerablePropertySourceWorks() {
+		nonEnumerablePropertySourceWorks("spring.config.use-legacy-processing=true",
+				"spring.cloud.bootstrap.name=nonenumerable");
+	}
+
+	@Test
+	public void nonEnumerablePropertySourceWorksWithAppContext() {
+		nonEnumerablePropertySourceWorks("spring.config.use-legacy-processing=true",
+				"spring.cloud.bootstrap.name=nonenumerable", "spring.cloud.config.initialize-on-context-refresh=true");
+	}
+
+	private void nonEnumerablePropertySourceWorks(String... properties) {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
-				.properties("spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name=nonenumerable").run();
+				.properties(properties).run();
 		then(this.context.getEnvironment().getProperty("foo")).isEqualTo("bar");
 	}
 
@@ -419,12 +692,24 @@ public class BootstrapConfigurationTests {
 
 		@Override
 		public PropertySource<?> locate(Environment environment) {
+			if (environment instanceof ConfigurableEnvironment) {
+				if (!((ConfigurableEnvironment) environment).getPropertySources()
+						.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+					if (MAP.containsKey(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME)) {
+						// This additional profile, after, should not be added when
+						// initialize-on-context-refresh=true
+						MAP.put(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME,
+								MAP.get(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME) + ",after");
+					}
+				}
+			}
 			if (this.name != null) {
 				then(this.name).isEqualTo(environment.getProperty("spring.application.name"));
 			}
 			if (this.fail) {
 				throw new RuntimeException("Planned");
 			}
+
 			return new MapPropertySource("testBootstrap", MAP);
 		}
 

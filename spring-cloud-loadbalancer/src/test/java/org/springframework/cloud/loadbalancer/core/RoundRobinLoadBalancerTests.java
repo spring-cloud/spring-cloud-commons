@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2022 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,13 @@ import static java.lang.Integer.MIN_VALUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Zhuozhi JI
+ * @author Jürgen Kreitler
  */
 class RoundRobinLoadBalancerTests {
 
@@ -66,6 +69,18 @@ class RoundRobinLoadBalancerTests {
 
 		loadBalancer.choose().block();
 		assertThat(loadBalancer.position).hasValue(0);
+	}
+
+	@Test
+	void shouldCallSelectedServiceInstanceIfSupplierOrItsDelegateIsInstanceOf() {
+		TestSelectedServiceInstanceSupplier delegate = mock(TestSelectedServiceInstanceSupplier.class);
+		DelegatingServiceInstanceListSupplier supplier = new RetryAwareServiceInstanceListSupplier(delegate);
+		when(delegate.get(any())).thenReturn(Flux.just(Collections.singletonList(new DefaultServiceInstance())));
+		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(new SimpleObjectProvider<>(supplier),
+				"shouldNotMovePositionIfOnlyOneInstance", 0);
+
+		loadBalancer.choose().block();
+		verify(delegate, times(1)).selectedServiceInstance(any(ServiceInstance.class));
 	}
 
 	@SuppressWarnings("all")

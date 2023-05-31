@@ -54,6 +54,10 @@ The additional property sources are:
 An example would be properties from the Spring Cloud Config Server.
 See "`<<customizing-bootstrap-property-sources>>`" for how to customize the contents of this property source.
 
+NOTE:  Prior to Spring Cloud 2022.0.3 `PropertySourceLocators` (including the ones for Spring Cloud Config) were run during
+the main application context and not in the Bootstrap context.  You can force `PropertySourceLocators` to be run during the
+Bootstrap context by setting `spring.cloud.config.initialize-on-context-refresh=true` in `bootstrap.[properties | yaml]`.
+
 * "`applicationConfig: [classpath:bootstrap.yml]`" (and related files if Spring profiles are active): If you have a `bootstrap.yml` (or `.properties`), those properties are used to configure the bootstrap context.
 Then they get added to the child context when its parent is set.
 They have lower precedence than the `application.yml` (or `.properties`) and any other property sources that are added to the child as a normal part of the process of creating a Spring Boot application.
@@ -146,6 +150,12 @@ org.springframework.cloud.bootstrap.BootstrapConfiguration=sample.custom.CustomP
 ----
 ====
 
+As of Spring Cloud 2022.0.3, Spring Cloud will now call `PropertySourceLocators` twice.  The first fetch
+will retrieve any property sources without any profiles.  These property sources will have the opportunity to
+activate profiles using `spring.profiles.active`.  After the main application context starts `PropertySourceLocators`
+will be called a second time, this time with any active profiles allowing `PropertySourceLocators` to locate
+any additional `PropertySources` with profiles.
+
 === Logging Configuration
 
 If you use Spring Boot to configure log settings, you should place this configuration in `bootstrap.[yml | properties]` if you would like it to apply to all events.
@@ -237,6 +247,10 @@ For a Spring Boot Actuator application, some additional management endpoints are
 * `/actuator/refresh` to re-load the boot strap context and refresh the `@RefreshScope` beans.
 * `/actuator/restart` to close the `ApplicationContext` and restart it (disabled by default).
 * `/actuator/pause` and `/actuator/resume` for calling the `Lifecycle` methods (`stop()` and `start()` on the `ApplicationContext`).
+
+NOTE: While enabling the `POST` method for `/actuator/env` endpoint can provide flexibility and convenience in managing your application environment variables,
+it's critical to ensure that the endpoint is secured and monitored to prevent potential security risks.
+Add a `spring-boot-starter-security` dependency to configure access control for the actuator’s endpoint.
 
 NOTE: If you disable the `/actuator/restart` endpoint then the `/actuator/pause` and `/actuator/resume` endpoints
 will also be disabled since they are just a special case of `/actuator/restart`.
@@ -562,8 +576,8 @@ public class MyConfiguration {
 }
 
 public class MyClass {
-@Autowired
-private RestTemplate restTemplate;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Autowired
     @LoadBalanced
@@ -1044,6 +1058,8 @@ for the scheduler. You can set the default path for the healthcheck URL by setti
 the value of the `spring.cloud.loadbalancer.health-check.path.default` property. You can also set a specific value for any given service by setting the value of the `spring.cloud.loadbalancer.health-check.path.[SERVICE_ID]` property, substituting `[SERVICE_ID]` with the correct ID of your service. If the `[SERVICE_ID]` is not specified, `/actuator/health` is used by default.  If the `[SERVICE_ID]` is set to `null` or empty as a value, then the health check will not be executed. You can also set a custom port for health-check requests by setting the value of `spring.cloud.loadbalancer.health-check.port`. If none is set, the port under which the requested service is available at the service instance.
 
 TIP: If you rely on the default path (`/actuator/health`), make sure you add `spring-boot-starter-actuator` to your collaborator's dependencies, unless you are planning to add such an endpoint on your own.
+
+TIP: By default, the `healthCheckFlux` will emit on each alive `ServiceInstance` that has been retrieved. You can modify this behaviour by setting the value of `spring.cloud.loadbalancer.health-check.update-results-list` to `false`. If this property is set to `false`, the entire alive instances sequence is first collected into a list and only then emitted, which ensures the flux does not emit values in between the health-check intervals set in properties.
 
 In order to use the health-check scheduler approach, you will have to instantiate a `HealthCheckServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.cloud.client.ServiceInstance;
  * chosen instance if it's available.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Jürgen Kreitler
  * @since 2.2.7
  */
 public class SameInstancePreferenceServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier
@@ -72,6 +73,7 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 
 	@Override
 	public void selectedServiceInstance(ServiceInstance serviceInstance) {
+		super.selectedServiceInstance(serviceInstance);
 		if (previouslyReturnedInstance == null || !previouslyReturnedInstance.equals(serviceInstance)) {
 			previouslyReturnedInstance = serviceInstance;
 		}
