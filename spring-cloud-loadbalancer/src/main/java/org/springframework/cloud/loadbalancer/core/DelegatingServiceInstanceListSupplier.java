@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cloud.loadbalancer.core;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.util.Assert;
 
 /**
@@ -26,9 +27,10 @@ import org.springframework.util.Assert;
  *
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
+ * @author Jürgen Kreitler
  */
 public abstract class DelegatingServiceInstanceListSupplier
-		implements ServiceInstanceListSupplier, InitializingBean, DisposableBean {
+		implements ServiceInstanceListSupplier, SelectedInstanceCallback, InitializingBean, DisposableBean {
 
 	protected final ServiceInstanceListSupplier delegate;
 
@@ -44,6 +46,13 @@ public abstract class DelegatingServiceInstanceListSupplier
 	@Override
 	public String getServiceId() {
 		return this.delegate.getServiceId();
+	}
+
+	@Override
+	public void selectedServiceInstance(ServiceInstance serviceInstance) {
+		if (delegate instanceof SelectedInstanceCallback selectedInstanceCallbackDelegate) {
+			selectedInstanceCallbackDelegate.selectedServiceInstance(serviceInstance);
+		}
 	}
 
 	@Override
