@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,10 +141,10 @@ public class DiscoveredResource implements RemoteResource {
 			return link;
 
 		}
-		catch (RuntimeException e) {
+		catch (RuntimeException exception) {
 
 			this.link = null;
-			this.log.debug("Target system unavailable. Got: ", e.getMessage());
+			this.log.debug("Target system unavailable. Got: ", exception.getMessage());
 
 			return null;
 		}
