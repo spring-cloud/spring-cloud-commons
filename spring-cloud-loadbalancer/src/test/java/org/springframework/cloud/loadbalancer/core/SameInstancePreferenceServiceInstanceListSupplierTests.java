@@ -86,7 +86,8 @@ class SameInstancePreferenceServiceInstanceListSupplierTests {
 	void shouldCallSelectedServiceInstanceOnItsDelegate() {
 		ServiceInstance firstInstance = serviceInstance("test-4");
 		TestSelectedServiceInstanceSupplier delegate = mock(TestSelectedServiceInstanceSupplier.class);
-		DelegatingServiceInstanceListSupplier supplier = new SameInstancePreferenceServiceInstanceListSupplier(delegate);
+		DelegatingServiceInstanceListSupplier supplier = new SameInstancePreferenceServiceInstanceListSupplier(
+				delegate);
 		supplier.selectedServiceInstance(firstInstance);
 		verify(delegate, times(1)).selectedServiceInstance(any(ServiceInstance.class));
 	}

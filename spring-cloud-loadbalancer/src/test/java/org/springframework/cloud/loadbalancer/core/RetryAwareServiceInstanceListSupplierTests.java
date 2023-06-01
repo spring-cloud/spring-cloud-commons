@@ -91,4 +91,5 @@ class RetryAwareServiceInstanceListSupplierTests {
 		supplier.selectedServiceInstance(firstInstance);
 		verify(delegate, times(1)).selectedServiceInstance(any(ServiceInstance.class));
 	}
+
 }
