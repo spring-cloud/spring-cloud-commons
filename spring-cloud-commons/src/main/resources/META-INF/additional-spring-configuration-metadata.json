@@ -132,7 +132,7 @@
 		{
 			"name": "spring.cloud.loadbalancer.retry.retry-on-all-operations",
 			"defaultValue": false,
-			"description": "Indicates retries should be attempted on operations other than `HttpMethod.GET`}.",
+			"description": "Indicates retries should be attempted on operations other than `HttpMethod.GET`.",
 			"type": "java.lang.Boolean"
 		},
 		{
