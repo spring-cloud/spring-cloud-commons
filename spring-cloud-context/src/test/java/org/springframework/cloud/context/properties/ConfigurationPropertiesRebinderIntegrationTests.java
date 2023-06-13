@@ -193,10 +193,6 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 		private String name;
 
-		public ConfigProperties() {
-			System.out.println();
-		}
-
 		public String getName() {
 			return this.name;
 		}
