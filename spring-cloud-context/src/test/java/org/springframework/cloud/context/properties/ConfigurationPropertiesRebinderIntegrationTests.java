@@ -177,11 +177,25 @@ public class ConfigurationPropertiesRebinderIntegrationTests {
 
 	}
 
+	@Configuration
+	public static class ConfigPropertiesConfig {
+
+		@Bean
+		@ConditionalOnMissingBean(ConfigProperties.class)
+		public ConfigProperties configProperties() {
+			return new ConfigProperties();
+		}
+
+	}
+
 	@ConfigurationProperties("config")
-	@ConditionalOnMissingBean(ConfigProperties.class)
 	public static class ConfigProperties {
 
 		private String name;
+
+		public ConfigProperties() {
+			System.out.println();
+		}
 
 		public String getName() {
 			return this.name;
