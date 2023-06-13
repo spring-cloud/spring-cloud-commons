@@ -36,8 +36,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<>() {
 		{
-			this.put("3.0", is3_0());
-			this.put("3.1", is3_1());
+			this.put("3.2", is3_2());
 		}
 	};
 
@@ -72,26 +71,27 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		return SpringBootVersion.getVersion();
 	}
 
-	CompatibilityPredicate is3_0() {
+	CompatibilityPredicate is3_2() {
 		return new CompatibilityPredicate() {
 
 			@Override
 			public String toString() {
-				return "Predicate for Boot 3.0";
+				return "Predicate for Boot 3.2";
 			}
 
 			@Override
 			public boolean isCompatible() {
-				try {
-					// since 3.0
-					Class.forName(
-							"org.springframework.boot.autoconfigure.validation.ValidationConfigurationCustomizer");
-					return true;
+				// try {
+				// since 3.2
+				// TODO: find new class/method in boot since 3.2
+				// Class.forName(
+				// "org.springframework.boot.autoconfigure.validation.ValidationConfigurationCustomizer");
+				return true;
 
-				}
-				catch (ClassNotFoundException e) {
-					return false;
-				}
+				// }
+				// catch (ClassNotFoundException e) {
+				// return false;
+				// }
 
 			}
 		};
