@@ -27,11 +27,11 @@ import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.logging.DeferredLogFactory;
 import org.springframework.boot.util.Instantiator;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
+import org.springframework.cloud.context.config.ContextRefreshedWithApplicationEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -45,7 +45,7 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
  * @author Venil Noronha
  */
 public class ConfigDataContextRefresher extends ContextRefresher
-		implements ApplicationListener<ApplicationPreparedEvent> {
+		implements ApplicationListener<ContextRefreshedWithApplicationEvent> {
 
 	private SpringApplication application;
 
@@ -60,7 +60,7 @@ public class ConfigDataContextRefresher extends ContextRefresher
 	}
 
 	@Override
-	public void onApplicationEvent(ApplicationPreparedEvent event) {
+	public void onApplicationEvent(ContextRefreshedWithApplicationEvent event) {
 		application = event.getSpringApplication();
 	}
 
