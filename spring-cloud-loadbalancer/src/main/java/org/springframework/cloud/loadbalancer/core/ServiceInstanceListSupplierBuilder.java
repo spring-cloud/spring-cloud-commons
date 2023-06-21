@@ -145,7 +145,7 @@ public final class ServiceInstanceListSupplierBuilder {
 	public ServiceInstanceListSupplierBuilder withHealthChecks() {
 		DelegateCreator creator = (context, delegate) -> {
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory = context
-					.getBean(LoadBalancerClientFactory.class);
+				.getBean(LoadBalancerClientFactory.class);
 			WebClient.Builder webClient = context.getBean(WebClient.Builder.class);
 			return healthCheckServiceInstanceListSupplier(webClient.build(), delegate, loadBalancerClientFactory);
 		};
@@ -268,7 +268,7 @@ public final class ServiceInstanceListSupplierBuilder {
 		}
 		this.cachingCreator = (context, delegate) -> {
 			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
-					.getBeanProvider(LoadBalancerCacheManager.class);
+				.getBeanProvider(LoadBalancerCacheManager.class);
 			if (cacheManagerProvider.getIfAvailable() != null) {
 				return new CachingServiceInstanceListSupplier(delegate, cacheManagerProvider.getIfAvailable());
 			}
@@ -334,10 +334,9 @@ public final class ServiceInstanceListSupplierBuilder {
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		return new HealthCheckServiceInstanceListSupplier(delegate, loadBalancerClientFactory,
 				(serviceInstance, healthCheckPath) -> webClient.get()
-						.uri(UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build()
-								.toUri())
+						.uri(UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build().toUri())
 						.exchange().flatMap(clientResponse -> clientResponse.releaseBody()
-								.thenReturn(HttpStatus.OK.value() == clientResponse.rawStatusCode())));
+								.thenReturn(HttpStatus.OK.equals(clientResponse.statusCode()))));
 	}
 
 	private ServiceInstanceListSupplier blockingHealthCheckServiceInstanceListSupplier(RestTemplate restTemplate,
@@ -345,11 +344,12 @@ public final class ServiceInstanceListSupplierBuilder {
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		return new HealthCheckServiceInstanceListSupplier(delegate, loadBalancerClientFactory,
 				(serviceInstance, healthCheckPath) -> Mono.defer(() -> {
-					URI uri = UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build()
-							.toUri();
+					URI uri = UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath))
+						.build()
+						.toUri();
 					try {
 						return Mono
-								.just(HttpStatus.OK.equals(restTemplate.getForEntity(uri, Void.class).getStatusCode()));
+							.just(HttpStatus.OK.equals(restTemplate.getForEntity(uri, Void.class).getStatusCode()));
 					}
 					catch (Exception ignored) {
 						return Mono.just(false);
