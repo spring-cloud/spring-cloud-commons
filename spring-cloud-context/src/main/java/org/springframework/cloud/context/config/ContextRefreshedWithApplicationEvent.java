@@ -21,9 +21,9 @@ import org.springframework.boot.context.event.SpringApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 
 /**
- * A custom event for spring cloud context use cases that need the saved
- * Spring Application. This prevents a duplicated ApplicationPreparedEvent
- * from being republished.
+ * A custom event for spring cloud context use cases that need the saved Spring
+ * Application. This prevents a duplicated ApplicationPreparedEvent from being
+ * republished.
  */
 public class ContextRefreshedWithApplicationEvent extends SpringApplicationEvent {
 
