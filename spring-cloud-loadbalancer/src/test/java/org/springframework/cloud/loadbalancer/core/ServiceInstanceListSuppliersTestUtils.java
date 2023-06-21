@@ -46,7 +46,7 @@ final class ServiceInstanceListSuppliersTestUtils {
 		return (serviceInstance, healthCheckPath) -> webClient.get()
 				.uri(UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build().toUri())
 				.exchange().flatMap(clientResponse -> clientResponse.releaseBody()
-						.thenReturn(HttpStatus.OK.value() == clientResponse.rawStatusCode()));
+						.thenReturn(HttpStatus.OK.equals(clientResponse.statusCode())));
 	}
 
 	static BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunction(RestTemplate restTemplate) {
