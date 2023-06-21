@@ -17,6 +17,7 @@
 package org.springframework.cloud.context.restart;
 
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
+import org.springframework.cloud.context.config.ContextRefreshedWithApplicationEvent;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
@@ -34,7 +35,7 @@ public class RestartListener implements SmartApplicationListener {
 
 	private ConfigurableApplicationContext context;
 
-	private ApplicationPreparedEvent event;
+	private ContextRefreshedWithApplicationEvent event;
 
 	@Override
 	public int getOrder() {
@@ -56,8 +57,9 @@ public class RestartListener implements SmartApplicationListener {
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent input) {
-		if (input instanceof ApplicationPreparedEvent) {
-			this.event = (ApplicationPreparedEvent) input;
+		if (input instanceof ApplicationPreparedEvent applicationPreparedEvent) {
+			this.event = new ContextRefreshedWithApplicationEvent(applicationPreparedEvent.getSpringApplication(),
+					applicationPreparedEvent.getArgs(), applicationPreparedEvent.getApplicationContext());
 			if (this.context == null) {
 				this.context = this.event.getApplicationContext();
 			}
