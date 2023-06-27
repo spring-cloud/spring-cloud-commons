@@ -73,6 +73,21 @@ public class LoadBalancerProperties {
 	 */
 	private boolean useRawStatusCodeInResponseData;
 
+	/**
+	 * If this flag is set to {@code true},
+	 * {@code ServiceInstanceListSupplier#get(Request request)} method will be implemented
+	 * to call {@code delegate.get(request)} in classes assignable from
+	 * {@code DelegatingServiceInstanceListSupplier} that don't already implement that
+	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
+	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
+	 * instance supplier hierarchy directly after the supplier performing instance
+	 * retrieval over the network, before any request-based filtering is done.
+	 * @deprecated This flag will be removed in 4.1, where this behaviour will become the
+	 * default
+	 */
+	@Deprecated
+	private boolean callGetWithRequestOnDelegates;
+
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
 	}
@@ -132,6 +147,40 @@ public class LoadBalancerProperties {
 
 	public void setUseRawStatusCodeInResponseData(boolean useRawStatusCodeInResponseData) {
 		this.useRawStatusCodeInResponseData = useRawStatusCodeInResponseData;
+	}
+
+	/**
+	 * If this flag is set to {@code true},
+	 * {@code ServiceInstanceListSupplier#get(Request request)} method will be implemented
+	 * to call {@code delegate.get(request)} in classes assignable from
+	 * {@code DelegatingServiceInstanceListSupplier} that don't already implement that
+	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
+	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
+	 * instance supplier hierarchy directly after the supplier performing instance
+	 * retrieval over the network, before any request-based filtering is done.
+	 * @deprecated This flag will be removed in 4.1, where this behaviour will become the
+	 * default
+	 */
+	@Deprecated
+	public boolean isCallGetWithRequestOnDelegates() {
+		return callGetWithRequestOnDelegates;
+	}
+
+	/**
+	 * If this flag is set to {@code true},
+	 * {@code ServiceInstanceListSupplier#get(Request request)} method will be implemented
+	 * to call {@code delegate.get(request)} in classes assignable from
+	 * {@code DelegatingServiceInstanceListSupplier} that don't already implement that
+	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
+	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
+	 * instance supplier hierarchy directly after the supplier performing instance
+	 * retrieval over the network, before any request-based filtering is done.
+	 * @deprecated This flag will be removed in 4.1, where this behaviour will become the
+	 * default
+	 */
+	@Deprecated
+	public void setCallGetWithRequestOnDelegates(boolean callGetWithRequestOnDelegates) {
+		this.callGetWithRequestOnDelegates = callGetWithRequestOnDelegates;
 	}
 
 	public static class StickySession {

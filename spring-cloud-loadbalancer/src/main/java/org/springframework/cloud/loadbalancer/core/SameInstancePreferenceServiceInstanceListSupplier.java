@@ -24,6 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 
 /**
  * An implementation of {@link ServiceInstanceListSupplier} that selects the previously
@@ -39,8 +41,22 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 
 	private ServiceInstance previouslyReturnedInstance;
 
+	private boolean callGetWithRequestOnDelegates;
+
 	public SameInstancePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate) {
 		super(delegate);
+	}
+
+	/**
+	 * @deprecated for removal in 4.1, where calling {@code get(Request request)} on
+	 * delegate will be the default behaviour.
+	 */
+	@Deprecated
+	public SameInstancePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
+		super(delegate);
+		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
+				.isCallGetWithRequestOnDelegates();
 	}
 
 	@Override
@@ -51,6 +67,14 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 	@Override
 	public Flux<List<ServiceInstance>> get() {
 		return delegate.get().map(this::filteredBySameInstancePreference);
+	}
+
+	@Override
+	public Flux<List<ServiceInstance>> get(Request request) {
+		if (callGetWithRequestOnDelegates) {
+			return delegate.get(request).map(this::filteredBySameInstancePreference);
+		}
+		return get();
 	}
 
 	private List<ServiceInstance> filteredBySameInstancePreference(List<ServiceInstance> serviceInstances) {

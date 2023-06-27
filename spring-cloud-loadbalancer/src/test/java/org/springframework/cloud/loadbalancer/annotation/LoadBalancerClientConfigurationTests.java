@@ -91,10 +91,10 @@ class LoadBalancerClientConfigurationTests {
 		reactiveDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=zone-preference")
 				.run(context -> {
 					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+					then(supplier).isInstanceOf(ZonePreferenceServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
 							.getDelegate();
-					then(delegate).isInstanceOf(ZonePreferenceServiceInstanceListSupplier.class);
+					then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
 							.getDelegate();
 					then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
@@ -119,10 +119,10 @@ class LoadBalancerClientConfigurationTests {
 				.withPropertyValues("spring.cloud.loadbalancer.configurations=request-based-sticky-session")
 				.run(context -> {
 					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+					then(supplier).isInstanceOf(RequestBasedStickySessionServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
 							.getDelegate();
-					then(delegate).isInstanceOf(RequestBasedStickySessionServiceInstanceListSupplier.class);
+					then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
 							.getDelegate();
 					then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);

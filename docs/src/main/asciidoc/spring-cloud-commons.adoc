@@ -964,8 +964,8 @@ public class CustomLoadBalancerConfiguration {
 			ConfigurableApplicationContext context) {
 		return ServiceInstanceListSupplier.builder()
 					.withDiscoveryClient()
+                    .withCaching()
 					.withZonePreference()
-					.withCaching()
 					.build(context);
 	}
 }
@@ -1110,8 +1110,8 @@ public class CustomLoadBalancerConfiguration {
 			ConfigurableApplicationContext context) {
 		return ServiceInstanceListSupplier.builder()
 					.withDiscoveryClient()
+                    .withCaching()
 					.withHints()
-					.withCaching()
 					.build(context);
 	}
 }
