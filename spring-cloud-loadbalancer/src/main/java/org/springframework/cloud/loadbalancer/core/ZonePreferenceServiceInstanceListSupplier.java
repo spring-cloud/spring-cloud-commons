@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.util.Map;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
 
 /**
@@ -43,15 +45,34 @@ public class ZonePreferenceServiceInstanceListSupplier extends DelegatingService
 
 	private String zone;
 
+	private boolean callGetWithRequestOnDelegates;
+
 	public ZonePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerZoneConfig zoneConfig) {
 		super(delegate);
 		this.zoneConfig = zoneConfig;
 	}
 
+	public ZonePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			LoadBalancerZoneConfig zoneConfig,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
+		super(delegate);
+		this.zoneConfig = zoneConfig;
+		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
+				.isCallGetWithRequestOnDelegates();
+	}
+
 	@Override
 	public Flux<List<ServiceInstance>> get() {
 		return getDelegate().get().map(this::filteredByZone);
+	}
+
+	@Override
+	public Flux<List<ServiceInstance>> get(Request request) {
+		if (callGetWithRequestOnDelegates) {
+			return getDelegate().get(request).map(this::filteredByZone);
+		}
+		return get();
 	}
 
 	private List<ServiceInstance> filteredByZone(List<ServiceInstance> serviceInstances) {

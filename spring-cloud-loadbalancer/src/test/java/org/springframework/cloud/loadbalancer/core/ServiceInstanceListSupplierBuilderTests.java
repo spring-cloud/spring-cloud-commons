@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,9 @@ public class ServiceInstanceListSupplierBuilderTests {
 	public void testBuilder() {
 		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class).run(context -> {
 			ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier.builder().withDiscoveryClient()
-					.withHealthChecks().withWeighted().withCaching().build(context);
-			assertThat(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+					.withHealthChecks().withWeighted().build(context);
+			assertThat(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
 			DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
-			assertThat(delegating.getDelegate()).isInstanceOf(WeightedServiceInstanceListSupplier.class);
-			delegating = (DelegatingServiceInstanceListSupplier) delegating.getDelegate();
 			assertThat(delegating.getDelegate()).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
 			delegating = (DelegatingServiceInstanceListSupplier) delegating.getDelegate();
 			assertThat(delegating.getDelegate()).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
