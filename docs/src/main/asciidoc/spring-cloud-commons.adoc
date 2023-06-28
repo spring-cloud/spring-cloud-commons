@@ -947,6 +947,12 @@ to `false`.
 
 WARNING: Although the basic, non-cached, implementation is useful for prototyping and testing, it's much less efficient than the cached versions, so we recommend always using the cached version in production. If the caching is already done by the `DiscoveryClient` implementation, for example `EurekaDiscoveryClient`, the load-balancer caching should be disabled to prevent double caching.
 
+====
+
+NOTE: When you create your own configuration, if you use `CachingServiceInstanceListSupplier` make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
+
+====
+
 === Weighted Load-Balancing
 
 To enable weighted load-balancing, we provide the `WeightedServiceInstanceListSupplier`. We use `WeightFunction` to calculate the weight of each instance.
@@ -1011,7 +1017,7 @@ If the zone is `null` or there are no instances within the same zone, it returns
 In order to use the zone-based load-balancing approach, you will have to instantiate a `ZonePreferenceServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.
 
 We use delegates to work with `ServiceInstanceListSupplier` beans.
-We suggest passing a `DiscoveryClientServiceInstanceListSupplier` delegate in the constructor of `ZonePreferenceServiceInstanceListSupplier` and, in turn, wrapping the latter with a `CachingServiceInstanceListSupplier` to leverage <<loadbalancer-caching, LoadBalancer caching mechanism>>.
+We suggest using a `DiscoveryClientServiceInstanceListSupplier` delegate, wrapping it with a `CachingServiceInstanceListSupplier` to leverage <<loadbalancer-caching, LoadBalancer caching mechanism>>, and then passing the resulting bean in the constructor of `ZonePreferenceServiceInstanceListSupplier`.
 
 You can use this sample configuration to set it up:
 
@@ -1025,8 +1031,8 @@ public class CustomLoadBalancerConfiguration {
 			ConfigurableApplicationContext context) {
 		return ServiceInstanceListSupplier.builder()
 					.withDiscoveryClient()
+                    .withCaching()
 					.withZonePreference()
-					.withCaching()
 					.build(context);
 	}
 }
@@ -1088,6 +1094,12 @@ TIP: For the non-reactive stack, create this supplier with the `withBlockingHeal
 You can also pass your own `WebClient` or `RestTemplate` instance to be used for the checks.
 
 WARNING: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`. Therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
+
+====
+
+NOTE: When you create your own configuration, `HealthCheckServiceInstanceListSupplier`, make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
+
+====
 
 === Same instance preference for LoadBalancer
 
@@ -1173,8 +1185,8 @@ public class CustomLoadBalancerConfiguration {
 			ConfigurableApplicationContext context) {
 		return ServiceInstanceListSupplier.builder()
 					.withDiscoveryClient()
+                    .withCaching()
 					.withHints()
-					.withCaching()
 					.build(context);
 	}
 }
@@ -1284,8 +1296,15 @@ public class MyConfiguration {
 	}
 }
 ----
+====
 
 NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` configuration arguments should either not be annotated with `@Configuration` or be outside component scan scope.
+
+====
+
+====
+
+NOTE: When you create your own configuration, if you use `CachingServiceInstanceListSupplier` or `HealthCheckServiceInstanceListSupplier`, makes sure to use one of them, not both, and make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
 
 ====
 
@@ -1355,6 +1374,8 @@ The per-client configuration properties work for most of the properties, apart f
 - `spring.cloud.loadbalancer.stats.micrometer.enabled` - globally enables or disables LoadBalancer Micrometer metrics
 
 NOTE: For the properties where maps where already used, where you can specify a different value per-client without using the `clients` keyword (for example, `hints`, `health-check.path`), we have kept that behaviour in order to keep the library backwards compatible. It will be modified in the next major release.
+
+NOTE: Starting with `4.0.4`, we have introduced the `callGetWithRequestOnDelegates` flag in `LoadBalancerProperties`. If this flag is set to `true`, `ServiceInstanceListSupplier#get(Request request)` method will be implemented to call `delegate.get(request)` in classes assignable from `DelegatingServiceInstanceListSupplier` that don't already implement that method, with the exclusion of `CachingServiceInstanceListSupplier` and `HealthCheckServiceInstanceListSupplier`, which should be placed in the instance supplier hierarchy directly after the supplier performing instance retrieval over the network, before any request-based filtering is done. For `4.0.x` the flag is set to `false` by default, however, since `4.1.0` it's going to be set to `true` by default.
 
 ===  AOT and Native Image Support
 
