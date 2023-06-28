@@ -188,7 +188,6 @@ class WeightedServiceInstanceListSupplierTests {
 	void shouldCallGetRequestOnDelegate() {
 		LoadBalancerClientFactory loadBalancerClientFactory = mock(LoadBalancerClientFactory.class);
 		LoadBalancerProperties properties = new LoadBalancerProperties();
-		properties.setCallGetWithRequestOnDelegates(true);
 		when(loadBalancerClientFactory.getProperties(any())).thenReturn(properties);
 		ServiceInstance one = serviceInstance("test-1", Collections.emptyMap());
 		ServiceInstance two = serviceInstance("test-2", Collections.emptyMap());

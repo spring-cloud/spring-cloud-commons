@@ -70,7 +70,6 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 	@BeforeEach
 	void setUp() {
 		LoadBalancerProperties properties = new LoadBalancerProperties();
-		properties.setCallGetWithRequestOnDelegates(true);
 		when(loadBalancerClientFactory.getProperties(any())).thenReturn(properties);
 		supplier = new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig, loadBalancerClientFactory);
 	}

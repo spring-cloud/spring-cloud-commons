@@ -80,10 +80,10 @@ public class LoadBalancerProperties {
 	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
 	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
 	 * instance supplier hierarchy directly after the supplier performing instance
-	 * retrieval over the network, before any request-based filtering is done. Note: in
-	 * 4.1, this behaviour will become the default
+	 * retrieval over the network, before any request-based filtering is done,
+	 * {@code true} by default.
 	 */
-	private boolean callGetWithRequestOnDelegates;
+	private boolean callGetWithRequestOnDelegates = true;
 
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
@@ -138,32 +138,10 @@ public class LoadBalancerProperties {
 		return xForwarded;
 	}
 
-	/**
-	 * If this flag is set to {@code true},
-	 * {@code ServiceInstanceListSupplier#get(Request request)} method will be implemented
-	 * to call {@code delegate.get(request)} in classes assignable from
-	 * {@code DelegatingServiceInstanceListSupplier} that don't already implement that
-	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
-	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
-	 * instance supplier hierarchy directly after the supplier performing instance
-	 * retrieval over the network, before any request-based filtering is done. Note: in
-	 * 4.1, this behaviour will become the default
-	 */
 	public boolean isCallGetWithRequestOnDelegates() {
 		return callGetWithRequestOnDelegates;
 	}
 
-	/**
-	 * If this flag is set to {@code true},
-	 * {@code ServiceInstanceListSupplier#get(Request request)} method will be implemented
-	 * to call {@code delegate.get(request)} in classes assignable from
-	 * {@code DelegatingServiceInstanceListSupplier} that don't already implement that
-	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
-	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
-	 * instance supplier hierarchy directly after the supplier performing instance
-	 * retrieval over the network, before any request-based filtering is done. Note: in
-	 * 4.1, this behaviour will become the default
-	 */
 	public void setCallGetWithRequestOnDelegates(boolean callGetWithRequestOnDelegates) {
 		this.callGetWithRequestOnDelegates = callGetWithRequestOnDelegates;
 	}
