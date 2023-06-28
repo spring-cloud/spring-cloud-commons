@@ -16,18 +16,6 @@
 
 package org.springframework.cloud.context.encrypt;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.regex.Pattern;
-
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.openssl.MiscPEMGenerator;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.util.io.pem.PemObjectGenerator;
-import org.bouncycastle.util.io.pem.PemWriter;
-
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
@@ -37,8 +25,6 @@ import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
  * @author Biju Kunjummen
  */
 public class EncryptorFactory {
-
-	private static final Pattern NEWLINE_ESCAPE_PATTERN = Pattern.compile("\\r|\\n");
 
 	private String salt = "deadbeef";
 
@@ -54,9 +40,9 @@ public class EncryptorFactory {
 		TextEncryptor encryptor;
 		if (data.contains("RSA PRIVATE KEY")) {
 
+				encryptor = new RsaSecretEncryptor(data);
+
 			try {
-				String normalizedPemData = normalizePem(data);
-				encryptor = new RsaSecretEncryptor(NEWLINE_ESCAPE_PATTERN.matcher(normalizedPemData).replaceAll(""));
 			}
 			catch (IllegalArgumentException e) {
 				throw new KeyFormatException(e);
@@ -71,26 +57,6 @@ public class EncryptorFactory {
 		}
 
 		return encryptor;
-	}
-
-	private String normalizePem(String data) {
-		PEMKeyPair pemKeyPair = null;
-		try (PEMParser pemParser = new PEMParser(new StringReader(data))) {
-			pemKeyPair = (PEMKeyPair) pemParser.readObject();
-			PrivateKeyInfo privateKeyInfo = pemKeyPair.getPrivateKeyInfo();
-
-			StringWriter textWriter = new StringWriter();
-			try (PemWriter pemWriter = new PemWriter(textWriter)) {
-				PemObjectGenerator pemObjectGenerator = new MiscPEMGenerator(privateKeyInfo);
-
-				pemWriter.writeObject(pemObjectGenerator);
-				pemWriter.flush();
-				return textWriter.toString();
-			}
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e.getMessage(), e);
-		}
 	}
 
 }
