@@ -81,11 +81,9 @@ public class LoadBalancerProperties {
 	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
 	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
 	 * instance supplier hierarchy directly after the supplier performing instance
-	 * retrieval over the network, before any request-based filtering is done.
-	 * @deprecated This flag will be removed in 4.1, where this behaviour will become the
-	 * default
+	 * retrieval over the network, before any request-based filtering is done. Note: in
+	 * 4.1, this behaviour will become the default
 	 */
-	@Deprecated
 	private boolean callGetWithRequestOnDelegates;
 
 	public HealthCheck getHealthCheck() {
@@ -157,11 +155,9 @@ public class LoadBalancerProperties {
 	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
 	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
 	 * instance supplier hierarchy directly after the supplier performing instance
-	 * retrieval over the network, before any request-based filtering is done.
-	 * @deprecated This flag will be removed in 4.1, where this behaviour will become the
-	 * default
+	 * retrieval over the network, before any request-based filtering is done. Note: in
+	 * 4.1, this behaviour will become the default
 	 */
-	@Deprecated
 	public boolean isCallGetWithRequestOnDelegates() {
 		return callGetWithRequestOnDelegates;
 	}
@@ -174,11 +170,9 @@ public class LoadBalancerProperties {
 	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
 	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
 	 * instance supplier hierarchy directly after the supplier performing instance
-	 * retrieval over the network, before any request-based filtering is done.
-	 * @deprecated This flag will be removed in 4.1, where this behaviour will become the
-	 * default
+	 * retrieval over the network, before any request-based filtering is done. Note: in
+	 * 4.1, this behaviour will become the default
 	 */
-	@Deprecated
 	public void setCallGetWithRequestOnDelegates(boolean callGetWithRequestOnDelegates) {
 		this.callGetWithRequestOnDelegates = callGetWithRequestOnDelegates;
 	}

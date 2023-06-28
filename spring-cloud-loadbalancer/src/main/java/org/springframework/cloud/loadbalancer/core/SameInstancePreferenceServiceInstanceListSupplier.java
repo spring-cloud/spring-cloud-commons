@@ -47,11 +47,6 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 		super(delegate);
 	}
 
-	/**
-	 * @deprecated for removal in 4.1, where calling {@code get(Request request)} on
-	 * delegate will be the default behaviour.
-	 */
-	@Deprecated
 	public SameInstancePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		super(delegate);

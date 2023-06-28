@@ -53,11 +53,6 @@ public class ZonePreferenceServiceInstanceListSupplier extends DelegatingService
 		this.zoneConfig = zoneConfig;
 	}
 
-	/**
-	 * @deprecated for removal in 4.1, where calling {@code get(Request request)} on
-	 * delegate will be the default behaviour.
-	 */
-	@Deprecated
 	public ZonePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerZoneConfig zoneConfig,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {

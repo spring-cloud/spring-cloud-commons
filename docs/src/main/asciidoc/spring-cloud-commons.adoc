@@ -933,6 +933,11 @@ to `false`.
 
 WARNING: Although the basic, non-cached, implementation is useful for prototyping and testing, it's much less efficient than the cached versions, so we recommend always using the cached version in production. If the caching is already done by the `DiscoveryClient` implementation, for example `EurekaDiscoveryClient`, the load-balancer caching should be disabled to prevent double caching.
 
+====
+
+NOTE: When you create your own configuration, if you use `CachingServiceInstanceListSupplier` make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
+
+====
 === Zone-Based Load-Balancing
 
 To enable zone-based load-balancing, we provide the `ZonePreferenceServiceInstanceListSupplier`.
@@ -950,7 +955,7 @@ If the zone is `null` or there are no instances within the same zone, it returns
 In order to use the zone-based load-balancing approach, you will have to instantiate a `ZonePreferenceServiceInstanceListSupplier` bean in a <<custom-loadbalancer-configuration,custom configuration>>.
 
 We use delegates to work with `ServiceInstanceListSupplier` beans.
-We suggest passing a `DiscoveryClientServiceInstanceListSupplier` delegate in the constructor of `ZonePreferenceServiceInstanceListSupplier` and, in turn, wrapping the latter with a `CachingServiceInstanceListSupplier` to leverage <<loadbalancer-caching, LoadBalancer caching mechanism>>.
+We suggest using a `DiscoveryClientServiceInstanceListSupplier` delegate, wrapping it with a `CachingServiceInstanceListSupplier` to leverage <<loadbalancer-caching, LoadBalancer caching mechanism>>, and then passing the resulting bean in the constructor of `ZonePreferenceServiceInstanceListSupplier`.
 
 You can use this sample configuration to set it up:
 
@@ -1025,6 +1030,12 @@ TIP: For the non-reactive stack, create this supplier with the `withBlockingHeal
 You can also pass your own `WebClient` or `RestTemplate` instance to be used for the checks.
 
 WARNING: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`. Therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
+
+====
+
+NOTE: When you create your own configuration, `HealthCheckServiceInstanceListSupplier`, make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
+
+====
 
 === Same instance preference for LoadBalancer
 
@@ -1221,8 +1232,15 @@ public class MyConfiguration {
 	}
 }
 ----
+====
 
 NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` configuration arguments should either not be annotated with `@Configuration` or be outside component scan scope.
+
+====
+
+====
+
+NOTE: When you create your own configuration, if you use `CachingServiceInstanceListSupplier` or `HealthCheckServiceInstanceListSupplier`, makes sure to use one of them, not both, and make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
 
 ====
 
