@@ -116,7 +116,11 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withWeighted() {
-		DelegateCreator creator = (context, delegate) -> new WeightedServiceInstanceListSupplier(delegate);
+		DelegateCreator creator = (context, delegate) -> {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory = context
+					.getBean(LoadBalancerClientFactory.class);
+			return new WeightedServiceInstanceListSupplier(delegate, loadBalancerClientFactory);
+		};
 		this.creators.add(creator);
 		return this;
 	}
@@ -129,8 +133,11 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withWeighted(WeightFunction weightFunction) {
-		DelegateCreator creator = (context, delegate) -> new WeightedServiceInstanceListSupplier(delegate,
-				weightFunction);
+		DelegateCreator creator = (context, delegate) -> {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory = context
+					.getBean(LoadBalancerClientFactory.class);
+			return new WeightedServiceInstanceListSupplier(delegate, weightFunction, loadBalancerClientFactory);
+		};
 		this.creators.add(creator);
 		return this;
 	}

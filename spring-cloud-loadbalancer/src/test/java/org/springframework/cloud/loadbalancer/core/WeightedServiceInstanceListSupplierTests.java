@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2022 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,15 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 
 import static java.util.stream.Collectors.summingInt;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.loadbalancer.core.WeightedServiceInstanceListSupplier.DEFAULT_WEIGHT;
@@ -40,6 +46,7 @@ import static org.springframework.cloud.loadbalancer.core.WeightedServiceInstanc
  * Tests for {@link WeightedServiceInstanceListSupplier}.
  *
  * @author Zhuozhi Ji
+ * @author Olga Maciaszek-Sharma
  */
 class WeightedServiceInstanceListSupplierTests {
 
@@ -175,6 +182,30 @@ class WeightedServiceInstanceListSupplierTests {
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", DEFAULT_WEIGHT);
+	}
+
+	@Test
+	void shouldCallGetRequestOnDelegate() {
+		LoadBalancerClientFactory loadBalancerClientFactory = mock(LoadBalancerClientFactory.class);
+		LoadBalancerProperties properties = new LoadBalancerProperties();
+		properties.setCallGetWithRequestOnDelegates(true);
+		when(loadBalancerClientFactory.getProperties(any())).thenReturn(properties);
+		ServiceInstance one = serviceInstance("test-1", Collections.emptyMap());
+		ServiceInstance two = serviceInstance("test-2", Collections.emptyMap());
+		ServiceInstance three = serviceInstance("test-3", buildWeightMetadata(3));
+		Request<DefaultRequestContext> request = new DefaultRequest<>(new DefaultRequestContext());
+
+		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(one, two, three)));
+		when(delegate.get(request)).thenReturn(Flux.just(Arrays.asList(one, two)));
+		WeightedServiceInstanceListSupplier supplier = new WeightedServiceInstanceListSupplier(delegate,
+				loadBalancerClientFactory);
+
+		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get(request).blockFirst());
+		Map<String, Integer> counter = serviceInstances.stream()
+				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
+		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
+		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
+		assertThat(counter).doesNotContainEntry("test-3", 3);
 	}
 
 	private ServiceInstance serviceInstance(String instanceId, Map<String, String> metadata) {

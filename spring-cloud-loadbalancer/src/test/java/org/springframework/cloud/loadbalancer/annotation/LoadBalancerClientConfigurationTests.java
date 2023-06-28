@@ -120,10 +120,10 @@ class LoadBalancerClientConfigurationTests {
 		reactiveDiscoveryClientRunner.withUserConfiguration(TestConfig.class)
 				.withPropertyValues("spring.cloud.loadbalancer.configurations=weighted").run(context -> {
 					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+					then(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
 							.getDelegate();
-					then(delegate).isInstanceOf(WeightedServiceInstanceListSupplier.class);
+					then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
 							.getDelegate();
 					then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
@@ -207,10 +207,10 @@ class LoadBalancerClientConfigurationTests {
 		blockingDiscoveryClientRunner.withUserConfiguration(RestTemplateTestConfig.class)
 				.withPropertyValues("spring.cloud.loadbalancer.configurations=weighted").run(context -> {
 					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+					then(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
 							.getDelegate();
-					then(delegate).isInstanceOf(WeightedServiceInstanceListSupplier.class);
+					then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
 					then(((DelegatingServiceInstanceListSupplier) delegate).getDelegate())
 							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
 				});
