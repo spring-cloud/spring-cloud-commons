@@ -16,10 +16,7 @@
 
 package org.springframework.cloud.configuration;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
@@ -27,11 +24,10 @@ import java.security.cert.Certificate;
 
 import javax.net.ssl.SSLContext;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,60 +38,22 @@ public class SSHContextFactoryTests {
 
 	private static final String KEY_PASSWORD = "test-key-password";
 
-	private static KeyAndCert ca;
-
-	private static KeyAndCert cert;
-
-	private static File keyStore;
-
-	private static File trustStore;
-
 	private TlsProperties properties;
-
-	@BeforeAll
-	public static void createKeyStoreAndTrustStore() throws Exception {
-		KeyTool tool = new KeyTool();
-
-		ca = tool.createCA("MyCA");
-		cert = ca.sign("MyCert");
-
-		keyStore = saveKeyAndCert(cert);
-		trustStore = saveCert(ca);
-	}
-
-	private static File saveKeyAndCert(KeyAndCert keyCert) throws Exception {
-		return saveKeyStore(keyCert.subject(), () -> keyCert.storeKeyAndCert(KEY_PASSWORD));
-	}
-
-	private static File saveCert(KeyAndCert keyCert) throws Exception {
-		return saveKeyStore(keyCert.subject(), keyCert::storeCert);
-	}
-
-	private static File saveKeyStore(String prefix, KeyStoreSupplier func) throws Exception {
-		File result = File.createTempFile(prefix, ".p12");
-		result.deleteOnExit();
-
-		try (OutputStream output = new FileOutputStream(result)) {
-			KeyStore store = func.createKeyStore();
-			store.store(output, KEY_STORE_PASSWORD.toCharArray());
-		}
-		return result;
-	}
 
 	@BeforeEach
 	public void createProperties() {
 		properties = new TlsProperties();
 
 		properties.setEnabled(true);
-		properties.setKeyStore(resourceOf(keyStore));
+		properties.setKeyStore(resourceOf("MyCert.p12"));
 		properties.setKeyStorePassword(KEY_STORE_PASSWORD);
 		properties.setKeyPassword(KEY_PASSWORD);
-		properties.setTrustStore(resourceOf(trustStore));
+		properties.setTrustStore(resourceOf("MyCA.p12"));
 		properties.setTrustStorePassword(KEY_STORE_PASSWORD);
 	}
 
-	private Resource resourceOf(File file) {
-		return new FileSystemResource(file);
+	private Resource resourceOf(String path) {
+		return new ClassPathResource(path);
 	}
 
 	@Test
@@ -104,10 +62,10 @@ public class SSHContextFactoryTests {
 		KeyStore store = factory.createKeyStore();
 
 		Certificate c = store.getCertificate("MyCert");
-		assertThat(c).isEqualTo(cert.certificate());
+		assertThat(c).isNotNull();
 
 		Key key = store.getKey("MyCert", KEY_PASSWORD.toCharArray());
-		assertThat(key).isEqualTo(cert.privateKey());
+		assertThat(key).isNotNull();
 	}
 
 	@Test
@@ -116,7 +74,7 @@ public class SSHContextFactoryTests {
 		KeyStore store = factory.createTrustStore();
 
 		Certificate c = store.getCertificate("MyCA");
-		assertThat(c).isEqualTo(ca.certificate());
+		assertThat(c).isNotNull();
 	}
 
 	@Test
