@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,6 @@ public final class ServiceInstanceListSupplierBuilder {
 	private static final Log LOG = LogFactory.getLog(ServiceInstanceListSupplierBuilder.class);
 
 	private Creator baseCreator;
-
-	private DelegateCreator cachingCreator;
 
 	private final List<DelegateCreator> creators = new ArrayList<>();
 
@@ -118,7 +116,11 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withWeighted() {
-		DelegateCreator creator = (context, delegate) -> new WeightedServiceInstanceListSupplier(delegate);
+		DelegateCreator creator = (context, delegate) -> {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory = context
+					.getBean(LoadBalancerClientFactory.class);
+			return new WeightedServiceInstanceListSupplier(delegate, loadBalancerClientFactory);
+		};
 		this.creators.add(creator);
 		return this;
 	}
@@ -131,8 +133,11 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withWeighted(WeightFunction weightFunction) {
-		DelegateCreator creator = (context, delegate) -> new WeightedServiceInstanceListSupplier(delegate,
-				weightFunction);
+		DelegateCreator creator = (context, delegate) -> {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory = context
+					.getBean(LoadBalancerClientFactory.class);
+			return new WeightedServiceInstanceListSupplier(delegate, weightFunction, loadBalancerClientFactory);
+		};
 		this.creators.add(creator);
 		return this;
 	}
@@ -174,8 +179,10 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withSameInstancePreference() {
-		DelegateCreator creator = (context,
-				delegate) -> new SameInstancePreferenceServiceInstanceListSupplier(delegate);
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
+			return new SameInstancePreferenceServiceInstanceListSupplier(delegate, loadBalancerClientFactory);
+		};
 		this.creators.add(creator);
 		return this;
 	}
@@ -217,8 +224,9 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withZonePreference() {
 		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
 			LoadBalancerZoneConfig zoneConfig = context.getBean(LoadBalancerZoneConfig.class);
-			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig);
+			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig, loadBalancerClientFactory);
 		};
 		this.creators.add(creator);
 		return this;
@@ -232,8 +240,9 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withZonePreference(String zoneName) {
 		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
 			LoadBalancerZoneConfig zoneConfig = new LoadBalancerZoneConfig(zoneName);
-			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig);
+			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig, loadBalancerClientFactory);
 		};
 		this.creators.add(creator);
 		return this;
@@ -254,19 +263,15 @@ public final class ServiceInstanceListSupplierBuilder {
 	}
 
 	/**
-	 * If {@link LoadBalancerCacheManager} is available in the context, wraps created
-	 * {@link ServiceInstanceListSupplier} hierarchy with a
-	 * {@link CachingServiceInstanceListSupplier} instance to provide a caching mechanism
-	 * for service instances. Uses {@link ObjectProvider} to lazily resolve
+	 * If {@link LoadBalancerCacheManager} is available in the context, adds a
+	 * {@link CachingServiceInstanceListSupplier} instance to the
+	 * {@link ServiceInstanceListSupplier} hierarchy to provide a caching mechanism for
+	 * service instances. Uses {@link ObjectProvider} to lazily resolve
 	 * {@link LoadBalancerCacheManager}.
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withCaching() {
-		if (cachingCreator != null && LOG.isWarnEnabled()) {
-			LOG.warn(
-					"Overriding a previously set cachingCreator with a CachingServiceInstanceListSupplier-based cachingCreator.");
-		}
-		this.cachingCreator = (context, delegate) -> {
+		DelegateCreator creator = (context, delegate) -> {
 			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
 					.getBeanProvider(LoadBalancerCacheManager.class);
 			if (cacheManagerProvider.getIfAvailable() != null) {
@@ -277,6 +282,7 @@ public final class ServiceInstanceListSupplierBuilder {
 			}
 			return delegate;
 		};
+		creators.add(creator);
 		return this;
 	}
 
@@ -323,9 +329,6 @@ public final class ServiceInstanceListSupplierBuilder {
 			supplier = creator.apply(context, supplier);
 		}
 
-		if (this.cachingCreator != null) {
-			supplier = this.cachingCreator.apply(context, supplier);
-		}
 		return supplier;
 	}
 

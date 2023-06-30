@@ -40,12 +40,12 @@ public abstract class DelegatingServiceInstanceListSupplier
 	}
 
 	public ServiceInstanceListSupplier getDelegate() {
-		return this.delegate;
+		return delegate;
 	}
 
 	@Override
 	public String getServiceId() {
-		return this.delegate.getServiceId();
+		return delegate.getServiceId();
 	}
 
 	@Override

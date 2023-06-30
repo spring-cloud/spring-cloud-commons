@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -46,8 +53,9 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 
 	private final LoadBalancerZoneConfig zoneConfig = new LoadBalancerZoneConfig(null);
 
-	private final ZonePreferenceServiceInstanceListSupplier supplier = new ZonePreferenceServiceInstanceListSupplier(
-			delegate, zoneConfig);
+	private ZonePreferenceServiceInstanceListSupplier supplier;
+
+	private final LoadBalancerClientFactory loadBalancerClientFactory = mock(LoadBalancerClientFactory.class);
 
 	private final ServiceInstance first = serviceInstance("test-1", buildZoneMetadata("zone1"));
 
@@ -58,6 +66,14 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 	private final ServiceInstance fourth = serviceInstance("test-4", buildZoneMetadata("zone3"));
 
 	private final ServiceInstance fifth = serviceInstance("test-5", buildZoneMetadata(null));
+
+	@BeforeEach
+	void setUp() {
+		LoadBalancerProperties properties = new LoadBalancerProperties();
+		properties.setCallGetWithRequestOnDelegates(true);
+		when(loadBalancerClientFactory.getProperties(any())).thenReturn(properties);
+		supplier = new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig, loadBalancerClientFactory);
+	}
 
 	@Test
 	void shouldFilterInstancesByZone() {
@@ -71,6 +87,19 @@ class ZonePreferenceServiceInstanceListSupplierTests {
 		assertThat(filtered).doesNotContain(third);
 		assertThat(filtered).doesNotContain(fourth);
 		assertThat(filtered).doesNotContain(fifth);
+	}
+
+	@Test
+	void shouldCallGetRequestOnDelegate() {
+		zoneConfig.setZone("zone1");
+		Request<DefaultRequestContext> request = new DefaultRequest<>(new DefaultRequestContext());
+		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(first, second, third, fourth, fifth)));
+		when(delegate.get(request)).thenReturn(Flux.just(Arrays.asList(first, third, fourth, fifth)));
+
+		List<ServiceInstance> filtered = supplier.get(request).blockFirst();
+
+		assertThat(filtered).hasSize(1);
+		assertThat(filtered).containsOnly(first);
 	}
 
 	@Test
