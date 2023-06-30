@@ -949,8 +949,6 @@ WARNING: Although the basic, non-cached, implementation is useful for prototypin
 
 NOTE: When you create your own configuration, if you use `CachingServiceInstanceListSupplier` make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
 
-====
-
 === Weighted Load-Balancing
 
 To enable weighted load-balancing, we provide the `WeightedServiceInstanceListSupplier`. We use `WeightFunction` to calculate the weight of each instance.
