@@ -15,7 +15,7 @@
 	<name>spring-cloud-commons-dependencies</name>
 	<description>Spring Cloud Commons Dependencies</description>
 	<properties>
-		<spring-security-rsa.version>1.0.12.RELEASE</spring-security-rsa.version>
+		<spring-security-rsa.version>1.1.1</spring-security-rsa.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>

@@ -62,7 +62,6 @@ class SameInstancePreferenceServiceInstanceListSupplierTests {
 	@BeforeEach
 	void setUp() {
 		LoadBalancerProperties properties = new LoadBalancerProperties();
-		properties.setCallGetWithRequestOnDelegates(true);
 		when(loadBalancerClientFactory.getProperties(any())).thenReturn(properties);
 		supplier = new SameInstancePreferenceServiceInstanceListSupplier(delegate, loadBalancerClientFactory);
 	}
