@@ -933,11 +933,8 @@ to `false`.
 
 WARNING: Although the basic, non-cached, implementation is useful for prototyping and testing, it's much less efficient than the cached versions, so we recommend always using the cached version in production. If the caching is already done by the `DiscoveryClient` implementation, for example `EurekaDiscoveryClient`, the load-balancer caching should be disabled to prevent double caching.
 
-====
-
 NOTE: When you create your own configuration, if you use `CachingServiceInstanceListSupplier` make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
 
-====
 === Zone-Based Load-Balancing
 
 To enable zone-based load-balancing, we provide the `ZonePreferenceServiceInstanceListSupplier`.
@@ -1031,11 +1028,7 @@ You can also pass your own `WebClient` or `RestTemplate` instance to be used for
 
 WARNING: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`. Therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
 
-====
-
 NOTE: When you create your own configuration, `HealthCheckServiceInstanceListSupplier`, make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
-
-====
 
 === Same instance preference for LoadBalancer
 
@@ -1190,7 +1183,6 @@ and https://github.com/stoyanr/Evictor[Evictor].
 
 You can also use the `@LoadBalancerClient` annotation to pass your own load-balancer client configuration, passing the name of the load-balancer client and the configuration class, as follows:
 
-====
 [source,java,indent=0]
 ----
 @Configuration
@@ -1205,10 +1197,10 @@ public class MyConfiguration {
 }
 ----
 
-TIP:: In order to make working on your own LoadBalancer configuration easier, we have added a `builder()` method to the `ServiceInstanceListSupplier` class.
+TIP: In order to make working on your own LoadBalancer configuration easier, we have added a `builder()` method to the `ServiceInstanceListSupplier` class.
 
-TIP:: You can also use our alternative predefined configurations in place of the default ones by setting the value of `spring.cloud.loadbalancer.configurations` property to `zone-preference` to use `ZonePreferenceServiceInstanceListSupplier` with caching or to `health-check` to use `HealthCheckServiceInstanceListSupplier` with caching.
-====
+TIP: You can also use our alternative predefined configurations in place of the default ones by setting the value of `spring.cloud.loadbalancer.configurations` property to `zone-preference` to use `ZonePreferenceServiceInstanceListSupplier` with caching or to `health-check` to use `HealthCheckServiceInstanceListSupplier` with caching.
+
 
 You can use this feature to instantiate different implementations of `ServiceInstanceListSupplier` or `ReactorLoadBalancer`, either written by you, or provided by us as alternatives (for example `ZonePreferenceServiceInstanceListSupplier`) to override the default setup.
 
@@ -1218,7 +1210,6 @@ NOTE: The annotation `value` arguments (`stores` in the example above) specifies
 
 You can also pass multiple configurations (for more than one load-balancer client) through the `@LoadBalancerClients` annotation, as the following example shows:
 
-====
 [source,java,indent=0]
 ----
 @Configuration
@@ -1232,17 +1223,11 @@ public class MyConfiguration {
 	}
 }
 ----
-====
 
 NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` configuration arguments should either not be annotated with `@Configuration` or be outside component scan scope.
 
-====
-
-====
-
 NOTE: When you create your own configuration, if you use `CachingServiceInstanceListSupplier` or `HealthCheckServiceInstanceListSupplier`, makes sure to use one of them, not both, and make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
 
-====
 
 [[loadbalancer-lifecycle]]
 === Spring Cloud LoadBalancer Lifecycle
