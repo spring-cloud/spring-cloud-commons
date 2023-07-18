@@ -158,27 +158,27 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	}
 
 	public GenericApplicationContext buildContext(String name) {
+		// https://github.com/spring-cloud/spring-cloud-netflix/issues/3101
+		// https://github.com/spring-cloud/spring-cloud-openfeign/issues/475
+		ClassLoader classLoader = getClass().getClassLoader();
 		GenericApplicationContext context;
 		if (this.parent != null) {
-			// jdk11 issue
-			// https://github.com/spring-cloud/spring-cloud-netflix/issues/3101
-			// https://github.com/spring-cloud/spring-cloud-openfeign/issues/475
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			if (parent instanceof ConfigurableApplicationContext) {
 				beanFactory.setBeanClassLoader(
 						((ConfigurableApplicationContext) parent).getBeanFactory().getBeanClassLoader());
 			}
 			else {
-				beanFactory.setBeanClassLoader(parent.getClassLoader());
+				beanFactory.setBeanClassLoader(classLoader);
 			}
 			context = AotDetector.useGeneratedArtifacts() ? new GenericApplicationContext(beanFactory)
 					: new AnnotationConfigApplicationContext(beanFactory);
-			context.setClassLoader(parent.getClassLoader());
 		}
 		else {
 			context = AotDetector.useGeneratedArtifacts() ? new GenericApplicationContext()
 					: new AnnotationConfigApplicationContext();
 		}
+		context.setClassLoader(classLoader);
 		context.getEnvironment().getPropertySources().addFirst(
 				new MapPropertySource(this.propertySourceName, Collections.singletonMap(this.propertyName, name)));
 		if (this.parent != null) {
