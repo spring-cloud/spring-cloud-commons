@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ import org.springframework.core.env.MapPropertySource;
  * @author Spencer Gibb
  * @author Dave Syer
  * @author Tommy Karlsson
+ * @author Olga Maciaszek-Sharma
  */
-// TODO: add javadoc
 public abstract class NamedContextFactory<C extends NamedContextFactory.Specification>
 		implements DisposableBean, ApplicationContextAware {
 
@@ -113,25 +113,25 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	}
 
 	protected AnnotationConfigApplicationContext createContext(String name) {
+		// https://github.com/spring-cloud/spring-cloud-netflix/issues/3101
+		// https://github.com/spring-cloud/spring-cloud-openfeign/issues/475
+		ClassLoader classLoader = getClass().getClassLoader();
 		AnnotationConfigApplicationContext context;
 		if (this.parent != null) {
-			// jdk11 issue
-			// https://github.com/spring-cloud/spring-cloud-netflix/issues/3101
-			// https://github.com/spring-cloud/spring-cloud-openfeign/issues/475
 			DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 			if (parent instanceof ConfigurableApplicationContext) {
 				beanFactory.setBeanClassLoader(
 						((ConfigurableApplicationContext) parent).getBeanFactory().getBeanClassLoader());
 			}
 			else {
-				beanFactory.setBeanClassLoader(parent.getClassLoader());
+				beanFactory.setBeanClassLoader(classLoader);
 			}
 			context = new AnnotationConfigApplicationContext(beanFactory);
-			context.setClassLoader(this.parent.getClassLoader());
 		}
 		else {
 			context = new AnnotationConfigApplicationContext();
 		}
+		context.setClassLoader(classLoader);
 		if (this.configurations.containsKey(name)) {
 			for (Class<?> configuration : this.configurations.get(name).getConfiguration()) {
 				context.register(configuration);
