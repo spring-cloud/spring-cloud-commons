@@ -81,17 +81,13 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 			@Override
 			public boolean isCompatible() {
-				// try {
-				// since 3.2
-				// TODO: find new class/method in boot since 3.2
-				// Class.forName(
-				// "org.springframework.boot.autoconfigure.validation.ValidationConfigurationCustomizer");
-				return true;
-
-				// }
-				// catch (ClassNotFoundException e) {
-				// return false;
-				// }
+				try {
+					Class.forName("org.springframework.boot.autoconfigure.web.client.RestClientSsl");
+					return true;
+				}
+				catch (ClassNotFoundException e) {
+					return false;
+				}
 
 			}
 		};
