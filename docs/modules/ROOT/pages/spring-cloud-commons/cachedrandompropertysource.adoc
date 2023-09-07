@@ -8,10 +8,8 @@ This random value might be useful in the case where you want a random value that
 context restarts.  The property value takes the form of `cachedrandom.[yourkey].[type]` where `yourkey` is the key in the cache.  The `type` value can
 be any type supported by Spring Boot's `RandomValuePropertySource`.
 
-====
 [source,properties,indent=0]
 ----
 myrandom=${cachedrandom.appname.value}
 ----
-====
 

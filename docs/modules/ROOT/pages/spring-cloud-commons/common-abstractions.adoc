@@ -1,4 +1,4 @@
-[[spring-cloud-commons:-common-abstractions]]
+[[spring-cloud-common-abstractions]]
 = Spring Cloud Commons: Common Abstractions
 
 Patterns such as service discovery, load balancing, and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (for example, discovery with Eureka or Consul).
@@ -52,7 +52,7 @@ the `getOrder()` method so that it returns the value that is suitable for your s
 properties to set the order of the `DiscoveryClient`
 implementations provided by Spring Cloud, among others  `ConsulDiscoveryClient`, `EurekaDiscoveryClient` and
 `ZookeeperDiscoveryClient`. In order to do it, you just need to set the
-`spring.cloud.{clientIdentifier}.discovery.order` (or `eureka.client.order` for Eureka) property to the desired value.
+`spring.cloud.\{clientIdentifier}.discovery.order` (or `eureka.client.order` for Eureka) property to the desired value.
 
 [[simplediscoveryclient]]
 === SimpleDiscoveryClient
@@ -75,7 +75,6 @@ Commons now provides a `ServiceRegistry` interface that provides methods such as
 
 The following example shows the `ServiceRegistry` in use:
 
-====
 [source,java,indent=0]
 ----
 @Configuration
@@ -94,7 +93,6 @@ public class MyConfiguration {
     }
 }
 ----
-====
 
 Each `ServiceRegistry` implementation has its own `Registry` implementation.
 
@@ -142,7 +140,6 @@ For instance, Eureka's supported statuses are `UP`, `DOWN`, `OUT_OF_SERVICE`, an
 You can configure a `RestTemplate` to use a Load-balancer client.
 To create a load-balanced `RestTemplate`, create a `RestTemplate` `@Bean` and use the `@LoadBalanced` qualifier, as the following example shows:
 
-====
 [source,java,indent=0]
 ----
 @Configuration
@@ -165,7 +162,6 @@ public class MyClass {
     }
 }
 ----
-====
 
 CAUTION: A `RestTemplate` bean is no longer created through auto-configuration.
 Individual applications must create it.
@@ -182,7 +178,6 @@ Add xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer-starte
 You can configure `WebClient` to automatically use a load-balancer client.
 To create a load-balanced `WebClient`, create a `WebClient.Builder` `@Bean` and use the `@LoadBalanced` qualifier, as follows:
 
-====
 [source,java,indent=0]
 ----
 @Configuration
@@ -205,7 +200,6 @@ public class MyClass {
     }
 }
 ----
-====
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The Spring Cloud LoadBalancer is used to create a full physical address.
@@ -249,7 +243,6 @@ NOTE: Individual Loadbalancer clients may be configured individually with the sa
 
 NOTE: For load-balanced retries, by default, we wrap the `ServiceInstanceListSupplier` bean with `RetryAwareServiceInstanceListSupplier` to select a different instance from the one previously chosen, if available. You can disable this behavior by setting the value of `spring.cloud.loadbalancer.retry.avoidPreviousInstance` to `false`.
 
-====
 [source,java,indent=0]
 ----
 @Configuration
@@ -265,13 +258,11 @@ public class MyConfiguration {
     }
 }
 ----
-====
 
 If you want to add one or more `RetryListener` implementations to your retry functionality, you need to
 create a bean of type `LoadBalancedRetryListenerFactory` and return the `RetryListener` array
 you would like to use for a given service, as the following example shows:
 
-====
 [source,java,indent=0]
 ----
 @Configuration
@@ -303,7 +294,6 @@ public class MyConfiguration {
     }
 }
 ----
-====
 
 [[multiple-resttemplate-objects]]
 == Multiple `RestTemplate` Objects
@@ -311,7 +301,6 @@ public class MyConfiguration {
 If you want a `RestTemplate` that is not load-balanced, create a `RestTemplate` bean and inject it.
 To access the load-balanced `RestTemplate`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
 
-====
 [source,java,indent=0]
 ----
 @Configuration
@@ -347,7 +336,6 @@ public class MyClass {
     }
 }
 ----
-====
 
 IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestTemplate` declaration in the preceding example to disambiguate the unqualified `@Autowired` injection.
 
@@ -359,7 +347,6 @@ TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set 
 If you want a `WebClient` that is not load-balanced, create a `WebClient` bean and inject it.
 To access the load-balanced `WebClient`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
 
-====
 [source,java,indent=0]
 ----
 @Configuration
@@ -397,15 +384,14 @@ public class MyClass {
     }
 }
 ----
-====
 
 [[loadbalanced-webclient]]
 == Spring WebFlux `WebClient` as a Load Balancer Client
 
 The Spring WebFlux can work with both reactive and non-reactive `WebClient` configurations, as the topics describe:
 
-* xref:spring-cloud-commons/commons:-common-abstractions.adoc#webflux-with-reactive-loadbalancer[Spring WebFlux `WebClient` with `ReactorLoadBalancerExchangeFilterFunction`]
-* xref:spring-cloud-commons/commons:-common-abstractions.adoc#load-balancer-exchange-filter-function[Spring WebFlux `WebClient` with a Non-reactive Load Balancer Client]
+* xref:spring-cloud-commons/common-abstractions.adoc#webflux-with-reactive-loadbalancer[Spring WebFlux `WebClient` with `ReactorLoadBalancerExchangeFilterFunction`]
+* xref:spring-cloud-commons/common-abstractions.adoc#load-balancer-exchange-filter-function[Spring WebFlux `WebClient` with a Non-reactive Load Balancer Client]
 
 [[webflux-with-reactive-loadbalancer]]
 === Spring WebFlux `WebClient` with `ReactorLoadBalancerExchangeFilterFunction`
@@ -415,7 +401,6 @@ If you add xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer
 and if `spring-webflux` is on the classpath, `ReactorLoadBalancerExchangeFilterFunction` is auto-configured.
 The following example shows how to configure a `WebClient` to use reactive load-balancer:
 
-====
 [source,java,indent=0]
 ----
 public class MyClass {
@@ -433,7 +418,6 @@ public class MyClass {
     }
 }
 ----
-====
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The `ReactorLoadBalancer` is used to create a full physical address.
@@ -446,7 +430,6 @@ is auto-configured. Note, however, that this
 uses a non-reactive client under the hood.
 The following example shows how to configure a `WebClient` to use load-balancer:
 
-====
 [source,java,indent=0]
 ----
 public class MyClass {
@@ -464,13 +447,12 @@ public class MyClass {
     }
 }
 ----
-====
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The `LoadBalancerClient` is used to create a full physical address.
 
 WARN: This approach is now deprecated.
-We suggest that you use xref:spring-cloud-commons/commons:-common-abstractions.adoc#webflux-with-reactive-loadbalancer[WebFlux with reactive Load-Balancer]
+We suggest that you use xref:spring-cloud-commons/common-abstractions.adoc#webflux-with-reactive-loadbalancer[WebFlux with reactive Load-Balancer]
 instead.
 
 [[ignore-network-interfaces]]
@@ -481,7 +463,6 @@ A list of regular expressions can be set to cause the desired network interfaces
 The following configuration ignores the `docker0` interface and all interfaces that start with `veth`:
 
 .application.yml
-====
 ----
 spring:
   cloud:
@@ -490,12 +471,10 @@ spring:
         - docker0
         - veth.*
 ----
-====
 
 You can also force the use of only specified network addresses by using a list of regular expressions, as the following example shows:
 
 .bootstrap.yml
-====
 ----
 spring:
   cloud:
@@ -504,19 +483,16 @@ spring:
         - 192.168
         - 10.0
 ----
-====
 
 You can also force the use of only site-local addresses, as the following example shows:
 
 .application.yml
-====
 ----
 spring:
   cloud:
     inetutils:
       useOnlySiteLocalInterfaces: true
 ----
-====
 
 See https://docs.oracle.com/javase/8/docs/api/java/net/Inet4Address.html#isSiteLocalAddress--[Inet4Address.html.isSiteLocalAddress()] for more details about what constitutes a site-local address.
 
@@ -553,7 +529,6 @@ Named features are features that do not have a particular class they implement. 
 
 Any module can declare any number of `HasFeature` beans, as the following examples show:
 
-====
 [source,java,indent=0]
 ----
 @Bean
@@ -577,7 +552,6 @@ HasFeatures localFeatures() {
       .build();
 }
 ----
-====
 
 Each of these beans should go in an appropriately guarded `@Configuration`.
 
@@ -593,7 +567,6 @@ At the moment we verify which version of Spring Boot is added to your classpath.
 
 Example of a report
 
-====
 ----
 ***************************
 APPLICATION FAILED TO START
@@ -614,7 +587,6 @@ Consider applying the following actions:
 You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
 If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.
 ----
-====
 
 In order to disable this feature, set `spring.cloud.compatibility-verifier.enabled` to `false`.
 If you want to override the compatible Spring Boot versions, just set the

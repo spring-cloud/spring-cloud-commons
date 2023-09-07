@@ -6,27 +6,19 @@ antora:
     - '@antora/collector-extension'
     - '@antora/atlas-extension'
     - require: '@springio/antora-extensions/root-component-extension'
-      root_component_name: 'shell' # FIXME: Change this to match `name:` in antora.yml
-      # FIXME: Run antora once using this extension to migrate to the Asciidoc Tabs syntax
-      # and then remove this extension
-    - require: '@springio/antora-extensions/tabs-migration-extension'
-      unwrap_example_block: always
-      save_result: true
+      root_component_name: 'cloud-commons'
 site:
-  title: Spring Shell # FIXME: Change to your Project's title
-  url: https://docs.spring.io/spring-shell/reference/ # FIXME: Change to your Project's URL
+  title: Spring Cloud Commons
+  url: https://docs.spring.io/spring-cloud-commons/reference/
 content:
   sources:
     - url: ./..
       branches: HEAD
-      # FIXME: Change this to the path to the directory containing antora.yml in your project
-      # See https://docs.antora.org/antora/latest/playbook/content-source-start-path/#start-path-key
-      start_path: spring-shell-docs
+      start_path: docs
       worktrees: true
 asciidoc:
   attributes:
-    # FIXME: Change to your stackoverflow URL or remove
-    page-stackoverflow-url: https://stackoverflow.com/tags/spring-shell
+    page-stackoverflow-url: https://stackoverflow.com/tags/spring-cloud
     page-pagination: ''
     hide-uri-scheme: '@'
     tabs-sync-option: '@'

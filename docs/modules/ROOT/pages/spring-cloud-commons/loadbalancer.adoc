@@ -5,7 +5,7 @@ Spring Cloud provides its own client-side load-balancer abstraction and implemen
 mechanism, `ReactiveLoadBalancer` interface has been added and a *Round-Robin-based* and *Random* implementations
 have been provided for it. In order to get instances to select from reactive `ServiceInstanceListSupplier`
 is used. Currently we support a service-discovery-based implementation of `ServiceInstanceListSupplier`
-that retrieves available instances from Service Discovery using a xref:spring-cloud-commons/commons:-common-abstractions.adoc#discovery-client[Discovery Client] available in the classpath.
+that retrieves available instances from Service Discovery using a xref:spring-cloud-commons/common-abstractions.adoc#discovery-client[Discovery Client] available in the classpath.
 
 TIP: It is possible to disable Spring Cloud LoadBalancer by setting the value of `spring.cloud.loadbalancer.enabled` to `false`.
 
@@ -47,9 +47,9 @@ NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` co
 In order to make it easy to use Spring Cloud LoadBalancer, we provide `ReactorLoadBalancerExchangeFilterFunction` that can be used with `WebClient` and `BlockingLoadBalancerClient` that works with `RestTemplate`.
 You can see more information and examples of usage in the following sections:
 
-* xref:spring-cloud-commons/commons:-common-abstractions.adoc#rest-template-loadbalancer-client[Spring RestTemplate as a Load Balancer Client]
-* xref:spring-cloud-commons/commons:-common-abstractions.adoc#webclinet-loadbalancer-client[Spring WebClient as a Load Balancer Client]
-* xref:spring-cloud-commons/commons:-common-abstractions.adoc#webflux-with-reactive-loadbalancer[Spring WebFlux WebClient with `ReactorLoadBalancerExchangeFilterFunction`]
+* xref:spring-cloud-commons/common-abstractions.adoc#rest-template-loadbalancer-client[Spring RestTemplate as a Load Balancer Client]
+* xref:spring-cloud-commons/common-abstractions.adoc#webclinet-loadbalancer-client[Spring WebClient as a Load Balancer Client]
+* xref:spring-cloud-commons/common-abstractions.adoc#webflux-with-reactive-loadbalancer[Spring WebFlux WebClient with `ReactorLoadBalancerExchangeFilterFunction`]
 
 [[loadbalancer-caching]]
 == Spring Cloud LoadBalancer Caching
@@ -269,7 +269,7 @@ You can set up the LoadBalancer in such a way that it prefers the instance with 
 
 For that, you need to use the `RequestBasedStickySessionServiceInstanceListSupplier`. You can configure it either by setting the value of `spring.cloud.loadbalancer.configurations` to `request-based-sticky-session` or by providing your own `ServiceInstanceListSupplier` bean -- for example:
 
-[[health-check-based-custom-loadbalancer-configuration]]
+[[health-check-based-custom-loadbalancer-configuration-example]]
 [source,java,indent=0]
 ----
 public class CustomLoadBalancerConfiguration {
@@ -483,7 +483,6 @@ TIP: You can further configure the behavior of those metrics (for example, add h
 Individual Loadbalancer clients may be configured individually with a different prefix `spring.cloud.loadbalancer.clients.<clientId>.*` where `clientId` is the name of the loadbalancer. Default configuration values may be set in the `spring.cloud.loadbalancer.*` namespace and will be merged with the client specific values taking precedence
 
 .application.yml
-====
 ----
 spring:
   cloud:
@@ -495,7 +494,6 @@ spring:
           health-check:
             interval: 30s
 ----
-====
 
 The above example will result in a merged health-check `@ConfigurationProperties` object with `initial-delay=1s` and `interval=30s`.
 

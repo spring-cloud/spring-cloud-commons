@@ -1,4 +1,4 @@
-[[spring-cloud-context:-application-context-services]]
+[[spring-cloud-context-application-context-services]]
 = Spring Cloud Context: Application Context Services
 
 Spring Boot has an opinionated view of how to build an application with Spring.
@@ -18,7 +18,6 @@ Instead of `application.yml` (or `.properties`), you can use `bootstrap.yml`, ke
 The following listing shows an example:
 
 .bootstrap.yml
-====
 ----
 spring:
   application:
@@ -27,7 +26,6 @@ spring:
     config:
       uri: ${SPRING_CONFIG_URI:http://localhost:8888}
 ----
-====
 
 If your application needs any application-specific configuration from the server, it is a good idea to set the `spring.application.name` (in `bootstrap.yml` or `application.yml`).
 For the property `spring.application.name` to be used as the application's context ID, you must set it in `bootstrap.[properties | yml]`.
@@ -45,7 +43,7 @@ The additional property sources are:
 
 * "`bootstrap`": If any `PropertySourceLocators` are found in the bootstrap context and if they have non-empty properties, an optional `CompositePropertySource` appears with high priority.
 An example would be properties from the Spring Cloud Config Server.
-See "`xref:spring-cloud-commons/context:-application-context-services.adoc#customizing-bootstrap-property-sources[Customizing the Bootstrap Property Sources]`" for how to customize the contents of this property source.
+See "`xref:spring-cloud-commons/application-context-services.adoc#customizing-bootstrap-property-sources[Customizing the Bootstrap Property Sources]`" for how to customize the contents of this property source.
 
 NOTE:  Prior to Spring Cloud 2022.0.3 `PropertySourceLocators` (including the ones for Spring Cloud Config) were run during
 the main application context and not in the Bootstrap context.  You can force `PropertySourceLocators` to be run during the
@@ -54,7 +52,7 @@ Bootstrap context by setting `spring.cloud.config.initialize-on-context-refresh=
 * "`applicationConfig: [classpath:bootstrap.yml]`" (and related files if Spring profiles are active): If you have a `bootstrap.yml` (or `.properties`), those properties are used to configure the bootstrap context.
 Then they get added to the child context when its parent is set.
 They have lower precedence than the `application.yml` (or `.properties`) and any other property sources that are added to the child as a normal part of the process of creating a Spring Boot application.
-See "`xref:spring-cloud-commons/context:-application-context-services.adoc#customizing-bootstrap-properties[Changing the Location of Bootstrap Properties]`" for how to customize the contents of these property sources.
+See "`xref:spring-cloud-commons/application-context-services.adoc#customizing-bootstrap-properties[Changing the Location of Bootstrap Properties]`" for how to customize the contents of these property sources.
 
 Because of the ordering rules of property sources, the "`bootstrap`" entries take precedence.
 However, note that these do not contain any data from `bootstrap.yml`, which has very low precedence but can be used to set defaults.
@@ -116,7 +114,6 @@ For instance, you can insert additional properties from a different server or fr
 
 As an example, consider the following custom locator:
 
-====
 [source,java]
 ----
 @Configuration
@@ -130,19 +127,16 @@ public class CustomPropertySourceLocator implements PropertySourceLocator {
 
 }
 ----
-====
 
 The `Environment` that is passed in is the one for the `ApplicationContext` about to be created -- in other words, the one for which we supply additional property sources.
 It already has its normal Spring Boot-provided property sources, so you can use those to locate a property source specific to this `Environment` (for example, by keying it on `spring.application.name`, as is done in the default Spring Cloud Config Server property source locator).
 
 If you create a jar with this class in it and then add a `META-INF/spring.factories` containing the following setting, the `customProperty` `PropertySource` appears in any application that includes that jar on its classpath:
 
-====
 [source]
 ----
 org.springframework.cloud.bootstrap.BootstrapConfiguration=sample.custom.CustomPropertySourceLocator
 ----
-====
 
 As of Spring Cloud 2022.0.3, Spring Cloud will now call `PropertySourceLocators` twice.  The first fetch
 will retrieve any property sources without any profiles.  These property sources will have the opportunity to
@@ -203,7 +197,6 @@ To refresh an individual bean by name, there is also a `refresh(String)` method.
 
 To expose the `/refresh` endpoint, you need to add following configuration to your application:
 
-====
 [source,yaml]
 ----
 management:
@@ -212,7 +205,6 @@ management:
       exposure:
         include: refresh
 ----
-====
 
 NOTE: `@RefreshScope` works (technically) on a `@Configuration` class, but it might lead to surprising behavior.
 For example, it does not mean that all the `@Beans` defined in that class are themselves in `@RefreshScope`.
@@ -230,10 +222,17 @@ on the value changing rather than not being present in the application's configu
 
 Spring Cloud has an `Environment` pre-processor for decrypting property values locally.
 It follows the same rules as the Spring Cloud Config Server and has the same external configuration through `encrypt.\*`.
-Thus, you can use encrypted values in the form of `{cipher}*`, and, as long as there is a valid key, they are decrypted before the main application context gets the `Environment` settings.
+Thus, you can use encrypted values in the form of `\{cipher}*`, and, as long as there is a valid key, they are decrypted before the main application context gets the `Environment` settings.
 To use the encryption features in an application, you need to include Spring Security RSA in your classpath (Maven co-ordinates: `org.springframework.security:spring-security-rsa`), and you also need the full strength JCE extensions in your JVM.
 
-include:../:jce.adoc[]
+If you get an exception due to "Illegal key size" and you use Sun's JDK, you need to install the Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files.
+See the following links for more information:
+
+* https://www.oracle.com/technetwork/java/javase/downloads/jce-6-download-429243.html[Java 6 JCE]
+* https://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html[Java 7 JCE]
+* https://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html[Java 8 JCE]
+
+Extract the files into the JDK/jre/lib/security folder for whichever version of JRE/JDK x64/x86 you use.
 
 [[endpoints]]
 == Endpoints
