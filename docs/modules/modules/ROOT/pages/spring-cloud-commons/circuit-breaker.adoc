@@ -1,0 +1,5 @@
+[[spring-cloud-circuit-breaker]]
+= Spring Cloud Circuit Breaker
+
+include:../:spring-cloud-circuitbreaker.adoc[leveloffset=+1]
+
