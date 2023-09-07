@@ -1,0 +1,10 @@
+
+https://pivotal.io/platform-as-a-service/migrating-to-cloud-native-application-architectures-ebook[Cloud Native] is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development.
+A related discipline is that of building https://12factor.net/[12-factor Applications], in which development practices are aligned with delivery and operations goals -- for instance, by using declarative programming and management and monitoring.
+Spring Cloud facilitates these styles of development in a number of specific ways.
+ The starting point is a set of features to which all components in a distributed system need easy access.
+
+Many of those features are covered by https://projects.spring.io/spring-boot[Spring Boot], on which Spring Cloud builds. Some more features are delivered by Spring Cloud as two libraries: Spring Cloud Context and Spring Cloud Commons.
+Spring Cloud Context provides utilities and special services for the `ApplicationContext` of a Spring Cloud application (bootstrap context, encryption, refresh scope, and environment endpoints). Spring Cloud Commons is a set of abstractions and common classes used in different Spring Cloud implementations (such as Spring Cloud Netflix and Spring Cloud Consul).
+
+include::jce.adoc[]

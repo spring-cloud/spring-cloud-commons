@@ -1,0 +1,105 @@
+== Introduction
+
+Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations.
+It provides a consistent API to use in your applications, letting you, the developer, choose the circuit breaker implementation that best fits your needs for your application.
+
+=== Supported Implementations
+
+Spring Cloud supports the following circuit-breaker implementations:
+
+* https://github.com/resilience4j/resilience4j[Resilience4J]
+* https://github.com/alibaba/Sentinel[Sentinel]
+* https://github.com/spring-projects/spring-retry[Spring Retry]
+
+== Core Concepts
+
+To create a circuit breaker in your code, you can use the `CircuitBreakerFactory` API. When you include a Spring Cloud Circuit Breaker starter on your classpath, a bean that implements this API is automatically created for you.
+The following example shows a simple example of how to use this API:
+
+====
+[source,java]
+----
+@Service
+public static class DemoControllerService {
+	private RestTemplate rest;
+	private CircuitBreakerFactory cbFactory;
+
+	public DemoControllerService(RestTemplate rest, CircuitBreakerFactory cbFactory) {
+		this.rest = rest;
+		this.cbFactory = cbFactory;
+	}
+
+	public String slow() {
+		return cbFactory.create("slow").run(() -> rest.getForObject("/slow", String.class), throwable -> "fallback");
+	}
+
+}
+----
+====
+
+The `CircuitBreakerFactory.create` API creates an instance of a class called `CircuitBreaker`.
+The `run` method takes a `Supplier` and a `Function`.
+The `Supplier` is the code that you are going to wrap in a circuit breaker.
+The `Function` is the fallback that is run if the circuit breaker is tripped.
+The function is passed the `Throwable` that caused the fallback to be triggered.
+You can optionally exclude the fallback if you do not want to provide one.
+
+=== Circuit Breakers In Reactive Code
+
+If Project Reactor is on the class path, you can also use `ReactiveCircuitBreakerFactory` for your reactive code.
+The following example shows how to do so:
+
+====
+[source,java]
+----
+@Service
+public static class DemoControllerService {
+	private ReactiveCircuitBreakerFactory cbFactory;
+	private WebClient webClient;
+
+
+	public DemoControllerService(WebClient webClient, ReactiveCircuitBreakerFactory cbFactory) {
+		this.webClient = webClient;
+		this.cbFactory = cbFactory;
+	}
+
+	public Mono<String> slow() {
+		return webClient.get().uri("/slow").retrieve().bodyToMono(String.class).transform(
+		it -> cbFactory.create("slow").run(it, throwable -> return Mono.just("fallback")));
+	}
+}
+----
+====
+
+The `ReactiveCircuitBreakerFactory.create` API creates an instance of a class called `ReactiveCircuitBreaker`.
+The `run` method takes a `Mono` or a `Flux` and wraps it in a circuit breaker.
+You can optionally profile a fallback `Function`, which will be called if the circuit breaker is tripped and is passed the `Throwable`
+that caused the failure.
+
+== Configuration
+
+You can configure your circuit breakers by creating beans of type `Customizer`.
+The `Customizer` interface has a single method (called `customize`) that takes the `Object` to customize.
+
+For detailed information on how to customize a given implementation see
+the following documentation:
+
+* link:../../../../spring-cloud-circuitbreaker/current/reference/html/spring-cloud-circuitbreaker.html#configuring-resilience4j-circuit-breakers[Resilience4J]
+* link:https://github.com/alibaba/spring-cloud-alibaba/blob/master/spring-cloud-alibaba-docs/src/main/asciidoc/circuitbreaker-sentinel.adoc#circuit-breaker-spring-cloud-circuit-breaker-with-sentinel--configuring-sentinel-circuit-breakers[Sentinel]
+* link:../../../../../spring-cloud-circuitbreaker/docs/current/reference/html/spring-cloud-circuitbreaker.html#configuring-spring-retry-circuit-breakers[Spring Retry]
+
+Some `CircuitBreaker` implementations such as `Resilience4JCircuitBreaker` call `customize` method every time `CircuitBreaker#run` is called.
+It can be inefficient. In that case, you can use `CircuitBreaker#once` method. It is useful where calling `customize` many times doesn't make sense,
+for example, in case of https://resilience4j.readme.io/docs/circuitbreaker#section-consume-emitted-circuitbreakerevents[consuming Resilience4j's  events].
+
+The following example shows the way for each `io.github.resilience4j.circuitbreaker.CircuitBreaker` to consume events.
+
+====
+[source,java]
+----
+Customizer.once(circuitBreaker -> {
+  circuitBreaker.getEventPublisher()
+    .onStateTransition(event -> log.info("{}: {}", event.getCircuitBreakerName(), event.getStateTransition()));
+}, CircuitBreaker::getName)
+----
+====
