@@ -63,8 +63,8 @@
 						<artifactId>exec-maven-plugin</artifactId>
 						<executions>
 							<execution>
-								<id>generate-docs</id>
-								<phase>generate-resources</phase>
+								<id>generate-observability-docs</id>
+								<phase>${generate-docs.phase}</phase>
 								<goals>
 									<goal>java</goal>
 								</goals>
