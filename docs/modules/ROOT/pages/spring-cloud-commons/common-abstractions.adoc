@@ -1,0 +1,595 @@
+[[spring-cloud-common-abstractions]]
+= Spring Cloud Commons: Common Abstractions
+
+Patterns such as service discovery, load balancing, and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (for example, discovery with Eureka or Consul).
+
+[[discovery-client]]
+== The `@EnableDiscoveryClient` Annotation
+
+Spring Cloud Commons provides the `@EnableDiscoveryClient` annotation.
+This looks for implementations of the `DiscoveryClient` and `ReactiveDiscoveryClient` interfaces with `META-INF/spring.factories`.
+Implementations of the discovery client add a configuration class to `spring.factories` under the `org.springframework.cloud.client.discovery.EnableDiscoveryClient` key.
+Examples of `DiscoveryClient` implementations include https://cloud.spring.io/spring-cloud-netflix/[Spring Cloud Netflix Eureka], https://cloud.spring.io/spring-cloud-consul/[Spring Cloud Consul Discovery], and https://cloud.spring.io/spring-cloud-zookeeper/[Spring Cloud Zookeeper Discovery].
+
+Spring Cloud will provide both the blocking and reactive service discovery clients by default.
+You can disable the blocking and/or reactive clients easily by setting `spring.cloud.discovery.blocking.enabled=false` or `spring.cloud.discovery.reactive.enabled=false`.
+To completely disable service discovery you just need to set `spring.cloud.discovery.enabled=false`.
+
+By default, implementations of `DiscoveryClient` auto-register the local Spring Boot server with the remote discovery server.
+This behavior can be disabled by setting `autoRegister=false` in `@EnableDiscoveryClient`.
+
+NOTE: `@EnableDiscoveryClient` is no longer required.
+You can put a `DiscoveryClient` implementation on the classpath to cause the Spring Boot application to register with the service discovery server.
+
+[[health-indicators]]
+=== Health Indicators
+
+Commons auto-configures the following Spring Boot health indicators.
+
+[[discoveryclienthealthindicator]]
+==== DiscoveryClientHealthIndicator
+This health indicator is based on the currently registered `DiscoveryClient` implementation.
+
+* To disable entirely, set `spring.cloud.discovery.client.health-indicator.enabled=false`.
+* To disable the description field, set `spring.cloud.discovery.client.health-indicator.include-description=false`.
+Otherwise, it can bubble up as the `description` of the rolled up `HealthIndicator`.
+* To disable service retrieval, set `spring.cloud.discovery.client.health-indicator.use-services-query=false`.
+By default, the indicator invokes the client's `getServices` method. In deployments with many registered services it may too
+costly to retrieve all services during every check. This will skip the service retrieval and instead use the client's `probe` method.
+
+[[discoverycompositehealthcontributor]]
+==== DiscoveryCompositeHealthContributor
+This composite health indicator is based on all registered `DiscoveryHealthIndicator` beans. To disable,
+set `spring.cloud.discovery.client.composite-indicator.enabled=false`.
+
+[[ordering-discoveryclient-instances]]
+=== Ordering `DiscoveryClient` instances
+`DiscoveryClient` interface extends `Ordered`. This is useful when using multiple discovery
+ clients, as it allows you to define the order of the returned discovery clients, similar to
+how you can order the beans loaded by a Spring application. By default, the order of any `DiscoveryClient` is set to
+`0`. If you want to set a different order for your custom `DiscoveryClient` implementations, you just need to override
+the `getOrder()` method so that it returns the value that is suitable for your setup. Apart from this, you can use
+properties to set the order of the `DiscoveryClient`
+implementations provided by Spring Cloud, among others  `ConsulDiscoveryClient`, `EurekaDiscoveryClient` and
+`ZookeeperDiscoveryClient`. In order to do it, you just need to set the
+`spring.cloud.\{clientIdentifier}.discovery.order` (or `eureka.client.order` for Eureka) property to the desired value.
+
+[[simplediscoveryclient]]
+=== SimpleDiscoveryClient
+
+If there is no Service-Registry-backed `DiscoveryClient` in the classpath, `SimpleDiscoveryClient`
+instance, that uses properties to get information on service and instances, will be used.
+
+The information about the available instances should be passed to via properties in the following format:
+`spring.cloud.discovery.client.simple.instances.service1[0].uri=http://s11:8080`, where
+`spring.cloud.discovery.client.simple.instances` is the common prefix, then `service1` stands
+for the ID of the service in question, while `[0]` indicates the index number of the instance
+(as visible in the example, indexes start with `0`), and then the value of `uri` is
+the actual URI under which the instance is available.
+
+[[serviceregistry]]
+== ServiceRegistry
+
+Commons now provides a `ServiceRegistry` interface that provides methods such as `register(Registration)` and `deregister(Registration)`, which let you provide custom registered services.
+`Registration` is a marker interface.
+
+The following example shows the `ServiceRegistry` in use:
+
+[source,java,indent=0]
+----
+@Configuration
+@EnableDiscoveryClient(autoRegister=false)
+public class MyConfiguration {
+    private ServiceRegistry registry;
+
+    public MyConfiguration(ServiceRegistry registry) {
+        this.registry = registry;
+    }
+
+    // called through some external process, such as an event or a custom actuator endpoint
+    public void register() {
+        Registration registration = constructRegistration();
+        this.registry.register(registration);
+    }
+}
+----
+
+Each `ServiceRegistry` implementation has its own `Registry` implementation.
+
+* `ZookeeperRegistration` used with `ZookeeperServiceRegistry`
+* `EurekaRegistration` used with `EurekaServiceRegistry`
+* `ConsulRegistration` used with `ConsulServiceRegistry`
+
+If you are using the `ServiceRegistry` interface, you are going to need to pass the
+correct `Registry` implementation for the `ServiceRegistry` implementation you
+are using.
+
+
+[[serviceregistry-auto-registration]]
+=== ServiceRegistry Auto-Registration
+
+By default, the `ServiceRegistry` implementation auto-registers the running service.
+To disable that behavior, you can set:
+* `@EnableDiscoveryClient(autoRegister=false)` to permanently disable auto-registration.
+* `spring.cloud.service-registry.auto-registration.enabled=false` to disable the behavior through configuration.
+
+[[serviceregistry-auto-registration-events]]
+==== ServiceRegistry Auto-Registration Events
+
+There are two events that will be fired when a service auto-registers.  The first event, called
+`InstancePreRegisteredEvent`, is fired before the service is registered.  The second
+event, called `InstanceRegisteredEvent`, is fired after the service is registered.  You can register an
+`ApplicationListener`(s) to listen to and react to these events.
+
+NOTE: These events will not be fired if the `spring.cloud.service-registry.auto-registration.enabled` property is set to `false`.
+
+[[service-registry-actuator-endpoint]]
+=== Service Registry Actuator Endpoint
+
+Spring Cloud Commons provides a `/service-registry` actuator endpoint.
+This endpoint relies on a `Registration` bean in the Spring Application Context.
+Calling `/service-registry` with GET returns the status of the `Registration`.
+Using POST to the same endpoint with a JSON body changes the status of the current `Registration` to the new value.
+The JSON body has to include the `status` field with the preferred value.
+Please see the documentation of the `ServiceRegistry` implementation you use for the allowed values when updating the status and the values returned for the status.
+For instance, Eureka's supported statuses are `UP`, `DOWN`, `OUT_OF_SERVICE`, and `UNKNOWN`.
+
+[[rest-template-loadbalancer-client]]
+== Spring RestTemplate as a Load Balancer Client
+
+You can configure a `RestTemplate` to use a Load-balancer client.
+To create a load-balanced `RestTemplate`, create a `RestTemplate` `@Bean` and use the `@LoadBalanced` qualifier, as the following example shows:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private RestTemplate restTemplate;
+
+    public String doOtherStuff() {
+        String results = restTemplate.getForObject("http://stores/stores", String.class);
+        return results;
+    }
+}
+----
+
+CAUTION: A `RestTemplate` bean is no longer created through auto-configuration.
+Individual applications must create it.
+
+The URI needs to use a virtual host name (that is, a service name, not a host name).
+The BlockingLoadBalancerClient is used to create a full physical address.
+
+IMPORTANT: To use a load-balanced `RestTemplate`, you need to have a load-balancer implementation in your classpath.
+Add xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer-starter[Spring Cloud LoadBalancer starter] to your project in order to use it.
+
+[[webclinet-loadbalancer-client]]
+== Spring WebClient as a Load Balancer Client
+
+You can configure `WebClient` to automatically use a load-balancer client.
+To create a load-balanced `WebClient`, create a `WebClient.Builder` `@Bean` and use the `@LoadBalanced` qualifier, as follows:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+	@Bean
+	@LoadBalanced
+	public WebClient.Builder loadBalancedWebClientBuilder() {
+		return WebClient.builder();
+	}
+}
+
+public class MyClass {
+    @Autowired
+    private WebClient.Builder webClientBuilder;
+
+    public Mono<String> doOtherStuff() {
+        return webClientBuilder.build().get().uri("http://stores/stores")
+        				.retrieve().bodyToMono(String.class);
+    }
+}
+----
+
+The URI needs to use a virtual host name (that is, a service name, not a host name).
+The Spring Cloud LoadBalancer is used to create a full physical address.
+
+IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder`, you need to have a load balancer
+implementation in the classpath. We recommend that you add the
+xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer-starter[Spring Cloud LoadBalancer starter] to your project.
+Then, `ReactiveLoadBalancer` is used underneath.
+
+[[retrying-failed-requests]]
+=== Retrying Failed Requests
+
+A load-balanced `RestTemplate` can be configured to retry failed requests.
+By default, this logic is disabled.
+For the non-reactive version (with `RestTemplate`), you can enable it by adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath. For the reactive version (with `WebTestClient`), you need to set `spring.cloud.loadbalancer.retry.enabled=true`.
+
+If you would like to disable the retry logic with Spring Retry or Reactive Retry on the classpath, you can set `spring.cloud.loadbalancer.retry.enabled=false`.
+
+For the non-reactive implementation, if you would like to implement a `BackOffPolicy` in your retries, you need to create a bean of type `LoadBalancedRetryFactory` and override the `createBackOffPolicy()` method.
+
+For the reactive implementation, you just need to enable it by setting `spring.cloud.loadbalancer.retry.backoff.enabled` to `false`.
+
+You can set:
+
+- `spring.cloud.loadbalancer.retry.maxRetriesOnSameServiceInstance` - indicates how many times a request should be retried on the same `ServiceInstance` (counted separately for every selected instance)
+- `spring.cloud.loadbalancer.retry.maxRetriesOnNextServiceInstance` - indicates how many times a request should be retried a newly selected `ServiceInstance`
+- `spring.cloud.loadbalancer.retry.retryableStatusCodes` - the status codes on which to always retry a failed request.
+
+For the reactive implementation, you can additionally set:
+ - `spring.cloud.loadbalancer.retry.backoff.minBackoff` - Sets the minimum backoff duration (by default, 5 milliseconds)
+ - `spring.cloud.loadbalancer.retry.backoff.maxBackoff` - Sets the maximum backoff duration (by default, max long value of milliseconds)
+ - `spring.cloud.loadbalancer.retry.backoff.jitter` - Sets the jitter used for calculating the actual backoff duration for each call (by default, 0.5).
+
+For the reactive implementation, you can also implement your own `LoadBalancerRetryPolicy` to have more detailed control over the load-balanced call retries.
+
+For both implementations, you can also set the exceptions that trigger the replies by adding a list of values under the `spring.cloud.loadbalancer.[serviceId].retry.retryable-exceptions` property. If you do, we make sure to add `RetryableStatusCodeExceptions` to the list of exceptions provided by you, so that we also retry on retryable status codes. If you do not specify any exceptions via properties, the exceptions we use by default are `IOException`, `TimeoutException` and `RetryableStatusCodeException`. You can also enable retrying on all exceptions by setting `spring.cloud.loadbalancer.[serviceId].retry.retry-on-all-exceptions` to `true`.
+
+WARNING: If you use the blocking implementation with Spring Retries, if you want to keep the behaviour from previous releases, set `spring.cloud.loadbalancer.[serviceId].retry.retry-on-all-exceptions` to `true` as that used to be the default mode for the blocking implementation.
+
+NOTE: Individual Loadbalancer clients may be configured individually with the same properties as above except the prefix is `spring.cloud.loadbalancer.clients.<clientId>.*` where `clientId` is the name of the loadbalancer.
+
+NOTE: For load-balanced retries, by default, we wrap the `ServiceInstanceListSupplier` bean with `RetryAwareServiceInstanceListSupplier` to select a different instance from the one previously chosen, if available. You can disable this behavior by setting the value of `spring.cloud.loadbalancer.retry.avoidPreviousInstance` to `false`.
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+    @Bean
+    LoadBalancedRetryFactory retryFactory() {
+        return new LoadBalancedRetryFactory() {
+            @Override
+            public BackOffPolicy createBackOffPolicy(String service) {
+        		return new ExponentialBackOffPolicy();
+        	}
+        };
+    }
+}
+----
+
+If you want to add one or more `RetryListener` implementations to your retry functionality, you need to
+create a bean of type `LoadBalancedRetryListenerFactory` and return the `RetryListener` array
+you would like to use for a given service, as the following example shows:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+    @Bean
+    LoadBalancedRetryListenerFactory retryListenerFactory() {
+        return new LoadBalancedRetryListenerFactory() {
+            @Override
+            public RetryListener[] createRetryListeners(String service) {
+                return new RetryListener[]{new RetryListener() {
+                    @Override
+                    public <T, E extends Throwable> boolean open(RetryContext context, RetryCallback<T, E> callback) {
+                        //TODO Do you business...
+                        return true;
+                    }
+
+                    @Override
+                     public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+                        //TODO Do you business...
+                    }
+
+                    @Override
+                    public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+                        //TODO Do you business...
+                    }
+                }};
+            }
+        };
+    }
+}
+----
+
+[[multiple-resttemplate-objects]]
+== Multiple `RestTemplate` Objects
+
+If you want a `RestTemplate` that is not load-balanced, create a `RestTemplate` bean and inject it.
+To access the load-balanced `RestTemplate`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    RestTemplate loadBalanced() {
+        return new RestTemplate();
+    }
+
+    @Primary
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    @LoadBalanced
+    private RestTemplate loadBalanced;
+
+    public String doOtherStuff() {
+        return loadBalanced.getForObject("http://stores/stores", String.class);
+    }
+
+    public String doStuff() {
+        return restTemplate.getForObject("http://example.com", String.class);
+    }
+}
+----
+
+IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestTemplate` declaration in the preceding example to disambiguate the unqualified `@Autowired` injection.
+
+TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89`, try injecting `RestOperations` or setting `spring.aop.proxyTargetClass=true`.
+
+[[multiple-webclient-objects]]
+== Multiple WebClient Objects
+
+If you want a `WebClient` that is not load-balanced, create a `WebClient` bean and inject it.
+To access the load-balanced `WebClient`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    WebClient.Builder loadBalanced() {
+        return WebClient.builder();
+    }
+
+    @Primary
+    @Bean
+    WebClient.Builder webClient() {
+        return WebClient.builder();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private WebClient.Builder webClientBuilder;
+
+    @Autowired
+    @LoadBalanced
+    private WebClient.Builder loadBalanced;
+
+    public Mono<String> doOtherStuff() {
+        return loadBalanced.build().get().uri("http://stores/stores")
+        				.retrieve().bodyToMono(String.class);
+    }
+
+    public Mono<String> doStuff() {
+        return webClientBuilder.build().get().uri("http://example.com")
+        				.retrieve().bodyToMono(String.class);
+    }
+}
+----
+
+[[loadbalanced-webclient]]
+== Spring WebFlux `WebClient` as a Load Balancer Client
+
+The Spring WebFlux can work with both reactive and non-reactive `WebClient` configurations, as the topics describe:
+
+* xref:spring-cloud-commons/common-abstractions.adoc#webflux-with-reactive-loadbalancer[Spring WebFlux `WebClient` with `ReactorLoadBalancerExchangeFilterFunction`]
+* xref:spring-cloud-commons/common-abstractions.adoc#load-balancer-exchange-filter-function[Spring WebFlux `WebClient` with a Non-reactive Load Balancer Client]
+
+[[webflux-with-reactive-loadbalancer]]
+=== Spring WebFlux `WebClient` with `ReactorLoadBalancerExchangeFilterFunction`
+
+You can configure `WebClient` to use the `ReactiveLoadBalancer`.
+If you add xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer-starter[Spring Cloud LoadBalancer starter] to your project
+and if `spring-webflux` is on the classpath, `ReactorLoadBalancerExchangeFilterFunction` is auto-configured.
+The following example shows how to configure a `WebClient` to use reactive load-balancer:
+
+[source,java,indent=0]
+----
+public class MyClass {
+    @Autowired
+    private ReactorLoadBalancerExchangeFilterFunction lbFunction;
+
+    public Mono<String> doOtherStuff() {
+        return WebClient.builder().baseUrl("http://stores")
+            .filter(lbFunction)
+            .build()
+            .get()
+            .uri("/stores")
+            .retrieve()
+            .bodyToMono(String.class);
+    }
+}
+----
+
+The URI needs to use a virtual host name (that is, a service name, not a host name).
+The `ReactorLoadBalancer` is used to create a full physical address.
+
+[[load-balancer-exchange-filter-function]]
+=== Spring WebFlux `WebClient` with a Non-reactive Load Balancer Client
+
+If `spring-webflux` is on the classpath, `LoadBalancerExchangeFilterFunction`
+is auto-configured. Note, however, that this
+uses a non-reactive client under the hood.
+The following example shows how to configure a `WebClient` to use load-balancer:
+
+[source,java,indent=0]
+----
+public class MyClass {
+    @Autowired
+    private LoadBalancerExchangeFilterFunction lbFunction;
+
+    public Mono<String> doOtherStuff() {
+        return WebClient.builder().baseUrl("http://stores")
+            .filter(lbFunction)
+            .build()
+            .get()
+            .uri("/stores")
+            .retrieve()
+            .bodyToMono(String.class);
+    }
+}
+----
+
+The URI needs to use a virtual host name (that is, a service name, not a host name).
+The `LoadBalancerClient` is used to create a full physical address.
+
+WARN: This approach is now deprecated.
+We suggest that you use xref:spring-cloud-commons/common-abstractions.adoc#webflux-with-reactive-loadbalancer[WebFlux with reactive Load-Balancer]
+instead.
+
+[[ignore-network-interfaces]]
+== Ignore Network Interfaces
+
+Sometimes, it is useful to ignore certain named network interfaces so that they can be excluded from Service Discovery registration (for example, when running in a Docker container).
+A list of regular expressions can be set to cause the desired network interfaces to be ignored.
+The following configuration ignores the `docker0` interface and all interfaces that start with `veth`:
+
+.application.yml
+----
+spring:
+  cloud:
+    inetutils:
+      ignoredInterfaces:
+        - docker0
+        - veth.*
+----
+
+You can also force the use of only specified network addresses by using a list of regular expressions, as the following example shows:
+
+.bootstrap.yml
+----
+spring:
+  cloud:
+    inetutils:
+      preferredNetworks:
+        - 192.168
+        - 10.0
+----
+
+You can also force the use of only site-local addresses, as the following example shows:
+
+.application.yml
+----
+spring:
+  cloud:
+    inetutils:
+      useOnlySiteLocalInterfaces: true
+----
+
+See https://docs.oracle.com/javase/8/docs/api/java/net/Inet4Address.html#isSiteLocalAddress--[Inet4Address.html.isSiteLocalAddress()] for more details about what constitutes a site-local address.
+
+[[http-clients]]
+== HTTP Client Factories
+
+Spring Cloud Commons provides beans for creating both Apache HTTP clients (`ApacheHttpClientFactory`) and OK HTTP clients (`OkHttpClientFactory`).
+The `OkHttpClientFactory` bean is created only if the OK HTTP jar is on the classpath.
+In addition, Spring Cloud Commons provides beans for creating the connection managers used by both clients: `ApacheHttpClientConnectionManagerFactory` for the Apache HTTP client and `OkHttpClientConnectionPoolFactory` for the OK HTTP client.
+If you would like to customize how the HTTP clients are created in downstream projects, you can provide your own implementation of these beans.
+In addition, if you provide a bean of type `HttpClientBuilder` or `OkHttpClient.Builder`, the default factories use these builders as the basis for the builders returned to downstream projects.
+You can also disable the creation of these beans by setting `spring.cloud.httpclientfactories.apache.enabled` or `spring.cloud.httpclientfactories.ok.enabled` to `false`.
+
+[[enabled-features]]
+== Enabled Features
+
+Spring Cloud Commons provides a `/features` actuator endpoint.
+This endpoint returns features available on the classpath and whether they are enabled.
+The information returned includes the feature type, name, version, and vendor.
+
+[[feature-types]]
+=== Feature types
+
+There are two types of 'features': abstract and named.
+
+Abstract features are features where an interface or abstract class is defined and that an implementation the creates, such as `DiscoveryClient`, `LoadBalancerClient`, or `LockService`.
+The abstract class or interface is used to find a bean of that type in the context.
+The version displayed is `bean.getClass().getPackage().getImplementationVersion()`.
+
+Named features are features that do not have a particular class they implement. These features include "`Circuit Breaker`", "`API Gateway`", "`Spring Cloud Bus`", and others. These features require a name and a bean type.
+
+[[declaring-features]]
+=== Declaring features
+
+Any module can declare any number of `HasFeature` beans, as the following examples show:
+
+[source,java,indent=0]
+----
+@Bean
+public HasFeatures commonsFeatures() {
+  return HasFeatures.abstractFeatures(DiscoveryClient.class, LoadBalancerClient.class);
+}
+
+@Bean
+public HasFeatures consulFeatures() {
+  return HasFeatures.namedFeatures(
+    new NamedFeature("Spring Cloud Bus", ConsulBusAutoConfiguration.class),
+    new NamedFeature("Circuit Breaker", HystrixCommandAspect.class));
+}
+
+@Bean
+HasFeatures localFeatures() {
+  return HasFeatures.builder()
+      .abstractFeature(Something.class)
+      .namedFeature(new NamedFeature("Some Other Feature", Someother.class))
+      .abstractFeature(Somethingelse.class)
+      .build();
+}
+----
+
+Each of these beans should go in an appropriately guarded `@Configuration`.
+
+
+[[spring-cloud-compatibility-verification]]
+== Spring Cloud Compatibility Verification
+
+Due to the fact that some users have problem with setting up Spring Cloud application, we've decided
+to add a compatibility verification mechanism. It will break if your current setup is not compatible
+with Spring Cloud requirements, together with a report, showing what exactly went wrong.
+
+At the moment we verify which version of Spring Boot is added to your classpath.
+
+Example of a report
+
+----
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Your project setup is incompatible with our requirements due to following reasons:
+
+- Spring Boot [2.1.0.RELEASE] is not compatible with this Spring Cloud release train
+
+
+Action:
+
+Consider applying the following actions:
+
+- Change Spring Boot version to one of the following versions [1.2.x, 1.3.x] .
+You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
+If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.
+----
+
+In order to disable this feature, set `spring.cloud.compatibility-verifier.enabled` to `false`.
+If you want to override the compatible Spring Boot versions, just set the
+`spring.cloud.compatibility-verifier.compatible-boot-versions` property with a comma separated list
+of compatible Spring Boot versions.
+

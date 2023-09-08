@@ -1,9 +1,12 @@
-include::intro.adoc[]
 
-== Building
+[[building]]
+= Building
+:page-section-summary-toc: 1
 
 include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/main/docs/src/main/asciidoc/building.adoc[]
 
-== Contributing
+[[contributing]]
+= Contributing
+:page-section-summary-toc: 1
 
 include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/main/docs/src/main/asciidoc/contributing.adoc[]

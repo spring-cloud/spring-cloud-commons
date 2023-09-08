@@ -1,0 +1,15 @@
+[[cachedrandompropertysource]]
+= CachedRandomPropertySource
+:page-section-summary-toc: 1
+
+Spring Cloud Context provides a `PropertySource` that caches random values based on a key.  Outside of the caching
+functionality it works the same as Spring Boot's https://github.com/spring-projects/spring-boot/blob/main/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/env/RandomValuePropertySource.java[`RandomValuePropertySource`].
+This random value might be useful in the case where you want a random value that is consistent even after the Spring Application
+context restarts.  The property value takes the form of `cachedrandom.[yourkey].[type]` where `yourkey` is the key in the cache.  The `type` value can
+be any type supported by Spring Boot's `RandomValuePropertySource`.
+
+[source,properties,indent=0]
+----
+myrandom=${cachedrandom.appname.value}
+----
+
