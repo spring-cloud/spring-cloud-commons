@@ -95,14 +95,6 @@
 					<plugin>
 						<groupId>io.spring.maven.antora</groupId>
 						<artifactId>antora-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>prepare-package</phase>
-								<goals>
-									<goal>antora</goal>
-								</goals>
-							</execution>
-						</executions>
 					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
