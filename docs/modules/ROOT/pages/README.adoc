@@ -1,11 +1,11 @@
 include::intro.adoc[]
 
 [[building]]
-== Building
+= Building
 
 include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/main/docs/src/main/asciidoc/building.adoc[]
 
 [[contributing]]
-== Contributing
+= Contributing
 
 include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/main/docs/src/main/asciidoc/contributing.adoc[]
