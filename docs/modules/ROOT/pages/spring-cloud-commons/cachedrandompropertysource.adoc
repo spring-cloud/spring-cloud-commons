@@ -1,5 +1,6 @@
 [[cachedrandompropertysource]]
 = CachedRandomPropertySource
+:page-section-summary-toc: 1
 
 Spring Cloud Context provides a `PropertySource` that caches random values based on a key.  Outside of the caching
 functionality it works the same as Spring Boot's https://github.com/spring-projects/spring-boot/blob/main/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/env/RandomValuePropertySource.java[`RandomValuePropertySource`].

@@ -1,5 +1,6 @@
 [[cloud-native-applications]]
 = Cloud Native Applications
+:page-section-summary-toc: 1
 
 
 // TODO: figure out remote includes in docs and replace pasted text
