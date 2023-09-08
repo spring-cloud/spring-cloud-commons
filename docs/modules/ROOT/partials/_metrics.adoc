@@ -1,0 +1,70 @@
+[[observability-metrics]]
+=== Observability - Metrics
+
+Below you can find a list of all metrics declared by this project.
+
+[[observability-metrics-circuit-breaker-function-observation]]
+==== Circuit Breaker Function Observation
+
+____
+Observation created when we wrap a Function passed to the CircuitBreaker as fallback.
+____
+
+
+**Metric name** `spring.cloud.circuitbreaker` (defined by convention class `org.springframework.cloud.client.circuitbreaker.observation.DefaultCircuitBreakerObservationConvention`). **Type** `timer`.
+
+**Metric name** `spring.cloud.circuitbreaker.active` (defined by convention class `org.springframework.cloud.client.circuitbreaker.observation.DefaultCircuitBreakerObservationConvention`). **Type** `long task timer`.
+
+
+IMPORTANT: KeyValues that are added after starting the Observation might be missing from the *.active metrics.
+
+
+IMPORTANT: Micrometer internally uses `nanoseconds` for the baseunit. However, each backend determines the actual baseunit. (i.e. Prometheus uses seconds)
+
+
+Fully qualified name of the enclosing class `org.springframework.cloud.client.circuitbreaker.observation.CircuitBreakerObservationDocumentation`.
+
+IMPORTANT: All tags must be prefixed with `spring.cloud.circuitbreaker` prefix!
+
+.Low cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`spring.cloud.circuitbreaker.type` _(required)_|Defines the type of wrapped lambda.
+|===
+
+
+
+[[observability-metrics-circuit-breaker-supplier-observation]]
+==== Circuit Breaker Supplier Observation
+
+____
+Observation created when we wrap a Supplier passed to the CircuitBreaker.
+____
+
+
+**Metric name** `spring.cloud.circuitbreaker` (defined by convention class `org.springframework.cloud.client.circuitbreaker.observation.DefaultCircuitBreakerObservationConvention`). **Type** `timer`.
+
+**Metric name** `spring.cloud.circuitbreaker.active` (defined by convention class `org.springframework.cloud.client.circuitbreaker.observation.DefaultCircuitBreakerObservationConvention`). **Type** `long task timer`.
+
+
+IMPORTANT: KeyValues that are added after starting the Observation might be missing from the *.active metrics.
+
+
+IMPORTANT: Micrometer internally uses `nanoseconds` for the baseunit. However, each backend determines the actual baseunit. (i.e. Prometheus uses seconds)
+
+
+Fully qualified name of the enclosing class `org.springframework.cloud.client.circuitbreaker.observation.CircuitBreakerObservationDocumentation`.
+
+IMPORTANT: All tags must be prefixed with `spring.cloud.circuitbreaker` prefix!
+
+.Low cardinality Keys
+[cols="a,a"]
+|===
+|Name | Description
+|`spring.cloud.circuitbreaker.type` _(required)_|Defines the type of wrapped lambda.
+|===
+
+
+
+
