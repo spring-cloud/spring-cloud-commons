@@ -45,7 +45,7 @@ The additional property sources are:
 
 * "`bootstrap`": If any `PropertySourceLocators` are found in the bootstrap context and if they have non-empty properties, an optional `CompositePropertySource` appears with high priority.
 An example would be properties from the Spring Cloud Config Server.
-See "`<<customizing-bootstrap-property-sources>>`" for how to customize the contents of this property source.
+See "`xref:spring-cloud-commons/context:-application-context-services.adoc#customizing-bootstrap-property-sources[Customizing the Bootstrap Property Sources]`" for how to customize the contents of this property source.
 
 NOTE:  Prior to Spring Cloud 2022.0.3 `PropertySourceLocators` (including the ones for Spring Cloud Config) were run during
 the main application context and not in the Bootstrap context.  You can force `PropertySourceLocators` to be run during the
@@ -54,7 +54,7 @@ Bootstrap context by setting `spring.cloud.config.initialize-on-context-refresh=
 * "`applicationConfig: [classpath:bootstrap.yml]`" (and related files if Spring profiles are active): If you have a `bootstrap.yml` (or `.properties`), those properties are used to configure the bootstrap context.
 Then they get added to the child context when its parent is set.
 They have lower precedence than the `application.yml` (or `.properties`) and any other property sources that are added to the child as a normal part of the process of creating a Spring Boot application.
-See "`<<customizing-bootstrap-properties>>`" for how to customize the contents of these property sources.
+See "`xref:spring-cloud-commons/context:-application-context-services.adoc#customizing-bootstrap-properties[Changing the Location of Bootstrap Properties]`" for how to customize the contents of these property sources.
 
 Because of the ordering rules of property sources, the "`bootstrap`" entries take precedence.
 However, note that these do not contain any data from `bootstrap.yml`, which has very low precedence but can be used to set defaults.
