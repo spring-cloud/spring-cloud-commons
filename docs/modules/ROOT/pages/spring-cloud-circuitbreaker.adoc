@@ -1,8 +1,10 @@
+[[introduction]]
 == Introduction
 
 Spring Cloud Circuit breaker provides an abstraction across different circuit breaker implementations.
 It provides a consistent API to use in your applications, letting you, the developer, choose the circuit breaker implementation that best fits your needs for your application.
 
+[[supported-implementations]]
 === Supported Implementations
 
 Spring Cloud supports the following circuit-breaker implementations:
@@ -11,6 +13,7 @@ Spring Cloud supports the following circuit-breaker implementations:
 * https://github.com/alibaba/Sentinel[Sentinel]
 * https://github.com/spring-projects/spring-retry[Spring Retry]
 
+[[core-concepts]]
 == Core Concepts
 
 To create a circuit breaker in your code, you can use the `CircuitBreakerFactory` API. When you include a Spring Cloud Circuit Breaker starter on your classpath, a bean that implements this API is automatically created for you.
@@ -44,6 +47,7 @@ The `Function` is the fallback that is run if the circuit breaker is tripped.
 The function is passed the `Throwable` that caused the fallback to be triggered.
 You can optionally exclude the fallback if you do not want to provide one.
 
+[[circuit-breakers-in-reactive-code]]
 === Circuit Breakers In Reactive Code
 
 If Project Reactor is on the class path, you can also use `ReactiveCircuitBreakerFactory` for your reactive code.
@@ -76,6 +80,7 @@ The `run` method takes a `Mono` or a `Flux` and wraps it in a circuit breaker.
 You can optionally profile a fallback `Function`, which will be called if the circuit breaker is tripped and is passed the `Throwable`
 that caused the failure.
 
+[[configuration]]
 == Configuration
 
 You can configure your circuit breakers by creating beans of type `Customizer`.

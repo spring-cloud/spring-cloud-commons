@@ -1,3 +1,4 @@
+[[cloud-native-applications]]
 = Cloud Native Applications
 include::_attributes.adoc[]
 
@@ -8,12 +9,14 @@ include::intro.adoc[]
 NOTE: Spring Cloud is released under the non-restrictive Apache 2.0 license.
 If you would like to contribute to this section of the documentation or if you find an error, you can find the source code and issue trackers for the project at {docslink}[github].
 
+[[spring-cloud-context:-application-context-services]]
 == Spring Cloud Context: Application Context Services
 
 Spring Boot has an opinionated view of how to build an application with Spring.
 For instance, it has conventional locations for common configuration files and has endpoints for common management and monitoring tasks.
 Spring Cloud builds on top of that and adds a few features that many components in a system would use or occasionally need.
 
+[[the-bootstrap-application-context]]
 === The Bootstrap Application Context
 
 A Spring Cloud application operates by creating a "`bootstrap`" context, which is a parent context for the main application.
@@ -44,6 +47,7 @@ If you want to retrieve specific profile configuration, you should also set `spr
 
 You can disable the bootstrap process completely by setting `spring.cloud.bootstrap.enabled=false` (for example, in system properties).
 
+[[application-context-hierarchies]]
 === Application Context Hierarchies
 
 If you build an application context from `SpringApplication` or `SpringApplicationBuilder`, the Bootstrap context is added as a parent to that context.
@@ -99,6 +103,7 @@ Once that flag is set, two finer-grained settings control the location of the re
 * `spring.cloud.config.overrideNone=true`: Override from any local property source.
 * `spring.cloud.config.overrideSystemProperties=false`: Only system properties, command line arguments, and environment variables (but not the local config files) should override the remote settings.
 
+[[customizing-the-bootstrap-configuration]]
 === Customizing the Bootstrap Configuration
 
 The bootstrap context can be set to do anything you like by adding entries to `/META-INF/spring.factories` under a key named `org.springframework.cloud.bootstrap.BootstrapConfiguration`.
@@ -156,6 +161,7 @@ activate profiles using `spring.profiles.active`.  After the main application co
 will be called a second time, this time with any active profiles allowing `PropertySourceLocators` to locate
 any additional `PropertySources` with profiles.
 
+[[logging-configuration]]
 === Logging Configuration
 
 If you use Spring Boot to configure log settings, you should place this configuration in `bootstrap.[yml | properties]` if you would like it to apply to all events.
@@ -163,6 +169,7 @@ If you use Spring Boot to configure log settings, you should place this configur
 NOTE: For Spring Cloud to initialize logging configuration properly, you cannot use a custom prefix.
 For example, using `custom.loggin.logpath` is not recognized by Spring Cloud when initializing the logging system.
 
+[[environment-changes]]
 === Environment Changes
 
 The application listens for an `EnvironmentChangeEvent` and reacts to the change in a couple of standard ways (additional `ApplicationListeners` can be added as `@Beans` in the normal way).
@@ -229,6 +236,7 @@ The configuration property must be present in order to update the value after a 
 a value in your application you might want to switch your logic to rely on its absence instead.  Another option would be to rely
 on the value changing rather than not being present in the application's configuration.
 
+[[encryption-and-decryption]]
 === Encryption and Decryption
 
 Spring Cloud has an `Environment` pre-processor for decrypting property values locally.
@@ -238,6 +246,7 @@ To use the encryption features in an application, you need to include Spring Sec
 
 include::jce.adoc[]
 
+[[endpoints]]
 === Endpoints
 
 For a Spring Boot Actuator application, some additional management endpoints are available. You can use:
@@ -255,6 +264,7 @@ Add a `spring-boot-starter-security` dependency to configure access control for 
 NOTE: If you disable the `/actuator/restart` endpoint then the `/actuator/pause` and `/actuator/resume` endpoints
 will also be disabled since they are just a special case of `/actuator/restart`.
 
+[[spring-cloud-commons:-common-abstractions]]
 == Spring Cloud Commons: Common Abstractions
 
 Patterns such as service discovery, load balancing, and circuit breakers lend themselves to a common abstraction layer that can be consumed by all Spring Cloud clients, independent of the implementation (for example, discovery with Eureka or Consul).
@@ -277,10 +287,12 @@ This behavior can be disabled by setting `autoRegister=false` in `@EnableDiscove
 NOTE: `@EnableDiscoveryClient` is no longer required.
 You can put a `DiscoveryClient` implementation on the classpath to cause the Spring Boot application to register with the service discovery server.
 
+[[health-indicators]]
 ==== Health Indicators
 
 Commons auto-configures the following Spring Boot health indicators.
 
+[[discoveryclienthealthindicator]]
 ===== DiscoveryClientHealthIndicator
 This health indicator is based on the currently registered `DiscoveryClient` implementation.
 
@@ -291,10 +303,12 @@ Otherwise, it can bubble up as the `description` of the rolled up `HealthIndicat
 By default, the indicator invokes the client's `getServices` method. In deployments with many registered services it may too
 costly to retrieve all services during every check. This will skip the service retrieval and instead use the client's `probe` method.
 
+[[discoverycompositehealthcontributor]]
 ===== DiscoveryCompositeHealthContributor
 This composite health indicator is based on all registered `DiscoveryHealthIndicator` beans. To disable,
 set `spring.cloud.discovery.client.composite-indicator.enabled=false`.
 
+[[ordering-discoveryclient-instances]]
 ==== Ordering `DiscoveryClient` instances
 `DiscoveryClient` interface extends `Ordered`. This is useful when using multiple discovery
  clients, as it allows you to define the order of the returned discovery clients, similar to
@@ -306,6 +320,7 @@ implementations provided by Spring Cloud, among others  `ConsulDiscoveryClient`,
 `ZookeeperDiscoveryClient`. In order to do it, you just need to set the
 `spring.cloud.{clientIdentifier}.discovery.order` (or `eureka.client.order` for Eureka) property to the desired value.
 
+[[simplediscoveryclient]]
 ==== SimpleDiscoveryClient
 
 If there is no Service-Registry-backed `DiscoveryClient` in the classpath, `SimpleDiscoveryClient`
@@ -318,6 +333,7 @@ for the ID of the service in question, while `[0]` indicates the index number of
 (as visible in the example, indexes start with `0`), and then the value of `uri` is
 the actual URI under which the instance is available.
 
+[[serviceregistry]]
 === ServiceRegistry
 
 Commons now provides a `ServiceRegistry` interface that provides methods such as `register(Registration)` and `deregister(Registration)`, which let you provide custom registered services.
@@ -357,6 +373,7 @@ correct `Registry` implementation for the `ServiceRegistry` implementation you
 are using.
 
 
+[[serviceregistry-auto-registration]]
 ==== ServiceRegistry Auto-Registration
 
 By default, the `ServiceRegistry` implementation auto-registers the running service.
@@ -364,6 +381,7 @@ To disable that behavior, you can set:
 * `@EnableDiscoveryClient(autoRegister=false)` to permanently disable auto-registration.
 * `spring.cloud.service-registry.auto-registration.enabled=false` to disable the behavior through configuration.
 
+[[serviceregistry-auto-registration-events]]
 ===== ServiceRegistry Auto-Registration Events
 
 There are two events that will be fired when a service auto-registers.  The first event, called
@@ -373,6 +391,7 @@ event, called `InstanceRegisteredEvent`, is fired after the service is registere
 
 NOTE: These events will not be fired if the `spring.cloud.service-registry.auto-registration.enabled` property is set to `false`.
 
+[[service-registry-actuator-endpoint]]
 ==== Service Registry Actuator Endpoint
 
 Spring Cloud Commons provides a `/service-registry` actuator endpoint.
@@ -462,6 +481,7 @@ implementation in the classpath. We recommend that you add the
 <<spring-cloud-loadbalancer-starter, Spring Cloud LoadBalancer starter>> to your project.
 Then, `ReactiveLoadBalancer` is used underneath.
 
+[[retrying-failed-requests]]
 ==== Retrying Failed Requests
 
 A load-balanced `RestTemplate` can be configured to retry failed requests.
@@ -551,6 +571,7 @@ public class MyConfiguration {
 ----
 ====
 
+[[multiple-resttemplate-objects]]
 === Multiple `RestTemplate` Objects
 
 If you want a `RestTemplate` that is not load-balanced, create a `RestTemplate` bean and inject it.
@@ -598,6 +619,7 @@ IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestTemplat
 
 TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89`, try injecting `RestOperations` or setting `spring.aop.proxyTargetClass=true`.
 
+[[multiple-webclient-objects]]
 === Multiple WebClient Objects
 
 If you want a `WebClient` that is not load-balanced, create a `WebClient` bean and inject it.
@@ -781,6 +803,7 @@ Spring Cloud Commons provides a `/features` actuator endpoint.
 This endpoint returns features available on the classpath and whether they are enabled.
 The information returned includes the feature type, name, version, and vendor.
 
+[[feature-types]]
 ==== Feature types
 
 There are two types of 'features': abstract and named.
@@ -791,6 +814,7 @@ The version displayed is `bean.getClass().getPackage().getImplementationVersion(
 
 Named features are features that do not have a particular class they implement. These features include "`Circuit Breaker`", "`API Gateway`", "`Spring Cloud Bus`", and others. These features require a name and a bean type.
 
+[[declaring-features]]
 ==== Declaring features
 
 Any module can declare any number of `HasFeature` beans, as the following examples show:
@@ -824,6 +848,7 @@ HasFeatures localFeatures() {
 Each of these beans should go in an appropriately guarded `@Configuration`.
 
 
+[[spring-cloud-compatibility-verification]]
 === Spring Cloud Compatibility Verification
 
 Due to the fact that some users have problem with setting up Spring Cloud application, we've decided
@@ -862,6 +887,7 @@ If you want to override the compatible Spring Boot versions, just set the
 `spring.cloud.compatibility-verifier.compatible-boot-versions` property with a comma separated list
 of compatible Spring Boot versions.
 
+[[spring-cloud-loadbalancer]]
 == Spring Cloud LoadBalancer
 
 Spring Cloud provides its own client-side load-balancer abstraction and implementation. For the load-balancing
@@ -872,12 +898,14 @@ that retrieves available instances from Service Discovery using a <<discovery-cl
 
 TIP: It is possible to disable Spring Cloud LoadBalancer by setting the value of `spring.cloud.loadbalancer.enabled` to `false`.
 
+[[eager-loading-of-loadbalancer-contexts]]
 === Eager loading of LoadBalancer contexts
 
 Spring Cloud LoadBalancer creates a separate Spring child context for each service id. By default, these contexts are initialised lazily, whenever the first request for a service id is being load-balanced.
 
 You can choose to load those contexts eagerly. In order to do that, specify the service ids for which you want to do eager load using the `spring.cloud-loadbalancer.eager-load.clients` property.
 
+[[switching-between-the-load-balancing-algorithms]]
 === Switching between the load-balancing algorithms
 
 The `ReactiveLoadBalancer` implementation that is used by default is `RoundRobinLoadBalancer`. To switch to a different implementation, either for selected services or all of them, you can use the <<custom-loadbalancer-configuration, custom LoadBalancer configurations mechanism>>.
@@ -902,6 +930,7 @@ public class CustomLoadBalancerConfiguration {
 
 NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` configuration arguments should either not be annotated with `@Configuration` or be outside component scan scope.
 
+[[spring-cloud-loadbalancer-integrations]]
 === Spring Cloud LoadBalancer integrations
 
 In order to make it easy to use Spring Cloud LoadBalancer, we provide `ReactorLoadBalancerExchangeFilterFunction` that can be used with `WebClient` and `BlockingLoadBalancerClient` that works with `RestTemplate`.
@@ -916,6 +945,7 @@ You can see more information and examples of usage in the following sections:
 
 Apart from the basic `ServiceInstanceListSupplier` implementation that retrieves instances via `DiscoveryClient` each time it has to choose an instance, we provide two caching implementations.
 
+[[https://github-com/ben-manes/caffeine[caffeine]-backed-loadbalancer-cache-implementation]]
 ==== https://github.com/ben-manes/caffeine[Caffeine]-backed LoadBalancer Cache Implementation
 
 If you have `com.github.ben-manes.caffeine:caffeine` in the classpath, Caffeine-based implementation will be used.
@@ -926,6 +956,7 @@ in the `spring.cloud.loadbalancer.cache.caffeine.spec` property.
 
 WARN: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including <<loadbalancer-cache-configuration, General LoadBalancer Cache Configuration>> fields, such as `ttl` and `capacity`.
 
+[[default-loadbalancer-cache-implementation]]
 ==== Default LoadBalancer Cache Implementation
 
 If you do not have Caffeine in the classpath, the `DefaultLoadBalancerCache`, which comes automatically with `spring-cloud-starter-loadbalancer`, will be used.
@@ -949,6 +980,7 @@ WARNING: Although the basic, non-cached, implementation is useful for prototypin
 
 NOTE: When you create your own configuration, if you use `CachingServiceInstanceListSupplier` make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
 
+[[weighted-load-balancing]]
 === Weighted Load-Balancing
 
 To enable weighted load-balancing, we provide the `WeightedServiceInstanceListSupplier`. We use `WeightFunction` to calculate the weight of each instance.
@@ -996,6 +1028,7 @@ public class CustomLoadBalancerConfiguration {
 }
 ----
 
+[[zone-based-load-balancing]]
 === Zone-Based Load-Balancing
 
 To enable zone-based load-balancing, we provide the `ZonePreferenceServiceInstanceListSupplier`.
@@ -1034,6 +1067,7 @@ public class CustomLoadBalancerConfiguration {
 }
 ----
 
+[[instance-health-check-for-loadbalancer]]
 === Instance Health-Check for LoadBalancer
 
 It is possible to enable a scheduled HealthCheck for the LoadBalancer. The `HealthCheckServiceInstanceListSupplier`
@@ -1093,6 +1127,7 @@ WARNING: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism 
 
 NOTE: When you create your own configuration, `HealthCheckServiceInstanceListSupplier`, make sure to place it in the hierarchy directly after the supplier that retrieves the instances over the network, for example, `DiscoveryClientServiceInstanceListSupplier`, before any other filtering suppliers.
 
+[[same-instance-preference-for-loadbalancer]]
 === Same instance preference for LoadBalancer
 
 You can set up the LoadBalancer in such a way that it prefers the instance that was previously selected, if that instance is available.
@@ -1116,6 +1151,7 @@ public class CustomLoadBalancerConfiguration {
 
 TIP: This is also a replacement for Zookeeper `StickyRule`.
 
+[[request-based-sticky-session-for-loadbalancer]]
 === Request-based Sticky Session for LoadBalancer
 
 You can set up the LoadBalancer in such a way that it prefers the instance with `instanceId` provided in a request cookie. We currently support this if the request is being passed to the LoadBalancer through either `ClientRequestContext` or `ServerHttpRequestContext`, which are used by the SC LoadBalancer exchange filter functions and filters.
@@ -1184,6 +1220,7 @@ public class CustomLoadBalancerConfiguration {
 }
 ----
 
+[[transform-the-load-balanced-http-request]]
 === Transform the load-balanced HTTP request
 
 You can use the selected `ServiceInstance` to transform the load-balanced HTTP Request.
@@ -1329,6 +1366,7 @@ NOTE: The meters are registered in the registry when at least one record is adde
 
 TIP: You can further configure the behavior of those metrics (for example, add https://micrometer.io/docs/concepts#_histograms_and_percentiles[publishing percentiles and histograms]) by https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-metrics-per-meter-properties[adding `MeterFilters`].
 
+[[configuring-individual-loadbalancerclients]]
 === Configuring Individual LoadBalancerClients
 
 Individual Loadbalancer clients may be configured individually with a different prefix `spring.cloud.loadbalancer.clients.<clientId>.*` where `clientId` is the name of the loadbalancer. Default configuration values may be set in the `spring.cloud.loadbalancer.*` namespace and will be merged with the client specific values taking precedence
@@ -1361,14 +1399,17 @@ NOTE: For the properties where maps where already used, where you can specify a 
 
 NOTE: Starting with `4.1.0`, we have introduced the `callGetWithRequestOnDelegates` flag in `LoadBalancerProperties`. If this flag is set to `true`, `ServiceInstanceListSupplier#get(Request request)` method will be implemented to call `delegate.get(request)` in classes assignable from `DelegatingServiceInstanceListSupplier` that don't already implement that method, with the exclusion of `CachingServiceInstanceListSupplier` and `HealthCheckServiceInstanceListSupplier`, which should be placed in the instance supplier hierarchy directly after the supplier performing instance retrieval over the network, before any request-based filtering is done. It is set to `true` by default.
 
+[[-aot-and-native-image-support]]
 ===  AOT and Native Image Support
 
 Since `4.0.0`, Spring Cloud LoadBalancer supports Spring AOT transformations and native images. However, to use this feature, you need to explicitly define your `LoadBalancerClient` service IDs. You can do so by using the `value` or `name` attributes of the `@LoadBalancerClient` annotation or as values of the `spring.cloud.loadbalancer.eager-load.clients` property.
 
+[[spring-cloud-circuit-breaker]]
 == Spring Cloud Circuit Breaker
 
 include::spring-cloud-circuitbreaker.adoc[leveloffset=+1]
 
+[[cachedrandompropertysource]]
 == CachedRandomPropertySource
 
 Spring Cloud Context provides a `PropertySource` that caches random values based on a key.  Outside of the caching
@@ -1473,6 +1514,7 @@ Feign clients will also pick up an interceptor that uses the
 `OAuth2ClientContext` if it is available, so they should also do a
 token relay anywhere where a `RestTemplate` would.
 
+[[configuration-properties]]
 == Configuration Properties
 
 To see the list of all Spring Cloud Commons related configuration properties please check link:appendix.html[the Appendix page].
