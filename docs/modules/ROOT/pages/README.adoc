@@ -1,4 +1,3 @@
-include::intro.adoc[]
 
 [[building]]
 = Building
