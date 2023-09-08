@@ -1,6 +1,0 @@
-[[spring-cloud-circuit-breaker]]
-= Spring Cloud Circuit Breaker
-:page-section-summary-toc: 1
-
-include:../:spring-cloud-circuitbreaker.adoc[leveloffset=+1]
-

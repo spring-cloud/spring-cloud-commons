@@ -1,6 +1,0 @@
-# Environment Post Processors
-org.springframework.boot.env.EnvironmentPostProcessor=\
-org.springframework.cloud.client.HostInfoEnvironmentPostProcessor
-# Failure Analyzers
-org.springframework.boot.diagnostics.FailureAnalyzer=\
-org.springframework.cloud.configuration.CompatibilityNotMetFailureAnalyzer

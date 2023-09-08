@@ -1,202 +1,70 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>org.springframework.cloud</groupId>
-	<artifactId>spring-cloud-commons-parent</artifactId>
-	<version>4.1.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>Spring Cloud Commons Parent</name>
-	<description>Spring Cloud Commons Parent</description>
-	<url>https://projects.spring.io/spring-cloud/</url>
-	<parent>
-		<groupId>org.springframework.cloud</groupId>
-		<artifactId>spring-cloud-build</artifactId>
-		<version>4.1.0-SNAPSHOT</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
+	<artifactId>spring-cloud-commons-docs-build</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<name>Spring Cloud Commons Docs Build</name>
+	<description>Builds Spring Cloud Commons Docs.</description>
+	<url>https://spring.io/projects/spring-cloud-commons</url>
 	<scm>
-		<url>https://github.com/spring-cloud/spring-cloud-commons</url>
-		<connection>scm:git:git://github.com/spring-cloud/spring-cloud-commons.git
+		<connection>scm:git:https://github.com/spring-cloud/spring-cloud-commons.git
 		</connection>
 		<developerConnection>
-			scm:git:ssh://git@github.com/spring-cloud/spring-cloud-commons.git
+			scm:git:git@github.com:spring-cloud/spring-cloud-commons.git
 		</developerConnection>
-		<tag>HEAD</tag>
+		<url>https://github.com/spring-cloud/spring-cloud-commons</url>
 	</scm>
+	<issueManagement>
+		<url>https://github.com/spring-cloud/spring-cloud-commons/issues</url>
+	</issueManagement>
+
 	<properties>
-		<bintray.package>commons</bintray.package>
-		<evictor.version>1.0.0</evictor.version>
-		<!-- Deprecated - reached EOL -->
-		<spring-security-oauth2-autoconfigure.version>2.5.2</spring-security-oauth2-autoconfigure.version>
+		<io.spring.maven.antora-version>0.0.3</io.spring.maven.antora-version>
 	</properties>
+
+
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>flatten-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
+				<groupId>io.spring.maven.antora</groupId>
+				<artifactId>antora-maven-plugin</artifactId>
+				<version>${io.spring.maven.antora-version}</version>
+				<extensions>true</extensions>
 				<configuration>
-					<useProjectReferences>false</useProjectReferences>
-					<additionalConfig>
-						<file>
-							<name>.settings/org.eclipse.jdt.ui.prefs</name>
-							<location>
-								${maven.multiModuleProjectDirectory}/eclipse/org.eclipse.jdt.ui.prefs
-							</location>
-						</file>
-						<file>
-							<name>.settings/org.eclipse.jdt.core.prefs</name>
-							<location>
-								${maven.multiModuleProjectDirectory}/eclipse/org.eclipse.jdt.core.prefs
-							</location>
-						</file>
-					</additionalConfig>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>io.spring.javaformat</groupId>
-				<artifactId>spring-javaformat-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.basepom.maven</groupId>
-				<artifactId>duplicate-finder-maven-plugin</artifactId>
-				<configuration>
-					<ignoredDependencies>
-						<dependency>
-							<groupId>org.apache.httpcomponents</groupId>
-							<artifactId>httpclient</artifactId>
-							<optional>true</optional>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.httpcomponents.client5</groupId>
-							<artifactId>httpclient5</artifactId>
-						</dependency>
-					</ignoredDependencies>
+					<options>
+						<option>--to-dir=target/antora/site</option>
+						<option>--stacktrace</option>
+						<option>--fetch</option>
+					</options>
+					<environment>
+						<ALGOLIA_API_KEY>9d489079e5ec46dbb238909fee5c9c29</ALGOLIA_API_KEY>
+						<ALGOLIA_APP_ID>WB1FQYI187</ALGOLIA_APP_ID>
+						<ALGOLIA_INDEX_NAME>springcloudcommons</ALGOLIA_INDEX_NAME>
+					</environment>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</reporting>
+	<repositories>
+		<repository>
+			<id>spring-snapshot</id>
+			<url>https://repo.spring.io/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
+		<repository>
+			<id>spring-milestone</id>
+			<url>https://repo.spring.io/milestone</url>
+		</repository>
+	</repositories>
 
-	<profiles>
-		<profile>
-			<id>spring</id>
-			<repositories>
-				<repository>
-					<id>spring-snapshots</id>
-					<name>Spring Snapshots</name>
-					<url>https://repo.spring.io/snapshot</url>
-					<snapshots>
-						<enabled>true</enabled>
-					</snapshots>
-				</repository>
-				<repository>
-					<id>spring-milestones</id>
-					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/milestone</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
-					<id>spring-releases</id>
-					<name>Spring Releases</name>
-					<url>https://repo.spring.io/release</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-			</repositories>
-			<pluginRepositories>
-				<pluginRepository>
-					<id>spring-snapshots</id>
-					<name>Spring Snapshots</name>
-					<url>https://repo.spring.io/snapshot</url>
-					<snapshots>
-						<enabled>true</enabled>
-					</snapshots>
-					<releases>
-						<enabled>false</enabled>
-					</releases>
-				</pluginRepository>
-				<pluginRepository>
-					<id>spring-milestones</id>
-					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/milestone</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-				<pluginRepository>
-					<id>spring-releases</id>
-					<name>Spring Releases</name>
-					<url>https://repo.spring.io/release</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-			</pluginRepositories>
-		</profile>
-	</profiles>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-commons-dependencies</artifactId>
-				<version>${project.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.cloud</groupId>
-				<artifactId>spring-cloud-test-support</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<!--<dependency>
-				<groupId>org.springframework.security.oauth.boot</groupId>
-				<artifactId>spring-security-oauth2-autoconfigure</artifactId>
-				<version>${spring-security-oauth2-autoconfigure.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.springframework.boot</groupId>
-						<artifactId>spring-boot</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.springframework.boot</groupId>
-						<artifactId>spring-boot-autoconfigure</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>-->
-		</dependencies>
-	</dependencyManagement>
-	<modules>
-		<module>spring-cloud-commons-dependencies</module>
-		<module>spring-cloud-test-support</module>
-		<module>spring-cloud-context</module>
-		<module>spring-cloud-context-integration-tests</module>
-		<module>spring-cloud-context-webflux-integration-tests</module>
-		<module>spring-cloud-commons</module>
-		<module>spring-cloud-loadbalancer</module>
-		<module>spring-cloud-starter</module>
-		<module>spring-cloud-starter-bootstrap</module>
-		<module>spring-cloud-starter-loadbalancer</module>
-		<module>docs</module>
-	</modules>
 </project>
