@@ -24,3 +24,4 @@ _metrics.adoc
 _conventions.adoc
 package.json
 package-lock.json
+.flattened-pom.xml
