@@ -15,8 +15,12 @@ src/ant/.ant-targets-upload-dist.xml
 *.iws
 /.idea/
 *.graphml
+node
 node_modules
-node/
-package-lock.json
+build
+_configprops.adoc
+_spans.adoc
+_metrics.adoc
+_conventions.adoc
 package.json
-.flattened-pom.xml
+package-lock.json

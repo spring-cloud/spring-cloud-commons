@@ -12,12 +12,12 @@ You can build the entire site by invoking the following on the docs-build branch
 
 [source,bash]
 ----
-mvn exec:exec@antora
+mvn antora
 ----
 
 == Building a Specific Branch
 
 [source,bash]
 ----
-mvn exec:exec@antora
+mvn antora
 ----
