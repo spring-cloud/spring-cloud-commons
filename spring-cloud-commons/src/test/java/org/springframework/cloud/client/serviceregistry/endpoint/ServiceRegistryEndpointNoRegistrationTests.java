@@ -48,12 +48,12 @@ public class ServiceRegistryEndpointNoRegistrationTests {
 
 	@Test
 	public void testGet() throws Exception {
-		this.mvc.perform(get("/service-registry/instance-status")).andExpect(status().isNotFound());
+		this.mvc.perform(get("/serviceregistry/instance-status")).andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void testPost() throws Exception {
-		this.mvc.perform(post("/service-registry/instance-status").content("newstatus"))
+		this.mvc.perform(post("/serviceregistry/instance-status").content("newstatus"))
 				.andExpect(status().isNotFound());
 	}
 
