@@ -55,7 +55,7 @@
 			"defaultValue": true
 		},
 		{
-			"name": "org.springframework.cloud.refresh.on-start.enabled",
+			"name": "spring.cloud.refresh.on-start.enabled",
 			"type": "java.lang.Boolean",
 			"description": "Enable refreshing context on start.",
 			"defaultValue": true
