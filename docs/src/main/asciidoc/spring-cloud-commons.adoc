@@ -4,7 +4,7 @@ include::_attributes.adoc[]
 include::intro.adoc[]
 
 // TODO: figure out remote includes in docs and replace pasted text
-// include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/master/docs/src/main/asciidoc/contributing-docs.adoc[]
+// include::https://raw.githubusercontent.com/spring-cloud/spring-cloud-build/4.0.x/docs/src/main/asciidoc/contributing-docs.adoc[]
 NOTE: Spring Cloud is released under the non-restrictive Apache 2.0 license.
 If you would like to contribute to this section of the documentation or if you find an error, you can find the source code and issue trackers for the project at {docslink}[github].
 
