@@ -42,8 +42,8 @@ public class RefreshScopeLifecycle implements Lifecycle {
 	public void start() {
 		synchronized (lifecycleMonitor) {
 			if (!isRunning()) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Refreshing context on restart.");
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Refreshing context on restart.");
 				}
 				contextRefresher.refresh();
 			}
