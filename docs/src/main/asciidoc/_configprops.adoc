@@ -37,6 +37,7 @@
 |spring.cloud.loadbalancer.cache.capacity | `+++256+++` | Initial cache capacity expressed as int.
 |spring.cloud.loadbalancer.cache.enabled | `+++true+++` | Enables Spring Cloud LoadBalancer caching mechanism.
 |spring.cloud.loadbalancer.cache.ttl | `+++35s+++` | Time To Live - time counted from writing of the record, after which cache entries are expired.
+|spring.cloud.loadbalancer.call-get-with-request-on-delegates | `+++false+++` | If this flag is set to {@code true}, {@code ServiceInstanceListSupplier#get(Request request)} method will be implemented to call {@code delegate.get(request)} in classes assignable from {@code DelegatingServiceInstanceListSupplier} that don't already implement that method, with the exclusion of {@code CachingServiceInstanceListSupplier} and {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the instance supplier hierarchy directly after the supplier performing instance retrieval over the network, before any request-based filtering is done. Note: in 4.1, this behaviour will become the default
 |spring.cloud.loadbalancer.clients |  | 
 |spring.cloud.loadbalancer.configurations | `+++default+++` | Enables a predefined LoadBalancer configuration.
 |spring.cloud.loadbalancer.eager-load.clients |  | Names of the clients.
