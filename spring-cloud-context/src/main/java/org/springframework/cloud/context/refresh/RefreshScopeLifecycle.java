@@ -22,7 +22,11 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.context.Lifecycle;
 
 /**
+ * A {@link Lifecycle} implementation that triggers {@link ContextRefresher#refresh()} to
+ * be called on restart.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 4.1.0
  */
 public class RefreshScopeLifecycle implements Lifecycle {
 

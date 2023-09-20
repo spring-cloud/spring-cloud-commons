@@ -67,6 +67,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Dave Syer
  * @author Venil Noronha
+ * @author Olga Maciaszek-Sharma
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RefreshScope.class)

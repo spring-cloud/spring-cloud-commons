@@ -217,6 +217,12 @@ The configuration property must be present in order to update the value after a 
 a value in your application you might want to switch your logic to rely on its absence instead.  Another option would be to rely
 on the value changing rather than not being present in the application's configuration.
 
+[refresh-scope-on-restart]
+=== Refresh Scope on Restart
+
+In order to allow seamlessly refreshing beans on restart, which is especially useful for applications running with JVM Checkpoint Restore (for example with https://github.com/CRaC[Project CRaC]), we now instantiate a `RefreshScopeLifecycle` bean that will trigger Context Refresh on restart, resulting in rebinding configuration properties and refreshing any `@RefreshScope`-annotated beans. This behaviour can be disabled by setting the value of `spring.cloud.refresh.on-restart.enabled` to `false`.
+
+
 [[encryption-and-decryption]]
 == Encryption and Decryption
 

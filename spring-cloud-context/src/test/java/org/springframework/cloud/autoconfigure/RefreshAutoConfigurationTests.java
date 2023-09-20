@@ -22,11 +22,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.context.refresh.ContextRefresher;
@@ -38,9 +40,10 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Dave Syer
+ * @author Olga Maciaszek-Sharma
  */
 @ExtendWith(OutputCaptureExtension.class)
-public class RefreshAutoConfigurationTests {
+class RefreshAutoConfigurationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(WebApplicationType type, Class<?> configuration,
 			String... properties) {
@@ -49,7 +52,7 @@ public class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	public void noWarnings(CapturedOutput output) {
+	void noWarnings(CapturedOutput output) {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class)) {
 			then(context.containsBean("refreshScope")).isTrue();
 			then(output.toString()).doesNotContain("WARN");
@@ -57,7 +60,7 @@ public class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	public void disabled() {
+	void disabled() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.SERVLET, Config.class,
 				"spring.cloud.refresh.enabled:false")) {
 			then(context.containsBean("refreshScope")).isFalse();
@@ -65,7 +68,7 @@ public class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	public void refreshables() {
+	void refreshables() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class,
 				"config.foo=bar", "spring.cloud.refresh.refreshable:" + SealedConfigProps.class.getName())) {
 			context.getBean(SealedConfigProps.class);
@@ -84,7 +87,7 @@ public class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	public void neverRefreshable() {
+	void neverRefreshable() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class,
 				"countingconfig.foo=bar",
 				"spring.cloud.refresh.never-refreshable:" + CountingConfigProps.class.getName())) {
@@ -92,6 +95,19 @@ public class RefreshAutoConfigurationTests {
 			context.getBean(ContextRefresher.class).refresh();
 			assertThat(configProps.count).as("config props was rebound when it should not have been").hasValue(1);
 		}
+	}
+
+	@Test
+	void refreshScopeLifecylePresentByDefault() {
+		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
+				.run(context -> assertThat(context).hasBean("refreshScopeLifecycle"));
+	}
+
+	@Test
+	void refreshScopeLifecyleDisabledWithProp() {
+		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
+				.withPropertyValues("spring.cloud.refresh.on-restart.enabled=false")
+				.run(context -> assertThat(context).doesNotHaveBean("refreshScopeLifecycle"));
 	}
 
 	@Configuration(proxyBeanMethods = false)
