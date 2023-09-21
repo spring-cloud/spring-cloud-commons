@@ -43,6 +43,7 @@ import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.cloud.context.refresh.ConfigDataContextRefresher;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.refresh.LegacyContextRefresher;
+import org.springframework.cloud.context.refresh.RefreshScopeLifecycle;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.logging.LoggingRebinder;
@@ -66,6 +67,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Dave Syer
  * @author Venil Noronha
+ * @author Olga Maciaszek-Sharma
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RefreshScope.class)
@@ -115,6 +117,12 @@ public class RefreshAutoConfiguration {
 	public ConfigDataContextRefresher configDataContextRefresher(ConfigurableApplicationContext context,
 			RefreshScope scope, RefreshProperties properties) {
 		return new ConfigDataContextRefresher(context, scope, properties);
+	}
+
+	@ConditionalOnProperty(value = "spring.cloud.refresh.on-restart.enabled", matchIfMissing = true)
+	@Bean
+	RefreshScopeLifecycle refreshScopeLifecycle(ContextRefresher contextRefresher) {
+		return new RefreshScopeLifecycle(contextRefresher);
 	}
 
 	@Bean

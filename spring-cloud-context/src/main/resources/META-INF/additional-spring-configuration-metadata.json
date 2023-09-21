@@ -53,6 +53,12 @@
 			"type": "java.lang.Boolean",
 			"description": "Enable the DecryptEnvironmentPostProcessor.",
 			"defaultValue": true
+		},
+		{
+			"name": "spring.cloud.refresh.on-restart.enabled",
+			"type": "java.lang.Boolean",
+			"description": "Enable refreshing context on start.",
+			"defaultValue": true
 		}
 	]
 }
