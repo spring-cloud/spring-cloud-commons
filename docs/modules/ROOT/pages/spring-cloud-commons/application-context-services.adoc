@@ -220,8 +220,7 @@ on the value changing rather than not being present in the application's configu
 [refresh-scope-on-restart]
 === Refresh Scope on Restart
 
-In order to allow seamlessly refreshing beans on restart, which is especially useful for applications running with JVM Checkpoint Restore (for example with https://github.com/CRaC[Project CRaC]), we now instantiate a `RefreshScopeLifecycle` bean that will trigger Context Refresh on restart, resulting in rebinding configuration properties and refreshing any `@RefreshScope`-annotated beans. This behaviour can be disabled by setting the value of `spring.cloud.refresh.on-restart.enabled` to `false`.
-
+Seamlessly refreshing beans on restart is especially useful for applications that run with JVM Checkpoint Restore (such as https://github.com/CRaC[Project CRaC]). To allow this ability, we now instantiate a `RefreshScopeLifecycle` bean that triggers Context Refresh on restart, resulting in rebinding configuration properties and refreshing any beans annotated with `@RefreshScope`. You can disable this behavior by setting `spring.cloud.refresh.on-restart.enabled` to `false`.
 
 [[encryption-and-decryption]]
 == Encryption and Decryption
