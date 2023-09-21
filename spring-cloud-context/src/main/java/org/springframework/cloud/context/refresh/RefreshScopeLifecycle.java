@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.context.refresh;
 
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -49,7 +51,10 @@ public class RefreshScopeLifecycle implements Lifecycle {
 				if (LOG.isInfoEnabled()) {
 					LOG.info("Refreshing context on restart.");
 				}
-				contextRefresher.refresh();
+				Set<String> keys = contextRefresher.refresh();
+				if(LOG.isInfoEnabled()){
+					LOG.info("Refreshed keys: " + keys);
+				}
 			}
 			running = true;
 		}
