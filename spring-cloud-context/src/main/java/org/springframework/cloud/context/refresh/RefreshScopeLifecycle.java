@@ -52,7 +52,7 @@ public class RefreshScopeLifecycle implements Lifecycle {
 					LOG.info("Refreshing context on restart.");
 				}
 				Set<String> keys = contextRefresher.refresh();
-				if(LOG.isInfoEnabled()){
+				if (LOG.isInfoEnabled()) {
 					LOG.info("Refreshed keys: " + keys);
 				}
 			}
