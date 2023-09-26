@@ -375,9 +375,9 @@ NOTE: These events will not be fired if the `spring.cloud.service-registry.auto-
 
 ==== Service Registry Actuator Endpoint
 
-Spring Cloud Commons provides a `/service-registry` actuator endpoint.
+Spring Cloud Commons provides a `/serviceregistry` actuator endpoint.
 This endpoint relies on a `Registration` bean in the Spring Application Context.
-Calling `/service-registry` with GET returns the status of the `Registration`.
+Calling `/serviceregistry` with GET returns the status of the `Registration`.
 Using POST to the same endpoint with a JSON body changes the status of the current `Registration` to the new value.
 The JSON body has to include the `status` field with the preferred value.
 Please see the documentation of the `ServiceRegistry` implementation you use for the allowed values when updating the status and the values returned for the status.
