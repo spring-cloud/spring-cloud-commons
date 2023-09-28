@@ -217,6 +217,8 @@ The configuration property must be present in order to update the value after a 
 a value in your application you might want to switch your logic to rely on its absence instead.  Another option would be to rely
 on the value changing rather than not being present in the application's configuration.
 
+WARNING: Context Refresh is not supported for Spring AOT transformations and native images. For AOT and native images, `spring.cloud.refresh.enabled` needs to be set to `false`.
+
 [refresh-scope-on-restart]
 === Refresh Scope on Restart
 
