@@ -35,7 +35,7 @@ import org.springframework.cloud.client.ServiceInstance;
  */
 public class SubsetServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
-	static final int DEFAULT_SUBSET_SIZE = 1000;
+	static final int DEFAULT_SUBSET_SIZE = 100;
 
 	final String instanceId;
 
