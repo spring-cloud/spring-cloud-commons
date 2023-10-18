@@ -285,6 +285,12 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 
 	private List<String> addActiveProfilesTo(List<String> profiles, PropertySource<?> propertySource,
 			ConfigurableEnvironment environment) {
+		// According to Spring Boot, "spring.profiles.active" should have priority,
+		// only value from property source with the highest priority wins.
+		// Once settled, ignore others
+		if (!profiles.isEmpty()) {
+			return profiles;
+		}
 		return addProfilesTo(profiles, propertySource, AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, environment);
 	}
 
