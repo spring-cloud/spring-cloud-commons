@@ -656,6 +656,23 @@ public class BootstrapConfigurationTests {
 		then(this.context.getEnvironment().getProperty("foo")).isEqualTo("bar");
 	}
 
+	@Test
+	void activeAndIncludeProfileFromBootstrapPropertySource_WhenMultiplePlacesHaveActiveProfileProperties_ShouldOnlyAcceptTheTopPriority() {
+		String[] properties = new String[] { "spring.config.use-legacy-processing=true" };
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
+				.sources(BareConfiguration.class).run("--spring.profiles.active=prod,secure");
+		then(this.context.getEnvironment().acceptsProfiles("prod", "secure")).isTrue();
+		// active profile from property sources with lower priority should not be included
+		then(this.context.getEnvironment().acceptsProfiles("local")).isFalse();
+		then(this.context.getEnvironment().getActiveProfiles()).contains("prod", "secure");
+		then(this.context.getEnvironment().getActiveProfiles()).doesNotContain("local");
+		// check if active profile value could possibly exist in other property sources
+		// with lower priority
+		then(this.context.getEnvironment().getPropertySources().stream()
+				.map(p -> p.getProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME)).anyMatch("local"::equals))
+						.isTrue();
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	protected static class BareConfiguration {
