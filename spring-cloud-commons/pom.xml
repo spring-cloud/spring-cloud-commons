@@ -33,6 +33,34 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.basepom.maven</groupId>
+				<artifactId>duplicate-finder-maven-plugin</artifactId>
+				<configuration>
+					<ignoredDependencies>
+						<dependency>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcprov-jdk18on</artifactId>
+							<version>1.73</version>
+						</dependency>
+						<dependency>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcprov-jdk15on</artifactId>
+							<version>1.64</version>
+						</dependency>
+						<dependency>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcpkix-jdk18on</artifactId>
+							<version>1.73</version>
+						</dependency>
+						<dependency>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcpkix-jdk15on</artifactId>
+							<version>1.64</version>
+						</dependency>
+					</ignoredDependencies>
+				</configuration>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
