@@ -38,7 +38,6 @@ import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
-import org.springframework.cloud.bootstrap.BootstrapConfigFileApplicationListener;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.logging.LoggingRebinder;
 import org.springframework.context.ApplicationContextInitializer;
@@ -284,6 +283,12 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 
 	private List<String> addActiveProfilesTo(List<String> profiles, PropertySource<?> propertySource,
 			ConfigurableEnvironment environment) {
+		// According to Spring Boot, "spring.profiles.active" should have priority,
+		// only value from property source with the highest priority wins.
+		// Once settled, ignore others
+		if (!profiles.isEmpty()) {
+			return profiles;
+		}
 		return addProfilesTo(profiles, propertySource, AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, environment);
 	}
 
@@ -296,9 +301,7 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 			}
 		}
 		else {
-			Collections.addAll(profiles, getProfilesForValue(
-					propertySource.getProperty(BootstrapConfigFileApplicationListener.INCLUDE_PROFILES_PROPERTY),
-					environment));
+			Collections.addAll(profiles, getProfilesForValue(propertySource.getProperty(property), environment));
 		}
 		return profiles;
 	}
