@@ -55,8 +55,8 @@ public class RefreshScopeLifecycle implements Lifecycle {
 				if (LOG.isInfoEnabled()) {
 					LOG.info("Refreshed keys: " + keys);
 				}
+				running = true;
 			}
-			running = true;
 		}
 	}
 
