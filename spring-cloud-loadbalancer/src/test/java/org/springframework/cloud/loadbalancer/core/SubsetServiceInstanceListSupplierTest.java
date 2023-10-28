@@ -75,6 +75,19 @@ class SubsetServiceInstanceListSupplierTest {
 	}
 
 	@Test
+	void shouldReturnRawWhenLessThanSubsetSize() {
+		List<ServiceInstance> instances = IntStream.range(0, 101)
+				.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
+				.collect(Collectors.toList());
+
+		when(delegate.get()).thenReturn(Flux.just(instances));
+		SubsetServiceInstanceListSupplier supplier = new SubsetServiceInstanceListSupplier(delegate, 1000);
+
+		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
+		assertThat(serviceInstances).hasSize(101);
+	}
+
+	@Test
 	void shouldReturnSameSublistForSameInstanceId() {
 		List<ServiceInstance> instances = IntStream.range(0, 101)
 				.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))

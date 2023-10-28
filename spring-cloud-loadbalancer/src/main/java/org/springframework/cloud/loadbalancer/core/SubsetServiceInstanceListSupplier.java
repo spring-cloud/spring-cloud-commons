@@ -58,7 +58,7 @@ public class SubsetServiceInstanceListSupplier extends DelegatingServiceInstance
 	@Override
 	public Flux<List<ServiceInstance>> get() {
 		return delegate.get().map(instances -> {
-			if (instances.isEmpty()) {
+			if (instances.size() <= subsetSize) {
 				return instances;
 			}
 
