@@ -30,6 +30,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.commons.util.IdUtils;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
@@ -507,9 +508,10 @@ public class LoadBalancerProperties {
 	public static class Subset {
 
 		/**
-		 * Instance id of deterministic subsetting.
+		 * Instance id of deterministic subsetting. If not set,
+		 * {@link IdUtils#getDefaultInstanceId(PropertyResolver)} will be used.
 		 */
-		private String instanceId = IdUtils.DEFAULT_SERVICE_ID_STRING;
+		private String instanceId = "";
 
 		/**
 		 * Max subset size of deterministic subsetting.

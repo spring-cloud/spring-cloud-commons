@@ -16,22 +16,22 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.cloud.commons.util.IdUtils;
+import org.springframework.mock.env.MockEnvironment;
+import reactor.core.publisher.Flux;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
-
-import org.springframework.cloud.client.DefaultServiceInstance;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
-import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -58,6 +58,23 @@ class SubsetServiceInstanceListSupplierTest {
 	@AfterEach
 	public void destroy() {
 		env = null;
+	}
+
+	@Test
+	void shouldResolvePlaceholderWhenInstanceIdSet() {
+		env.setProperty("foo", "bar");
+		SubsetServiceInstanceListSupplier supplier = new SubsetServiceInstanceListSupplier(delegate, env,
+				factory("${foo}", 100));
+
+		assertThat(supplier.getInstanceId()).isEqualTo("bar");
+	}
+
+	@Test
+	void shouldUseIdUtilsWhenInstanceIdNotSet() {
+		SubsetServiceInstanceListSupplier supplier = new SubsetServiceInstanceListSupplier(delegate, env,
+				factory("", 100));
+
+		assertThat(supplier.getInstanceId()).isEqualTo(IdUtils.getDefaultInstanceId(env));
 	}
 
 	@Test
