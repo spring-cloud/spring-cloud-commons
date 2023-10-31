@@ -25,6 +25,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.core.env.PropertyResolver;
 
 /**
@@ -42,8 +43,9 @@ public class SubsetServiceInstanceListSupplier extends DelegatingServiceInstance
 	private final int size;
 
 	public SubsetServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, PropertyResolver resolver,
-			LoadBalancerProperties properties) {
+			ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
 		super(delegate);
+		LoadBalancerProperties properties = factory.getProperties(getServiceId());
 		this.instanceId = resolver.resolvePlaceholders(properties.getSubset().getInstanceId());
 		this.size = properties.getSubset().getSize();
 	}

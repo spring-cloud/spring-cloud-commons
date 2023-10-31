@@ -30,11 +30,13 @@ import reactor.core.publisher.Flux;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.mock.env.MockEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.loadbalancer.core.LoadBalancerTestUtils.buildLoadBalancerClientFactory;
 
 /**
  * Tests for {@link SubsetServiceInstanceListSupplier}
@@ -60,9 +62,10 @@ class SubsetServiceInstanceListSupplierTest {
 
 	@Test
 	void shouldReturnEmptyWhenDelegateReturnedEmpty() {
+		when(delegate.getServiceId()).thenReturn("test");
 		when(delegate.get()).thenReturn(Flux.just(Collections.emptyList()));
 		SubsetServiceInstanceListSupplier supplier = new SubsetServiceInstanceListSupplier(delegate, env,
-				subsetProperties("foobar", 100));
+				factory("foobar", 100));
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		assertThat(serviceInstances).isEmpty();
@@ -74,9 +77,10 @@ class SubsetServiceInstanceListSupplierTest {
 				.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
 				.collect(Collectors.toList());
 
+		when(delegate.getServiceId()).thenReturn("test");
 		when(delegate.get()).thenReturn(Flux.just(instances));
 		SubsetServiceInstanceListSupplier supplier = new SubsetServiceInstanceListSupplier(delegate, env,
-				subsetProperties("foobar", 5));
+				factory("foobar", 5));
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		assertThat(serviceInstances).hasSize(5);
@@ -88,9 +92,10 @@ class SubsetServiceInstanceListSupplierTest {
 				.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
 				.collect(Collectors.toList());
 
+		when(delegate.getServiceId()).thenReturn("test");
 		when(delegate.get()).thenReturn(Flux.just(instances));
 		SubsetServiceInstanceListSupplier supplier = new SubsetServiceInstanceListSupplier(delegate, env,
-				subsetProperties("foobar", 1000));
+				factory("foobar", 1000));
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		assertThat(serviceInstances).hasSize(101);
@@ -102,14 +107,15 @@ class SubsetServiceInstanceListSupplierTest {
 				.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
 				.collect(Collectors.toList());
 
+		when(delegate.getServiceId()).thenReturn("test");
 		when(delegate.get()).thenReturn(Flux.just(instances));
 
 		SubsetServiceInstanceListSupplier supplier1 = new SubsetServiceInstanceListSupplier(delegate, env,
-				subsetProperties("foobar", 5));
+				factory("foobar", 5));
 		List<ServiceInstance> serviceInstances1 = Objects.requireNonNull(supplier1.get().blockFirst());
 
 		SubsetServiceInstanceListSupplier supplier2 = new SubsetServiceInstanceListSupplier(delegate, env,
-				subsetProperties("foobar", 5));
+				factory("foobar", 5));
 		List<ServiceInstance> serviceInstances2 = Objects.requireNonNull(supplier2.get().blockFirst());
 
 		assertThat(serviceInstances1).isEqualTo(serviceInstances2);
@@ -121,26 +127,28 @@ class SubsetServiceInstanceListSupplierTest {
 				.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
 				.collect(Collectors.toList());
 
+		when(delegate.getServiceId()).thenReturn("test");
 		when(delegate.get()).thenReturn(Flux.just(instances));
 
 		SubsetServiceInstanceListSupplier supplier1 = new SubsetServiceInstanceListSupplier(delegate, env,
-				subsetProperties("foobar1", 5));
+				factory("foobar1", 5));
 		List<ServiceInstance> serviceInstances1 = Objects.requireNonNull(supplier1.get().blockFirst());
 
 		SubsetServiceInstanceListSupplier supplier2 = new SubsetServiceInstanceListSupplier(delegate, env,
-				subsetProperties("foobar2", 5));
+				factory("foobar2", 5));
 		List<ServiceInstance> serviceInstances2 = Objects.requireNonNull(supplier2.get().blockFirst());
 
 		assertThat(serviceInstances1).isNotEqualTo(serviceInstances2);
 	}
 
-	LoadBalancerProperties subsetProperties(String instanceId, int size) {
+	ReactiveLoadBalancer.Factory<ServiceInstance> factory(String instanceId, int size) {
 		LoadBalancerProperties properties = new LoadBalancerProperties();
 		LoadBalancerProperties.Subset subset = new LoadBalancerProperties.Subset();
 		subset.setInstanceId(instanceId);
 		subset.setSize(size);
 		properties.setSubset(subset);
-		return properties;
+
+		return buildLoadBalancerClientFactory("test", properties);
 	}
 
 }
