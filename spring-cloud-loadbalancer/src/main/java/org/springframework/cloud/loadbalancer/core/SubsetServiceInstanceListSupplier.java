@@ -87,4 +87,5 @@ public class SubsetServiceInstanceListSupplier extends DelegatingServiceInstance
 	public int getSize() {
 		return size;
 	}
+
 }
