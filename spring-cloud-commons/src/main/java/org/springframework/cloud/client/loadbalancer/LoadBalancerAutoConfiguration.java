@@ -32,11 +32,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -49,7 +51,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Olga Maciaszek-Sharma
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(RestTemplate.class)
+@ConditionalOnClass({ RestTemplate.class, RestClient.class })
 @ConditionalOnBean(LoadBalancerClient.class)
 @EnableConfigurationProperties(LoadBalancerClientsProperties.class)
 public class LoadBalancerAutoConfiguration {
@@ -97,6 +99,13 @@ public class LoadBalancerAutoConfiguration {
 				list.add(loadBalancerInterceptor);
 				restTemplate.setInterceptors(list);
 			};
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
+				final LoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {
+			return new LoadBalancerRestClientBuilderBeanPostProcessor(loadBalancerInterceptor, context);
 		}
 
 	}
@@ -162,6 +171,13 @@ public class LoadBalancerAutoConfiguration {
 				list.add(loadBalancerInterceptor);
 				restTemplate.setInterceptors(list);
 			};
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
+				final RetryLoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {
+			return new LoadBalancerRestClientBuilderBeanPostProcessor(loadBalancerInterceptor, context);
 		}
 
 	}
