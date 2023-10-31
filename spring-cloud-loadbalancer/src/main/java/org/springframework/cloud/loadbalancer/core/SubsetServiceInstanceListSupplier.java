@@ -20,60 +20,53 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.core.env.PropertyResolver;
 
 /**
  * A {@link ServiceInstanceListSupplier} implementation that uses
  * <a href="https://sre.google/sre-book/load-balancing-datacenter/">deterministic
- * subsetting</a> to limit the number of instances provided by delegate.
+ * subsetting algorithm</a> to limit the number of instances provided by delegate.
  *
  * @author Zhuozhi Ji
+ * @since 4.1.0
  */
 public class SubsetServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
-	static final int DEFAULT_SUBSET_SIZE = 100;
+	private final String instanceId;
 
-	final String instanceId;
+	private final int size;
 
-	final int subsetSize;
-
-	public SubsetServiceInstanceListSupplier(ServiceInstanceListSupplier delegate) {
-		this(delegate, DEFAULT_SUBSET_SIZE);
-	}
-
-	public SubsetServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, int subsetSize) {
-		this(delegate, UUID.randomUUID().toString(), subsetSize);
-	}
-
-	public SubsetServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, String instanceId, int subsetSize) {
+	public SubsetServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, PropertyResolver resolver,
+			LoadBalancerProperties properties) {
 		super(delegate);
-		this.instanceId = instanceId;
-		this.subsetSize = subsetSize;
+		this.instanceId = resolver.resolvePlaceholders(properties.getSubset().getInstanceId());
+		this.size = properties.getSubset().getSize();
 	}
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
 		return delegate.get().map(instances -> {
-			if (instances.size() <= subsetSize) {
+			if (instances.size() <= size) {
 				return instances;
 			}
 
 			instances = new ArrayList<>(instances);
 
-			int clientId = instanceId.hashCode() & Integer.MAX_VALUE;
-			int subsetCount = instances.size() / subsetSize;
-			int round = clientId / subsetCount;
+			int instanceId = this.instanceId.hashCode() & Integer.MAX_VALUE;
+			int count = instances.size() / size;
+			int round = instanceId / count;
 
 			Random random = new Random(round);
 			Collections.shuffle(instances, random);
 
-			int subsetId = clientId % subsetCount;
-			int start = subsetId * subsetSize;
-			return instances.subList(start, start + subsetSize);
+			int bucket = instanceId % count;
+			int start = bucket * size;
+			return instances.subList(start, start + size);
 		});
 	}
 
