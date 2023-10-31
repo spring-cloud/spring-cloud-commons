@@ -64,6 +64,7 @@ class SubsetServiceInstanceListSupplierTest {
 	@Test
 	void shouldResolvePlaceholderWhenInstanceIdSet() {
 		env.setProperty("foo", "bar");
+		when(delegate.getServiceId()).thenReturn("test");
 		SubsetServiceInstanceListSupplier supplier = new SubsetServiceInstanceListSupplier(delegate, env,
 				factory("${foo}", 100));
 
@@ -75,6 +76,7 @@ class SubsetServiceInstanceListSupplierTest {
 		SubsetServiceInstanceListSupplier supplier = new SubsetServiceInstanceListSupplier(delegate, env,
 				factory("", 100));
 
+		when(delegate.getServiceId()).thenReturn("test");
 		assertThat(supplier.getInstanceId()).isEqualTo(IdUtils.getDefaultInstanceId(env));
 	}
 
