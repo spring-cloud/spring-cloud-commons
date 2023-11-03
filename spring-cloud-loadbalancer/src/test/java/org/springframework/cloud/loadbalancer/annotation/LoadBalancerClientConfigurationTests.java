@@ -204,7 +204,7 @@ class LoadBalancerClientConfigurationTests {
 
 	@Test
 	void shouldInstantiateBlockingWeightedServiceInstanceListSupplier() {
-		blockingDiscoveryClientRunner.withUserConfiguration(RestTemplateTestConfig.class)
+		blockingDiscoveryClientRunner
 				.withPropertyValues("spring.cloud.loadbalancer.configurations=weighted").run(context -> {
 					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 					then(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
