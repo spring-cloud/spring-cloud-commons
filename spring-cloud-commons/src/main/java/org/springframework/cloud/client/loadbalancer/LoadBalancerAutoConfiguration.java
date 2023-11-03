@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -51,7 +50,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Olga Maciaszek-Sharma
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass({ RestTemplate.class, RestClient.class })
+@Conditional(BlockingRestClassesPresentCondition.class)
 @ConditionalOnBean(LoadBalancerClient.class)
 @EnableConfigurationProperties(LoadBalancerClientsProperties.class)
 public class LoadBalancerAutoConfiguration {
