@@ -24,18 +24,19 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer.REQUEST;
 
@@ -46,49 +47,82 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoa
  */
 public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
+	protected ApplicationContextRunner applicationContextRunner = new ApplicationContextRunner()
+			.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class));
+
 	@Test
-	public void restTemplateGetsLoadBalancerInterceptor() {
-		ConfigurableApplicationContext context = init(OneRestTemplate.class);
-		final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
+	void restTemplateGetsLoadBalancerInterceptor() {
+		applicationContextRunner.withUserConfiguration(OneRestTemplate.class).run(context -> {
+			final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
 
-		then(restTemplates).isNotNull();
-		then(restTemplates.values()).hasSize(1);
-		RestTemplate restTemplate = restTemplates.values().iterator().next();
-		then(restTemplate).isNotNull();
+			then(restTemplates).isNotNull();
+			then(restTemplates.values()).hasSize(1);
+			RestTemplate restTemplate = restTemplates.values().iterator().next();
+			then(restTemplate).isNotNull();
 
-		assertLoadBalanced(restTemplate);
+			assertLoadBalanced(restTemplate);
+		});
 	}
+
+	@Test
+	void restClientBuilderWithLoadBalancerInterceptor() {
+		applicationContextRunner.withUserConfiguration(OneRestClientBuilder.class).run(context -> {
+			final Map<String, RestClient.Builder> restClientBuilders = context.getBeansOfType(RestClient.Builder.class);
+
+			assertThat(restClientBuilders).isNotNull();
+			assertThat(restClientBuilders).hasSize(1);
+			RestClient.Builder restClientBuilder = restClientBuilders.values().iterator().next();
+			assertThat(restClientBuilder).isNotNull();
+			assertLoadBalanced(restClientBuilder);
+		});
+	}
+
+	@Test
+	void multipleRestTemplates() {
+		applicationContextRunner.withUserConfiguration(TwoRestTemplatesAndTwoRestClientBuilders.class).run(context -> {
+			final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
+
+			then(restTemplates).isNotNull();
+			Collection<RestTemplate> templates = restTemplates.values();
+			then(templates).hasSize(2);
+
+			TwoRestTemplatesAndTwoRestClientBuilders.Two two = context
+					.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
+
+			then(two.loadBalanced).isNotNull();
+			assertLoadBalanced(two.loadBalanced);
+
+			then(two.nonLoadBalanced).isNotNull();
+			then(two.nonLoadBalanced.getInterceptors()).isEmpty();
+		});
+	}
+
+	@Test
+	void multipleRestClientBuilders() {
+		applicationContextRunner.withUserConfiguration(TwoRestTemplatesAndTwoRestClientBuilders.class).run(context -> {
+			final Map<String, RestClient.Builder> restClientBuilders = context.getBeansOfType(RestClient.Builder.class);
+
+			assertThat(restClientBuilders).isNotNull();
+			assertThat(restClientBuilders.values()).hasSize(2);
+
+			TwoRestTemplatesAndTwoRestClientBuilders.Two two = context
+					.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
+
+			assertThat(two.loadBalancedRestClientBuilder).isNotNull();
+			assertLoadBalanced(two.loadBalancedRestClientBuilder);
+
+			assertThat(two.nonLoadBalancedRestClientBuilder).isNotNull();
+			two.nonLoadBalancedRestClientBuilder
+					.requestInterceptors(interceptors -> assertThat(interceptors).isEmpty());
+		});
+	}
+
+	protected abstract void assertLoadBalanced(RestClient.Builder restClientBuilder);
 
 	protected abstract void assertLoadBalanced(RestTemplate restTemplate);
 
-	@Test
-	public void multipleRestTemplates() {
-		ConfigurableApplicationContext context = init(TwoRestTemplates.class);
-		final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
-
-		then(restTemplates).isNotNull();
-		Collection<RestTemplate> templates = restTemplates.values();
-		then(templates).hasSize(2);
-
-		TwoRestTemplates.Two two = context.getBean(TwoRestTemplates.Two.class);
-
-		then(two.loadBalanced).isNotNull();
-		assertLoadBalanced(two.loadBalanced);
-
-		then(two.nonLoadBalanced).isNotNull();
-		then(two.nonLoadBalanced.getInterceptors()).isEmpty();
-	}
-
-	protected ConfigurableApplicationContext init(Class<?> config) {
-		return init(config, "spring.aop.proxyTargetClass=true");
-	}
-
-	protected ConfigurableApplicationContext init(Class<?> config, String... props) {
-		return new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(props)
-				.sources(config, LoadBalancerAutoConfiguration.class).run();
-	}
-
 	@Configuration(proxyBeanMethods = false)
+	@Import(BaseConfiguration.class)
 	protected static class OneRestTemplate {
 
 		@LoadBalanced
@@ -96,6 +130,23 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		RestTemplate loadBalancedRestTemplate() {
 			return new RestTemplate();
 		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@Import(BaseConfiguration.class)
+	protected static class OneRestClientBuilder {
+
+		@LoadBalanced
+		@Bean
+		RestClient.Builder loadBalancedRestClientBuilder() {
+			return RestClient.builder();
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	protected static class BaseConfiguration {
 
 		@Bean
 		LoadBalancerClient loadBalancerClient() {
@@ -110,13 +161,19 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@Import(OneRestTemplate.class)
-	protected static class TwoRestTemplates {
+	@Import({ OneRestTemplate.class, OneRestClientBuilder.class })
+	protected static class TwoRestTemplatesAndTwoRestClientBuilders {
 
 		@Primary
 		@Bean
 		RestTemplate restTemplate() {
 			return new RestTemplate();
+		}
+
+		@Primary
+		@Bean
+		RestClient.Builder restClientBuilder() {
+			return RestClient.builder();
 		}
 
 		@Configuration(proxyBeanMethods = false)
@@ -128,6 +185,13 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 			@Autowired
 			@LoadBalanced
 			RestTemplate loadBalanced;
+
+			@Autowired
+			RestClient.Builder nonLoadBalancedRestClientBuilder;
+
+			@Autowired
+			@LoadBalanced
+			RestClient.Builder loadBalancedRestClientBuilder;
 
 		}
 
