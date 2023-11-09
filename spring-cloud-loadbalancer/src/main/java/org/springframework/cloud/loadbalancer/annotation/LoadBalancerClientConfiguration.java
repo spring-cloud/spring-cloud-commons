@@ -217,6 +217,15 @@ public class LoadBalancerClientConfiguration {
 					.build(context);
 		}
 
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(SubsetConfigurationCondition.class)
+		public ServiceInstanceListSupplier subsetServiceInstanceListSupplier(ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withSubset().withCaching()
+					.build(context);
+		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
