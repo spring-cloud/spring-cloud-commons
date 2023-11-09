@@ -379,6 +379,34 @@ For `WebClient`, you need to implement and define `LoadBalancerClientRequestTran
 If multiple transformers are defined, they are applied in the order in which Beans are defined.
 Alternatively, you can use `LoadBalancerRequestTransformer.DEFAULT_ORDER` or `LoadBalancerClientRequestTransformer.DEFAULT_ORDER` to specify the order.
 
+[[loadbalancer-subset]]
+== Spring Cloud LoadBalancer Subset
+
+`SubsetServiceInstanceListSupplier` implements a https://sre.google/sre-book/load-balancing-datacenter/[deterministic subsetting algorithm] to select a limited number of instances in the `ServiceInstanceListSupplier` delegates hierarchy.
+
+You can configure it either by setting the value of `spring.cloud.loadbalancer.configurations` to `subset` or by providing your own `ServiceInstanceListSupplier` bean -- for example:
+
+[[subset-custom-loadbalancer-configuration-example]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+					.withSubset()
+					.withCaching()
+					.build(context);
+	    }
+	}
+----
+
+TIP: Each service instance will be assigned a unique `instanceId` by default, and different `instanceId` will often select different subsets. Normally you don't need to pay attention to it, but if you need to have multiple instances select the same subset, you can set it via `spring.cloud.loadbalancer.subset.instance-id` (supports placeholders).
+
+TIP: The size of the subset is set to 100 by default, you can also set it via `spring.cloud.loadbalancer.subset.size`
+
 [[spring-cloud-loadbalancer-starter]]
 == Spring Cloud LoadBalancer Starter
 
