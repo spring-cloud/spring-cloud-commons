@@ -234,6 +234,21 @@ public final class ServiceInstanceListSupplierBuilder {
 	}
 
 	/**
+	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
+	 * {@link RestClient} instance to the {@link ServiceInstanceListSupplier} hierarchy.
+	 * @param restClient a user-provided {@link RestClient} instance
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withBlockingHealthChecks(RestClient restClient) {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
+			return blockingHealthCheckServiceInstanceListSupplier(restClient, delegate, loadBalancerClientFactory);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
 	 * Adds a {@link ZonePreferenceServiceInstanceListSupplier} to the
 	 * {@link ServiceInstanceListSupplier} hierarchy.
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
