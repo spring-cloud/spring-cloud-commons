@@ -22,7 +22,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Tests whether either {@link RestTemplate} or {@link RestClient} class is present.
+ * Verifies whether either {@link RestTemplate} or {@link RestClient} class is present.
  *
  * @author Olga Maciaszek-Sharma
  * @since 4.1.0

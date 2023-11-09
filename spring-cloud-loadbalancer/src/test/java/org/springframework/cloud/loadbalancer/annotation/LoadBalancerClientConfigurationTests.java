@@ -246,6 +246,7 @@ class LoadBalancerClientConfigurationTests {
 		RestTemplate restTemplate() {
 			return new RestTemplate();
 		}
+
 	}
 
 	@Configuration

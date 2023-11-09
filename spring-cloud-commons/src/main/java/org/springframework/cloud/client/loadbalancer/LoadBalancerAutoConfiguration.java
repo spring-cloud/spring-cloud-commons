@@ -101,6 +101,7 @@ public class LoadBalancerAutoConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnBean(LoadBalancerInterceptor.class)
 		@ConditionalOnMissingBean
 		LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
 				final LoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {
@@ -173,6 +174,7 @@ public class LoadBalancerAutoConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnBean(RetryLoadBalancerInterceptor.class)
 		@ConditionalOnMissingBean
 		LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
 				final RetryLoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {

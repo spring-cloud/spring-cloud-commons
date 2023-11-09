@@ -23,9 +23,12 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestClient;
 
 /**
+ * A {@link BeanPostProcessor} that adds the provided {@link ClientHttpRequestInterceptor}
+ * to all {@link RestClient.Builder} instances annotated with {@link LoadBalanced}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 4.1.0
  */
-// TODO: make deferring?
 public class LoadBalancerRestClientBuilderBeanPostProcessor implements BeanPostProcessor {
 
 	private final ClientHttpRequestInterceptor loadBalancerInterceptor;
