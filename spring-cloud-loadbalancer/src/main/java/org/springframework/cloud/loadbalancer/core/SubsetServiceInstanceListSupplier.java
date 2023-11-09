@@ -48,13 +48,7 @@ public class SubsetServiceInstanceListSupplier extends DelegatingServiceInstance
 			ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
 		super(delegate);
 		LoadBalancerProperties properties = factory.getProperties(getServiceId());
-		String instanceId = properties.getSubset().getInstanceId();
-		if (StringUtils.hasText(instanceId)) {
-			this.instanceId = resolver.resolvePlaceholders(properties.getSubset().getInstanceId());
-		}
-		else {
-			this.instanceId = IdUtils.getDefaultInstanceId(resolver);
-		}
+		this.instanceId = resolveInstanceId(properties, resolver);
 		this.size = properties.getSubset().getSize();
 	}
 
@@ -78,6 +72,14 @@ public class SubsetServiceInstanceListSupplier extends DelegatingServiceInstance
 			int start = bucket * size;
 			return instances.subList(start, start + size);
 		});
+	}
+
+	private static String resolveInstanceId(LoadBalancerProperties properties, PropertyResolver resolver) {
+		String instanceId = properties.getSubset().getInstanceId();
+		if (StringUtils.hasText(instanceId)) {
+			return resolver.resolvePlaceholders(properties.getSubset().getInstanceId());
+		}
+		return IdUtils.getDefaultInstanceId(resolver);
 	}
 
 	public String getInstanceId() {

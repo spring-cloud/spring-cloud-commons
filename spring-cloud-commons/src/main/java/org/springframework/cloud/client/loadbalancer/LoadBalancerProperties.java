@@ -42,6 +42,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  *
  * @author Olga Maciaszek-Sharma
  * @author Gandhimathi Velusamy
+ * @author Zhuozhi Ji
  * @since 2.2.1
  */
 public class LoadBalancerProperties {
@@ -88,7 +89,8 @@ public class LoadBalancerProperties {
 	private boolean callGetWithRequestOnDelegates = true;
 
 	/**
-	 * Properties for <code>SubsetServiceInstanceListSupplier</code>.
+	 * Properties for
+	 * {@link org.springframework.cloud.loadbalancer.core.SubsetServiceInstanceListSupplier}.
 	 */
 	private Subset subset = new Subset();
 
