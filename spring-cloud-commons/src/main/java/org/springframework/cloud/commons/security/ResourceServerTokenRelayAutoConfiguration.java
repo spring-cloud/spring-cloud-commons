@@ -26,6 +26,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Conditional;
@@ -54,6 +55,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 // @AutoConfigureAfter(OAuth2AutoConfiguration.class)
 // @ResourceServerTokenRelayAutoConfiguration.ConditionalOnOAuth2ClientInResourceServer
 // @ConditionalOnClass(ResourceServerConfiguration.class)
+@ConditionalOnClass(WebMvcConfigurer.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnProperty(value = "spring.cloud.mvc.token-relay.enabled", matchIfMissing = true)
 public class ResourceServerTokenRelayAutoConfiguration {
