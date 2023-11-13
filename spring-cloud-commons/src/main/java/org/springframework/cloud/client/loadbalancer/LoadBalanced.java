@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import java.lang.annotation.Target;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
- * Annotation to mark a RestTemplate or WebClient bean to be configured to use a
- * LoadBalancerClient.
+ * Annotation to mark a RestTemplate, RestClient.Builder or WebClient.Builder bean to be
+ * configured to use a LoadBalancerClient.
  * @author Spencer Gibb
  */
 @Target({ ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD })

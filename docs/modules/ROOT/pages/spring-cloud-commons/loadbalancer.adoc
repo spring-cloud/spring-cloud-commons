@@ -44,12 +44,13 @@ NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` co
 [[spring-cloud-loadbalancer-integrations]]
 == Spring Cloud LoadBalancer integrations
 
-In order to make it easy to use Spring Cloud LoadBalancer, we provide `ReactorLoadBalancerExchangeFilterFunction` that can be used with `WebClient` and `BlockingLoadBalancerClient` that works with `RestTemplate`.
+In order to make it easy to use Spring Cloud LoadBalancer, we provide `ReactorLoadBalancerExchangeFilterFunction` that can be used with `WebClient` and `BlockingLoadBalancerClient` that works with `RestTemplate` and `RestClient`.
 You can see more information and examples of usage in the following sections:
 
-* xref:spring-cloud-commons/common-abstractions.adoc#rest-template-loadbalancer-client[Spring RestTemplate as a Load Balancer Client]
-* xref:spring-cloud-commons/common-abstractions.adoc#webclinet-loadbalancer-client[Spring WebClient as a Load Balancer Client]
-* xref:spring-cloud-commons/common-abstractions.adoc#webflux-with-reactive-loadbalancer[Spring WebFlux WebClient with `ReactorLoadBalancerExchangeFilterFunction`]
+* xref:spring-cloud-commons/common-abstractions.adoc#rest-template-loadbalancer-client[Spring `RestTemplate` as a LoadBalancer Client]
+* xref:spring-cloud-commons/common-abstractions.adoc#rest-client-loadbalancer-client[Spring `RestClient` as a LoadBalancer Client]
+* xref:spring-cloud-commons/common-abstractions.adoc#webclinet-loadbalancer-client[Spring `WebClient` as a LoadBalancer Client]
+* xref:spring-cloud-commons/common-abstractions.adoc#webflux-with-reactive-loadbalancer[Spring `WebFlux WebClient` with `ReactorLoadBalancerExchangeFilterFunction`]
 
 [[loadbalancer-caching]]
 == Spring Cloud LoadBalancer Caching
@@ -232,7 +233,7 @@ public class CustomLoadBalancerConfiguration {
 ----
 
 TIP: For the non-reactive stack, create this supplier with the `withBlockingHealthChecks()`.
-You can also pass your own `WebClient` or `RestTemplate` instance to be used for the checks.
+You can also pass your own `WebClient`, `RestTemplate` or `RestClient` instance to be used for the checks.
 
 WARNING: `HealthCheckServiceInstanceListSupplier` has its own caching mechanism based on Reactor Flux `replay()`. Therefore, if it's being used, you may want to skip wrapping that supplier with `CachingServiceInstanceListSupplier`.
 
@@ -336,7 +337,7 @@ public class CustomLoadBalancerConfiguration {
 
 You can use the selected `ServiceInstance` to transform the load-balanced HTTP Request.
 
-For `RestTemplate`, you need to implement and define `LoadBalancerRequestTransformer` as follows:
+For `RestTemplate` and `RestClient`, you need to implement and define `LoadBalancerRequestTransformer` as follows:
 
 [source,java,indent=0]
 ----

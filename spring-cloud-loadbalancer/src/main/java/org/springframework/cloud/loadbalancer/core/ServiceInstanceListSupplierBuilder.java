@@ -39,6 +39,7 @@ import org.springframework.core.env.PropertyResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -205,6 +206,21 @@ public final class ServiceInstanceListSupplierBuilder {
 
 	/**
 	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
+	 * {@link RestClient} instance to the {@link ServiceInstanceListSupplier} hierarchy.
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withBlockingRestClientHealthChecks() {
+		DelegateCreator creator = (context, delegate) -> {
+			RestClient restClient = context.getBean(RestClient.class);
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
+			return blockingHealthCheckServiceInstanceListSupplier(restClient, delegate, loadBalancerClientFactory);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
+	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
 	 * {@link RestTemplate} instance to the {@link ServiceInstanceListSupplier} hierarchy.
 	 * @param restTemplate a user-provided {@link RestTemplate} instance
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
@@ -213,6 +229,21 @@ public final class ServiceInstanceListSupplierBuilder {
 		DelegateCreator creator = (context, delegate) -> {
 			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
 			return blockingHealthCheckServiceInstanceListSupplier(restTemplate, delegate, loadBalancerClientFactory);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
+	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
+	 * {@link RestClient} instance to the {@link ServiceInstanceListSupplier} hierarchy.
+	 * @param restClient a user-provided {@link RestClient} instance
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withBlockingHealthChecks(RestClient restClient) {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
+			return blockingHealthCheckServiceInstanceListSupplier(restClient, delegate, loadBalancerClientFactory);
 		};
 		this.creators.add(creator);
 		return this;
@@ -364,6 +395,22 @@ public final class ServiceInstanceListSupplierBuilder {
 					try {
 						return Mono
 								.just(HttpStatus.OK.equals(restTemplate.getForEntity(uri, Void.class).getStatusCode()));
+					}
+					catch (Exception ignored) {
+						return Mono.just(false);
+					}
+				}));
+	}
+
+	private ServiceInstanceListSupplier blockingHealthCheckServiceInstanceListSupplier(RestClient restClient,
+			ServiceInstanceListSupplier delegate, LoadBalancerClientFactory loadBalancerClientFactory) {
+		return new HealthCheckServiceInstanceListSupplier(delegate, loadBalancerClientFactory,
+				(serviceInstance, healthCheckPath) -> Mono.defer(() -> {
+					URI uri = UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build()
+							.toUri();
+					try {
+						return Mono.just(HttpStatus.OK
+								.equals(restClient.get().uri(uri).retrieve().toBodilessEntity().getStatusCode()));
 					}
 					catch (Exception ignored) {
 						return Mono.just(false);

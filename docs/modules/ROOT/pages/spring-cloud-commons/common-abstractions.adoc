@@ -135,7 +135,7 @@ Please see the documentation of the `ServiceRegistry` implementation you use for
 For instance, Eureka's supported statuses are `UP`, `DOWN`, `OUT_OF_SERVICE`, and `UNKNOWN`.
 
 [[rest-template-loadbalancer-client]]
-== Spring RestTemplate as a Load Balancer Client
+== Spring `RestTemplate` as a LoadBalancer Client
 
 You can configure a `RestTemplate` to use a Load-balancer client.
 To create a load-balanced `RestTemplate`, create a `RestTemplate` `@Bean` and use the `@LoadBalanced` qualifier, as the following example shows:
@@ -157,8 +157,8 @@ public class MyClass {
     private RestTemplate restTemplate;
 
     public String doOtherStuff() {
-        String results = restTemplate.getForObject("http://stores/stores", String.class);
-        return results;
+        String result = restTemplate.getForObject("http://stores/stores", String.class);
+        return result;
     }
 }
 ----
@@ -167,13 +167,140 @@ CAUTION: A `RestTemplate` bean is no longer created through auto-configuration.
 Individual applications must create it.
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
-The BlockingLoadBalancerClient is used to create a full physical address.
+The `BlockingLoadBalancerClient` is used to create a full physical address.
 
-IMPORTANT: To use a load-balanced `RestTemplate`, you need to have a load-balancer implementation in your classpath.
+IMPORTANT: To use a load-balanced `RestTemplate`, you need to have a Spring Cloud LoadBalancer implementation in your classpath.
 Add xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer-starter[Spring Cloud LoadBalancer starter] to your project in order to use it.
 
+[[multiple-resttemplate-objects]]
+=== Multiple `RestTemplate` Objects
+
+If you want a `RestTemplate` that is not load-balanced, create a `RestTemplate` bean and inject it.
+To access the load-balanced `RestTemplate`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    RestTemplate loadBalanced() {
+        return new RestTemplate();
+    }
+
+    @Primary
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    @LoadBalanced
+    private RestTemplate loadBalanced;
+
+    public String doOtherStuff() {
+        return loadBalanced.getForObject("http://stores/stores", String.class);
+    }
+
+    public String doStuff() {
+        return restTemplate.getForObject("http://example.com", String.class);
+    }
+}
+----
+
+IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestTemplate` declaration in the preceding example to disambiguate the unqualified `@Autowired` injection.
+
+TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89`, try injecting `RestOperations` or setting `spring.aop.proxyTargetClass=true`.
+
+[[rest-client-loadbalancer-client]]
+== Spring `RestClient` as a LoadBalancer Client
+
+You can configure a `RestClient` to use a Load-balancer client.
+To create a load-balanced `RestClient`, create a `RestClient.Builder` `@Bean` and use the `@LoadBalanced` qualifier, as the following example shows:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    RestClient.Builder restClientBuilder() {
+        return RestClient.builder();
+    }
+}
+
+public class MyClass {
+
+    @Autowired
+    private RestClient.Builder restClientBuilder;
+
+    public String doOtherStuff() {
+        return restClientBuilder.build().get().uri(URI.create("http://stores/stores")).retrieve().body(String.class);
+    }
+}
+----
+
+The URI needs to use a virtual host name (that is, a service name, not a host name).
+The `BlockingLoadBalancerClient` is used to create a full physical address.
+
+IMPORTANT: To use a load-balanced `RestClient`, you need to have a Spring LoadBalancer implementation in your classpath.
+Add xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer-starter[Spring Cloud LoadBalancer starter] to your project in order to use it.
+
+[[multiple-restclient-objects]]
+=== Multiple `RestClient.Builder` Objects
+
+If you want a `RestClient.Builder` that is not load-balanced, create a `RestClient.Builder` bean and inject it.
+To access the load-balanced `RestClient`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    RestClient.Builder loadBalanced() {
+        return RestClient.builder();
+    }
+
+    @Primary
+    @Bean
+    RestClient.Builder restClientBuilder() {
+        return WebClient.builder();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private RestClient.Builder restClientBuilder;
+
+    @Autowired
+    @LoadBalanced
+    private RestClient.Builder loadBalanced;
+
+    public String doOtherStuff() {
+        return restClientBuilder.build().get().uri("http://stores/stores")
+        				.retrieve().body(String.class);
+    }
+
+    public String doStuff() {
+        return restClientBuilder.build().get().uri("http://example.com")
+        				.retrieve().body(String.class);
+    }
+}
+----
+
+IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestTemplate` declaration in the preceding example to disambiguate the unqualified `@Autowired` injection.
+
 [[webclinet-loadbalancer-client]]
-== Spring WebClient as a Load Balancer Client
+== Spring `WebClient` as a LoadBalancer Client
 
 You can configure `WebClient` to automatically use a load-balancer client.
 To create a load-balanced `WebClient`, create a `WebClient.Builder` `@Bean` and use the `@LoadBalanced` qualifier, as follows:
@@ -204,10 +331,54 @@ public class MyClass {
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The Spring Cloud LoadBalancer is used to create a full physical address.
 
-IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder`, you need to have a load balancer
+IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder`, you need to have a Spring Cloud LoadBalancer
 implementation in the classpath. We recommend that you add the
 xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer-starter[Spring Cloud LoadBalancer starter] to your project.
 Then, `ReactiveLoadBalancer` is used underneath.
+
+[[multiple-webclient-objects]]
+=== Multiple `WebClient.Builder` Objects
+
+If you want a `WebClient.Buider` that is not load-balanced, create a `WebClient` bean and inject it.
+To access the load-balanced `WebClient.Builder`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    WebClient.Builder loadBalanced() {
+        return WebClient.builder();
+    }
+
+    @Primary
+    @Bean
+    WebClient.Builder webClientBuilder() {
+        return WebClient.builder();
+    }
+}
+
+public class MyClass {
+    @Autowired
+    private WebClient.Builder webClientBuilder;
+
+    @Autowired
+    @LoadBalanced
+    private WebClient.Builder loadBalanced;
+
+    public Mono<String> doOtherStuff() {
+        return loadBalanced.build().get().uri("http://stores/stores")
+        				.retrieve().bodyToMono(String.class);
+    }
+
+    public Mono<String> doStuff() {
+        return webClientBuilder.build().get().uri("http://example.com")
+        				.retrieve().bodyToMono(String.class);
+    }
+}
+----
 
 [[retrying-failed-requests]]
 === Retrying Failed Requests
@@ -291,96 +462,6 @@ public class MyConfiguration {
                 }};
             }
         };
-    }
-}
-----
-
-[[multiple-resttemplate-objects]]
-== Multiple `RestTemplate` Objects
-
-If you want a `RestTemplate` that is not load-balanced, create a `RestTemplate` bean and inject it.
-To access the load-balanced `RestTemplate`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
-
-[source,java,indent=0]
-----
-@Configuration
-public class MyConfiguration {
-
-    @LoadBalanced
-    @Bean
-    RestTemplate loadBalanced() {
-        return new RestTemplate();
-    }
-
-    @Primary
-    @Bean
-    RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-}
-
-public class MyClass {
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
-    @LoadBalanced
-    private RestTemplate loadBalanced;
-
-    public String doOtherStuff() {
-        return loadBalanced.getForObject("http://stores/stores", String.class);
-    }
-
-    public String doStuff() {
-        return restTemplate.getForObject("http://example.com", String.class);
-    }
-}
-----
-
-IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestTemplate` declaration in the preceding example to disambiguate the unqualified `@Autowired` injection.
-
-TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89`, try injecting `RestOperations` or setting `spring.aop.proxyTargetClass=true`.
-
-[[multiple-webclient-objects]]
-== Multiple WebClient Objects
-
-If you want a `WebClient` that is not load-balanced, create a `WebClient` bean and inject it.
-To access the load-balanced `WebClient`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
-
-[source,java,indent=0]
-----
-@Configuration
-public class MyConfiguration {
-
-    @LoadBalanced
-    @Bean
-    WebClient.Builder loadBalanced() {
-        return WebClient.builder();
-    }
-
-    @Primary
-    @Bean
-    WebClient.Builder webClient() {
-        return WebClient.builder();
-    }
-}
-
-public class MyClass {
-    @Autowired
-    private WebClient.Builder webClientBuilder;
-
-    @Autowired
-    @LoadBalanced
-    private WebClient.Builder loadBalanced;
-
-    public Mono<String> doOtherStuff() {
-        return loadBalanced.build().get().uri("http://stores/stores")
-        				.retrieve().bodyToMono(String.class);
-    }
-
-    public Mono<String> doStuff() {
-        return webClientBuilder.build().get().uri("http://example.com")
-        				.retrieve().bodyToMono(String.class);
     }
 }
 ----

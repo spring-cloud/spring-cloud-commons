@@ -16,7 +16,12 @@
 
 package org.springframework.cloud.loadbalancer.annotation;
 
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
@@ -38,6 +43,7 @@ import org.springframework.cloud.loadbalancer.core.ZonePreferenceServiceInstance
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -191,9 +197,10 @@ class LoadBalancerClientConfigurationTests {
 
 	}
 
-	@Test
-	void shouldInstantiateBlockingHealthCheckServiceInstanceListSupplier() {
-		blockingDiscoveryClientRunner.withUserConfiguration(RestTemplateTestConfig.class)
+	@ParameterizedTest
+	@MethodSource("blockingConfigurations")
+	void shouldInstantiateBlockingHealthCheckServiceInstanceListSupplier(Class<?> configurationClass) {
+		blockingDiscoveryClientRunner.withUserConfiguration(configurationClass)
 				.withPropertyValues("spring.cloud.loadbalancer.configurations=health-check").run(context -> {
 					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 					then(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
@@ -204,8 +211,8 @@ class LoadBalancerClientConfigurationTests {
 
 	@Test
 	void shouldInstantiateBlockingWeightedServiceInstanceListSupplier() {
-		blockingDiscoveryClientRunner.withUserConfiguration(RestTemplateTestConfig.class)
-				.withPropertyValues("spring.cloud.loadbalancer.configurations=weighted").run(context -> {
+		blockingDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=weighted")
+				.run(context -> {
 					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 					then(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
@@ -214,6 +221,11 @@ class LoadBalancerClientConfigurationTests {
 					then(((DelegatingServiceInstanceListSupplier) delegate).getDelegate())
 							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
 				});
+	}
+
+	private static Stream<Arguments> blockingConfigurations() {
+		return Stream.of(Arguments.of(RestTemplateTestConfig.class), Arguments.of(RestClientTestConfig.class),
+				Arguments.of(RestTemplateAndRestClientConfig.class));
 	}
 
 	@Configuration
@@ -233,6 +245,31 @@ class LoadBalancerClientConfigurationTests {
 		@Bean
 		RestTemplate restTemplate() {
 			return new RestTemplate();
+		}
+
+	}
+
+	@Configuration
+	protected static class RestClientTestConfig {
+
+		@Bean
+		RestClient restClient() {
+			return RestClient.create();
+		}
+
+	}
+
+	@Configuration
+	protected static class RestTemplateAndRestClientConfig {
+
+		@Bean
+		RestTemplate restTemplate() {
+			return new RestTemplate();
+		}
+
+		@Bean
+		RestClient restClient() {
+			return RestClient.create();
 		}
 
 	}

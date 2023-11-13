@@ -48,6 +48,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -186,6 +187,16 @@ public class LoadBalancerClientConfiguration {
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withBlockingHealthChecks()
 					.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean({ DiscoveryClient.class, RestClient.class })
+		@ConditionalOnMissingBean
+		@Conditional(HealthCheckConfigurationCondition.class)
+		public ServiceInstanceListSupplier healthCheckRestClientDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient()
+					.withBlockingRestClientHealthChecks().build(context);
 		}
 
 		@Bean

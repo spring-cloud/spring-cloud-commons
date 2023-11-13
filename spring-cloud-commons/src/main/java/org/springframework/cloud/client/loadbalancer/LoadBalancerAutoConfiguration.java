@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -49,7 +50,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Olga Maciaszek-Sharma
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(RestTemplate.class)
+@Conditional(BlockingRestClassesPresentCondition.class)
 @ConditionalOnBean(LoadBalancerClient.class)
 @EnableConfigurationProperties(LoadBalancerClientsProperties.class)
 public class LoadBalancerAutoConfiguration {
@@ -97,6 +98,14 @@ public class LoadBalancerAutoConfiguration {
 				list.add(loadBalancerInterceptor);
 				restTemplate.setInterceptors(list);
 			};
+		}
+
+		@Bean
+		@ConditionalOnBean(LoadBalancerInterceptor.class)
+		@ConditionalOnMissingBean
+		LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
+				final LoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {
+			return new LoadBalancerRestClientBuilderBeanPostProcessor(loadBalancerInterceptor, context);
 		}
 
 	}
@@ -162,6 +171,14 @@ public class LoadBalancerAutoConfiguration {
 				list.add(loadBalancerInterceptor);
 				restTemplate.setInterceptors(list);
 			};
+		}
+
+		@Bean
+		@ConditionalOnBean(RetryLoadBalancerInterceptor.class)
+		@ConditionalOnMissingBean
+		LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
+				final RetryLoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {
+			return new LoadBalancerRestClientBuilderBeanPostProcessor(loadBalancerInterceptor, context);
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -54,6 +55,19 @@ final class ServiceInstanceListSuppliersTestUtils {
 			URI uri = UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build().toUri();
 			try {
 				return Mono.just(HttpStatus.OK.equals(restTemplate.getForEntity(uri, Void.class).getStatusCode()));
+			}
+			catch (Exception ignored) {
+				return Mono.just(false);
+			}
+		});
+	}
+
+	static BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunction(RestClient restClient) {
+		return (serviceInstance, healthCheckPath) -> Mono.defer(() -> {
+			URI uri = UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build().toUri();
+			try {
+				return Mono.just(
+						HttpStatus.OK.equals(restClient.get().uri(uri).retrieve().toBodilessEntity().getStatusCode()));
 			}
 			catch (Exception ignored) {
 				return Mono.just(false);
