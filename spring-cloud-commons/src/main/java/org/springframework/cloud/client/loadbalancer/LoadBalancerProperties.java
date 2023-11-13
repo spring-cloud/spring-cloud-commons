@@ -29,6 +29,8 @@ import reactor.util.retry.RetryBackoffSpec;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.cloud.commons.util.IdUtils;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
@@ -40,6 +42,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  *
  * @author Olga Maciaszek-Sharma
  * @author Gandhimathi Velusamy
+ * @author Zhuozhi Ji
  * @since 2.2.1
  */
 public class LoadBalancerProperties {
@@ -84,6 +87,12 @@ public class LoadBalancerProperties {
 	 * {@code true} by default.
 	 */
 	private boolean callGetWithRequestOnDelegates = true;
+
+	/**
+	 * Properties for
+	 * {@link org.springframework.cloud.loadbalancer.core.SubsetServiceInstanceListSupplier}.
+	 */
+	private Subset subset = new Subset();
 
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
@@ -140,6 +149,14 @@ public class LoadBalancerProperties {
 
 	public boolean isCallGetWithRequestOnDelegates() {
 		return callGetWithRequestOnDelegates;
+	}
+
+	public Subset getSubset() {
+		return subset;
+	}
+
+	public void setSubset(Subset subset) {
+		this.subset = subset;
 	}
 
 	public void setCallGetWithRequestOnDelegates(boolean callGetWithRequestOnDelegates) {
@@ -486,6 +503,37 @@ public class LoadBalancerProperties {
 				this.enabled = enabled;
 			}
 
+		}
+
+	}
+
+	public static class Subset {
+
+		/**
+		 * Instance id of deterministic subsetting. If not set,
+		 * {@link IdUtils#getDefaultInstanceId(PropertyResolver)} will be used.
+		 */
+		private String instanceId = "";
+
+		/**
+		 * Max subset size of deterministic subsetting.
+		 */
+		private int size = 100;
+
+		public String getInstanceId() {
+			return instanceId;
+		}
+
+		public void setInstanceId(String instanceId) {
+			this.instanceId = instanceId;
+		}
+
+		public int getSize() {
+			return size;
+		}
+
+		public void setSize(int size) {
+			this.size = size;
 		}
 
 	}

@@ -35,6 +35,7 @@ import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -296,6 +297,16 @@ public final class ServiceInstanceListSupplierBuilder {
 		DelegateCreator creator = (context, delegate) -> {
 			LoadBalancerClientFactory factory = context.getBean(LoadBalancerClientFactory.class);
 			return new HintBasedServiceInstanceListSupplier(delegate, factory);
+		};
+		creators.add(creator);
+		return this;
+	}
+
+	public ServiceInstanceListSupplierBuilder withSubset() {
+		DelegateCreator creator = (context, delegate) -> {
+			PropertyResolver resolver = context.getBean(PropertyResolver.class);
+			LoadBalancerClientFactory factory = context.getBean(LoadBalancerClientFactory.class);
+			return new SubsetServiceInstanceListSupplier(delegate, resolver, factory);
 		};
 		creators.add(creator);
 		return this;
