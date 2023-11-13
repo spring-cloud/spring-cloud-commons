@@ -44,7 +44,7 @@ NOTE: The classes you pass as `@LoadBalancerClient` or `@LoadBalancerClients` co
 [[spring-cloud-loadbalancer-integrations]]
 == Spring Cloud LoadBalancer integrations
 
-In order to make it easy to use Spring Cloud LoadBalancer, we provide `ReactorLoadBalancerExchangeFilterFunction` that can be used with `WebClient` and `BlockingLoadBalancerClient` that works with `RestTemplate` and `RestClient`.
+To make it easy to use Spring Cloud LoadBalancer, we provide `ReactorLoadBalancerExchangeFilterFunction` (which can be used with `WebClient`) and `BlockingLoadBalancerClient` (which works with `RestTemplate` and `RestClient`).
 You can see more information and examples of usage in the following sections:
 
 * xref:spring-cloud-commons/common-abstractions.adoc#rest-template-loadbalancer-client[Spring `RestTemplate` as a LoadBalancer Client]
