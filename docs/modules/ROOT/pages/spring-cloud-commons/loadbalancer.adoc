@@ -403,9 +403,9 @@ public class CustomLoadBalancerConfiguration {
 	}
 ----
 
-TIP: Each service instance will be assigned a unique `instanceId` by default, and different `instanceId` will often select different subsets. Normally you don't need to pay attention to it, but if you need to have multiple instances select the same subset, you can set it via `spring.cloud.loadbalancer.subset.instance-id` (supports placeholders).
+TIP: By default, each service instance is assigned a unique `instanceId`, and different `instanceId` values often select different subsets. Normally, you need not pay attention to it. However, if you need to have multiple instances select the same subset, you can set it with `spring.cloud.loadbalancer.subset.instance-id` (which supports placeholders).
 
-TIP: The size of the subset is set to 100 by default, you can also set it via `spring.cloud.loadbalancer.subset.size`
+TIP: By default, the size of the subset is set to 100. You can also set it with `spring.cloud.loadbalancer.subset.size`.
 
 [[spring-cloud-loadbalancer-starter]]
 == Spring Cloud LoadBalancer Starter
