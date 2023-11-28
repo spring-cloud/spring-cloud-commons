@@ -272,7 +272,7 @@ public class MyConfiguration {
     @Primary
     @Bean
     RestClient.Builder restClientBuilder() {
-        return WebClient.builder();
+        return RestClient.builder();
     }
 }
 
@@ -285,7 +285,7 @@ public class MyClass {
     private RestClient.Builder loadBalanced;
 
     public String doOtherStuff() {
-        return restClientBuilder.build().get().uri("http://stores/stores")
+        return loadBalanced.build().get().uri("http://stores/stores")
         				.retrieve().body(String.class);
     }
 
