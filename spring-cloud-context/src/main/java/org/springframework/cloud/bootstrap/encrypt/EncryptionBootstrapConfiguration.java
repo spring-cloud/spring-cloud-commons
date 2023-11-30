@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.bootstrap.encrypt;
 
-import org.springframework.aot.hint.MemberCategory;
-import org.springframework.aot.hint.RuntimeHints;
-import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
@@ -142,17 +139,6 @@ public class EncryptionBootstrapConfiguration {
 
 	@Deprecated
 	protected static class FailsafeTextEncryptor extends TextEncryptorUtils.FailsafeTextEncryptor {
-
-	}
-
-	class EncryptionHints implements RuntimeHintsRegistrar {
-
-		@Override
-		public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-			hints.reflection().registerTypeIfPresent(classLoader,
-					"org.springframework.security.rsa.crypto.RsaSecretEncryptor",
-					MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
-		}
 
 	}
 
