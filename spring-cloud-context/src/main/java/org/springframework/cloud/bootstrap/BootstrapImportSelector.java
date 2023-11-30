@@ -24,12 +24,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.boot.context.annotation.ImportCandidates;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.DeferredImportSelector;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
@@ -38,9 +38,10 @@ import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * This class uses {@link SpringFactoriesLoader} to load {@link BootstrapConfiguration}
- * entries from {@code spring.factories}. The classes are then loaded so they can be
- * sorted using {@link AnnotationAwareOrderComparator#sort(List)}. This class is a
+ * This class uses {@link ImportCandidates} to load {@link BootstrapConfiguration} entries
+ * from {@code org.springframework.cloud.bootstrap.BootstrapConfiguration.imports}.
+ * The classes are then loaded so they can be sorted using
+ * {@link AnnotationAwareOrderComparator#sort(List)}. This class is a
  * {@link DeferredImportSelector} so {@code @Conditional} annotations on imported classes
  * are supported.
  *
@@ -62,7 +63,7 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		// Use names and ensure unique to protect against duplicates
 		List<String> names = new ArrayList<>(
-				SpringFactoriesLoader.loadFactoryNames(BootstrapConfiguration.class, classLoader));
+				ImportCandidates.load(BootstrapConfiguration.class, classLoader).getCandidates());
 		names.addAll(Arrays.asList(StringUtils
 				.commaDelimitedListToStringArray(this.environment.getProperty("spring.cloud.bootstrap.sources", ""))));
 

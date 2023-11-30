@@ -1,0 +1,2 @@
+org.springframework.cloud.bootstrap.TestBootstrapConfiguration
+org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration
