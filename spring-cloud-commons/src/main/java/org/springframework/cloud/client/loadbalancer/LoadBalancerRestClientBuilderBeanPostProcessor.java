@@ -27,27 +27,27 @@ import org.springframework.web.client.RestClient;
  * to all {@link RestClient.Builder} instances annotated with {@link LoadBalanced}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Freeman Lau
  * @since 4.1.0
  */
 public class LoadBalancerRestClientBuilderBeanPostProcessor implements BeanPostProcessor {
 
-	private final ClientHttpRequestInterceptor loadBalancerInterceptor;
-
 	private final ApplicationContext context;
 
-	public LoadBalancerRestClientBuilderBeanPostProcessor(ClientHttpRequestInterceptor loadBalancerInterceptor,
-			ApplicationContext context) {
-		this.loadBalancerInterceptor = loadBalancerInterceptor;
+	private final DeferringLoadBalancerInterceptor interceptor;
+
+	public LoadBalancerRestClientBuilderBeanPostProcessor(ApplicationContext context) {
 		this.context = context;
+		this.interceptor = new DeferringLoadBalancerInterceptor(context);
 	}
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		if (bean instanceof RestClient.Builder) {
+		if (bean instanceof RestClient.Builder builder) {
 			if (context.findAnnotationOnBean(beanName, LoadBalanced.class) == null) {
 				return bean;
 			}
-			((RestClient.Builder) bean).requestInterceptor(loadBalancerInterceptor);
+			builder.requestInterceptor(interceptor);
 		}
 		return bean;
 	}

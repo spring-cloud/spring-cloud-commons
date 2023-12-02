@@ -152,7 +152,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 	private ConfigurableApplicationContext init(Class<?> config) {
 		return LoadBalancerTestUtils.init(config, ReactorLoadBalancerClientAutoConfiguration.class,
-				LoadBalancerBeanPostProcessorAutoConfiguration.class);
+				LoadBalancerBeanPostProcessorConfiguration.class);
 	}
 
 	@Configuration

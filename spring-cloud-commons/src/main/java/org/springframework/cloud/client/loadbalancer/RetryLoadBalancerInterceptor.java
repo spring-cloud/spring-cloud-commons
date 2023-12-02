@@ -28,7 +28,6 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.RetryListener;
 import org.springframework.retry.backoff.BackOffPolicy;
@@ -43,9 +42,10 @@ import org.springframework.util.StreamUtils;
  * @author Will Tran
  * @author Gang Li
  * @author Olga Maciaszek-Sharma
+ * @author Freeman Lau
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class RetryLoadBalancerInterceptor implements ClientHttpRequestInterceptor {
+public class RetryLoadBalancerInterceptor implements LoadBalancedInterceptor {
 
 	private static final Log LOG = LogFactory.getLog(RetryLoadBalancerInterceptor.class);
 

@@ -300,7 +300,8 @@ public class LoadBalancerClientConfiguration {
 			super(ConfigurationPhase.REGISTER_BEAN);
 		}
 
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true")
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true",
+				matchIfMissing = true)
 		static class LoadBalancerRetryEnabled {
 
 		}

@@ -19,6 +19,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.ApplicationContext;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
@@ -36,12 +37,12 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 public class DeferringLoadBalancerExchangeFilterFunction<T extends ExchangeFilterFunction>
 		implements ExchangeFilterFunction {
 
-	private final ObjectProvider<T> exchangeFilterFunctionProvider;
-
 	private T delegate;
 
-	public DeferringLoadBalancerExchangeFilterFunction(ObjectProvider<T> exchangeFilterFunctionProvider) {
-		this.exchangeFilterFunctionProvider = exchangeFilterFunctionProvider;
+	private final ApplicationContext ctx;
+
+	public DeferringLoadBalancerExchangeFilterFunction(ApplicationContext ctx) {
+		this.ctx = ctx;
 	}
 
 	@Override
@@ -53,9 +54,9 @@ public class DeferringLoadBalancerExchangeFilterFunction<T extends ExchangeFilte
 	// Visible for tests
 	void tryResolveDelegate() {
 		if (delegate == null) {
-			delegate = exchangeFilterFunctionProvider.getIfAvailable();
+			delegate = (T) ctx.getBeanProvider(LoadBalancedExchangeFilterFunction.class).getIfAvailable();
 			if (delegate == null) {
-				throw new IllegalStateException("ReactorLoadBalancerExchangeFilterFunction not available.");
+				throw new IllegalStateException("LoadBalancedExchangeFilterFunction not available.");
 			}
 		}
 	}

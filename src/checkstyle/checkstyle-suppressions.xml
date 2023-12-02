@@ -19,4 +19,6 @@
 	<suppress files=".*Tests.*" checks="JavadocMethod"/>
 	<suppress files=".*Tests.*" checks="HideUtilityClassConstructor"/>
 	<suppress files=".*ReactiveDiscoveryClient.*" checks="JavadocVariable"/>
+	<suppress files=".*LoadBalancerBeanPostProcessorAutoConfiguration.*" checks="HideUtilityClassConstructor"/>
+	<suppress files=".*LoadBalancerBeanPostProcessorConfiguration.*" checks="HideUtilityClassConstructor"/>
 </suppressions>

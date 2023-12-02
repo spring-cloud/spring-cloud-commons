@@ -16,41 +16,34 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * A {@link BeanPostProcessor} that applies
- * {@link DeferringLoadBalancerExchangeFilterFunction} filter to all
- * {@link WebClient.Builder} instances annotated with {@link LoadBalanced}.
+ * An auto-configuration that provides a {@link BeanPostProcessor} that allows the use of
+ * a {@link LoadBalanced} {@link WebClient.Builder} with
+ * {@link ReactorLoadBalancerExchangeFilterFunction} and {@link ReactiveLoadBalancer} used
+ * under the hood. NOTE: This has been extracted to a separate configuration in order to
+ * not impact instantiation and post-processing of other Reactor-LoadBalancer-related
+ * beans.
  *
  * @author Olga Maciaszek-Sharma
  * @author Freeman Lau
  * @since 2.2.0
  */
-public class LoadBalancerWebClientBuilderBeanPostProcessor implements BeanPostProcessor {
+@Configuration(proxyBeanMethods = false)
+@ConditionalOnClass(WebClient.class)
+public class LoadBalancerBeanPostProcessorConfiguration {
 
-	private final ApplicationContext ctx;
-
-	private final DeferringLoadBalancerExchangeFilterFunction<?> deferringFilterFunction;
-
-	public LoadBalancerWebClientBuilderBeanPostProcessor(ApplicationContext ctx) {
-		this.ctx = ctx;
-		this.deferringFilterFunction = new DeferringLoadBalancerExchangeFilterFunction<>(ctx);
-	}
-
-	@Override
-	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		if (bean instanceof WebClient.Builder builder) {
-			if (ctx.findAnnotationOnBean(beanName, LoadBalanced.class) == null) {
-				return bean;
-			}
-			builder.filter(deferringFilterFunction);
-		}
-		return bean;
+	@Bean
+	static LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
+			ApplicationContext context) {
+		return new LoadBalancerWebClientBuilderBeanPostProcessor(context);
 	}
 
 }
