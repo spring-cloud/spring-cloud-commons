@@ -46,7 +46,7 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 	protected void assertLoadBalanced(RestClient.Builder restClientBuilder) {
 		restClientBuilder.requestInterceptors(interceptors -> {
 			assertThat(interceptors).hasSize(1);
-			assertThat(interceptors.get(0)).isInstanceOf(RetryLoadBalancerInterceptor.class);
+			assertThat(interceptors.get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
 		});
 	}
 
@@ -72,7 +72,7 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 
 					restClientBuilder.requestInterceptors(interceptors -> {
 						assertThat(interceptors).hasSize(1);
-						assertThat(interceptors.get(0)).isInstanceOf(LoadBalancerInterceptor.class);
+						assertThat(interceptors.get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
 					});
 				});
 	}

@@ -68,7 +68,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class ReactorLoadBalancerExchangeFilterFunctionTests {
 
 	@Autowired
-	private ReactorLoadBalancerExchangeFilterFunction loadBalancerFunction;
+	private RetryableLoadBalancerExchangeFilterFunction loadBalancerFunction;
 
 	@Autowired
 	private SimpleDiscoveryProperties properties;

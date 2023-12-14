@@ -48,7 +48,8 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoa
 public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 	protected ApplicationContextRunner applicationContextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class));
+			.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class))
+			.withConfiguration(AutoConfigurations.of(LoadBalancerBeanPostProcessorAutoConfiguration.class));
 
 	@Test
 	void restTemplateGetsLoadBalancerInterceptor() {
