@@ -24,7 +24,7 @@ import org.springframework.core.env.Environment;
 public final class LoadBalancerEnvironmentPropertyUtils {
 
 	private LoadBalancerEnvironmentPropertyUtils() {
-		throw new IllegalStateException("Should not instantiate a utility class");
+		throw new UnsupportedOperationException("Cannot instantiate a utility class");
 	}
 
 	public static boolean trueForClientOrDefault(Environment environment, String propertySuffix) {

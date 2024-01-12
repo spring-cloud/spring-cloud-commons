@@ -18,5 +18,7 @@
 	<suppress files=".*Tests.*" checks="JavadocVariable"/>
 	<suppress files=".*Tests.*" checks="JavadocMethod"/>
 	<suppress files=".*Tests.*" checks="HideUtilityClassConstructor"/>
+	<suppress files=".*AutoConfiguration.*" checks="HideUtilityClassConstructor"/>
+	<suppress files=".*AutoConfiguration.*" checks="FinalClass"/>
 	<suppress files=".*ReactiveDiscoveryClient.*" checks="JavadocVariable"/>
 </suppressions>
