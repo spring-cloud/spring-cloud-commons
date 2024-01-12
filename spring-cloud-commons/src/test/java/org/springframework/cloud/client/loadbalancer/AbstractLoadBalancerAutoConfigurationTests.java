@@ -101,7 +101,6 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	void multipleRestClientBuilders() {
 		applicationContextRunner.withUserConfiguration(TwoRestTemplatesAndTwoRestClientBuilders.class).run(context -> {
 			final Map<String, RestClient.Builder> restClientBuilders = context.getBeansOfType(RestClient.Builder.class);
-			final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
 
 			assertThat(restClientBuilders).isNotNull();
 			assertThat(restClientBuilders.values()).hasSize(2);
@@ -115,19 +114,6 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 			assertThat(two.nonLoadBalancedRestClientBuilder).isNotNull();
 			two.nonLoadBalancedRestClientBuilder
 					.requestInterceptors(interceptors -> assertThat(interceptors).isEmpty());
-
-			assertThat(restTemplates).isNotNull();
-			Collection<RestTemplate> templates = restTemplates.values();
-			assertThat(templates).hasSize(2);
-
-			TwoRestTemplatesAndTwoRestClientBuilders.Two twoRestTemplate = context
-					.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
-
-			assertThat(twoRestTemplate.loadBalanced).isNotNull();
-			assertLoadBalanced(twoRestTemplate.loadBalanced);
-
-			assertThat(twoRestTemplate.nonLoadBalanced).isNotNull();
-			assertThat(twoRestTemplate.nonLoadBalanced.getInterceptors()).isEmpty();
 		});
 	}
 
@@ -138,6 +124,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 				.run(context -> {
 					final Map<String, RestClient.Builder> restClientBuilders = context
 							.getBeansOfType(RestClient.Builder.class);
+					final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
 
 					assertThat(restClientBuilders).isNotNull();
 					assertThat(restClientBuilders.values()).hasSize(2);
@@ -151,6 +138,19 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 					assertThat(two.nonLoadBalancedRestClientBuilder).isNotNull();
 					two.nonLoadBalancedRestClientBuilder
 							.requestInterceptors(interceptors -> assertThat(interceptors).isEmpty());
+
+					assertThat(restTemplates).isNotNull();
+					Collection<RestTemplate> templates = restTemplates.values();
+					assertThat(templates).hasSize(2);
+
+					TwoRestTemplatesAndTwoRestClientBuilders.Two twoRestTemplate = context
+							.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
+
+					assertThat(twoRestTemplate.loadBalanced).isNotNull();
+					assertLoadBalanced(twoRestTemplate.loadBalanced);
+
+					assertThat(twoRestTemplate.nonLoadBalanced).isNotNull();
+					assertThat(twoRestTemplate.nonLoadBalanced.getInterceptors()).isEmpty();
 				});
 	}
 
