@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -32,12 +33,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -49,7 +50,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Gang Li
  * @author Olga Maciaszek-Sharma
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @Conditional(BlockingRestClassesPresentCondition.class)
 @ConditionalOnBean(LoadBalancerClient.class)
 @EnableConfigurationProperties(LoadBalancerClientsProperties.class)
@@ -58,6 +59,10 @@ public class LoadBalancerAutoConfiguration {
 	@LoadBalanced
 	@Autowired(required = false)
 	private List<RestTemplate> restTemplates = Collections.emptyList();
+
+	@LoadBalanced
+	@Autowired(required = false)
+	private List<RestClient.Builder> restClientBuilders = Collections.emptyList();
 
 	@Autowired(required = false)
 	private List<LoadBalancerRequestTransformer> transformers = Collections.emptyList();
@@ -70,6 +75,19 @@ public class LoadBalancerAutoConfiguration {
 				for (RestTemplateCustomizer customizer : customizers) {
 					customizer.customize(restTemplate);
 				}
+			}
+		});
+	}
+
+	@Bean
+	public SmartInitializingSingleton loadBalancedRestClientBuilderInitializer(
+			final ObjectProvider<List<RestClientBuilderCustomizer>> restClientBuilderCustomizers) {
+		return () -> restClientBuilderCustomizers.ifAvailable(customizers -> {
+			for (RestClient.Builder restClientBuilder : LoadBalancerAutoConfiguration.this.restClientBuilders) {
+				for (RestClientBuilderCustomizer customizer : customizers) {
+					customizer.customize(restClientBuilder);
+				}
+
 			}
 		});
 	}
@@ -101,11 +119,10 @@ public class LoadBalancerAutoConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnBean(LoadBalancerInterceptor.class)
 		@ConditionalOnMissingBean
-		LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
-				final LoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {
-			return new LoadBalancerRestClientBuilderBeanPostProcessor(loadBalancerInterceptor, context);
+		public RestClientBuilderCustomizer restClientBuilderCustomizer(
+				final LoadBalancerInterceptor loadBalancerInterceptor) {
+			return restClientBuilder -> restClientBuilder.requestInterceptor(loadBalancerInterceptor);
 		}
 
 	}
@@ -174,11 +191,10 @@ public class LoadBalancerAutoConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnBean(RetryLoadBalancerInterceptor.class)
 		@ConditionalOnMissingBean
-		LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
-				final RetryLoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {
-			return new LoadBalancerRestClientBuilderBeanPostProcessor(loadBalancerInterceptor, context);
+		public RestClientBuilderCustomizer restClientBuilderCustomizer(
+				final RetryLoadBalancerInterceptor loadBalancerInterceptor) {
+			return restClientBuilder -> restClientBuilder.requestInterceptor(loadBalancerInterceptor);
 		}
 
 	}

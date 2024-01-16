@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,9 @@ import org.springframework.web.client.RestClient;
  *
  * @author Olga Maciaszek-Sharma
  * @since 4.1.0
+ * @deprecated to be removed in the next release.
  */
+@Deprecated
 public class LoadBalancerRestClientBuilderBeanPostProcessor implements BeanPostProcessor {
 
 	private final ClientHttpRequestInterceptor loadBalancerInterceptor;
