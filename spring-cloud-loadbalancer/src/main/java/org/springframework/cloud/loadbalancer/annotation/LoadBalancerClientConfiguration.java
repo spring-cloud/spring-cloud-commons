@@ -59,6 +59,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author BaoLin Zhu
  * @author changjin wei(魏昌进)
  * @author Zhuozhi Ji
+ * @author Freeman Lau
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnDiscoveryEnabled
@@ -300,7 +301,8 @@ public class LoadBalancerClientConfiguration {
 			super(ConfigurationPhase.REGISTER_BEAN);
 		}
 
-		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true")
+		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true",
+				matchIfMissing = true)
 		static class LoadBalancerRetryEnabled {
 
 		}

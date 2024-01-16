@@ -38,6 +38,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * {@link ReactiveLoadBalancer} used under the hood.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Freeman Lau
  * @since 2.2.0
  */
 @Configuration(proxyBeanMethods = false)
@@ -47,8 +48,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class ReactorLoadBalancerClientAutoConfiguration {
 
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "false",
-			matchIfMissing = true)
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "false")
 	@Bean
 	public ReactorLoadBalancerExchangeFilterFunction loadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
@@ -58,7 +58,8 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 	}
 
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true")
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true",
+			matchIfMissing = true)
 	@Bean
 	public RetryableLoadBalancerExchangeFilterFunction retryableLoadBalancerExchangeFilterFunction(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
@@ -69,7 +70,8 @@ public class ReactorLoadBalancerClientAutoConfiguration {
 	}
 
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true")
+	@ConditionalOnProperty(value = "spring.cloud.loadbalancer.retry.enabled", havingValue = "true",
+			matchIfMissing = true)
 	@Bean
 	public LoadBalancerRetryPolicy.Factory loadBalancerRetryPolicy(
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
