@@ -18,6 +18,7 @@ package org.springframework.cloud.loadbalancer.config;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -38,8 +39,9 @@ public class LoadBalancerStatsAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean(MeterRegistry.class)
-	public MicrometerStatsLoadBalancerLifecycle micrometerStatsLifecycle(MeterRegistry meterRegistry) {
-		return new MicrometerStatsLoadBalancerLifecycle(meterRegistry);
+	public MicrometerStatsLoadBalancerLifecycle micrometerStatsLifecycle(MeterRegistry meterRegistry,
+			@Value("${spring.cloud.loadbalancer.stats.micrometer.use-uri-template-attribute: false}") boolean useUriTemplateAttribute) {
+		return new MicrometerStatsLoadBalancerLifecycle(meterRegistry, useUriTemplateAttribute);
 	}
 
 }

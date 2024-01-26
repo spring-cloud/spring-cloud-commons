@@ -42,16 +42,20 @@ import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buil
  * load-balanced calls.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Jaroslaw Dembek
  * @since 3.0.0
  */
 public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
 	private final MeterRegistry meterRegistry;
 
+	private final boolean useUriTemplateAttribute;
+
 	private final ConcurrentHashMap<ServiceInstance, AtomicLong> activeRequestsPerInstance = new ConcurrentHashMap<>();
 
-	public MicrometerStatsLoadBalancerLifecycle(MeterRegistry meterRegistry) {
+	public MicrometerStatsLoadBalancerLifecycle(MeterRegistry meterRegistry, boolean useUriTemplateAttribute) {
 		this.meterRegistry = meterRegistry;
+		this.useUriTemplateAttribute = useUriTemplateAttribute;
 	}
 
 	@Override
@@ -86,8 +90,9 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 	public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 		long requestFinishedTimestamp = System.nanoTime();
 		if (CompletionContext.Status.DISCARD.equals(completionContext.status())) {
-			Counter.builder("loadbalancer.requests.discard").tags(buildDiscardedRequestTags(completionContext))
-					.register(meterRegistry).increment();
+			Counter.builder("loadbalancer.requests.discard")
+					.tags(buildDiscardedRequestTags(completionContext, useUriTemplateAttribute)).register(meterRegistry)
+					.increment();
 			return;
 		}
 		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
@@ -98,15 +103,16 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 		Object loadBalancerRequestContext = completionContext.getLoadBalancerRequest().getContext();
 		if (requestHasBeenTimed(loadBalancerRequestContext)) {
 			if (CompletionContext.Status.FAILED.equals(completionContext.status())) {
-				Timer.builder("loadbalancer.requests.failed").tags(buildFailedRequestTags(completionContext))
+				Timer.builder("loadbalancer.requests.failed")
+						.tags(buildFailedRequestTags(completionContext, useUriTemplateAttribute))
 						.register(meterRegistry)
 						.record(requestFinishedTimestamp
 								- ((TimedRequestContext) loadBalancerRequestContext).getRequestStartTime(),
 								TimeUnit.NANOSECONDS);
 				return;
 			}
-			Timer.builder("loadbalancer.requests.success").tags(buildSuccessRequestTags(completionContext))
-					.register(meterRegistry)
+			Timer.builder("loadbalancer.requests.success")
+					.tags(buildSuccessRequestTags(completionContext, useUriTemplateAttribute)).register(meterRegistry)
 					.record(requestFinishedTimestamp
 							- ((TimedRequestContext) loadBalancerRequestContext).getRequestStartTime(),
 							TimeUnit.NANOSECONDS);

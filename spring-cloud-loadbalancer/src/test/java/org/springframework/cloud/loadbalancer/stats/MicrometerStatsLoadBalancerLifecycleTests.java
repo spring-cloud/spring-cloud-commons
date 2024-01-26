@@ -18,6 +18,7 @@ package org.springframework.cloud.loadbalancer.stats;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.Map;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
@@ -43,17 +44,23 @@ import org.springframework.util.MultiValueMapAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.UNKNOWN;
+import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.URI_TEMPLATE_ATTRIBUTE;
 
 /**
  * Tests for {@link MicrometerStatsLoadBalancerLifecycle}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Jaroslaw Dembek
  */
 class MicrometerStatsLoadBalancerLifecycleTests {
 
 	MeterRegistry meterRegistry = new SimpleMeterRegistry();
 
-	MicrometerStatsLoadBalancerLifecycle statsLifecycle = new MicrometerStatsLoadBalancerLifecycle(meterRegistry);
+	MicrometerStatsLoadBalancerLifecycle statsLifecycle = new MicrometerStatsLoadBalancerLifecycle(meterRegistry,
+			false);
+
+	MicrometerStatsLoadBalancerLifecycle statsLifecycleWithUriTemplateAttributeUse = new MicrometerStatsLoadBalancerLifecycle(
+			meterRegistry, true);
 
 	@Test
 	void shouldRecordSuccessfulTimedRequest() {
@@ -78,6 +85,34 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 				Tag.of("method", "GET"), Tag.of("outcome", "SUCCESS"), Tag.of("serviceId", "test"),
 				Tag.of("serviceInstance.host", "test.org"), Tag.of("serviceInstance.instanceId", "test-1"),
 				Tag.of("serviceInstance.port", "8080"), Tag.of("status", "200"), Tag.of("uri", "/test"));
+	}
+
+	@Test
+	void shouldRecordSuccessfulTimedRequestWithUriTemplate() {
+		Map<String, Object> attributes = new HashMap<>();
+		String uriTemplate = "/test/{pathParam}/test";
+		attributes.put(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
+		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test/123/test"),
+				new HttpHeaders(), new HttpHeaders(), attributes);
+		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
+		Response<ServiceInstance> lbResponse = new DefaultResponse(
+				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
+		ResponseData responseData = new ResponseData(HttpStatus.OK, new HttpHeaders(),
+				new MultiValueMapAdapter<>(new HashMap<>()), requestData);
+		statsLifecycleWithUriTemplateAttributeUse.onStartRequest(lbRequest, lbResponse);
+		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
+
+		statsLifecycleWithUriTemplateAttributeUse.onComplete(
+				new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
+
+		assertThat(meterRegistry.getMeters()).hasSize(2);
+		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
+		assertThat(meterRegistry.get("loadbalancer.requests.success").timers()).hasSize(1);
+		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().count()).isEqualTo(1);
+		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId().getTags()).contains(
+				Tag.of("method", "GET"), Tag.of("outcome", "SUCCESS"), Tag.of("serviceId", "test"),
+				Tag.of("serviceInstance.host", "test.org"), Tag.of("serviceInstance.instanceId", "test-1"),
+				Tag.of("serviceInstance.port", "8080"), Tag.of("status", "200"), Tag.of("uri", uriTemplate));
 	}
 
 	@Test
