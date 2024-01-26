@@ -25,16 +25,20 @@ import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Utility class for building metrics tags for load-balanced calls.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Jarek Dembek
  * @since 3.0.0
  */
 final class LoadBalancerTags {
 
 	static final String UNKNOWN = "UNKNOWN";
+
+	static final String URI_TEMPLATE_ATTRIBUTE = WebClient.class.getName() + ".uriTemplate";
 
 	private LoadBalancerTags() {
 		throw new UnsupportedOperationException("Cannot instantiate utility class");
@@ -70,6 +74,12 @@ final class LoadBalancerTags {
 	}
 
 	private static String getPath(RequestData requestData) {
+		if (requestData.getAttributes() != null) {
+			var uriTemplate = (String) requestData.getAttributes().get(URI_TEMPLATE_ATTRIBUTE);
+			if (uriTemplate != null) {
+				return uriTemplate;
+			}
+		}
 		return requestData.getUrl() != null ? requestData.getUrl().getPath() : UNKNOWN;
 	}
 

@@ -14,168 +14,189 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.loadbalancer.stats;
+package org.springframework.cloud.loadbalancer.config;
 
-import java.net.URI;
-import java.util.HashMap;
-
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Tag;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.cloud.client.DefaultServiceInstance;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.CompletionContext;
-import org.springframework.cloud.client.loadbalancer.DefaultRequest;
-import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
-import org.springframework.cloud.client.loadbalancer.DefaultResponse;
-import org.springframework.cloud.client.loadbalancer.EmptyResponse;
-import org.springframework.cloud.client.loadbalancer.Request;
-import org.springframework.cloud.client.loadbalancer.RequestData;
-import org.springframework.cloud.client.loadbalancer.RequestDataContext;
-import org.springframework.cloud.client.loadbalancer.Response;
-import org.springframework.cloud.client.loadbalancer.ResponseData;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.MultiValueMapAdapter;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
+import org.springframework.boot.test.context.FilteredClassLoader;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.support.NoOpCacheManager;
+import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
+import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.UNKNOWN;
 
 /**
- * Tests for {@link MicrometerStatsLoadBalancerLifecycle}.
+ * Tests for {@link LoadBalancerCacheAutoConfiguration}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Jarek Dembek
  */
-class MicrometerStatsLoadBalancerLifecycleTests {
-
-	MeterRegistry meterRegistry = new SimpleMeterRegistry();
-
-	MicrometerStatsLoadBalancerLifecycle statsLifecycle = new MicrometerStatsLoadBalancerLifecycle(meterRegistry);
+class LoadBalancerCacheAutoConfigurationTests {
 
 	@Test
-	void shouldRecordSuccessfulTimedRequest() {
-		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
-				new HttpHeaders(), new HashMap<>());
-		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
-		Response<ServiceInstance> lbResponse = new DefaultResponse(
-				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
-		ResponseData responseData = new ResponseData(HttpStatus.OK, new HttpHeaders(),
-				new MultiValueMapAdapter<>(new HashMap<>()), requestData);
-		statsLifecycle.onStartRequest(lbRequest, lbResponse);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
+	void shouldAutoEnableCaching() {
+		ApplicationContextRunner contextRunner = baseApplicationRunner();
 
-		statsLifecycle.onComplete(
-				new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
-
-		assertThat(meterRegistry.getMeters()).hasSize(2);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timers()).hasSize(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().count()).isEqualTo(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId().getTags()).contains(
-				Tag.of("method", "GET"), Tag.of("outcome", "SUCCESS"), Tag.of("serviceId", "test"),
-				Tag.of("serviceInstance.host", "test.org"), Tag.of("serviceInstance.instanceId", "test-1"),
-				Tag.of("serviceInstance.port", "8080"), Tag.of("status", "200"), Tag.of("uri", "/test"));
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+			assertThat(((CacheManager) context.getBean("caffeineLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
+			assertThat(context.getBean("caffeineLoadBalancerCacheManager")).isInstanceOf(CaffeineCacheManager.class);
+			assertThat(((CacheManager) context.getBean("caffeineLoadBalancerCacheManager")).getCacheNames())
+					.contains("CachingServiceInstanceListSupplierCache");
+		});
 	}
 
 	@Test
-	void shouldRecordFailedTimedRequest() {
-		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
-				new HttpHeaders(), new HashMap<>());
-		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
-		Response<ServiceInstance> lbResponse = new DefaultResponse(
-				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
-		statsLifecycle.onStartRequest(lbRequest, lbResponse);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
+	void caffeineLoadBalancerCacheShouldNotOverrideCacheTypeSetting() {
+		ApplicationContextRunner contextRunner = baseApplicationRunner().withUserConfiguration(TestConfiguration.class)
+				.withPropertyValues("spring.cache.type=none");
 
-		statsLifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.FAILED, new IllegalStateException(),
-				lbRequest, lbResponse));
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
+			assertThat(context.getBean("caffeineLoadBalancerCacheManager")).isInstanceOf(CaffeineCacheManager.class);
+			assertThat(context.getBeansOfType(CacheManager.class).get("cacheManager"))
+					.isInstanceOf(NoOpCacheManager.class);
 
-		assertThat(meterRegistry.getMeters()).hasSize(2);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
-		assertThat(meterRegistry.get("loadbalancer.requests.failed").timers()).hasSize(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.failed").timer().count()).isEqualTo(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.failed").timer().getId().getTags()).contains(
-				Tag.of("exception", "IllegalStateException"), Tag.of("method", "GET"), Tag.of("serviceId", "test"),
-				Tag.of("serviceInstance.host", "test.org"), Tag.of("serviceInstance.instanceId", "test-1"),
-				Tag.of("serviceInstance.port", "8080"), Tag.of("uri", "/test"));
+		});
 	}
 
 	@Test
-	void shouldNotRecordDiscardedRequest() {
-		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
-				new HttpHeaders(), new HashMap<>());
-		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
-		Response<ServiceInstance> lbResponse = new EmptyResponse();
-		statsLifecycle.onStartRequest(lbRequest, lbResponse);
+	void loadBalancerCacheShouldNotOverrideExistingCaffeineCacheManager() {
+		ApplicationContextRunner contextRunner = baseApplicationRunner().withUserConfiguration(TestConfiguration.class);
 
-		statsLifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, lbRequest, lbResponse));
-		assertThat(meterRegistry.getMeters()).hasSize(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.discard").counter().count()).isEqualTo(1);
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
+			assertThat(context.getBean("cacheManager")).isInstanceOf(CaffeineCacheManager.class);
+			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
+			assertThat(((CacheManager) context.getBean("caffeineLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
+			assertThat(((CacheManager) context.getBean("caffeineLoadBalancerCacheManager")).getCacheNames())
+					.contains("CachingServiceInstanceListSupplierCache");
+		});
+
 	}
 
 	@Test
-	void shouldNotRecordUnTimedRequest() {
-		Request<Object> lbRequest = new DefaultRequest<>(new StatsTestContext());
-		Response<ServiceInstance> lbResponse = new DefaultResponse(
-				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
-		ResponseData responseData = new ResponseData(HttpStatus.OK, new HttpHeaders(),
-				new MultiValueMapAdapter<>(new HashMap<>()), null);
-		statsLifecycle.onStartRequest(lbRequest, lbResponse);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
+	void shouldNotInstantiateCaffeineLoadBalancerCacheIfDisabled() {
+		ApplicationContextRunner contextRunner = baseApplicationRunner()
+				.withPropertyValues("spring.cloud.loadbalancer.cache.enabled=false")
+				.withUserConfiguration(TestConfiguration.class);
 
-		statsLifecycle.onComplete(
-				new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
-
-		assertThat(meterRegistry.getMeters()).hasSize(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+			assertThat(context.getBean("cacheManager")).isInstanceOf(CaffeineCacheManager.class);
+			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
+		});
 	}
 
 	@Test
-	void shouldNotCreateNullTagsWhenNullDataObjects() {
-		Request<Object> lbRequest = new DefaultRequest<>(new DefaultRequestContext());
-		Response<ServiceInstance> lbResponse = new DefaultResponse(new DefaultServiceInstance());
-		statsLifecycle.onStartRequest(lbRequest, lbResponse);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
+	void shouldUseDefaultCacheIfCaffeineNotInClasspath() {
+		ApplicationContextRunner contextRunner = noCaffeineRunner();
 
-		statsLifecycle
-				.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, null));
-
-		assertThat(meterRegistry.getMeters()).hasSize(2);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timers()).hasSize(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().count()).isEqualTo(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId().getTags()).contains(
-				Tag.of("method", UNKNOWN), Tag.of("outcome", UNKNOWN), Tag.of("serviceId", UNKNOWN),
-				Tag.of("serviceInstance.host", UNKNOWN), Tag.of("serviceInstance.instanceId", UNKNOWN),
-				Tag.of("serviceInstance.port", "0"), Tag.of("status", UNKNOWN), Tag.of("uri", UNKNOWN));
+		contextRunner.run(context -> {
+			assertThat(context.getBean(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
+					.isNotNull();
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
+			assertThat(context.getBean("defaultLoadBalancerCacheManager"))
+					.isInstanceOf(DefaultLoadBalancerCacheManager.class);
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames())
+					.contains("CachingServiceInstanceListSupplierCache");
+		});
 	}
 
 	@Test
-	void shouldNotCreateNullTagsWhenEmptyDataObjects() {
-		RequestData requestData = new RequestData(null, null, null, null, null);
-		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext());
-		Response<ServiceInstance> lbResponse = new DefaultResponse(new DefaultServiceInstance());
-		ResponseData responseData = new ResponseData(null, null, null, requestData);
-		statsLifecycle.onStartRequest(lbRequest, lbResponse);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
+	void shouldUseDefaultCacheIfCaffeineCacheManagerNotInClasspath() {
+		ApplicationContextRunner contextRunner = noCaffeineCacheManagerRunner();
 
-		statsLifecycle.onComplete(
-				new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
-
-		assertThat(meterRegistry.getMeters()).hasSize(2);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timers()).hasSize(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().count()).isEqualTo(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId().getTags()).contains(
-				Tag.of("method", UNKNOWN), Tag.of("outcome", "SUCCESS"), Tag.of("serviceId", UNKNOWN),
-				Tag.of("serviceInstance.host", UNKNOWN), Tag.of("serviceInstance.instanceId", UNKNOWN),
-				Tag.of("serviceInstance.port", "0"), Tag.of("status", "200"), Tag.of("uri", UNKNOWN));
+		contextRunner.run(context -> {
+			assertThat(context.getBean(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
+					.isNotNull();
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
+			assertThat(context.getBean("defaultLoadBalancerCacheManager"))
+					.isInstanceOf(DefaultLoadBalancerCacheManager.class);
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames())
+					.contains("CachingServiceInstanceListSupplierCache");
+		});
 	}
 
-	private static class StatsTestContext {
+	@Test
+	void defaultLoadBalancerCacheShouldNotOverrideCacheTypeSetting() {
+		ApplicationContextRunner contextRunner = noCaffeineRunner().withUserConfiguration(TestConfiguration.class)
+				.withPropertyValues("spring.cache.type=none");
+
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
+			assertThat(context.getBean("defaultLoadBalancerCacheManager"))
+					.isInstanceOf(DefaultLoadBalancerCacheManager.class);
+			assertThat(context.getBeansOfType(CacheManager.class).get("cacheManager"))
+					.isInstanceOf(NoOpCacheManager.class);
+
+		});
+	}
+
+	@Test
+	void defaultLoadBalancerCacheShouldNotOverrideExistingCacheManager() {
+		ApplicationContextRunner contextRunner = noCaffeineRunner().withUserConfiguration(TestConfiguration.class);
+
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
+			assertThat(context.getBean("cacheManager")).isInstanceOf(ConcurrentMapCacheManager.class);
+			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
+			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames())
+					.contains("CachingServiceInstanceListSupplierCache");
+		});
+
+	}
+
+	@Test
+	void shouldNotInstantiateDefaultLoadBalancerCacheIfDisabled() {
+		ApplicationContextRunner contextRunner = noCaffeineRunner()
+				.withPropertyValues("spring.cloud.loadbalancer.cache.enabled=false")
+				.withUserConfiguration(TestConfiguration.class);
+
+		contextRunner.run(context -> {
+			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+			assertThat(context.getBean("cacheManager")).isInstanceOf(ConcurrentMapCacheManager.class);
+			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
+		});
+	}
+
+	@Test
+	void shouldNotInstantiateDefaultLoadBalancerCacheIfLoadBalancingDisabled() {
+		noCaffeineRunner().withPropertyValues("spring.cloud.loadbalancer.enabled=false")
+				.withUserConfiguration(TestConfiguration.class).run(context -> {
+					assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+					assertThat(context.getBean("cacheManager")).isInstanceOf(ConcurrentMapCacheManager.class);
+					assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
+				});
+	}
+
+	private ApplicationContextRunner baseApplicationRunner() {
+		return new ApplicationContextRunner().withConfiguration(
+				AutoConfigurations.of(CacheAutoConfiguration.class, LoadBalancerCacheAutoConfiguration.class));
+	}
+
+	private ApplicationContextRunner noCaffeineRunner() {
+		return baseApplicationRunner().withClassLoader(new FilteredClassLoader(Caffeine.class));
+	}
+
+	private ApplicationContextRunner noCaffeineCacheManagerRunner() {
+		return baseApplicationRunner().withClassLoader(new FilteredClassLoader(CaffeineCacheManager.class));
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@EnableCaching
+	static class TestConfiguration {
 
 	}
 
