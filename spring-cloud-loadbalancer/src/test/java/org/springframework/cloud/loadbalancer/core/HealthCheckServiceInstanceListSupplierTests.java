@@ -28,7 +28,6 @@ import org.assertj.core.util.Lists;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import reactor.core.publisher.Flux;
@@ -665,7 +664,6 @@ class HealthCheckServiceInstanceListSupplierTests {
 	}
 
 	@Test
-	@Disabled
 	void shouldCheckUseProvidedPortForHealthCheckRequest() {
 		Throwable exception = catchThrowable(() -> {
 			String serviceId = "ignored-service";
