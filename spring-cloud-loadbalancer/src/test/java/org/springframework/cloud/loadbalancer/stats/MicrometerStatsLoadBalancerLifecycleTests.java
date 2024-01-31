@@ -56,11 +56,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 
 	MeterRegistry meterRegistry = new SimpleMeterRegistry();
 
-	MicrometerStatsLoadBalancerLifecycle statsLifecycle = new MicrometerStatsLoadBalancerLifecycle(meterRegistry,
-			false);
-
-	MicrometerStatsLoadBalancerLifecycle statsLifecycleWithUriTemplateAttributeUse = new MicrometerStatsLoadBalancerLifecycle(
-			meterRegistry, true);
+	MicrometerStatsLoadBalancerLifecycle statsLifecycle = new MicrometerStatsLoadBalancerLifecycle(meterRegistry);
 
 	@Test
 	void shouldRecordSuccessfulTimedRequest() {
@@ -99,10 +95,10 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
 		ResponseData responseData = new ResponseData(HttpStatus.OK, new HttpHeaders(),
 				new MultiValueMapAdapter<>(new HashMap<>()), requestData);
-		statsLifecycleWithUriTemplateAttributeUse.onStartRequest(lbRequest, lbResponse);
+		statsLifecycle.onStartRequest(lbRequest, lbResponse);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
 
-		statsLifecycleWithUriTemplateAttributeUse.onComplete(
+		statsLifecycle.onComplete(
 				new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
 
 		assertThat(meterRegistry.getMeters()).hasSize(2);

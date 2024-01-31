@@ -44,8 +44,7 @@ final class LoadBalancerTags {
 		throw new UnsupportedOperationException("Cannot instantiate utility class");
 	}
 
-	static Iterable<Tag> buildSuccessRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext,
-			boolean useUriTemplateAttribute) {
+	static Iterable<Tag> buildSuccessRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
 		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance));
 		Object clientResponse = completionContext.getClientResponse();
@@ -53,7 +52,7 @@ final class LoadBalancerTags {
 			RequestData requestData = responseData.getRequestData();
 			if (requestData != null) {
 				tags = tags.and(valueOrUnknown("method", requestData.getHttpMethod()),
-						valueOrUnknown("uri", getPath(requestData, useUriTemplateAttribute)));
+						valueOrUnknown("uri", getPath(requestData)));
 			}
 			else {
 				tags = tags.and(Tag.of("method", UNKNOWN), Tag.of("uri", UNKNOWN));
@@ -74,8 +73,8 @@ final class LoadBalancerTags {
 		return responseData.getHttpStatus() != null ? responseData.getHttpStatus().value() : 200;
 	}
 
-	private static String getPath(RequestData requestData, boolean useUriTemplateAttribute) {
-		if (useUriTemplateAttribute && requestData.getAttributes() != null) {
+	private static String getPath(RequestData requestData) {
+		if (requestData.getAttributes() != null) {
 			var uriTemplate = (String) requestData.getAttributes().get(URI_TEMPLATE_ATTRIBUTE);
 			if (uriTemplate != null) {
 				return uriTemplate;
@@ -84,15 +83,14 @@ final class LoadBalancerTags {
 		return requestData.getUrl() != null ? requestData.getUrl().getPath() : UNKNOWN;
 	}
 
-	static Iterable<Tag> buildDiscardedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext,
-			boolean useUriTemplateAttribute) {
+	static Iterable<Tag> buildDiscardedRequestTags(
+			CompletionContext<Object, ServiceInstance, Object> completionContext) {
 		if (completionContext.getLoadBalancerRequest().getContext() instanceof RequestDataContext) {
 			RequestData requestData = ((RequestDataContext) completionContext.getLoadBalancerRequest().getContext())
 				.getClientRequest();
 			if (requestData != null) {
 				return Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
-						valueOrUnknown("uri", getPath(requestData, useUriTemplateAttribute)),
-						valueOrUnknown("serviceId", getHost(requestData)));
+						valueOrUnknown("uri", getPath(requestData)), valueOrUnknown("serviceId", getHost(requestData)));
 			}
 		}
 		return Tags.of(valueOrUnknown("method", UNKNOWN), valueOrUnknown("uri", UNKNOWN),
@@ -104,8 +102,7 @@ final class LoadBalancerTags {
 		return requestData.getUrl() != null ? requestData.getUrl().getHost() : UNKNOWN;
 	}
 
-	static Iterable<Tag> buildFailedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext,
-			boolean useUriTemplateAttribute) {
+	static Iterable<Tag> buildFailedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
 		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
 		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance)).and(exception(completionContext.getThrowable()));
 		if (completionContext.getLoadBalancerRequest().getContext() instanceof RequestDataContext) {
@@ -113,7 +110,7 @@ final class LoadBalancerTags {
 				.getClientRequest();
 			if (requestData != null) {
 				return tags.and(Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
-						valueOrUnknown("uri", getPath(requestData, useUriTemplateAttribute))));
+						valueOrUnknown("uri", getPath(requestData))));
 			}
 		}
 		return tags.and(Tags.of(valueOrUnknown("method", UNKNOWN), valueOrUnknown("uri", UNKNOWN)));
