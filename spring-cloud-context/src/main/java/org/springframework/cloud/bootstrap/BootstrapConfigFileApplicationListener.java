@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link EnvironmentPostProcessor} that configures the context environment by loading
- * properties from well known file locations. By default properties will be loaded from
+ * properties from well known file locations. By default, properties will be loaded from
  * 'application.properties' and/or 'application.yml' files in the following locations:
  * <ul>
  * <li>file:./config/</li>
@@ -116,6 +116,7 @@ import org.springframework.util.StringUtils;
  * @author Eddú Meléndez
  * @author Madhura Bhave
  * @author Scott Frederick
+ * @author Olga Maciaszek-Sharma
  * @since 1.0.0 {@link ConfigDataEnvironmentPostProcessor}
  */
 public class BootstrapConfigFileApplicationListener
@@ -168,9 +169,9 @@ public class BootstrapConfigFileApplicationListener
 	 */
 	public static final int DEFAULT_ORDER =
 			// This listener needs to run after the `ConfigDataEnvironmentPostProcessor`
-			// to
-			// make sure the `Environment.activeProfiles` are correctly set
-			Math.addExact(ConfigDataEnvironmentPostProcessor.ORDER, 1);
+			// and `HostInfoEnvironmentPostProcessor`
+			// to make sure the `Environment.activeProfiles` are correctly set
+			Math.addExact(ConfigDataEnvironmentPostProcessor.ORDER, 2);
 
 	private final Log logger;
 
