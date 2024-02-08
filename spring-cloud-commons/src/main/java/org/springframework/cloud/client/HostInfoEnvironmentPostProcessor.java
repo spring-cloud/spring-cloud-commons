@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cloud.client;
 import java.util.LinkedHashMap;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
@@ -32,15 +33,17 @@ import org.springframework.core.env.MapPropertySource;
 
 /**
  * @author Spencer Gibb
+ * @author Olga Maciaszek-Sharma
  */
 public class HostInfoEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
-	// Before BootstrapConfigFileApplicationListener
-	private int order = Ordered.HIGHEST_PRECEDENCE + 9;
+	// Before BootstrapConfigFileApplicationListener, but after
+	// ConfigDataEnvironmentPostProcessor
+	private static final int ORDER = Math.addExact(ConfigDataEnvironmentPostProcessor.ORDER, 1);
 
 	@Override
 	public int getOrder() {
-		return this.order;
+		return ORDER;
 	}
 
 	@Override
