@@ -34,7 +34,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.cloud.loadbalancer")
 public class LoadBalancerClientsProperties extends LoadBalancerProperties {
 
-	private Map<String, LoadBalancerProperties> clients = new HashMap<>();
+	private final Map<String, LoadBalancerProperties> clients = new HashMap<>();
 
 	public Map<String, LoadBalancerProperties> getClients() {
 		return this.clients;
