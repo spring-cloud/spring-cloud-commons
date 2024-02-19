@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 	protected void assertLoadBalanced(RestClient.Builder restClientBuilder) {
 		restClientBuilder.requestInterceptors(interceptors -> {
 			assertThat(interceptors).hasSize(1);
-			assertThat(interceptors.get(0)).isInstanceOf(RetryLoadBalancerInterceptor.class);
+			assertThat(interceptors.get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
 		});
 	}
 
@@ -72,7 +72,11 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 
 					restClientBuilder.requestInterceptors(interceptors -> {
 						assertThat(interceptors).hasSize(1);
-						assertThat(interceptors.get(0)).isInstanceOf(LoadBalancerInterceptor.class);
+						assertThat(interceptors.get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
+						DeferringLoadBalancerInterceptor interceptor = (DeferringLoadBalancerInterceptor) interceptors
+								.get(0);
+						assertThat(interceptor.getLoadBalancerInterceptorProvider().getObject())
+								.isInstanceOf(LoadBalancerInterceptor.class);
 					});
 				});
 	}

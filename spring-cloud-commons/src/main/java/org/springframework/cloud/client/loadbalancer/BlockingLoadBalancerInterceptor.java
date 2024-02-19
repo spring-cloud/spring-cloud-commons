@@ -16,20 +16,15 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import org.springframework.web.client.RestClient;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 
 /**
- * A customizer interface for {@link RestClient.Builder}. Used to set
- * {@link LoadBalancerInterceptor} on the builder at the end of the singleton
- * pre-instantiation phase.
+ * A marker interface for {@link ClientHttpRequestInterceptor} instances used for
+ * load-balancing.
  *
  * @author Olga Maciaszek-Sharma
- * @since 4.1.1
- * @deprecated to be removed in the next major release.
+ * @since 4.1.2
  */
-@Deprecated(forRemoval = true)
-public interface RestClientBuilderCustomizer {
-
-	void customize(RestClient.Builder restClientBuilder);
+public interface BlockingLoadBalancerInterceptor extends ClientHttpRequestInterceptor {
 
 }

@@ -28,9 +28,7 @@ import org.springframework.web.client.RestClient;
  *
  * @author Olga Maciaszek-Sharma
  * @since 4.1.0
- * @deprecated to be removed in the next release.
  */
-@Deprecated(forRemoval = true)
 public class LoadBalancerRestClientBuilderBeanPostProcessor implements BeanPostProcessor {
 
 	private final ClientHttpRequestInterceptor loadBalancerInterceptor;
