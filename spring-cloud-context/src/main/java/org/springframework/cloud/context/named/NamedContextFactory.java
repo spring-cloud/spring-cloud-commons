@@ -67,11 +67,11 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 
 	private final Map<String, GenericApplicationContext> contexts = new ConcurrentHashMap<>();
 
-	private Map<String, C> configurations = new ConcurrentHashMap<>();
+	private final Map<String, C> configurations = new ConcurrentHashMap<>();
 
 	private ApplicationContext parent;
 
-	private Class<?> defaultConfigType;
+	private final Class<?> defaultConfigType;
 
 	public NamedContextFactory(Class<?> defaultConfigType, String propertySourceName, String propertyName) {
 		this(defaultConfigType, propertySourceName, propertyName, new HashMap<>());
@@ -222,11 +222,9 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 	public <T> T getInstance(String name, ResolvableType type) {
 		GenericApplicationContext context = getContext(name);
 		String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(context, type);
-		if (beanNames.length > 0) {
-			for (String beanName : beanNames) {
-				if (context.isTypeMatch(beanName, type)) {
-					return (T) context.getBean(beanName);
-				}
+		for (String beanName : beanNames) {
+			if (context.isTypeMatch(beanName, type)) {
+				return (T) context.getBean(beanName);
 			}
 		}
 		return null;
