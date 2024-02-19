@@ -48,8 +48,8 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 	}
 
 	@Override
-	public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-			ClientHttpRequestExecution execution) throws IOException {
+	public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+			throws IOException {
 		URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
 		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
