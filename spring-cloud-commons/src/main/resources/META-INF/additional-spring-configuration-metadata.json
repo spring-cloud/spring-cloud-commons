@@ -170,6 +170,12 @@
 			"defaultValue": "{}",
 			"description": "A `Set` of `Throwable` classes that should trigger a retry.",
 			"type": "java.util.Set"
+		},
+		{
+			"name": "spring.cloud.loadbalancer.stats.micrometer.enabled",
+			"defaultValue": false,
+			"description": "Enables micrometer metrics for load-balanced requests.",
+			"type": "java.lang.Boolean"
 		}
 	]
 }
