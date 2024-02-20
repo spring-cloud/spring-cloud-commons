@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.RetryListener;
 import org.springframework.retry.backoff.BackOffPolicy;
@@ -45,7 +44,7 @@ import org.springframework.util.StreamUtils;
  * @author Olga Maciaszek-Sharma
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class RetryLoadBalancerInterceptor implements ClientHttpRequestInterceptor {
+public class RetryLoadBalancerInterceptor implements BlockingLoadBalancerInterceptor {
 
 	private static final Log LOG = LogFactory.getLog(RetryLoadBalancerInterceptor.class);
 

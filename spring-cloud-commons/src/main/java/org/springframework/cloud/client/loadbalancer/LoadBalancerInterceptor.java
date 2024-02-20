@@ -21,7 +21,6 @@ import java.net.URI;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
 
@@ -31,7 +30,7 @@ import org.springframework.util.Assert;
  * @author Ryan Baxter
  * @author William Tran
  */
-public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
+public class LoadBalancerInterceptor implements BlockingLoadBalancerInterceptor {
 
 	private final LoadBalancerClient loadBalancer;
 
