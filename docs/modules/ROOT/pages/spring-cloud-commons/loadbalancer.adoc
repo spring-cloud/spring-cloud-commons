@@ -14,7 +14,7 @@ TIP: It is possible to disable Spring Cloud LoadBalancer by setting the value of
 
 Spring Cloud LoadBalancer creates a separate Spring child context for each service id. By default, these contexts are initialised lazily, whenever the first request for a service id is being load-balanced.
 
-You can choose to load those contexts eagerly. In order to do that, specify the service ids for which you want to do eager load using the `spring.cloud-loadbalancer.eager-load.clients` property, for example:
+You can choose to load those contexts eagerly. In order to do that, specify the service ids for which you want to do eager load using the `spring.cloud.loadbalancer.eager-load.clients` property, for example:
 
 [source]
 ----
