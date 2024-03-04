@@ -180,14 +180,14 @@ public class SpringBootDependencyTests {
 			verifyCurrentVersionFromManifest("3.2.x");
 		}
 		catch (AssertionError e) {
-			// if (e.getMessage() != null && e.getMessage().contains("3.3.")) {
-			// we're likely running a boot 3.3 compatibility test, try 3.3
-			// verifyCurrentVersionFromManifest("3.3");
-			// verifyCurrentVersionFromManifest("3.3.x");
-			// }
-			// else {
-			throw e;
-			// }
+			if (e.getMessage() != null && e.getMessage().contains("3.3.")) {
+				// we're likely running a boot 3.3 compatibility test, try 3.3
+				verifyCurrentVersionFromManifest("3.3");
+				verifyCurrentVersionFromManifest("3.3.x");
+			}
+			else {
+				throw e;
+			}
 		}
 	}
 
