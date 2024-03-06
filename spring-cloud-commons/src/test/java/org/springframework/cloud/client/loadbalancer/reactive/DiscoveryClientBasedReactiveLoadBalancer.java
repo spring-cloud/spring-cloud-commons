@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.util.List;
-import java.util.Random;
+import java.util.random.RandomGenerator;
+import java.util.random.RandomGeneratorFactory;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
@@ -38,7 +39,7 @@ import org.springframework.cloud.client.loadbalancer.RetryableRequestContext;
  */
 class DiscoveryClientBasedReactiveLoadBalancer implements ReactiveLoadBalancer<ServiceInstance> {
 
-	private final Random random = new Random();
+	private final RandomGenerator random = RandomGeneratorFactory.getDefault().create();
 
 	private final String serviceId;
 
@@ -52,10 +53,10 @@ class DiscoveryClientBasedReactiveLoadBalancer implements ReactiveLoadBalancer<S
 	@Override
 	public Publisher<Response<ServiceInstance>> choose() {
 		List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
-		if (instances.size() == 0) {
+		if (instances.isEmpty()) {
 			return Mono.just(new EmptyResponse());
 		}
-		int instanceIdx = this.random.nextInt(instances.size());
+		int instanceIdx = random.nextInt(instances.size());
 		return Mono.just(new DefaultResponse(instances.get(instanceIdx)));
 	}
 
@@ -72,10 +73,10 @@ class DiscoveryClientBasedReactiveLoadBalancer implements ReactiveLoadBalancer<S
 				}
 			}
 		}
-		if (instances.size() == 0) {
+		if (instances.isEmpty()) {
 			return Mono.just(new EmptyResponse());
 		}
-		int instanceIdx = this.random.nextInt(instances.size());
+		int instanceIdx = random.nextInt(instances.size());
 		return Mono.just(new DefaultResponse(instances.get(instanceIdx)));
 	}
 
