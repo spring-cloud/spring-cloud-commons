@@ -42,17 +42,19 @@ public class SSLContextFactory {
 		char[] keyPassword = properties.keyPassword();
 		KeyStore keyStore = createKeyStore();
 
-		try {
-			builder.loadKeyMaterial(keyStore, keyPassword);
-		}
-		catch (UnrecoverableKeyException e) {
-			if (keyPassword.length == 0) {
-				// Retry if empty password, see
-				// https://rt.openssl.org/Ticket/Display.html?id=1497&user=guest&pass=guest
-				builder.loadKeyMaterial(keyStore, new char[] { '\0' });
+		if (keyStore != null) {
+			try {
+				builder.loadKeyMaterial(keyStore, keyPassword);
 			}
-			else {
-				throw e;
+			catch (UnrecoverableKeyException e) {
+				if (keyPassword.length == 0) {
+					// Retry if empty password, see
+					// https://rt.openssl.org/Ticket/Display.html?id=1497&user=guest&pass=guest
+					builder.loadKeyMaterial(keyStore, new char[] { '\0' });
+				}
+				else {
+					throw e;
+				}
 			}
 		}
 
@@ -66,7 +68,7 @@ public class SSLContextFactory {
 
 	public KeyStore createKeyStore() throws GeneralSecurityException, IOException {
 		if (properties.getKeyStore() == null) {
-			throw new KeyStoreException("Keystore not specified.");
+			return null;
 		}
 		if (!properties.getKeyStore().exists()) {
 			throw new KeyStoreException("Keystore not exists: " + properties.getKeyStore());
