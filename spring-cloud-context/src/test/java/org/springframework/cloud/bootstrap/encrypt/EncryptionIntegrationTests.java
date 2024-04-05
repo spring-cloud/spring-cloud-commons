@@ -142,6 +142,28 @@ public class EncryptionIntegrationTests {
 		TestConfigDataLocationResolver.config.clear();
 	}
 
+	@Test
+	public void failsafeTextEncryptor() {
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(
+				EncryptionIntegrationTests.TestConfiguration.class).web(WebApplicationType.NONE).properties().run();
+		then(context.getBean(TextEncryptor.class)).isInstanceOf(TextEncryptorUtils.FailsafeTextEncryptor.class);
+	}
+
+	@Test
+	public void failsafeShouldHaveDelegate() {
+		TestConfigDataLocationResolver.config.put("foo.password",
+				"{cipher}bf29452295df354e6153c5b31b03ef23c70e55fba24299aa85c63438f1c43c95");
+		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestAutoConfiguration.class)
+				.web(WebApplicationType.NONE)
+				.properties("spring.config.import=testdatasource:,classpath:application-failsafe.properties",
+						"createfailsafedelegate=true")
+				.run();
+		ConfigurableEnvironment env = context.getBean(ConfigurableEnvironment.class);
+		then(env.getProperty("foo.password")).isEqualTo("test");
+		context.close();
+		TestConfigDataLocationResolver.config.clear();
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties(PasswordProperties.class)
 	protected static class TestConfiguration {

@@ -177,14 +177,40 @@ public abstract class TextEncryptorUtils {
 	 */
 	public static class FailsafeTextEncryptor implements TextEncryptor {
 
+		private TextEncryptor delegate;
+
+		/**
+		 * You can set a delegate that can be used to encrypt/decrypt values if later on
+		 * after the initial initialization of the app we have the necessary values to
+		 * create a proper {@link TextEncryptor}. Depending on where the encryption keys
+		 * are set we might not have the right values to create a {@link TextEncryptor}
+		 * (this can happen if the keys are in application.properties for example, but we
+		 * create the text encryptor during Bootstrap). The delegate functionality allows
+		 * us the option to set the delegate later on when we have the necessary values.
+		 * @param delegate The TextEncryptor to use for encryption/decryption
+		 */
+		public void setDelegate(TextEncryptor delegate) {
+			this.delegate = delegate;
+		}
+
+		public TextEncryptor getDelegate() {
+			return this.delegate;
+		}
+
 		@Override
 		public String encrypt(String text) {
+			if (this.delegate != null) {
+				return this.delegate.encrypt(text);
+			}
 			throw new UnsupportedOperationException(
 					"No encryption for FailsafeTextEncryptor. Did you configure the keystore correctly?");
 		}
 
 		@Override
 		public String decrypt(String encryptedText) {
+			if (this.delegate != null) {
+				return this.delegate.decrypt(encryptedText);
+			}
 			throw new UnsupportedOperationException(
 					"No decryption for FailsafeTextEncryptor. Did you configure the keystore correctly?");
 		}
