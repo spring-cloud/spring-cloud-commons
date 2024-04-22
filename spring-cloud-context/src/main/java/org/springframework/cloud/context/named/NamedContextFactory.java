@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.context.named;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,9 +48,8 @@ import org.springframework.util.Assert;
 
 /**
  * Creates a set of child contexts that allows a set of Specifications to define the beans
- * in each child context.
- *
- * Ported from spring-cloud-netflix FeignClientFactory and SpringClientFactory
+ * in each child context. Ported from spring-cloud-netflix FeignClientFactory and
+ * SpringClientFactory
  *
  * @param <C> specification
  * @author Spencer Gibb
@@ -228,6 +229,23 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 			}
 		}
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T getAnnotatedInstance(String name, ResolvableType type, Class<? extends Annotation> annotationType) {
+		GenericApplicationContext context = getContext(name);
+		String[] beanNames = BeanFactoryUtils.beanNamesForAnnotationIncludingAncestors(context, annotationType);
+
+		List<T> beans = new ArrayList<>();
+		for (String beanName : beanNames) {
+			if (context.isTypeMatch(beanName, type)) {
+				beans.add((T) context.getBean(beanName));
+			}
+		}
+		if (beans.size() > 1) {
+			throw new IllegalStateException("Only one annotated bean for type expected.");
+		}
+		return beans.isEmpty() ? null : beans.get(0);
 	}
 
 	public <T> Map<String, T> getInstances(String name, Class<T> type) {
