@@ -63,7 +63,7 @@ You can see more information and examples of usage in the following sections:
 
 Apart from the basic `ServiceInstanceListSupplier` implementation that retrieves instances via `DiscoveryClient` each time it has to choose an instance, we provide two caching implementations.
 
-[[https://github-com/ben-manes/caffeine[caffeine]-backed-loadbalancer-cache-implementation]]
+[[caffeine-backed-loadbalancer-cache-implementation]]
 === https://github.com/ben-manes/caffeine[Caffeine]-backed LoadBalancer Cache Implementation
 
 If you have `com.github.ben-manes.caffeine:caffeine` in the classpath, Caffeine-based implementation will be used.
