@@ -130,7 +130,7 @@ public class RefreshAutoConfiguration {
 		return new RefreshEventListener(contextRefresher);
 	}
 
-	@ConfigurationProperties("spring.cloud.refresh")
+	@ConfigurationProperties(REFRESH_SCOPE_PREFIX)
 	public static class RefreshProperties {
 
 		/**
@@ -219,7 +219,7 @@ public class RefreshAutoConfiguration {
 				if (isApplicable(registry, name, definition)) {
 					BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, name);
 					BeanDefinitionHolder proxy = ScopedProxyUtils.createScopedProxy(holder, registry, true);
-					definition.setScope("refresh");
+					definition.setScope(REFRESH_SCOPE_NAME);
 					if (registry.containsBeanDefinition(proxy.getBeanName())) {
 						registry.removeBeanDefinition(proxy.getBeanName());
 					}
@@ -252,7 +252,7 @@ public class RefreshAutoConfiguration {
 				if (this.environment == null) {
 					this.environment = new StandardEnvironment();
 				}
-				Binder.get(this.environment).bind("spring.cloud.refresh", Bindable.ofInstance(this));
+				Binder.get(this.environment).bind(REFRESH_SCOPE_PREFIX, Bindable.ofInstance(this));
 				this.bound = true;
 			}
 		}
