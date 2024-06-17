@@ -46,7 +46,7 @@ import org.springframework.util.CollectionUtils;
  * @see <a href=
  * "https://github.com/spring-projects/spring-boot/blob/main/spring-boot-project/spring-boot-tools/spring-boot-test-support/src/main/java/org/springframework/boot/testsupport/classpath/ModifiedClassPathExtension.java">ModifiedClassPathExtension.java</a>
  */
-class ModifiedClassPathExtension implements InvocationInterceptor {
+public class ModifiedClassPathExtension implements InvocationInterceptor {
 
 	@Override
 	public void interceptBeforeAllMethod(Invocation<Void> invocation,
