@@ -40,6 +40,7 @@ import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceList
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.WeightedServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ZonePreferenceServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.MultiMainZoneServiceInstanceListSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.support.RetryTemplate;
@@ -100,6 +101,21 @@ class LoadBalancerClientConfigurationTests {
 				.run(context -> {
 					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 					then(supplier).isInstanceOf(ZonePreferenceServiceInstanceListSupplier.class);
+					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
+							.getDelegate();
+					then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
+					ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
+							.getDelegate();
+					then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+				});
+	}
+
+	@Test
+	void shouldInstantiateMultiMainZoneServiceInstanceListSupplier() {
+		reactiveDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=multi-main-zone")
+				.run(context -> {
+					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+					then(supplier).isInstanceOf(MultiMainZoneServiceInstanceListSupplier.class);
 					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
 							.getDelegate();
 					then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);

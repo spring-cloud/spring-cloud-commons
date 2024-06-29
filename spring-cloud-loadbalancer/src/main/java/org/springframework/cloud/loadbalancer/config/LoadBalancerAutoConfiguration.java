@@ -56,6 +56,13 @@ public class LoadBalancerAutoConfiguration {
 		return new LoadBalancerZoneConfig(environment.getProperty("spring.cloud.loadbalancer.zone"));
 	}
 
+	@Bean
+	@ConditionalOnMissingBean
+	public LoadBalancerMultiMainZoneConfig multiMainZoneConfig(Environment environment) {
+		return new LoadBalancerMultiMainZoneConfig(environment.getProperty("spring.cloud.loadbalancer.multiMainZone.mainZone", "DAILY"),
+				environment.getProperty("spring.cloud.loadbalancer.multiMainZone.zoneRequestHeaderKey", "zone"));
+	}
+
 	@ConditionalOnMissingBean
 	@Bean
 	public LoadBalancerClientFactory loadBalancerClientFactory(LoadBalancerClientsProperties properties,
