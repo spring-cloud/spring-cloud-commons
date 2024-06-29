@@ -24,6 +24,7 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.cloud.loadbalancer.config.LoadBalancerMultiMainZoneConfig;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -275,6 +276,38 @@ public final class ServiceInstanceListSupplierBuilder {
 			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
 			LoadBalancerZoneConfig zoneConfig = new LoadBalancerZoneConfig(zoneName);
 			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig, loadBalancerClientFactory);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
+	 * Adds a {@link MultiMainZoneServiceInstanceListSupplier} to the
+	 * {@link ServiceInstanceListSupplier} hierarchy.
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withMultiMainZone() {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
+			LoadBalancerMultiMainZoneConfig multiMainZoneConfig = context.getBean(LoadBalancerMultiMainZoneConfig.class);
+			return new MultiMainZoneServiceInstanceListSupplier(delegate, multiMainZoneConfig, loadBalancerClientFactory);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
+	 * Adds a {@link MultiMainZoneServiceInstanceListSupplier} to the
+	 * {@link ServiceInstanceListSupplier} hierarchy.
+	 * @param mainZone main zone sign
+	 * @param zoneRequestHeaderKey the target zone key in the request header
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withMultiMainZone(String mainZone, String zoneRequestHeaderKey) {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
+			LoadBalancerMultiMainZoneConfig multiMainZoneConfig = new LoadBalancerMultiMainZoneConfig(mainZone, zoneRequestHeaderKey);
+			return new MultiMainZoneServiceInstanceListSupplier(delegate, multiMainZoneConfig, loadBalancerClientFactory);
 		};
 		this.creators.add(creator);
 		return this;
