@@ -50,7 +50,8 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
 	@Bean
 	public static LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
-			@Lazy DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction, ApplicationContext context) {
+			@Lazy DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction,
+			ApplicationContext context) {
 		return new LoadBalancerWebClientBuilderBeanPostProcessor(deferringExchangeFilterFunction, context);
 	}
 
