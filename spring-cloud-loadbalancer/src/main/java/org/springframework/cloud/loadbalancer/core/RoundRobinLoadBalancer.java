@@ -30,6 +30,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.util.function.SingletonSupplier;
 
 /**
  * A Round-Robin-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
@@ -46,7 +47,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	final String serviceId;
 
-	ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
+	final SingletonSupplier<ServiceInstanceListSupplier> serviceInstanceListSingletonSupplier;
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
@@ -67,7 +68,9 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	public RoundRobinLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId, int seedPosition) {
 		this.serviceId = serviceId;
-		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
+		this.serviceInstanceListSingletonSupplier = SingletonSupplier.of(
+				() -> serviceInstanceListSupplierProvider.getIfAvailable(NoopServiceInstanceListSupplier::new)
+		);
 		this.position = new AtomicInteger(seedPosition);
 	}
 
@@ -77,8 +80,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	// https://github.com/Netflix/ocelli/blob/master/ocelli-core/
 	// src/main/java/netflix/ocelli/loadbalancer/RoundRobinLoadBalancer.java
 	public Mono<Response<ServiceInstance>> choose(Request request) {
-		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
-				.getIfAvailable(NoopServiceInstanceListSupplier::new);
+		ServiceInstanceListSupplier supplier = serviceInstanceListSingletonSupplier.obtain();
 		return supplier.get(request).next()
 				.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}

@@ -29,6 +29,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.util.function.SingletonSupplier;
 
 /**
  * A random-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
@@ -42,7 +43,7 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
 	private final String serviceId;
 
-	private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
+	private final SingletonSupplier<ServiceInstanceListSupplier> serviceInstanceListSingletonSupplier;
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
@@ -52,14 +53,15 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 	public RandomLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId) {
 		this.serviceId = serviceId;
-		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
+		this.serviceInstanceListSingletonSupplier = SingletonSupplier.of(
+				() -> serviceInstanceListSupplierProvider.getIfAvailable(NoopServiceInstanceListSupplier::new)
+		);
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Mono<Response<ServiceInstance>> choose(Request request) {
-		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
-				.getIfAvailable(NoopServiceInstanceListSupplier::new);
+		ServiceInstanceListSupplier supplier = serviceInstanceListSingletonSupplier.obtain();
 		return supplier.get(request).next()
 				.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
