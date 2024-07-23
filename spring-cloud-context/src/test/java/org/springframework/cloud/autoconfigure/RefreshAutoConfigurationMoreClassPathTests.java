@@ -46,9 +46,9 @@ public class RefreshAutoConfigurationMoreClassPathTests {
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class, "debug=true")) {
 			String output = outputCapture.toString();
 			then(output)
-					.doesNotContain("Failed to introspect annotations on "
-							+ "[class org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration")
-					.doesNotContain("TypeNotPresentExceptionProxy");
+				.doesNotContain("Failed to introspect annotations on "
+						+ "[class org.springframework.cloud.autoconfigure.RefreshEndpointAutoConfiguration")
+				.doesNotContain("TypeNotPresentExceptionProxy");
 		}
 	}
 

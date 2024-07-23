@@ -121,7 +121,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 			return Stream.of(((URLClassLoader) classLoader).getURLs());
 		}
 		return Stream.of(ManagementFactory.getRuntimeMXBean().getClassPath().split(File.pathSeparator))
-				.map(this::toURL);
+			.map(this::toURL);
 	}
 
 	private URL toURL(String entry) {
@@ -286,7 +286,7 @@ public class ModifiedClassPathRunner extends BlockJUnit4ClassRunner {
 		@SuppressWarnings("unchecked")
 		private List<FrameworkMethod> getAnnotatedMethods(String annotationClassName) throws ClassNotFoundException {
 			Class<? extends Annotation> annotationClass = (Class<? extends Annotation>) this.classLoader
-					.loadClass(annotationClassName);
+				.loadClass(annotationClassName);
 			List<FrameworkMethod> methods = super.getAnnotatedMethods(annotationClass);
 			return wrapFrameworkMethods(methods);
 		}

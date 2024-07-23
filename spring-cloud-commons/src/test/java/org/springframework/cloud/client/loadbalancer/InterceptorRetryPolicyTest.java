@@ -152,7 +152,7 @@ public class InterceptorRetryPolicyTest {
 		then(interceptorRetryPolicy.equals(new Object())).isFalse();
 		then(interceptorRetryPolicy.equals(interceptorRetryPolicy)).isTrue();
 		then(interceptorRetryPolicy
-				.equals(new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName))).isTrue();
+			.equals(new InterceptorRetryPolicy(request, policy, serviceInstanceChooser, serviceName))).isTrue();
 	}
 
 }

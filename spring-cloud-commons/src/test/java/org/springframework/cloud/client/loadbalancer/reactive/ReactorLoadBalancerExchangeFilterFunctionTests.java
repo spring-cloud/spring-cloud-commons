@@ -91,66 +91,94 @@ class ReactorLoadBalancerExchangeFilterFunctionTests {
 		instanceWithNoLifecycleProcessors.setServiceId("serviceWithNoLifecycleProcessors");
 		instanceWithNoLifecycleProcessors.setUri(URI.create("http://localhost:" + this.port));
 		properties.getInstances().put("testservice", Collections.singletonList(instance));
-		properties.getInstances().put("serviceWithNoLifecycleProcessors",
-				Collections.singletonList(instanceWithNoLifecycleProcessors));
+		properties.getInstances()
+			.put("serviceWithNoLifecycleProcessors", Collections.singletonList(instanceWithNoLifecycleProcessors));
 	}
 
 	@Test
 	void correctResponseReturnedForExistingHostAndInstancePresent() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice").filter(loadBalancerFunction)
-				.build().get().uri("/hello").exchange().block();
+		ClientResponse clientResponse = WebClient.builder()
+			.baseUrl("http://testservice")
+			.filter(loadBalancerFunction)
+			.build()
+			.get()
+			.uri("/hello")
+			.exchange()
+			.block();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		then(clientResponse.bodyToMono(String.class).block()).isEqualTo("Hello World");
 	}
 
 	@Test
 	void serviceUnavailableReturnedWhenNoInstancePresent() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://xxx").filter(this.loadBalancerFunction)
-				.build().get().exchange().block();
+		ClientResponse clientResponse = WebClient.builder()
+			.baseUrl("http://xxx")
+			.filter(this.loadBalancerFunction)
+			.build()
+			.get()
+			.exchange()
+			.block();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
 	}
 
 	@Test
 	@Disabled // FIXME 3.0.0
 	void badRequestReturnedForIncorrectHost() {
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http:///xxx").filter(this.loadBalancerFunction)
-				.build().get().exchange().block();
+		ClientResponse clientResponse = WebClient.builder()
+			.baseUrl("http:///xxx")
+			.filter(this.loadBalancerFunction)
+			.build()
+			.get()
+			.exchange()
+			.block();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 	}
 
 	@Test
 	void exceptionNotThrownWhenFactoryReturnsNullLifecycleProcessorsMap() {
-		assertThatCode(() -> WebClient.builder().baseUrl("http://serviceWithNoLifecycleProcessors")
-				.filter(loadBalancerFunction).build().get().uri("/hello").exchange().block())
-						.doesNotThrowAnyException();
+		assertThatCode(() -> WebClient.builder()
+			.baseUrl("http://serviceWithNoLifecycleProcessors")
+			.filter(loadBalancerFunction)
+			.build()
+			.get()
+			.uri("/hello")
+			.exchange()
+			.block()).doesNotThrowAnyException();
 	}
 
 	@Test
 	void loadBalancerLifecycleCallbacksExecuted() {
 		final String callbackTestHint = "callbackTestHint";
 		loadBalancerProperties.getHint().put("testservice", "callbackTestHint");
-		ClientResponse clientResponse = WebClient.builder().baseUrl("http://testservice").filter(loadBalancerFunction)
-				.build().get().uri("/callback").exchange().block();
+		ClientResponse clientResponse = WebClient.builder()
+			.baseUrl("http://testservice")
+			.filter(loadBalancerFunction)
+			.build()
+			.get()
+			.uri("/callback")
+			.exchange()
+			.block();
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
-						.values();
+			.getInstances("testservice", LoadBalancerLifecycle.class)
+			.get("loadBalancerLifecycle")).getStartLog().values();
 		Collection<Request<Object>> lifecycleStartedLogRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("testservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle"))
-						.getStartRequestLog().values();
+			.getInstances("testservice", LoadBalancerLifecycle.class)
+			.get("loadBalancerLifecycle")).getStartRequestLog().values();
 		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
-				.getInstances("testservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
-						.getCompleteLog().values();
+			.getInstances("testservice", LoadBalancerLifecycle.class)
+			.get("anotherLoadBalancerLifecycle")).getCompleteLog().values();
 		then(clientResponse.statusCode()).isEqualTo(HttpStatus.OK);
 		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
-				.contains(callbackTestHint);
+			.contains(callbackTestHint);
 		assertThat(lifecycleStartedLogRequests)
-				.extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
-				.contains(callbackTestHint);
+			.extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
+			.contains(callbackTestHint);
 		assertThat(anotherLifecycleLogRequests)
-				.extracting(completionContext -> ((ResponseData) completionContext.getClientResponse()).getRequestData()
-						.getUrl().toString())
-				.contains("http://testservice/callback");
+			.extracting(completionContext -> ((ResponseData) completionContext.getClientResponse()).getRequestData()
+				.getUrl()
+				.toString())
+			.contains("http://testservice/callback");
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

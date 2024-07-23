@@ -40,14 +40,16 @@ class EncryptionRuntimeHintsTests {
 
 	@BeforeEach
 	void setup() {
-		SpringFactoriesLoader.forResourceLocation("META-INF/spring/aot.factories").load(RuntimeHintsRegistrar.class)
-				.forEach(registrar -> registrar.registerHints(this.hints, ClassUtils.getDefaultClassLoader()));
+		SpringFactoriesLoader.forResourceLocation("META-INF/spring/aot.factories")
+			.load(RuntimeHintsRegistrar.class)
+			.forEach(registrar -> registrar.registerHints(this.hints, ClassUtils.getDefaultClassLoader()));
 	}
 
 	@Test
 	void rsaSecretEncryptorHasHints() {
-		assertThat(RuntimeHintsPredicates.reflection().onType(RsaSecretEncryptor.class)
-				.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.hints);
+		assertThat(RuntimeHintsPredicates.reflection()
+			.onType(RsaSecretEncryptor.class)
+			.withMemberCategories(MemberCategory.INVOKE_DECLARED_CONSTRUCTORS)).accepts(this.hints);
 	}
 
 }

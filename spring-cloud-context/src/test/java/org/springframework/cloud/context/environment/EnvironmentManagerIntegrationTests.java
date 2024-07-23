@@ -72,7 +72,8 @@ public class EnvironmentManagerIntegrationTests {
 		String content = property("message", "Foo");
 
 		this.mvc.perform(post(BASE_PATH + "/env").content(content).contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().string("{\"message\":\"Foo\"}"));
+			.andExpect(status().isOk())
+			.andExpect(content().string("{\"message\":\"Foo\"}"));
 		then(this.properties.getMessage()).isEqualTo("Foo");
 	}
 
@@ -88,9 +89,11 @@ public class EnvironmentManagerIntegrationTests {
 	@Test
 	public void testRefreshFails() throws Exception {
 		try {
-			this.mvc.perform(
-					post(BASE_PATH + "/env").content(property("delay", "foo")).contentType(MediaType.APPLICATION_JSON))
-					.andExpect(status().isOk()).andExpect(status().is5xxServerError());
+			this.mvc
+				.perform(post(BASE_PATH + "/env").content(property("delay", "foo"))
+					.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(status().is5xxServerError());
 			fail("expected ServletException");
 		}
 		catch (ServletException e) {
@@ -111,10 +114,10 @@ public class EnvironmentManagerIntegrationTests {
 		then(envbeans.get("writableEnvironmentEndpoint")).isInstanceOf(WritableEnvironmentEndpoint.class);
 
 		Map<String, EnvironmentEndpointWebExtension> extbeans = this.context
-				.getBeansOfType(EnvironmentEndpointWebExtension.class);
+			.getBeansOfType(EnvironmentEndpointWebExtension.class);
 		then(extbeans).hasSize(1).containsKey("writableEnvironmentEndpointWebExtension");
 		then(extbeans.get("writableEnvironmentEndpointWebExtension"))
-				.isInstanceOf(WritableEnvironmentEndpointWebExtension.class);
+			.isInstanceOf(WritableEnvironmentEndpointWebExtension.class);
 	}
 
 	@Configuration(proxyBeanMethods = false)

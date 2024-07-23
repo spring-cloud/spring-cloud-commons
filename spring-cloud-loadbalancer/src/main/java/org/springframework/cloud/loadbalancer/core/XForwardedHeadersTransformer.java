@@ -45,7 +45,7 @@ public class XForwardedHeadersTransformer implements LoadBalancerClientRequestTr
 			return request;
 		}
 		LoadBalancerProperties.XForwarded xForwarded = clientFactory.getProperties(instance.getServiceId())
-				.getXForwarded();
+			.getXForwarded();
 		if (xForwarded.isEnabled()) {
 			HttpHeaders headers = request.headers();
 			String xForwardedHost = request.url().getHost();

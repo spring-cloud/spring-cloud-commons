@@ -83,9 +83,9 @@ public class RetryLoadBalancerInterceptor implements BlockingLoadBalancerInterce
 				}
 			}
 			Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
-					.getSupportedLifecycleProcessors(
-							loadBalancerFactory.getInstances(serviceName, LoadBalancerLifecycle.class),
-							RetryableRequestContext.class, ResponseData.class, ServiceInstance.class);
+				.getSupportedLifecycleProcessors(
+						loadBalancerFactory.getInstances(serviceName, LoadBalancerLifecycle.class),
+						RetryableRequestContext.class, ResponseData.class, ServiceInstance.class);
 			String hint = getHint(serviceName);
 			if (serviceInstance == null) {
 				if (LOG.isDebugEnabled()) {
@@ -109,11 +109,10 @@ public class RetryLoadBalancerInterceptor implements BlockingLoadBalancerInterce
 				Response<ServiceInstance> lbResponse = new DefaultResponse(serviceInstance);
 				if (serviceInstance == null) {
 					supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
-									CompletionContext.Status.DISCARD,
-									new DefaultRequest<>(
-											new RetryableRequestContext(null, new RequestData(request), hint)),
-									lbResponse)));
+						.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
+								CompletionContext.Status.DISCARD,
+								new DefaultRequest<>(new RetryableRequestContext(null, new RequestData(request), hint)),
+								lbResponse)));
 				}
 			}
 			LoadBalancerRequestAdapter<ClientHttpResponse, RetryableRequestContext> lbRequest = new LoadBalancerRequestAdapter<>(

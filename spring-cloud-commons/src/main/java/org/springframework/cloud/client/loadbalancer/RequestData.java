@@ -83,7 +83,7 @@ public class RequestData {
 		HttpHeaders newCookies = new HttpHeaders();
 		if (cookies != null) {
 			cookies.forEach((key, value) -> value
-					.forEach(cookie -> newCookies.put(cookie.getName(), Collections.singletonList(cookie.getValue()))));
+				.forEach(cookie -> newCookies.put(cookie.getName(), Collections.singletonList(cookie.getValue()))));
 		}
 		return newCookies;
 	}

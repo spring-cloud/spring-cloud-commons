@@ -147,8 +147,9 @@ class LoadBalancerUriToolsTests {
 	void originalUserInfoSet() {
 		TestServiceInstance serviceInstance = new TestServiceInstance();
 		URI original = UriComponentsBuilder
-				.fromUriString("http://testUser@testHost.example/path?query1=test1&query2=test2#fragment").build()
-				.toUri();
+			.fromUriString("http://testUser@testHost.example/path?query1=test1&query2=test2#fragment")
+			.build()
+			.toUri();
 
 		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original);
 
@@ -166,7 +167,9 @@ class LoadBalancerUriToolsTests {
 	void reconstructedURIEncodedCorrectly() {
 		TestServiceInstance serviceInstance = new TestServiceInstance();
 		URI original = UriComponentsBuilder
-				.fromUriString("http://test.example/path%40%21%242?query=val%40%21%242#frag%40%21%242").build().toUri();
+			.fromUriString("http://test.example/path%40%21%242?query=val%40%21%242#frag%40%21%242")
+			.build()
+			.toUri();
 
 		URI reconstructed = LoadBalancerUriTools.reconstructURI(serviceInstance, original);
 

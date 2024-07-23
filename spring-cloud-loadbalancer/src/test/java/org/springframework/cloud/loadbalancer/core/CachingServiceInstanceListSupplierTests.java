@@ -132,7 +132,7 @@ class CachingServiceInstanceListSupplierTests {
 					firstDelegate, loadBalancerProperties, webClientBuilder.build());
 			delegate.afterPropertiesSet();
 			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
-					.getBeanProvider(LoadBalancerCacheManager.class);
+				.getBeanProvider(LoadBalancerCacheManager.class);
 			return new CachingServiceInstanceListSupplier(delegate, cacheManagerProvider.getIfAvailable());
 		}
 

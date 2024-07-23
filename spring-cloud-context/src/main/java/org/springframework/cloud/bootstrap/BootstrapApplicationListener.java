@@ -146,7 +146,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		MutablePropertySources bootstrapProperties = bootstrapEnvironment.getPropertySources();
 		String configLocation = environment.resolvePlaceholders("${spring.cloud.bootstrap.location:}");
 		String configAdditionalLocation = environment
-				.resolvePlaceholders("${spring.cloud.bootstrap.additional-location:}");
+			.resolvePlaceholders("${spring.cloud.bootstrap.additional-location:}");
 		Map<String, Object> bootstrapMap = new HashMap<>();
 		bootstrapMap.put("spring.config.name", configName);
 		// if an app (or test) uses spring.main.web-application-type=reactive, bootstrap
@@ -170,9 +170,12 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		}
 		// TODO: is it possible or sensible to share a ResourceLoader?
 		SpringApplicationBuilder builder = new SpringApplicationBuilder().profiles(environment.getActiveProfiles())
-				.bannerMode(Mode.OFF).environment(bootstrapEnvironment)
-				// Don't use the default properties in this builder
-				.registerShutdownHook(false).logStartupInfo(false).web(WebApplicationType.NONE);
+			.bannerMode(Mode.OFF)
+			.environment(bootstrapEnvironment)
+			// Don't use the default properties in this builder
+			.registerShutdownHook(false)
+			.logStartupInfo(false)
+			.web(WebApplicationType.NONE);
 		final SpringApplication builderApplication = builder.application();
 		if (builderApplication.getMainApplicationClass() == null) {
 			// gh_425:
@@ -383,7 +386,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 			PropertySource<?> removed = environment.getPropertySources().remove(DEFAULT_PROPERTIES);
 			if (removed instanceof ExtendedDefaultPropertySource defaultProperties) {
 				environment.getPropertySources()
-						.addLast(new MapPropertySource(DEFAULT_PROPERTIES, defaultProperties.getSource()));
+					.addLast(new MapPropertySource(DEFAULT_PROPERTIES, defaultProperties.getSource()));
 				for (PropertySource<?> source : defaultProperties.getPropertySources().getPropertySources()) {
 					if (!environment.getPropertySources().contains(source.getName())) {
 						environment.getPropertySources().addBefore(DEFAULT_PROPERTIES, source);

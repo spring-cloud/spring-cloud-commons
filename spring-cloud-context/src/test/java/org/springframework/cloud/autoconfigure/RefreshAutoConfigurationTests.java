@@ -47,8 +47,10 @@ class RefreshAutoConfigurationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(WebApplicationType type, Class<?> configuration,
 			String... properties) {
-		return new SpringApplicationBuilder(configuration).web(type).properties(properties).properties("server.port=0")
-				.run();
+		return new SpringApplicationBuilder(configuration).web(type)
+			.properties(properties)
+			.properties("server.port=0")
+			.run();
 	}
 
 	@Test
@@ -100,14 +102,14 @@ class RefreshAutoConfigurationTests {
 	@Test
 	void refreshScopeLifecylePresentByDefault() {
 		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
-				.run(context -> assertThat(context).hasBean("refreshScopeLifecycle"));
+			.run(context -> assertThat(context).hasBean("refreshScopeLifecycle"));
 	}
 
 	@Test
 	void refreshScopeLifecyleDisabledWithProp() {
 		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
-				.withPropertyValues("spring.cloud.refresh.on-restart.enabled=false")
-				.run(context -> assertThat(context).doesNotHaveBean("refreshScopeLifecycle"));
+			.withPropertyValues("spring.cloud.refresh.on-restart.enabled=false")
+			.run(context -> assertThat(context).doesNotHaveBean("refreshScopeLifecycle"));
 	}
 
 	@Configuration(proxyBeanMethods = false)

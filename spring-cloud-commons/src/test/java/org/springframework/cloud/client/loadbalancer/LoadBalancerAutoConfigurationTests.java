@@ -48,7 +48,7 @@ public class LoadBalancerAutoConfigurationTests extends AbstractLoadBalancerAuto
 			assertThat(interceptors.get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
 			DeferringLoadBalancerInterceptor interceptor = (DeferringLoadBalancerInterceptor) interceptors.get(0);
 			assertThat(interceptor.getLoadBalancerInterceptorProvider().getObject())
-					.isInstanceOf(LoadBalancerInterceptor.class);
+				.isInstanceOf(LoadBalancerInterceptor.class);
 		});
 	}
 

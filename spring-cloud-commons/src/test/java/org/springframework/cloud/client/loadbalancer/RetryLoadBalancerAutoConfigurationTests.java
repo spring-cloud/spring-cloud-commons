@@ -53,32 +53,31 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 	@Test
 	void testRetryDisabled() {
 		applicationContextRunner.withUserConfiguration(OneRestTemplate.class)
-				.withPropertyValues("spring.aop.proxyTargetClass=true", "spring.cloud.loadbalancer.retry.enabled=false")
-				.run(context -> {
-					List<ClientHttpRequestInterceptor> interceptors = context.getBean(RestTemplate.class)
-							.getInterceptors();
-					then(interceptors).hasSize(1);
-					ClientHttpRequestInterceptor interceptor = interceptors.get(0);
-					then(interceptor).isInstanceOf(LoadBalancerInterceptor.class);
-				});
+			.withPropertyValues("spring.aop.proxyTargetClass=true", "spring.cloud.loadbalancer.retry.enabled=false")
+			.run(context -> {
+				List<ClientHttpRequestInterceptor> interceptors = context.getBean(RestTemplate.class).getInterceptors();
+				then(interceptors).hasSize(1);
+				ClientHttpRequestInterceptor interceptor = interceptors.get(0);
+				then(interceptor).isInstanceOf(LoadBalancerInterceptor.class);
+			});
 	}
 
 	@Test
 	void testRetryDisabledWithRestClientBuilder() {
 		applicationContextRunner.withUserConfiguration(OneRestClientBuilder.class)
-				.withPropertyValues("spring.aop.proxyTargetClass=true", "spring.cloud.loadbalancer.retry.enabled=false")
-				.run(context -> {
-					RestClient.Builder restClientBuilder = context.getBean(RestClient.Builder.class);
+			.withPropertyValues("spring.aop.proxyTargetClass=true", "spring.cloud.loadbalancer.retry.enabled=false")
+			.run(context -> {
+				RestClient.Builder restClientBuilder = context.getBean(RestClient.Builder.class);
 
-					restClientBuilder.requestInterceptors(interceptors -> {
-						assertThat(interceptors).hasSize(1);
-						assertThat(interceptors.get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
-						DeferringLoadBalancerInterceptor interceptor = (DeferringLoadBalancerInterceptor) interceptors
-								.get(0);
-						assertThat(interceptor.getLoadBalancerInterceptorProvider().getObject())
-								.isInstanceOf(LoadBalancerInterceptor.class);
-					});
+				restClientBuilder.requestInterceptors(interceptors -> {
+					assertThat(interceptors).hasSize(1);
+					assertThat(interceptors.get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
+					DeferringLoadBalancerInterceptor interceptor = (DeferringLoadBalancerInterceptor) interceptors
+						.get(0);
+					assertThat(interceptor.getLoadBalancerInterceptorProvider().getObject())
+						.isInstanceOf(LoadBalancerInterceptor.class);
 				});
+			});
 	}
 
 	@Test

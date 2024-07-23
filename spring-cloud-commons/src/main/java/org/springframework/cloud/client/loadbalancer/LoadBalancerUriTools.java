@@ -95,7 +95,7 @@ public final class LoadBalancerUriTools {
 	private static URI doReconstructURI(ServiceInstance serviceInstance, URI original) {
 		String host = serviceInstance.getHost();
 		String scheme = Optional.ofNullable(serviceInstance.getScheme())
-				.orElse(computeScheme(original, serviceInstance));
+			.orElse(computeScheme(original, serviceInstance));
 		int port = computePort(serviceInstance.getPort(), scheme);
 
 		if (Objects.equals(host, original.getHost()) && port == original.getPort()

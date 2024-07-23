@@ -66,18 +66,19 @@ public class CachingServiceInstanceListSupplier extends DelegatingServiceInstanc
 				return Mono.empty();
 			}
 			return Flux.just(list).materialize().collectList();
-		}, delegate.getServiceId()).onCacheMissResume(delegate.get().take(1))
-				.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize().doOnNext(instances -> {
-					Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
-					if (cache == null) {
-						if (log.isErrorEnabled()) {
-							log.error("Unable to find cache for writing: " + SERVICE_INSTANCE_CACHE_NAME);
-						}
+		}, delegate.getServiceId())
+			.onCacheMissResume(delegate.get().take(1))
+			.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize().doOnNext(instances -> {
+				Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
+				if (cache == null) {
+					if (log.isErrorEnabled()) {
+						log.error("Unable to find cache for writing: " + SERVICE_INSTANCE_CACHE_NAME);
 					}
-					else {
-						cache.put(key, instances);
-					}
-				}).then());
+				}
+				else {
+					cache.put(key, instances);
+				}
+			}).then());
 	}
 
 	@Override

@@ -55,7 +55,7 @@ public class RefreshScopeConfigurationTests {
 		EnvironmentManager environmentManager = this.context.getBean(EnvironmentManager.class);
 		environmentManager.setProperty("message", "Hello Dave!");
 		org.springframework.cloud.context.scope.refresh.RefreshScope scope = this.context
-				.getBean(org.springframework.cloud.context.scope.refresh.RefreshScope.class);
+			.getBean(org.springframework.cloud.context.scope.refresh.RefreshScope.class);
 		scope.refreshAll();
 	}
 
@@ -69,7 +69,7 @@ public class RefreshScopeConfigurationTests {
 				LifecycleMvcEndpointAutoConfiguration.class);
 		Application application = this.context.getBean(Application.class);
 		then(this.context.getBeanDefinition(ScopedProxyUtils.getTargetBeanName("application")).getScope())
-				.isEqualTo("refresh");
+			.isEqualTo("refresh");
 		application.hello();
 		refresh();
 		String message = application.hello();

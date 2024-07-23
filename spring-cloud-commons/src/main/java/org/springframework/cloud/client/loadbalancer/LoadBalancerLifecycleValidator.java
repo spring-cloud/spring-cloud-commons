@@ -41,9 +41,10 @@ public final class LoadBalancerLifecycleValidator {
 		if (lifecycleProcessors == null) {
 			return new HashSet<>();
 		}
-		return lifecycleProcessors.values().stream()
-				.filter(lifecycle -> lifecycle.supports(requestContextClass, clientResponseClass, serverTypeClass))
-				.collect(Collectors.toSet());
+		return lifecycleProcessors.values()
+			.stream()
+			.filter(lifecycle -> lifecycle.supports(requestContextClass, clientResponseClass, serverTypeClass))
+			.collect(Collectors.toSet());
 	}
 
 }

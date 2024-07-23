@@ -54,7 +54,7 @@ public class ServiceRegistryEndpointNoRegistrationTests {
 	@Test
 	public void testPost() throws Exception {
 		this.mvc.perform(post("/serviceregistry/instance-status").content("newstatus"))
-				.andExpect(status().isNotFound());
+			.andExpect(status().isNotFound());
 	}
 
 	@Import({ JacksonAutoConfiguration.class, HttpMessageConvertersAutoConfiguration.class,

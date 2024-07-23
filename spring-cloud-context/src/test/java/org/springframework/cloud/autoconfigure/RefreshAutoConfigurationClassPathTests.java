@@ -42,7 +42,7 @@ public class RefreshAutoConfigurationClassPathTests {
 	public void refreshEventListenerCreated() {
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class)) {
 			then(context.getBeansOfType(RefreshEventListener.class)).as("RefreshEventListeners not created")
-					.isNotEmpty();
+				.isNotEmpty();
 			then(context.containsBean("refreshEndpoint")).as("refreshEndpoint created").isFalse();
 		}
 	}

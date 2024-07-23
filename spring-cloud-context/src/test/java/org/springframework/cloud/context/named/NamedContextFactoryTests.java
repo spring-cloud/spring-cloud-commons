@@ -158,11 +158,11 @@ public class NamedContextFactoryTests {
 		GenericApplicationContext barContext = factory.getContext("bar");
 
 		then(fooContext.getClassLoader()).as("foo context classloader does not match parent")
-				.isSameAs(parent.getClassLoader());
+			.isSameAs(parent.getClassLoader());
 
 		then(fooContext.getBeanFactory().getBeanClassLoader())
-				.as("foo context bean factory classloader does not match parent")
-				.isSameAs(parent.getBeanFactory().getBeanClassLoader());
+			.as("foo context bean factory classloader does not match parent")
+			.isSameAs(parent.getBeanFactory().getBeanClassLoader());
 
 		assertThat(fooContext).hasFieldOrPropertyWithValue("customClassLoader", true);
 
@@ -287,7 +287,7 @@ public class NamedContextFactoryTests {
 
 	}
 
-	record Container<T> (T item) {
+	record Container<T>(T item) {
 
 	}
 

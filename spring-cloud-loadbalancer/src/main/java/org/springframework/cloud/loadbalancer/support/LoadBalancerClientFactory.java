@@ -102,9 +102,9 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 			Map<String, Object> applicationContextInitializers) {
 		Map<String, ApplicationContextInitializer<GenericApplicationContext>> convertedInitializers = new HashMap<>();
 		applicationContextInitializers.keySet()
-				.forEach(contextId -> convertedInitializers.put(contextId,
-						(ApplicationContextInitializer<GenericApplicationContext>) applicationContextInitializers
-								.get(contextId)));
+			.forEach(contextId -> convertedInitializers.put(contextId,
+					(ApplicationContextInitializer<GenericApplicationContext>) applicationContextInitializers
+						.get(contextId)));
 		return new LoadBalancerClientFactory(properties, convertedInitializers);
 	}
 

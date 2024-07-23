@@ -41,8 +41,10 @@ public class CaffeineBasedLoadBalancerCacheManager extends CaffeineCacheManager 
 			setCacheSpecification(properties.getCaffeine().getSpec());
 		}
 		else {
-			setCaffeine(Caffeine.newBuilder().initialCapacity(properties.getCapacity())
-					.expireAfterWrite(properties.getTtl()).softValues());
+			setCaffeine(Caffeine.newBuilder()
+				.initialCapacity(properties.getCapacity())
+				.expireAfterWrite(properties.getTtl())
+				.softValues());
 		}
 
 	}

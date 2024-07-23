@@ -55,12 +55,12 @@ public abstract class TextEncryptorUtils {
 	static TextEncryptor getTextEncryptor(AbstractEnvironmentDecrypt decryptor, ConfigurableEnvironment environment) {
 		Binder binder = Binder.get(environment);
 		KeyProperties keyProperties = binder.bind(KeyProperties.PREFIX, KeyProperties.class)
-				.orElseGet(KeyProperties::new);
+			.orElseGet(KeyProperties::new);
 		if (TextEncryptorUtils.keysConfigured(keyProperties)) {
 			decryptor.setFailOnError(keyProperties.isFailOnError());
 			if (ClassUtils.isPresent("org.springframework.security.rsa.crypto.RsaSecretEncryptor", null)) {
 				RsaProperties rsaProperties = binder.bind(RsaProperties.PREFIX, RsaProperties.class)
-						.orElseGet(RsaProperties::new);
+					.orElseGet(RsaProperties::new);
 				return TextEncryptorUtils.createTextEncryptor(keyProperties, rsaProperties);
 			}
 			return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
@@ -121,7 +121,8 @@ public abstract class TextEncryptorUtils {
 			if (keyStore.getLocation().exists()) {
 				return new RsaSecretEncryptor(
 						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray(),
-								keyStore.getType()).getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
+								keyStore.getType())
+							.getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
 						rsaProperties.getAlgorithm(), rsaProperties.getSalt(), rsaProperties.isStrong());
 			}
 

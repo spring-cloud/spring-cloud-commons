@@ -158,12 +158,12 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 					registrationLifecycle -> registrationLifecycle.postProcessAfterStartRegister(getRegistration()));
 			if (shouldRegisterManagement()) {
 				this.registrationManagementLifecycles
-						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
-								.postProcessBeforeStartRegisterManagement(getManagementRegistration()));
+					.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+						.postProcessBeforeStartRegisterManagement(getManagementRegistration()));
 				this.registerManagement();
 				registrationManagementLifecycles
-						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
-								.postProcessAfterStartRegisterManagement(getManagementRegistration()));
+					.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+						.postProcessAfterStartRegisterManagement(getManagementRegistration()));
 
 			}
 			this.context.publishEvent(new InstanceRegisteredEvent<>(this, getConfiguration()));
@@ -301,12 +301,12 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 					registrationLifecycle -> registrationLifecycle.postProcessAfterStopRegister(getRegistration()));
 			if (shouldRegisterManagement()) {
 				this.registrationManagementLifecycles
-						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
-								.postProcessBeforeStopRegisterManagement(getManagementRegistration()));
+					.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+						.postProcessBeforeStopRegisterManagement(getManagementRegistration()));
 				deregisterManagement();
 				this.registrationManagementLifecycles
-						.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
-								.postProcessAfterStopRegisterManagement(getManagementRegistration()));
+					.forEach(registrationManagementLifecycle -> registrationManagementLifecycle
+						.postProcessAfterStopRegisterManagement(getManagementRegistration()));
 			}
 			this.serviceRegistry.close();
 		}

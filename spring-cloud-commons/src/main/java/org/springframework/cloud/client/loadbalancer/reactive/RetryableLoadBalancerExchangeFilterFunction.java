@@ -98,9 +98,8 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 				properties.getRetry(), retryPolicy);
 
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
-				.getSupportedLifecycleProcessors(
-						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
-						RetryableRequestContext.class, ResponseData.class, ServiceInstance.class);
+			.getSupportedLifecycleProcessors(loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
+					RetryableRequestContext.class, ResponseData.class, ServiceInstance.class);
 		String hint = getHint(serviceId, properties.getHint());
 		RequestData requestData = new RequestData(clientRequest);
 		DefaultRequest<RetryableRequestContext> lbRequest = new DefaultRequest<>(
@@ -115,10 +114,11 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 					LOG.warn(message);
 				}
 				supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-						.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
-								CompletionContext.Status.DISCARD, lbRequest, lbResponse)));
+					.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
+							CompletionContext.Status.DISCARD, lbRequest, lbResponse)));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
-						.body(serviceInstanceUnavailableMessage(serviceId)).build());
+					.body(serviceInstanceUnavailableMessage(serviceId))
+					.build());
 			}
 
 			if (LOG.isDebugEnabled()) {
@@ -131,24 +131,24 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 					stickySessionProperties.isAddServiceInstanceCookie(), transformers);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, lbResponse));
 			return next.exchange(newRequest)
-					.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
-									CompletionContext.Status.FAILED, throwable, lbRequest, lbResponse))))
-					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-									lbRequest, lbResponse, new ResponseData(clientResponse, requestData)))))
-					.map(clientResponse -> {
-						loadBalancerRetryContext.setClientResponse(clientResponse);
-						if (shouldRetrySameServiceInstance(retryPolicy, loadBalancerRetryContext)) {
-							if (LOG.isDebugEnabled()) {
-								LOG.debug(String.format("Retrying on status code: %d",
-										clientResponse.statusCode().value()));
-							}
-							throw new RetryableStatusCodeException();
+				.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
+					.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
+							CompletionContext.Status.FAILED, throwable, lbRequest, lbResponse))))
+				.doOnSuccess(clientResponse -> supportedLifecycleProcessors
+					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
+							lbRequest, lbResponse, new ResponseData(clientResponse, requestData)))))
+				.map(clientResponse -> {
+					loadBalancerRetryContext.setClientResponse(clientResponse);
+					if (shouldRetrySameServiceInstance(retryPolicy, loadBalancerRetryContext)) {
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(
+									String.format("Retrying on status code: %d", clientResponse.statusCode().value()));
 						}
-						return clientResponse;
+						throw new RetryableStatusCodeException();
+					}
+					return clientResponse;
 
-					});
+				});
 		}).map(clientResponse -> {
 			loadBalancerRetryContext.setClientResponse(clientResponse);
 			if (shouldRetryNextServiceInstance(retryPolicy, loadBalancerRetryContext)) {
@@ -165,18 +165,21 @@ public class RetryableLoadBalancerExchangeFilterFunction implements LoadBalanced
 	private Retry buildRetrySpec(int max, boolean transientErrors, LoadBalancerProperties.Retry retry,
 			LoadBalancerRetryPolicy retryPolicy) {
 		if (!retry.isEnabled()) {
-			return Retry.max(0).filter(throwable -> isRetryException(throwable, retryPolicy))
-					.transientErrors(transientErrors);
+			return Retry.max(0)
+				.filter(throwable -> isRetryException(throwable, retryPolicy))
+				.transientErrors(transientErrors);
 		}
 		LoadBalancerProperties.Retry.Backoff backoffProperties = retry.getBackoff();
 		if (backoffProperties.isEnabled()) {
 			return RetrySpec.backoff(max, backoffProperties.getMinBackoff())
-					.filter(throwable -> isRetryException(throwable, retryPolicy))
-					.maxBackoff(backoffProperties.getMaxBackoff()).jitter(backoffProperties.getJitter())
-					.transientErrors(transientErrors);
-		}
-		return RetrySpec.max(max).filter(throwable -> isRetryException(throwable, retryPolicy))
+				.filter(throwable -> isRetryException(throwable, retryPolicy))
+				.maxBackoff(backoffProperties.getMaxBackoff())
+				.jitter(backoffProperties.getJitter())
 				.transientErrors(transientErrors);
+		}
+		return RetrySpec.max(max)
+			.filter(throwable -> isRetryException(throwable, retryPolicy))
+			.transientErrors(transientErrors);
 	}
 
 	private boolean shouldRetrySameServiceInstance(LoadBalancerRetryPolicy retryPolicy,

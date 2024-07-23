@@ -59,19 +59,20 @@ public class TestConfigDataLocationResolver implements ConfigDataLocationResolve
 			context.getBootstrapContext().registerIfAbsent(aClass, supplier);
 		}
 		String myplaceholder = context.getBinder().bind("myplaceholder", Bindable.of(String.class)).orElse("notfound");
-		boolean createFailsafeDelegate = context.getBinder().bind("createfailsafedelegate", Bindable.of(Boolean.class))
-				.orElse(Boolean.FALSE);
+		boolean createFailsafeDelegate = context.getBinder()
+			.bind("createfailsafedelegate", Bindable.of(Boolean.class))
+			.orElse(Boolean.FALSE);
 		if (createFailsafeDelegate) {
 			assertThat(context.getBootstrapContext().isRegistered(TextEncryptor.class)).isTrue();
 			TextEncryptor textEncryptor = context.getBootstrapContext().get(TextEncryptor.class);
 			assertThat(textEncryptor).isInstanceOf(TextEncryptorUtils.FailsafeTextEncryptor.class);
-			KeyProperties keyProperties = context.getBinder().bindOrCreate(KeyProperties.PREFIX,
-					Bindable.of(KeyProperties.class));
+			KeyProperties keyProperties = context.getBinder()
+				.bindOrCreate(KeyProperties.PREFIX, Bindable.of(KeyProperties.class));
 			assertThat(TextEncryptorUtils.keysConfigured(keyProperties)).isTrue();
-			RsaProperties rsaProperties = context.getBinder().bindOrCreate(RsaProperties.PREFIX,
-					Bindable.of(RsaProperties.class));
+			RsaProperties rsaProperties = context.getBinder()
+				.bindOrCreate(RsaProperties.PREFIX, Bindable.of(RsaProperties.class));
 			((TextEncryptorUtils.FailsafeTextEncryptor) textEncryptor)
-					.setDelegate(TextEncryptorUtils.createTextEncryptor(keyProperties, rsaProperties));
+				.setDelegate(TextEncryptorUtils.createTextEncryptor(keyProperties, rsaProperties));
 		}
 		HashMap<String, Object> props = new HashMap<>(config);
 		props.put(TestEnvPostProcessor.EPP_VALUE, count.get());

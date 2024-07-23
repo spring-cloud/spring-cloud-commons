@@ -81,7 +81,7 @@ public class EnvironmentDecryptApplicationInitializer extends AbstractEnvironmen
 		if (!propertySources.contains(DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			// No reason to decrypt bootstrap twice
 			PropertySource<?> bootstrap = propertySources
-					.get(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME);
+				.get(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME);
 			if (bootstrap != null) {
 				Map<String, Object> map = decrypt(bootstrap);
 				if (!map.isEmpty()) {
@@ -139,7 +139,7 @@ public class EnvironmentDecryptApplicationInitializer extends AbstractEnvironmen
 		while (parent != null) {
 			if (parent.getEnvironment() instanceof ConfigurableEnvironment) {
 				((ConfigurableEnvironment) parent.getEnvironment()).getPropertySources()
-						.remove(DECRYPTED_PROPERTY_SOURCE_NAME);
+					.remove(DECRYPTED_PROPERTY_SOURCE_NAME);
 			}
 			parent = parent.getParent();
 		}

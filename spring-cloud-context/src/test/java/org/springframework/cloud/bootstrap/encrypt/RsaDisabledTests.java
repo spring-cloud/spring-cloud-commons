@@ -40,8 +40,10 @@ public class RsaDisabledTests {
 	@BeforeEach
 	public void setUp() {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.sources(EncryptionBootstrapConfiguration.class).web(WebApplicationType.NONE)
-				.properties("encrypt.key:mykey", "encrypt.rsa.strong:true", "encrypt.rsa.salt:foobar").run();
+			.sources(EncryptionBootstrapConfiguration.class)
+			.web(WebApplicationType.NONE)
+			.properties("encrypt.key:mykey", "encrypt.rsa.strong:true", "encrypt.rsa.salt:foobar")
+			.run();
 	}
 
 	@AfterEach

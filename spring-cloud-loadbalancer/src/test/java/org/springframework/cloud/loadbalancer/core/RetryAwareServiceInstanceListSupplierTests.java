@@ -52,7 +52,7 @@ class RetryAwareServiceInstanceListSupplierTests {
 		ServiceInstanceListSupplier supplier = new RetryAwareServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> returnedInstances = supplier.get(new DefaultRequest<>(new RetryableRequestContext(null)))
-				.blockFirst();
+			.blockFirst();
 
 		assertThat(returnedInstances).isEmpty();
 	}
@@ -66,7 +66,8 @@ class RetryAwareServiceInstanceListSupplierTests {
 		ServiceInstanceListSupplier supplier = new RetryAwareServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> returnedInstances = supplier
-				.get(new DefaultRequest<>(new RetryableRequestContext(firstInstance))).blockFirst();
+			.get(new DefaultRequest<>(new RetryableRequestContext(firstInstance)))
+			.blockFirst();
 
 		assertThat(returnedInstances).containsExactly(secondInstance);
 	}
@@ -78,7 +79,8 @@ class RetryAwareServiceInstanceListSupplierTests {
 		ServiceInstanceListSupplier supplier = new RetryAwareServiceInstanceListSupplier(delegate);
 
 		List<ServiceInstance> returnedInstances = supplier
-				.get(new DefaultRequest<>(new RetryableRequestContext(firstInstance))).blockFirst();
+			.get(new DefaultRequest<>(new RetryableRequestContext(firstInstance)))
+			.blockFirst();
 
 		assertThat(returnedInstances).containsExactly(firstInstance);
 	}

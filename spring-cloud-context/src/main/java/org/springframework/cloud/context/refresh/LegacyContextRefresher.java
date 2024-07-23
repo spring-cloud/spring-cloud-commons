@@ -70,11 +70,13 @@ public class LegacyContextRefresher extends ContextRefresher {
 			environment.getPropertySources().addFirst(new MapPropertySource(REFRESH_ARGS_PROPERTY_SOURCE, map));
 
 			SpringApplicationBuilder builder = new SpringApplicationBuilder(Empty.class).bannerMode(Banner.Mode.OFF)
-					.web(WebApplicationType.NONE).environment(environment);
+				.web(WebApplicationType.NONE)
+				.environment(environment);
 			// Just the listeners that affect the environment (e.g. excluding logging
 			// listener because it has side effects)
-			builder.application().setListeners(
-					Arrays.asList(new BootstrapApplicationListener(), new BootstrapConfigFileApplicationListener()));
+			builder.application()
+				.setListeners(Arrays.asList(new BootstrapApplicationListener(),
+						new BootstrapConfigFileApplicationListener()));
 			capture = builder.run();
 			if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
 				environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);

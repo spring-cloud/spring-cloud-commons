@@ -429,7 +429,7 @@ public class LoadBalancerProperties {
 
 		public void setRetryableExceptions(Set<Class<? extends Throwable>> retryableExceptions) {
 			retryableExceptions
-					.add(org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
+				.add(org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
 			this.retryableExceptions = retryableExceptions;
 		}
 

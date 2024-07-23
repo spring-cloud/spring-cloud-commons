@@ -54,7 +54,7 @@ public class LoadBalancedRestClientIntegrationTests {
 	void shouldBuildLoadBalancedRestClientInConstructor() {
 		// Interceptors are not visible in RestClient
 		assertThatThrownBy(() -> client.get().uri("http://test-service").retrieve())
-				.hasMessage("LoadBalancerInterceptor invoked.");
+			.hasMessage("LoadBalancerInterceptor invoked.");
 	}
 
 	@SpringBootConfiguration

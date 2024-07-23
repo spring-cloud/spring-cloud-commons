@@ -158,7 +158,8 @@ class BlockingLoadBalancerClientTests {
 				(LoadBalancerRequest<Object>) instance -> {
 					assertThat(instance.getHost()).isEqualTo("test.example");
 					return "result";
-				})).doesNotThrowAnyException();
+				}))
+			.doesNotThrowAnyException();
 	}
 
 	@Test
@@ -172,20 +173,20 @@ class BlockingLoadBalancerClientTests {
 		});
 
 		Collection<Request<Object>> lifecycleLogRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle")).getStartLog()
-						.values();
+			.getInstances("myservice", LoadBalancerLifecycle.class)
+			.get("loadBalancerLifecycle")).getStartLog().values();
 		Collection<Request<Object>> lifecycleLogStartedRequests = ((TestLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class).get("loadBalancerLifecycle"))
-						.getStartRequestLog().values();
+			.getInstances("myservice", LoadBalancerLifecycle.class)
+			.get("loadBalancerLifecycle")).getStartRequestLog().values();
 		Collection<CompletionContext<Object, ServiceInstance, Object>> anotherLifecycleLogRequests = ((AnotherLoadBalancerLifecycle) factory
-				.getInstances("myservice", LoadBalancerLifecycle.class).get("anotherLoadBalancerLifecycle"))
-						.getCompleteLog().values();
+			.getInstances("myservice", LoadBalancerLifecycle.class)
+			.get("anotherLoadBalancerLifecycle")).getCompleteLog().values();
 		assertThat(actualResult).isEqualTo(result);
 		assertThat(lifecycleLogRequests).extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
-				.contains(callbackTestHint);
+			.contains(callbackTestHint);
 		assertThat(lifecycleLogStartedRequests)
-				.extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
-				.contains(callbackTestHint);
+			.extracting(request -> ((DefaultRequestContext) request.getContext()).getHint())
+			.contains(callbackTestHint);
 		assertThat(anotherLifecycleLogRequests).extracting(CompletionContext::getClientResponse).contains(result);
 	}
 

@@ -213,9 +213,13 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNext(Lists.list(serviceInstance1)).expectNoEvent(properties.getHealthCheck().getInterval())
-				.thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1))
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -244,9 +248,14 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNext(Lists.list(serviceInstance1)).expectNext(Lists.list(serviceInstance1, serviceInstance2))
-				.expectNoEvent(properties.getHealthCheck().getInterval()).thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1))
+			.expectNext(Lists.list(serviceInstance1, serviceInstance2))
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -277,9 +286,13 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNext(Lists.list(serviceInstance1, serviceInstance2))
-				.expectNoEvent(properties.getHealthCheck().getInterval()).thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1, serviceInstance2))
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -308,9 +321,13 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNext(Lists.list(serviceInstance1)).expectNoEvent(properties.getHealthCheck().getInterval())
-				.thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1))
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -339,8 +356,13 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay()).expectNext(Lists.list())
-				.expectNoEvent(properties.getHealthCheck().getInterval()).thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list())
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -364,9 +386,13 @@ class HealthCheckServiceInstanceListSupplierTests {
 			listSupplier.afterPropertiesSet();
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNext(Lists.list(serviceInstance1)).expectNoEvent(properties.getHealthCheck().getInterval())
-				.thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1))
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -395,10 +421,16 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay()).expectNext(Lists.list())
-				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
-				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
-				.thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list())
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.expectNext(Lists.list(serviceInstance1))
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.expectNext(Lists.list(serviceInstance1))
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -424,11 +456,17 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list())
-				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
-				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
-				.thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.expectNext(Lists.list())
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.expectNext(Lists.list(serviceInstance1))
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.expectNext(Lists.list(serviceInstance1))
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -443,8 +481,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
 			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			Flux<List<ServiceInstance>> instances = Flux.just(Lists.list(serviceInstance1))
-					.concatWith(Flux.just(Lists.list(serviceInstance1, serviceInstance2))
-							.delayElements(properties.getHealthCheck().getInterval().dividedBy(2)));
+				.concatWith(Flux.just(Lists.list(serviceInstance1, serviceInstance2))
+					.delayElements(properties.getHealthCheck().getInterval().dividedBy(2)));
 			Mockito.when(delegate.get()).thenReturn(instances);
 
 			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
@@ -456,12 +494,18 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNext(Lists.list(serviceInstance1))
-				.thenAwait(properties.getHealthCheck().getInterval().dividedBy(2))
-				.expectNext(Lists.list(serviceInstance1)).expectNext(Lists.list(serviceInstance1, serviceInstance2))
-				.expectNoEvent(properties.getHealthCheck().getInterval()).expectNext(Lists.list(serviceInstance1))
-				.expectNext(Lists.list(serviceInstance1, serviceInstance2)).thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1))
+			.thenAwait(properties.getHealthCheck().getInterval().dividedBy(2))
+			.expectNext(Lists.list(serviceInstance1))
+			.expectNext(Lists.list(serviceInstance1, serviceInstance2))
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.expectNext(Lists.list(serviceInstance1))
+			.expectNext(Lists.list(serviceInstance1, serviceInstance2))
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -478,8 +522,8 @@ class HealthCheckServiceInstanceListSupplierTests {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
 			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			Flux<List<ServiceInstance>> instances = Flux.just(Lists.list(serviceInstance1))
-					.concatWith(Flux.just(Lists.list(serviceInstance1, serviceInstance2))
-							.delayElements(properties.getHealthCheck().getInterval().dividedBy(2)));
+				.concatWith(Flux.just(Lists.list(serviceInstance1, serviceInstance2))
+					.delayElements(properties.getHealthCheck().getInterval().dividedBy(2)));
 			Mockito.when(delegate.get()).thenReturn(instances);
 
 			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
@@ -491,12 +535,16 @@ class HealthCheckServiceInstanceListSupplierTests {
 			};
 
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNext(Lists.list(serviceInstance1))
-				.thenAwait(properties.getHealthCheck().getInterval().dividedBy(2))
-				.expectNext(Lists.list(serviceInstance1, serviceInstance2))
-				.expectNoEvent(properties.getHealthCheck().getInterval())
-				.expectNext(Lists.list(serviceInstance1, serviceInstance2)).thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1))
+			.thenAwait(properties.getHealthCheck().getInterval().dividedBy(2))
+			.expectNext(Lists.list(serviceInstance1, serviceInstance2))
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.expectNext(Lists.list(serviceInstance1, serviceInstance2))
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -514,7 +562,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
 			when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			when(delegate.get()).thenReturn(Flux.just(Collections.singletonList(serviceInstance1)))
-					.thenReturn(Flux.just(Collections.singletonList(serviceInstance2)));
+				.thenReturn(Flux.just(Collections.singletonList(serviceInstance2)));
 			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
 					buildLoadBalancerClientFactory(SERVICE_ID, properties), webClientHealthCheckFunction()) {
 				@Override
@@ -523,10 +571,14 @@ class HealthCheckServiceInstanceListSupplierTests {
 				}
 			};
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNext(Lists.list(serviceInstance1))
-				.thenAwait(properties.getHealthCheck().getRefetchInstancesInterval())
-				.expectNext(Lists.list(serviceInstance2)).thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1))
+			.thenAwait(properties.getHealthCheck().getRefetchInstancesInterval())
+			.expectNext(Lists.list(serviceInstance2))
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -544,7 +596,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
 			when(delegate.getServiceId()).thenReturn(SERVICE_ID);
 			when(delegate.get()).thenReturn(Flux.just(Collections.singletonList(serviceInstance1)))
-					.thenReturn(Flux.just(Collections.singletonList(serviceInstance2)));
+				.thenReturn(Flux.just(Collections.singletonList(serviceInstance2)));
 			BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunc = webClientHealthCheckFunction();
 			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
 					buildLoadBalancerClientFactory(SERVICE_ID, properties), healthCheckFunc) {
@@ -554,10 +606,14 @@ class HealthCheckServiceInstanceListSupplierTests {
 				}
 			};
 			return listSupplier.get();
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNext(Lists.list(serviceInstance1))
-				.thenAwait(properties.getHealthCheck().getRefetchInstancesInterval())
-				.expectNext(Lists.list(serviceInstance2)).thenCancel().verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1))
+			.thenAwait(properties.getHealthCheck().getRefetchInstancesInterval())
+			.expectNext(Lists.list(serviceInstance2))
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 	}
 
 	@Test
@@ -589,9 +645,13 @@ class HealthCheckServiceInstanceListSupplierTests {
 			listSupplier.afterPropertiesSet();
 
 			return listSupplier.get().take(1).concatWith(listSupplier.get().take(1));
-		}).expectSubscription().expectNoEvent(properties.getHealthCheck().getInitialDelay())
-				.expectNext(Lists.list(serviceInstance1)).expectNext(Lists.list(serviceInstance1)).thenCancel()
-				.verify(VERIFY_TIMEOUT);
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1))
+			.expectNext(Lists.list(serviceInstance1))
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
 
 		Assertions.assertThat(emitCounter).hasValue(1);
 	}
@@ -602,22 +662,28 @@ class HealthCheckServiceInstanceListSupplierTests {
 		final AtomicInteger instancesCanceled = new AtomicInteger();
 		final AtomicBoolean subscribed = new AtomicBoolean();
 		ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
-		Mockito.when(delegate.get()).thenReturn(Flux.<List<ServiceInstance>>never()
-				.doOnSubscribe(subscription -> subscribed.set(true)).doOnCancel(instancesCanceled::incrementAndGet));
+		Mockito.when(delegate.get())
+			.thenReturn(Flux.<List<ServiceInstance>>never()
+				.doOnSubscribe(subscription -> subscribed.set(true))
+				.doOnCancel(instancesCanceled::incrementAndGet));
 
 		listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
 				buildLoadBalancerClientFactory(SERVICE_ID, properties), webClientHealthCheckFunction());
 
 		listSupplier.afterPropertiesSet();
 
-		Awaitility.await("delegate subscription").pollDelay(Duration.ofMillis(50)).atMost(VERIFY_TIMEOUT)
-				.untilTrue(subscribed);
+		Awaitility.await("delegate subscription")
+			.pollDelay(Duration.ofMillis(50))
+			.atMost(VERIFY_TIMEOUT)
+			.untilTrue(subscribed);
 
 		Assertions.assertThat(instancesCanceled).hasValue(0);
 
 		listSupplier.destroy();
-		Awaitility.await("delegate cancellation").pollDelay(Duration.ofMillis(100)).atMost(VERIFY_TIMEOUT)
-				.untilAsserted(() -> Assertions.assertThat(instancesCanceled).hasValue(1));
+		Awaitility.await("delegate cancellation")
+			.pollDelay(Duration.ofMillis(100))
+			.atMost(VERIFY_TIMEOUT)
+			.untilAsserted(() -> Assertions.assertThat(instancesCanceled).hasValue(1));
 	}
 
 	@SuppressWarnings("ConstantConditions")

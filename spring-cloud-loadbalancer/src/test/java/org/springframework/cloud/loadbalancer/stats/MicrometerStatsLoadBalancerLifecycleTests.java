@@ -67,8 +67,8 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		statsLifecycle.onStartRequest(lbRequest, lbResponse);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
 
-		statsLifecycle.onComplete(
-				new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
+		statsLifecycle
+			.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
 
 		assertThat(meterRegistry.getMeters()).hasSize(2);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
@@ -126,8 +126,8 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		statsLifecycle.onStartRequest(lbRequest, lbResponse);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
 
-		statsLifecycle.onComplete(
-				new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
+		statsLifecycle
+			.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
 
 		assertThat(meterRegistry.getMeters()).hasSize(1);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
@@ -141,7 +141,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
 
 		statsLifecycle
-				.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, null));
+			.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, null));
 
 		assertThat(meterRegistry.getMeters()).hasSize(2);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
@@ -162,8 +162,8 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		statsLifecycle.onStartRequest(lbRequest, lbResponse);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
 
-		statsLifecycle.onComplete(
-				new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
+		statsLifecycle
+			.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
 
 		assertThat(meterRegistry.getMeters()).hasSize(2);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);

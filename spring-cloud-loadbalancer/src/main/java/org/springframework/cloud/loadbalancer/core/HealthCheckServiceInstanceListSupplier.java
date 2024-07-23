@@ -68,12 +68,14 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default", "/actuator/health");
 		this.aliveFunction = aliveFunction;
 		Repeat<Object> aliveInstancesReplayRepeat = Repeat
-				.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
-				.fixedBackoff(healthCheck.getRefetchInstancesInterval());
-		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate).repeatWhen(aliveInstancesReplayRepeat)
-				.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(alive -> List.copyOf(alive)));
-		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay()).replay(1)
-				.refCount(1);
+			.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
+			.fixedBackoff(healthCheck.getRefetchInstancesInterval());
+		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate)
+			.repeatWhen(aliveInstancesReplayRepeat)
+			.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(alive -> List.copyOf(alive)));
+		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay())
+			.replay(1)
+			.refCount(1);
 	}
 
 	@Override
@@ -87,7 +89,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 
 	protected Flux<List<ServiceInstance>> healthCheckFlux(List<ServiceInstance> instances) {
 		Repeat<Object> healthCheckFluxRepeat = Repeat.onlyIf(repeatContext -> healthCheck.getRepeatHealthCheck())
-				.fixedBackoff(healthCheck.getInterval());
+			.fixedBackoff(healthCheck.getInterval());
 		return Flux.defer(() -> {
 			List<Mono<ServiceInstance>> checks = new ArrayList<>(instances.size());
 			for (ServiceInstance instance : instances) {

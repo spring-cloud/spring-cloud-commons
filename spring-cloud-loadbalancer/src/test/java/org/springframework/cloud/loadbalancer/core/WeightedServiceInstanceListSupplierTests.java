@@ -73,7 +73,7 @@ class WeightedServiceInstanceListSupplierTests {
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = serviceInstances.stream()
-				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
+			.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", 1);
 		assertThat(counter).containsEntry("test-2", 2);
 		assertThat(counter).containsEntry("test-3", 3);
@@ -90,7 +90,7 @@ class WeightedServiceInstanceListSupplierTests {
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = serviceInstances.stream()
-				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
+			.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", 1);
 		assertThat(counter).containsEntry("test-2", 2);
 		assertThat(counter).containsEntry("test-3", 3);
@@ -107,7 +107,7 @@ class WeightedServiceInstanceListSupplierTests {
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = serviceInstances.stream()
-				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
+			.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", 3);
@@ -124,7 +124,7 @@ class WeightedServiceInstanceListSupplierTests {
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = serviceInstances.stream()
-				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
+			.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", DEFAULT_WEIGHT);
@@ -141,7 +141,7 @@ class WeightedServiceInstanceListSupplierTests {
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = serviceInstances.stream()
-				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
+			.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", DEFAULT_WEIGHT);
@@ -159,7 +159,7 @@ class WeightedServiceInstanceListSupplierTests {
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = serviceInstances.stream()
-				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
+			.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", DEFAULT_WEIGHT);
@@ -178,7 +178,7 @@ class WeightedServiceInstanceListSupplierTests {
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get().blockFirst());
 		Map<String, Integer> counter = serviceInstances.stream()
-				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
+			.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-3", DEFAULT_WEIGHT);
@@ -201,7 +201,7 @@ class WeightedServiceInstanceListSupplierTests {
 
 		List<ServiceInstance> serviceInstances = Objects.requireNonNull(supplier.get(request).blockFirst());
 		Map<String, Integer> counter = serviceInstances.stream()
-				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
+			.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		assertThat(counter).containsEntry("test-1", DEFAULT_WEIGHT);
 		assertThat(counter).containsEntry("test-2", DEFAULT_WEIGHT);
 		assertThat(counter).doesNotContainEntry("test-3", 3);

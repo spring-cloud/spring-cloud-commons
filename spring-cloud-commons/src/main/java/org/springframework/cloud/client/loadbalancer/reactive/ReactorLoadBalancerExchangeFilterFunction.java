@@ -80,9 +80,8 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 			return Mono.just(ClientResponse.create(HttpStatus.BAD_REQUEST).body(message).build());
 		}
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
-				.getSupportedLifecycleProcessors(
-						loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
-						RequestDataContext.class, ResponseData.class, ServiceInstance.class);
+			.getSupportedLifecycleProcessors(loadBalancerFactory.getInstances(serviceId, LoadBalancerLifecycle.class),
+					RequestDataContext.class, ResponseData.class, ServiceInstance.class);
 		String hint = getHint(serviceId, loadBalancerFactory.getProperties(serviceId).getHint());
 		RequestData requestData = new RequestData(clientRequest);
 		DefaultRequest<RequestDataContext> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData, hint));
@@ -95,9 +94,10 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 					LOG.warn(message);
 				}
 				supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-						.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, lbRequest, lbResponse)));
+					.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, lbRequest, lbResponse)));
 				return Mono.just(ClientResponse.create(HttpStatus.SERVICE_UNAVAILABLE)
-						.body(serviceInstanceUnavailableMessage(serviceId)).build());
+					.body(serviceInstanceUnavailableMessage(serviceId))
+					.build());
 			}
 
 			if (LOG.isDebugEnabled()) {
@@ -105,18 +105,18 @@ public class ReactorLoadBalancerExchangeFilterFunction implements LoadBalancedEx
 						instance.getUri()));
 			}
 			LoadBalancerProperties.StickySession stickySessionProperties = loadBalancerFactory.getProperties(serviceId)
-					.getStickySession();
+				.getStickySession();
 			ClientRequest newRequest = buildClientRequest(clientRequest, instance,
 					stickySessionProperties.getInstanceIdCookieName(),
 					stickySessionProperties.isAddServiceInstanceCookie(), transformers);
 			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, lbResponse));
 			return next.exchange(newRequest)
-					.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RequestDataContext>(
-									CompletionContext.Status.FAILED, throwable, lbRequest, lbResponse))))
-					.doOnSuccess(clientResponse -> supportedLifecycleProcessors.forEach(
-							lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-									lbRequest, lbResponse, new ResponseData(clientResponse, requestData)))));
+				.doOnError(throwable -> supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
+					.onComplete(new CompletionContext<ResponseData, ServiceInstance, RequestDataContext>(
+							CompletionContext.Status.FAILED, throwable, lbRequest, lbResponse))))
+				.doOnSuccess(clientResponse -> supportedLifecycleProcessors
+					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
+							lbRequest, lbResponse, new ResponseData(clientResponse, requestData)))));
 		});
 	}
 

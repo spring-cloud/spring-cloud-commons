@@ -77,7 +77,7 @@ final class LoadBalancerTags {
 			CompletionContext<Object, ServiceInstance, Object> completionContext) {
 		if (completionContext.getLoadBalancerRequest().getContext() instanceof RequestDataContext) {
 			RequestData requestData = ((RequestDataContext) completionContext.getLoadBalancerRequest().getContext())
-					.getClientRequest();
+				.getClientRequest();
 			if (requestData != null) {
 				return Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
 						valueOrUnknown("uri", getPath(requestData)), valueOrUnknown("serviceId", getHost(requestData)));
@@ -97,7 +97,7 @@ final class LoadBalancerTags {
 		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance)).and(exception(completionContext.getThrowable()));
 		if (completionContext.getLoadBalancerRequest().getContext() instanceof RequestDataContext) {
 			RequestData requestData = ((RequestDataContext) completionContext.getLoadBalancerRequest().getContext())
-					.getClientRequest();
+				.getClientRequest();
 			if (requestData != null) {
 				return tags.and(Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
 						valueOrUnknown("uri", getPath(requestData))));

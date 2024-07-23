@@ -65,7 +65,7 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 		super(delegate);
 		this.weightFunction = weightFunction;
 		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
-				.isCallGetWithRequestOnDelegates();
+			.isCallGetWithRequestOnDelegates();
 	}
 
 	@Override

@@ -29,9 +29,9 @@ class EncryptionRuntimeHints implements RuntimeHintsRegistrar {
 
 	@Override
 	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
-		hints.reflection().registerTypeIfPresent(classLoader,
-				"org.springframework.security.rsa.crypto.RsaSecretEncryptor",
-				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
+		hints.reflection()
+			.registerTypeIfPresent(classLoader, "org.springframework.security.rsa.crypto.RsaSecretEncryptor",
+					MemberCategory.INVOKE_DECLARED_CONSTRUCTORS);
 	}
 
 }

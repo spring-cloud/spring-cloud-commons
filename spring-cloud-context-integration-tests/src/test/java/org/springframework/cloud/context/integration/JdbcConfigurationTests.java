@@ -36,7 +36,8 @@ public class JdbcConfigurationTests {
 	@Test
 	public void schemaApplied() {
 		new SpringApplicationBuilder(BrokenApplication.class).web(WebApplicationType.NONE)
-				.run("--spring.datasource.initialization-mode=always").close();
+			.run("--spring.datasource.initialization-mode=always")
+			.close();
 	}
 
 	@SpringBootConfiguration

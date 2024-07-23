@@ -51,94 +51,125 @@ public class FluxFirstNonEmptyEmittingTests {
 	@Test
 	public void firstWinner() {
 		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.range(1, 10), Flux.range(11, 10)))
-				.expectNext(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).verifyComplete();
+			.expectNext(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+			.verifyComplete();
 	}
 
 	@Test
 	public void firstWinnerSecondEmpty() {
 		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.range(1, 10), Flux.empty()))
-				.expectNext(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).verifyComplete();
+			.expectNext(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+			.verifyComplete();
 	}
 
 	@Test
 	public void firstWinnerBackpressured() {
-		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.range(1, 10), Flux.range(11, 10))).thenRequest(5)
-				.expectNext(1, 2, 3, 4, 5).thenCancel().verifyThenAssertThat().hasNotDiscardedElements()
-				.hasNotDroppedElements().hasNotDroppedErrors();
+		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.range(1, 10), Flux.range(11, 10)))
+			.thenRequest(5)
+			.expectNext(1, 2, 3, 4, 5)
+			.thenCancel()
+			.verifyThenAssertThat()
+			.hasNotDiscardedElements()
+			.hasNotDroppedElements()
+			.hasNotDroppedErrors();
 	}
 
 	@Test
 	public void secondWinner() {
 		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.never(), Flux.range(11, 10).log()))
-				.expectNext(11, 12, 13, 14, 15, 16, 17, 18, 19, 20).verifyComplete();
+			.expectNext(11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
+			.verifyComplete();
 	}
 
 	@Test
 	public void secondWinnerFirstEmpty() {
 		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.empty(), Flux.range(11, 10).log()))
-				.expectNext(11, 12, 13, 14, 15, 16, 17, 18, 19, 20).verifyComplete();
+			.expectNext(11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
+			.verifyComplete();
 	}
 
 	@Test
 	public void bothEmpty() {
-		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.empty(), Flux.empty())).expectComplete().verifyThenAssertThat()
-				.hasNotDiscardedElements().hasNotDroppedElements().hasNotDroppedErrors();
+		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.empty(), Flux.empty()))
+			.expectComplete()
+			.verifyThenAssertThat()
+			.hasNotDiscardedElements()
+			.hasNotDroppedElements()
+			.hasNotDroppedErrors();
 	}
 
 	@Test
 	public void neverAndEmpty() {
-		StepVerifier.withVirtualTime(() -> CloudFlux.firstNonEmpty(Flux.never(), Flux.empty())).expectSubscription()
-				.expectNoEvent(Duration.ofDays(1)).thenCancel().verifyThenAssertThat().hasNotDiscardedElements()
-				.hasNotDroppedElements().hasNotDroppedErrors();
+		StepVerifier.withVirtualTime(() -> CloudFlux.firstNonEmpty(Flux.never(), Flux.empty()))
+			.expectSubscription()
+			.expectNoEvent(Duration.ofDays(1))
+			.thenCancel()
+			.verifyThenAssertThat()
+			.hasNotDiscardedElements()
+			.hasNotDroppedElements()
+			.hasNotDroppedErrors();
 	}
 
 	@Test
 	public void firstEmitsError() {
 		RuntimeException ex = new RuntimeException("forced failure");
 		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.<Integer>error(ex), Flux.empty()))
-				.expectErrorMessage("forced failure").verifyThenAssertThat().hasNotDiscardedElements()
-				.hasNotDroppedElements().hasNotDroppedErrors();
+			.expectErrorMessage("forced failure")
+			.verifyThenAssertThat()
+			.hasNotDiscardedElements()
+			.hasNotDroppedElements()
+			.hasNotDroppedErrors();
 	}
 
 	@Test
 	public void secondEmitsError() {
 		RuntimeException ex = new RuntimeException("forced failure");
 		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.empty(), Flux.<Integer>error(ex)))
-				.expectErrorMessage("forced failure").verifyThenAssertThat().hasNotDiscardedElements()
-				.hasNotDroppedElements().hasNotDroppedErrors();
+			.expectErrorMessage("forced failure")
+			.verifyThenAssertThat()
+			.hasNotDiscardedElements()
+			.hasNotDroppedElements()
+			.hasNotDroppedErrors();
 	}
 
 	@Test
 	public void neverAndSecondEmitsError() {
 		RuntimeException ex = new RuntimeException("forced failure");
 		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.never(), Flux.<Integer>error(ex)))
-				.expectErrorMessage("forced failure").verifyThenAssertThat().hasNotDiscardedElements()
-				.hasNotDroppedElements().hasNotDroppedErrors();
+			.expectErrorMessage("forced failure")
+			.verifyThenAssertThat()
+			.hasNotDiscardedElements()
+			.hasNotDroppedElements()
+			.hasNotDroppedErrors();
 	}
 
 	@Test
 	public void singleArrayNullSource() {
-		StepVerifier.create(CloudFlux.firstNonEmpty((Publisher<Object>) null)).expectError(NullPointerException.class)
-				.verify();
+		StepVerifier.create(CloudFlux.firstNonEmpty((Publisher<Object>) null))
+			.expectError(NullPointerException.class)
+			.verify();
 	}
 
 	@Test
 	public void arrayOneIsNullSource() {
 		StepVerifier.create(CloudFlux.firstNonEmpty(Flux.never(), null, Flux.never()))
-				.expectError(NullPointerException.class).verify();
+			.expectError(NullPointerException.class)
+			.verify();
 	}
 
 	@Test
 	public void singleIterableNullSource() {
 		StepVerifier.create(CloudFlux.firstNonEmpty(singletonList((Publisher<Object>) null)))
-				.expectError(NullPointerException.class).verify();
+			.expectError(NullPointerException.class)
+			.verify();
 	}
 
 	@Test
 	public void iterableOneIsNullSource() {
 		StepVerifier
-				.create(CloudFlux.firstNonEmpty(Arrays.asList(Flux.never(), (Publisher<Object>) null, Flux.never())))
-				.expectError(NullPointerException.class).verify();
+			.create(CloudFlux.firstNonEmpty(Arrays.asList(Flux.never(), (Publisher<Object>) null, Flux.never())))
+			.expectError(NullPointerException.class)
+			.verify();
 	}
 
 	@Test

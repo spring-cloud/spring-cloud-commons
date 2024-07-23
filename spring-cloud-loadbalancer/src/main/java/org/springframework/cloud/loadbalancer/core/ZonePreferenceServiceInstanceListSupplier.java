@@ -59,7 +59,7 @@ public class ZonePreferenceServiceInstanceListSupplier extends DelegatingService
 		super(delegate);
 		this.zoneConfig = zoneConfig;
 		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
-				.isCallGetWithRequestOnDelegates();
+			.isCallGetWithRequestOnDelegates();
 	}
 
 	@Override

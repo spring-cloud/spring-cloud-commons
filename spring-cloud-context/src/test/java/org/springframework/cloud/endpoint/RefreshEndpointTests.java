@@ -71,8 +71,10 @@ public class RefreshEndpointTests {
 	@Test
 	@Disabled // FIXME: legacy
 	public void keysComputedWhenAdded() {
-		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
-				.properties("spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name:none").run();
+		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE)
+			.bannerMode(Mode.OFF)
+			.properties("spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name:none")
+			.run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		this.context.getEnvironment().setActiveProfiles("local");
@@ -85,8 +87,10 @@ public class RefreshEndpointTests {
 	@Test
 	@Disabled // FIXME: legacy
 	public void keysComputedWhenOveridden() {
-		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
-				.properties("spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name:none").run();
+		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE)
+			.bannerMode(Mode.OFF)
+			.properties("spring.cloud.bootstrap.enabled=true", "spring.cloud.bootstrap.name:none")
+			.run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		this.context.getEnvironment().setActiveProfiles("override");
@@ -98,12 +102,14 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void keysComputedWhenChangesInExternalProperties() {
-		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
-				.properties("spring.cloud.bootstrap.name:none", "spring.cloud.bootstrap.enabled=true").run();
+		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE)
+			.bannerMode(Mode.OFF)
+			.properties("spring.cloud.bootstrap.name:none", "spring.cloud.bootstrap.enabled=true")
+			.run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		TestPropertyValues.of("spring.cloud.bootstrap.sources=" + ExternalPropertySourceLocator.class.getName())
-				.applyTo(this.context.getEnvironment(), Type.MAP, "defaultProperties");
+			.applyTo(this.context.getEnvironment(), Type.MAP, "defaultProperties");
 		ContextRefresher contextRefresher = new LegacyContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
@@ -112,15 +118,17 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void springMainSourcesEmptyInRefreshCycle() {
-		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
-				.properties("spring.cloud.bootstrap.name:none").run();
+		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE)
+			.bannerMode(Mode.OFF)
+			.properties("spring.cloud.bootstrap.name:none")
+			.run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		// spring.main.sources should be empty when the refresh cycle starts (we don't
 		// want any config files from the application context getting into the one used to
 		// construct the environment for refresh)
 		TestPropertyValues.of("spring.main.sources=" + ExternalPropertySourceLocator.class.getName())
-				.applyTo(this.context);
+			.applyTo(this.context);
 		ContextRefresher contextRefresher = new LegacyContextRefresher(this.context, scope);
 		RefreshEndpoint endpoint = new RefreshEndpoint(contextRefresher);
 		Collection<String> keys = endpoint.refresh();
@@ -129,8 +137,9 @@ public class RefreshEndpointTests {
 
 	@Test
 	public void eventsPublishedInOrder() {
-		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE).bannerMode(Mode.OFF)
-				.run();
+		this.context = new SpringApplicationBuilder(Empty.class).web(WebApplicationType.NONE)
+			.bannerMode(Mode.OFF)
+			.run();
 		RefreshScope scope = new RefreshScope();
 		scope.setApplicationContext(this.context);
 		ContextRefresher contextRefresher = new LegacyContextRefresher(this.context, scope);
@@ -146,7 +155,9 @@ public class RefreshEndpointTests {
 	@DisabledForJreRange(min = JRE.JAVA_16) // FIXME:
 	public void shutdownHooksCleaned() {
 		try (ConfigurableApplicationContext context = new SpringApplicationBuilder(Empty.class)
-				.web(WebApplicationType.NONE).bannerMode(Mode.OFF).run()) {
+			.web(WebApplicationType.NONE)
+			.bannerMode(Mode.OFF)
+			.run()) {
 			RefreshScope scope = new RefreshScope();
 			scope.setApplicationContext(context);
 			ContextRefresher contextRefresher = new LegacyContextRefresher(context, scope);

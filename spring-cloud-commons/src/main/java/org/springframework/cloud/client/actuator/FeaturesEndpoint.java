@@ -83,8 +83,9 @@ public class FeaturesEndpoint implements ApplicationContextAware {
 
 	private void addFeature(Features features, NamedFeature feature) {
 		Class<?> type = feature.getType();
-		features.getEnabled().add(new Feature(feature.getName(), type.getCanonicalName(),
-				type.getPackage().getImplementationVersion(), type.getPackage().getImplementationVendor()));
+		features.getEnabled()
+			.add(new Feature(feature.getName(), type.getCanonicalName(), type.getPackage().getImplementationVersion(),
+					type.getPackage().getImplementationVendor()));
 	}
 
 	static class Features {

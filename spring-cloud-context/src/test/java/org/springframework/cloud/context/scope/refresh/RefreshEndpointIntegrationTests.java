@@ -72,7 +72,7 @@ public class RefreshEndpointIntegrationTests {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity request = new HttpEntity(headers);
 		ResponseEntity<String> refreshResponse = template
-				.postForEntity("http://localhost:" + this.port + BASE_PATH + "/refresh", request, String.class);
+			.postForEntity("http://localhost:" + this.port + BASE_PATH + "/refresh", request, String.class);
 		assertThat(refreshResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 		String message = template.getForObject("http://localhost:" + this.port + "/", String.class);
 		then(message).isEqualTo("Hello Dave!");

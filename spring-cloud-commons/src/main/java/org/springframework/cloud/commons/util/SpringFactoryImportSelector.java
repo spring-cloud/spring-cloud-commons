@@ -64,7 +64,7 @@ public abstract class SpringFactoryImportSelector<T>
 			return new String[0];
 		}
 		AnnotationAttributes attributes = AnnotationAttributes
-				.fromMap(metadata.getAnnotationAttributes(this.annotationClass.getName(), true));
+			.fromMap(metadata.getAnnotationAttributes(this.annotationClass.getName(), true));
 
 		Assert.notNull(attributes, "No " + getSimpleName() + " attributes found. Is " + metadata.getClassName()
 				+ " annotated with @" + getSimpleName() + "?");

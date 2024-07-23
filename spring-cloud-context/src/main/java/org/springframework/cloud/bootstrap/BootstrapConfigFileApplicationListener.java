@@ -376,14 +376,15 @@ public class BootstrapConfigFileApplicationListener
 
 		private String[] getDefaultProfiles(Binder binder) {
 			return binder.bind(AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME, STRING_ARRAY)
-					.orElseGet(this.environment::getDefaultProfiles);
+				.orElseGet(this.environment::getDefaultProfiles);
 		}
 
 		private List<Profile> getOtherActiveProfiles(Set<Profile> activatedViaProperty,
 				Set<Profile> includedViaProperty) {
-			return Arrays.stream(this.environment.getActiveProfiles()).map(Profile::new).filter(
-					(profile) -> !activatedViaProperty.contains(profile) && !includedViaProperty.contains(profile))
-					.collect(Collectors.toList());
+			return Arrays.stream(this.environment.getActiveProfiles())
+				.map(Profile::new)
+				.filter((profile) -> !activatedViaProperty.contains(profile) && !includedViaProperty.contains(profile))
+				.collect(Collectors.toList());
 		}
 
 		void addActiveProfiles(Set<Profile> profiles) {
@@ -474,7 +475,7 @@ public class BootstrapConfigFileApplicationListener
 
 		private boolean canLoadFileExtension(PropertySourceLoader loader, String name) {
 			return Arrays.stream(loader.getFileExtensions())
-					.anyMatch((fileExtension) -> StringUtils.endsWithIgnoreCase(name, fileExtension));
+				.anyMatch((fileExtension) -> StringUtils.endsWithIgnoreCase(name, fileExtension));
 		}
 
 		private void loadForFileExtension(PropertySourceLoader loader, String prefix, String fileExtension,
@@ -606,9 +607,12 @@ public class BootstrapConfigFileApplicationListener
 			if (files != null) {
 				String fileName = locationReference.substring(locationReference.lastIndexOf("/") + 1);
 				Arrays.sort(files, FILE_COMPARATOR);
-				return Arrays.stream(files).map((file) -> file.listFiles((dir, name) -> name.equals(fileName)))
-						.filter(Objects::nonNull).flatMap((Function<File[], Stream<File>>) Arrays::stream)
-						.map(FileSystemResource::new).toArray(Resource[]::new);
+				return Arrays.stream(files)
+					.map((file) -> file.listFiles((dir, name) -> name.equals(fileName)))
+					.filter(Objects::nonNull)
+					.flatMap((Function<File[], Stream<File>>) Arrays::stream)
+					.map(FileSystemResource::new)
+					.toArray(Resource[]::new);
 			}
 			return EMPTY_RESOURCES;
 		}
@@ -793,8 +797,10 @@ public class BootstrapConfigFileApplicationListener
 					activeProfiles.addAll(bindStringList(binder, "spring.profiles.active"));
 				}
 			}
-			this.processedProfiles.stream().filter(this::isDefaultProfile).map(Profile::getName)
-					.forEach(activeProfiles::add);
+			this.processedProfiles.stream()
+				.filter(this::isDefaultProfile)
+				.map(Profile::getName)
+				.forEach(activeProfiles::add);
 			this.environment.setActiveProfiles(activeProfiles.toArray(new String[0]));
 		}
 

@@ -77,7 +77,7 @@ public class DiscoveredResourceUnitTests {
 		Link link = Link.of("target", "rel");
 
 		when(this.provider.getServiceInstance())
-				.thenReturn(new DefaultServiceInstance("instance", "service", "localhost", 8080, false));
+			.thenReturn(new DefaultServiceInstance("instance", "service", "localhost", 8080, false));
 		when(this.builder.asTemplatedLink()).thenReturn(link);
 
 		this.resource.verifyOrDiscover();

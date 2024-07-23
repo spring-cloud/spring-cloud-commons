@@ -48,14 +48,17 @@ public final class ExchangeFilterFunctionUtils {
 			List<LoadBalancerClientRequestTransformer> transformers) {
 		URI originalUrl = request.url();
 		ClientRequest clientRequest = ClientRequest
-				.create(request.method(), LoadBalancerUriTools.reconstructURI(serviceInstance, originalUrl))
-				.headers(headers -> headers.addAll(request.headers())).cookies(cookies -> {
-					cookies.addAll(request.cookies());
-					if (!(instanceIdCookieName == null || instanceIdCookieName.length() == 0)
-							&& addServiceInstanceCookie) {
-						cookies.add(instanceIdCookieName, serviceInstance.getInstanceId());
-					}
-				}).attributes(attributes -> attributes.putAll(request.attributes())).body(request.body()).build();
+			.create(request.method(), LoadBalancerUriTools.reconstructURI(serviceInstance, originalUrl))
+			.headers(headers -> headers.addAll(request.headers()))
+			.cookies(cookies -> {
+				cookies.addAll(request.cookies());
+				if (!(instanceIdCookieName == null || instanceIdCookieName.length() == 0) && addServiceInstanceCookie) {
+					cookies.add(instanceIdCookieName, serviceInstance.getInstanceId());
+				}
+			})
+			.attributes(attributes -> attributes.putAll(request.attributes()))
+			.body(request.body())
+			.build();
 		if (transformers != null) {
 			for (LoadBalancerClientRequestTransformer transformer : transformers) {
 				clientRequest = transformer.transformRequest(clientRequest, serviceInstance);

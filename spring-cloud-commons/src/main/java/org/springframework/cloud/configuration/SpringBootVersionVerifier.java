@@ -123,14 +123,14 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 	}
 
 	private String action() {
-		return String.format(
-				"""
-						Change Spring Boot version to one of the following versions %s .
-						You can find the latest Spring Boot versions here [%s].\s
-						If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [%s] and check the [Release Trains] section.
-						If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]""",
-				this.acceptedVersions, "https://spring.io/projects/spring-boot#learn",
-				"https://spring.io/projects/spring-cloud#overview");
+		return String
+			.format("""
+					Change Spring Boot version to one of the following versions %s .
+					You can find the latest Spring Boot versions here [%s].\s
+					If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [%s] and check the [Release Trains] section.
+					If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]""",
+					this.acceptedVersions, "https://spring.io/projects/spring-boot#learn",
+					"https://spring.io/projects/spring-cloud#overview");
 	}
 
 	private boolean springBootVersionMatches() {
@@ -147,7 +147,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 				// otherwise this could lead to false positives for future
 				// versions of boot
 				CompatibilityPredicate predicate = this.ACCEPTED_VERSIONS
-						.get(stripWildCardFromVersion(acceptedVersion));
+					.get(stripWildCardFromVersion(acceptedVersion));
 				if (predicate != null && predicate.isCompatible()) {
 					if (log.isDebugEnabled()) {
 						log.debug("Predicate [" + predicate + "] was matched");

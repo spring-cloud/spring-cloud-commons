@@ -48,7 +48,7 @@ class DefaultLoadBalancerCacheTests {
 		DefaultLoadBalancerCache cache = new DefaultLoadBalancerCache("test", false);
 
 		assertThatIllegalArgumentException().isThrownBy(() -> cache.put("testKey", null))
-				.withMessageContaining("Cache 'test' is configured to not allow null values but null was provided");
+			.withMessageContaining("Cache 'test' is configured to not allow null values but null was provided");
 	}
 
 	@Test

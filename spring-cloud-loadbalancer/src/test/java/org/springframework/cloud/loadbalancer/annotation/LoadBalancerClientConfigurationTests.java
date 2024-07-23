@@ -58,20 +58,20 @@ import static org.assertj.core.api.BDDAssertions.then;
 class LoadBalancerClientConfigurationTests {
 
 	ApplicationContextRunner reactiveDiscoveryClientRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(ReactiveCompositeDiscoveryClientAutoConfiguration.class,
-					LoadBalancerCacheAutoConfiguration.class, LoadBalancerAutoConfiguration.class,
-					LoadBalancerClientConfiguration.class));
+		.withConfiguration(AutoConfigurations.of(ReactiveCompositeDiscoveryClientAutoConfiguration.class,
+				LoadBalancerCacheAutoConfiguration.class, LoadBalancerAutoConfiguration.class,
+				LoadBalancerClientConfiguration.class));
 
 	ApplicationContextRunner blockingDiscoveryClientRunner = new ApplicationContextRunner()
-			.withClassLoader(new FilteredClassLoader(RetryTemplate.class))
-			.withConfiguration(AutoConfigurations.of(CompositeDiscoveryClientAutoConfiguration.class,
-					LoadBalancerCacheAutoConfiguration.class, LoadBalancerAutoConfiguration.class,
-					LoadBalancerClientConfiguration.class));
+		.withClassLoader(new FilteredClassLoader(RetryTemplate.class))
+		.withConfiguration(AutoConfigurations.of(CompositeDiscoveryClientAutoConfiguration.class,
+				LoadBalancerCacheAutoConfiguration.class, LoadBalancerAutoConfiguration.class,
+				LoadBalancerClientConfiguration.class));
 
 	ApplicationContextRunner blockingDiscoveryClientRunnerWithRetry = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(CompositeDiscoveryClientAutoConfiguration.class,
-					LoadBalancerCacheAutoConfiguration.class, LoadBalancerAutoConfiguration.class,
-					LoadBalancerClientConfiguration.class));
+		.withConfiguration(AutoConfigurations.of(CompositeDiscoveryClientAutoConfiguration.class,
+				LoadBalancerCacheAutoConfiguration.class, LoadBalancerAutoConfiguration.class,
+				LoadBalancerClientConfiguration.class));
 
 	@Test
 	void shouldInstantiateDefaultServiceInstanceListSupplierWhenConfigurationsPropertyNotSet() {
@@ -79,77 +79,75 @@ class LoadBalancerClientConfigurationTests {
 			ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 			then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
 			then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
-					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+				.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
 		});
 	}
 
 	@Test
 	void shouldInstantiateDefaultServiceInstanceListSupplier() {
 		reactiveDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=default")
-				.run(context -> {
-					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
-					then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
-							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-				});
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+				then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
+					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	@Test
 	void shouldInstantiateZonePreferenceServiceInstanceListSupplier() {
 		reactiveDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=zone-preference")
-				.run(context -> {
-					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(ZonePreferenceServiceInstanceListSupplier.class);
-					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
-							.getDelegate();
-					then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
-					ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
-							.getDelegate();
-					then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-				});
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(ZonePreferenceServiceInstanceListSupplier.class);
+				ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier).getDelegate();
+				then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
+				ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
+					.getDelegate();
+				then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	@Test
 	void shouldInstantiateHealthCheckServiceInstanceListSupplier() {
 		reactiveDiscoveryClientRunner.withUserConfiguration(TestConfig.class)
-				.withPropertyValues("spring.cloud.loadbalancer.configurations=health-check").run(context -> {
-					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
-					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
-							.getDelegate();
-					then(delegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-				});
+			.withPropertyValues("spring.cloud.loadbalancer.configurations=health-check")
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
+				ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier).getDelegate();
+				then(delegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	@Test
 	void shouldInstantiateWeightedServiceInstanceListSupplier() {
 		reactiveDiscoveryClientRunner.withUserConfiguration(TestConfig.class)
-				.withPropertyValues("spring.cloud.loadbalancer.configurations=weighted").run(context -> {
-					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
-					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
-							.getDelegate();
-					then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
-					ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
-							.getDelegate();
-					then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-				});
+			.withPropertyValues("spring.cloud.loadbalancer.configurations=weighted")
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
+				ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier).getDelegate();
+				then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
+				ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
+					.getDelegate();
+				then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	@Test
 	void shouldInstantiateRequestBasedStickySessionServiceInstanceListSupplierTests() {
 		reactiveDiscoveryClientRunner.withUserConfiguration(TestConfig.class)
-				.withPropertyValues("spring.cloud.loadbalancer.configurations=request-based-sticky-session")
-				.run(context -> {
-					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(RequestBasedStickySessionServiceInstanceListSupplier.class);
-					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
-							.getDelegate();
-					then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
-					ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
-							.getDelegate();
-					then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-				});
+			.withPropertyValues("spring.cloud.loadbalancer.configurations=request-based-sticky-session")
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(RequestBasedStickySessionServiceInstanceListSupplier.class);
+				ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier).getDelegate();
+				then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
+				ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
+					.getDelegate();
+				then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	@Test
@@ -158,19 +156,19 @@ class LoadBalancerClientConfigurationTests {
 			ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 			then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
 			then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
-					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+				.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
 		});
 	}
 
 	@Test
 	void shouldInstantiateDefaultBlockingServiceInstanceListSupplier() {
 		blockingDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=default")
-				.run(context -> {
-					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
-					then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
-							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-				});
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+				then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
+					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	@Test
@@ -179,21 +177,21 @@ class LoadBalancerClientConfigurationTests {
 			ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 			then(supplier).isInstanceOf(RetryAwareServiceInstanceListSupplier.class);
 			then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
-					.isInstanceOf(CachingServiceInstanceListSupplier.class);
+				.isInstanceOf(CachingServiceInstanceListSupplier.class);
 			then(((DelegatingServiceInstanceListSupplier) ((DelegatingServiceInstanceListSupplier) supplier)
-					.getDelegate()).getDelegate()).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+				.getDelegate()).getDelegate()).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
 		});
 	}
 
 	@Test
 	void shouldNotWrapWithRetryAwareSupplierWhenRetryTemplateOnClasspath() {
 		blockingDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.retry.avoidPreviousInstance=false")
-				.run(context -> {
-					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
-					then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
-							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-				});
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+				then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
+					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 
 	}
 
@@ -201,26 +199,26 @@ class LoadBalancerClientConfigurationTests {
 	@MethodSource("blockingConfigurations")
 	void shouldInstantiateBlockingHealthCheckServiceInstanceListSupplier(Class<?> configurationClass) {
 		blockingDiscoveryClientRunner.withUserConfiguration(configurationClass)
-				.withPropertyValues("spring.cloud.loadbalancer.configurations=health-check").run(context -> {
-					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
-					then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
-							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-				});
+			.withPropertyValues("spring.cloud.loadbalancer.configurations=health-check")
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
+				then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
+					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	@Test
 	void shouldInstantiateBlockingWeightedServiceInstanceListSupplier() {
 		blockingDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=weighted")
-				.run(context -> {
-					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-					then(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
-					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
-							.getDelegate();
-					then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
-					then(((DelegatingServiceInstanceListSupplier) delegate).getDelegate())
-							.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-				});
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
+				ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier).getDelegate();
+				then(delegate).isInstanceOf(CachingServiceInstanceListSupplier.class);
+				then(((DelegatingServiceInstanceListSupplier) delegate).getDelegate())
+					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	private static Stream<Arguments> blockingConfigurations() {

@@ -48,7 +48,7 @@ public class BootstrapOrderingCustomPropertySourceIntegrationTests {
 	@Test
 	public void bootstrapPropertiesExist() {
 		then(this.environment.getPropertySources().contains("applicationConfig: [classpath:/custom.properties]"))
-				.isTrue();
+			.isTrue();
 	}
 
 	@Test

@@ -80,7 +80,7 @@ public class LoadBalancerRequestFactoryTests {
 
 		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
 		then(this.httpRequestCaptor.getValue().getClass()).as("request should be of type ServiceRequestWrapper")
-				.isEqualTo(ServiceRequestWrapper.class);
+			.isEqualTo(ServiceRequestWrapper.class);
 	}
 
 	@Test
@@ -91,37 +91,37 @@ public class LoadBalancerRequestFactoryTests {
 
 		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
 		then(this.httpRequestCaptor.getValue().getClass()).as("request should be of type ServiceRequestWrapper")
-				.isEqualTo(ServiceRequestWrapper.class);
+			.isEqualTo(ServiceRequestWrapper.class);
 	}
 
 	@Test
 	public void testOneTransformer() throws Exception {
 		List<LoadBalancerRequestTransformer> transformers = List.of(this.transformer1);
 		when(this.transformer1.transformRequest(any(ServiceRequestWrapper.class), eq(this.instance)))
-				.thenReturn(this.transformedRequest1);
+			.thenReturn(this.transformedRequest1);
 
 		executeLbRequest(transformers);
 
 		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
 		then(this.httpRequestCaptor.getValue())
-				.as("transformer1 should have transformed request into transformedRequest1")
-				.isEqualTo(this.transformedRequest1);
+			.as("transformer1 should have transformed request into transformedRequest1")
+			.isEqualTo(this.transformedRequest1);
 	}
 
 	@Test
 	public void testTwoTransformers() throws Exception {
 		List<LoadBalancerRequestTransformer> transformers = Arrays.asList(this.transformer1, this.transformer2);
 		when(this.transformer1.transformRequest(any(ServiceRequestWrapper.class), eq(this.instance)))
-				.thenReturn(this.transformedRequest1);
+			.thenReturn(this.transformedRequest1);
 		when(this.transformer2.transformRequest(this.transformedRequest1, this.instance))
-				.thenReturn(this.transformedRequest2);
+			.thenReturn(this.transformedRequest2);
 
 		executeLbRequest(transformers);
 
 		verify(this.execution).execute(this.httpRequestCaptor.capture(), eq(this.body));
 		then(this.httpRequestCaptor.getValue())
-				.as("transformer2 should have transformed transformedRequest1 into transformedRequest2")
-				.isEqualTo(this.transformedRequest2);
+			.as("transformer2 should have transformed transformedRequest1 into transformedRequest2")
+			.isEqualTo(this.transformedRequest2);
 	}
 
 	private void executeLbRequest(List<LoadBalancerRequestTransformer> transformers) throws Exception {
