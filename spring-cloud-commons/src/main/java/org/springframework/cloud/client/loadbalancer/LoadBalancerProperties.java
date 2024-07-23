@@ -139,6 +139,8 @@ public class LoadBalancerProperties {
 	 */
 	private XForwarded xForwarded = new XForwarded();
 
+
+	// TODO: fix spelling in a major release
 	public void setxForwarded(XForwarded xForwarded) {
 		this.xForwarded = xForwarded;
 	}
