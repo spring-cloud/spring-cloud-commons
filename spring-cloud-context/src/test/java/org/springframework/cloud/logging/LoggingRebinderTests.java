@@ -73,7 +73,7 @@ public class LoggingRebinderTests {
 	@Test
 	public void logLevelFalseResolvedToOff() {
 		ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
-				.getLogger("org.springframework.cloud");
+			.getLogger("org.springframework.cloud");
 		StandardEnvironment environment = new StandardEnvironment();
 		TestPropertyValues.of("logging.level.org.springframework.cloud=false").applyTo(environment);
 		rebinder.setEnvironment(environment);

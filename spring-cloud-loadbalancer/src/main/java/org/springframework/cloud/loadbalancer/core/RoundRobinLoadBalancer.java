@@ -78,9 +78,10 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	// src/main/java/netflix/ocelli/loadbalancer/RoundRobinLoadBalancer.java
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
-				.getIfAvailable(NoopServiceInstanceListSupplier::new);
-		return supplier.get(request).next()
-				.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
+			.getIfAvailable(NoopServiceInstanceListSupplier::new);
+		return supplier.get(request)
+			.next()
+			.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
 
 	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,

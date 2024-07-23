@@ -43,7 +43,8 @@ final class LoadBalancerTestUtils {
 
 	static ConfigurableApplicationContext init(Class<?>... configClasses) {
 		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.sources(ArrayUtils.add(configClasses, WebClientAutoConfiguration.class)).run();
+			.sources(ArrayUtils.add(configClasses, WebClientAutoConfiguration.class))
+			.run();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -56,7 +57,7 @@ final class LoadBalancerTestUtils {
 		then(filters).hasSize(1);
 		then(filters.get(0)).isInstanceOf(DeferringLoadBalancerExchangeFilterFunction.class);
 		DeferringLoadBalancerExchangeFilterFunction interceptor = (DeferringLoadBalancerExchangeFilterFunction) filters
-				.get(0);
+			.get(0);
 		interceptor.tryResolveDelegate();
 		then(interceptor.getDelegate()).isInstanceOf(exchangeFilterFunctionClass);
 	}

@@ -71,8 +71,8 @@ public class ReactiveDiscoveryClientHealthIndicator
 			return doHealthCheck();
 		}
 		else {
-			return Mono.just(
-					Health.status(new Status(Status.UNKNOWN.getCode(), "Discovery Client not initialized")).build());
+			return Mono
+				.just(Health.status(new Status(Status.UNKNOWN.getCode(), "Discovery Client not initialized")).build());
 		}
 	}
 

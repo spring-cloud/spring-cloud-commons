@@ -180,8 +180,10 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 					: new AnnotationConfigApplicationContext();
 		}
 		context.setClassLoader(classLoader);
-		context.getEnvironment().getPropertySources().addFirst(
-				new MapPropertySource(this.propertySourceName, Collections.singletonMap(this.propertyName, name)));
+		context.getEnvironment()
+			.getPropertySources()
+			.addFirst(
+					new MapPropertySource(this.propertySourceName, Collections.singletonMap(this.propertyName, name)));
 		if (this.parent != null) {
 			// Uses Environment from parent as well as beans
 			context.setParent(this.parent);

@@ -80,9 +80,9 @@ public class LoadBalancerChildContextInitializerTests {
 	void shouldStartLBChildContextsFromAotContributions(CapturedOutput output) {
 		WebApplicationContextRunner contextRunner = new WebApplicationContextRunner(
 				AnnotationConfigServletWebApplicationContext::new)
-						.withConfiguration(AutoConfigurations.of(ServletWebServerFactoryAutoConfiguration.class,
-								LoadBalancerAutoConfiguration.class))
-						.withConfiguration(UserConfigurations.of(TestLoadBalancerConfiguration.class));
+			.withConfiguration(AutoConfigurations.of(ServletWebServerFactoryAutoConfiguration.class,
+					LoadBalancerAutoConfiguration.class))
+			.withConfiguration(UserConfigurations.of(TestLoadBalancerConfiguration.class));
 		contextRunner.withPropertyValues("spring.cloud.loadbalancer.eager-load.clients[0]=test1").prepare(context -> {
 			TestGenerationContext generationContext = new TestGenerationContext(TestTarget.class);
 			ClassName className = new ApplicationContextAotGenerator().processAheadOfTime(
@@ -92,14 +92,14 @@ public class LoadBalancerChildContextInitializerTests {
 			compiler.with(generationContext).compile(compiled -> {
 				ServletWebServerApplicationContext freshApplicationContext = new ServletWebServerApplicationContext();
 				ApplicationContextInitializer<GenericApplicationContext> initializer = compiled
-						.getInstance(ApplicationContextInitializer.class, className.toString());
+					.getInstance(ApplicationContextInitializer.class, className.toString());
 				initializer.initialize(freshApplicationContext);
 				assertThat(output).contains("Refreshing LoadBalancerClientFactory-test1",
 						"Refreshing LoadBalancerClientFactory-test-2", "Refreshing LoadBalancerClientFactory-test_3");
 				assertThat(output).doesNotContain("Instantiating bean from Test 2 custom config",
 						"Instantiating bean from default custom config");
 				TestPropertyValues.of(AotDetector.AOT_ENABLED + "=true")
-						.applyToSystemProperties(freshApplicationContext::refresh);
+					.applyToSystemProperties(freshApplicationContext::refresh);
 				WebClient webClient = freshApplicationContext.getBean(WebClient.class);
 				webClient.get().uri(URI.create("http://test-2/")).retrieve().bodyToMono(String.class).subscribe();
 				assertThat(output).contains("Instantiating bean from Test 2 custom config",

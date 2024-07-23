@@ -92,8 +92,9 @@ public class RestartEndpoint implements ApplicationListener<ContextRefreshedWith
 			this.args = this.event.getArgs();
 			this.application = this.event.getSpringApplication();
 			this.application.addInitializers(new PostProcessorInitializer());
-			this.pauseHandlers = this.context.getBeanProvider(PauseHandler.class).orderedStream()
-					.collect(Collectors.toList());
+			this.pauseHandlers = this.context.getBeanProvider(PauseHandler.class)
+				.orderedStream()
+				.collect(Collectors.toList());
 		}
 	}
 

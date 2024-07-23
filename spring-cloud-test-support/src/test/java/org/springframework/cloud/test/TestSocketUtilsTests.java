@@ -65,13 +65,13 @@ class TestSocketUtilsTests {
 	@Test
 	void findAvailableTcpPortWhenPortOnLoopbackInterfaceIsNotAvailable() throws Exception {
 		int port = TestSocketUtils.findAvailableTcpPort();
-		try (ServerSocket socket = ServerSocketFactory.getDefault().createServerSocket(port, 1,
-				InetAddress.getByName("localhost"))) {
+		try (ServerSocket socket = ServerSocketFactory.getDefault()
+			.createServerSocket(port, 1, InetAddress.getByName("localhost"))) {
 			assertThat(socket).isNotNull();
 			// will only look for the exact port
 			assertThatIllegalStateException().isThrownBy(() -> TestSocketUtils.findAvailableTcpPort(port, port))
-					.withMessageStartingWith("Could not find an available TCP port")
-					.withMessageEndingWith("after 1 attempts");
+				.withMessageStartingWith("Could not find an available TCP port")
+				.withMessageEndingWith("after 1 attempts");
 		}
 	}
 
@@ -139,8 +139,8 @@ class TestSocketUtilsTests {
 			assertThat(socket).isNotNull();
 			// will only look for the exact port
 			assertThatIllegalStateException().isThrownBy(() -> TestSocketUtils.findAvailableUdpPort(port, port))
-					.withMessageStartingWith("Could not find an available UDP port")
-					.withMessageEndingWith("after 1 attempts");
+				.withMessageStartingWith("Could not find an available UDP port")
+				.withMessageEndingWith("after 1 attempts");
 		}
 	}
 

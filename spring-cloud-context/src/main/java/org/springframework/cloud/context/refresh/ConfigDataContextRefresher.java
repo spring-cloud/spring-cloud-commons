@@ -71,7 +71,7 @@ public class ConfigDataContextRefresher extends ContextRefresher
 		}
 		StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
 		ConfigurableBootstrapContext bootstrapContext = getContext().getBeanProvider(ConfigurableBootstrapContext.class)
-				.getIfAvailable(DefaultBootstrapContext::new);
+			.getIfAvailable(DefaultBootstrapContext::new);
 
 		// run thru all EnvironmentPostProcessor instances. This lets things like vcap and
 		// decrypt happen after refresh. The hard coded call to

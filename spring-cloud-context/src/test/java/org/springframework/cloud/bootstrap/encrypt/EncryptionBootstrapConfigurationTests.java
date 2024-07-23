@@ -31,7 +31,9 @@ public class EncryptionBootstrapConfigurationTests {
 	@Test
 	public void symmetric() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
-				.web(WebApplicationType.NONE).properties("encrypt.key:pie").run();
+			.web(WebApplicationType.NONE)
+			.properties("encrypt.key:pie")
+			.run();
 		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
 		then(encryptor.decrypt(encryptor.encrypt("foo"))).isEqualTo("foo");
 		context.close();
@@ -40,10 +42,10 @@ public class EncryptionBootstrapConfigurationTests {
 	@Test
 	public void rsaKeyStore() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
-				.web(WebApplicationType.NONE)
-				.properties("encrypt.keyStore.location:classpath:/server.jks", "encrypt.keyStore.password:letmein",
-						"encrypt.keyStore.alias:mytestkey", "encrypt.keyStore.secret:changeme")
-				.run();
+			.web(WebApplicationType.NONE)
+			.properties("encrypt.keyStore.location:classpath:/server.jks", "encrypt.keyStore.password:letmein",
+					"encrypt.keyStore.alias:mytestkey", "encrypt.keyStore.secret:changeme")
+			.run();
 		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
 		then(encryptor.decrypt(encryptor.encrypt("foo"))).isEqualTo("foo");
 		context.close();
@@ -52,10 +54,10 @@ public class EncryptionBootstrapConfigurationTests {
 	@Test
 	public void rsaPkcs12KeyStore() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
-				.web(WebApplicationType.NONE)
-				.properties("encrypt.keyStore.location:classpath:/server.p12", "encrypt.keyStore.password:letmein",
-						"encrypt.keyStore.alias:mytestkey", "encrypt.keyStore.type:PKCS12")
-				.run();
+			.web(WebApplicationType.NONE)
+			.properties("encrypt.keyStore.location:classpath:/server.p12", "encrypt.keyStore.password:letmein",
+					"encrypt.keyStore.alias:mytestkey", "encrypt.keyStore.type:PKCS12")
+			.run();
 		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
 		then(encryptor.decrypt(encryptor.encrypt("foo"))).isEqualTo("foo");
 		context.close();
@@ -64,10 +66,10 @@ public class EncryptionBootstrapConfigurationTests {
 	@Test
 	public void rsaKeyStoreWithRelaxedProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
-				.web(WebApplicationType.NONE)
-				.properties("encrypt.key-store.location:classpath:/server.jks", "encrypt.key-store.password:letmein",
-						"encrypt.key-store.alias:mytestkey", "encrypt.key-store.secret:changeme")
-				.run();
+			.web(WebApplicationType.NONE)
+			.properties("encrypt.key-store.location:classpath:/server.jks", "encrypt.key-store.password:letmein",
+					"encrypt.key-store.alias:mytestkey", "encrypt.key-store.secret:changeme")
+			.run();
 		TextEncryptor encryptor = context.getBean(TextEncryptor.class);
 		then(encryptor.decrypt(encryptor.encrypt("foo"))).isEqualTo("foo");
 		context.close();
@@ -76,11 +78,11 @@ public class EncryptionBootstrapConfigurationTests {
 	@Test
 	public void rsaProperties() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class)
-				.web(WebApplicationType.NONE)
-				.properties("encrypt.key-store.location:classpath:/server.jks", "encrypt.key-store.password:letmein",
-						"encrypt.key-store.alias:mytestkey", "encrypt.key-store.secret:changeme",
-						"encrypt.rsa.strong:true", "encrypt.rsa.salt:foobar")
-				.run();
+			.web(WebApplicationType.NONE)
+			.properties("encrypt.key-store.location:classpath:/server.jks", "encrypt.key-store.password:letmein",
+					"encrypt.key-store.alias:mytestkey", "encrypt.key-store.secret:changeme", "encrypt.rsa.strong:true",
+					"encrypt.rsa.salt:foobar")
+			.run();
 		RsaProperties properties = context.getBean(RsaProperties.class);
 		then(properties.getSalt()).isEqualTo("foobar");
 		then(properties.isStrong()).isTrue();
@@ -92,10 +94,9 @@ public class EncryptionBootstrapConfigurationTests {
 	public void nonExistentKeystoreLocationShouldNotBeAllowed() {
 		try {
 			new SpringApplicationBuilder(EncryptionBootstrapConfiguration.class).web(WebApplicationType.NONE)
-					.properties("encrypt.key-store.location:classpath:/server.jks1",
-							"encrypt.key-store.password:letmein", "encrypt.key-store.alias:mytestkey",
-							"encrypt.key-store.secret:changeme")
-					.run();
+				.properties("encrypt.key-store.location:classpath:/server.jks1", "encrypt.key-store.password:letmein",
+						"encrypt.key-store.alias:mytestkey", "encrypt.key-store.secret:changeme")
+				.run();
 			then(false).as("Should not create an application context with invalid keystore location").isTrue();
 		}
 		catch (Exception e) {

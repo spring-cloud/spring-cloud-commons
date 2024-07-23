@@ -60,9 +60,9 @@ class LoadBalancerEnvironmentPropertyUtilsTests {
 		environment.setProperty("spring.cloud.loadbalancer.test", "false");
 
 		assertThat(LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(environment, "test", "true"))
-				.isTrue();
+			.isTrue();
 		assertThat(LoadBalancerEnvironmentPropertyUtils.equalToOrMissingForClientOrDefault(environment, "test", "true"))
-				.isTrue();
+			.isTrue();
 	}
 
 	@Test
@@ -70,16 +70,16 @@ class LoadBalancerEnvironmentPropertyUtilsTests {
 		environment.setProperty("spring.cloud.loadbalancer.test", "true");
 
 		assertThat(LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(environment, "test", "true"))
-				.isTrue();
+			.isTrue();
 		assertThat(LoadBalancerEnvironmentPropertyUtils.equalToOrMissingForClientOrDefault(environment, "test", "true"))
-				.isTrue();
+			.isTrue();
 	}
 
 	@Test
 	void shouldReturnTrueWhenMissingForClientAndDefault() {
 		assertThat(LoadBalancerEnvironmentPropertyUtils.trueOrMissingForClientOrDefault(environment, "test")).isTrue();
 		assertThat(LoadBalancerEnvironmentPropertyUtils.equalToOrMissingForClientOrDefault(environment, "test", "true"))
-				.isTrue();
+			.isTrue();
 	}
 
 }

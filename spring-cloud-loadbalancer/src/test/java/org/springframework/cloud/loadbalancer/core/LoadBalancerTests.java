@@ -118,7 +118,7 @@ class LoadBalancerTests {
 	void staticConfigurationWorks() {
 		String serviceId = "test1";
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(ServiceInstanceListSuppliers
-				.toProvider(serviceId, instance(serviceId, "1host", false), instance(serviceId, "2host-secure", true)),
+			.toProvider(serviceId, instance(serviceId, "1host", false), instance(serviceId, "2host-secure", true)),
 				serviceId, -1);
 		assertLoadBalancer(loadBalancer, Arrays.asList("1host", "2host-secure"));
 	}

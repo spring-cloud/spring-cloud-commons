@@ -88,24 +88,27 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 
 	private List<Object> getConfigImports(ConfigurableEnvironment environment) {
 		MutablePropertySources propertySources = environment.getPropertySources();
-		List<Object> property = propertySources.stream().filter(this::propertySourceWithConfigImport)
-				.flatMap(propertySource -> {
-					List<Object> configImports = new ArrayList<>();
-					if (propertySource.getProperty(CONFIG_IMPORT_PROPERTY) != null) {
-						configImports.add(propertySource.getProperty(CONFIG_IMPORT_PROPERTY));
-					}
-					else {
-						configImports.addAll(Arrays.asList(getConfigImportArray(propertySource)));
-					}
-					return configImports.stream();
-				}).collect(Collectors.toList());
+		List<Object> property = propertySources.stream()
+			.filter(this::propertySourceWithConfigImport)
+			.flatMap(propertySource -> {
+				List<Object> configImports = new ArrayList<>();
+				if (propertySource.getProperty(CONFIG_IMPORT_PROPERTY) != null) {
+					configImports.add(propertySource.getProperty(CONFIG_IMPORT_PROPERTY));
+				}
+				else {
+					configImports.addAll(Arrays.asList(getConfigImportArray(propertySource)));
+				}
+				return configImports.stream();
+			})
+			.collect(Collectors.toList());
 		return property;
 	}
 
 	private boolean propertySourceWithConfigImport(PropertySource propertySource) {
 		if (propertySource instanceof CompositePropertySource) {
-			return ((CompositePropertySource) propertySource).getPropertySources().stream()
-					.anyMatch(this::propertySourceWithConfigImport);
+			return ((CompositePropertySource) propertySource).getPropertySources()
+				.stream()
+				.anyMatch(this::propertySourceWithConfigImport);
 		}
 		return propertySource.containsProperty(CONFIG_IMPORT_PROPERTY)
 				|| getConfigImportArray(propertySource).length > 0;

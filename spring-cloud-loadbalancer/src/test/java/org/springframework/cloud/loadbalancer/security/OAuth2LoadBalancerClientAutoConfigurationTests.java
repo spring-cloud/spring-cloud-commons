@@ -57,8 +57,10 @@ public class OAuth2LoadBalancerClientAutoConfigurationTests {
 	@Test
 	@Disabled
 	public void userInfoNotLoadBalanced() {
-		this.context = new SpringApplicationBuilder(ClientConfiguration.class).properties("spring.config.name=test",
-				"server.port=0", "security.oauth2.resource.userInfoUri:https://example.com").run();
+		this.context = new SpringApplicationBuilder(ClientConfiguration.class)
+			.properties("spring.config.name=test", "server.port=0",
+					"security.oauth2.resource.userInfoUri:https://example.com")
+			.run();
 
 		assertThat(this.context.containsBean("loadBalancedUserInfoRestTemplateCustomizer")).isFalse();
 		assertThat(this.context.containsBean("retryLoadBalancedUserInfoRestTemplateCustomizer")).isFalse();
@@ -67,9 +69,11 @@ public class OAuth2LoadBalancerClientAutoConfigurationTests {
 	@Test
 	@Disabled
 	public void userInfoLoadBalancedNoRetry() {
-		this.context = new SpringApplicationBuilder(ClientConfiguration.class).properties("spring.config.name=test",
-				"server.port=0", "security.oauth2.resource.userInfoUri:https://nosuchservice",
-				"spring.cloud.oauth2.load-balanced.enabled=true").run();
+		this.context = new SpringApplicationBuilder(ClientConfiguration.class)
+			.properties("spring.config.name=test", "server.port=0",
+					"security.oauth2.resource.userInfoUri:https://nosuchservice",
+					"spring.cloud.oauth2.load-balanced.enabled=true")
+			.run();
 
 		assertThat(this.context.containsBean("loadBalancedUserInfoRestTemplateCustomizer")).isTrue();
 		assertThat(this.context.containsBean("retryLoadBalancedUserInfoRestTemplateCustomizer")).isFalse();

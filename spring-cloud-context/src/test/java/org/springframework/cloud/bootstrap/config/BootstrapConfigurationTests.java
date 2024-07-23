@@ -90,13 +90,15 @@ public class BootstrapConfigurationTests {
 	}
 
 	private void pickupOnlyExternalBootstrapProperties(String... properties) {
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
-				.properties(properties).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.sources(BareConfiguration.class)
+			.properties(properties)
+			.run();
 		then(this.context.getEnvironment().getProperty("info.name")).isEqualTo("externalPropertiesInfoName");
 		then(this.context.getEnvironment().getProperty("info.desc")).isNull();
-		then(this.context.getEnvironment().getPropertySources()
-				.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap"))
-						.isTrue();
+		then(this.context.getEnvironment()
+			.getPropertySources()
+			.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap")).isTrue();
 	}
 
 	@Test
@@ -116,13 +118,15 @@ public class BootstrapConfigurationTests {
 	}
 
 	private void pickupAdditionalExternalBootstrapProperties(String... properties) {
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
-				.properties(properties).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.sources(BareConfiguration.class)
+			.properties(properties)
+			.run();
 		then(this.context.getEnvironment().getProperty("info.name")).isEqualTo("externalPropertiesInfoName");
 		then(this.context.getEnvironment().getProperty("info.desc")).isEqualTo("defaultPropertiesInfoDesc");
-		then(this.context.getEnvironment().getPropertySources()
-				.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap"))
-						.isTrue();
+		then(this.context.getEnvironment()
+			.getPropertySources()
+			.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap")).isTrue();
 	}
 
 	@Test
@@ -137,14 +141,17 @@ public class BootstrapConfigurationTests {
 	}
 
 	private void bootstrapPropertiesAvailableInInitializer(String... properties) {
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.sources(BareConfiguration.class).initializers(applicationContext -> {
-					// This property is defined in bootstrap.properties
-					then(applicationContext.getEnvironment().getProperty("info.name")).isEqualTo("child");
-				}).run();
-		then(this.context.getEnvironment().getPropertySources()
-				.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap"))
-						.isTrue();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.initializers(applicationContext -> {
+				// This property is defined in bootstrap.properties
+				then(applicationContext.getEnvironment().getProperty("info.name")).isEqualTo("child");
+			})
+			.run();
+		then(this.context.getEnvironment()
+			.getPropertySources()
+			.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap")).isTrue();
 	}
 
 	/**
@@ -170,12 +177,14 @@ public class BootstrapConfigurationTests {
 
 	private void picksUpAdditionalPropertySource(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
-		then(this.context.getEnvironment().getPropertySources()
-				.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap"))
-						.isTrue();
+		then(this.context.getEnvironment()
+			.getPropertySources()
+			.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap")).isTrue();
 	}
 
 	@Test
@@ -192,8 +201,10 @@ public class BootstrapConfigurationTests {
 	private void failsOnPropertySource(String... properties) {
 		System.setProperty("expected.fail", "true");
 		Throwable throwable = Assertions.assertThrows(RuntimeException.class, () -> {
-			this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-					.sources(BareConfiguration.class).run();
+			this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+				.properties(properties)
+				.sources(BareConfiguration.class)
+				.run();
 		});
 		then(throwable.getMessage().equals("Planned"));
 	}
@@ -214,8 +225,10 @@ public class BootstrapConfigurationTests {
 	private void overrideSystemPropertySourceByDefault(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 	}
 
@@ -234,8 +247,10 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("system");
 	}
 
@@ -258,8 +273,10 @@ public class BootstrapConfigurationTests {
 		// their own remote property source.
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "false");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 	}
 
@@ -279,8 +296,10 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
 		System.setProperty("bootstrap.foo", "system");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("system");
 	}
 
@@ -300,10 +319,13 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideNone", "true");
 		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
 		ConfigurableEnvironment environment = new StandardEnvironment();
-		environment.getPropertySources().addLast(
-				new MapPropertySource("last", Collections.<String, Object>singletonMap("bootstrap.foo", "splat")));
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.environment(environment).sources(BareConfiguration.class).run();
+		environment.getPropertySources()
+			.addLast(new MapPropertySource("last", Collections.<String, Object>singletonMap("bootstrap.foo", "splat")));
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.environment(environment)
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("splat");
 	}
 
@@ -322,15 +344,17 @@ public class BootstrapConfigurationTests {
 
 	private void applicationNameInBootstrapAndMain(String... properties) {
 		System.setProperty("expected.name", "main");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().getProperty("spring.application.name")).isEqualTo("app");
 		// The parent is called "main" because spring.application.name is specified in
 		// other.properties (the bootstrap properties)
 		then(this.context.getParent().getEnvironment().getProperty("spring.application.name")).isEqualTo("main");
 		// The bootstrap context has the same "bootstrap" property source
 		then(((ConfigurableEnvironment) this.context.getParent().getEnvironment()).getPropertySources()
-				.get("bootstrap")).isEqualTo(this.context.getEnvironment().getPropertySources().get("bootstrap"));
+			.get("bootstrap")).isEqualTo(this.context.getEnvironment().getPropertySources().get("bootstrap"));
 		then(this.context.getId()).isEqualTo("main-1");
 	}
 
@@ -349,8 +373,10 @@ public class BootstrapConfigurationTests {
 
 	private void applicationNameNotInBootstrap(String... properties) {
 		System.setProperty("expected.name", "main");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().getProperty("spring.application.name")).isEqualTo("main");
 		// The parent has no name because spring.application.name is not
 		// defined in the bootstrap properties
@@ -370,8 +396,10 @@ public class BootstrapConfigurationTests {
 
 	private void applicationNameOnlyInBootstrap(String... properties) {
 		System.setProperty("expected.name", "main");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run();
 		// The main context is called "main" because spring.application.name is specified
 		// in other.properties (and not in the main config file)
 		then(this.context.getEnvironment().getProperty("spring.application.name")).isEqualTo("main");
@@ -394,14 +422,17 @@ public class BootstrapConfigurationTests {
 
 	private void environmentEnrichedOnceWhenSharedWithChildContext(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class).properties(properties)
-				.environment(new StandardEnvironment()).child(BareConfiguration.class).web(WebApplicationType.NONE)
-				.run();
+		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
+			.properties(properties)
+			.environment(new StandardEnvironment())
+			.child(BareConfiguration.class)
+			.web(WebApplicationType.NONE)
+			.run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 		then(this.context.getParent().getEnvironment()).isEqualTo(this.context.getEnvironment());
 		MutablePropertySources sources = this.context.getEnvironment().getPropertySources();
 		PropertySource<?> bootstrap = sources
-				.get(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap");
+			.get(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap");
 		then(bootstrap).isNotNull();
 		then(sources.precedenceOf(bootstrap)).isEqualTo(0);
 	}
@@ -420,8 +451,11 @@ public class BootstrapConfigurationTests {
 	private void onlyOneBootstrapContext(String... properties) {
 		TestHigherPriorityBootstrapConfiguration.count.set(0);
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class).properties(properties)
-				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
+		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
+			.properties(properties)
+			.child(BareConfiguration.class)
+			.web(WebApplicationType.NONE)
+			.run();
 		then(TestHigherPriorityBootstrapConfiguration.count.get()).isEqualTo(1);
 		then(this.context.getParent()).isNotNull();
 		then(this.context.getParent().getParent().getId()).isEqualTo("bootstrap");
@@ -441,8 +475,11 @@ public class BootstrapConfigurationTests {
 	}
 
 	private void listOverride(String... properties) {
-		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class).properties(properties)
-				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
+		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
+			.properties(properties)
+			.child(BareConfiguration.class)
+			.web(WebApplicationType.NONE)
+			.run();
 		ListProperties listProperties = new ListProperties();
 		Binder.get(this.context.getEnvironment()).bind("list", Bindable.ofInstance(listProperties));
 		then(listProperties.getFoo().size()).isEqualTo(1);
@@ -464,11 +501,15 @@ public class BootstrapConfigurationTests {
 		TestHigherPriorityBootstrapConfiguration.count.set(0);
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		SpringApplicationBuilder builder = new SpringApplicationBuilder().properties(properties)
-				.sources(BareConfiguration.class);
-		this.sibling = builder.child(BareConfiguration.class).properties("spring.application.name=sibling")
-				.web(WebApplicationType.NONE).run();
-		this.context = builder.child(BareConfiguration.class).properties("spring.application.name=context")
-				.web(WebApplicationType.NONE).run();
+			.sources(BareConfiguration.class);
+		this.sibling = builder.child(BareConfiguration.class)
+			.properties("spring.application.name=sibling")
+			.web(WebApplicationType.NONE)
+			.run();
+		this.context = builder.child(BareConfiguration.class)
+			.properties("spring.application.name=context")
+			.web(WebApplicationType.NONE)
+			.run();
 		then(TestHigherPriorityBootstrapConfiguration.count.get()).isEqualTo(1);
 		then(this.context.getParent()).isNotNull();
 		then(this.context.getParent().getParent().getId()).isEqualTo("bootstrap");
@@ -495,16 +536,18 @@ public class BootstrapConfigurationTests {
 
 	private void environmentEnrichedInParentContext(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class).properties(properties)
-				.child(BareConfiguration.class).web(WebApplicationType.NONE).run();
+		this.context = new SpringApplicationBuilder().sources(BareConfiguration.class)
+			.properties(properties)
+			.child(BareConfiguration.class)
+			.web(WebApplicationType.NONE)
+			.run();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 		then(this.context.getParent().getEnvironment()).isNotSameAs(this.context.getEnvironment());
-		then(this.context.getEnvironment().getPropertySources()
-				.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap"))
-						.isTrue();
+		then(this.context.getEnvironment()
+			.getPropertySources()
+			.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap")).isTrue();
 		then(((ConfigurableEnvironment) this.context.getParent().getEnvironment()).getPropertySources()
-				.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap"))
-						.isTrue();
+			.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap")).isTrue();
 	}
 
 	@Test
@@ -513,10 +556,15 @@ public class BootstrapConfigurationTests {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
 		// Profiles are always merged with the child
 		ConfigurableApplicationContext parent = new SpringApplicationBuilder().sources(BareConfiguration.class)
-				.profiles("parent").web(WebApplicationType.NONE).run();
+			.profiles("parent")
+			.web(WebApplicationType.NONE)
+			.run();
 		this.context = new SpringApplicationBuilder(BareConfiguration.class)
-				.properties("spring.config.use-legacy-processing=true").profiles("child").parent(parent)
-				.web(WebApplicationType.NONE).run();
+			.properties("spring.config.use-legacy-processing=true")
+			.profiles("child")
+			.parent(parent)
+			.web(WebApplicationType.NONE)
+			.run();
 		then(this.context.getParent().getEnvironment()).isNotSameAs(this.context.getEnvironment());
 		// The ApplicationContext merges profiles (profiles and property sources), see
 		// AbstractEnvironment.merge()
@@ -525,8 +573,7 @@ public class BootstrapConfigurationTests {
 		then(this.context.getParent().getEnvironment().acceptsProfiles("child")).isFalse();
 		then(this.context.getParent().getEnvironment().acceptsProfiles("parent")).isTrue();
 		then(((ConfigurableEnvironment) this.context.getParent().getEnvironment()).getPropertySources()
-				.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap"))
-						.isTrue();
+			.contains(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-testBootstrap")).isTrue();
 		then(this.context.getEnvironment().getProperty("bootstrap.foo")).isEqualTo("bar");
 		// The "bootstrap" property source is not shared now, but it has the same
 		// properties in it because they are pulled from the PropertySourceConfiguration
@@ -550,8 +597,11 @@ public class BootstrapConfigurationTests {
 
 	private void includeProfileFromBootstrapPropertySource(String... properties) {
 		PropertySourceConfiguration.MAP.put("spring.profiles.include", "bar,baz");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.profiles("foo").sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.profiles("foo")
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().acceptsProfiles("baz")).isTrue();
 		then(this.context.getEnvironment().acceptsProfiles("bar")).isTrue();
 	}
@@ -572,8 +622,11 @@ public class BootstrapConfigurationTests {
 
 	private void activeProfileFromBootstrapPropertySource(String... properties) {
 		PropertySourceConfiguration.MAP.put("spring.profiles.active", "bar,baz");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.profiles("foo").sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.profiles("foo")
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().acceptsProfiles("baz", "bar", "foo")).isTrue();
 
 	}
@@ -592,8 +645,11 @@ public class BootstrapConfigurationTests {
 	private void activeAndIncludeProfileFromBootstrapPropertySource(String... properties) {
 		PropertySourceConfiguration.MAP.put("spring.profiles.active", "bar,baz");
 		PropertySourceConfiguration.MAP.put("spring.profiles.include", "bar,baz,hello");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.profiles("foo").sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.profiles("foo")
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().acceptsProfiles("baz", "bar", "hello", "foo")).isTrue();
 		then(this.context.getEnvironment().getActiveProfiles()).contains("baz", "bar", "foo", "hello");
 	}
@@ -613,8 +669,11 @@ public class BootstrapConfigurationTests {
 	private void activeAndIncludeProfileFromBootstrapPropertySourceWithReplacement(String... properties) {
 		PropertySourceConfiguration.MAP.put("spring.profiles.active", "${barreplacement},baz");
 		PropertySourceConfiguration.MAP.put("spring.profiles.include", "${barreplacement},baz,hello");
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.profiles("foo").sources(BareConfiguration.class).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.profiles("foo")
+			.sources(BareConfiguration.class)
+			.run();
 		then(this.context.getEnvironment().acceptsProfiles("baz", "bar", "hello", "foo")).isTrue();
 		then(this.context.getEnvironment().getActiveProfiles()).contains("baz", "bar", "foo", "hello");
 	}
@@ -632,8 +691,10 @@ public class BootstrapConfigurationTests {
 	}
 
 	private void includeProfileFromBootstrapProperties(String... properties) {
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
-				.properties(properties).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.sources(BareConfiguration.class)
+			.properties(properties)
+			.run();
 		then(this.context.getEnvironment().acceptsProfiles("local")).isTrue();
 		then(this.context.getEnvironment().getProperty("added")).isEqualTo("Hello added!");
 	}
@@ -651,16 +712,20 @@ public class BootstrapConfigurationTests {
 	}
 
 	private void nonEnumerablePropertySourceWorks(String... properties) {
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(BareConfiguration.class)
-				.properties(properties).run();
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.sources(BareConfiguration.class)
+			.properties(properties)
+			.run();
 		then(this.context.getEnvironment().getProperty("foo")).isEqualTo("bar");
 	}
 
 	@Test
 	void activeAndIncludeProfileFromBootstrapPropertySource_WhenMultiplePlacesHaveActiveProfileProperties_ShouldOnlyAcceptTheTopPriority() {
 		String[] properties = new String[] { "spring.config.use-legacy-processing=true" };
-		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE).properties(properties)
-				.sources(BareConfiguration.class).run("--spring.profiles.active=prod,secure");
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run("--spring.profiles.active=prod,secure");
 		then(this.context.getEnvironment().acceptsProfiles("prod", "secure")).isTrue();
 		// active profile from property sources with lower priority should not be included
 		then(this.context.getEnvironment().acceptsProfiles("local")).isFalse();
@@ -668,9 +733,11 @@ public class BootstrapConfigurationTests {
 		then(this.context.getEnvironment().getActiveProfiles()).doesNotContain("local");
 		// check if active profile value could possibly exist in other property sources
 		// with lower priority
-		then(this.context.getEnvironment().getPropertySources().stream()
-				.map(p -> p.getProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME)).anyMatch("local"::equals))
-						.isTrue();
+		then(this.context.getEnvironment()
+			.getPropertySources()
+			.stream()
+			.map(p -> p.getProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME))
+			.anyMatch("local"::equals)).isTrue();
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -711,7 +778,7 @@ public class BootstrapConfigurationTests {
 		public PropertySource<?> locate(Environment environment) {
 			if (environment instanceof ConfigurableEnvironment) {
 				if (!((ConfigurableEnvironment) environment).getPropertySources()
-						.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+					.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 					if (MAP.containsKey(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME)) {
 						// This additional profile, after, should not be added when
 						// initialize-on-context-refresh=true

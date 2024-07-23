@@ -76,7 +76,7 @@ public class InetUtils implements Closeable {
 		try {
 			int lowest = Integer.MAX_VALUE;
 			for (Enumeration<NetworkInterface> nics = NetworkInterface.getNetworkInterfaces(); nics
-					.hasMoreElements();) {
+				.hasMoreElements();) {
 				NetworkInterface ifc = nics.nextElement();
 				if (ifc.isUp()) {
 					this.log.trace("Testing interface: " + ifc.getDisplayName());

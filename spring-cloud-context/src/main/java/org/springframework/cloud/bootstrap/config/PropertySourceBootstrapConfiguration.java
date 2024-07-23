@@ -106,7 +106,8 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
 		if (!bootstrapProperties.isInitializeOnContextRefresh() || !applicationContext.getEnvironment()
-				.getPropertySources().contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+			.getPropertySources()
+			.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			doInitialize(applicationContext);
 		}
 	}
@@ -151,8 +152,9 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 	}
 
 	private void reinitializeLoggingSystem(ConfigurableEnvironment environment) {
-		Map<String, Object> props = Binder.get(environment).bind("logging", Bindable.mapOf(String.class, Object.class))
-				.orElseGet(Collections::emptyMap);
+		Map<String, Object> props = Binder.get(environment)
+			.bind("logging", Bindable.mapOf(String.class, Object.class))
+			.orElseGet(Collections::emptyMap);
 		if (!props.isEmpty()) {
 			String logConfig = environment.resolvePlaceholders("${logging.config:}");
 			LogFile logFile = LogFile.get(environment);
@@ -240,7 +242,7 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 
 	private void handleProfiles(ConfigurableEnvironment environment) {
 		if (bootstrapProperties.isInitializeOnContextRefresh() && !environment.getPropertySources()
-				.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+			.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			// In the case that spring.cloud.config.initialize-on-context-refresh is true
 			// this method will
 			// be called during the bootstrap phase and the main application startup. We
@@ -268,7 +270,7 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 			activeProfiles.add(0, profile);
 		}
 		List<String> activeProfilesFromEnvironment = Arrays.stream(environment.getActiveProfiles())
-				.collect(Collectors.toList());
+			.collect(Collectors.toList());
 		if (!activeProfiles.containsAll(activeProfilesFromEnvironment)) {
 			activeProfiles.addAll(activeProfilesFromEnvironment);
 
@@ -296,7 +298,7 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 			String property, ConfigurableEnvironment environment) {
 		if (propertySource instanceof CompositePropertySource) {
 			for (PropertySource<?> nestedPropertySource : ((CompositePropertySource) propertySource)
-					.getPropertySources()) {
+				.getPropertySources()) {
 				addProfilesTo(profiles, nestedPropertySource, property, environment);
 			}
 		}
@@ -331,8 +333,9 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if (bootstrapProperties.isInitializeOnContextRefresh()
 				&& event.getApplicationContext() instanceof ConfigurableApplicationContext) {
-			if (((ConfigurableApplicationContext) event.getApplicationContext()).getEnvironment().getPropertySources()
-					.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+			if (((ConfigurableApplicationContext) event.getApplicationContext()).getEnvironment()
+				.getPropertySources()
+				.contains(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 				doInitialize((ConfigurableApplicationContext) event.getApplicationContext());
 			}
 		}

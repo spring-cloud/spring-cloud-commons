@@ -75,8 +75,8 @@ public class ResourceServerTokenRelayTests {
 	public void tokenRelayJWT() {
 
 		mockServerToReceiveRelay.expect(requestTo("https://example.com/test"))
-				.andExpect(header("authorization", AUTH_HEADER_TO_BE_RELAYED))
-				.andRespond(withSuccess(TEST_RESPONSE, MediaType.APPLICATION_JSON));
+			.andExpect(header("authorization", AUTH_HEADER_TO_BE_RELAYED))
+			.andRespond(withSuccess(TEST_RESPONSE, MediaType.APPLICATION_JSON));
 
 		HttpEntity<String> authorizationHeader = createAuthorizationHeader();
 		ResponseEntity<String> exchange = testRestTemplate.exchange("/token-relay", HttpMethod.GET, authorizationHeader,

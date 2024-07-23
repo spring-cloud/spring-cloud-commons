@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Annotation to enable a DiscoveryClient implementation.
+ *
  * @author Spencer Gibb
  */
 @Target(ElementType.TYPE)

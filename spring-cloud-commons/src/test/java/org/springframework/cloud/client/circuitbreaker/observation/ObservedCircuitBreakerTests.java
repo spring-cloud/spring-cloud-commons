@@ -47,10 +47,11 @@ class ObservedCircuitBreakerTests {
 		String result = circuitBreaker.run(() -> "hello");
 
 		then(result).isEqualTo("hello");
-		TestObservationRegistryAssert.assertThat(registry).hasSingleObservationThat()
-				.hasNameEqualTo("spring.cloud.circuitbreaker")
-				.hasLowCardinalityKeyValue("spring.cloud.circuitbreaker.type", "supplier")
-				.hasContextualNameEqualTo("circuit-breaker");
+		TestObservationRegistryAssert.assertThat(registry)
+			.hasSingleObservationThat()
+			.hasNameEqualTo("spring.cloud.circuitbreaker")
+			.hasLowCardinalityKeyValue("spring.cloud.circuitbreaker.type", "supplier")
+			.hasContextualNameEqualTo("circuit-breaker");
 	}
 
 	@Test
@@ -78,8 +79,11 @@ class ObservedCircuitBreakerTests {
 		String result = circuitBreaker.run(() -> "hello");
 
 		then(result).isEqualTo("hello");
-		TestObservationRegistryAssert.assertThat(registry).hasSingleObservationThat().hasNameEqualTo("foo")
-				.hasLowCardinalityKeyValue("bar", "baz").hasContextualNameEqualTo("circuit-breaker");
+		TestObservationRegistryAssert.assertThat(registry)
+			.hasSingleObservationThat()
+			.hasNameEqualTo("foo")
+			.hasLowCardinalityKeyValue("bar", "baz")
+			.hasContextualNameEqualTo("circuit-breaker");
 	}
 
 	@Test
@@ -105,18 +109,21 @@ class ObservedCircuitBreakerTests {
 
 		then(result).isEqualTo("goodbye");
 
-		TestObservationRegistryAssert.then(registry).hasNumberOfObservationsEqualTo(3)
-				.hasHandledContextsThatSatisfy(contexts -> {
-					ObservationContextAssert.then(contexts.get(0)).hasNameEqualTo("parent");
-					ObservationContextAssert.then(contexts.get(1)).hasNameEqualTo("spring.cloud.circuitbreaker")
-							.hasContextualNameEqualTo("circuit-breaker")
-							.hasLowCardinalityKeyValue("spring.cloud.circuitbreaker.type", "supplier")
-							.hasParentObservationEqualTo(parent);
-					ObservationContextAssert.then(contexts.get(2)).hasNameEqualTo("spring.cloud.circuitbreaker")
-							.hasContextualNameEqualTo("circuit-breaker fallback")
-							.hasLowCardinalityKeyValue("spring.cloud.circuitbreaker.type", "function")
-							.hasParentObservationEqualTo(parent);
-				});
+		TestObservationRegistryAssert.then(registry)
+			.hasNumberOfObservationsEqualTo(3)
+			.hasHandledContextsThatSatisfy(contexts -> {
+				ObservationContextAssert.then(contexts.get(0)).hasNameEqualTo("parent");
+				ObservationContextAssert.then(contexts.get(1))
+					.hasNameEqualTo("spring.cloud.circuitbreaker")
+					.hasContextualNameEqualTo("circuit-breaker")
+					.hasLowCardinalityKeyValue("spring.cloud.circuitbreaker.type", "supplier")
+					.hasParentObservationEqualTo(parent);
+				ObservationContextAssert.then(contexts.get(2))
+					.hasNameEqualTo("spring.cloud.circuitbreaker")
+					.hasContextualNameEqualTo("circuit-breaker fallback")
+					.hasLowCardinalityKeyValue("spring.cloud.circuitbreaker.type", "function")
+					.hasParentObservationEqualTo(parent);
+			});
 	}
 
 }

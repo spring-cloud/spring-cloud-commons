@@ -62,26 +62,27 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
 		resolveTimeout(environment);
 		this.serviceInstances = Flux.defer(() -> Mono.fromCallable(() -> delegate.getInstances(serviceId)))
-				.timeout(timeout, Flux.defer(() -> {
-					logTimeout();
-					return Flux.just(new ArrayList<>());
-				}), Schedulers.boundedElastic()).onErrorResume(error -> {
-					logException(error);
-					return Flux.just(new ArrayList<>());
-				});
+			.timeout(timeout, Flux.defer(() -> {
+				logTimeout();
+				return Flux.just(new ArrayList<>());
+			}), Schedulers.boundedElastic())
+			.onErrorResume(error -> {
+				logException(error);
+				return Flux.just(new ArrayList<>());
+			});
 	}
 
 	public DiscoveryClientServiceInstanceListSupplier(ReactiveDiscoveryClient delegate, Environment environment) {
 		this.serviceId = environment.getProperty(PROPERTY_NAME);
 		resolveTimeout(environment);
 		this.serviceInstances = Flux
-				.defer(() -> delegate.getInstances(serviceId).collectList().flux().timeout(timeout, Flux.defer(() -> {
-					logTimeout();
-					return Flux.just(new ArrayList<>());
-				})).onErrorResume(error -> {
-					logException(error);
-					return Flux.just(new ArrayList<>());
-				}));
+			.defer(() -> delegate.getInstances(serviceId).collectList().flux().timeout(timeout, Flux.defer(() -> {
+				logTimeout();
+				return Flux.just(new ArrayList<>());
+			})).onErrorResume(error -> {
+				logException(error);
+				return Flux.just(new ArrayList<>());
+			}));
 	}
 
 	@Override

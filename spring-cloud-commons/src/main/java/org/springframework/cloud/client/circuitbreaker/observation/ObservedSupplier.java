@@ -37,9 +37,9 @@ class ObservedSupplier<T> implements Supplier<T> {
 			String contextualName, ObservationRegistry observationRegistry, Supplier<T> toRun) {
 		this.delegate = toRun;
 		this.observation = CircuitBreakerObservationDocumentation.CIRCUIT_BREAKER_SUPPLIER_OBSERVATION
-				.observation(customConvention, DefaultCircuitBreakerObservationConvention.INSTANCE, () -> context,
-						observationRegistry)
-				.parentObservation(observationRegistry.getCurrentObservation());
+			.observation(customConvention, DefaultCircuitBreakerObservationConvention.INSTANCE, () -> context,
+					observationRegistry)
+			.parentObservation(observationRegistry.getCurrentObservation());
 		this.observation.contextualName(contextualName);
 	}
 

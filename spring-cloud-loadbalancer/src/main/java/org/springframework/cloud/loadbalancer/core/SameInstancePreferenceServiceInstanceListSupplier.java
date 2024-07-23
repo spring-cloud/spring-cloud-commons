@@ -52,7 +52,7 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		super(delegate);
 		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
-				.isCallGetWithRequestOnDelegates();
+			.isCallGetWithRequestOnDelegates();
 	}
 
 	@Override

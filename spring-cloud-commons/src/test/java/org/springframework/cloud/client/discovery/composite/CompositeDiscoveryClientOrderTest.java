@@ -48,7 +48,7 @@ public class CompositeDiscoveryClientOrderTest {
 	public void shouldGetOrderedDiscoveryClients() {
 		// when:
 		List<DiscoveryClient> discoveryClients = ((CompositeDiscoveryClient) this.discoveryClient)
-				.getDiscoveryClients();
+			.getDiscoveryClients();
 
 		// then:
 		then(discoveryClients.get(0).description()).isEqualTo(CUSTOM_DISCOVERY_CLIENT);

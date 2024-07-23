@@ -59,9 +59,10 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 	@Override
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
-				.getIfAvailable(NoopServiceInstanceListSupplier::new);
-		return supplier.get(request).next()
-				.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
+			.getIfAvailable(NoopServiceInstanceListSupplier::new);
+		return supplier.get(request)
+			.next()
+			.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
 
 	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,

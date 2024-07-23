@@ -54,7 +54,7 @@ public class DefaultLoadBalancerCacheManager implements LoadBalancerCacheManager
 	public DefaultLoadBalancerCacheManager(LoadBalancerCacheProperties loadBalancerCacheProperties,
 			String... cacheNames) {
 		cacheMap.putAll(createCaches(cacheNames, loadBalancerCacheProperties).stream()
-				.collect(Collectors.toMap(DefaultLoadBalancerCache::getName, cache -> cache)));
+			.collect(Collectors.toMap(DefaultLoadBalancerCache::getName, cache -> cache)));
 	}
 
 	public DefaultLoadBalancerCacheManager(LoadBalancerCacheProperties loadBalancerCacheProperties) {
@@ -63,12 +63,13 @@ public class DefaultLoadBalancerCacheManager implements LoadBalancerCacheManager
 
 	private Set<DefaultLoadBalancerCache> createCaches(String[] cacheNames,
 			LoadBalancerCacheProperties loadBalancerCacheProperties) {
-		return Arrays.stream(cacheNames).distinct()
-				.map(name -> new DefaultLoadBalancerCache(name,
-						new ConcurrentHashMapWithTimedEviction<>(loadBalancerCacheProperties.getCapacity(),
-								new DelayedTaskEvictionScheduler<>(aScheduledDaemonThreadExecutor())),
-						loadBalancerCacheProperties.getTtl().toMillis(), false))
-				.collect(Collectors.toSet());
+		return Arrays.stream(cacheNames)
+			.distinct()
+			.map(name -> new DefaultLoadBalancerCache(name,
+					new ConcurrentHashMapWithTimedEviction<>(loadBalancerCacheProperties.getCapacity(),
+							new DelayedTaskEvictionScheduler<>(aScheduledDaemonThreadExecutor())),
+					loadBalancerCacheProperties.getTtl().toMillis(), false))
+			.collect(Collectors.toSet());
 	}
 
 	private ScheduledExecutorService aScheduledDaemonThreadExecutor() {

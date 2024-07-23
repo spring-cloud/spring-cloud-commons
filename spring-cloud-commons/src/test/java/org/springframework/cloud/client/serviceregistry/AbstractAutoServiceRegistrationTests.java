@@ -65,11 +65,11 @@ public class AbstractAutoServiceRegistrationTests {
 	public void portsWork() {
 		then(this.autoRegistration.getPort().get()).isNotEqualTo(0).as("Lifecycle port is zero");
 		then(this.managementPort).isNotEqualTo(this.autoRegistration.getPort().get())
-				.as("Lifecycle port is management port");
+			.as("Lifecycle port is management port");
 		then(this.port).isEqualTo(this.autoRegistration.getPort().get()).as("Lifecycle port is wrong");
 		then(this.autoRegistration.isRunning()).isTrue().as("Lifecycle not running");
 		then(this.autoRegistration.getServiceRegistry()).isInstanceOf(TestServiceRegistry.class)
-				.as("ServiceRegistry is wrong type");
+			.as("ServiceRegistry is wrong type");
 		TestServiceRegistry serviceRegistry = (TestServiceRegistry) this.autoRegistration.getServiceRegistry();
 		then(serviceRegistry.isRegistered()).isTrue().as("Lifecycle not registered");
 		then(this.autoRegistration.getAppName()).as("Lifecycle appName is wrong").isEqualTo("application");

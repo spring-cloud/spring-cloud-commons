@@ -36,7 +36,7 @@ public class DefaultCircuitBreakerObservationConvention implements CircuitBreake
 	@Override
 	public KeyValues getLowCardinalityKeyValues(CircuitBreakerObservationContext context) {
 		return KeyValues.of(CircuitBreakerObservationDocumentation.LowCardinalityTags.OBJECT_TYPE
-				.withValue(context.getType().name().toLowerCase(Locale.ROOT)));
+			.withValue(context.getType().name().toLowerCase(Locale.ROOT)));
 	}
 
 	@Override

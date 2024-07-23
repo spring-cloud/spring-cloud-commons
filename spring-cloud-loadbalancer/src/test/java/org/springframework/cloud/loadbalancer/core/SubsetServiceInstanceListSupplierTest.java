@@ -94,8 +94,8 @@ class SubsetServiceInstanceListSupplierTest {
 	@Test
 	void shouldReturnSublistWithGivenSubsetSize() {
 		List<ServiceInstance> instances = IntStream.range(0, 101)
-				.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
-				.collect(Collectors.toList());
+			.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
+			.collect(Collectors.toList());
 
 		when(delegate.getServiceId()).thenReturn("test");
 		when(delegate.get()).thenReturn(Flux.just(instances));
@@ -109,8 +109,8 @@ class SubsetServiceInstanceListSupplierTest {
 	@Test
 	void shouldReturnRawWhenLessThanSubsetSize() {
 		List<ServiceInstance> instances = IntStream.range(0, 101)
-				.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
-				.collect(Collectors.toList());
+			.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
+			.collect(Collectors.toList());
 
 		when(delegate.getServiceId()).thenReturn("test");
 		when(delegate.get()).thenReturn(Flux.just(instances));
@@ -124,8 +124,8 @@ class SubsetServiceInstanceListSupplierTest {
 	@Test
 	void shouldReturnSameSublistForSameInstanceId() {
 		List<ServiceInstance> instances = IntStream.range(0, 101)
-				.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
-				.collect(Collectors.toList());
+			.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
+			.collect(Collectors.toList());
 
 		when(delegate.getServiceId()).thenReturn("test");
 		when(delegate.get()).thenReturn(Flux.just(instances));
@@ -144,8 +144,8 @@ class SubsetServiceInstanceListSupplierTest {
 	@Test
 	void shouldReturnDifferentSublistForDifferentInstanceId() {
 		List<ServiceInstance> instances = IntStream.range(0, 101)
-				.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
-				.collect(Collectors.toList());
+			.mapToObj(i -> new DefaultServiceInstance(Integer.toString(i), "test", "host" + i, 8080, false, null))
+			.collect(Collectors.toList());
 
 		when(delegate.getServiceId()).thenReturn("test");
 		when(delegate.get()).thenReturn(Flux.just(instances));

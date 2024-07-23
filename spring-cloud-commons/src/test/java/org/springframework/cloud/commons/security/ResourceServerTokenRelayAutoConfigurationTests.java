@@ -46,9 +46,9 @@ public class ResourceServerTokenRelayAutoConfigurationTests {
 	@Test
 	public void clientNotConfigured() {
 		this.context = new SpringApplicationBuilder(NoClientConfiguration.class)
-				.properties("spring.config.name=test", "server.port=0", "spring.cloud.mvc.token-relay.enabled=true",
-						"security.oauth2.resource.userInfoUri:https://example.com")
-				.run();
+			.properties("spring.config.name=test", "server.port=0", "spring.cloud.mvc.token-relay.enabled=true",
+					"security.oauth2.resource.userInfoUri:https://example.com")
+			.run();
 		assertThat(this.context.containsBean("loadBalancedOauth2RestTemplate")).isFalse();
 	}
 

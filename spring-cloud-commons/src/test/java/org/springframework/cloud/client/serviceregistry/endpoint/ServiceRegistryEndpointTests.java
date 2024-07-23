@@ -68,15 +68,18 @@ public class ServiceRegistryEndpointTests {
 
 	@Test
 	public void testGet() throws Exception {
-		this.mvc.perform(get(BASE_PATH + "/serviceregistry")).andExpect(status().isOk())
-				.andExpect(content().string(containsString(MYSTATUS)));
+		this.mvc.perform(get(BASE_PATH + "/serviceregistry"))
+			.andExpect(status().isOk())
+			.andExpect(content().string(containsString(MYSTATUS)));
 	}
 
 	@Test
 	public void testPost() throws Exception {
 		Map<String, String> status = Collections.singletonMap("status", UPDATED_STATUS);
-		this.mvc.perform(post(BASE_PATH + "/serviceregistry").content(new ObjectMapper().writeValueAsString(status))
-				.contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+		this.mvc
+			.perform(post(BASE_PATH + "/serviceregistry").content(new ObjectMapper().writeValueAsString(status))
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk());
 		then(this.serviceRegistry.getUpdatedStatus().get()).isEqualTo(UPDATED_STATUS);
 	}
 

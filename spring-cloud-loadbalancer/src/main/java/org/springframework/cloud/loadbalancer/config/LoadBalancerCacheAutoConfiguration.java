@@ -179,21 +179,21 @@ class CaffeineHints implements RuntimeHintsRegistrar {
 			return;
 		}
 		hints.reflection()
-				.registerType(TypeReference.of(Caffeine.class),
-						hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS,
-								MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS))
-				.registerType(TypeReference.of("com.github.benmanes.caffeine.cache.BoundedLocalCache"),
-						hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS,
-								MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS))
-				.registerType(TypeReference.of("com.github.benmanes.caffeine.cache.LocalCacheFactory"),
-						hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS,
-								MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS))
-				.registerType(TypeReference.of("com.github.benmanes.caffeine.cache.Node"),
-						hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS,
-								MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS));
-		getCaffeineSubtypes().forEach(cacheType -> hints.reflection().registerType(TypeReference.of(cacheType),
-				hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS,
-						MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS)));
+			.registerType(TypeReference.of(Caffeine.class),
+					hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS,
+							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS))
+			.registerType(TypeReference.of("com.github.benmanes.caffeine.cache.BoundedLocalCache"),
+					hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS,
+							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS))
+			.registerType(TypeReference.of("com.github.benmanes.caffeine.cache.LocalCacheFactory"),
+					hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS,
+							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS))
+			.registerType(TypeReference.of("com.github.benmanes.caffeine.cache.Node"),
+					hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS,
+							MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS));
+		getCaffeineSubtypes().forEach(cacheType -> hints.reflection()
+			.registerType(TypeReference.of(cacheType), hint -> hint.withMembers(MemberCategory.INVOKE_DECLARED_METHODS,
+					MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.DECLARED_FIELDS)));
 	}
 
 	private Set<String> getCaffeineSubtypes() {
@@ -205,8 +205,12 @@ class CaffeineHints implements RuntimeHintsRegistrar {
 		catch (ClassNotFoundException e) {
 			LOG.warn("Could not get class for name: " + CAFFEINE_BOUNDED_LOCAL_CACHE_CLASS_NAME);
 		}
-		return provider.findCandidateComponents(CAFFEINE_CACHE_BASE_PACKAGE).stream().filter(Objects::nonNull)
-				.map(BeanDefinition::getBeanClassName).filter(Objects::nonNull).collect(Collectors.toSet());
+		return provider.findCandidateComponents(CAFFEINE_CACHE_BASE_PACKAGE)
+			.stream()
+			.filter(Objects::nonNull)
+			.map(BeanDefinition::getBeanClassName)
+			.filter(Objects::nonNull)
+			.collect(Collectors.toSet());
 	}
 
 }

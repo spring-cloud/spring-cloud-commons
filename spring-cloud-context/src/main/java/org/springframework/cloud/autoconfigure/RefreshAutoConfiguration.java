@@ -151,7 +151,8 @@ public class RefreshAutoConfiguration {
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)
-					.append("additionalPropertySourcesToRetain", additionalPropertySourcesToRetain).toString();
+				.append("additionalPropertySourcesToRetain", additionalPropertySourcesToRetain)
+				.toString();
 
 		}
 

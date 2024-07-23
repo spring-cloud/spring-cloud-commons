@@ -49,14 +49,14 @@ public class CompositeDiscoveryClientAutoConfigurationTests {
 		CompositeDiscoveryClient compositeDiscoveryClient = (CompositeDiscoveryClient) this.discoveryClient;
 		then(compositeDiscoveryClient.getDiscoveryClients()).hasSize(2);
 		then(compositeDiscoveryClient.getDiscoveryClients().get(0).description())
-				.isEqualTo("A custom discovery client");
+			.isEqualTo("A custom discovery client");
 	}
 
 	@Test
 	public void simpleDiscoveryClientShouldBeHaveTheLowestPrecedence() {
 		CompositeDiscoveryClient compositeDiscoveryClient = (CompositeDiscoveryClient) this.discoveryClient;
 		then(compositeDiscoveryClient.getDiscoveryClients().get(0).description())
-				.isEqualTo("A custom discovery client");
+			.isEqualTo("A custom discovery client");
 		then(compositeDiscoveryClient.getDiscoveryClients().get(1)).isInstanceOf(SimpleDiscoveryClient.class);
 	}
 

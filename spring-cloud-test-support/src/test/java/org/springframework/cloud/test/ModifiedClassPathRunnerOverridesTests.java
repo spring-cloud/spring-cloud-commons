@@ -34,13 +34,13 @@ public class ModifiedClassPathRunnerOverridesTests {
 	@Test
 	public void classesAreLoadedFromOverride() {
 		assertThat(ApplicationContext.class.getProtectionDomain().getCodeSource().getLocation().toString())
-				.endsWith("spring-context-4.1.0.RELEASE.jar");
+			.endsWith("spring-context-4.1.0.RELEASE.jar");
 	}
 
 	@Test
 	public void classesAreLoadedFromTransitiveDependencyOfOverride() {
 		assertThat(StringUtils.class.getProtectionDomain().getCodeSource().getLocation().toString())
-				.endsWith("spring-core-4.1.0.RELEASE.jar");
+			.endsWith("spring-core-4.1.0.RELEASE.jar");
 	}
 
 }

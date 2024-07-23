@@ -36,8 +36,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BlockingLoadBalancerClientAutoConfigurationTests {
 
 	private ApplicationContextRunner applicationContextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class,
-					BlockingLoadBalancerClientAutoConfiguration.class));
+		.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class,
+				BlockingLoadBalancerClientAutoConfiguration.class));
 
 	@Test
 	void beansCreatedNormally() {
@@ -50,7 +50,7 @@ class BlockingLoadBalancerClientAutoConfigurationTests {
 	@Test
 	public void worksWithoutSpringWeb() {
 		applicationContextRunner.withClassLoader(new FilteredClassLoader(RestTemplate.class, RestClient.class))
-				.run(context -> assertThat(context).doesNotHaveBean(BlockingLoadBalancerClient.class));
+			.run(context -> assertThat(context).doesNotHaveBean(BlockingLoadBalancerClient.class));
 	}
 
 	@Test

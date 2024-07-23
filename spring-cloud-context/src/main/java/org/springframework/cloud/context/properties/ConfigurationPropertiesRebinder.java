@@ -153,7 +153,7 @@ public class ConfigurationPropertiesRebinder
 	@ManagedAttribute
 	public Set<String> getNeverRefreshable() {
 		String neverRefresh = this.applicationContext.getEnvironment()
-				.getProperty("spring.cloud.refresh.never-refreshable", "com.zaxxer.hikari.HikariDataSource");
+			.getProperty("spring.cloud.refresh.never-refreshable", "com.zaxxer.hikari.HikariDataSource");
 		return StringUtils.commaDelimitedListToSet(neverRefresh);
 	}
 

@@ -33,7 +33,7 @@ public class BootstrapSourcesOrderingTests {
 	public void sourcesAreOrderedCorrectly() {
 		Class<?> firstConstructedClass = firstToBeCreated.get();
 		then(firstConstructedClass).as("bootstrap sources not ordered correctly")
-				.isEqualTo(TestHigherPriorityBootstrapConfiguration.class);
+			.isEqualTo(TestHigherPriorityBootstrapConfiguration.class);
 	}
 
 	@EnableAutoConfiguration

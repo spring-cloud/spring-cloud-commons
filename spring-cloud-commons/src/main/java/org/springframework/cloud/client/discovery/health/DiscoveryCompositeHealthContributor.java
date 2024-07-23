@@ -43,7 +43,7 @@ public class DiscoveryCompositeHealthContributor implements CompositeHealthContr
 	public DiscoveryCompositeHealthContributor(Collection<DiscoveryHealthIndicator> indicators) {
 		Assert.notNull(indicators, "'indicators' must not be null");
 		this.indicators = indicators.stream()
-				.collect(Collectors.toMap(DiscoveryHealthIndicator::getName, Function.identity()));
+			.collect(Collectors.toMap(DiscoveryHealthIndicator::getName, Function.identity()));
 	}
 
 	@Override

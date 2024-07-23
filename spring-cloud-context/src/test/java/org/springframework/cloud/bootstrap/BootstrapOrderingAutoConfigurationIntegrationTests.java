@@ -39,7 +39,7 @@ public class BootstrapOrderingAutoConfigurationIntegrationTests {
 	@Test
 	public void bootstrapPropertiesExist() {
 		then(this.environment.getPropertySources().contains("applicationConfig: [classpath:/bootstrap.properties]"))
-				.isTrue();
+			.isTrue();
 	}
 
 	@Test

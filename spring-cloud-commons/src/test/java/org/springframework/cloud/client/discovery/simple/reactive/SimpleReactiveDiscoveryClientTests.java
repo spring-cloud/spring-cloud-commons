@@ -46,7 +46,7 @@ public class SimpleReactiveDiscoveryClientTests {
 	public void setUp() {
 		SimpleReactiveDiscoveryProperties simpleReactiveDiscoveryProperties = new SimpleReactiveDiscoveryProperties();
 		simpleReactiveDiscoveryProperties
-				.setInstances(singletonMap("service", Arrays.asList(service1Inst1, service1Inst2)));
+			.setInstances(singletonMap("service", Arrays.asList(service1Inst1, service1Inst2)));
 		simpleReactiveDiscoveryProperties.afterPropertiesSet();
 		this.client = new SimpleReactiveDiscoveryClient(simpleReactiveDiscoveryProperties);
 	}

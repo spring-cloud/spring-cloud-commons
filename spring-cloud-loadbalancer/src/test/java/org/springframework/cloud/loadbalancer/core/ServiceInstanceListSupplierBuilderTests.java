@@ -36,8 +36,11 @@ public class ServiceInstanceListSupplierBuilderTests {
 	@Test
 	public void testBuilder() {
 		new ApplicationContextRunner().withUserConfiguration(CacheTestConfig.class).run(context -> {
-			ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier.builder().withDiscoveryClient()
-					.withHealthChecks().withWeighted().build(context);
+			ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier.builder()
+				.withDiscoveryClient()
+				.withHealthChecks()
+				.withWeighted()
+				.build(context);
 			assertThat(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
 			DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;
 			assertThat(delegating.getDelegate()).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
@@ -63,8 +66,11 @@ public class ServiceInstanceListSupplierBuilderTests {
 	@Test
 	public void testDelegateReturnedIfLoadBalancerCacheManagerNotAvailable() {
 		new ApplicationContextRunner().withUserConfiguration(BaseTestConfig.class).run(context -> {
-			ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier.builder().withDiscoveryClient()
-					.withHealthChecks().withCaching().build(context);
+			ServiceInstanceListSupplier supplier = ServiceInstanceListSupplier.builder()
+				.withDiscoveryClient()
+				.withHealthChecks()
+				.withCaching()
+				.build(context);
 			assertThat(supplier).isNotInstanceOf(CachingServiceInstanceListSupplier.class);
 			assertThat(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
 			DelegatingServiceInstanceListSupplier delegating = (DelegatingServiceInstanceListSupplier) supplier;

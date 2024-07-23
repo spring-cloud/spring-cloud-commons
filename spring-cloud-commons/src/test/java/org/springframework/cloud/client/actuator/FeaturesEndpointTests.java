@@ -57,8 +57,8 @@ public class FeaturesEndpointTests {
 	public void invokeWorks() {
 		FeaturesEndpoint.Features features = this.context.getBean(FeaturesEndpoint.class).features();
 		then(features).isNotNull();
-		then(features.getEnabled()).hasSize(2).contains(newFeature("foo", Foo.class),
-				newFeature("Baz Feature", Baz.class));
+		then(features.getEnabled()).hasSize(2)
+			.contains(newFeature("foo", Foo.class), newFeature("Baz Feature", Baz.class));
 		then(features.getDisabled()).hasSize(1).contains("Bar");
 	}
 

@@ -59,7 +59,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		assertLoadBalanced(webClientBuilder, ReactorLoadBalancerExchangeFilterFunction.class);
 
 		final Map<String, OneWebClientBuilder.TestService> testServiceMap = context
-				.getBeansOfType(OneWebClientBuilder.TestService.class);
+			.getBeansOfType(OneWebClientBuilder.TestService.class);
 		then(testServiceMap).isNotNull().hasSize(1);
 		OneWebClientBuilder.TestService testService = testServiceMap.values().stream().findFirst().get();
 		assertLoadBalanced(testService.webClient, ReactorLoadBalancerExchangeFilterFunction.class);
@@ -78,7 +78,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		assertLoadBalanced(webClientBuilder, RetryableLoadBalancerExchangeFilterFunction.class);
 
 		final Map<String, OneWebClientBuilder.TestService> testServiceMap = context
-				.getBeansOfType(OneWebClientBuilder.TestService.class);
+			.getBeansOfType(OneWebClientBuilder.TestService.class);
 		then(testServiceMap).isNotNull().hasSize(1);
 		OneWebClientBuilder.TestService testService = testServiceMap.values().stream().findFirst().get();
 		assertLoadBalanced(testService.webClient, RetryableLoadBalancerExchangeFilterFunction.class);
@@ -136,10 +136,10 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	@Test
 	void defaultPropertiesWorks() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-				.sources(OneWebClientBuilder.class, DefaulConfig.class)
-				.properties("spring.cloud.loadbalancer.health-check.initial-delay=1s",
-						"spring.cloud.loadbalancer.clients.myclient.health-check.interval=30s")
-				.run();
+			.sources(OneWebClientBuilder.class, DefaulConfig.class)
+			.properties("spring.cloud.loadbalancer.health-check.initial-delay=1s",
+					"spring.cloud.loadbalancer.clients.myclient.health-check.interval=30s")
+			.run();
 		LoadBalancerClientsProperties properties = context.getBean(LoadBalancerClientsProperties.class);
 
 		then(properties.getClients()).containsKey("myclient");

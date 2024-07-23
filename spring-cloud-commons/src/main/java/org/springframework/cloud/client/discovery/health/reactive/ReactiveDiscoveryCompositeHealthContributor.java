@@ -40,7 +40,7 @@ public class ReactiveDiscoveryCompositeHealthContributor implements CompositeRea
 	public ReactiveDiscoveryCompositeHealthContributor(Collection<ReactiveDiscoveryHealthIndicator> indicators) {
 		Assert.notNull(indicators, "'indicators' must not be null");
 		this.indicators = indicators.stream()
-				.collect(Collectors.toMap(ReactiveDiscoveryHealthIndicator::getName, Function.identity()));
+			.collect(Collectors.toMap(ReactiveDiscoveryHealthIndicator::getName, Function.identity()));
 	}
 
 	@Override

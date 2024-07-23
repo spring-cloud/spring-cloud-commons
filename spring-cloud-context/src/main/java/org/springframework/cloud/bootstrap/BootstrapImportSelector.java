@@ -64,7 +64,7 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 		List<String> names = new ArrayList<>(
 				SpringFactoriesLoader.loadFactoryNames(BootstrapConfiguration.class, classLoader));
 		names.addAll(Arrays.asList(StringUtils
-				.commaDelimitedListToStringArray(this.environment.getProperty("spring.cloud.bootstrap.sources", ""))));
+			.commaDelimitedListToStringArray(this.environment.getProperty("spring.cloud.bootstrap.sources", ""))));
 
 		List<OrderedAnnotatedElement> elements = new ArrayList<>();
 		for (String name : names) {
