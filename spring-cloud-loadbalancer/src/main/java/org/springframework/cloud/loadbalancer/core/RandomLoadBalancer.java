@@ -62,7 +62,8 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 	@Override
 	public Mono<Response<ServiceInstance>> choose(Request request) {
 		ServiceInstanceListSupplier supplier = serviceInstanceListSingletonSupplier.obtain();
-		return supplier.get(request).next()
+		return supplier.get(request)
+				.next()
 				.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
 
