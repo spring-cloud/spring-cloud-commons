@@ -27,7 +27,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -48,9 +47,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Conditional(LoadBalancerBeanPostProcessorAutoConfiguration.OnAnyLoadBalancerImplementationPresentCondition.class)
 public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
+	@SuppressWarnings("rawtypes")
 	@Bean
 	public static LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
-			@Lazy DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction,
+			ObjectProvider<DeferringLoadBalancerExchangeFilterFunction> deferringExchangeFilterFunction,
 			ApplicationContext context) {
 		return new LoadBalancerWebClientBuilderBeanPostProcessor(deferringExchangeFilterFunction, context);
 	}
