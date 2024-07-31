@@ -49,6 +49,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Will Tran
  * @author Gang Li
  * @author Olga Maciaszek-Sharma
+ * @author Henning Pöttker
  */
 @AutoConfiguration
 @Conditional(BlockingRestClassesPresentCondition.class)
@@ -86,17 +87,18 @@ public class LoadBalancerAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public DeferringLoadBalancerInterceptor deferringLoadBalancerInterceptor(
+		public static DeferringLoadBalancerInterceptor deferringLoadBalancerInterceptor(
 				ObjectProvider<BlockingLoadBalancerInterceptor> loadBalancerInterceptorObjectProvider) {
 			return new DeferringLoadBalancerInterceptor(loadBalancerInterceptorObjectProvider);
 		}
 
 		@Bean
 		@ConditionalOnBean(DeferringLoadBalancerInterceptor.class)
-		@ConditionalOnMissingBean
-		LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
-				DeferringLoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {
-			return new LoadBalancerRestClientBuilderBeanPostProcessor(loadBalancerInterceptor, context);
+		@ConditionalOnMissingBean(LoadBalancerRestClientBuilderBeanPostProcessor.class)
+		static LoadBalancerRestClientBuilderBeanPostProcessor<DeferringLoadBalancerInterceptor> lbRestClientPostProcessor(
+				ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
+				ApplicationContext context) {
+			return new LoadBalancerRestClientBuilderBeanPostProcessor<>(loadBalancerInterceptorProvider, context);
 		}
 
 	}

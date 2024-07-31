@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -29,15 +30,21 @@ import org.springframework.web.client.RestClient;
  * @author Olga Maciaszek-Sharma
  * @since 4.1.0
  */
-public class LoadBalancerRestClientBuilderBeanPostProcessor implements BeanPostProcessor {
+public class LoadBalancerRestClientBuilderBeanPostProcessor<T extends ClientHttpRequestInterceptor>
+		implements BeanPostProcessor {
 
-	private final ClientHttpRequestInterceptor loadBalancerInterceptor;
+	private final ObjectProvider<T> loadBalancerInterceptorProvider;
 
 	private final ApplicationContext context;
 
-	public LoadBalancerRestClientBuilderBeanPostProcessor(ClientHttpRequestInterceptor loadBalancerInterceptor,
+	public LoadBalancerRestClientBuilderBeanPostProcessor(T loadBalancerInterceptor, ApplicationContext context) {
+		this.loadBalancerInterceptorProvider = new SimpleObjectProvider<>(loadBalancerInterceptor);
+		this.context = context;
+	}
+
+	public LoadBalancerRestClientBuilderBeanPostProcessor(ObjectProvider<T> loadBalancerInterceptorProvider,
 			ApplicationContext context) {
-		this.loadBalancerInterceptor = loadBalancerInterceptor;
+		this.loadBalancerInterceptorProvider = loadBalancerInterceptorProvider;
 		this.context = context;
 	}
 
@@ -47,7 +54,11 @@ public class LoadBalancerRestClientBuilderBeanPostProcessor implements BeanPostP
 			if (context.findAnnotationOnBean(beanName, LoadBalanced.class) == null) {
 				return bean;
 			}
-			((RestClient.Builder) bean).requestInterceptor(loadBalancerInterceptor);
+			ClientHttpRequestInterceptor interceptor = loadBalancerInterceptorProvider.getIfAvailable();
+			if (interceptor == null) {
+				throw new IllegalStateException(ClientHttpRequestInterceptor.class.getSimpleName() + " not available.");
+			}
+			((RestClient.Builder) bean).requestInterceptor(interceptor);
 		}
 		return bean;
 	}
