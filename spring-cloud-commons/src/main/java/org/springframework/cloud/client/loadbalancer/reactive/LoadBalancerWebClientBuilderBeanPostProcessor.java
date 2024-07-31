@@ -40,7 +40,8 @@ public class LoadBalancerWebClientBuilderBeanPostProcessor implements BeanPostPr
 	private final ApplicationContext context;
 
 	/**
-	 * @deprecated in favour of {@link LoadBalancerWebClientBuilderBeanPostProcessor#LoadBalancerWebClientBuilderBeanPostProcessor(ObjectProvider, ApplicationContext)}
+	 * @deprecated in favour of
+	 * {@link LoadBalancerWebClientBuilderBeanPostProcessor#LoadBalancerWebClientBuilderBeanPostProcessor(ObjectProvider, ApplicationContext)}
 	 */
 	@Deprecated(forRemoval = true)
 	public LoadBalancerWebClientBuilderBeanPostProcessor(
