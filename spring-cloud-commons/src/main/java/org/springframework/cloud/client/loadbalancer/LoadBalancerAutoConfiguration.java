@@ -37,7 +37,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
@@ -50,7 +49,6 @@ import org.springframework.web.client.RestTemplate;
  * @author Will Tran
  * @author Gang Li
  * @author Olga Maciaszek-Sharma
- * @author Henning Pöttker
  */
 @AutoConfiguration
 @Conditional(BlockingRestClassesPresentCondition.class)
@@ -88,7 +86,7 @@ public class LoadBalancerAutoConfiguration {
 
 		@Bean
 		@ConditionalOnMissingBean
-		public static DeferringLoadBalancerInterceptor deferringLoadBalancerInterceptor(
+		public DeferringLoadBalancerInterceptor deferringLoadBalancerInterceptor(
 				ObjectProvider<BlockingLoadBalancerInterceptor> loadBalancerInterceptorObjectProvider) {
 			return new DeferringLoadBalancerInterceptor(loadBalancerInterceptorObjectProvider);
 		}
@@ -96,8 +94,8 @@ public class LoadBalancerAutoConfiguration {
 		@Bean
 		@ConditionalOnBean(DeferringLoadBalancerInterceptor.class)
 		@ConditionalOnMissingBean
-		static LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
-				@Lazy DeferringLoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {
+		LoadBalancerRestClientBuilderBeanPostProcessor lbRestClientPostProcessor(
+				DeferringLoadBalancerInterceptor loadBalancerInterceptor, ApplicationContext context) {
 			return new LoadBalancerRestClientBuilderBeanPostProcessor(loadBalancerInterceptor, context);
 		}
 

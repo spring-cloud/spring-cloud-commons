@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -40,7 +39,6 @@ import org.springframework.web.reactive.function.client.WebClient;
  * beans.
  *
  * @author Olga Maciaszek-Sharma
- * @author Henning Pöttker
  * @since 2.2.0
  */
 @Configuration(proxyBeanMethods = false)
@@ -49,9 +47,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
 	@Bean
-	public static LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
-			@Lazy DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction,
-			ApplicationContext context) {
+	public LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
+			DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction, ApplicationContext context) {
 		return new LoadBalancerWebClientBuilderBeanPostProcessor(deferringExchangeFilterFunction, context);
 	}
 
@@ -61,7 +58,7 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
 		@Bean
 		@Primary
-		static DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> reactorDeferringLoadBalancerExchangeFilterFunction(
+		DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> reactorDeferringLoadBalancerExchangeFilterFunction(
 				ObjectProvider<LoadBalancedExchangeFilterFunction> exchangeFilterFunctionProvider) {
 			return new DeferringLoadBalancerExchangeFilterFunction<>(exchangeFilterFunctionProvider);
 		}
