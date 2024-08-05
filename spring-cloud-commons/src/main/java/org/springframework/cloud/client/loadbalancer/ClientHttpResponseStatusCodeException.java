@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.client.AbstractClientHttpResponse;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
  * {@link RetryableStatusCodeException} that captures a {@link ClientHttpResponse}.
  *
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeException {
 
@@ -52,7 +53,7 @@ public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeEx
 		return this.response;
 	}
 
-	static class ClientHttpResponseWrapper extends AbstractClientHttpResponse {
+	static class ClientHttpResponseWrapper implements ClientHttpResponse {
 
 		private ClientHttpResponse response;
 
@@ -64,8 +65,8 @@ public class ClientHttpResponseStatusCodeException extends RetryableStatusCodeEx
 		}
 
 		@Override
-		public int getRawStatusCode() throws IOException {
-			return this.response.getStatusCode().value();
+		public HttpStatusCode getStatusCode() throws IOException {
+			return this.response.getStatusCode();
 		}
 
 		@Override
