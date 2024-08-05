@@ -35,8 +35,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<>() {
 		{
-			this.put("3.2", is3_2());
-			this.put("3.3", is3_3());
+			this.put("3.4", is3_4());
 		}
 	};
 
@@ -71,39 +70,18 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		return SpringBootVersion.getVersion();
 	}
 
-	CompatibilityPredicate is3_2() {
+	CompatibilityPredicate is3_4() {
 		return new CompatibilityPredicate() {
 
 			@Override
 			public String toString() {
-				return "Predicate for Boot 3.2";
+				return "Predicate for Boot 3.4";
 			}
 
 			@Override
 			public boolean isCompatible() {
 				try {
 					Class.forName("org.springframework.boot.autoconfigure.web.client.RestClientSsl");
-					return true;
-				}
-				catch (ClassNotFoundException e) {
-					return false;
-				}
-			}
-		};
-	}
-
-	CompatibilityPredicate is3_3() {
-		return new CompatibilityPredicate() {
-
-			@Override
-			public String toString() {
-				return "Predicate for Boot 3.3";
-			}
-
-			@Override
-			public boolean isCompatible() {
-				try {
-					Class.forName("org.springframework.boot.autoconfigure.ldap.PropertiesLdapConnectionDetails");
 					return true;
 				}
 				catch (ClassNotFoundException e) {
