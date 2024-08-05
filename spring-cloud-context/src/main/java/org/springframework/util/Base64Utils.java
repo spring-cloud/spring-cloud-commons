@@ -21,14 +21,15 @@ import java.util.Base64;
 /**
  * A simple utility class for Base64 encoding and decoding.
  *
- * <p>Adapts to Java 8's {@link java.util.Base64} in a convenience fashion.
+ * <p>
+ * Adapts to Java 8's {@link java.util.Base64} in a convenience fashion.
  *
  * @author Juergen Hoeller
  * @author Gary Russell
  * @since 4.1
  * @see java.util.Base64
- * @deprecated as of Spring Framework 6.0.5 in favor of {@link Base64}; scheduled
- * for removal in 6.2
+ * @deprecated as of Spring Framework 6.0.5 in favor of {@link Base64}; scheduled for
+ * removal in 6.2
  */
 @Deprecated(since = "6.0.5", forRemoval = true)
 public abstract class Base64Utils {
@@ -58,8 +59,8 @@ public abstract class Base64Utils {
 	}
 
 	/**
-	 * Base64-encode the given byte array using the RFC 4648
-	 * "URL and Filename Safe Alphabet".
+	 * Base64-encode the given byte array using the RFC 4648 "URL and Filename Safe
+	 * Alphabet".
 	 * @param src the original byte array
 	 * @return the encoded byte array
 	 * @since 4.2.4
@@ -72,8 +73,8 @@ public abstract class Base64Utils {
 	}
 
 	/**
-	 * Base64-decode the given byte array using the RFC 4648
-	 * "URL and Filename Safe Alphabet".
+	 * Base64-decode the given byte array using the RFC 4648 "URL and Filename Safe
+	 * Alphabet".
 	 * @param src the encoded byte array
 	 * @return the original byte array
 	 * @since 4.2.4
@@ -110,8 +111,8 @@ public abstract class Base64Utils {
 	}
 
 	/**
-	 * Base64-encode the given byte array to a String using the RFC 4648
-	 * "URL and Filename Safe Alphabet".
+	 * Base64-encode the given byte array to a String using the RFC 4648 "URL and Filename
+	 * Safe Alphabet".
 	 * @param src the original byte array
 	 * @return the encoded byte array as a UTF-8 String
 	 */
@@ -120,8 +121,8 @@ public abstract class Base64Utils {
 	}
 
 	/**
-	 * Base64-decode the given byte array from a UTF-8 String using the RFC 4648
-	 * "URL and Filename Safe Alphabet".
+	 * Base64-decode the given byte array from a UTF-8 String using the RFC 4648 "URL and
+	 * Filename Safe Alphabet".
 	 * @param src the encoded UTF-8 String
 	 * @return the original byte array
 	 */
