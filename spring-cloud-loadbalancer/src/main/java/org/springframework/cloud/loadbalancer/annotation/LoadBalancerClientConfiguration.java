@@ -103,6 +103,16 @@ public class LoadBalancerClientConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(MultiMainZoneConfigurationCondition.class)
+		public ServiceInstanceListSupplier multiMainZoneDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withCaching().withMultiMainZone()
+					.build(context);
+		}
+
+		@Bean
 		@ConditionalOnBean(LoadBalancerClientFactory.class)
 		@ConditionalOnMissingBean
 		public XForwardedHeadersTransformer xForwarderHeadersTransformer(LoadBalancerClientFactory clientFactory) {
@@ -195,6 +205,16 @@ public class LoadBalancerClientConfiguration {
 				.withCaching()
 				.withZonePreference()
 				.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(MultiMainZoneConfigurationCondition.class)
+		public ServiceInstanceListSupplier multiMainZoneDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withCaching()
+					.withMultiMainZone().build(context);
 		}
 
 		@Bean
@@ -374,6 +394,15 @@ public class LoadBalancerClientConfiguration {
 					"configurations", "zone-preference");
 		}
 
+	}
+
+	static class MultiMainZoneConfigurationCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"configurations", "multi-main-zone");
+		}
 	}
 
 	static class HealthCheckConfigurationCondition implements Condition {

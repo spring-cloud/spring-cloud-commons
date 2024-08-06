@@ -185,6 +185,51 @@ public class CustomLoadBalancerConfiguration {
 }
 ----
 
+[[multi-main-zone-based-load-balancing]]
+== Multi-main-zone-Based Load-Balancing
+
+To enable multi-main-zone-based load-balancing, we provide the `MultiMainZoneServiceInstanceListSupplier`.
+We use `DiscoveryClient`-specific `main-zone` and `subset-zone` configuration (for example, `eureka.instance.metadata-map.main-zone` and `eureka.instance.metadata-map.subset-zone`) to pick the zone that the client tries to filter available service instances for.
+
+WARNING: There's no Discovery Client instrumented to set the LoadBalancer main-zone and subset-zone.
+
+NOTE: To determine the zone of a retrieved `ServiceInstance`, we check the value under the `"main-zone"` and `"subset-zone"` key in its metadata map.
+
+The `MultiMainZoneServiceInstanceListSupplier` filters retrieved instances and only returns the ones within the same main-zone and subset-zone.
+
+The `MultiMainZoneServiceInstanceListSupplier` main-zone config by `spring.cloud.loadbalancer.multiMainZone.mainZone` default value is `DAILY`, and request header key config by `spring. cloud. loadbalance. multiMainZone. zoneRequestHeaderKey` default value is `zone`.
+
+The comparison of subset-zone follows the following two rules:
+
+  - If a value is obtained from the request header (key ${"spring. cloud. loadbalance. multiMainZone. zoneRequestHeaderKey:zone"}), this value is prioritized for comparison. If the instance is empty, main-zone is used for comparison.
+  - If no value is obtained from the request header (key ${"spring. cloud. loadbalance. multiMainZone. zoneRequestHeaderKey:zone"}), use main-zone for comparison.
+
+If the main-zone or subset-zone is `null` or there are no instances within the same zone, it returns none the retrieved instances.
+
+In order to use the multi-main-zone-based load-balancing approach, you will have to instantiate a `MultiMainZoneServiceInstanceListSupplier` bean in a xref:spring-cloud-commons/loadbalancer.adoc#custom-loadbalancer-configuration[custom configuration].
+
+We use delegates to work with `ServiceInstanceListSupplier` beans.
+We suggest using a `DiscoveryClientServiceInstanceListSupplier` delegate, wrapping it with a `CachingServiceInstanceListSupplier` to leverage xref:spring-cloud-commons/loadbalancer.adoc#loadbalancer-caching[LoadBalancer caching mechanism], and then passing the resulting bean in the constructor of `MultiMainZoneServiceInstanceListSupplier`.
+
+You can use this sample configuration to set it up:
+
+[[multi-main-zone-based-custom-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+                    .withCaching()
+					.withMultiMainZone()
+					.build(context);
+	}
+}
+----
+
 [[instance-health-check-for-loadbalancer]]
 == Instance Health-Check for LoadBalancer
 
