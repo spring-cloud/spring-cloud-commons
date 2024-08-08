@@ -47,7 +47,7 @@ public class InetUtils implements Closeable {
 
 	public InetUtils(final InetUtilsProperties properties) {
 		this.properties = properties;
-		this.executorService = Executors.newSingleThreadExecutor(r -> {
+		this.executorService = Executors.newCachedThreadPool(r -> {
 			Thread thread = new Thread(r);
 			thread.setName(InetUtilsProperties.PREFIX);
 			thread.setDaemon(true);
