@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.util.function.SingletonSupplier;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  * @author Zhuozhi JI
+ * @author Nan Chiu
  */
 public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
@@ -47,7 +48,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	final String serviceId;
 
-	final SingletonSupplier<ServiceInstanceListSupplier> serviceInstanceListSingletonSupplier;
+	private final SingletonSupplier<ServiceInstanceListSupplier> serviceInstanceListSingletonSupplier;
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
