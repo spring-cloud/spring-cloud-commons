@@ -54,9 +54,8 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 	public RandomLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId) {
 		this.serviceId = serviceId;
-		this.serviceInstanceListSingletonSupplier = SingletonSupplier.of(
-				() -> serviceInstanceListSupplierProvider.getIfAvailable(NoopServiceInstanceListSupplier::new)
-		);
+		this.serviceInstanceListSingletonSupplier = SingletonSupplier
+			.of(() -> serviceInstanceListSupplierProvider.getIfAvailable(NoopServiceInstanceListSupplier::new));
 	}
 
 	@SuppressWarnings("rawtypes")
