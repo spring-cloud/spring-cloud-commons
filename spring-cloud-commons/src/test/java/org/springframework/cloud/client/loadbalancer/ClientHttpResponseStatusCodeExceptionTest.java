@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.client.AbstractClientHttpResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
 
@@ -33,6 +34,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Ryan Baxter
+ * @author Olga Maciaszek-Sharma
  */
 @ExtendWith(MockitoExtension.class)
 public class ClientHttpResponseStatusCodeExceptionTest {
@@ -44,19 +46,19 @@ public class ClientHttpResponseStatusCodeExceptionTest {
 		ClientHttpResponseStatusCodeException exp = new ClientHttpResponseStatusCodeException("service", response,
 				response.getStatusText().getBytes());
 		ClientHttpResponse expResponse = exp.getResponse();
-		then(expResponse.getStatusCode().value()).isEqualTo(response.getRawStatusCode());
+		then(expResponse.getStatusCode()).isEqualTo(response.getStatusCode());
 		then(expResponse.getStatusText()).isEqualTo(response.getStatusText());
 		then(expResponse.getHeaders()).isEqualTo(response.getHeaders());
 		then(new String(StreamUtils.copyToByteArray(expResponse.getBody()))).isEqualTo(response.getStatusText());
 	}
 
-	static class MyClientHttpResponse extends AbstractClientHttpResponse {
+	static class MyClientHttpResponse implements ClientHttpResponse {
 
 		private boolean closed = false;
 
 		@Override
-		public int getRawStatusCode() {
-			return 200;
+		public HttpStatusCode getStatusCode() {
+			return HttpStatus.OK;
 		}
 
 		@Override

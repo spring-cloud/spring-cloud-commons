@@ -16,9 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer.reactive;
 
+import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
@@ -42,9 +41,9 @@ final class LoadBalancerTestUtils {
 	}
 
 	static ConfigurableApplicationContext init(Class<?>... configClasses) {
-		return new SpringApplicationBuilder().web(WebApplicationType.NONE)
-			.sources(ArrayUtils.add(configClasses, WebClientAutoConfiguration.class))
-			.run();
+		Class[] classes = Arrays.copyOf(configClasses, configClasses.length + 1);
+		classes[configClasses.length] = WebClientAutoConfiguration.class;
+		return new SpringApplicationBuilder().web(WebApplicationType.NONE).sources(classes).run();
 	}
 
 	@SuppressWarnings("unchecked")

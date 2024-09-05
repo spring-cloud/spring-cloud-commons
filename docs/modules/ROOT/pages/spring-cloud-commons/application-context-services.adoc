@@ -173,6 +173,8 @@ For instance, a `DataSource` can have its `maxPoolSize` changed at runtime (the 
 Re-binding `@ConfigurationProperties` does not cover another large class of use cases, where you need more control over the refresh and where you need a change to be atomic over the whole `ApplicationContext`.
 To address those concerns, we have `@RefreshScope`.
 
+NOTE:  Java Records annotated with `@ConfigurationProperties` cannot be refreshed.
+
 [[refresh-scope]]
 == Refresh Scope
 
