@@ -35,10 +35,10 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Spencer Gibb
+ * @author Sergey Tsypanov
  */
 public class InetUtils implements Closeable {
 
-	// TODO: maybe shutdown the thread pool if it isn't being used?
 	private final ExecutorService executorService;
 
 	private final InetUtilsProperties properties;
