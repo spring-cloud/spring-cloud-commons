@@ -25,11 +25,15 @@ import java.security.UnrecoverableKeyException;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
 
 import org.springframework.core.io.Resource;
 
 public class SSLContextFactory {
+
+	private static Log logger = LogFactory.getLog(SSLContextFactory.class);
 
 	private TlsProperties properties;
 
@@ -39,26 +43,32 @@ public class SSLContextFactory {
 
 	public SSLContext createSSLContext() throws GeneralSecurityException, IOException {
 		SSLContextBuilder builder = new SSLContextBuilder();
-		char[] keyPassword = properties.keyPassword();
-		KeyStore keyStore = createKeyStore();
-
-		try {
-			builder.loadKeyMaterial(keyStore, keyPassword);
-		}
-		catch (UnrecoverableKeyException e) {
-			if (keyPassword.length == 0) {
-				// Retry if empty password, see
-				// https://rt.openssl.org/Ticket/Display.html?id=1497&user=guest&pass=guest
-				builder.loadKeyMaterial(keyStore, new char[] { '\0' });
-			}
-			else {
-				throw e;
-			}
-		}
 
 		KeyStore trust = createTrustStore();
 		if (trust != null) {
 			builder.loadTrustMaterial(trust, null);
+		}
+
+		char[] keyPassword = properties.keyPassword();
+		try {
+			KeyStore keyStore = createKeyStore();
+
+			try {
+				builder.loadKeyMaterial(keyStore, keyPassword);
+			}
+			catch (UnrecoverableKeyException e) {
+				if (keyPassword.length == 0) {
+					// Retry if empty password, see
+					// https://rt.openssl.org/Ticket/Display.html?id=1497&user=guest&pass=guest
+					builder.loadKeyMaterial(keyStore, new char[] { '\0' });
+				}
+				else {
+					logger.warn("Could not create keystore.", e);
+				}
+			}
+		}
+		catch (KeyStoreException e) {
+			logger.warn("Could not create keystore.", e);
 		}
 
 		return builder.build();
