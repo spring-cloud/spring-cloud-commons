@@ -17,8 +17,8 @@
 package org.springframework.cloud.context.encrypt;
 
 import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.RsaSecretEncryptor;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
 
 /**
  * @author Dave Syer

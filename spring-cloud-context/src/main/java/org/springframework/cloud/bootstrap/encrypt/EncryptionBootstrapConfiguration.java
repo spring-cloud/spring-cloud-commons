@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.bootstrap.encrypt;
 
+import org.bouncycastle.asn1.ASN1Sequence;
+
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionOutcome;
@@ -32,8 +34,8 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
+import org.springframework.security.crypto.encrypt.RsaSecretEncryptor;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
 import org.springframework.util.StringUtils;
 
 /**
@@ -73,7 +75,7 @@ public class EncryptionBootstrapConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@Conditional(KeyCondition.class)
-	@ConditionalOnClass(RsaSecretEncryptor.class)
+	@ConditionalOnClass({ RsaSecretEncryptor.class, ASN1Sequence.class })
 	@EnableConfigurationProperties
 	protected static class RsaEncryptionConfiguration {
 
@@ -93,7 +95,7 @@ public class EncryptionBootstrapConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@Conditional(KeyCondition.class)
-	@ConditionalOnMissingClass("org.springframework.security.rsa.crypto.RsaSecretEncryptor")
+	@ConditionalOnMissingClass("org.bouncycastle.asn1.ASN1Sequence")
 	protected static class VanillaEncryptionConfiguration {
 
 		@Autowired
