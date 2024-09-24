@@ -18,7 +18,7 @@ package org.springframework.cloud.bootstrap.encrypt;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.security.rsa.crypto.RsaAlgorithm;
+import org.springframework.security.crypto.encrypt.RsaAlgorithm;
 
 /**
  * @author Ryan Baxter

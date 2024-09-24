@@ -32,7 +32,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Ryan Baxter
  */
-@ClassPathExclusions({ "spring-security-rsa*.jar" })
+@ClassPathExclusions({ "bcprov-jdk*.jar" })
 public class RsaDisabledTests {
 
 	private ConfigurableApplicationContext context;
@@ -54,7 +54,7 @@ public class RsaDisabledTests {
 	}
 
 	@Test
-	public void testLoadBalancedRetryFactoryBean() throws Exception {
+	public void testNoRsaProperites() throws Exception {
 		Map<String, RsaProperties> properties = this.context.getBeansOfType(RsaProperties.class);
 		then(properties.values()).hasSize(0);
 	}

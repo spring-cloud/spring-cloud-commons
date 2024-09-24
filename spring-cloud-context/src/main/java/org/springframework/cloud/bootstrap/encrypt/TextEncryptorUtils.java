@@ -31,11 +31,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.security.crypto.encrypt.KeyStoreKeyFactory;
+import org.springframework.security.crypto.encrypt.RsaSecretEncryptor;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.security.rsa.crypto.KeyStoreKeyFactory;
-import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper.BCPROV_IS_PRESENT;
 
 public abstract class TextEncryptorUtils {
 
@@ -58,7 +60,7 @@ public abstract class TextEncryptorUtils {
 			.orElseGet(KeyProperties::new);
 		if (TextEncryptorUtils.keysConfigured(keyProperties)) {
 			decryptor.setFailOnError(keyProperties.isFailOnError());
-			if (ClassUtils.isPresent("org.springframework.security.rsa.crypto.RsaSecretEncryptor", null)) {
+			if (ClassUtils.isPresent("org.springframework.security.crypto.encrypt.RsaSecretEncryptor", null)) {
 				RsaProperties rsaProperties = binder.bind(RsaProperties.PREFIX, RsaProperties.class)
 					.orElseGet(RsaProperties::new);
 				return TextEncryptorUtils.createTextEncryptor(keyProperties, rsaProperties);
@@ -78,7 +80,7 @@ public abstract class TextEncryptorUtils {
 		registry.registerIfAbsent(TextEncryptor.class, context -> {
 			KeyProperties keyProperties = context.get(KeyProperties.class);
 			if (TextEncryptorConfigBootstrapper.keysConfigured(keyProperties)) {
-				if (TextEncryptorConfigBootstrapper.RSA_IS_PRESENT) {
+				if (TextEncryptorConfigBootstrapper.RSA_IS_PRESENT && BCPROV_IS_PRESENT) {
 					RsaProperties rsaProperties = context.get(RsaProperties.class);
 					return createTextEncryptor(keyProperties, rsaProperties);
 				}

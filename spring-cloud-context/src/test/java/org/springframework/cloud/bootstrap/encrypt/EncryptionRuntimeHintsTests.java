@@ -24,7 +24,7 @@ import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.RuntimeHintsRegistrar;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
 import org.springframework.core.io.support.SpringFactoriesLoader;
-import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
+import org.springframework.security.crypto.encrypt.RsaSecretEncryptor;
 import org.springframework.util.ClassUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
