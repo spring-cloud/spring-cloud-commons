@@ -37,11 +37,23 @@ public class LoadBalancerRestClientBuilderBeanPostProcessor<T extends ClientHttp
 
 	private final ApplicationContext context;
 
+	/**
+	 * Creates a {@link LoadBalancerRestClientBuilderBeanPostProcessor} instance using a provided {@link ClientHttpRequestInterceptor} and application context.
+	 * @param loadBalancerInterceptor a {@link ClientHttpRequestInterceptor} used for load-balancing
+	 * @param context {@link ApplicationContext}
+	 * @deprecated in favour of {@link LoadBalancerRestClientBuilderBeanPostProcessor#LoadBalancerRestClientBuilderBeanPostProcessor(ObjectProvider, ApplicationContext)}
+	 */
+	@Deprecated(forRemoval = true)
 	public LoadBalancerRestClientBuilderBeanPostProcessor(T loadBalancerInterceptor, ApplicationContext context) {
 		this.loadBalancerInterceptorProvider = new SimpleObjectProvider<>(loadBalancerInterceptor);
 		this.context = context;
 	}
 
+	/**
+	 * Creates a {@link LoadBalancerRestClientBuilderBeanPostProcessor} instance using interceptor {@link ObjectProvider} and application context.
+	 * @param loadBalancerInterceptorProvider an {@link ObjectProvider} for {@link ClientHttpRequestInterceptor} used for load-balancing
+	 * @param context {@link ApplicationContext}
+	 */
 	public LoadBalancerRestClientBuilderBeanPostProcessor(ObjectProvider<T> loadBalancerInterceptorProvider,
 			ApplicationContext context) {
 		this.loadBalancerInterceptorProvider = loadBalancerInterceptorProvider;
