@@ -16,13 +16,15 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import java.net.URI;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.ApplicationContext;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
@@ -39,9 +41,6 @@ public class LoadBalancedRestTemplateBuilderIntegrationTests {
 
 	private final RestTemplateBuilder restTemplateBuilder;
 
-	@Autowired
-	ApplicationContext context;
-
 	public LoadBalancedRestTemplateBuilderIntegrationTests(@Autowired RestTemplateBuilder restTemplateBuilder) {
 		this.restTemplateBuilder = restTemplateBuilder;
 	}
@@ -51,7 +50,12 @@ public class LoadBalancedRestTemplateBuilderIntegrationTests {
 		RestTemplate restTemplate = restTemplateBuilder.build();
 
 		assertThat(restTemplate.getInterceptors()).hasSize(1);
-		assertThat(restTemplate.getInterceptors().get(0)).isInstanceOf(BlockingLoadBalancerInterceptor.class);
+		assertThat(restTemplate.getInterceptors()
+				.get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
+		assertThat(((DeferringLoadBalancerInterceptor) restTemplate.getInterceptors()
+				.get(0))
+				.getLoadBalancerInterceptorProvider()
+				.getObject()).isInstanceOf(BlockingLoadBalancerInterceptor.class);
 	}
 
 	@SpringBootConfiguration
@@ -63,6 +67,38 @@ public class LoadBalancedRestTemplateBuilderIntegrationTests {
 			return new RestTemplateBuilder();
 		}
 
+		@Bean
+		LoadBalancerClient testLoadBalancerClient() {
+			return new LoadBalancerClient() {
+				@Override
+				public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
+					throw new UnsupportedOperationException("LoadBalancerInterceptor invoked.");
+				}
+
+				@Override
+				public <T> T execute(String serviceId, ServiceInstance serviceInstance,
+						LoadBalancerRequest<T> request) {
+					throw new UnsupportedOperationException("LoadBalancerInterceptor invoked.");
+				}
+
+				@Override
+				public URI reconstructURI(ServiceInstance instance, URI original) {
+					throw new UnsupportedOperationException("LoadBalancerInterceptor invoked.");
+				}
+
+				@Override
+				public ServiceInstance choose(String serviceId) {
+					throw new UnsupportedOperationException("LoadBalancerInterceptor invoked.");
+				}
+
+				@Override
+				public <T> ServiceInstance choose(String serviceId, Request<T> request) {
+					throw new UnsupportedOperationException("LoadBalancerInterceptor invoked.");
+				}
+			};
+		}
+
 	}
 
-}
+	}
+

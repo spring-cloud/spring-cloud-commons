@@ -24,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestClient;
 
@@ -40,17 +39,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 		properties = "spring.cloud.loadbalancer.retry.enabled=false")
 public class LoadBalancedRestClientIntegrationTests {
 
-	private final RestClient client;
+	private final RestClient.Builder restClientBuilder;
 
-	@Autowired
-	ApplicationContext context;
 
-	public LoadBalancedRestClientIntegrationTests(@Autowired RestClient.Builder clientBuilder) {
-		this.client = clientBuilder.build();
+	public LoadBalancedRestClientIntegrationTests(@Autowired RestClient.Builder restClientBuilder) {
+		this.restClientBuilder = restClientBuilder;
 	}
 
 	@Test
 	void shouldBuildLoadBalancedRestClientInConstructor() {
+		RestClient client = restClientBuilder.build();
+
 		// Interceptors are not visible in RestClient
 		assertThatThrownBy(() -> client.get().uri("http://test-service").retrieve())
 			.hasMessage("LoadBalancerInterceptor invoked.");
