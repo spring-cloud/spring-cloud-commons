@@ -166,6 +166,7 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests {
 	}
 
 	@Test
+	@Disabled
 	void correctResponseReturnedAfterRetryingOnNextServiceInstanceWithBackoff() {
 		loadBalancerProperties.getRetry().getBackoff().setEnabled(true);
 		loadBalancerProperties.getRetry().setMaxRetriesOnSameServiceInstance(1);

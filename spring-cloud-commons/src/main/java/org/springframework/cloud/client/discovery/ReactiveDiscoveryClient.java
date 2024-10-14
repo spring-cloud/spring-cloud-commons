@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public interface ReactiveDiscoveryClient extends Ordered {
 	 * within. We are leaving it with a deprecation in order not to bring downstream
 	 * implementations.
 	 */
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	default void probe() {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("ReactiveDiscoveryClient#probe has been called. If you're calling this method directly, "
