@@ -50,12 +50,10 @@ public class LoadBalancedRestTemplateBuilderIntegrationTests {
 		RestTemplate restTemplate = restTemplateBuilder.build();
 
 		assertThat(restTemplate.getInterceptors()).hasSize(1);
-		assertThat(restTemplate.getInterceptors()
-				.get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
-		assertThat(((DeferringLoadBalancerInterceptor) restTemplate.getInterceptors()
-				.get(0))
-				.getLoadBalancerInterceptorProvider()
-				.getObject()).isInstanceOf(BlockingLoadBalancerInterceptor.class);
+		assertThat(restTemplate.getInterceptors().get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
+		assertThat(((DeferringLoadBalancerInterceptor) restTemplate.getInterceptors().get(0))
+			.getLoadBalancerInterceptorProvider()
+			.getObject()).isInstanceOf(BlockingLoadBalancerInterceptor.class);
 	}
 
 	@SpringBootConfiguration
@@ -100,5 +98,4 @@ public class LoadBalancedRestTemplateBuilderIntegrationTests {
 
 	}
 
-	}
-
+}

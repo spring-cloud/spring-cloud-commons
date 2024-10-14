@@ -41,7 +41,6 @@ public class LoadBalancedRestClientIntegrationTests {
 
 	private final RestClient.Builder restClientBuilder;
 
-
 	public LoadBalancedRestClientIntegrationTests(@Autowired RestClient.Builder restClientBuilder) {
 		this.restClientBuilder = restClientBuilder;
 	}
