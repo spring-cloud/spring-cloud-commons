@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
-import java.io.IOException;
 import java.net.URI;
 
 import org.junit.jupiter.api.Test;
@@ -70,13 +69,13 @@ public class LoadBalancedRestClientIntegrationTests {
 		LoadBalancerClient testLoadBalancerClient() {
 			return new LoadBalancerClient() {
 				@Override
-				public <T> T execute(String serviceId, LoadBalancerRequest<T> request) throws IOException {
+				public <T> T execute(String serviceId, LoadBalancerRequest<T> request) {
 					throw new UnsupportedOperationException("LoadBalancerInterceptor invoked.");
 				}
 
 				@Override
-				public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request)
-						throws IOException {
+				public <T> T execute(String serviceId, ServiceInstance serviceInstance,
+						LoadBalancerRequest<T> request) {
 					throw new UnsupportedOperationException("LoadBalancerInterceptor invoked.");
 				}
 
