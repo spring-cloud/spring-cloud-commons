@@ -42,16 +42,20 @@ import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.buil
  * load-balanced calls.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Jaroslaw Dembek
  * @since 3.0.0
  */
 public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecycle<Object, Object, ServiceInstance> {
 
 	private final MeterRegistry meterRegistry;
 
+	private final boolean useUriTemplateAttribute;
+
 	private final ConcurrentHashMap<ServiceInstance, AtomicLong> activeRequestsPerInstance = new ConcurrentHashMap<>();
 
-	public MicrometerStatsLoadBalancerLifecycle(MeterRegistry meterRegistry) {
+	public MicrometerStatsLoadBalancerLifecycle(MeterRegistry meterRegistry, boolean useUriTemplateAttribute) {
 		this.meterRegistry = meterRegistry;
+		this.useUriTemplateAttribute = useUriTemplateAttribute;
 	}
 
 	@Override
@@ -88,7 +92,7 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 		long requestFinishedTimestamp = System.nanoTime();
 		if (CompletionContext.Status.DISCARD.equals(completionContext.status())) {
 			Counter.builder("loadbalancer.requests.discard")
-				.tags(buildDiscardedRequestTags(completionContext))
+				.tags(buildDiscardedRequestTags(completionContext, useUriTemplateAttribute))
 				.register(meterRegistry)
 				.increment();
 			return;
@@ -102,7 +106,7 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 		if (requestHasBeenTimed(loadBalancerRequestContext)) {
 			if (CompletionContext.Status.FAILED.equals(completionContext.status())) {
 				Timer.builder("loadbalancer.requests.failed")
-					.tags(buildFailedRequestTags(completionContext))
+					.tags(buildFailedRequestTags(completionContext, useUriTemplateAttribute))
 					.register(meterRegistry)
 					.record(requestFinishedTimestamp
 							- ((TimedRequestContext) loadBalancerRequestContext).getRequestStartTime(),
@@ -110,7 +114,7 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 				return;
 			}
 			Timer.builder("loadbalancer.requests.success")
-				.tags(buildSuccessRequestTags(completionContext))
+				.tags(buildSuccessRequestTags(completionContext, useUriTemplateAttribute))
 				.register(meterRegistry)
 				.record(requestFinishedTimestamp
 						- ((TimedRequestContext) loadBalancerRequestContext).getRequestStartTime(),
