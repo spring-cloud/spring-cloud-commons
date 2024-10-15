@@ -23,35 +23,37 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for load-balanced {@link RestClient}.
+ * Integration tests for load-balanced {@link RestTemplateBuilder}.
  *
  * @author Olga Maciaszek-Sharma
  */
-@SpringBootTest(
-		classes = { LoadBalancedRestClientIntegrationTests.TestConfig.class, LoadBalancerAutoConfiguration.class },
-		properties = "spring.cloud.loadbalancer.retry.enabled=false")
-public class LoadBalancedRestClientIntegrationTests {
+@SpringBootTest(classes = { LoadBalancedRestTemplateBuilderIntegrationTests.TestConfig.class,
+		LoadBalancerAutoConfiguration.class }, properties = "spring.cloud.loadbalancer.retry.enabled=false")
+public class LoadBalancedRestTemplateBuilderIntegrationTests {
 
-	private final RestClient.Builder restClientBuilder;
+	private final RestTemplateBuilder restTemplateBuilder;
 
-	public LoadBalancedRestClientIntegrationTests(@Autowired RestClient.Builder restClientBuilder) {
-		this.restClientBuilder = restClientBuilder;
+	public LoadBalancedRestTemplateBuilderIntegrationTests(@Autowired RestTemplateBuilder restTemplateBuilder) {
+		this.restTemplateBuilder = restTemplateBuilder;
 	}
 
 	@Test
-	void shouldBuildLoadBalancedRestClientInConstructor() {
-		RestClient client = restClientBuilder.build();
+	void shouldBuildLoadBalancedRestTemplate() {
+		RestTemplate restTemplate = restTemplateBuilder.build();
 
-		// Interceptors are not visible in RestClient
-		assertThatThrownBy(() -> client.get().uri("http://test-service").retrieve())
-			.hasMessage("LoadBalancerInterceptor invoked.");
+		assertThat(restTemplate.getInterceptors()).hasSize(1);
+		assertThat(restTemplate.getInterceptors().get(0)).isInstanceOf(DeferringLoadBalancerInterceptor.class);
+		assertThat(((DeferringLoadBalancerInterceptor) restTemplate.getInterceptors().get(0))
+			.getLoadBalancerInterceptorProvider()
+			.getObject()).isInstanceOf(BlockingLoadBalancerInterceptor.class);
 	}
 
 	@SpringBootConfiguration
@@ -59,8 +61,8 @@ public class LoadBalancedRestClientIntegrationTests {
 
 		@LoadBalanced
 		@Bean
-		RestClient.Builder restClientBuilder() {
-			return RestClient.builder();
+		RestTemplateBuilder restTemplateBuilder() {
+			return new RestTemplateBuilder();
 		}
 
 		@Bean

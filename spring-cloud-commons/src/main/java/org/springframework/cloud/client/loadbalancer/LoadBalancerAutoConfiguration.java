@@ -101,6 +101,15 @@ public class LoadBalancerAutoConfiguration {
 			return new LoadBalancerRestClientBuilderBeanPostProcessor<>(loadBalancerInterceptorProvider, context);
 		}
 
+		@Bean
+		@ConditionalOnBean(DeferringLoadBalancerInterceptor.class)
+		@ConditionalOnMissingBean(LoadBalancerRestTemplateBuilderBeanPostProcessor.class)
+		static LoadBalancerRestTemplateBuilderBeanPostProcessor<DeferringLoadBalancerInterceptor> lbRestTemplateBuilderPostProcessor(
+				ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
+				ApplicationContext context) {
+			return new LoadBalancerRestTemplateBuilderBeanPostProcessor<>(loadBalancerInterceptorProvider, context);
+		}
+
 	}
 
 	@AutoConfiguration
