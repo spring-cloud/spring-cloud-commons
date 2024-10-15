@@ -218,6 +218,89 @@ IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestTemplat
 
 TIP: If you see errors such as `java.lang.IllegalArgumentException: Can not set org.springframework.web.client.RestTemplate field com.my.app.Foo.restTemplate to com.sun.proxy.$Proxy89`, try injecting `RestOperations` or setting `spring.aop.proxyTargetClass=true`.
 
+[[rest-template-builder-loadbalancer-client]]
+== Using `@LoadBalanced RestTemplateBuilder` to create a LoadBalancer Client
+
+You can also configure a `RestTemplate` to use a Load-Balancer client by annotating a
+`RestTemplateBuilder` bean with `@LoadBalanced`:
+
+[source,java,indent=0]
+----
+import org.springframework.boot.web.client.RestTemplateBuilder;@Configuration
+public class MyConfiguration {
+
+    @Bean
+	@LoadBalanced
+	RestTemplateBuilder loadBalancedRestTemplateBuilder() {
+		return new RestTemplateBuilder();
+	}
+}
+
+public class MyClass {
+
+    private final RestTemplate restTemplate;
+
+	MyClass(@LoadBalanced RestTemplateBuilder restTemplateBuilder) {
+		this.restTemplate = restTemplateBuilder.build();
+	}
+
+    public String getStores() {
+        return restTemplate.getForObject("http://stores/stores", String.class);
+    }
+}
+----
+
+The URI needs to use a virtual host name (that is, a service name, not a host name).
+The `BlockingLoadBalancerClient` is used to create a full physical address.
+
+IMPORTANT: To use it, add xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer-starter[Spring Cloud LoadBalancer starter] to your project.
+
+[[multiple-resttemplate-builder-beans]]
+=== Multiple `RestTemplateBuilder` beans
+
+If you want a `RestTemplateBuilder` that is not load-balanced, create a `RestTemplateBuilder` bean and inject it.
+To access the load-balanced `RestTemplateBuilder`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    RestTemplateBuilder loadBalancedRestTemplateBuilder() {
+		return new RestTemplateBuilder();
+	}
+
+    @Primary
+    @Bean
+    RestTemplateBuilder restTemplateBuilder() {
+		return new RestTemplateBuilder();
+	}
+}
+
+public class MyClass {
+
+    @Autowired
+    private RestTemplateBuilder restTemplateBuilder;
+
+    @Autowired
+    @LoadBalanced
+    private RestTemplateBuilder loadBalanced;
+
+    public String doOtherStuff() {
+        return loadBalanced.getForObject("http://stores/stores", String.class);
+    }
+
+    public String doStuff() {
+		return restTemplateBuilder.build().getForObject("http://example.com", String.class);
+    }
+}
+----
+
+IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestTemplateBuilder` declaration in the preceding example to disambiguate the unqualified `@Autowired` injection.
+
+
 [[rest-client-loadbalancer-client]]
 == Spring RestClient as a LoadBalancer Client
 
@@ -256,7 +339,7 @@ IMPORTANT: To use it, add xref:spring-cloud-commons/loadbalancer.adoc#spring-clo
 === Multiple `RestClient.Builder` Objects
 
 If you want a `RestClient.Builder` that is not load-balanced, create a `RestClient.Builder` bean and inject it.
-To access the load-balanced `RestClient`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
+To access the load-balanced `RestClient.Builder`, use the `@LoadBalanced` qualifier when you create your `@Bean`, as the following example shows:
 
 [source,java,indent=0]
 ----
@@ -296,7 +379,7 @@ public class MyClass {
 }
 ----
 
-IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestTemplate` declaration in the preceding example to disambiguate the unqualified `@Autowired` injection.
+IMPORTANT: Notice the use of the `@Primary` annotation on the plain `RestClient.Builder` declaration in the preceding example to disambiguate the unqualified `@Autowired` injection.
 
 [[webclinet-loadbalancer-client]]
 == Spring WebClient as a LoadBalancer Client
