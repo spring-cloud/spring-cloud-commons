@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.configuration;
 
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.core.io.Resource;
@@ -143,7 +144,7 @@ public class TlsProperties {
 		String name = resource.getFilename();
 		int index = name.lastIndexOf('.');
 
-		return index < 0 ? "" : name.substring(index + 1).toLowerCase();
+		return index < 0 ? "" : name.substring(index + 1).toLowerCase(Locale.ROOT);
 	}
 
 }
