@@ -25,6 +25,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -50,7 +51,7 @@ public class LoadBalancedRestClientIntegrationTests {
 		RestClient client = restClientBuilder.build();
 
 		// Interceptors are not visible in RestClient
-		assertThatThrownBy(() -> client.get().uri("http://test-service").retrieve())
+		assertThatThrownBy(() -> client.get().uri("http://test-service").retrieve().toBodilessEntity())
 			.hasMessage("LoadBalancerInterceptor invoked.");
 	}
 
