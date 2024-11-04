@@ -50,7 +50,7 @@ public class LoadBalancedRestClientIntegrationTests {
 		RestClient client = restClientBuilder.build();
 
 		// Interceptors are not visible in RestClient
-		assertThatThrownBy(() -> client.get().uri("http://test-service").retrieve())
+		assertThatThrownBy(() -> client.get().uri("http://test-service").retrieve().toBodilessEntity())
 			.hasMessage("LoadBalancerInterceptor invoked.");
 	}
 

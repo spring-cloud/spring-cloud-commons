@@ -80,6 +80,10 @@
 							<artifactId>httpclient5</artifactId>
 						</dependency>
 					</ignoredDependencies>
+					<ignoredResourcePatterns>
+						<ignoredResourcePattern>mockito-extensions/org.mockito.plugins.MockResolver</ignoredResourcePattern>
+					</ignoredResourcePatterns>
+					<checkTestClasspath>false</checkTestClasspath>
 				</configuration>
 			</plugin>
 		</plugins>
