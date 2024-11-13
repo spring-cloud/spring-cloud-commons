@@ -253,6 +253,21 @@ public class MyClass {
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The `BlockingLoadBalancerClient` is used to create a full physical address.
 
+In order to leverage additional capabilities that Spring Boot provides for `RestTemplateBuilder` (for example, observability support) you may want to use the autoconfigured
+`RestTemplateBuilderConfigurer` while creating the `@LoadBalanced RestTemplateBuilder` beans:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+	@LoadBalanced
+	RestTemplateBuilder loadBalancedRestTemplateBuilder(RestTemplateBuilderConfigurer configurer) {
+		return configurer.configure(new RestTemplateBuilder());
+	}
+}
+----
+
 IMPORTANT: To use it, add xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer-starter[Spring Cloud LoadBalancer starter] to your project.
 
 [[multiple-resttemplate-builder-beans]]
@@ -333,6 +348,22 @@ public class MyClass {
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The `BlockingLoadBalancerClient` is used to create a full physical address.
 
+In order to leverage additional capabilities that Spring Boot provides for `RestClient.Builder` (for example, observability support) you may want to use the autoconfigured
+`RestClientBuilderConfigurer` while creating the `@LoadBalanced RestClient.Builder` beans:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+    @LoadBalanced
+    @Bean
+    RestClient.Builder restClientBuilder(RestClientBuilderConfigurer configurer) {
+		return configurer.configure(RestClient.builder());
+	}
+}
+----
+
 IMPORTANT: To use it, add xref:spring-cloud-commons/loadbalancer.adoc#spring-cloud-loadbalancer-starter[Spring Cloud LoadBalancer starter] to your project.
 
 [[multiple-restclient-objects]]
@@ -412,6 +443,24 @@ public class MyClass {
 
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The Spring Cloud LoadBalancer is used to create a full physical address.
+
+In order to leverage additional capabilities that Spring Boot provides for `WebClient.Builder` (for example, observability support) you may want to use the autoconfigured
+`WebClientCustomizer` beans while creating the `@LoadBalanced WebClient.Builder` beans:
+
+[source,java,indent=0]
+----
+@Configuration
+public class MyConfiguration {
+
+	@Bean
+	@LoadBalanced
+	public WebClient.Builder loadBalancedWebClientBuilder(ObjectProvider<WebClientCustomizer> customizerProvider) {
+		WebClient.Builder builder = WebClient.builder();
+		customizerProvider.orderedStream().forEach((customizer) -> customizer.customize(builder));
+		return builder;
+	}
+}
+----
 
 IMPORTANT: If you want to use a `@LoadBalanced WebClient.Builder`, you need to have a Spring Cloud LoadBalancer
 implementation in the classpath. We recommend that you add the
