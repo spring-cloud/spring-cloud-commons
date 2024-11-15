@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,6 @@ import org.springframework.util.MultiValueMapAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.UNKNOWN;
-import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.URI_TEMPLATE_ATTRIBUTE;
 
 /**
  * Tests for {@link MicrometerStatsLoadBalancerLifecycle}.
@@ -53,6 +52,8 @@ import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.URI_
  * @author Jaroslaw Dembek
  */
 class MicrometerStatsLoadBalancerLifecycleTests {
+
+	private static final String URI_TEMPLATE_ATTRIBUTE = "org.springframework.web.reactive.function.client.WebClient.uriTemplate";
 
 	MeterRegistry meterRegistry = new SimpleMeterRegistry();
 
@@ -98,8 +99,8 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		statsLifecycle.onStartRequest(lbRequest, lbResponse);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
 
-		statsLifecycle.onComplete(
-				new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
+		statsLifecycle
+			.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
 
 		assertThat(meterRegistry.getMeters()).hasSize(2);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
