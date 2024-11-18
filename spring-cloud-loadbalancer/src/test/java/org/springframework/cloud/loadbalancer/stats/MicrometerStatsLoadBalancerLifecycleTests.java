@@ -24,6 +24,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -32,17 +34,21 @@ import org.springframework.cloud.client.loadbalancer.DefaultRequest;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
 import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMapAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.UNKNOWN;
 
 /**
@@ -53,7 +59,8 @@ import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.UNKN
  */
 class MicrometerStatsLoadBalancerLifecycleTests {
 
-	private static final String URI_TEMPLATE_ATTRIBUTE = "org.springframework.web.reactive.function.client.WebClient.uriTemplate";
+	private static final String WEB_CLIENT_URI_TEMPLATE_ATTRIBUTE = "org.springframework.web.reactive.function.client.WebClient.uriTemplate";
+	private static final String REST_CLIENT_URI_TEMPLATE_ATTRIBUTE = "org.springframework.web.reactive.function.client.WebClient.uriTemplate";
 
 	MeterRegistry meterRegistry = new SimpleMeterRegistry();
 
@@ -85,10 +92,37 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 	}
 
 	@Test
-	void shouldRecordSuccessfulTimedRequestWithUriTemplate() {
+	void shouldNotAddPathValueWhenDisabled() {
+		ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
+		LoadBalancerProperties properties = new LoadBalancerProperties();
+		properties.getMetrics().setIncludePath(false);
+		when(factory.getProperties("test")).thenReturn(properties);
+		MicrometerStatsLoadBalancerLifecycle statsLifecycle = new MicrometerStatsLoadBalancerLifecycle(meterRegistry, factory);
+		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
+				new HttpHeaders(), new HashMap<>());
+		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
+		Response<ServiceInstance> lbResponse = new DefaultResponse(
+				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
+		ResponseData responseData = new ResponseData(HttpStatus.OK, new HttpHeaders(),
+				new MultiValueMapAdapter<>(new HashMap<>()), requestData);
+		statsLifecycle.onStartRequest(lbRequest, lbResponse);
+		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge()
+				.value()).isEqualTo(1);
+
+		statsLifecycle
+				.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
+
+		assertThat(meterRegistry.getMeters()).hasSize(2);
+		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId()
+				.getTags()).doesNotContain(Tag.of("uri", "/test"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {WEB_CLIENT_URI_TEMPLATE_ATTRIBUTE, REST_CLIENT_URI_TEMPLATE_ATTRIBUTE})
+	void shouldRecordSuccessfulTimedRequestWithUriTemplate(String attributeName) {
 		Map<String, Object> attributes = new HashMap<>();
 		String uriTemplate = "/test/{pathParam}/test";
-		attributes.put(URI_TEMPLATE_ATTRIBUTE, uriTemplate);
+		attributes.put(attributeName, uriTemplate);
 		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test/123/test"),
 				new HttpHeaders(), new HttpHeaders(), attributes);
 		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
@@ -106,7 +140,8 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
 		assertThat(meterRegistry.get("loadbalancer.requests.success").timers()).hasSize(1);
 		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().count()).isEqualTo(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId().getTags()).contains(
+		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId()
+				.getTags()).containsExactlyInAnyOrder(
 				Tag.of("method", "GET"), Tag.of("outcome", "SUCCESS"), Tag.of("serviceId", "test"),
 				Tag.of("serviceInstance.host", "test.org"), Tag.of("serviceInstance.instanceId", "test-1"),
 				Tag.of("serviceInstance.port", "8080"), Tag.of("status", "200"), Tag.of("uri", uriTemplate));
