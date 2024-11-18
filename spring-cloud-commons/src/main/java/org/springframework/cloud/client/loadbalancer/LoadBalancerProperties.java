@@ -556,18 +556,18 @@ public class LoadBalancerProperties {
 	public static class Metrics {
 
 		/**
-		 * Indicates whether path values should be included in metric tags. When
+		 * Indicates whether the `uri` tag should be added to metrics. When
 		 * {@link RestTemplate} is used to execute load-balanced requests with high
 		 * cardinality paths, setting it to {@code false} is recommended.
 		 */
-		private boolean includePath = true;
+		private boolean includeUriTag = true;
 
-		public boolean isIncludePath() {
-			return includePath;
+		public boolean isIncludeUriTag() {
+			return includeUriTag;
 		}
 
-		public void setIncludePath(boolean includePath) {
-			this.includePath = includePath;
+		public void setIncludeUriTag(boolean includeUriTag) {
+			this.includeUriTag = includeUriTag;
 		}
 
 	}

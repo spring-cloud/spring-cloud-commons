@@ -60,6 +60,7 @@ import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.UNKN
 class MicrometerStatsLoadBalancerLifecycleTests {
 
 	private static final String WEB_CLIENT_URI_TEMPLATE_ATTRIBUTE = "org.springframework.web.reactive.function.client.WebClient.uriTemplate";
+
 	private static final String REST_CLIENT_URI_TEMPLATE_ATTRIBUTE = "org.springframework.web.reactive.function.client.WebClient.uriTemplate";
 
 	MeterRegistry meterRegistry = new SimpleMeterRegistry();
@@ -95,9 +96,10 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 	void shouldNotAddPathValueWhenDisabled() {
 		ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
 		LoadBalancerProperties properties = new LoadBalancerProperties();
-		properties.getMetrics().setIncludePath(false);
+		properties.getMetrics().setIncludeUriTag(false);
 		when(factory.getProperties("test")).thenReturn(properties);
-		MicrometerStatsLoadBalancerLifecycle statsLifecycle = new MicrometerStatsLoadBalancerLifecycle(meterRegistry, factory);
+		MicrometerStatsLoadBalancerLifecycle statsLifecycle = new MicrometerStatsLoadBalancerLifecycle(meterRegistry,
+				factory);
 		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
 				new HttpHeaders(), new HashMap<>());
 		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
@@ -106,19 +108,18 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		ResponseData responseData = new ResponseData(HttpStatus.OK, new HttpHeaders(),
 				new MultiValueMapAdapter<>(new HashMap<>()), requestData);
 		statsLifecycle.onStartRequest(lbRequest, lbResponse);
-		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge()
-				.value()).isEqualTo(1);
+		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
 
 		statsLifecycle
-				.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
+			.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS, lbRequest, lbResponse, responseData));
 
 		assertThat(meterRegistry.getMeters()).hasSize(2);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId()
-				.getTags()).doesNotContain(Tag.of("uri", "/test"));
+		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId().getTags())
+			.doesNotContain(Tag.of("uri", "/test"));
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {WEB_CLIENT_URI_TEMPLATE_ATTRIBUTE, REST_CLIENT_URI_TEMPLATE_ATTRIBUTE})
+	@ValueSource(strings = { WEB_CLIENT_URI_TEMPLATE_ATTRIBUTE, REST_CLIENT_URI_TEMPLATE_ATTRIBUTE })
 	void shouldRecordSuccessfulTimedRequestWithUriTemplate(String attributeName) {
 		Map<String, Object> attributes = new HashMap<>();
 		String uriTemplate = "/test/{pathParam}/test";
@@ -140,11 +141,11 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(0);
 		assertThat(meterRegistry.get("loadbalancer.requests.success").timers()).hasSize(1);
 		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().count()).isEqualTo(1);
-		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId()
-				.getTags()).containsExactlyInAnyOrder(
-				Tag.of("method", "GET"), Tag.of("outcome", "SUCCESS"), Tag.of("serviceId", "test"),
-				Tag.of("serviceInstance.host", "test.org"), Tag.of("serviceInstance.instanceId", "test-1"),
-				Tag.of("serviceInstance.port", "8080"), Tag.of("status", "200"), Tag.of("uri", uriTemplate));
+		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId().getTags())
+			.containsExactlyInAnyOrder(Tag.of("method", "GET"), Tag.of("outcome", "SUCCESS"),
+					Tag.of("serviceId", "test"), Tag.of("serviceInstance.host", "test.org"),
+					Tag.of("serviceInstance.instanceId", "test-1"), Tag.of("serviceInstance.port", "8080"),
+					Tag.of("status", "200"), Tag.of("uri", uriTemplate));
 	}
 
 	@Test

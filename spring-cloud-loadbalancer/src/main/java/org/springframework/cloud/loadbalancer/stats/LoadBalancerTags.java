@@ -84,7 +84,7 @@ class LoadBalancerTags {
 	}
 
 	private String getPath(RequestData requestData) {
-		if (!properties.getMetrics().isIncludePath()) {
+		if (!properties.getMetrics().isIncludeUriTag()) {
 			return UNKNOWN;
 		}
 		Optional<Object> uriTemplateValue = Optional.ofNullable(requestData.getAttributes())
@@ -96,8 +96,7 @@ class LoadBalancerTags {
 			.filter(Objects::nonNull)
 			.findAny();
 		return uriTemplateValue.map(uriTemplate -> (String) uriTemplate)
-				.orElseGet(() -> (requestData.getUrl() != null)
-					? requestData.getUrl().getPath() : UNKNOWN);
+			.orElseGet(() -> (requestData.getUrl() != null) ? requestData.getUrl().getPath() : UNKNOWN);
 	}
 
 	Iterable<Tag> buildDiscardedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
