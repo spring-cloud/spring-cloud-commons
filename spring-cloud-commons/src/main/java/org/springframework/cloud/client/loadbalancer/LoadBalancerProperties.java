@@ -103,7 +103,7 @@ public class LoadBalancerProperties {
 	/**
 	 * Properties for LoadBalancer metrics.
 	 */
-	private Metrics metrics = new Metrics();
+	private Stats stats = new Stats();
 
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
@@ -170,12 +170,12 @@ public class LoadBalancerProperties {
 		this.callGetWithRequestOnDelegates = callGetWithRequestOnDelegates;
 	}
 
-	public Metrics getMetrics() {
-		return metrics;
+	public Stats getStats() {
+		return stats;
 	}
 
-	public void setMetrics(Metrics metrics) {
-		this.metrics = metrics;
+	public void setStats(Stats stats) {
+		this.stats = stats;
 	}
 
 	public static class StickySession {
@@ -553,21 +553,21 @@ public class LoadBalancerProperties {
 
 	}
 
-	public static class Metrics {
+	public static class Stats {
 
 		/**
-		 * Indicates whether the `uri` tag should be added to metrics. When
-		 * {@link RestTemplate} is used to execute load-balanced requests with high
-		 * cardinality paths, setting it to {@code false} is recommended.
+		 * Indicates whether the {@code path} should be added to {@code uri} tag in
+		 * metrics. When {@link RestTemplate} is used to execute load-balanced requests
+		 * with high cardinality paths, setting it to {@code false} is recommended.
 		 */
-		private boolean includeUriTag = true;
+		private boolean includePath = true;
 
-		public boolean isIncludeUriTag() {
-			return includeUriTag;
+		public boolean isIncludePath() {
+			return includePath;
 		}
 
-		public void setIncludeUriTag(boolean includeUriTag) {
-			this.includeUriTag = includeUriTag;
+		public void setIncludePath(boolean includePath) {
+			this.includePath = includePath;
 		}
 
 	}

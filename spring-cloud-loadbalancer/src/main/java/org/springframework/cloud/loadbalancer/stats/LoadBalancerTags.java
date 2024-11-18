@@ -84,7 +84,7 @@ class LoadBalancerTags {
 	}
 
 	private String getPath(RequestData requestData) {
-		if (!properties.getMetrics().isIncludeUriTag()) {
+		if (!properties.getStats().isIncludePath()) {
 			return UNKNOWN;
 		}
 		Optional<Object> uriTemplateValue = Optional.ofNullable(requestData.getAttributes())

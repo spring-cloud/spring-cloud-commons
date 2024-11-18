@@ -96,7 +96,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 	void shouldNotAddPathValueWhenDisabled() {
 		ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
 		LoadBalancerProperties properties = new LoadBalancerProperties();
-		properties.getMetrics().setIncludeUriTag(false);
+		properties.getStats().setIncludePath(false);
 		when(factory.getProperties("test")).thenReturn(properties);
 		MicrometerStatsLoadBalancerLifecycle statsLifecycle = new MicrometerStatsLoadBalancerLifecycle(meterRegistry,
 				factory);
