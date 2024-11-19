@@ -506,6 +506,12 @@ set the value of the `spring.cloud.loadbalancer.stats.micrometer.enabled` to `tr
 
 Additional information regarding the service instances, request data, and response data is added to metrics via tags whenever available.
 
+NOTE: For `WebClient` and `RestClient`-backed load-balancing, we use `uriTemplate` for the `uri` tag whenever available.
+
+TIP: It is possible to disable adding `path` to `uri` tag by setting `spring.cloud.loadbalancer.stats.include-path` to `false`.
+
+WARNING: As with `RestTemplate`-backed load-balancing, we don't have access to `uriTemplate`, full path is always used in the `uri` tag. In order to avoid high cardinality issues, if path is a high cardinality value (for example, `/orders/\{id\}`, where `id` takes a big number of values), it is strongly recommended to disable adding path to `uri` tag by setting `spring.cloud.loadbalancer.stats.include-path` to `false`.
+
 NOTE: For some implementations, such as `BlockingLoadBalancerClient`, request and response data might not be available, as we establish generic types from arguments and might not be able to determine the types and read the data.
 
 NOTE: The meters are registered in the registry when at least one record is added for a given meter.

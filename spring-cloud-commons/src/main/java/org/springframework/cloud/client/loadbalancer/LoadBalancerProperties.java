@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.cloud.commons.util.IdUtils;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * The base configuration bean for Spring Cloud LoadBalancer.
@@ -90,9 +91,19 @@ public class LoadBalancerProperties {
 
 	/**
 	 * Properties for
-	 * {@link org.springframework.cloud.loadbalancer.core.SubsetServiceInstanceListSupplier}.
+	 * {@code org.springframework.cloud.loadbalancer.core.SubsetServiceInstanceListSupplier}.
 	 */
 	private Subset subset = new Subset();
+
+	/**
+	 * Enabling X-Forwarded Host and Proto Headers.
+	 */
+	private XForwarded xForwarded = new XForwarded();
+
+	/**
+	 * Properties for LoadBalancer metrics.
+	 */
+	private Stats stats = new Stats();
 
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
@@ -134,11 +145,6 @@ public class LoadBalancerProperties {
 		this.hintHeaderName = hintHeaderName;
 	}
 
-	/**
-	 * Enabling X-Forwarded Host and Proto Headers.
-	 */
-	private XForwarded xForwarded = new XForwarded();
-
 	// TODO: fix spelling in a major release
 	public void setxForwarded(XForwarded xForwarded) {
 		this.xForwarded = xForwarded;
@@ -162,6 +168,14 @@ public class LoadBalancerProperties {
 
 	public void setCallGetWithRequestOnDelegates(boolean callGetWithRequestOnDelegates) {
 		this.callGetWithRequestOnDelegates = callGetWithRequestOnDelegates;
+	}
+
+	public Stats getStats() {
+		return stats;
+	}
+
+	public void setStats(Stats stats) {
+		this.stats = stats;
 	}
 
 	public static class StickySession {
@@ -535,6 +549,25 @@ public class LoadBalancerProperties {
 
 		public void setSize(int size) {
 			this.size = size;
+		}
+
+	}
+
+	public static class Stats {
+
+		/**
+		 * Indicates whether the {@code path} should be added to {@code uri} tag in
+		 * metrics. When {@link RestTemplate} is used to execute load-balanced requests
+		 * with high cardinality paths, setting it to {@code false} is recommended.
+		 */
+		private boolean includePath = true;
+
+		public boolean isIncludePath() {
+			return includePath;
+		}
+
+		public void setIncludePath(boolean includePath) {
+			this.includePath = includePath;
 		}
 
 	}
