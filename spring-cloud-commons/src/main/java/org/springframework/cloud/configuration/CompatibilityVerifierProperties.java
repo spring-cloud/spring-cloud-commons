@@ -34,9 +34,9 @@ public class CompatibilityVerifierProperties {
 	/**
 	 * Default accepted versions for the Spring Boot dependency. You can set {@code x} for
 	 * the patch version if you don't want to specify a concrete value. Example:
-	 * {@code 3.4.x}
+	 * {@code 3.5.x}
 	 */
-	private List<String> compatibleBootVersions = List.of("3.4.x");
+	private List<String> compatibleBootVersions = List.of("3.5.x");
 
 	public boolean isEnabled() {
 		return this.enabled;
