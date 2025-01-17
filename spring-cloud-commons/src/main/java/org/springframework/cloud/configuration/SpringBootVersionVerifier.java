@@ -80,13 +80,13 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 			@Override
 			public boolean isCompatible() {
-				// try {
-				// Class.forName("org.springframework.boot.autoconfigure.web.client.RestClientSsl");
-				return true;
-				// }
-				// catch (ClassNotFoundException e) {
-				// return false;
-				// }
+				try {
+					Class.forName("org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty");
+					return true;
+				}
+				catch (ClassNotFoundException e) {
+					return false;
+				}
 			}
 		};
 	}
