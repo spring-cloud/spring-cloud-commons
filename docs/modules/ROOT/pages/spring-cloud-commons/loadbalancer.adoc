@@ -516,7 +516,7 @@ NOTE: For some implementations, such as `BlockingLoadBalancerClient`, request an
 
 NOTE: The meters are registered in the registry when at least one record is added for a given meter.
 
-TIP: You can further configure the behavior of those metrics (for example, add https://micrometer.io/docs/concepts#_histograms_and_percentiles[publishing percentiles and histograms]) by https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-metrics-per-meter-properties[adding `MeterFilters`].
+TIP: You can further configure the behavior of those metrics (for example, add https://micrometer.io/docs/concepts#_histograms_and_percentiles[publishing percentiles and histograms]) by https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-metrics-per-meter-properties[adding `MeterFilter`s].
 
 [[configuring-individual-loadbalancerclients]]
 == Configuring Individual LoadBalancerClients
