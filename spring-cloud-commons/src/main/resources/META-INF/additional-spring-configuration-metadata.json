@@ -1,19 +1,13 @@
 {
 	"properties": [
 		{
-			"defaultValue": "true",
-			"name": "spring.cloud.refresh.enabled",
-			"description": "Enables autoconfiguration for the refresh scope and associated features.",
-			"type": "java.lang.Boolean"
-		},
-		{
 			"defaultValue": true,
 			"name": "spring.cloud.httpclientfactories.apache.enabled",
 			"description": "Enables creation of Apache Http Client factory beans.",
 			"type": "java.lang.Boolean"
 		},
 		{
-			"defaultValue": "true",
+			"defaultValue": true,
 			"name": "spring.cloud.httpclientfactories.ok.enabled",
 			"description": "Enables creation of OK Http Client factory beans.",
 			"type": "java.lang.Boolean"

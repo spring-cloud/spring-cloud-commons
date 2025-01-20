@@ -37,6 +37,24 @@
 			"defaultValue": true
 		},
 		{
+			"defaultValue": true,
+			"name": "spring.cloud.refresh.enabled",
+			"description": "Enables autoconfiguration for the refresh scope and associated features.",
+			"type": "java.lang.Boolean"
+		},
+		{
+			"defaultValue": true,
+			"name": "spring.cloud.refresh.on-restart.enabled",
+			"description": "Triggers scope refreshing on application context restart.",
+			"type": "java.lang.Boolean"
+		},
+		{
+			"name": "spring.cloud.refresh.refreshable",
+			"type": "java.util.Set<java.lang.String>",
+			"description": "Class names for beans to post process into refresh scope.",
+			"defaultValue": true
+		},
+		{
 			"name": "spring.cloud.refresh.extra-refreshable",
 			"type": "java.util.Set<java.lang.String>",
 			"description": "Additional class names for beans to post process into refresh scope.",
