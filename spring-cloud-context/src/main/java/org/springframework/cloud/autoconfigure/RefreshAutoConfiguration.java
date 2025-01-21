@@ -119,7 +119,7 @@ public class RefreshAutoConfiguration {
 		return new ConfigDataContextRefresher(context, scope, properties);
 	}
 
-	@ConditionalOnProperty(value = "spring.cloud.refresh.on-restart.enabled", matchIfMissing = true)
+	@ConditionalOnProperty(value = REFRESH_SCOPE_PREFIX + ".on-restart.enabled", matchIfMissing = true)
 	@Bean
 	RefreshScopeLifecycle refreshScopeLifecycle(ContextRefresher contextRefresher) {
 		return new RefreshScopeLifecycle(contextRefresher);
