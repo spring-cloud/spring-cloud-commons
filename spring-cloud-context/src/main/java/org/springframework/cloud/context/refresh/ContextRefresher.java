@@ -32,7 +32,6 @@ import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.CommandLinePropertySource;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -184,11 +183,6 @@ public abstract class ContextRefresher {
 				result.put(key, parent.getProperty(key));
 			}
 		}
-	}
-
-	@Configuration(proxyBeanMethods = false)
-	protected static class Empty {
-
 	}
 
 }
