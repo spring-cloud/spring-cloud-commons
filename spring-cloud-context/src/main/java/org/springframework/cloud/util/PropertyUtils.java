@@ -42,7 +42,7 @@ public abstract class PropertyUtils {
 	public static final boolean MARKER_CLASS_EXISTS = ClassUtils.isPresent(MARKER_CLASS, null);
 
 	private PropertyUtils() {
-		throw new UnsupportedOperationException("unable to instatiate utils class");
+		throw new UnsupportedOperationException("unable to instantiate utils class");
 	}
 
 	public static boolean bootstrapEnabled(Environment environment) {
