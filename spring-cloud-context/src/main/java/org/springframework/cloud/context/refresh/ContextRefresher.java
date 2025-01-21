@@ -50,8 +50,6 @@ public abstract class ContextRefresher {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	protected static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
-
 	protected static final String[] DEFAULT_PROPERTY_SOURCES = new String[] {
 			// order matters, if cli args aren't first, things get messy
 			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME, "defaultProperties" };
