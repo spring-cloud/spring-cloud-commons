@@ -35,7 +35,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<>() {
 		{
-			this.put("3.4", is3_4());
+			this.put("3.5", is3_5());
 		}
 	};
 
@@ -70,18 +70,18 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		return SpringBootVersion.getVersion();
 	}
 
-	CompatibilityPredicate is3_4() {
+	CompatibilityPredicate is3_5() {
 		return new CompatibilityPredicate() {
 
 			@Override
 			public String toString() {
-				return "Predicate for Boot 3.4";
+				return "Predicate for Boot 3.5";
 			}
 
 			@Override
 			public boolean isCompatible() {
 				try {
-					Class.forName("org.springframework.boot.autoconfigure.web.client.RestClientSsl");
+					Class.forName("org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty");
 					return true;
 				}
 				catch (ClassNotFoundException e) {
