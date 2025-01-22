@@ -85,7 +85,7 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 
 	@Override
 	public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
-		if (request.getContext() instanceof TimedRequestContext) {
+		if (request != null && request.getContext() instanceof TimedRequestContext) {
 			((TimedRequestContext) request.getContext()).setRequestStartTime(System.nanoTime());
 		}
 		if (lbResponse == null || !lbResponse.hasServer()) {
