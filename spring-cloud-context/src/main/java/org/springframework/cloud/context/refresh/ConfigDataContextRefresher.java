@@ -92,9 +92,6 @@ public class ConfigDataContextRefresher extends ContextRefresher
 			postProcessor.postProcessEnvironment(environment, application);
 		}
 
-		if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
-			environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
-		}
 		MutablePropertySources target = getContext().getEnvironment().getPropertySources();
 		String targetName = null;
 		for (PropertySource<?> source : environment.getPropertySources()) {
