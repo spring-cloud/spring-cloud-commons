@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ import org.springframework.util.StringUtils;
  * @author Dave Syer
  * @author Venil Noronha
  * @author Olga Maciaszek-Sharma
+ * @author Yanming Zhou
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RefreshScope.class)
@@ -208,6 +209,9 @@ public class RefreshAutoConfiguration {
 			if (REFRESH_SCOPE_NAME.equals(scope)) {
 				// Already refresh scoped
 				return false;
+			}
+			if (this.refreshables.contains(name)) {
+				return true;
 			}
 			String type = definition.getBeanClassName();
 			if (!StringUtils.hasText(type) && registry instanceof BeanFactory) {
