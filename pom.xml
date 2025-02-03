@@ -28,7 +28,7 @@
 	<properties>
 		<bintray.package>commons</bintray.package>
 		<evictor.version>1.0.0</evictor.version>
-		<bouncycastle-bcprov-jdk18on.version>1.78.1</bouncycastle-bcprov-jdk18on.version>
+		<bouncycastle-bcprov-jdk18on.version>1.80</bouncycastle-bcprov-jdk18on.version>
 	</properties>
 	<build>
 		<plugins>
