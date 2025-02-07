@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -132,7 +133,8 @@ public class ConfigurationPropertiesRebinder
 				// TODO: determine a more general approach to fix this.
 				// see
 				// https://github.com/spring-cloud/spring-cloud-commons/issues/571
-				if (getNeverRefreshable().contains(bean.getClass().getName()) || getNeverRefreshable().contains(name)) {
+				Class<?> beanClass = AopProxyUtils.ultimateTargetClass(bean);
+				if (getNeverRefreshable().contains(beanClass.getName()) || getNeverRefreshable().contains(name)) {
 					return false; // ignore
 				}
 				appContext.getAutowireCapableBeanFactory().destroyBean(bean);
