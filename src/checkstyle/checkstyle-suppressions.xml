@@ -21,6 +21,8 @@
 	<suppress files=".*Tests.*" checks="MethodParamPad"/>
 	<suppress files=".*AutoConfiguration.*" checks="HideUtilityClassConstructor"/>
 	<suppress files=".*AutoConfiguration.*" checks="FinalClass"/>
+	<suppress files=".*ApplicationListener.*" checks="FinalClass"/>
+	<suppress files=".*Tests.*" checks="FinalClass"/>
 	<suppress files=".*ReactiveDiscoveryClient.*" checks="JavadocVariable"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="RegexpSinglelineJava" id="toLowerCaseWithoutLocale"/>
 	<suppress files="[\\/]src[\\/](test|testFixtures)[\\/](java|java21)[\\/]" checks="RegexpSinglelineJava" id="toUpperCaseWithoutLocale"/>
