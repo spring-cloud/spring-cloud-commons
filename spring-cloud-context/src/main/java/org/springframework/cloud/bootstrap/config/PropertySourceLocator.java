@@ -21,8 +21,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.core.env.PropertySource;
 
 /**
@@ -31,6 +33,7 @@ import org.springframework.core.env.PropertySource;
  * starting.
  *
  * @author Dave Syer
+ * @author Yanming Zhou
  *
  */
 public interface PropertySourceLocator {
@@ -55,15 +58,29 @@ public interface PropertySourceLocator {
 			Collection<PropertySource<?>> sources = ((CompositePropertySource) propertySource).getPropertySources();
 			List<PropertySource<?>> filteredSources = new ArrayList<>();
 			for (PropertySource<?> p : sources) {
-				if (p != null) {
+				if (p != null && shouldActivatePropertySource(p, environment)) {
 					filteredSources.add(p);
 				}
 			}
 			return filteredSources;
 		}
 		else {
-			return List.of(propertySource);
+			return shouldActivatePropertySource(propertySource, environment) ? List.of(propertySource)
+					: Collections.emptyList();
 		}
+	}
+
+	private static boolean shouldActivatePropertySource(PropertySource<?> ps, Environment environment) {
+		String onProfile = (String) ps.getProperty("spring.config.activate.on-profile");
+		if ((onProfile != null) && !environment.acceptsProfiles(Profiles.of(onProfile))) {
+			return false;
+		}
+		String onCloudPlatform = (String) ps.getProperty("spring.config.activate.on-cloud-platform");
+		if (onCloudPlatform != null) {
+			CloudPlatform cloudPlatform = CloudPlatform.getActive(environment);
+			return cloudPlatform != null && cloudPlatform.name().equalsIgnoreCase(onCloudPlatform);
+		}
+		return true;
 	}
 
 }
