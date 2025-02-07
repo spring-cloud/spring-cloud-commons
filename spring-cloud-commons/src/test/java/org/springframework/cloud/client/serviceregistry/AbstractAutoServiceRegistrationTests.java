@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 /**
  * @author Spencer Gibb
  * @author Tim Ysewyn
+ * @author Yanming Zhou
  */
 // @checkstyle:off
 @SpringBootTest(classes = AbstractAutoServiceRegistrationTests.Config.class, properties = "management.port=0",
@@ -48,6 +49,9 @@ public class AbstractAutoServiceRegistrationTests {
 
 	@Autowired
 	public PostEventListener postEventListener;
+
+	@Autowired
+	public TestRegistrationPostEventListener testRegistrationPostEventListener;
 
 	@Autowired
 	private TestAutoServiceRegistration autoRegistration;
@@ -81,6 +85,8 @@ public class AbstractAutoServiceRegistrationTests {
 		then(this.preEventListener.registration.getServiceId()).isEqualTo("testRegistration2");
 		then(this.postEventListener.wasFired).isTrue();
 		then(this.postEventListener.config.getServiceId()).isEqualTo("testRegistration2");
+		then(this.testRegistrationPostEventListener.wasFired).isTrue();
+		then(this.testRegistrationPostEventListener.config.getServiceId()).isEqualTo("testRegistration2");
 	}
 
 	@EnableAutoConfiguration
@@ -100,6 +106,11 @@ public class AbstractAutoServiceRegistrationTests {
 		@Bean
 		public PostEventListener postEventListener() {
 			return new PostEventListener();
+		}
+
+		@Bean
+		public TestRegistrationPostEventListener testRegistrationPostEventListener() {
+			return new TestRegistrationPostEventListener();
 		}
 
 	}
@@ -127,6 +138,20 @@ public class AbstractAutoServiceRegistrationTests {
 		@Override
 		public void onApplicationEvent(InstanceRegisteredEvent event) {
 			this.config = (Registration) event.getConfig();
+			this.wasFired = true;
+		}
+
+	}
+
+	public static class TestRegistrationPostEventListener implements ApplicationListener<InstanceRegisteredEvent<TestRegistration>> {
+
+		public boolean wasFired = false;
+
+		public TestRegistration config;
+
+		@Override
+		public void onApplicationEvent(InstanceRegisteredEvent<TestRegistration> event) {
+			this.config = event.getConfig();
 			this.wasFired = true;
 		}
 
