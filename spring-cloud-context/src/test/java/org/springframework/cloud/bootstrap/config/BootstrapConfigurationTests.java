@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Dave Syer
+ * @author Yanming Zhou
  *
  */
 public class BootstrapConfigurationTests {
@@ -738,6 +739,78 @@ public class BootstrapConfigurationTests {
 			.stream()
 			.map(p -> p.getProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME))
 			.anyMatch("local"::equals)).isTrue();
+	}
+
+	@Test
+	void activatedOnProfile() {
+		PropertySourceConfiguration.MAP.put("stage", "dev");
+		PropertySourceConfiguration.MAP.put("spring.config.activate.on-profile", "dev");
+		String[] properties = new String[] { "spring.config.use-legacy-processing=true" };
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run("--spring.profiles.active=dev");
+		then(this.context.getEnvironment().getProperty("stage")).isEqualTo("dev");
+	}
+
+	@Test
+	void notActivatedOnNoActiveProfile() {
+		PropertySourceConfiguration.MAP.put("stage", "dev");
+		PropertySourceConfiguration.MAP.put("spring.config.activate.on-profile", "dev");
+		String[] properties = new String[] { "spring.config.use-legacy-processing=true" };
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run();
+		then(this.context.getEnvironment().getProperty("stage")).isNotEqualTo("dev");
+	}
+
+	@Test
+	void notActivatedOnMismatchedProfile() {
+		PropertySourceConfiguration.MAP.put("stage", "dev");
+		PropertySourceConfiguration.MAP.put("spring.config.activate.on-profile", "dev");
+		String[] properties = new String[] { "spring.config.use-legacy-processing=true" };
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run("--spring.profiles.active=prod");
+		then(this.context.getEnvironment().getProperty("stage")).isNotEqualTo("dev");
+	}
+
+	@Test
+	void activatedOnCloudPlatform() {
+		PropertySourceConfiguration.MAP.put("cloud", "kubernetes");
+		PropertySourceConfiguration.MAP.put("spring.config.activate.on-cloud-platform", "kubernetes");
+		String[] properties = new String[] { "spring.config.use-legacy-processing=true" };
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run("--spring.main.cloud-platform=kubernetes");
+		then(this.context.getEnvironment().getProperty("cloud")).isEqualTo("kubernetes");
+	}
+
+	@Test
+	void notActivatedOnNoActiveCloudPlatform() {
+		PropertySourceConfiguration.MAP.put("cloud", "kubernetes");
+		PropertySourceConfiguration.MAP.put("spring.config.activate.on-cloud-platform", "kubernetes");
+		String[] properties = new String[] { "spring.config.use-legacy-processing=true" };
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run();
+		then(this.context.getEnvironment().getProperty("cloud")).isNotEqualTo("kubernetes");
+	}
+
+	@Test
+	void notActivatedOnMismatchedCloudPlatform() {
+		PropertySourceConfiguration.MAP.put("cloud", "kubernetes");
+		PropertySourceConfiguration.MAP.put("spring.config.activate.on-cloud-platform", "kubernetes");
+		String[] properties = new String[] { "spring.config.use-legacy-processing=true" };
+		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
+			.properties(properties)
+			.sources(BareConfiguration.class)
+			.run("--spring.main.cloud-platform=heroku");
+		then(this.context.getEnvironment().getProperty("cloud")).isNotEqualTo("kubernetes");
 	}
 
 	@Configuration(proxyBeanMethods = false)
