@@ -31,11 +31,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.security.crypto.encrypt.KeyStoreKeyFactory;
+import org.springframework.security.crypto.encrypt.RsaSecretEncryptor;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.security.rsa.crypto.KeyStoreKeyFactory;
-import org.springframework.security.rsa.crypto.RsaSecretEncryptor;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import static org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper.BCPROV_IS_PRESENT;
 
 public abstract class TextEncryptorUtils {
 
@@ -55,12 +57,12 @@ public abstract class TextEncryptorUtils {
 	static TextEncryptor getTextEncryptor(AbstractEnvironmentDecrypt decryptor, ConfigurableEnvironment environment) {
 		Binder binder = Binder.get(environment);
 		KeyProperties keyProperties = binder.bind(KeyProperties.PREFIX, KeyProperties.class)
-				.orElseGet(KeyProperties::new);
+			.orElseGet(KeyProperties::new);
 		if (TextEncryptorUtils.keysConfigured(keyProperties)) {
 			decryptor.setFailOnError(keyProperties.isFailOnError());
-			if (ClassUtils.isPresent("org.springframework.security.rsa.crypto.RsaSecretEncryptor", null)) {
+			if (ClassUtils.isPresent("org.springframework.security.crypto.encrypt.RsaSecretEncryptor", null)) {
 				RsaProperties rsaProperties = binder.bind(RsaProperties.PREFIX, RsaProperties.class)
-						.orElseGet(RsaProperties::new);
+					.orElseGet(RsaProperties::new);
 				return TextEncryptorUtils.createTextEncryptor(keyProperties, rsaProperties);
 			}
 			return new EncryptorFactory(keyProperties.getSalt()).create(keyProperties.getKey());
@@ -78,7 +80,7 @@ public abstract class TextEncryptorUtils {
 		registry.registerIfAbsent(TextEncryptor.class, context -> {
 			KeyProperties keyProperties = context.get(KeyProperties.class);
 			if (TextEncryptorConfigBootstrapper.keysConfigured(keyProperties)) {
-				if (TextEncryptorConfigBootstrapper.RSA_IS_PRESENT) {
+				if (TextEncryptorConfigBootstrapper.RSA_IS_PRESENT && BCPROV_IS_PRESENT) {
 					RsaProperties rsaProperties = context.get(RsaProperties.class);
 					return createTextEncryptor(keyProperties, rsaProperties);
 				}
@@ -121,7 +123,8 @@ public abstract class TextEncryptorUtils {
 			if (keyStore.getLocation().exists()) {
 				return new RsaSecretEncryptor(
 						new KeyStoreKeyFactory(keyStore.getLocation(), keyStore.getPassword().toCharArray(),
-								keyStore.getType()).getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
+								keyStore.getType())
+							.getKeyPair(keyStore.getAlias(), keyStore.getSecret().toCharArray()),
 						rsaProperties.getAlgorithm(), rsaProperties.getSalt(), rsaProperties.isStrong());
 			}
 
@@ -177,14 +180,40 @@ public abstract class TextEncryptorUtils {
 	 */
 	public static class FailsafeTextEncryptor implements TextEncryptor {
 
+		private TextEncryptor delegate;
+
+		/**
+		 * You can set a delegate that can be used to encrypt/decrypt values if later on
+		 * after the initial initialization of the app we have the necessary values to
+		 * create a proper {@link TextEncryptor}. Depending on where the encryption keys
+		 * are set we might not have the right values to create a {@link TextEncryptor}
+		 * (this can happen if the keys are in application.properties for example, but we
+		 * create the text encryptor during Bootstrap). The delegate functionality allows
+		 * us the option to set the delegate later on when we have the necessary values.
+		 * @param delegate The TextEncryptor to use for encryption/decryption
+		 */
+		public void setDelegate(TextEncryptor delegate) {
+			this.delegate = delegate;
+		}
+
+		public TextEncryptor getDelegate() {
+			return this.delegate;
+		}
+
 		@Override
 		public String encrypt(String text) {
+			if (this.delegate != null) {
+				return this.delegate.encrypt(text);
+			}
 			throw new UnsupportedOperationException(
 					"No encryption for FailsafeTextEncryptor. Did you configure the keystore correctly?");
 		}
 
 		@Override
 		public String decrypt(String encryptedText) {
+			if (this.delegate != null) {
+				return this.delegate.decrypt(encryptedText);
+			}
 			throw new UnsupportedOperationException(
 					"No decryption for FailsafeTextEncryptor. Did you configure the keystore correctly?");
 		}

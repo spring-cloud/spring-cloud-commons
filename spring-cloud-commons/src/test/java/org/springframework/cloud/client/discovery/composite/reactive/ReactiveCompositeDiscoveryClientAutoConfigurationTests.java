@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 
 	private ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(ReactiveCompositeDiscoveryClientAutoConfiguration.class));
+		.withConfiguration(AutoConfigurations.of(ReactiveCompositeDiscoveryClientAutoConfiguration.class));
 
 	@Test
 	public void shouldCreateCompositeReactiveDiscoveryClientWithoutDelegates() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.retry.RetryListener;
 import org.springframework.retry.backoff.BackOffPolicy;
@@ -45,7 +44,7 @@ import org.springframework.util.StreamUtils;
  * @author Olga Maciaszek-Sharma
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class RetryLoadBalancerInterceptor implements ClientHttpRequestInterceptor {
+public class RetryLoadBalancerInterceptor implements BlockingLoadBalancerInterceptor {
 
 	private static final Log LOG = LogFactory.getLog(RetryLoadBalancerInterceptor.class);
 
@@ -84,9 +83,9 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 				}
 			}
 			Set<LoadBalancerLifecycle> supportedLifecycleProcessors = LoadBalancerLifecycleValidator
-					.getSupportedLifecycleProcessors(
-							loadBalancerFactory.getInstances(serviceName, LoadBalancerLifecycle.class),
-							RetryableRequestContext.class, ResponseData.class, ServiceInstance.class);
+				.getSupportedLifecycleProcessors(
+						loadBalancerFactory.getInstances(serviceName, LoadBalancerLifecycle.class),
+						RetryableRequestContext.class, ResponseData.class, ServiceInstance.class);
 			String hint = getHint(serviceName);
 			if (serviceInstance == null) {
 				if (LOG.isDebugEnabled()) {
@@ -110,11 +109,10 @@ public class RetryLoadBalancerInterceptor implements ClientHttpRequestIntercepto
 				Response<ServiceInstance> lbResponse = new DefaultResponse(serviceInstance);
 				if (serviceInstance == null) {
 					supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
-							.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
-									CompletionContext.Status.DISCARD,
-									new DefaultRequest<>(
-											new RetryableRequestContext(null, new RequestData(request), hint)),
-									lbResponse)));
+						.onComplete(new CompletionContext<ResponseData, ServiceInstance, RetryableRequestContext>(
+								CompletionContext.Status.DISCARD,
+								new DefaultRequest<>(new RetryableRequestContext(null, new RequestData(request), hint)),
+								lbResponse)));
 				}
 			}
 			LoadBalancerRequestAdapter<ClientHttpResponse, RetryableRequestContext> lbRequest = new LoadBalancerRequestAdapter<>(

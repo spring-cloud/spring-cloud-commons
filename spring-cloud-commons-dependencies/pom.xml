@@ -6,34 +6,18 @@
 	<parent>
 		<artifactId>spring-cloud-dependencies-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
-		<version>4.0.2-SNAPSHOT</version>
+		<version>4.3.0-SNAPSHOT</version>
 		<relativePath/>
 	</parent>
 	<artifactId>spring-cloud-commons-dependencies</artifactId>
-	<version>4.0.2-SNAPSHOT</version>
+	<version>4.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>spring-cloud-commons-dependencies</name>
 	<description>Spring Cloud Commons Dependencies</description>
 	<properties>
-		<spring-security-rsa.version>1.0.11.RELEASE</spring-security-rsa.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-rsa</artifactId>
-				<version>${spring-security-rsa.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>spring-core</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.springframework.security</groupId>
-						<artifactId>spring-security-crypto</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-commons</artifactId>

@@ -108,7 +108,7 @@ public class RetryLoadBalancerInterceptorTests {
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		when(client.choose(eq("foo"), any())).thenReturn(serviceInstance);
 		when(client.execute(eq("foo"), eq(serviceInstance), any(LoadBalancerRequest.class)))
-				.thenThrow(new IOException());
+			.thenThrow(new IOException());
 		properties.getRetry().setEnabled(false);
 		RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(client, lbRequestFactory,
 				loadBalancedRetryFactory, lbFactory);
@@ -141,7 +141,7 @@ public class RetryLoadBalancerInterceptorTests {
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		when(client.choose(eq("foo"), any())).thenReturn(serviceInstance);
 		when(client.execute(eq("foo"), eq(serviceInstance), any(LoadBalancerRequest.class)))
-				.thenReturn(clientHttpResponse);
+			.thenReturn(clientHttpResponse);
 		when(lbRequestFactory.createRequest(any(), any(), any())).thenReturn(mock(LoadBalancerRequest.class));
 		properties.getRetry().setEnabled(true);
 		RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(client, lbRequestFactory,
@@ -162,7 +162,7 @@ public class RetryLoadBalancerInterceptorTests {
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		when(client.choose(eq("foo"), any())).thenReturn(serviceInstance);
 		when(client.execute(eq("foo"), eq(serviceInstance), any(LoadBalancerRequest.class)))
-				.thenReturn(clientHttpResponse);
+			.thenReturn(clientHttpResponse);
 		when(lbRequestFactory.createRequest(any(), any(), any())).thenReturn(mock(LoadBalancerRequest.class));
 		properties.getRetry().setEnabled(true);
 		RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(client, lbRequestFactory,
@@ -189,7 +189,8 @@ public class RetryLoadBalancerInterceptorTests {
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		when(client.choose(eq("foo"), any())).thenReturn(serviceInstance);
 		when(client.execute(eq("foo"), eq(serviceInstance), nullable(LoadBalancerRequest.class)))
-				.thenReturn(clientHttpResponseNotFound).thenReturn(clientHttpResponseOk);
+			.thenReturn(clientHttpResponseNotFound)
+			.thenReturn(clientHttpResponseOk);
 		properties.getRetry().setEnabled(true);
 		RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(client, lbRequestFactory,
 				new MyLoadBalancedRetryFactory(policy), lbFactory);
@@ -220,7 +221,7 @@ public class RetryLoadBalancerInterceptorTests {
 		when(client.choose(eq("foo"), any())).thenReturn(serviceInstance);
 		when(client.execute(eq("foo"), eq(serviceInstance),
 				ArgumentMatchers.<LoadBalancerRequest<ClientHttpResponse>>any()))
-						.thenReturn(clientHttpResponseNotFound);
+			.thenReturn(clientHttpResponseNotFound);
 
 		properties.getRetry().setEnabled(true);
 		byte[] body = new byte[] {};
@@ -253,7 +254,8 @@ public class RetryLoadBalancerInterceptorTests {
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		when(client.choose(eq("foo"), any())).thenReturn(serviceInstance);
 		when(client.execute(eq("foo"), eq(serviceInstance), any(LoadBalancerRequest.class)))
-				.thenThrow(new IOException()).thenReturn(clientHttpResponse);
+			.thenThrow(new IOException())
+			.thenReturn(clientHttpResponse);
 		when(lbRequestFactory.createRequest(any(), any(), any())).thenReturn(mock(LoadBalancerRequest.class));
 		properties.getRetry().setEnabled(true);
 		RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(client, lbRequestFactory,
@@ -278,7 +280,8 @@ public class RetryLoadBalancerInterceptorTests {
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		when(client.choose(eq("foo"), any())).thenReturn(serviceInstance);
 		when(client.execute(eq("foo"), eq(serviceInstance), any(LoadBalancerRequest.class)))
-				.thenThrow(new IOException()).thenReturn(clientHttpResponse);
+			.thenThrow(new IOException())
+			.thenReturn(clientHttpResponse);
 		when(lbRequestFactory.createRequest(any(), any(), any())).thenReturn(mock(LoadBalancerRequest.class));
 		properties.getRetry().setEnabled(true);
 		RetryLoadBalancerInterceptor interceptor = new RetryLoadBalancerInterceptor(client, lbRequestFactory,
@@ -305,7 +308,8 @@ public class RetryLoadBalancerInterceptorTests {
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		when(client.choose(eq("listener"), any())).thenReturn(serviceInstance);
 		when(client.execute(eq("listener"), eq(serviceInstance), any(LoadBalancerRequest.class)))
-				.thenThrow(new IOException()).thenReturn(clientHttpResponse);
+			.thenThrow(new IOException())
+			.thenReturn(clientHttpResponse);
 		properties.getRetry().setEnabled(true);
 		MyRetryListener retryListener = new MyRetryListener();
 		when(lbRequestFactory.createRequest(any(), any(), any())).thenReturn(mock(LoadBalancerRequest.class));
@@ -333,7 +337,8 @@ public class RetryLoadBalancerInterceptorTests {
 		ServiceInstance serviceInstance = mock(ServiceInstance.class);
 		when(client.choose(eq("default"), any())).thenReturn(serviceInstance);
 		when(client.execute(eq("default"), eq(serviceInstance), any(LoadBalancerRequest.class)))
-				.thenThrow(new IOException()).thenReturn(clientHttpResponse);
+			.thenThrow(new IOException())
+			.thenReturn(clientHttpResponse);
 		properties.getRetry().setEnabled(true);
 		when(lbRequestFactory.createRequest(any(), any(), any())).thenReturn(mock(LoadBalancerRequest.class));
 		when(policy.retryableException(any())).thenReturn(true);
@@ -385,28 +390,28 @@ public class RetryLoadBalancerInterceptorTests {
 
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("testLifecycle")).getStartLog()).hasSize(1);
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("testLifecycle")).getStartRequestLog())
-				.hasSize(0);
+			.hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("testLifecycle")).getCompleteLog()).hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("anotherLifecycle")).getStartLog()).hasSize(1);
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("anotherLifecycle")).getStartRequestLog())
-				.hasSize(0);
+			.hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) lifecycleProcessors.get("anotherLifecycle")).getCompleteLog())
-				.hasSize(0);
+			.hasSize(0);
 		assertThat(((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("testLifecycle")).getStartLog())
-				.hasSize(0);
+			.hasSize(0);
 		assertThat(
 				((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("testLifecycle")).getStartRequestLog())
-						.hasSize(1);
+			.hasSize(1);
 		assertThat(((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("testLifecycle")).getCompleteLog())
-				.hasSize(1);
+			.hasSize(1);
 		assertThat(((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("anotherLifecycle")).getStartLog())
-				.hasSize(0);
+			.hasSize(0);
 		assertThat(
 				((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("testLifecycle")).getStartRequestLog())
-						.hasSize(1);
+			.hasSize(1);
 		assertThat(
 				((TestLoadBalancerLifecycle) client.getLifecycleProcessors().get("anotherLifecycle")).getCompleteLog())
-						.hasSize(1);
+			.hasSize(1);
 	}
 
 	static class MyLoadBalancedRetryFactory implements LoadBalancedRetryFactory {
@@ -508,14 +513,14 @@ public class RetryLoadBalancerInterceptorTests {
 		@Override
 		public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request) {
 			Set<LoadBalancerLifecycle> supportedLoadBalancerProcessors = LoadBalancerLifecycleValidator
-					.getSupportedLifecycleProcessors(lifecycleProcessors, DefaultRequestContext.class, Object.class,
-							ServiceInstance.class);
+				.getSupportedLifecycleProcessors(lifecycleProcessors, DefaultRequestContext.class, Object.class,
+						ServiceInstance.class);
 			supportedLoadBalancerProcessors.forEach(lifecycle -> lifecycle.onStartRequest(new DefaultRequest<>(),
 					new DefaultResponse(serviceInstance)));
 			T response = (T) new MockClientHttpResponse(new byte[] {}, HttpStatus.OK);
 			supportedLoadBalancerProcessors
-					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext(CompletionContext.Status.SUCCESS,
-							new DefaultRequest<>(), new DefaultResponse(defaultServiceInstance()))));
+				.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext(CompletionContext.Status.SUCCESS,
+						new DefaultRequest<>(), new DefaultResponse(defaultServiceInstance()))));
 			return response;
 		}
 

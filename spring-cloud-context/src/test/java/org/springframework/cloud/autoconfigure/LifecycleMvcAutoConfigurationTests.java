@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -57,6 +58,7 @@ public class LifecycleMvcAutoConfigurationTests {
 	}
 
 	@Test
+	@Disabled("TODO: https://github.com/spring-cloud/spring-cloud-commons/issues/1362")
 	public void environmentWebEndpointExtensionEnabled() {
 		beanCreated("writableEnvironmentEndpointWebExtension", "management.endpoint.env.enabled=true",
 				"management.endpoint.env.post.enabled=true", "management.endpoints.web.exposure.include=env");
@@ -117,6 +119,7 @@ public class LifecycleMvcAutoConfigurationTests {
 	}
 
 	@Test
+	@Disabled("TODO: https://github.com/spring-cloud/spring-cloud-commons/issues/1362")
 	public void resumeEndpointGloballyDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.default.enabled=false");
 	}

@@ -88,13 +88,14 @@ public class ContextRefresherTests {
 			System.err.println("***** " + context.getEnvironment().getPropertySources());
 			then(names).doesNotContain("bootstrapProperties");
 			ContextRefresher refresher = new LegacyContextRefresher(context, this.scope);
-			TestPropertyValues.of("spring.cloud.bootstrap.sources: "
-					+ "org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
-					.applyTo(context.getEnvironment(), Type.MAP, "defaultProperties");
+			TestPropertyValues
+				.of("spring.cloud.bootstrap.sources: "
+						+ "org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
+				.applyTo(context.getEnvironment(), Type.MAP, "defaultProperties");
 			refresher.refresh();
 			names = names(context.getEnvironment().getPropertySources());
 			then(names).first()
-					.isEqualTo(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-refreshTest");
+				.isEqualTo(PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME + "-refreshTest");
 		}
 	}
 
@@ -106,9 +107,10 @@ public class ContextRefresherTests {
 				"--spring.main.web-application-type=none", "--spring.cloud.bootstrap.enabled=true", "--debug=false",
 				"--spring.main.bannerMode=OFF", "--spring.cloud.bootstrap.name=refresh")) {
 			LegacyContextRefresher refresher = new LegacyContextRefresher(context, this.scope);
-			TestPropertyValues.of("spring.cloud.bootstrap.sources: "
-					+ "org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
-					.applyTo(context);
+			TestPropertyValues
+				.of("spring.cloud.bootstrap.sources: "
+						+ "org.springframework.cloud.context.refresh.ContextRefresherTests.PropertySourceConfiguration")
+				.applyTo(context);
 
 			ConfigurableApplicationContext refresherContext = refresher.addConfigFilesToEnvironment();
 			then(refresherContext.getParent()).isNotNull().isInstanceOf(ConfigurableApplicationContext.class);
@@ -152,28 +154,30 @@ public class ContextRefresherTests {
 	@Test
 	public void legacyContextRefresherCreatedUsingBootstrapEnabled() {
 		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
-				.withPropertyValues("spring.cloud.bootstrap.enabled=true").run(context -> {
-					assertThat(context).hasSingleBean(LegacyContextRefresher.class);
-					assertThat(context).hasSingleBean(ContextRefresher.class);
-				});
+			.withPropertyValues("spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
+				assertThat(context).hasSingleBean(LegacyContextRefresher.class);
+				assertThat(context).hasSingleBean(ContextRefresher.class);
+			});
 	}
 
 	@Test
 	public void legacyContextRefresherCreated() {
 		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
-				.withPropertyValues("spring.cloud.bootstrap.enabled=true").run(context -> {
-					assertThat(context).hasSingleBean(LegacyContextRefresher.class);
-					assertThat(context).hasSingleBean(ContextRefresher.class);
-				});
+			.withPropertyValues("spring.cloud.bootstrap.enabled=true")
+			.run(context -> {
+				assertThat(context).hasSingleBean(LegacyContextRefresher.class);
+				assertThat(context).hasSingleBean(ContextRefresher.class);
+			});
 	}
 
 	@Test
 	public void configDataContextRefresherCreated() {
 		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
-				.run(context -> {
-					assertThat(context).hasSingleBean(ConfigDataContextRefresher.class);
-					assertThat(context).hasSingleBean(ContextRefresher.class);
-				});
+			.run(context -> {
+				assertThat(context).hasSingleBean(ConfigDataContextRefresher.class);
+				assertThat(context).hasSingleBean(ContextRefresher.class);
+			});
 	}
 
 	private List<String> names(MutablePropertySources propertySources) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,13 @@ import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.util.function.SingletonSupplier;
 
 /**
  * A random-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Nan Chiu
  * @since 2.2.7
  */
 public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
@@ -42,7 +44,7 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
 	private final String serviceId;
 
-	private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
+	private final SingletonSupplier<ServiceInstanceListSupplier> serviceInstanceListSingletonSupplier;
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
@@ -52,16 +54,17 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 	public RandomLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId) {
 		this.serviceId = serviceId;
-		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
+		this.serviceInstanceListSingletonSupplier = SingletonSupplier
+			.of(() -> serviceInstanceListSupplierProvider.getIfAvailable(NoopServiceInstanceListSupplier::new));
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Mono<Response<ServiceInstance>> choose(Request request) {
-		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
-				.getIfAvailable(NoopServiceInstanceListSupplier::new);
-		return supplier.get(request).next()
-				.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
+		ServiceInstanceListSupplier supplier = serviceInstanceListSingletonSupplier.obtain();
+		return supplier.get(request)
+			.next()
+			.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
 
 	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,

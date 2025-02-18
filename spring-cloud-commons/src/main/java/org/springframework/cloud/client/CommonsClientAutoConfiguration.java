@@ -46,6 +46,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  * @author Tim Ysewyn
+ * @author Omer Naci Soydemir
  */
 @Configuration(proxyBeanMethods = false)
 public class CommonsClientAutoConfiguration {
@@ -75,7 +76,7 @@ public class CommonsClientAutoConfiguration {
 		}
 
 		@Bean
-		public HasFeatures commonsFeatures() {
+		public HasFeatures springCloudCommonsFeatures() {
 			return HasFeatures.abstractFeatures(DiscoveryClient.class, LoadBalancerClient.class);
 		}
 

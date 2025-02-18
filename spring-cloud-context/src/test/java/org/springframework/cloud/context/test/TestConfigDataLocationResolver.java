@@ -29,8 +29,15 @@ import org.springframework.boot.context.config.ConfigDataLocationResolver;
 import org.springframework.boot.context.config.ConfigDataLocationResolverContext;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.cloud.bootstrap.encrypt.KeyProperties;
+import org.springframework.cloud.bootstrap.encrypt.RsaProperties;
+import org.springframework.cloud.bootstrap.encrypt.TextEncryptorUtils;
+import org.springframework.core.Ordered;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 
-public class TestConfigDataLocationResolver implements ConfigDataLocationResolver<TestConfigDataResource> {
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class TestConfigDataLocationResolver implements ConfigDataLocationResolver<TestConfigDataResource>, Ordered {
 
 	public static AtomicInteger count = new AtomicInteger(1);
 
@@ -52,6 +59,21 @@ public class TestConfigDataLocationResolver implements ConfigDataLocationResolve
 			context.getBootstrapContext().registerIfAbsent(aClass, supplier);
 		}
 		String myplaceholder = context.getBinder().bind("myplaceholder", Bindable.of(String.class)).orElse("notfound");
+		boolean createFailsafeDelegate = context.getBinder()
+			.bind("createfailsafedelegate", Bindable.of(Boolean.class))
+			.orElse(Boolean.FALSE);
+		if (createFailsafeDelegate) {
+			assertThat(context.getBootstrapContext().isRegistered(TextEncryptor.class)).isTrue();
+			TextEncryptor textEncryptor = context.getBootstrapContext().get(TextEncryptor.class);
+			assertThat(textEncryptor).isInstanceOf(TextEncryptorUtils.FailsafeTextEncryptor.class);
+			KeyProperties keyProperties = context.getBinder()
+				.bindOrCreate(KeyProperties.PREFIX, Bindable.of(KeyProperties.class));
+			assertThat(TextEncryptorUtils.keysConfigured(keyProperties)).isTrue();
+			RsaProperties rsaProperties = context.getBinder()
+				.bindOrCreate(RsaProperties.PREFIX, Bindable.of(RsaProperties.class));
+			((TextEncryptorUtils.FailsafeTextEncryptor) textEncryptor)
+				.setDelegate(TextEncryptorUtils.createTextEncryptor(keyProperties, rsaProperties));
+		}
 		HashMap<String, Object> props = new HashMap<>(config);
 		props.put(TestEnvPostProcessor.EPP_VALUE, count.get());
 		if (count.get() == 99 && myplaceholder.contains("${vcap")) {
@@ -59,6 +81,11 @@ public class TestConfigDataLocationResolver implements ConfigDataLocationResolve
 					new IllegalArgumentException("placeholder not resolved"));
 		}
 		return Collections.singletonList(new TestConfigDataResource(props));
+	}
+
+	@Override
+	public int getOrder() {
+		return -1;
 	}
 
 }

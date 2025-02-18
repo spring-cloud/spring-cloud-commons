@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.cloud.client.loadbalancer.DefaultResponse;
 import org.springframework.cloud.client.loadbalancer.EmptyResponse;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.util.function.SingletonSupplier;
 
 /**
  * A Round-Robin-based implementation of {@link ReactorServiceInstanceLoadBalancer}.
@@ -37,6 +38,7 @@ import org.springframework.cloud.client.loadbalancer.Response;
  * @author Spencer Gibb
  * @author Olga Maciaszek-Sharma
  * @author Zhuozhi JI
+ * @author Nan Chiu
  */
 public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 
@@ -46,7 +48,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 
 	final String serviceId;
 
-	ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
+	private final SingletonSupplier<ServiceInstanceListSupplier> serviceInstanceListSingletonSupplier;
 
 	/**
 	 * @param serviceInstanceListSupplierProvider a provider of
@@ -67,7 +69,8 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	public RoundRobinLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider,
 			String serviceId, int seedPosition) {
 		this.serviceId = serviceId;
-		this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
+		this.serviceInstanceListSingletonSupplier = SingletonSupplier
+			.of(() -> serviceInstanceListSupplierProvider.getIfAvailable(NoopServiceInstanceListSupplier::new));
 		this.position = new AtomicInteger(seedPosition);
 	}
 
@@ -77,10 +80,10 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 	// https://github.com/Netflix/ocelli/blob/master/ocelli-core/
 	// src/main/java/netflix/ocelli/loadbalancer/RoundRobinLoadBalancer.java
 	public Mono<Response<ServiceInstance>> choose(Request request) {
-		ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider
-				.getIfAvailable(NoopServiceInstanceListSupplier::new);
-		return supplier.get(request).next()
-				.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
+		ServiceInstanceListSupplier supplier = serviceInstanceListSingletonSupplier.obtain();
+		return supplier.get(request)
+			.next()
+			.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
 
 	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,

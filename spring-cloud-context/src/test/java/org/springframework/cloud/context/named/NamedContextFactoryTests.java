@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,14 @@
 
 package org.springframework.cloud.context.named;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -24,15 +31,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.ClassUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
@@ -48,6 +57,64 @@ public class NamedContextFactoryTests {
 		parent.register(BaseConfig.class);
 		parent.refresh();
 		testChildContexts(parent);
+	}
+
+	@Test
+	void testBadThreadContextClassLoader() throws InterruptedException, ExecutionException, TimeoutException {
+		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
+		parent.setClassLoader(ClassUtils.getDefaultClassLoader());
+		parent.register(BaseConfig.class);
+		parent.refresh();
+
+		ExecutorService es = Executors.newSingleThreadExecutor(r -> {
+			Thread t = new Thread(r);
+			t.setContextClassLoader(new ThrowingClassLoader());
+			return t;
+		});
+		es.submit(() -> this.testChildContexts(parent)).get(5, TimeUnit.SECONDS);
+
+	}
+
+	@Test
+	void testGetAnnotatedBeanInstance() {
+		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
+		parent.register(BaseConfig.class);
+		parent.refresh();
+		TestClientFactory factory = new TestClientFactory();
+		factory.setApplicationContext(parent);
+		factory.setConfigurations(List.of(getSpec("annotated", AnnotatedConfig.class)));
+
+		TestType annotatedBean = factory.getAnnotatedInstance("annotated", ResolvableType.forType(TestType.class),
+				TestBean.class);
+
+		assertThat(annotatedBean.value()).isEqualTo(2);
+	}
+
+	@Test
+	void testNoAnnotatedBeanInstance() {
+		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
+		parent.register(BaseConfig.class);
+		parent.refresh();
+		TestClientFactory factory = new TestClientFactory();
+		factory.setApplicationContext(parent);
+		factory.setConfigurations(List.of(getSpec("not-annotated", NotAnnotatedConfig.class)));
+
+		TestType annotatedBean = factory.getAnnotatedInstance("not-annotated", ResolvableType.forType(TestType.class),
+				TestBean.class);
+		assertThat(annotatedBean).isNull();
+	}
+
+	@Test
+	void testMoreThanOneAnnotatedBeanInstance() {
+		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
+		parent.register(BaseConfig.class);
+		parent.refresh();
+		TestClientFactory factory = new TestClientFactory();
+		factory.setApplicationContext(parent);
+		factory.setConfigurations(List.of(getSpec("many-annotated", ManyAnnotatedConfig.class)));
+
+		assertThatIllegalStateException().isThrownBy(() -> factory.getAnnotatedInstance("many-annotated",
+				ResolvableType.forType(TestType.class), TestBean.class));
 	}
 
 	private void testChildContexts(GenericApplicationContext parent) {
@@ -91,35 +158,19 @@ public class NamedContextFactoryTests {
 		GenericApplicationContext barContext = factory.getContext("bar");
 
 		then(fooContext.getClassLoader()).as("foo context classloader does not match parent")
-				.isSameAs(parent.getClassLoader());
+			.isSameAs(parent.getClassLoader());
 
 		then(fooContext.getBeanFactory().getBeanClassLoader())
-				.as("foo context bean factory classloader does not match parent")
-				.isSameAs(parent.getBeanFactory().getBeanClassLoader());
+			.as("foo context bean factory classloader does not match parent")
+			.isSameAs(parent.getBeanFactory().getBeanClassLoader());
 
-		Assertions.assertThat(fooContext).hasFieldOrPropertyWithValue("customClassLoader", true);
+		assertThat(fooContext).hasFieldOrPropertyWithValue("customClassLoader", true);
 
 		factory.destroy();
 
 		then(fooContext.isActive()).as("foo context wasn't closed").isFalse();
 
 		then(barContext.isActive()).as("bar context wasn't closed").isFalse();
-	}
-
-	@Test
-	void testBadThreadContextClassLoader() throws InterruptedException, ExecutionException, TimeoutException {
-		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
-		parent.setClassLoader(ClassUtils.getDefaultClassLoader());
-		parent.register(BaseConfig.class);
-		parent.refresh();
-
-		ExecutorService es = Executors.newSingleThreadExecutor(r -> {
-			Thread t = new Thread(r);
-			t.setContextClassLoader(new ThrowingClassLoader());
-			return t;
-		});
-
-		es.submit(() -> this.testChildContexts(parent)).get(5, TimeUnit.SECONDS);
 	}
 
 	private TestSpec getSpec(String name, Class<?> configClass) {
@@ -236,17 +287,80 @@ public class NamedContextFactoryTests {
 
 	}
 
-	static class Container<T> {
+	record Container<T>(T item) {
 
-		private final T item;
+	}
 
-		Container(T item) {
-			this.item = item;
+	static class AnnotatedConfig {
+
+		@Bean
+		TestType test1() {
+			return new TestType(1);
 		}
 
-		public T getItem() {
-			return this.item;
+		@TestBean
+		@Bean
+		TestType test2() {
+			return new TestType(2);
 		}
+
+		@TestBean
+		@Bean
+		Bar bar() {
+			return new Bar();
+		}
+
+	}
+
+	static class NotAnnotatedConfig {
+
+		@Bean
+		TestType test1() {
+			return new TestType(1);
+		}
+
+		@Bean
+		TestType test2() {
+			return new TestType(2);
+		}
+
+		@TestBean
+		@Bean
+		Bar bar() {
+			return new Bar();
+		}
+
+	}
+
+	static class ManyAnnotatedConfig {
+
+		@TestBean
+		@Bean
+		TestType test1() {
+			return new TestType(1);
+		}
+
+		@TestBean
+		@Bean
+		TestType test2() {
+			return new TestType(2);
+		}
+
+		@Bean
+		Bar bar() {
+			return new Bar();
+		}
+
+	}
+
+	record TestType(int value) {
+	}
+
+	@Target({ ElementType.TYPE, ElementType.METHOD })
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@Inherited
+	@interface TestBean {
 
 	}
 

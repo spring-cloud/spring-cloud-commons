@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * beans.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Henning Pöttker
  * @since 2.2.0
  */
 @Configuration(proxyBeanMethods = false)
@@ -46,9 +47,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Conditional(LoadBalancerBeanPostProcessorAutoConfiguration.OnAnyLoadBalancerImplementationPresentCondition.class)
 public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
+	@SuppressWarnings("rawtypes")
 	@Bean
-	public LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
-			DeferringLoadBalancerExchangeFilterFunction deferringExchangeFilterFunction, ApplicationContext context) {
+	public static LoadBalancerWebClientBuilderBeanPostProcessor loadBalancerWebClientBuilderBeanPostProcessor(
+			ObjectProvider<DeferringLoadBalancerExchangeFilterFunction> deferringExchangeFilterFunction,
+			ApplicationContext context) {
 		return new LoadBalancerWebClientBuilderBeanPostProcessor(deferringExchangeFilterFunction, context);
 	}
 
@@ -58,7 +61,7 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 
 		@Bean
 		@Primary
-		DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> reactorDeferringLoadBalancerExchangeFilterFunction(
+		static DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> reactorDeferringLoadBalancerExchangeFilterFunction(
 				ObjectProvider<LoadBalancedExchangeFilterFunction> exchangeFilterFunctionProvider) {
 			return new DeferringLoadBalancerExchangeFilterFunction<>(exchangeFilterFunctionProvider);
 		}

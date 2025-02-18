@@ -57,7 +57,7 @@ public class ConfigurationPropertiesBeans implements BeanPostProcessor, Applicat
 			this.beanFactory = (ConfigurableListableBeanFactory) applicationContext.getAutowireCapableBeanFactory();
 		}
 		if (applicationContext.getParent() != null && applicationContext.getParent()
-				.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory listable) {
+			.getAutowireCapableBeanFactory() instanceof ConfigurableListableBeanFactory listable) {
 			String[] names = listable.getBeanNamesForType(ConfigurationPropertiesBeans.class);
 			if (names.length == 1) {
 				this.parent = (ConfigurationPropertiesBeans) listable.getBean(names[0]);

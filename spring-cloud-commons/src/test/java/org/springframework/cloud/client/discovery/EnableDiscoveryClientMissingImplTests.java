@@ -38,7 +38,8 @@ public class EnableDiscoveryClientMissingImplTests {
 	@Test
 	public void testContextFails() {
 		try (ConfigurableApplicationContext context = new SpringApplicationBuilder().sources(App.class)
-				.web(WebApplicationType.NONE).run()) {
+			.web(WebApplicationType.NONE)
+			.run()) {
 			// do sth
 		}
 		catch (NestedRuntimeException e) {

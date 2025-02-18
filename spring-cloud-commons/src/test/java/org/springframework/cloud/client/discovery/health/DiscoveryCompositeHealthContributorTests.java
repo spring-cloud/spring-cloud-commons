@@ -40,7 +40,7 @@ public class DiscoveryCompositeHealthContributorTests {
 	@Test
 	public void createWhenIndicatorsAreNullThrowsException() {
 		assertThatIllegalArgumentException().isThrownBy(() -> new DiscoveryCompositeHealthContributor(null))
-				.withMessage("'indicators' must not be null");
+			.withMessage("'indicators' must not be null");
 	}
 
 	@Test

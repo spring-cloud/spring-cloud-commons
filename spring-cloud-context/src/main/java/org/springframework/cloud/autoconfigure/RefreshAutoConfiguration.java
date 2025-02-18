@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,6 @@ import java.util.Set;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -43,6 +40,7 @@ import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.cloud.context.refresh.ConfigDataContextRefresher;
 import org.springframework.cloud.context.refresh.ContextRefresher;
 import org.springframework.cloud.context.refresh.LegacyContextRefresher;
+import org.springframework.cloud.context.refresh.RefreshScopeLifecycle;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.cloud.endpoint.event.RefreshEventListener;
 import org.springframework.cloud.logging.LoggingRebinder;
@@ -52,11 +50,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -66,6 +62,8 @@ import org.springframework.util.StringUtils;
  *
  * @author Dave Syer
  * @author Venil Noronha
+ * @author Olga Maciaszek-Sharma
+ * @author Yanming Zhou
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RefreshScope.class)
@@ -117,12 +115,18 @@ public class RefreshAutoConfiguration {
 		return new ConfigDataContextRefresher(context, scope, properties);
 	}
 
+	@ConditionalOnProperty(value = REFRESH_SCOPE_PREFIX + ".on-restart.enabled", matchIfMissing = true)
+	@Bean
+	RefreshScopeLifecycle refreshScopeLifecycle(ContextRefresher contextRefresher) {
+		return new RefreshScopeLifecycle(contextRefresher);
+	}
+
 	@Bean
 	public RefreshEventListener refreshEventListener(ContextRefresher contextRefresher) {
 		return new RefreshEventListener(contextRefresher);
 	}
 
-	@ConfigurationProperties("spring.cloud.refresh")
+	@ConfigurationProperties(REFRESH_SCOPE_PREFIX)
 	public static class RefreshProperties {
 
 		/**
@@ -143,29 +147,9 @@ public class RefreshAutoConfiguration {
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)
-					.append("additionalPropertySourcesToRetain", additionalPropertySourcesToRetain).toString();
+				.append("additionalPropertySourcesToRetain", additionalPropertySourcesToRetain)
+				.toString();
 
-		}
-
-	}
-
-	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass(name = "javax.persistence.EntityManagerFactory")
-	protected static class JpaInvokerConfiguration implements LoadTimeWeaverAware, InitializingBean {
-
-		@Autowired
-		private ListableBeanFactory beanFactory;
-
-		@Override
-		public void afterPropertiesSet() {
-			String cls = "org.springframework.boot.autoconfigure.jdbc.DataSourceInitializerInvoker";
-			if (this.beanFactory.containsBean(cls)) {
-				this.beanFactory.getBean(cls);
-			}
-		}
-
-		@Override
-		public void setLoadTimeWeaver(LoadTimeWeaver ltw) {
 		}
 
 	}
@@ -211,7 +195,7 @@ public class RefreshAutoConfiguration {
 				if (isApplicable(registry, name, definition)) {
 					BeanDefinitionHolder holder = new BeanDefinitionHolder(definition, name);
 					BeanDefinitionHolder proxy = ScopedProxyUtils.createScopedProxy(holder, registry, true);
-					definition.setScope("refresh");
+					definition.setScope(REFRESH_SCOPE_NAME);
 					if (registry.containsBeanDefinition(proxy.getBeanName())) {
 						registry.removeBeanDefinition(proxy.getBeanName());
 					}
@@ -225,6 +209,9 @@ public class RefreshAutoConfiguration {
 			if (REFRESH_SCOPE_NAME.equals(scope)) {
 				// Already refresh scoped
 				return false;
+			}
+			if (this.refreshables.contains(name)) {
+				return true;
 			}
 			String type = definition.getBeanClassName();
 			if (!StringUtils.hasText(type) && registry instanceof BeanFactory) {
@@ -244,7 +231,7 @@ public class RefreshAutoConfiguration {
 				if (this.environment == null) {
 					this.environment = new StandardEnvironment();
 				}
-				Binder.get(this.environment).bind("spring.cloud.refresh", Bindable.ofInstance(this));
+				Binder.get(this.environment).bind(REFRESH_SCOPE_PREFIX, Bindable.ofInstance(this));
 				this.bound = true;
 			}
 		}

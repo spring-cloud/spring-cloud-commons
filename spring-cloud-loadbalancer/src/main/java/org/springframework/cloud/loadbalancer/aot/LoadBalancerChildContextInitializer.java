@@ -74,8 +74,8 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 		contextIds.addAll(getContextIdsFromConfig());
 		contextIds.addAll(getEagerLoadContextIds());
 		Map<String, GenericApplicationContext> childContextAotContributions = contextIds.stream()
-				.map(contextId -> Map.entry(contextId, buildChildContext(contextId)))
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+			.map(contextId -> Map.entry(contextId, buildChildContext(contextId)))
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		return new AotContribution(childContextAotContributions);
 	}
 
@@ -86,8 +86,8 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 
 	private Set<String> getEagerLoadContextIds() {
 		return Binder.get(applicationContext.getEnvironment())
-				.bind("spring.cloud.loadbalancer.eager-load.clients", Bindable.setOf(String.class))
-				.orElse(Collections.emptySet());
+			.bind("spring.cloud.loadbalancer.eager-load.clients", Bindable.setOf(String.class))
+			.orElse(Collections.emptySet());
 	}
 
 	private GenericApplicationContext buildChildContext(String contextId) {
@@ -101,9 +101,11 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 		private final Map<String, GenericApplicationContext> childContexts;
 
 		AotContribution(Map<String, GenericApplicationContext> childContexts) {
-			this.childContexts = childContexts.entrySet().stream().filter(entry -> entry.getValue() != null)
-					.map(entry -> Map.entry(entry.getKey(), entry.getValue()))
-					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+			this.childContexts = childContexts.entrySet()
+				.stream()
+				.filter(entry -> entry.getValue() != null)
+				.map(entry -> Map.entry(entry.getKey(), entry.getValue()))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		}
 
 		@Override
@@ -113,22 +115,22 @@ public class LoadBalancerChildContextInitializer implements BeanRegistrationAotP
 				name = name.replaceAll("[-]", "_");
 				GenerationContext childGenerationContext = generationContext.withName(name);
 				ClassName initializerClassName = new ApplicationContextAotGenerator()
-						.processAheadOfTime(entry.getValue(), childGenerationContext);
+					.processAheadOfTime(entry.getValue(), childGenerationContext);
 				return Map.entry(entry.getKey(), initializerClassName);
 			}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-			GeneratedMethod postProcessorMethod = beanRegistrationCode.getMethods().add("addChildContextInitializer",
-					method -> {
-						method.addJavadoc("Use AOT child context management initialization")
-								.addModifiers(Modifier.PRIVATE, Modifier.STATIC)
-								.addParameter(RegisteredBean.class, "registeredBean")
-								.addParameter(LoadBalancerClientFactory.class, "instance")
-								.returns(LoadBalancerClientFactory.class)
-								.addStatement("$T<String, Object> initializers = new $T<>()", Map.class, HashMap.class);
-						generatedInitializerClassNames.keySet()
-								.forEach(contextId -> method.addStatement("initializers.put($S, new $L())", contextId,
-										generatedInitializerClassNames.get(contextId)));
-						method.addStatement("return instance.withApplicationContextInitializers(initializers)");
-					});
+			GeneratedMethod postProcessorMethod = beanRegistrationCode.getMethods()
+				.add("addChildContextInitializer", method -> {
+					method.addJavadoc("Use AOT child context management initialization")
+						.addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+						.addParameter(RegisteredBean.class, "registeredBean")
+						.addParameter(LoadBalancerClientFactory.class, "instance")
+						.returns(LoadBalancerClientFactory.class)
+						.addStatement("$T<String, Object> initializers = new $T<>()", Map.class, HashMap.class);
+					generatedInitializerClassNames.keySet()
+						.forEach(contextId -> method.addStatement("initializers.put($S, new $L())", contextId,
+								generatedInitializerClassNames.get(contextId)));
+					method.addStatement("return instance.withApplicationContextInitializers(initializers)");
+				});
 			beanRegistrationCode.addInstancePostProcessor(postProcessorMethod.toMethodReference());
 		}
 

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-commons-parent</artifactId>
-		<version>4.0.2-SNAPSHOT</version>
+		<version>4.3.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>spring-cloud-loadbalancer</artifactId>
@@ -84,25 +84,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!--<dependency>
-			<groupId>org.springframework.security.oauth.boot</groupId>
-			<artifactId>spring-security-oauth2-autoconfigure</artifactId>
-			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.xml.bind</groupId>
-					<artifactId>jaxb-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.activation</groupId>
-					<artifactId>jakarta.activation</artifactId>
-				</exclusion>
-					<exclusion>
-						<groupId>javax.activation</groupId>
-						<artifactId>javax.activation-api</artifactId>
-					</exclusion>
-			</exclusions>
-		</dependency>-->
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-core</artifactId>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,9 +35,11 @@ import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -58,8 +60,6 @@ public final class ServiceInstanceListSupplierBuilder {
 	private static final Log LOG = LogFactory.getLog(ServiceInstanceListSupplierBuilder.class);
 
 	private Creator baseCreator;
-
-	private DelegateCreator cachingCreator;
 
 	private final List<DelegateCreator> creators = new ArrayList<>();
 
@@ -119,7 +119,11 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withWeighted() {
-		DelegateCreator creator = (context, delegate) -> new WeightedServiceInstanceListSupplier(delegate);
+		DelegateCreator creator = (context, delegate) -> {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory = context
+				.getBean(LoadBalancerClientFactory.class);
+			return new WeightedServiceInstanceListSupplier(delegate, loadBalancerClientFactory);
+		};
 		this.creators.add(creator);
 		return this;
 	}
@@ -132,8 +136,11 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withWeighted(WeightFunction weightFunction) {
-		DelegateCreator creator = (context, delegate) -> new WeightedServiceInstanceListSupplier(delegate,
-				weightFunction);
+		DelegateCreator creator = (context, delegate) -> {
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory = context
+				.getBean(LoadBalancerClientFactory.class);
+			return new WeightedServiceInstanceListSupplier(delegate, weightFunction, loadBalancerClientFactory);
+		};
 		this.creators.add(creator);
 		return this;
 	}
@@ -146,7 +153,7 @@ public final class ServiceInstanceListSupplierBuilder {
 	public ServiceInstanceListSupplierBuilder withHealthChecks() {
 		DelegateCreator creator = (context, delegate) -> {
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory = context
-					.getBean(LoadBalancerClientFactory.class);
+				.getBean(LoadBalancerClientFactory.class);
 			WebClient.Builder webClient = context.getBean(WebClient.Builder.class);
 			return healthCheckServiceInstanceListSupplier(webClient.build(), delegate, loadBalancerClientFactory);
 		};
@@ -175,8 +182,10 @@ public final class ServiceInstanceListSupplierBuilder {
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withSameInstancePreference() {
-		DelegateCreator creator = (context,
-				delegate) -> new SameInstancePreferenceServiceInstanceListSupplier(delegate);
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
+			return new SameInstancePreferenceServiceInstanceListSupplier(delegate, loadBalancerClientFactory);
+		};
 		this.creators.add(creator);
 		return this;
 	}
@@ -198,6 +207,21 @@ public final class ServiceInstanceListSupplierBuilder {
 
 	/**
 	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
+	 * {@link RestClient} instance to the {@link ServiceInstanceListSupplier} hierarchy.
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withBlockingRestClientHealthChecks() {
+		DelegateCreator creator = (context, delegate) -> {
+			RestClient restClient = context.getBean(RestClient.class);
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
+			return blockingHealthCheckServiceInstanceListSupplier(restClient, delegate, loadBalancerClientFactory);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
+	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
 	 * {@link RestTemplate} instance to the {@link ServiceInstanceListSupplier} hierarchy.
 	 * @param restTemplate a user-provided {@link RestTemplate} instance
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
@@ -212,14 +236,30 @@ public final class ServiceInstanceListSupplierBuilder {
 	}
 
 	/**
+	 * Adds a {@link HealthCheckServiceInstanceListSupplier} that uses user-provided
+	 * {@link RestClient} instance to the {@link ServiceInstanceListSupplier} hierarchy.
+	 * @param restClient a user-provided {@link RestClient} instance
+	 * @return the {@link ServiceInstanceListSupplierBuilder} object
+	 */
+	public ServiceInstanceListSupplierBuilder withBlockingHealthChecks(RestClient restClient) {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
+			return blockingHealthCheckServiceInstanceListSupplier(restClient, delegate, loadBalancerClientFactory);
+		};
+		this.creators.add(creator);
+		return this;
+	}
+
+	/**
 	 * Adds a {@link ZonePreferenceServiceInstanceListSupplier} to the
 	 * {@link ServiceInstanceListSupplier} hierarchy.
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withZonePreference() {
 		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
 			LoadBalancerZoneConfig zoneConfig = context.getBean(LoadBalancerZoneConfig.class);
-			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig);
+			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig, loadBalancerClientFactory);
 		};
 		this.creators.add(creator);
 		return this;
@@ -233,8 +273,9 @@ public final class ServiceInstanceListSupplierBuilder {
 	 */
 	public ServiceInstanceListSupplierBuilder withZonePreference(String zoneName) {
 		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory loadBalancerClientFactory = context.getBean(LoadBalancerClientFactory.class);
 			LoadBalancerZoneConfig zoneConfig = new LoadBalancerZoneConfig(zoneName);
-			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig);
+			return new ZonePreferenceServiceInstanceListSupplier(delegate, zoneConfig, loadBalancerClientFactory);
 		};
 		this.creators.add(creator);
 		return this;
@@ -282,21 +323,17 @@ public final class ServiceInstanceListSupplierBuilder {
 	}
 
 	/**
-	 * If {@link LoadBalancerCacheManager} is available in the context, wraps created
-	 * {@link ServiceInstanceListSupplier} hierarchy with a
-	 * {@link CachingServiceInstanceListSupplier} instance to provide a caching mechanism
-	 * for service instances. Uses {@link ObjectProvider} to lazily resolve
+	 * If {@link LoadBalancerCacheManager} is available in the context, adds a
+	 * {@link CachingServiceInstanceListSupplier} instance to the
+	 * {@link ServiceInstanceListSupplier} hierarchy to provide a caching mechanism for
+	 * service instances. Uses {@link ObjectProvider} to lazily resolve
 	 * {@link LoadBalancerCacheManager}.
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
 	public ServiceInstanceListSupplierBuilder withCaching() {
-		if (cachingCreator != null && LOG.isWarnEnabled()) {
-			LOG.warn(
-					"Overriding a previously set cachingCreator with a CachingServiceInstanceListSupplier-based cachingCreator.");
-		}
-		this.cachingCreator = (context, delegate) -> {
+		DelegateCreator creator = (context, delegate) -> {
 			ObjectProvider<LoadBalancerCacheManager> cacheManagerProvider = context
-					.getBeanProvider(LoadBalancerCacheManager.class);
+				.getBeanProvider(LoadBalancerCacheManager.class);
 			if (cacheManagerProvider.getIfAvailable() != null) {
 				return new CachingServiceInstanceListSupplier(delegate, cacheManagerProvider.getIfAvailable());
 			}
@@ -305,6 +342,7 @@ public final class ServiceInstanceListSupplierBuilder {
 			}
 			return delegate;
 		};
+		creators.add(creator);
 		return this;
 	}
 
@@ -318,6 +356,16 @@ public final class ServiceInstanceListSupplierBuilder {
 		DelegateCreator creator = (context, delegate) -> {
 			LoadBalancerClientFactory factory = context.getBean(LoadBalancerClientFactory.class);
 			return new HintBasedServiceInstanceListSupplier(delegate, factory);
+		};
+		creators.add(creator);
+		return this;
+	}
+
+	public ServiceInstanceListSupplierBuilder withSubset() {
+		DelegateCreator creator = (context, delegate) -> {
+			PropertyResolver resolver = context.getBean(PropertyResolver.class);
+			LoadBalancerClientFactory factory = context.getBean(LoadBalancerClientFactory.class);
+			return new SubsetServiceInstanceListSupplier(delegate, resolver, factory);
 		};
 		creators.add(creator);
 		return this;
@@ -351,9 +399,6 @@ public final class ServiceInstanceListSupplierBuilder {
 			supplier = creator.apply(context, supplier);
 		}
 
-		if (this.cachingCreator != null) {
-			supplier = this.cachingCreator.apply(context, supplier);
-		}
 		return supplier;
 	}
 
@@ -362,10 +407,10 @@ public final class ServiceInstanceListSupplierBuilder {
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		return new HealthCheckServiceInstanceListSupplier(delegate, loadBalancerClientFactory,
 				(serviceInstance, healthCheckPath) -> webClient.get()
-						.uri(UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build()
-								.toUri())
-						.exchange().flatMap(clientResponse -> clientResponse.releaseBody()
-								.thenReturn(HttpStatus.OK.value() == clientResponse.rawStatusCode())));
+					.uri(UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build().toUri())
+					.exchange()
+					.flatMap(clientResponse -> clientResponse.releaseBody()
+						.thenReturn(HttpStatus.OK.equals(clientResponse.statusCode()))));
 	}
 
 	private ServiceInstanceListSupplier blockingHealthCheckServiceInstanceListSupplier(RestTemplate restTemplate,
@@ -373,11 +418,29 @@ public final class ServiceInstanceListSupplierBuilder {
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		return new HealthCheckServiceInstanceListSupplier(delegate, loadBalancerClientFactory,
 				(serviceInstance, healthCheckPath) -> Mono.defer(() -> {
-					URI uri = UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build()
-							.toUri();
+					URI uri = UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath))
+						.build()
+						.toUri();
 					try {
 						return Mono
-								.just(HttpStatus.OK.equals(restTemplate.getForEntity(uri, Void.class).getStatusCode()));
+							.just(HttpStatus.OK.equals(restTemplate.getForEntity(uri, Void.class).getStatusCode()));
+					}
+					catch (Exception ignored) {
+						return Mono.just(false);
+					}
+				}));
+	}
+
+	private ServiceInstanceListSupplier blockingHealthCheckServiceInstanceListSupplier(RestClient restClient,
+			ServiceInstanceListSupplier delegate, LoadBalancerClientFactory loadBalancerClientFactory) {
+		return new HealthCheckServiceInstanceListSupplier(delegate, loadBalancerClientFactory,
+				(serviceInstance, healthCheckPath) -> Mono.defer(() -> {
+					URI uri = UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath))
+						.build()
+						.toUri();
+					try {
+						return Mono.just(HttpStatus.OK
+							.equals(restClient.get().uri(uri).retrieve().toBodilessEntity().getStatusCode()));
 					}
 					catch (Exception ignored) {
 						return Mono.just(false);

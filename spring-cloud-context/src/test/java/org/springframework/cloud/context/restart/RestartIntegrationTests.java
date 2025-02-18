@@ -30,10 +30,6 @@ public class RestartIntegrationTests {
 
 	private ConfigurableApplicationContext context;
 
-	public static void main(String[] args) {
-		SpringApplication.run(TestConfiguration.class, args);
-	}
-
 	@AfterEach
 	public void close() {
 		if (this.context != null) {

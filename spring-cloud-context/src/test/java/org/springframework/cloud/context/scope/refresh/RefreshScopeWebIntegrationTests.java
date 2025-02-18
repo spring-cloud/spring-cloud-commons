@@ -57,7 +57,7 @@ public class RefreshScopeWebIntegrationTests {
 	@Test
 	public void scopeOnBeanDefinition() {
 		then(this.beanFactory.getBeanDefinition(ScopedProxyUtils.getTargetBeanName("application")).getScope())
-				.isEqualTo("refresh");
+			.isEqualTo("refresh");
 	}
 
 	@Test

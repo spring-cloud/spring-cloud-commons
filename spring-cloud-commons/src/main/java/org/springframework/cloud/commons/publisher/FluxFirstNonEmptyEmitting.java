@@ -150,10 +150,10 @@ final class FluxFirstNonEmptyEmitting<T> extends Flux<T> implements Scannable, P
 
 		@SuppressWarnings("rawtypes")
 		static final AtomicIntegerFieldUpdater<RaceCoordinator> WIP = AtomicIntegerFieldUpdater
-				.newUpdater(RaceCoordinator.class, "wip");
+			.newUpdater(RaceCoordinator.class, "wip");
 
 		static final AtomicIntegerFieldUpdater<RaceCoordinator> COMPETING_SUBSCRIBERS = AtomicIntegerFieldUpdater
-				.newUpdater(RaceCoordinator.class, "competingSubscribers");
+			.newUpdater(RaceCoordinator.class, "competingSubscribers");
 
 		@SuppressWarnings("unchecked")
 		RaceCoordinator(int n) {

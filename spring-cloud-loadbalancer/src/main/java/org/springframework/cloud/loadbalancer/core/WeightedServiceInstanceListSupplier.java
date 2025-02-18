@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2022 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,15 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 
 /**
  * A {@link ServiceInstanceListSupplier} implementation that uses weights to expand the
  * instances provided by delegate.
  *
  * @author Zhuozhi Ji
+ * @author Olga Maciaszek-Sharma
  */
 public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
@@ -41,9 +44,10 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 
 	private final WeightFunction weightFunction;
 
+	private boolean callGetWithRequestOnDelegates;
+
 	public WeightedServiceInstanceListSupplier(ServiceInstanceListSupplier delegate) {
-		super(delegate);
-		this.weightFunction = WeightedServiceInstanceListSupplier::metadataWeightFunction;
+		this(delegate, WeightedServiceInstanceListSupplier::metadataWeightFunction);
 	}
 
 	public WeightedServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, WeightFunction weightFunction) {
@@ -51,9 +55,30 @@ public class WeightedServiceInstanceListSupplier extends DelegatingServiceInstan
 		this.weightFunction = weightFunction;
 	}
 
+	public WeightedServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
+		this(delegate, WeightedServiceInstanceListSupplier::metadataWeightFunction, loadBalancerClientFactory);
+	}
+
+	public WeightedServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, WeightFunction weightFunction,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
+		super(delegate);
+		this.weightFunction = weightFunction;
+		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
+			.isCallGetWithRequestOnDelegates();
+	}
+
 	@Override
 	public Flux<List<ServiceInstance>> get() {
 		return delegate.get().map(this::expandByWeight);
+	}
+
+	@Override
+	public Flux<List<ServiceInstance>> get(Request request) {
+		if (callGetWithRequestOnDelegates) {
+			return delegate.get(request).map(this::expandByWeight);
+		}
+		return get();
 	}
 
 	private List<ServiceInstance> expandByWeight(List<ServiceInstance> instances) {

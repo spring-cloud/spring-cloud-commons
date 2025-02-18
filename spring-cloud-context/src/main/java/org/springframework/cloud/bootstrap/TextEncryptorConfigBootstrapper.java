@@ -38,7 +38,12 @@ public class TextEncryptorConfigBootstrapper implements BootstrapRegistryInitial
 	 * RsaSecretEncryptor present.
 	 */
 	public static final boolean RSA_IS_PRESENT = ClassUtils
-			.isPresent("org.springframework.security.rsa.crypto.RsaSecretEncryptor", null);
+		.isPresent("org.springframework.security.crypto.encrypt.RsaSecretEncryptor", null);
+
+	/**
+	 * RsaSecretEncryptor present.
+	 */
+	public static final boolean BCPROV_IS_PRESENT = ClassUtils.isPresent("org.bouncycastle.asn1.ASN1Sequence", null);
 
 	@Override
 	public void initialize(BootstrapRegistry registry) {
@@ -46,11 +51,15 @@ public class TextEncryptorConfigBootstrapper implements BootstrapRegistryInitial
 			return;
 		}
 
-		registry.registerIfAbsent(KeyProperties.class, context -> context.get(Binder.class)
-				.bind(KeyProperties.PREFIX, KeyProperties.class).orElseGet(KeyProperties::new));
-		if (RSA_IS_PRESENT) {
-			registry.registerIfAbsent(RsaProperties.class, context -> context.get(Binder.class)
-					.bind(RsaProperties.PREFIX, RsaProperties.class).orElseGet(RsaProperties::new));
+		registry.registerIfAbsent(KeyProperties.class,
+				context -> context.get(Binder.class)
+					.bind(KeyProperties.PREFIX, KeyProperties.class)
+					.orElseGet(KeyProperties::new));
+		if (RSA_IS_PRESENT && BCPROV_IS_PRESENT) {
+			registry.registerIfAbsent(RsaProperties.class,
+					context -> context.get(Binder.class)
+						.bind(RsaProperties.PREFIX, RsaProperties.class)
+						.orElseGet(RsaProperties::new));
 		}
 		TextEncryptorUtils.register(registry);
 
@@ -65,7 +74,7 @@ public class TextEncryptorConfigBootstrapper implements BootstrapRegistryInitial
 			if (keyProperties != null) {
 				beanFactory.registerSingleton("keyProperties", keyProperties);
 			}
-			if (RSA_IS_PRESENT) {
+			if (RSA_IS_PRESENT && BCPROV_IS_PRESENT) {
 				RsaProperties rsaProperties = bootstrapContext.get(RsaProperties.class);
 				if (rsaProperties != null) {
 					beanFactory.registerSingleton("rsaProperties", rsaProperties);

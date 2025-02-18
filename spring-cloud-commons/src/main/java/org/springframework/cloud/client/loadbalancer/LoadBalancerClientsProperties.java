@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2021 the original author or authors.
+ * Copyright 2013-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.cloud.loadbalancer")
 public class LoadBalancerClientsProperties extends LoadBalancerProperties {
 
-	private Map<String, LoadBalancerProperties> clients = new HashMap<>();
+	private final Map<String, LoadBalancerProperties> clients = new HashMap<>();
 
 	public Map<String, LoadBalancerProperties> getClients() {
 		return this.clients;

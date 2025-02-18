@@ -30,8 +30,8 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
-import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.ContextRefreshedWithApplicationEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEvent;
@@ -51,7 +51,7 @@ import org.springframework.util.ClassUtils;
  *
  */
 @Endpoint(id = "restart", enableByDefault = false)
-public class RestartEndpoint implements ApplicationListener<ApplicationPreparedEvent> {
+public class RestartEndpoint implements ApplicationListener<ContextRefreshedWithApplicationEvent> {
 
 	private static Log logger = LogFactory.getLog(RestartEndpoint.class);
 
@@ -61,7 +61,7 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 
 	private String[] args;
 
-	private ApplicationPreparedEvent event;
+	private ContextRefreshedWithApplicationEvent event;
 
 	private IntegrationShutdown integrationShutdown;
 
@@ -85,15 +85,16 @@ public class RestartEndpoint implements ApplicationListener<ApplicationPreparedE
 	}
 
 	@Override
-	public void onApplicationEvent(ApplicationPreparedEvent input) {
+	public void onApplicationEvent(ContextRefreshedWithApplicationEvent input) {
 		this.event = input;
 		if (this.context == null) {
 			this.context = this.event.getApplicationContext();
 			this.args = this.event.getArgs();
 			this.application = this.event.getSpringApplication();
 			this.application.addInitializers(new PostProcessorInitializer());
-			this.pauseHandlers = this.context.getBeanProvider(PauseHandler.class).orderedStream()
-					.collect(Collectors.toList());
+			this.pauseHandlers = this.context.getBeanProvider(PauseHandler.class)
+				.orderedStream()
+				.collect(Collectors.toList());
 		}
 	}
 

@@ -119,7 +119,7 @@ public class IdUtilsTests {
 	@Test
 	public void testUnresolvedServiceIdWithActiveProfiles() {
 		then(IdUtils.DEFAULT_SERVICE_ID_WITH_ACTIVE_PROFILES_STRING)
-				.isEqualTo(IdUtils.getUnresolvedServiceIdWithActiveProfiles());
+			.isEqualTo(IdUtils.getUnresolvedServiceIdWithActiveProfiles());
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.net.URI;
 
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
 
@@ -31,11 +30,11 @@ import org.springframework.util.Assert;
  * @author Ryan Baxter
  * @author William Tran
  */
-public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
+public class LoadBalancerInterceptor implements BlockingLoadBalancerInterceptor {
 
-	private LoadBalancerClient loadBalancer;
+	private final LoadBalancerClient loadBalancer;
 
-	private LoadBalancerRequestFactory requestFactory;
+	private final LoadBalancerRequestFactory requestFactory;
 
 	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRequestFactory requestFactory) {
 		this.loadBalancer = loadBalancer;
@@ -48,12 +47,12 @@ public class LoadBalancerInterceptor implements ClientHttpRequestInterceptor {
 	}
 
 	@Override
-	public ClientHttpResponse intercept(final HttpRequest request, final byte[] body,
-			final ClientHttpRequestExecution execution) throws IOException {
-		final URI originalUri = request.getURI();
+	public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+			throws IOException {
+		URI originalUri = request.getURI();
 		String serviceName = originalUri.getHost();
 		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
-		return this.loadBalancer.execute(serviceName, this.requestFactory.createRequest(request, body, execution));
+		return loadBalancer.execute(serviceName, requestFactory.createRequest(request, body, execution));
 	}
 
 }

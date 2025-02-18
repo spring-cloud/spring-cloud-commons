@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.context.refresh.ContextRefresher;
@@ -38,18 +40,22 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Dave Syer
+ * @author Olga Maciaszek-Sharma
+ * @author Yanming Zhou
  */
 @ExtendWith(OutputCaptureExtension.class)
-public class RefreshAutoConfigurationTests {
+class RefreshAutoConfigurationTests {
 
 	private static ConfigurableApplicationContext getApplicationContext(WebApplicationType type, Class<?> configuration,
 			String... properties) {
-		return new SpringApplicationBuilder(configuration).web(type).properties(properties).properties("server.port=0")
-				.run();
+		return new SpringApplicationBuilder(configuration).web(type)
+			.properties(properties)
+			.properties("server.port=0")
+			.run();
 	}
 
 	@Test
-	public void noWarnings(CapturedOutput output) {
+	void noWarnings(CapturedOutput output) {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class)) {
 			then(context.containsBean("refreshScope")).isTrue();
 			then(output.toString()).doesNotContain("WARN");
@@ -57,7 +63,7 @@ public class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	public void disabled() {
+	void disabled() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.SERVLET, Config.class,
 				"spring.cloud.refresh.enabled:false")) {
 			then(context.containsBean("refreshScope")).isFalse();
@@ -65,7 +71,7 @@ public class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	public void refreshables() {
+	void refreshables() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class,
 				"config.foo=bar", "spring.cloud.refresh.refreshable:" + SealedConfigProps.class.getName())) {
 			context.getBean(SealedConfigProps.class);
@@ -74,7 +80,7 @@ public class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	public void extraRefreshables() {
+	public void extraRefreshableWithClassName() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class,
 				"sealedconfig.foo=bar",
 				"spring.cloud.refresh.extra-refreshable:" + SealedConfigProps.class.getName())) {
@@ -84,7 +90,17 @@ public class RefreshAutoConfigurationTests {
 	}
 
 	@Test
-	public void neverRefreshable() {
+	public void extraRefreshableWithBeanName() {
+		String beanName = "sealedconfig-" + SealedConfigProps.class.getName();
+		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class,
+				"sealedconfig.foo=bar", "spring.cloud.refresh.extra-refreshable:" + beanName)) {
+			context.getBean(SealedConfigProps.class);
+			context.getBean(ContextRefresher.class).refresh();
+		}
+	}
+
+	@Test
+	void neverRefreshableWithClassName() {
 		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class,
 				"countingconfig.foo=bar",
 				"spring.cloud.refresh.never-refreshable:" + CountingConfigProps.class.getName())) {
@@ -92,6 +108,30 @@ public class RefreshAutoConfigurationTests {
 			context.getBean(ContextRefresher.class).refresh();
 			assertThat(configProps.count).as("config props was rebound when it should not have been").hasValue(1);
 		}
+	}
+
+	@Test
+	void neverRefreshableWithBeanName() {
+		String beanName = "countingconfig-" + CountingConfigProps.class.getName();
+		try (ConfigurableApplicationContext context = getApplicationContext(WebApplicationType.NONE, Config.class,
+				"countingconfig.foo=bar", "spring.cloud.refresh.never-refreshable:" + beanName)) {
+			CountingConfigProps configProps = context.getBean(CountingConfigProps.class);
+			context.getBean(ContextRefresher.class).refresh();
+			assertThat(configProps.count).as("config props was rebound when it should not have been").hasValue(1);
+		}
+	}
+
+	@Test
+	void refreshScopeLifecylePresentByDefault() {
+		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
+			.run(context -> assertThat(context).hasBean("refreshScopeLifecycle"));
+	}
+
+	@Test
+	void refreshScopeLifecyleDisabledWithProp() {
+		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
+			.withPropertyValues("spring.cloud.refresh.on-restart.enabled=false")
+			.run(context -> assertThat(context).doesNotHaveBean("refreshScopeLifecycle"));
 	}
 
 	@Configuration(proxyBeanMethods = false)

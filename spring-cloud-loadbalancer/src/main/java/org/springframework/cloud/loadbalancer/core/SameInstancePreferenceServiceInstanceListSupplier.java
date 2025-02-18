@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,15 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 
 /**
  * An implementation of {@link ServiceInstanceListSupplier} that selects the previously
  * chosen instance if it's available.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Jürgen Kreitler
  * @since 2.2.7
  */
 public class SameInstancePreferenceServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier
@@ -39,8 +42,17 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 
 	private ServiceInstance previouslyReturnedInstance;
 
+	private boolean callGetWithRequestOnDelegates;
+
 	public SameInstancePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate) {
 		super(delegate);
+	}
+
+	public SameInstancePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
+		super(delegate);
+		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
+			.isCallGetWithRequestOnDelegates();
 	}
 
 	@Override
@@ -51,6 +63,14 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 	@Override
 	public Flux<List<ServiceInstance>> get() {
 		return delegate.get().map(this::filteredBySameInstancePreference);
+	}
+
+	@Override
+	public Flux<List<ServiceInstance>> get(Request request) {
+		if (callGetWithRequestOnDelegates) {
+			return delegate.get(request).map(this::filteredBySameInstancePreference);
+		}
+		return get();
 	}
 
 	private List<ServiceInstance> filteredBySameInstancePreference(List<ServiceInstance> serviceInstances) {
@@ -72,6 +92,7 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 
 	@Override
 	public void selectedServiceInstance(ServiceInstance serviceInstance) {
+		super.selectedServiceInstance(serviceInstance);
 		if (previouslyReturnedInstance == null || !previouslyReturnedInstance.equals(serviceInstance)) {
 			previouslyReturnedInstance = serviceInstance;
 		}

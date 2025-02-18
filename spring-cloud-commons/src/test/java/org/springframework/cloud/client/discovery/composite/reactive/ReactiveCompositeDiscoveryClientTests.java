@@ -75,8 +75,12 @@ class ReactiveCompositeDiscoveryClientTests {
 
 		Flux<String> services = client.getServices();
 
-		StepVerifier.create(services).expectNext("serviceAFromClient1").expectNext("serviceBFromClient1")
-				.expectNext("serviceCFromClient2").expectComplete().verify();
+		StepVerifier.create(services)
+			.expectNext("serviceAFromClient1")
+			.expectNext("serviceBFromClient1")
+			.expectNext("serviceCFromClient2")
+			.expectComplete()
+			.verify();
 	}
 
 	@Test
@@ -110,8 +114,11 @@ class ReactiveCompositeDiscoveryClientTests {
 
 		Flux<ServiceInstance> instances = client.getInstances("service");
 
-		StepVerifier.create(instances).expectNext(serviceInstance1).expectNext(serviceInstance2).expectComplete()
-				.verify();
+		StepVerifier.create(instances)
+			.expectNext(serviceInstance1)
+			.expectNext(serviceInstance2)
+			.expectComplete()
+			.verify();
 	}
 
 }

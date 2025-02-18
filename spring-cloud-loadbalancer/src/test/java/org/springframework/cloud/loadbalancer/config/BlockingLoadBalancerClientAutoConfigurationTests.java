@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,8 +36,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BlockingLoadBalancerClientAutoConfigurationTests {
 
 	private ApplicationContextRunner applicationContextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class,
-					BlockingLoadBalancerClientAutoConfiguration.class));
+		.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class,
+				BlockingLoadBalancerClientAutoConfiguration.class));
 
 	@Test
 	void beansCreatedNormally() {
@@ -48,8 +49,8 @@ class BlockingLoadBalancerClientAutoConfigurationTests {
 
 	@Test
 	public void worksWithoutSpringWeb() {
-		applicationContextRunner.withClassLoader(new FilteredClassLoader(RestTemplate.class))
-				.run(context -> assertThat(context).doesNotHaveBean(BlockingLoadBalancerClient.class));
+		applicationContextRunner.withClassLoader(new FilteredClassLoader(RestTemplate.class, RestClient.class))
+			.run(context -> assertThat(context).doesNotHaveBean(BlockingLoadBalancerClient.class));
 	}
 
 	@Test

@@ -36,7 +36,8 @@ public class ServiceRegistryAutoConfigurationTests {
 	@Test
 	public void runsWithoutActuator() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder(TestConfig.class)
-				.web(WebApplicationType.NONE).run();
+			.web(WebApplicationType.NONE)
+			.run();
 		try {
 			context.getBean("serviceRegistryEndpoint");
 			fail("found a bean that shouldn't be there");

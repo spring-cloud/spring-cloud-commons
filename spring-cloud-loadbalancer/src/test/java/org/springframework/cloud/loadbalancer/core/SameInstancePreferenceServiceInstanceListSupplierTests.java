@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,34 +19,52 @@ package org.springframework.cloud.loadbalancer.core;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link SameInstancePreferenceServiceInstanceListSupplier}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Jürgen Kreitler
  */
 class SameInstancePreferenceServiceInstanceListSupplierTests {
 
 	private final DiscoveryClientServiceInstanceListSupplier delegate = mock(
 			DiscoveryClientServiceInstanceListSupplier.class);
 
-	private final SameInstancePreferenceServiceInstanceListSupplier supplier = new SameInstancePreferenceServiceInstanceListSupplier(
-			delegate);
+	private final LoadBalancerClientFactory loadBalancerClientFactory = mock(LoadBalancerClientFactory.class);
+
+	private SameInstancePreferenceServiceInstanceListSupplier supplier;
 
 	private final ServiceInstance first = serviceInstance("test-1");
 
 	private final ServiceInstance second = serviceInstance("test-2");
 
 	private final ServiceInstance third = serviceInstance("test-3");
+
+	@BeforeEach
+	void setUp() {
+		LoadBalancerProperties properties = new LoadBalancerProperties();
+		when(loadBalancerClientFactory.getProperties(any())).thenReturn(properties);
+		supplier = new SameInstancePreferenceServiceInstanceListSupplier(delegate, loadBalancerClientFactory);
+	}
 
 	@Test
 	void shouldReturnPreviouslySelectedInstanceIfAvailable() {
@@ -69,13 +87,34 @@ class SameInstancePreferenceServiceInstanceListSupplierTests {
 	}
 
 	@Test
-	void shouldReturnAllInstancesFromDelegateIfPreviouslySelectedInstanceIfAvailable() {
+	void shouldReturnAllInstancesFromDelegateIfPreviouslySelectedInstanceIsNotAvailable() {
 		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(second, third)));
 		supplier.selectedServiceInstance(first);
 
 		List<ServiceInstance> instances = supplier.get().blockFirst();
 
 		assertThat(instances).hasSize(2);
+	}
+
+	@Test
+	void shouldCallGetRequestOnDelegate() {
+		Request<DefaultRequestContext> request = new DefaultRequest<>(new DefaultRequestContext());
+		when(delegate.get()).thenReturn(Flux.just(Arrays.asList(first, second, third)));
+		when(delegate.get(request)).thenReturn(Flux.just(Arrays.asList(first, second)));
+
+		List<ServiceInstance> instances = supplier.get(request).blockFirst();
+
+		assertThat(instances).hasSize(2);
+	}
+
+	@Test
+	void shouldCallSelectedServiceInstanceOnItsDelegate() {
+		ServiceInstance firstInstance = serviceInstance("test-4");
+		TestSelectedServiceInstanceSupplier delegate = mock(TestSelectedServiceInstanceSupplier.class);
+		DelegatingServiceInstanceListSupplier supplier = new SameInstancePreferenceServiceInstanceListSupplier(
+				delegate);
+		supplier.selectedServiceInstance(firstInstance);
+		verify(delegate, times(1)).selectedServiceInstance(any(ServiceInstance.class));
 	}
 
 	private DefaultServiceInstance serviceInstance(String instanceId) {

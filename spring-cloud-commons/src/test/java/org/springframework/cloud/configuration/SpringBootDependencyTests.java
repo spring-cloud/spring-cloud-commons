@@ -176,18 +176,18 @@ public class SpringBootDependencyTests {
 	@Test
 	public void should_match_against_current_manifest() {
 		try {
-			verifyCurrentVersionFromManifest("3.0");
-			verifyCurrentVersionFromManifest("3.0.x");
+			verifyCurrentVersionFromManifest("3.5");
+			verifyCurrentVersionFromManifest("3.5.x");
 		}
 		catch (AssertionError e) {
-			if (e.getMessage() != null && e.getMessage().contains("3.1.")) {
-				// we're likely running a boot 3.1 compatibility test, try 3.1
-				verifyCurrentVersionFromManifest("3.1");
-				verifyCurrentVersionFromManifest("3.1.x");
-			}
-			else {
-				throw e;
-			}
+			// if (e.getMessage() != null && e.getMessage().contains("3.3.")) {
+			// // we're likely running a boot 3.3 compatibility test, try 3.3
+			// verifyCurrentVersionFromManifest("3.3");
+			// verifyCurrentVersionFromManifest("3.3.x");
+			// }
+			// else {
+			throw e;
+			// }
 		}
 	}
 
@@ -212,7 +212,7 @@ public class SpringBootDependencyTests {
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("3.0", versionVerifier.is3_0());
+		versionVerifier.ACCEPTED_VERSIONS.put("3.0", versionVerifier.is3_5());
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
@@ -230,7 +230,7 @@ public class SpringBootDependencyTests {
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("3.0", versionVerifier.is3_0());
+		versionVerifier.ACCEPTED_VERSIONS.put("3.0", versionVerifier.is3_5());
 
 		VerificationResult verificationResult = versionVerifier.verify();
 

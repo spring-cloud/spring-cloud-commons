@@ -27,11 +27,11 @@ import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.logging.DeferredLogFactory;
 import org.springframework.boot.util.Instantiator;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
+import org.springframework.cloud.context.config.ContextRefreshedWithApplicationEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -45,7 +45,7 @@ import org.springframework.core.io.support.SpringFactoriesLoader;
  * @author Venil Noronha
  */
 public class ConfigDataContextRefresher extends ContextRefresher
-		implements ApplicationListener<ApplicationPreparedEvent> {
+		implements ApplicationListener<ContextRefreshedWithApplicationEvent> {
 
 	private SpringApplication application;
 
@@ -60,7 +60,7 @@ public class ConfigDataContextRefresher extends ContextRefresher
 	}
 
 	@Override
-	public void onApplicationEvent(ApplicationPreparedEvent event) {
+	public void onApplicationEvent(ContextRefreshedWithApplicationEvent event) {
 		application = event.getSpringApplication();
 	}
 
@@ -71,7 +71,7 @@ public class ConfigDataContextRefresher extends ContextRefresher
 		}
 		StandardEnvironment environment = copyEnvironment(getContext().getEnvironment());
 		ConfigurableBootstrapContext bootstrapContext = getContext().getBeanProvider(ConfigurableBootstrapContext.class)
-				.getIfAvailable(DefaultBootstrapContext::new);
+			.getIfAvailable(DefaultBootstrapContext::new);
 
 		// run thru all EnvironmentPostProcessor instances. This lets things like vcap and
 		// decrypt happen after refresh. The hard coded call to
@@ -92,9 +92,6 @@ public class ConfigDataContextRefresher extends ContextRefresher
 			postProcessor.postProcessEnvironment(environment, application);
 		}
 
-		if (environment.getPropertySources().contains(REFRESH_ARGS_PROPERTY_SOURCE)) {
-			environment.getPropertySources().remove(REFRESH_ARGS_PROPERTY_SOURCE);
-		}
 		MutablePropertySources target = getContext().getEnvironment().getPropertySources();
 		String targetName = null;
 		for (PropertySource<?> source : environment.getPropertySources()) {

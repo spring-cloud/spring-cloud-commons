@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-commons-parent</artifactId>
-		<version>4.0.2-SNAPSHOT</version>
+		<version>4.3.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>spring-cloud-starter</artifactId>
 	<name>spring-cloud-starter</name>
@@ -30,15 +30,8 @@
 			<artifactId>spring-cloud-commons</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-rsa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<!-- Only needed at compile time -->
-			<scope>compile</scope>
-			<optional>true</optional>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
 		</dependency>
 	</dependencies>
 </project>

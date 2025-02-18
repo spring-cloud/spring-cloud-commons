@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,13 @@ import java.util.concurrent.TimeoutException;
 import reactor.util.retry.RetryBackoffSpec;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.cloud.commons.util.IdUtils;
+import org.springframework.core.env.PropertyResolver;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * The base configuration bean for Spring Cloud LoadBalancer.
@@ -39,6 +43,7 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
  *
  * @author Olga Maciaszek-Sharma
  * @author Gandhimathi Velusamy
+ * @author Zhuozhi Ji
  * @since 2.2.1
  */
 public class LoadBalancerProperties {
@@ -70,6 +75,35 @@ public class LoadBalancerProperties {
 	 * Properties for LoadBalancer sticky-session.
 	 */
 	private StickySession stickySession = new StickySession();
+
+	/**
+	 * If this flag is set to {@code true},
+	 * {@code ServiceInstanceListSupplier#get(Request request)} method will be implemented
+	 * to call {@code delegate.get(request)} in classes assignable from
+	 * {@code DelegatingServiceInstanceListSupplier} that don't already implement that
+	 * method, with the exclusion of {@code CachingServiceInstanceListSupplier} and
+	 * {@code HealthCheckServiceInstanceListSupplier}, which should be placed in the
+	 * instance supplier hierarchy directly after the supplier performing instance
+	 * retrieval over the network, before any request-based filtering is done,
+	 * {@code true} by default.
+	 */
+	private boolean callGetWithRequestOnDelegates = true;
+
+	/**
+	 * Properties for
+	 * {@code org.springframework.cloud.loadbalancer.core.SubsetServiceInstanceListSupplier}.
+	 */
+	private Subset subset = new Subset();
+
+	/**
+	 * Enabling X-Forwarded Host and Proto Headers.
+	 */
+	private XForwarded xForwarded = new XForwarded();
+
+	/**
+	 * Properties for LoadBalancer metrics.
+	 */
+	private Stats stats = new Stats();
 
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
@@ -111,17 +145,37 @@ public class LoadBalancerProperties {
 		this.hintHeaderName = hintHeaderName;
 	}
 
-	/**
-	 * Enabling X-Forwarded Host and Proto Headers.
-	 */
-	private XForwarded xForwarded = new XForwarded();
-
+	// TODO: fix spelling in a major release
 	public void setxForwarded(XForwarded xForwarded) {
 		this.xForwarded = xForwarded;
 	}
 
 	public XForwarded getXForwarded() {
 		return xForwarded;
+	}
+
+	public boolean isCallGetWithRequestOnDelegates() {
+		return callGetWithRequestOnDelegates;
+	}
+
+	public Subset getSubset() {
+		return subset;
+	}
+
+	public void setSubset(Subset subset) {
+		this.subset = subset;
+	}
+
+	public void setCallGetWithRequestOnDelegates(boolean callGetWithRequestOnDelegates) {
+		this.callGetWithRequestOnDelegates = callGetWithRequestOnDelegates;
+	}
+
+	public Stats getStats() {
+		return stats;
+	}
+
+	public void setStats(Stats stats) {
+		this.stats = stats;
 	}
 
 	public static class StickySession {
@@ -217,6 +271,14 @@ public class LoadBalancerProperties {
 		 */
 		private boolean repeatHealthCheck = true;
 
+		/**
+		 * Indicates whether the {@code healthCheckFlux} should emit on each alive
+		 * {@link ServiceInstance} that has been retrieved. If set to {@code false}, the
+		 * entire alive instances sequence is first collected into a list and only then
+		 * emitted.
+		 */
+		private boolean updateResultsList = true;
+
 		public boolean getRefetchInstances() {
 			return refetchInstances;
 		}
@@ -271,6 +333,14 @@ public class LoadBalancerProperties {
 
 		public void setPort(Integer port) {
 			this.port = port;
+		}
+
+		public boolean isUpdateResultsList() {
+			return updateResultsList;
+		}
+
+		public void setUpdateResultsList(boolean updateResultsList) {
+			this.updateResultsList = updateResultsList;
 		}
 
 	}
@@ -374,7 +444,7 @@ public class LoadBalancerProperties {
 
 		public void setRetryableExceptions(Set<Class<? extends Throwable>> retryableExceptions) {
 			retryableExceptions
-					.add(org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
+				.add(org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException.class);
 			this.retryableExceptions = retryableExceptions;
 		}
 
@@ -448,6 +518,56 @@ public class LoadBalancerProperties {
 				this.enabled = enabled;
 			}
 
+		}
+
+	}
+
+	public static class Subset {
+
+		/**
+		 * Instance id of deterministic subsetting. If not set,
+		 * {@link IdUtils#getDefaultInstanceId(PropertyResolver)} will be used.
+		 */
+		private String instanceId = "";
+
+		/**
+		 * Max subset size of deterministic subsetting.
+		 */
+		private int size = 100;
+
+		public String getInstanceId() {
+			return instanceId;
+		}
+
+		public void setInstanceId(String instanceId) {
+			this.instanceId = instanceId;
+		}
+
+		public int getSize() {
+			return size;
+		}
+
+		public void setSize(int size) {
+			this.size = size;
+		}
+
+	}
+
+	public static class Stats {
+
+		/**
+		 * Indicates whether the {@code path} should be added to {@code uri} tag in
+		 * metrics. When {@link RestTemplate} is used to execute load-balanced requests
+		 * with high cardinality paths, setting it to {@code false} is recommended.
+		 */
+		private boolean includePath = true;
+
+		public boolean isIncludePath() {
+			return includePath;
+		}
+
+		public void setIncludePath(boolean includePath) {
+			this.includePath = includePath;
 		}
 
 	}

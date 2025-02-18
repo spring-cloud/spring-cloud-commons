@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,14 +104,14 @@ public class DiscoveredResource implements RemoteResource {
 
 			String uri = link.expand().getHref();
 
-			this.log.debug("Verifying link pointing to {}…", uri);
+			this.log.debug("Verifying link pointing to {}...", uri);
 			this.restOperations.headForHeaders(uri);
 			this.log.debug("Successfully verified link!");
 
 			return link;
 
 		}
-		catch (RestClientException o_O) {
+		catch (RestClientException e) {
 
 			this.log.debug("Verification failed, marking as outdated!");
 			return null;
@@ -131,7 +131,7 @@ public class DiscoveredResource implements RemoteResource {
 			URI uri = service.getUri();
 			String serviceId = service.getServiceId();
 
-			this.log.debug("Discovered {} system at {}. Discovering resource…", serviceId, uri);
+			this.log.debug("Discovered {} system at {}. Discovering resource...", serviceId, uri);
 
 			Traverson traverson = new Traverson(uri, MediaTypes.HAL_JSON);
 			Link link = this.traversal.buildTraversal(traverson).asTemplatedLink();
@@ -141,10 +141,10 @@ public class DiscoveredResource implements RemoteResource {
 			return link;
 
 		}
-		catch (RuntimeException o_O) {
+		catch (RuntimeException exception) {
 
 			this.link = null;
-			this.log.debug("Target system unavailable. Got: ", o_O.getMessage());
+			this.log.debug("Target system unavailable. Got: ", exception.getMessage());
 
 			return null;
 		}

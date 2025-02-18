@@ -48,6 +48,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -94,8 +95,11 @@ public class LoadBalancerClientConfiguration {
 		@Conditional(ZonePreferenceConfigurationCondition.class)
 		public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withZonePreference().withCaching()
-					.build(context);
+			return ServiceInstanceListSupplier.builder()
+				.withDiscoveryClient()
+				.withCaching()
+				.withZonePreference()
+				.build(context);
 		}
 
 		@Bean
@@ -130,8 +134,11 @@ public class LoadBalancerClientConfiguration {
 		@Conditional(RequestBasedStickySessionConfigurationCondition.class)
 		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withRequestBasedStickySession()
-					.withCaching().build(context);
+			return ServiceInstanceListSupplier.builder()
+				.withDiscoveryClient()
+				.withCaching()
+				.withRequestBasedStickySession()
+				.build(context);
 		}
 
 		@Bean
@@ -140,8 +147,11 @@ public class LoadBalancerClientConfiguration {
 		@Conditional(SameInstancePreferenceConfigurationCondition.class)
 		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withSameInstancePreference()
-					.withCaching().build(context);
+			return ServiceInstanceListSupplier.builder()
+				.withDiscoveryClient()
+				.withCaching()
+				.withSameInstancePreference()
+				.build(context);
 		}
 
 		@Bean
@@ -149,8 +159,23 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnMissingBean
 		@Conditional(WeightedConfigurationCondition.class)
 		public ServiceInstanceListSupplier weightedServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withWeighted().withCaching()
-					.build(context);
+			return ServiceInstanceListSupplier.builder()
+				.withDiscoveryClient()
+				.withCaching()
+				.withWeighted()
+				.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(SubsetConfigurationCondition.class)
+		public ServiceInstanceListSupplier subsetServiceInstanceListSupplier(ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder()
+				.withDiscoveryClient()
+				.withSubset()
+				.withCaching()
+				.build(context);
 		}
 
 	}
@@ -175,8 +200,11 @@ public class LoadBalancerClientConfiguration {
 		@Conditional(ZonePreferenceConfigurationCondition.class)
 		public ServiceInstanceListSupplier zonePreferenceDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withZonePreference()
-					.withCaching().build(context);
+			return ServiceInstanceListSupplier.builder()
+				.withBlockingDiscoveryClient()
+				.withCaching()
+				.withZonePreference()
+				.build(context);
 		}
 
 		@Bean
@@ -185,8 +213,22 @@ public class LoadBalancerClientConfiguration {
 		@Conditional(HealthCheckConfigurationCondition.class)
 		public ServiceInstanceListSupplier healthCheckDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withBlockingHealthChecks()
-					.build(context);
+			return ServiceInstanceListSupplier.builder()
+				.withBlockingDiscoveryClient()
+				.withBlockingHealthChecks()
+				.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean({ DiscoveryClient.class, RestClient.class })
+		@ConditionalOnMissingBean
+		@Conditional(HealthCheckConfigurationCondition.class)
+		public ServiceInstanceListSupplier healthCheckRestClientDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder()
+				.withBlockingDiscoveryClient()
+				.withBlockingRestClientHealthChecks()
+				.build(context);
 		}
 
 		@Bean
@@ -205,8 +247,11 @@ public class LoadBalancerClientConfiguration {
 		@Conditional(RequestBasedStickySessionConfigurationCondition.class)
 		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withRequestBasedStickySession()
-					.withCaching().build(context);
+			return ServiceInstanceListSupplier.builder()
+				.withBlockingDiscoveryClient()
+				.withCaching()
+				.withRequestBasedStickySession()
+				.build(context);
 		}
 
 		@Bean
@@ -215,8 +260,11 @@ public class LoadBalancerClientConfiguration {
 		@Conditional(SameInstancePreferenceConfigurationCondition.class)
 		public ServiceInstanceListSupplier sameInstancePreferenceServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withSameInstancePreference()
-					.withCaching().build(context);
+			return ServiceInstanceListSupplier.builder()
+				.withBlockingDiscoveryClient()
+				.withCaching()
+				.withSameInstancePreference()
+				.build(context);
 		}
 
 		@Bean
@@ -224,8 +272,23 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnMissingBean
 		@Conditional(WeightedConfigurationCondition.class)
 		public ServiceInstanceListSupplier weightedServiceInstanceListSupplier(ConfigurableApplicationContext context) {
-			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withWeighted().withCaching()
-					.build(context);
+			return ServiceInstanceListSupplier.builder()
+				.withBlockingDiscoveryClient()
+				.withCaching()
+				.withWeighted()
+				.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(SubsetConfigurationCondition.class)
+		public ServiceInstanceListSupplier subsetServiceInstanceListSupplier(ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder()
+				.withBlockingDiscoveryClient()
+				.withSubset()
+				.withCaching()
+				.build(context);
 		}
 
 	}
@@ -379,6 +442,16 @@ public class LoadBalancerClientConfiguration {
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
 					"configurations", "weighted");
+		}
+
+	}
+
+	static class SubsetConfigurationCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"configurations", "subset");
 		}
 
 	}

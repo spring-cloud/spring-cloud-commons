@@ -97,8 +97,10 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 		if (properties.getRetry().isRetryOnAllExceptions()) {
 			return true;
 		}
-		return properties.getRetry().getRetryableExceptions().stream()
-				.anyMatch(exception -> exception.isInstance(throwable) || exception.isInstance(throwable.getCause()));
+		return properties.getRetry()
+			.getRetryableExceptions()
+			.stream()
+			.anyMatch(exception -> exception.isInstance(throwable) || exception.isInstance(throwable.getCause()));
 	}
 
 }

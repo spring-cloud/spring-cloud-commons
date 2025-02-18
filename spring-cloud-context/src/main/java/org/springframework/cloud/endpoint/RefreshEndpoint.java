@@ -19,6 +19,9 @@ package org.springframework.cloud.endpoint;
 import java.util.Collection;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.cloud.context.refresh.ContextRefresher;
@@ -30,7 +33,9 @@ import org.springframework.cloud.context.refresh.ContextRefresher;
 @Endpoint(id = "refresh")
 public class RefreshEndpoint {
 
-	private ContextRefresher contextRefresher;
+	private static final Log LOG = LogFactory.getLog(RefreshEndpoint.class);
+
+	private final ContextRefresher contextRefresher;
 
 	public RefreshEndpoint(ContextRefresher contextRefresher) {
 		this.contextRefresher = contextRefresher;
@@ -39,6 +44,7 @@ public class RefreshEndpoint {
 	@WriteOperation
 	public Collection<String> refresh() {
 		Set<String> keys = this.contextRefresher.refresh();
+		LOG.info("Refreshed keys : " + keys);
 		return keys;
 	}
 

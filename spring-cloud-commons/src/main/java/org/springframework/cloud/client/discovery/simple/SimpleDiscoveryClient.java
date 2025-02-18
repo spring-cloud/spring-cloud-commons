@@ -48,7 +48,7 @@ public class SimpleDiscoveryClient implements DiscoveryClient {
 	public List<ServiceInstance> getInstances(String serviceId) {
 		List<ServiceInstance> serviceInstances = new ArrayList<>();
 		List<DefaultServiceInstance> serviceInstanceForService = this.simpleDiscoveryProperties.getInstances()
-				.get(serviceId);
+			.get(serviceId);
 		if (serviceInstanceForService != null) {
 			serviceInstances.addAll(serviceInstanceForService);
 		}

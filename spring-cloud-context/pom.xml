@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-commons-parent</artifactId>
-		<version>4.0.2-SNAPSHOT</version>
+		<version>4.3.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>spring-cloud-context</artifactId>
@@ -47,8 +47,8 @@
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-rsa</artifactId>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

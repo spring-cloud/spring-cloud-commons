@@ -47,7 +47,7 @@ public class LoadBalancerClientConfigurationRegistrar implements ImportBeanDefin
 	private static void registerClientConfiguration(BeanDefinitionRegistry registry, Object name,
 			Object configuration) {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder
-				.genericBeanDefinition(LoadBalancerClientSpecification.class);
+			.genericBeanDefinition(LoadBalancerClientSpecification.class);
 		builder.addConstructorArgValue(name);
 		builder.addConstructorArgValue(configuration);
 		registry.registerBeanDefinition(name + ".LoadBalancerClientSpecification", builder.getBeanDefinition());

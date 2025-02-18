@@ -121,7 +121,7 @@ class LazyWeightedServiceInstanceListTest {
 		list.get(list.size() - 1);
 
 		Map<String, Integer> counter = Arrays.stream(list.expanded)
-				.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
+			.collect(Collectors.groupingBy(ServiceInstance::getInstanceId, summingInt(e -> 1)));
 		for (int i = 0; i < 10; i++) {
 			assertThat(counter).containsEntry(serviceInstances.get(i).getInstanceId(), weights[i]);
 		}

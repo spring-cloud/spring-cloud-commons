@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.stats.MicrometerStatsLoadBalancerLifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,8 +40,9 @@ public class LoadBalancerStatsAutoConfiguration {
 
 	@Bean
 	@ConditionalOnBean(MeterRegistry.class)
-	public MicrometerStatsLoadBalancerLifecycle micrometerStatsLifecycle(MeterRegistry meterRegistry) {
-		return new MicrometerStatsLoadBalancerLifecycle(meterRegistry);
+	public MicrometerStatsLoadBalancerLifecycle micrometerStatsLifecycle(MeterRegistry meterRegistry,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+		return new MicrometerStatsLoadBalancerLifecycle(meterRegistry, loadBalancerFactory);
 	}
 
 }

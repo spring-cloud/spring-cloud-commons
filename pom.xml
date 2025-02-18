@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-commons-parent</artifactId>
-	<version>4.0.2-SNAPSHOT</version>
+	<version>4.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Spring Cloud Commons Parent</name>
 	<description>Spring Cloud Commons Parent</description>
@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-build</artifactId>
-		<version>4.0.2-SNAPSHOT</version>
+		<version>4.3.0-SNAPSHOT</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<scm>
@@ -28,8 +28,7 @@
 	<properties>
 		<bintray.package>commons</bintray.package>
 		<evictor.version>1.0.0</evictor.version>
-		<!-- Deprecated - reached EOL -->
-		<spring-security-oauth2-autoconfigure.version>2.5.2</spring-security-oauth2-autoconfigure.version>
+		<bouncycastle-bcprov-jdk18on.version>1.80</bouncycastle-bcprov-jdk18on.version>
 	</properties>
 	<build>
 		<plugins>
@@ -81,6 +80,10 @@
 							<artifactId>httpclient5</artifactId>
 						</dependency>
 					</ignoredDependencies>
+					<ignoredResourcePatterns>
+						<ignoredResourcePattern>mockito-extensions/org.mockito.plugins.MockResolver</ignoredResourcePattern>
+					</ignoredResourcePatterns>
+					<checkTestClasspath>false</checkTestClasspath>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -169,21 +172,11 @@
 				<artifactId>spring-cloud-test-support</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<!--<dependency>
-				<groupId>org.springframework.security.oauth.boot</groupId>
-				<artifactId>spring-security-oauth2-autoconfigure</artifactId>
-				<version>${spring-security-oauth2-autoconfigure.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.springframework.boot</groupId>
-						<artifactId>spring-boot</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.springframework.boot</groupId>
-						<artifactId>spring-boot-autoconfigure</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>-->
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk18on</artifactId>
+				<version>${bouncycastle-bcprov-jdk18on.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<modules>

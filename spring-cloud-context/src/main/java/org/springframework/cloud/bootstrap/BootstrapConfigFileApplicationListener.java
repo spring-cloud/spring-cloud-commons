@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link EnvironmentPostProcessor} that configures the context environment by loading
- * properties from well known file locations. By default properties will be loaded from
+ * properties from well known file locations. By default, properties will be loaded from
  * 'application.properties' and/or 'application.yml' files in the following locations:
  * <ul>
  * <li>file:./config/</li>
@@ -116,6 +116,7 @@ import org.springframework.util.StringUtils;
  * @author Eddú Meléndez
  * @author Madhura Bhave
  * @author Scott Frederick
+ * @author Olga Maciaszek-Sharma
  * @since 1.0.0 {@link ConfigDataEnvironmentPostProcessor}
  */
 public class BootstrapConfigFileApplicationListener
@@ -166,7 +167,11 @@ public class BootstrapConfigFileApplicationListener
 	/**
 	 * The default order for the processor.
 	 */
-	public static final int DEFAULT_ORDER = Ordered.HIGHEST_PRECEDENCE + 10;
+	public static final int DEFAULT_ORDER =
+			// This listener needs to run after the `ConfigDataEnvironmentPostProcessor`
+			// and `HostInfoEnvironmentPostProcessor`
+			// to make sure the `Environment.activeProfiles` are correctly set
+			Math.addExact(ConfigDataEnvironmentPostProcessor.ORDER, 2);
 
 	private final Log logger;
 
@@ -371,14 +376,15 @@ public class BootstrapConfigFileApplicationListener
 
 		private String[] getDefaultProfiles(Binder binder) {
 			return binder.bind(AbstractEnvironment.DEFAULT_PROFILES_PROPERTY_NAME, STRING_ARRAY)
-					.orElseGet(this.environment::getDefaultProfiles);
+				.orElseGet(this.environment::getDefaultProfiles);
 		}
 
 		private List<Profile> getOtherActiveProfiles(Set<Profile> activatedViaProperty,
 				Set<Profile> includedViaProperty) {
-			return Arrays.stream(this.environment.getActiveProfiles()).map(Profile::new).filter(
-					(profile) -> !activatedViaProperty.contains(profile) && !includedViaProperty.contains(profile))
-					.collect(Collectors.toList());
+			return Arrays.stream(this.environment.getActiveProfiles())
+				.map(Profile::new)
+				.filter((profile) -> !activatedViaProperty.contains(profile) && !includedViaProperty.contains(profile))
+				.collect(Collectors.toList());
 		}
 
 		void addActiveProfiles(Set<Profile> profiles) {
@@ -469,7 +475,7 @@ public class BootstrapConfigFileApplicationListener
 
 		private boolean canLoadFileExtension(PropertySourceLoader loader, String name) {
 			return Arrays.stream(loader.getFileExtensions())
-					.anyMatch((fileExtension) -> StringUtils.endsWithIgnoreCase(name, fileExtension));
+				.anyMatch((fileExtension) -> StringUtils.endsWithIgnoreCase(name, fileExtension));
 		}
 
 		private void loadForFileExtension(PropertySourceLoader loader, String prefix, String fileExtension,
@@ -601,9 +607,12 @@ public class BootstrapConfigFileApplicationListener
 			if (files != null) {
 				String fileName = locationReference.substring(locationReference.lastIndexOf("/") + 1);
 				Arrays.sort(files, FILE_COMPARATOR);
-				return Arrays.stream(files).map((file) -> file.listFiles((dir, name) -> name.equals(fileName)))
-						.filter(Objects::nonNull).flatMap((Function<File[], Stream<File>>) Arrays::stream)
-						.map(FileSystemResource::new).toArray(Resource[]::new);
+				return Arrays.stream(files)
+					.map((file) -> file.listFiles((dir, name) -> name.equals(fileName)))
+					.filter(Objects::nonNull)
+					.flatMap((Function<File[], Stream<File>>) Arrays::stream)
+					.map(FileSystemResource::new)
+					.toArray(Resource[]::new);
 			}
 			return EMPTY_RESOURCES;
 		}
@@ -788,8 +797,10 @@ public class BootstrapConfigFileApplicationListener
 					activeProfiles.addAll(bindStringList(binder, "spring.profiles.active"));
 				}
 			}
-			this.processedProfiles.stream().filter(this::isDefaultProfile).map(Profile::getName)
-					.forEach(activeProfiles::add);
+			this.processedProfiles.stream()
+				.filter(this::isDefaultProfile)
+				.map(Profile::getName)
+				.forEach(activeProfiles::add);
 			this.environment.setActiveProfiles(activeProfiles.toArray(new String[0]));
 		}
 

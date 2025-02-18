@@ -42,9 +42,23 @@ public class PropertySourceBootstrapProperties {
 	/**
 	 * Flag to indicate that when {@link #setAllowOverride(boolean) allowOverride} is
 	 * true, external properties should take lowest priority and should not override any
-	 * existing property sources (including local config files). Default false.
+	 * existing property sources (including local config files). Default false. This will
+	 * only have an effect when using config first bootstrap.
 	 */
 	private boolean overrideNone = false;
+
+	/**
+	 * Flag to initialize bootstrap configuration on context refresh event. Default false.
+	 */
+	private boolean initializeOnContextRefresh = false;
+
+	public boolean isInitializeOnContextRefresh() {
+		return initializeOnContextRefresh;
+	}
+
+	public void setInitializeOnContextRefresh(boolean initializeOnContextRefresh) {
+		this.initializeOnContextRefresh = initializeOnContextRefresh;
+	}
 
 	public boolean isOverrideNone() {
 		return this.overrideNone;

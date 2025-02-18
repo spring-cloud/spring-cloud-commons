@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /**
  * Taken from Spring Boot test utils. https://github.com/spring-projects/spring-boot/blob/
  * 1.4.x/spring-boot/src/test/java/org/springframework/boot/testutil/ClassPathExclusions.java
+ *
  * @author Ryan Baxter
  */
 @Retention(RetentionPolicy.RUNTIME)

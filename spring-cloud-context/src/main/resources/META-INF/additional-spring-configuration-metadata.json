@@ -39,19 +39,25 @@
 		{
 			"name": "spring.cloud.refresh.extra-refreshable",
 			"type": "java.util.Set<java.lang.String>",
-			"description": "Additional class names for beans to post process into refresh scope.",
+			"description": "Additional bean names or class names for beans to post process into refresh scope.",
 			"defaultValue": true
 		},
 		{
 			"name": "spring.cloud.refresh.never-refreshable",
 			"type": "java.lang.String",
-			"description": "Comma separated list of class names for beans to never be refreshed or rebound.",
+			"description": "Comma separated list of bean names or class names for beans to never be refreshed or rebound.",
 			"defaultValue": true
 		},
 		{
 			"name": "spring.cloud.decrypt-environment-post-processor.enabled",
 			"type": "java.lang.Boolean",
 			"description": "Enable the DecryptEnvironmentPostProcessor.",
+			"defaultValue": true
+		},
+		{
+			"name": "spring.cloud.refresh.on-restart.enabled",
+			"type": "java.lang.Boolean",
+			"description": "Enable refreshing context on start.",
 			"defaultValue": true
 		}
 	]

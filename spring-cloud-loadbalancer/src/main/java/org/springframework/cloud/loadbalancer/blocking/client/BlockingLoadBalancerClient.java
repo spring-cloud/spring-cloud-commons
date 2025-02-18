@@ -73,8 +73,8 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 		supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onStart(lbRequest));
 		ServiceInstance serviceInstance = choose(serviceId, lbRequest);
 		if (serviceInstance == null) {
-			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle.onComplete(
-					new CompletionContext<>(CompletionContext.Status.DISCARD, lbRequest, new EmptyResponse())));
+			supportedLifecycleProcessors.forEach(lifecycle -> lifecycle
+				.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, lbRequest, new EmptyResponse())));
 			throw new IllegalStateException("No instances available for " + serviceId);
 		}
 		return execute(serviceId, serviceInstance, lbRequest);
@@ -95,19 +95,19 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	public <T> T execute(String serviceId, ServiceInstance serviceInstance, LoadBalancerRequest<T> request)
 			throws IOException {
 		if (serviceInstance == null) {
-			throw new IllegalArgumentException("Service Instance cannot be null");
+			throw new IllegalArgumentException("Service Instance cannot be null, serviceId: " + serviceId);
 		}
 		DefaultResponse defaultResponse = new DefaultResponse(serviceInstance);
 		Set<LoadBalancerLifecycle> supportedLifecycleProcessors = getSupportedLifecycleProcessors(serviceId);
 		Request lbRequest = request instanceof Request ? (Request) request : new DefaultRequest<>();
 		supportedLifecycleProcessors
-				.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, new DefaultResponse(serviceInstance)));
+			.forEach(lifecycle -> lifecycle.onStartRequest(lbRequest, new DefaultResponse(serviceInstance)));
 		try {
 			T response = request.apply(serviceInstance);
 			Object clientResponse = getClientResponse(response);
 			supportedLifecycleProcessors
-					.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
-							lbRequest, defaultResponse, clientResponse)));
+				.forEach(lifecycle -> lifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.SUCCESS,
+						lbRequest, defaultResponse, clientResponse)));
 			return response;
 		}
 		catch (IOException iOException) {

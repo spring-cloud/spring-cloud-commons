@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,21 @@
 
 package org.springframework.cloud.loadbalancer.stats;
 
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
+import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.util.StringUtils;
 
@@ -30,18 +38,30 @@ import org.springframework.util.StringUtils;
  * Utility class for building metrics tags for load-balanced calls.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Jaroslaw Dembek
  * @since 3.0.0
  */
-final class LoadBalancerTags {
+class LoadBalancerTags {
 
 	static final String UNKNOWN = "UNKNOWN";
 
-	private LoadBalancerTags() {
-		throw new UnsupportedOperationException("Cannot instantiate utility class");
+	private final LoadBalancerProperties properties;
+
+	// Not using class references in case not in classpath
+	private static final Set<String> URI_TEMPLATE_ATTRIBUTES = Set.of(
+			"org.springframework.web.reactive.function.client.WebClient.uriTemplate",
+			"org.springframework.web.client.RestClient.uriTemplate");
+
+	LoadBalancerTags(LoadBalancerProperties properties) {
+		this.properties = properties;
 	}
 
-	static Iterable<Tag> buildSuccessRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
+	Iterable<Tag> buildSuccessRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
+		Response<ServiceInstance> lbResponse = completionContext.getLoadBalancerResponse();
+		if (lbResponse == null) {
+			return Tags.empty();
+		}
+		ServiceInstance serviceInstance = lbResponse.getServer();
 		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance));
 		Object clientResponse = completionContext.getClientResponse();
 		if (clientResponse instanceof ResponseData responseData) {
@@ -69,15 +89,26 @@ final class LoadBalancerTags {
 		return responseData.getHttpStatus() != null ? responseData.getHttpStatus().value() : 200;
 	}
 
-	private static String getPath(RequestData requestData) {
-		return requestData.getUrl() != null ? requestData.getUrl().getPath() : UNKNOWN;
+	private String getPath(RequestData requestData) {
+		if (!properties.getStats().isIncludePath()) {
+			return UNKNOWN;
+		}
+		Optional<Object> uriTemplateValue = Optional.ofNullable(requestData.getAttributes())
+			.orElse(Collections.emptyMap())
+			.keySet()
+			.stream()
+			.filter(URI_TEMPLATE_ATTRIBUTES::contains)
+			.map(key -> requestData.getAttributes().get(key))
+			.filter(Objects::nonNull)
+			.findAny();
+		return uriTemplateValue.map(uriTemplate -> (String) uriTemplate)
+			.orElseGet(() -> (requestData.getUrl() != null) ? requestData.getUrl().getPath() : UNKNOWN);
 	}
 
-	static Iterable<Tag> buildDiscardedRequestTags(
-			CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		if (completionContext.getLoadBalancerRequest().getContext() instanceof RequestDataContext) {
-			RequestData requestData = ((RequestDataContext) completionContext.getLoadBalancerRequest().getContext())
-					.getClientRequest();
+	Iterable<Tag> buildDiscardedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
+		Request<Object> lbRequest = completionContext.getLoadBalancerRequest();
+		if (lbRequest != null && lbRequest.getContext() instanceof RequestDataContext requestDataContext) {
+			RequestData requestData = requestDataContext.getClientRequest();
 			if (requestData != null) {
 				return Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
 						valueOrUnknown("uri", getPath(requestData)), valueOrUnknown("serviceId", getHost(requestData)));
@@ -92,12 +123,16 @@ final class LoadBalancerTags {
 		return requestData.getUrl() != null ? requestData.getUrl().getHost() : UNKNOWN;
 	}
 
-	static Iterable<Tag> buildFailedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
+	Iterable<Tag> buildFailedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
+		Response<ServiceInstance> lbResponse = completionContext.getLoadBalancerResponse();
+		if (lbResponse == null) {
+			return Tags.empty();
+		}
+		ServiceInstance serviceInstance = lbResponse.getServer();
 		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance)).and(exception(completionContext.getThrowable()));
-		if (completionContext.getLoadBalancerRequest().getContext() instanceof RequestDataContext) {
-			RequestData requestData = ((RequestDataContext) completionContext.getLoadBalancerRequest().getContext())
-					.getClientRequest();
+		Request<Object> lbRequest = completionContext.getLoadBalancerRequest();
+		if (lbRequest != null && lbRequest.getContext() instanceof RequestDataContext requestDataContext) {
+			RequestData requestData = requestDataContext.getClientRequest();
 			if (requestData != null) {
 				return tags.and(Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
 						valueOrUnknown("uri", getPath(requestData))));

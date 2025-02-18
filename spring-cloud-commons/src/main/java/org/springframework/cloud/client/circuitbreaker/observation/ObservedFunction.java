@@ -37,9 +37,9 @@ class ObservedFunction<T> implements Function<Throwable, T> {
 			String conextualName, ObservationRegistry observationRegistry, Function<Throwable, T> toRun) {
 		this.delegate = toRun;
 		this.observation = CircuitBreakerObservationDocumentation.CIRCUIT_BREAKER_SUPPLIER_OBSERVATION
-				.observation(customConvention, DefaultCircuitBreakerObservationConvention.INSTANCE, () -> context,
-						observationRegistry)
-				.parentObservation(observationRegistry.getCurrentObservation());
+			.observation(customConvention, DefaultCircuitBreakerObservationConvention.INSTANCE, () -> context,
+					observationRegistry)
+			.parentObservation(observationRegistry.getCurrentObservation());
 		this.observation.contextualName(conextualName);
 	}
 

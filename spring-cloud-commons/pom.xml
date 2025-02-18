@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-commons-parent</artifactId>
-		<version>4.0.2-SNAPSHOT</version>
+		<version>4.3.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>spring-cloud-commons</artifactId>
@@ -31,6 +31,44 @@
 					<excludes>
 						<exclude>**/*.properties</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.basepom.maven</groupId>
+				<artifactId>duplicate-finder-maven-plugin</artifactId>
+				<configuration>
+					<ignoredDependencies>
+						<dependency>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcprov-jdk18on</artifactId>
+							<version>1.73</version>
+						</dependency>
+						<dependency>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcprov-jdk15on</artifactId>
+							<version>1.64</version>
+						</dependency>
+						<dependency>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcpkix-jdk18on</artifactId>
+							<version>1.73</version>
+						</dependency>
+						<dependency>
+							<groupId>org.bouncycastle</groupId>
+							<artifactId>bcpkix-jdk15on</artifactId>
+							<version>1.64</version>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.httpcomponents.client5</groupId>
+							<artifactId>httpclient5</artifactId>
+							<version>5.1.4</version>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.httpcomponents</groupId>
+							<artifactId>httpclient</artifactId>
+							<version>4.5.14</version>
+						</dependency>
+					</ignoredDependencies>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -94,11 +132,6 @@
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-rsa</artifactId>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.integration</groupId>
 			<artifactId>spring-integration-jmx</artifactId>
 			<optional>true</optional>
@@ -108,25 +141,6 @@
 			<artifactId>spring-boot-starter-hateoas</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<!--<dependency>
-			<groupId>org.springframework.security.oauth.boot</groupId>
-			<artifactId>spring-security-oauth2-autoconfigure</artifactId>
-			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.xml.bind</groupId>
-					<artifactId>jaxb-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.activation</groupId>
-					<artifactId>jakarta.activation</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>javax.activation-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
@@ -185,6 +199,12 @@
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-observation-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.17.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.configuration;
 
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.core.io.Resource;
@@ -143,7 +144,7 @@ public class TlsProperties {
 		String name = resource.getFilename();
 		int index = name.lastIndexOf('.');
 
-		return index < 0 ? "" : name.substring(index + 1).toLowerCase();
+		return index < 0 ? "" : name.substring(index + 1).toLowerCase(Locale.ROOT);
 	}
 
 }
