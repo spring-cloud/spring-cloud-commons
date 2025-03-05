@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMapAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.loadbalancer.stats.LoadBalancerTags.UNKNOWN;
@@ -241,6 +242,26 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 				Tag.of("method", UNKNOWN), Tag.of("outcome", "SUCCESS"), Tag.of("serviceId", UNKNOWN),
 				Tag.of("serviceInstance.host", UNKNOWN), Tag.of("serviceInstance.instanceId", UNKNOWN),
 				Tag.of("serviceInstance.port", "0"), Tag.of("status", "200"), Tag.of("uri", UNKNOWN));
+	}
+
+	@Test
+	void shouldHandleNullLoadBalancerResponse() {
+		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
+				new HttpHeaders(), new HashMap<>());
+		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
+		assertThatCode(() -> {
+			statsLifecycle.onStartRequest(lbRequest, null);
+			statsLifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, lbRequest, null));
+		}).doesNotThrowAnyException();
+	}
+
+	@Test
+	void shouldHandleNullLoadBalancerRequest() {
+		Response<ServiceInstance> lbResponse = new EmptyResponse();
+		assertThatCode(() -> {
+			statsLifecycle.onStartRequest(null, lbResponse);
+			statsLifecycle.onComplete(new CompletionContext<>(CompletionContext.Status.DISCARD, null, lbResponse));
+		}).doesNotThrowAnyException();
 	}
 
 	private static class StatsTestContext {

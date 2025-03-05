@@ -41,6 +41,8 @@ import static org.springframework.cloud.util.PropertyUtils.BOOTSTRAP_ENABLED_PRO
  */
 public class LegacyContextRefresher extends ContextRefresher {
 
+	private static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
+
 	@Deprecated
 	public LegacyContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
 		super(context, scope);

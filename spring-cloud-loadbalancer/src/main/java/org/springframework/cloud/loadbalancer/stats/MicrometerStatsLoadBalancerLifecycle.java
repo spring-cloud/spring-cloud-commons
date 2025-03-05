@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,10 +85,10 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 
 	@Override
 	public void onStartRequest(Request<Object> request, Response<ServiceInstance> lbResponse) {
-		if (request.getContext() instanceof TimedRequestContext) {
+		if (request != null && request.getContext() instanceof TimedRequestContext) {
 			((TimedRequestContext) request.getContext()).setRequestStartTime(System.nanoTime());
 		}
-		if (!lbResponse.hasServer()) {
+		if (lbResponse == null || !lbResponse.hasServer()) {
 			return;
 		}
 		ServiceInstance serviceInstance = lbResponse.getServer();
@@ -104,7 +104,11 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 
 	@Override
 	public void onComplete(CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
+		ServiceInstance serviceInstance = null;
+		Response<ServiceInstance> loadBalancerResponse = completionContext.getLoadBalancerResponse();
+		if (loadBalancerResponse != null) {
+			serviceInstance = loadBalancerResponse.getServer();
+		}
 		LoadBalancerProperties properties = serviceInstance != null
 				? loadBalancerFactory.getProperties(serviceInstance.getServiceId())
 				: loadBalancerFactory.getProperties(null);
@@ -121,7 +125,11 @@ public class MicrometerStatsLoadBalancerLifecycle implements LoadBalancerLifecyc
 		if (activeRequestsCounter != null) {
 			activeRequestsCounter.decrementAndGet();
 		}
-		Object loadBalancerRequestContext = completionContext.getLoadBalancerRequest().getContext();
+		Request<Object> lbRequest = completionContext.getLoadBalancerRequest();
+		if (lbRequest == null) {
+			return;
+		}
+		Object loadBalancerRequestContext = lbRequest.getContext();
 		if (requestHasBeenTimed(loadBalancerRequestContext)) {
 			if (CompletionContext.Status.FAILED.equals(completionContext.status())) {
 				Timer.builder("loadbalancer.requests.failed")

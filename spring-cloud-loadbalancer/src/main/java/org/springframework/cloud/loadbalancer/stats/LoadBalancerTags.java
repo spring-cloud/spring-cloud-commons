@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,10 @@ import io.micrometer.core.instrument.Tags;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
+import org.springframework.cloud.client.loadbalancer.Response;
 import org.springframework.cloud.client.loadbalancer.ResponseData;
 import org.springframework.util.StringUtils;
 
@@ -55,7 +57,11 @@ class LoadBalancerTags {
 	}
 
 	Iterable<Tag> buildSuccessRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
+		Response<ServiceInstance> lbResponse = completionContext.getLoadBalancerResponse();
+		if (lbResponse == null) {
+			return Tags.empty();
+		}
+		ServiceInstance serviceInstance = lbResponse.getServer();
 		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance));
 		Object clientResponse = completionContext.getClientResponse();
 		if (clientResponse instanceof ResponseData responseData) {
@@ -100,9 +106,9 @@ class LoadBalancerTags {
 	}
 
 	Iterable<Tag> buildDiscardedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		if (completionContext.getLoadBalancerRequest().getContext() instanceof RequestDataContext) {
-			RequestData requestData = ((RequestDataContext) completionContext.getLoadBalancerRequest().getContext())
-				.getClientRequest();
+		Request<Object> lbRequest = completionContext.getLoadBalancerRequest();
+		if (lbRequest != null && lbRequest.getContext() instanceof RequestDataContext requestDataContext) {
+			RequestData requestData = requestDataContext.getClientRequest();
 			if (requestData != null) {
 				return Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
 						valueOrUnknown("uri", getPath(requestData)), valueOrUnknown("serviceId", getHost(requestData)));
@@ -118,11 +124,15 @@ class LoadBalancerTags {
 	}
 
 	Iterable<Tag> buildFailedRequestTags(CompletionContext<Object, ServiceInstance, Object> completionContext) {
-		ServiceInstance serviceInstance = completionContext.getLoadBalancerResponse().getServer();
+		Response<ServiceInstance> lbResponse = completionContext.getLoadBalancerResponse();
+		if (lbResponse == null) {
+			return Tags.empty();
+		}
+		ServiceInstance serviceInstance = lbResponse.getServer();
 		Tags tags = Tags.of(buildServiceInstanceTags(serviceInstance)).and(exception(completionContext.getThrowable()));
-		if (completionContext.getLoadBalancerRequest().getContext() instanceof RequestDataContext) {
-			RequestData requestData = ((RequestDataContext) completionContext.getLoadBalancerRequest().getContext())
-				.getClientRequest();
+		Request<Object> lbRequest = completionContext.getLoadBalancerRequest();
+		if (lbRequest != null && lbRequest.getContext() instanceof RequestDataContext requestDataContext) {
+			RequestData requestData = requestDataContext.getClientRequest();
 			if (requestData != null) {
 				return tags.and(Tags.of(valueOrUnknown("method", requestData.getHttpMethod()),
 						valueOrUnknown("uri", getPath(requestData))));

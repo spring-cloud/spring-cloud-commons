@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
  * the <code>@ConfigurationProperties</code> bean.
  *
  * @author Dave Syer
+ * @author Yanming Zhou
  * @see RefreshScope for a deeper and optionally more focused refresh of bean components.
  *
  */
@@ -131,7 +132,7 @@ public class ConfigurationPropertiesRebinder
 				// TODO: determine a more general approach to fix this.
 				// see
 				// https://github.com/spring-cloud/spring-cloud-commons/issues/571
-				if (getNeverRefreshable().contains(bean.getClass().getName())) {
+				if (getNeverRefreshable().contains(bean.getClass().getName()) || getNeverRefreshable().contains(name)) {
 					return false; // ignore
 				}
 				appContext.getAutowireCapableBeanFactory().destroyBean(bean);
