@@ -1,0 +1,7 @@
+spring.main.sources: org.springframework.cloud.bootstrap.config.BootstrapConfigurationTests.PropertySourceConfiguration
+info.name: externalPropertiesInfoName
+
+---
+spring.config.activate.on-profile: bar
+info.name: externalPropertiesInfoName from bar
+
