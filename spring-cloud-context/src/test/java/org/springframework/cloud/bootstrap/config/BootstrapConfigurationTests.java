@@ -598,6 +598,19 @@ public class BootstrapConfigurationTests {
 
 	private void includeProfileFromBootstrapPropertySource(String... properties) {
 		PropertySourceConfiguration.MAP.put("spring.profiles.include", "bar,baz");
+		assertIncludeProfileFromBootstrapPropertySource(properties);
+
+		PropertySourceConfiguration.MAP.clear();
+		PropertySourceConfiguration.MAP.put("spring.profiles.include[0]", "bar");
+		PropertySourceConfiguration.MAP.put("spring.profiles.include[1]", "baz");
+		assertIncludeProfileFromBootstrapPropertySource(properties);
+
+		PropertySourceConfiguration.MAP.clear();
+		PropertySourceConfiguration.MAP.put("spring.profiles.include", "${ENVIRONMENT_PROFILE_NAME:bar,baz}");
+		assertIncludeProfileFromBootstrapPropertySource(properties);
+	}
+
+	private void assertIncludeProfileFromBootstrapPropertySource(String... properties) {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 			.properties(properties)
 			.profiles("foo")
@@ -623,13 +636,25 @@ public class BootstrapConfigurationTests {
 
 	private void activeProfileFromBootstrapPropertySource(String... properties) {
 		PropertySourceConfiguration.MAP.put("spring.profiles.active", "bar,baz");
+		assertActiveProfileFromBootstrapPropertySource(properties);
+
+		PropertySourceConfiguration.MAP.clear();
+		PropertySourceConfiguration.MAP.put("spring.profiles.active[0]", "bar");
+		PropertySourceConfiguration.MAP.put("spring.profiles.active[1]", "baz");
+		assertActiveProfileFromBootstrapPropertySource(properties);
+
+		PropertySourceConfiguration.MAP.clear();
+		PropertySourceConfiguration.MAP.put("spring.profiles.active", "${ENVIRONMENT_PROFILE_NAME:bar,baz}");
+		assertActiveProfileFromBootstrapPropertySource(properties);
+	}
+
+	private void assertActiveProfileFromBootstrapPropertySource(String... properties) {
 		this.context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 			.properties(properties)
 			.profiles("foo")
 			.sources(BareConfiguration.class)
 			.run();
 		then(this.context.getEnvironment().acceptsProfiles("baz", "bar", "foo")).isTrue();
-
 	}
 
 	@Test
