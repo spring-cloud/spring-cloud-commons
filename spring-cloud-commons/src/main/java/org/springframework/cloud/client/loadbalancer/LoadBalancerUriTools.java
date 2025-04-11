@@ -56,7 +56,7 @@ public final class LoadBalancerUriTools {
 		boolean encoded = (uri.getRawQuery() != null && uri.getRawQuery().contains(PERCENTAGE_SIGN))
 				|| (uri.getRawPath() != null && uri.getRawPath().contains(PERCENTAGE_SIGN))
 				|| (uri.getRawFragment() != null && uri.getRawFragment().contains(PERCENTAGE_SIGN));
-		// Verify if it is really fully encoded. Treat partial encoded as unencoded.
+		// Verify if it is real ly fully encoded. Treat partial encoded as unencoded.
 		if (encoded) {
 			try {
 				UriComponentsBuilder.fromUri(uri).build(true);
