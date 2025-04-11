@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.cloud.context.scope.refresh;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +40,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.test.annotation.DirtiesContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.BDDAssertions.then;
 
 @SpringBootTest(classes = TestConfiguration.class)
@@ -69,12 +69,12 @@ public class RefreshScopeIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testSimpleProperties() {
-		then(this.service.getMessage()).isEqualTo("Hello scope!");
-		then(this.service instanceof Advised).isTrue();
+		then(service.getMessage()).isEqualTo("Hello scope!");
+		then(service instanceof Advised).isTrue();
 		// Change the dynamic property source...
-		this.properties.setMessage("Foo");
+		properties.setMessage("Foo");
 		// ...but don't refresh, so the bean stays the same:
-		then(this.service.getMessage()).isEqualTo("Hello scope!");
+		then(service.getMessage()).isEqualTo("Hello scope!");
 		then(ExampleService.getInitCount()).isEqualTo(0);
 		then(ExampleService.getDestroyCount()).isEqualTo(0);
 	}
@@ -82,14 +82,14 @@ public class RefreshScopeIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testRefresh() {
-		then(this.service.getMessage()).isEqualTo("Hello scope!");
-		String id1 = this.service.toString();
+		then(service.getMessage()).isEqualTo("Hello scope!");
+		String id1 = service.toString();
 		// Change the dynamic property source...
-		this.properties.setMessage("Foo");
+		properties.setMessage("Foo");
 		// ...and then refresh, so the bean is re-initialized:
-		this.scope.refreshAll();
-		String id2 = this.service.toString();
-		then(this.service.getMessage()).isEqualTo("Foo");
+		scope.refreshAll();
+		String id2 = service.toString();
+		then(service.getMessage()).isEqualTo("Foo");
 		then(ExampleService.getInitCount()).isEqualTo(1);
 		then(ExampleService.getDestroyCount()).isEqualTo(1);
 		then(id2).isNotSameAs(id1);
@@ -100,15 +100,15 @@ public class RefreshScopeIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testRefreshBean() {
-		then(this.service.getMessage()).isEqualTo("Hello scope!");
-		String id1 = this.service.toString();
+		then(service.getMessage()).isEqualTo("Hello scope!");
+		String id1 = service.toString();
 		// Change the dynamic property source...
-		this.properties.setMessage("Foo");
+		properties.setMessage("Foo");
 		// ...and then refresh, so the bean is re-initialized:
-		this.scope.refresh("service");
-		String id2 = this.service.toString();
-		then(this.service.getMessage()).isEqualTo("Foo");
-		then(this.service.getMessage()).isEqualTo("Foo");
+		scope.refresh("service");
+		String id2 = service.toString();
+		then(service.getMessage()).isEqualTo("Foo");
+		then(service.getMessage()).isEqualTo("Foo");
 		then(ExampleService.getInitCount()).isEqualTo(1);
 		then(ExampleService.getDestroyCount()).isEqualTo(1);
 		then(id2).isNotSameAs(id1);
@@ -120,7 +120,7 @@ public class RefreshScopeIntegrationTests {
 	@Test
 	@DirtiesContext
 	public void testCheckedException() {
-		Assertions.assertThrows(ServiceException.class, () -> this.service.throwsException());
+		assertThatExceptionOfType(ServiceException.class).isThrownBy(() -> service.throwsException());
 	}
 
 	public interface Service {
@@ -166,28 +166,28 @@ public class RefreshScopeIntegrationTests {
 
 		@Override
 		public void afterPropertiesSet() throws Exception {
-			logger.debug("Initializing message: " + this.message);
+			logger.debug("Initializing message: " + message);
 			initCount++;
 		}
 
 		@Override
 		public void destroy() throws Exception {
-			logger.debug("Destroying message: " + this.message);
+			logger.debug("Destroying message: " + message);
 			destroyCount++;
-			this.message = null;
+			message = null;
 		}
 
 		@Override
 		public String getMessage() {
-			logger.debug("Getting message: " + this.message);
+			logger.debug("Getting message: " + message);
 			try {
-				Thread.sleep(this.delay);
+				Thread.sleep(delay);
 			}
 			catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			logger.info("Returning message: " + this.message);
-			return this.message;
+			logger.info("Returning message: " + message);
+			return message;
 		}
 
 		public void setMessage(String message) {
@@ -224,8 +224,8 @@ public class RefreshScopeIntegrationTests {
 		@RefreshScope
 		public ExampleService service() {
 			ExampleService service = new ExampleService();
-			service.setMessage(this.properties.getMessage());
-			service.setDelay(this.properties.getDelay());
+			service.setMessage(properties.getMessage());
+			service.setDelay(properties.getDelay());
 			return service;
 		}
 
@@ -241,7 +241,7 @@ public class RefreshScopeIntegrationTests {
 
 		@ManagedAttribute
 		public String getMessage() {
-			return this.message;
+			return message;
 		}
 
 		public void setMessage(String message) {
@@ -250,7 +250,7 @@ public class RefreshScopeIntegrationTests {
 
 		@ManagedAttribute
 		public int getDelay() {
-			return this.delay;
+			return delay;
 		}
 
 		public void setDelay(int delay) {

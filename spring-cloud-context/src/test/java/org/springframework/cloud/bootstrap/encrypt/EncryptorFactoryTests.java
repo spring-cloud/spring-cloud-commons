@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.cloud.bootstrap.encrypt;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.context.encrypt.EncryptorFactory;
@@ -26,10 +25,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.util.StreamUtils;
 
+import static org.assertj.core.api.Assertions.assertThatRuntimeException;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * @author Biju Kunjummen
+ * @author Olga Maciaszek-Sharma
  */
 public class EncryptorFactoryTests {
 
@@ -51,7 +52,7 @@ public class EncryptorFactoryTests {
 				-----BEGIN RSA PRIVATE KEY-----
 				MIIEowIBAAKCAQEAwClFgrRa/PUHPIJr9gvIPL6g6Rjp/TVZmVNOf2fL96DYbkj5
 				""";
-		Assertions.assertThrows(RuntimeException.class, () -> new EncryptorFactory().create(key));
+		assertThatRuntimeException().isThrownBy(() -> new EncryptorFactory().create(key));
 	}
 
 }

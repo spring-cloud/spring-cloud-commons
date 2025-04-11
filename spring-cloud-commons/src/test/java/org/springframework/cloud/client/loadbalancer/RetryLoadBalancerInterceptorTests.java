@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +55,9 @@ import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.listener.RetryListenerSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -117,7 +119,7 @@ public class RetryLoadBalancerInterceptorTests {
 
 		when(lbRequestFactory.createRequest(any(), any(), any())).thenReturn(mock(LoadBalancerRequest.class));
 
-		Assertions.assertThrows(IOException.class, () -> interceptor.intercept(request, body, execution));
+		assertThatIOException().isThrownBy(() -> interceptor.intercept(request, body, execution));
 		verify(lbRequestFactory).createRequest(request, body, execution);
 	}
 
@@ -130,7 +132,7 @@ public class RetryLoadBalancerInterceptorTests {
 				loadBalancedRetryFactory, lbFactory);
 		byte[] body = new byte[] {};
 		ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-		Assertions.assertThrows(IllegalStateException.class, () -> interceptor.intercept(request, body, execution));
+		assertThatIllegalStateException().isThrownBy(() -> interceptor.intercept(request, body, execution));
 	}
 
 	@Test
@@ -288,7 +290,7 @@ public class RetryLoadBalancerInterceptorTests {
 				new MyLoadBalancedRetryFactory(policy), lbFactory);
 		byte[] body = new byte[] {};
 		ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-		Assertions.assertThrows(IOException.class, () -> interceptor.intercept(request, body, execution));
+		assertThatIOException().isThrownBy(() -> interceptor.intercept(request, body, execution));
 		verify(lbRequestFactory).createRequest(request, body, execution);
 	}
 
@@ -370,8 +372,8 @@ public class RetryLoadBalancerInterceptorTests {
 				new MyLoadBalancedRetryFactory(policy, backOffPolicy, new RetryListener[] { myRetryListener }),
 				lbFactory);
 		ClientHttpRequestExecution execution = mock(ClientHttpRequestExecution.class);
-		Assertions.assertThrows(TerminatedRetryException.class,
-				() -> interceptor.intercept(request, new byte[] {}, execution));
+		assertThatExceptionOfType(TerminatedRetryException.class)
+			.isThrownBy(() -> interceptor.intercept(request, new byte[] {}, execution));
 	}
 
 	@Test
