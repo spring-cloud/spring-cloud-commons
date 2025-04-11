@@ -23,9 +23,6 @@ import java.util.Set;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -53,11 +50,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.instrument.classloading.LoadTimeWeaver;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -119,7 +114,7 @@ public class RefreshAutoConfiguration {
 		return new ConfigDataContextRefresher(context, scope, properties);
 	}
 
-	@ConditionalOnProperty(value = "spring.cloud.refresh.on-restart.enabled", matchIfMissing = true)
+	@ConditionalOnProperty(value = REFRESH_SCOPE_PREFIX + ".on-restart.enabled", matchIfMissing = true)
 	@Bean
 	RefreshScopeLifecycle refreshScopeLifecycle(ContextRefresher contextRefresher) {
 		return new RefreshScopeLifecycle(contextRefresher);
@@ -154,27 +149,6 @@ public class RefreshAutoConfiguration {
 				.append("additionalPropertySourcesToRetain", additionalPropertySourcesToRetain)
 				.toString();
 
-		}
-
-	}
-
-	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass(name = "javax.persistence.EntityManagerFactory")
-	protected static class JpaInvokerConfiguration implements LoadTimeWeaverAware, InitializingBean {
-
-		@Autowired
-		private ListableBeanFactory beanFactory;
-
-		@Override
-		public void afterPropertiesSet() {
-			String cls = "org.springframework.boot.autoconfigure.jdbc.DataSourceInitializerInvoker";
-			if (this.beanFactory.containsBean(cls)) {
-				this.beanFactory.getBean(cls);
-			}
-		}
-
-		@Override
-		public void setLoadTimeWeaver(LoadTimeWeaver ltw) {
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -49,8 +50,6 @@ import org.springframework.web.context.support.StandardServletEnvironment;
 public abstract class ContextRefresher {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-
-	protected static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
 
 	protected static final String[] DEFAULT_PROPERTY_SOURCES = new String[] {
 			// order matters, if cli args aren't first, things get messy
@@ -139,7 +138,7 @@ public abstract class ContextRefresher {
 			if (!after.containsKey(key)) {
 				result.put(key, null);
 			}
-			else if (!equal(before.get(key), after.get(key))) {
+			else if (!Objects.equals(before.get(key), after.get(key))) {
 				result.put(key, after.get(key));
 			}
 		}
@@ -149,16 +148,6 @@ public abstract class ContextRefresher {
 			}
 		}
 		return result;
-	}
-
-	private boolean equal(Object one, Object two) {
-		if (one == null && two == null) {
-			return true;
-		}
-		if (one == null || two == null) {
-			return false;
-		}
-		return one.equals(two);
 	}
 
 	private Map<String, Object> extract(MutablePropertySources propertySources) {
