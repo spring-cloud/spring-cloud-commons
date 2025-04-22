@@ -25,7 +25,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
@@ -120,7 +119,6 @@ abstract class AbstractLoadBalancerExchangeFilterFunctionIntegrationTests {
 	}
 
 	@Test
-	@Disabled // FIXME 3.0.0
 	void badRequestReturnedForIncorrectHost() {
 		assertThatIllegalStateException()
 			.isThrownBy(() -> WebClient.builder()
