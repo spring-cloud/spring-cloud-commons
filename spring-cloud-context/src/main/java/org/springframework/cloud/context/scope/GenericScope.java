@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,6 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -67,6 +66,7 @@ import org.springframework.util.StringUtils;
  * </p>
  *
  * @author Dave Syer
+ * @author Yanming Zhou
  * @since 3.1
  *
  */
@@ -81,13 +81,11 @@ public class GenericScope
 
 	private ConfigurableListableBeanFactory beanFactory;
 
-	private StandardEvaluationContext evaluationContext;
-
 	private String id;
 
-	private Map<String, Exception> errors = new ConcurrentHashMap<>();
+	private final Map<String, Exception> errors = new ConcurrentHashMap<>();
 
-	private ConcurrentMap<String, ReadWriteLock> locks = new ConcurrentHashMap<>();
+	private final ConcurrentMap<String, ReadWriteLock> locks = new ConcurrentHashMap<>();
 
 	static RuntimeException wrapIfNecessary(Throwable throwable) {
 		if (throwable instanceof RuntimeException) {
@@ -213,7 +211,7 @@ public class GenericScope
 	@Override
 	public Object resolveContextualObject(String key) {
 		Expression expression = parseExpression(key);
-		return expression.getValue(this.evaluationContext, this.beanFactory);
+		return expression.getValue(this.beanFactory);
 	}
 
 	private Expression parseExpression(String input) {
