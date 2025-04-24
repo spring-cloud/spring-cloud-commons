@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
@@ -80,7 +81,7 @@ public class RequestData {
 	}
 
 	private static MultiValueMap<String, String> buildCookies(MultiValueMap<String, HttpCookie> cookies) {
-		HttpHeaders newCookies = new HttpHeaders();
+		MultiValueMap<String, String> newCookies = new LinkedMultiValueMap<>();
 		if (cookies != null) {
 			cookies.forEach((key, value) -> value
 				.forEach(cookie -> newCookies.put(cookie.getName(), Collections.singletonList(cookie.getValue()))));
@@ -89,7 +90,7 @@ public class RequestData {
 	}
 
 	private static MultiValueMap<String, String> buildCookiesFromHeaders(HttpHeaders headers) {
-		HttpHeaders newCookies = new HttpHeaders();
+		MultiValueMap<String, String> newCookies = new LinkedMultiValueMap<>();
 		if (headers == null) {
 			return newCookies;
 		}
