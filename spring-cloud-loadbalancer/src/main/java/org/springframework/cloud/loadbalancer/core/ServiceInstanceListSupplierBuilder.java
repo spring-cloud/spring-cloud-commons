@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2023 the original author or authors.
+ * Copyright 2013-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -380,9 +380,10 @@ public final class ServiceInstanceListSupplierBuilder {
 		return new HealthCheckServiceInstanceListSupplier(delegate, loadBalancerClientFactory,
 				(serviceInstance, healthCheckPath) -> webClient.get()
 					.uri(UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build().toUri())
-					.exchange()
-					.flatMap(clientResponse -> clientResponse.releaseBody()
-						.thenReturn(HttpStatus.OK.equals(clientResponse.statusCode()))));
+					.retrieve()
+					.toBodilessEntity()
+					.map(response -> HttpStatus.OK.equals(response.getStatusCode()))
+					.onErrorReturn(false));
 	}
 
 	private ServiceInstanceListSupplier blockingHealthCheckServiceInstanceListSupplier(RestTemplate restTemplate,
