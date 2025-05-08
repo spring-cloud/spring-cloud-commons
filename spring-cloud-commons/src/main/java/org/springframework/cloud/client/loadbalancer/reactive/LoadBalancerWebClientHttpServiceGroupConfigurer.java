@@ -14,83 +14,78 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.loadbalancer;
+package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.net.URI;
-
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
-import org.jspecify.annotations.NonNull;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.util.function.SingletonSupplier;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
 
 import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.constructInterfaceClientsBaseUrl;
 import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.isServiceIdUrl;
 
 /**
- * Load-balancer-specific {@link RestClientHttpServiceGroupConfigurer} implementation. If
+ * Load-balancer-specific {@link WebClientHttpServiceGroupConfigurer} implementation. If
  * the group {@code baseUrl} is {@code null}, sets up a {@code baseUrl} with LoadBalancer
  * {@code serviceId} -resolved from Interface Client {@code groupName} set as
  * {@code host}. If the group {@code baseUrl} is {@code null} or
  * {@link LoadBalancerUriTools#isServiceIdUrl(String, String)}, a
- * {@link DeferringLoadBalancerInterceptor} instance picked from application context is
- * added to the group's {@link RestClient.Builder} if available, allowing for the requests
- * to be load-balanced.
+ * {@link DeferringLoadBalancerExchangeFilterFunction} instance picked from application
+ * context is added to the group's {@link WebClient.Builder} if available, allowing for
+ * the requests to be load-balanced.
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
- * @see RestClientHttpServiceGroupConfigurer
+ * @see WebClient.Builder
  * @see HttpClientServiceProperties
  */
-public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
+public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClientHttpServiceGroupConfigurer {
 
 	// Make sure Boot's customisers run before
 	private static final int ORDER = 10;
 
-	private static final Log LOG = LogFactory.getLog(LoadBalancerRestClientHttpServiceGroupConfigurer.class);
-
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
 
-	private final SingletonSupplier<DeferringLoadBalancerInterceptor> loadBalancerInterceptorSupplier;
+	private final SingletonSupplier<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> loadBalancerFilterFunctionSupplier;
 
 	private final HttpClientServiceProperties clientServiceProperties;
 
-	public LoadBalancerRestClientHttpServiceGroupConfigurer(
-			ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
+	public LoadBalancerWebClientHttpServiceGroupConfigurer(
+			ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> exchangeFilterFunctionProvider,
 			HttpClientServiceProperties clientServiceProperties,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
-		this.loadBalancerInterceptorSupplier = SingletonSupplier
-			.ofNullable(loadBalancerInterceptorProvider.getIfAvailable());
+		this.loadBalancerFilterFunctionSupplier = SingletonSupplier
+			.ofNullable(exchangeFilterFunctionProvider.getIfAvailable());
 		this.clientServiceProperties = clientServiceProperties;
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 	}
 
 	@Override
-	public void configureGroups(@NonNull Groups<RestClient.Builder> groups) {
-		DeferringLoadBalancerInterceptor loadBalancerInterceptor = loadBalancerInterceptorSupplier.get();
-		if (loadBalancerInterceptor == null) {
+	public void configureGroups(Groups<WebClient.Builder> groups) {
+		DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> loadBalancerFilterFunction = loadBalancerFilterFunctionSupplier
+			.get();
+		if (loadBalancerFilterFunction == null) {
 			throw new IllegalStateException(
-					DeferringLoadBalancerInterceptor.class.getSimpleName() + " instance not available.");
+					DeferringLoadBalancerExchangeFilterFunction.class.getSimpleName() + " instance not available.");
 		}
 		groups.configureClient((group, builder) -> {
 			String groupName = group.name();
 			HttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
 			if (groupProperties == null || groupProperties.getBaseUrl() == null) {
 				URI baseUrl = constructBaseUrl(groupName);
-				builder.baseUrl(baseUrl);
-				builder.requestInterceptor(loadBalancerInterceptor);
+				builder.baseUrl(String.valueOf(baseUrl));
+				builder.filter(loadBalancerFilterFunction);
 			}
 			else if (isServiceIdUrl(groupProperties.getBaseUrl(), groupName)) {
-				builder.requestInterceptor(loadBalancerInterceptor);
+				builder.filter(loadBalancerFilterFunction);
 			}
 		});
-
 	}
 
 	@Override

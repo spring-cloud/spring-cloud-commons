@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,14 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -34,6 +38,8 @@ public final class LoadBalancerUriTools {
 	private LoadBalancerUriTools() {
 		throw new IllegalStateException("Can't instantiate a utility class");
 	}
+
+	private static final Log LOG = LogFactory.getLog(LoadBalancerUriTools.class);
 
 	private static final String PERCENTAGE_SIGN = "%";
 
@@ -113,6 +119,27 @@ public final class LoadBalancerUriTools {
 			return INSECURE_SCHEME_MAPPINGS.get(originalOrDefault);
 		}
 		return originalOrDefault;
+	}
+
+	public static URI constructInterfaceClientsBaseUrl(String groupName, String defaultScheme) {
+		return UriComponentsBuilder.newInstance().scheme(defaultScheme).host(groupName).encode().build().toUri();
+	}
+
+	public static boolean isServiceIdUrl(String baseUrlString, String serviceId) {
+		if (baseUrlString == null) {
+			return false;
+		}
+		URI baseUrl;
+		try {
+			baseUrl = new URI(baseUrlString);
+		}
+		catch (URISyntaxException e) {
+			if (LOG.isErrorEnabled()) {
+				LOG.error("Incorrect baseUrl String syntax", e);
+			}
+			return false;
+		}
+		return serviceId.equals(baseUrl.getHost());
 	}
 
 }
