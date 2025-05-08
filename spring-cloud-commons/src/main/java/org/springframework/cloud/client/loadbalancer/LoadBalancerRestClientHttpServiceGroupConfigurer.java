@@ -24,8 +24,9 @@ import org.apache.juli.logging.LogFactory;
 import org.jspecify.annotations.NonNull;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.interfaceclients.http.HttpInterfaceGroupProperties;
-import org.springframework.boot.autoconfigure.interfaceclients.http.HttpInterfaceGroupsProperties;
+import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.client.RestClient;
@@ -37,20 +38,22 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 
-	private static final String DEFAULT_SCHEME = "http";
-
 	private static final Log LOG = LogFactory.getLog(LoadBalancerRestClientHttpServiceGroupConfigurer.class);
+
+	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
 
 	private final SingletonSupplier<DeferringLoadBalancerInterceptor> loadBalancerInterceptorSupplier;
 
-	private final HttpInterfaceGroupsProperties properties;
+	private final HttpClientServiceProperties clientServiceProperties;
 
 	public LoadBalancerRestClientHttpServiceGroupConfigurer(
 			ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
-			HttpInterfaceGroupsProperties properties) {
+			HttpClientServiceProperties clientServiceProperties,
+			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		this.loadBalancerInterceptorSupplier = SingletonSupplier
 			.ofNullable(loadBalancerInterceptorProvider.getIfAvailable());
-		this.properties = properties;
+		this.clientServiceProperties = clientServiceProperties;
+		this.loadBalancerClientFactory = loadBalancerClientFactory;
 	}
 
 	@Override
@@ -61,11 +64,8 @@ public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestCli
 		}
 		groups.configureClient((group, builder) -> {
 			String groupName = group.name();
-			HttpInterfaceGroupProperties groupProperties = properties.getProperties(groupName);
-			if (groupProperties == null) {
-				return;
-			}
-			if (groupProperties.getBaseUrl() == null) {
+			HttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
+			if (groupProperties == null || groupProperties.getBaseUrl() == null) {
 				URI baseUrl = constructBaseUrl(groupName);
 				builder.baseUrl(baseUrl);
 				builder.requestInterceptor(loadBalancerInterceptor);
@@ -94,8 +94,14 @@ public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestCli
 		return groupName.equals(baseUrl.getHost());
 	}
 
-	private static URI constructBaseUrl(String groupName) {
-		return UriComponentsBuilder.newInstance().scheme(DEFAULT_SCHEME).host(groupName).encode().build().toUri();
+	private URI constructBaseUrl(String groupName) {
+		LoadBalancerProperties loadBalancerProperties = loadBalancerClientFactory.getProperties(groupName);
+		return UriComponentsBuilder.newInstance()
+			.scheme(loadBalancerProperties.getInterfaceClients().getDefaultScheme())
+			.host(groupName)
+			.encode()
+			.build()
+			.toUri();
 	}
 
 }
