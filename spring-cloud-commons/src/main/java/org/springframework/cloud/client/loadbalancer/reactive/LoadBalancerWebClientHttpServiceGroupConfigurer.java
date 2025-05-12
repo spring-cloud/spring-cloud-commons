@@ -72,7 +72,7 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 			.get();
 		if (loadBalancerFilterFunction == null) {
 			throw new IllegalStateException(
-					DeferringLoadBalancerExchangeFilterFunction.class.getSimpleName() + " instance not available.");
+					DeferringLoadBalancerExchangeFilterFunction.class.getSimpleName() + " bean not available.");
 		}
 		groups.configureClient((group, builder) -> {
 			String groupName = group.name();

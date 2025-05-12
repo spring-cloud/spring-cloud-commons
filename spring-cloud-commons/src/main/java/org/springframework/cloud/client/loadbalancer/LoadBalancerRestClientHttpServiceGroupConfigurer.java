@@ -76,7 +76,7 @@ public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestCli
 		DeferringLoadBalancerInterceptor loadBalancerInterceptor = loadBalancerInterceptorSupplier.get();
 		if (loadBalancerInterceptor == null) {
 			throw new IllegalStateException(
-					DeferringLoadBalancerInterceptor.class.getSimpleName() + " instance not available.");
+					DeferringLoadBalancerInterceptor.class.getSimpleName() + " bean not available.");
 		}
 		groups.configureClient((group, builder) -> {
 			String groupName = group.name();

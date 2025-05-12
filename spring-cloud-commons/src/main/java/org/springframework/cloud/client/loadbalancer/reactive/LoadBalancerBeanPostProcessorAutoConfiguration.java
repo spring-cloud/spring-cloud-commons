@@ -72,7 +72,7 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 		@Bean
 		@ConditionalOnBean({ HttpClientServiceProperties.class, ReactiveLoadBalancer.Factory.class })
 		@ConditionalOnMissingBean(LoadBalancerWebClientHttpServiceGroupConfigurer.class)
-		LoadBalancerWebClientHttpServiceGroupConfigurer loadBalancerRestClientHttpServiceGroupConfigurer(
+		LoadBalancerWebClientHttpServiceGroupConfigurer loadBalancerWebClientHttpServiceGroupConfigurer(
 				ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> deferringExchangeFilterFunction,
 				HttpClientServiceProperties properties,
 				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
