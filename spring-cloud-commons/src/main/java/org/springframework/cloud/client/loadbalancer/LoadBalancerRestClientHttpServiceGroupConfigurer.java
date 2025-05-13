@@ -18,8 +18,6 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.net.URI;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.NonNull;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -50,10 +48,8 @@ import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools
  */
 public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 
-	// Make sure Boot's customisers run before
+	// Make sure Boot's configurers run before
 	private static final int ORDER = 10;
-
-	private static final Log LOG = LogFactory.getLog(LoadBalancerRestClientHttpServiceGroupConfigurer.class);
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
 

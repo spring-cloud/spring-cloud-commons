@@ -19,6 +19,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.net.URI;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.http.client.reactive.service.ReactiveHttpClientServiceProperties;
 import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
@@ -47,18 +48,18 @@ import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools
  */
 public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClientHttpServiceGroupConfigurer {
 
-	// Make sure Boot's customisers run before
+	// Make sure Boot's configurers run before
 	private static final int ORDER = 10;
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
 
 	private final SingletonSupplier<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> loadBalancerFilterFunctionSupplier;
 
-	private final HttpClientServiceProperties clientServiceProperties;
+	private final ReactiveHttpClientServiceProperties clientServiceProperties;
 
 	public LoadBalancerWebClientHttpServiceGroupConfigurer(
 			ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> exchangeFilterFunctionProvider,
-			HttpClientServiceProperties clientServiceProperties,
+			ReactiveHttpClientServiceProperties clientServiceProperties,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		this.loadBalancerFilterFunctionSupplier = SingletonSupplier
 			.ofNullable(exchangeFilterFunctionProvider.getIfAvailable());
@@ -76,7 +77,8 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 		}
 		groups.configureClient((group, builder) -> {
 			String groupName = group.name();
-			HttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
+			ReactiveHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup()
+				.get(groupName);
 			if (groupProperties == null || groupProperties.getBaseUrl() == null) {
 				URI baseUrl = constructBaseUrl(groupName);
 				builder.baseUrl(String.valueOf(baseUrl));
