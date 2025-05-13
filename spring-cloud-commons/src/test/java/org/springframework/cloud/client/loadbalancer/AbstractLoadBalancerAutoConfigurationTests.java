@@ -50,127 +50,118 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoa
 public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 	protected ApplicationContextRunner applicationContextRunner = new ApplicationContextRunner()
-			.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class));
+		.withConfiguration(AutoConfigurations.of(LoadBalancerAutoConfiguration.class));
 
 	@Test
 	void restTemplateGetsLoadBalancerInterceptor() {
-		applicationContextRunner.withUserConfiguration(OneRestTemplate.class)
-				.run(context -> {
-					final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
+		applicationContextRunner.withUserConfiguration(OneRestTemplate.class).run(context -> {
+			final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
 
-					then(restTemplates).isNotNull();
-					then(restTemplates.values()).hasSize(1);
-					RestTemplate restTemplate = restTemplates.values().iterator().next();
-					then(restTemplate).isNotNull();
+			then(restTemplates).isNotNull();
+			then(restTemplates.values()).hasSize(1);
+			RestTemplate restTemplate = restTemplates.values().iterator().next();
+			then(restTemplate).isNotNull();
 
-					assertLoadBalanced(restTemplate);
-				});
+			assertLoadBalanced(restTemplate);
+		});
 	}
 
 	@Test
 	void restClientBuilderWithLoadBalancerInterceptor() {
-		applicationContextRunner.withUserConfiguration(OneRestClientBuilder.class)
-				.run(context -> {
-					final Map<String, RestClient.Builder> restClientBuilders = context.getBeansOfType(RestClient.Builder.class);
+		applicationContextRunner.withUserConfiguration(OneRestClientBuilder.class).run(context -> {
+			final Map<String, RestClient.Builder> restClientBuilders = context.getBeansOfType(RestClient.Builder.class);
 
-					assertThat(restClientBuilders).isNotNull();
-					assertThat(restClientBuilders).hasSize(1);
-					RestClient.Builder restClientBuilder = restClientBuilders.values()
-							.iterator().next();
-					assertThat(restClientBuilder).isNotNull();
-					assertLoadBalanced(restClientBuilder);
-				});
+			assertThat(restClientBuilders).isNotNull();
+			assertThat(restClientBuilders).hasSize(1);
+			RestClient.Builder restClientBuilder = restClientBuilders.values().iterator().next();
+			assertThat(restClientBuilder).isNotNull();
+			assertLoadBalanced(restClientBuilder);
+		});
 	}
 
 	@Test
 	void multipleRestTemplates() {
-		applicationContextRunner.withUserConfiguration(TwoRestTemplatesAndTwoRestClientBuilders.class)
-				.run(context -> {
-					final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
+		applicationContextRunner.withUserConfiguration(TwoRestTemplatesAndTwoRestClientBuilders.class).run(context -> {
+			final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
 
-					then(restTemplates).isNotNull();
-					Collection<RestTemplate> templates = restTemplates.values();
-					then(templates).hasSize(2);
+			then(restTemplates).isNotNull();
+			Collection<RestTemplate> templates = restTemplates.values();
+			then(templates).hasSize(2);
 
-					TwoRestTemplatesAndTwoRestClientBuilders.Two two = context
-							.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
+			TwoRestTemplatesAndTwoRestClientBuilders.Two two = context
+				.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
 
-					then(two.loadBalanced).isNotNull();
-					assertLoadBalanced(two.loadBalanced);
+			then(two.loadBalanced).isNotNull();
+			assertLoadBalanced(two.loadBalanced);
 
-					then(two.nonLoadBalanced).isNotNull();
-					then(two.nonLoadBalanced.getInterceptors()).isEmpty();
-				});
+			then(two.nonLoadBalanced).isNotNull();
+			then(two.nonLoadBalanced.getInterceptors()).isEmpty();
+		});
 	}
 
 	@Test
 	void multipleRestClientBuilders() {
-		applicationContextRunner.withUserConfiguration(TwoRestTemplatesAndTwoRestClientBuilders.class)
-				.run(context -> {
-					final Map<String, RestClient.Builder> restClientBuilders = context.getBeansOfType(RestClient.Builder.class);
+		applicationContextRunner.withUserConfiguration(TwoRestTemplatesAndTwoRestClientBuilders.class).run(context -> {
+			final Map<String, RestClient.Builder> restClientBuilders = context.getBeansOfType(RestClient.Builder.class);
 
-					assertThat(restClientBuilders).isNotNull();
-					assertThat(restClientBuilders.values()).hasSize(2);
+			assertThat(restClientBuilders).isNotNull();
+			assertThat(restClientBuilders.values()).hasSize(2);
 
-					TwoRestTemplatesAndTwoRestClientBuilders.Two two = context
-							.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
+			TwoRestTemplatesAndTwoRestClientBuilders.Two two = context
+				.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
 
-					assertThat(two.loadBalancedRestClientBuilder).isNotNull();
-					assertLoadBalanced(two.loadBalancedRestClientBuilder);
+			assertThat(two.loadBalancedRestClientBuilder).isNotNull();
+			assertLoadBalanced(two.loadBalancedRestClientBuilder);
 
-					assertThat(two.nonLoadBalancedRestClientBuilder).isNotNull();
-					two.nonLoadBalancedRestClientBuilder
-							.requestInterceptors(interceptors -> assertThat(interceptors).isEmpty());
-				});
+			assertThat(two.nonLoadBalancedRestClientBuilder).isNotNull();
+			two.nonLoadBalancedRestClientBuilder
+				.requestInterceptors(interceptors -> assertThat(interceptors).isEmpty());
+		});
 	}
 
 	@Test
 	void restTemplatesAndRestClientsFromUsersAutoConfiguration() {
 		applicationContextRunner
-				.withConfiguration(AutoConfigurations.of(TwoRestTemplatesAndTwoRestClientBuilders.class))
-				.run(context -> {
-					final Map<String, RestClient.Builder> restClientBuilders = context
-							.getBeansOfType(RestClient.Builder.class);
-					final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
+			.withConfiguration(AutoConfigurations.of(TwoRestTemplatesAndTwoRestClientBuilders.class))
+			.run(context -> {
+				final Map<String, RestClient.Builder> restClientBuilders = context
+					.getBeansOfType(RestClient.Builder.class);
+				final Map<String, RestTemplate> restTemplates = context.getBeansOfType(RestTemplate.class);
 
-					assertThat(restClientBuilders).isNotNull();
-					assertThat(restClientBuilders.values()).hasSize(2);
+				assertThat(restClientBuilders).isNotNull();
+				assertThat(restClientBuilders.values()).hasSize(2);
 
-					TwoRestTemplatesAndTwoRestClientBuilders.Two two = context
-							.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
+				TwoRestTemplatesAndTwoRestClientBuilders.Two two = context
+					.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
 
-					assertThat(two.loadBalancedRestClientBuilder).isNotNull();
-					assertLoadBalanced(two.loadBalancedRestClientBuilder);
+				assertThat(two.loadBalancedRestClientBuilder).isNotNull();
+				assertLoadBalanced(two.loadBalancedRestClientBuilder);
 
-					assertThat(two.nonLoadBalancedRestClientBuilder).isNotNull();
-					two.nonLoadBalancedRestClientBuilder
-							.requestInterceptors(interceptors -> assertThat(interceptors).isEmpty());
+				assertThat(two.nonLoadBalancedRestClientBuilder).isNotNull();
+				two.nonLoadBalancedRestClientBuilder
+					.requestInterceptors(interceptors -> assertThat(interceptors).isEmpty());
 
-					assertThat(restTemplates).isNotNull();
-					Collection<RestTemplate> templates = restTemplates.values();
-					assertThat(templates).hasSize(2);
+				assertThat(restTemplates).isNotNull();
+				Collection<RestTemplate> templates = restTemplates.values();
+				assertThat(templates).hasSize(2);
 
-					TwoRestTemplatesAndTwoRestClientBuilders.Two twoRestTemplate = context
-							.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
+				TwoRestTemplatesAndTwoRestClientBuilders.Two twoRestTemplate = context
+					.getBean(TwoRestTemplatesAndTwoRestClientBuilders.Two.class);
 
-					assertThat(twoRestTemplate.loadBalanced).isNotNull();
-					assertLoadBalanced(twoRestTemplate.loadBalanced);
+				assertThat(twoRestTemplate.loadBalanced).isNotNull();
+				assertLoadBalanced(twoRestTemplate.loadBalanced);
 
-					assertThat(twoRestTemplate.nonLoadBalanced).isNotNull();
-					assertThat(twoRestTemplate.nonLoadBalanced.getInterceptors()).isEmpty();
-				});
+				assertThat(twoRestTemplate.nonLoadBalanced).isNotNull();
+				assertThat(twoRestTemplate.nonLoadBalanced.getInterceptors()).isEmpty();
+			});
 	}
 
 	@Test
 	void loadBalancerRestClientHttpServiceGroupConfigurerPresent() {
-		applicationContextRunner
-				.withUserConfiguration(OneRestClientBuilder.class)
-				.run(context -> {
-					assertThat(context.getBeansOfType(LoadBalancerRestClientHttpServiceGroupConfigurer.class))
-							.hasSize(1);
-					assertThat(context.getBeansOfType(LoadBalancerWebClientHttpServiceGroupConfigurer.class))
-							.hasSize(0);
-				});
+		applicationContextRunner.withUserConfiguration(OneRestClientBuilder.class).run(context -> {
+			assertThat(context.getBeansOfType(LoadBalancerRestClientHttpServiceGroupConfigurer.class)).hasSize(1);
+			assertThat(context.getBeansOfType(LoadBalancerWebClientHttpServiceGroupConfigurer.class)).hasSize(0);
+		});
 	}
 
 	protected abstract void assertLoadBalanced(RestClient.Builder restClientBuilder);
@@ -222,7 +213,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@Import({OneRestTemplate.class, OneRestClientBuilder.class})
+	@Import({ OneRestTemplate.class, OneRestClientBuilder.class })
 	protected static class TwoRestTemplatesAndTwoRestClientBuilders {
 
 		@Primary
