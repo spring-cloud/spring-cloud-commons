@@ -68,7 +68,7 @@ class XForwardedHeadersTransformerTests {
 
 		assertThat(newRequest.headers().containsHeader("X-Forwarded-Host")).isTrue();
 		assertThat(newRequest.headers().getFirst("X-Forwarded-Host")).isEqualTo("spring.io");
-		assertThat(newRequest.headers().containsHeader("X-Forwarded-Host")).isTrue();
+		assertThat(newRequest.headers().containsHeader("X-Forwarded-Proto")).isTrue();
 		assertThat(newRequest.headers().getFirst("X-Forwarded-Proto")).isEqualTo("https");
 	}
 
