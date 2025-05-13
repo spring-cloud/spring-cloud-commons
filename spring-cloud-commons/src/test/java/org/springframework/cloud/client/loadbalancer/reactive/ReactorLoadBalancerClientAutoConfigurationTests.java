@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,19 +23,24 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.http.client.reactive.service.ReactiveHttpClientServiceProperties;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerRestClientHttpServiceGroupConfigurer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerTestUtils.assertLoadBalanced;
 import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerTestUtils.getFilters;
@@ -59,9 +64,10 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		assertLoadBalanced(webClientBuilder, ReactorLoadBalancerExchangeFilterFunction.class);
 
 		final Map<String, OneWebClientBuilder.TestService> testServiceMap = context
-			.getBeansOfType(OneWebClientBuilder.TestService.class);
+				.getBeansOfType(OneWebClientBuilder.TestService.class);
 		then(testServiceMap).isNotNull().hasSize(1);
-		OneWebClientBuilder.TestService testService = testServiceMap.values().stream().findFirst().get();
+		OneWebClientBuilder.TestService testService = testServiceMap.values().stream()
+				.findFirst().get();
 		assertLoadBalanced(testService.webClient, ReactorLoadBalancerExchangeFilterFunction.class);
 	}
 
@@ -78,9 +84,10 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		assertLoadBalanced(webClientBuilder, RetryableLoadBalancerExchangeFilterFunction.class);
 
 		final Map<String, OneWebClientBuilder.TestService> testServiceMap = context
-			.getBeansOfType(OneWebClientBuilder.TestService.class);
+				.getBeansOfType(OneWebClientBuilder.TestService.class);
 		then(testServiceMap).isNotNull().hasSize(1);
-		OneWebClientBuilder.TestService testService = testServiceMap.values().stream().findFirst().get();
+		OneWebClientBuilder.TestService testService = testServiceMap.values().stream()
+				.findFirst().get();
 		assertLoadBalanced(testService.webClient, RetryableLoadBalancerExchangeFilterFunction.class);
 
 		System.clearProperty("spring.cloud.loadbalancer.retry.enabled");
@@ -136,18 +143,34 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	@Test
 	void defaultPropertiesWorks() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-			.sources(OneWebClientBuilder.class, DefaulConfig.class)
-			.properties("spring.cloud.loadbalancer.health-check.initial-delay=1s",
-					"spring.cloud.loadbalancer.clients.myclient.health-check.interval=30s")
-			.run();
+				.sources(OneWebClientBuilder.class, DefaulConfig.class)
+				.properties("spring.cloud.loadbalancer.health-check.initial-delay=1s",
+						"spring.cloud.loadbalancer.clients.myclient.health-check.interval=30s")
+				.run();
 		LoadBalancerClientsProperties properties = context.getBean(LoadBalancerClientsProperties.class);
 
 		then(properties.getClients()).containsKey("myclient");
 		LoadBalancerProperties clientProperties = properties.getClients().get("myclient");
 		// default value
-		then(clientProperties.getHealthCheck().getInitialDelay()).isEqualTo(Duration.ofSeconds(1));
+		then(clientProperties.getHealthCheck()
+				.getInitialDelay()).isEqualTo(Duration.ofSeconds(1));
 		// client specific value
-		then(clientProperties.getHealthCheck().getInterval()).isEqualTo(Duration.ofSeconds(30));
+		then(clientProperties.getHealthCheck()
+				.getInterval()).isEqualTo(Duration.ofSeconds(30));
+	}
+
+	@Test
+	void loadBalancerRestClientHttpServiceGroupConfigurerPresent() {
+		new ApplicationContextRunner()
+				.withConfiguration(AutoConfigurations.of(ReactorLoadBalancerClientAutoConfiguration.class,
+						LoadBalancerBeanPostProcessorAutoConfiguration.class))
+				.withUserConfiguration(OneWebClientBuilder.class)
+				.run(context -> {
+					assertThat(context.getBeansOfType(LoadBalancerWebClientHttpServiceGroupConfigurer.class))
+							.hasSize(1);
+					assertThat(context.getBeansOfType(LoadBalancerRestClientHttpServiceGroupConfigurer.class))
+							.hasSize(0);
+				});
 	}
 
 	private ConfigurableApplicationContext init(Class<?> config) {
@@ -219,6 +242,11 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 				this.webClient = builder.build();
 			}
 
+		}
+
+		@Bean
+		ReactiveHttpClientServiceProperties reactiveHttpClientServiceProperties() {
+			return new ReactiveHttpClientServiceProperties();
 		}
 
 	}

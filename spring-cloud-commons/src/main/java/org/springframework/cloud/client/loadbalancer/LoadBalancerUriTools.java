@@ -126,6 +126,9 @@ public final class LoadBalancerUriTools {
 	}
 
 	public static boolean isServiceIdUrl(String baseUrlString, String serviceId) {
+		if (serviceId == null) {
+			return false;
+		}
 		if (baseUrlString == null) {
 			return false;
 		}
