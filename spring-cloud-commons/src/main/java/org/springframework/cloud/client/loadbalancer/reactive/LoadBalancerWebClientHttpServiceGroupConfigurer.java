@@ -62,7 +62,7 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 			ReactiveHttpClientServiceProperties clientServiceProperties,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		this.loadBalancerFilterFunctionSupplier = SingletonSupplier
-			.ofNullable(exchangeFilterFunctionProvider.getIfAvailable());
+			.ofNullable(exchangeFilterFunctionProvider::getIfAvailable);
 		this.clientServiceProperties = clientServiceProperties;
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 	}

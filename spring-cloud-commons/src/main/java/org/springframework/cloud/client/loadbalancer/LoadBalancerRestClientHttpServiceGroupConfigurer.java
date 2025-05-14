@@ -62,7 +62,7 @@ public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestCli
 			HttpClientServiceProperties clientServiceProperties,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		this.loadBalancerInterceptorSupplier = SingletonSupplier
-			.ofNullable(loadBalancerInterceptorProvider.getIfAvailable());
+			.ofNullable(loadBalancerInterceptorProvider::getIfAvailable);
 		this.clientServiceProperties = clientServiceProperties;
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 	}
