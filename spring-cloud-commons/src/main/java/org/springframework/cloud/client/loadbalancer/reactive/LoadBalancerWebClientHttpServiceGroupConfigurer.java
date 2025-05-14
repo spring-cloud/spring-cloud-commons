@@ -21,8 +21,6 @@ import java.net.URI;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.http.client.reactive.service.ReactiveHttpClientServiceProperties;
 import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -51,20 +49,16 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 	// Make sure Boot's configurers run before
 	private static final int ORDER = 10;
 
-	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
-
 	private final SingletonSupplier<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> loadBalancerFilterFunctionSupplier;
 
 	private final ReactiveHttpClientServiceProperties clientServiceProperties;
 
 	public LoadBalancerWebClientHttpServiceGroupConfigurer(
 			ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> exchangeFilterFunctionProvider,
-			ReactiveHttpClientServiceProperties clientServiceProperties,
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
+			ReactiveHttpClientServiceProperties clientServiceProperties) {
 		this.loadBalancerFilterFunctionSupplier = SingletonSupplier
 			.ofNullable(exchangeFilterFunctionProvider::getIfAvailable);
 		this.clientServiceProperties = clientServiceProperties;
-		this.loadBalancerClientFactory = loadBalancerClientFactory;
 	}
 
 	@Override
@@ -96,9 +90,7 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 	}
 
 	private URI constructBaseUrl(String groupName) {
-		LoadBalancerProperties loadBalancerProperties = loadBalancerClientFactory.getProperties(groupName);
-		return constructInterfaceClientsBaseUrl(groupName,
-				loadBalancerProperties.getInterfaceClients().getDefaultScheme());
+		return constructInterfaceClientsBaseUrl(groupName);
 	}
 
 }

@@ -27,8 +27,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.http.client.reactive.service.ReactiveHttpClientServiceProperties;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.SimpleObjectProvider;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
@@ -37,7 +35,6 @@ import org.springframework.web.service.registry.HttpServiceGroupConfigurer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link LoadBalancerWebClientHttpServiceGroupConfigurer}
@@ -49,8 +46,6 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 
 	private static final String GROUP_NAME = "testService";
 
-	private ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
-
 	private ReactiveHttpClientServiceProperties clientServiceProperties;
 
 	private ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> exchangeFilterFunctionProvider;
@@ -60,16 +55,13 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 		DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> exchangeFilterFunction = mock(
 				DeferringLoadBalancerExchangeFilterFunction.class);
 		exchangeFilterFunctionProvider = new SimpleObjectProvider<>(exchangeFilterFunction);
-		loadBalancerClientFactory = mock(ReactiveLoadBalancer.Factory.class);
 		clientServiceProperties = new ReactiveHttpClientServiceProperties();
-		LoadBalancerProperties properties = new LoadBalancerProperties();
-		when(loadBalancerClientFactory.getProperties(GROUP_NAME)).thenReturn(properties);
 	}
 
 	@Test
 	void shouldAddInterceptorWhenBaseUrlIsNotSet() {
 		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(
-				exchangeFilterFunctionProvider, clientServiceProperties, loadBalancerClientFactory);
+				exchangeFilterFunctionProvider, clientServiceProperties);
 		TestGroups groups = new TestGroups();
 
 		configurer.configureGroups(groups);
@@ -86,7 +78,7 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 		group.setBaseUrl("https://" + GROUP_NAME + "/path");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
 		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(
-				exchangeFilterFunctionProvider, clientServiceProperties, loadBalancerClientFactory);
+				exchangeFilterFunctionProvider, clientServiceProperties);
 		TestGroups groups = new TestGroups();
 
 		configurer.configureGroups(groups);
@@ -103,7 +95,7 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 		group.setBaseUrl("https://some-other-service/path");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
 		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(
-				exchangeFilterFunctionProvider, clientServiceProperties, loadBalancerClientFactory);
+				exchangeFilterFunctionProvider, clientServiceProperties);
 		TestGroups groups = new TestGroups();
 
 		configurer.configureGroups(groups);

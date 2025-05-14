@@ -105,12 +105,6 @@ public class LoadBalancerProperties {
 	 */
 	private Stats stats = new Stats();
 
-	/**
-	 * Properties for load-balanced interface clients. LoadBalancer serviceId will be used
-	 * as interface clients group name.
-	 */
-	private InterfaceClients interfaceClients = new InterfaceClients();
-
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
 	}
@@ -181,14 +175,6 @@ public class LoadBalancerProperties {
 
 	public void setStats(Stats stats) {
 		this.stats = stats;
-	}
-
-	public InterfaceClients getInterfaceClients() {
-		return interfaceClients;
-	}
-
-	public void setInterfaceClients(InterfaceClients interfaceClients) {
-		this.interfaceClients = interfaceClients;
 	}
 
 	public static class StickySession {
@@ -581,24 +567,6 @@ public class LoadBalancerProperties {
 
 		public void setIncludePath(boolean includePath) {
 			this.includePath = includePath;
-		}
-
-	}
-
-	public static class InterfaceClients {
-
-		/**
-		 * Default scheme to use when building interface clients baseUrl. If a baseUrl is
-		 * provided by the user, this will be ignored.
-		 */
-		private String defaultScheme = "http";
-
-		public String getDefaultScheme() {
-			return defaultScheme;
-		}
-
-		public void setDefaultScheme(String defaultScheme) {
-			this.defaultScheme = defaultScheme;
 		}
 
 	}

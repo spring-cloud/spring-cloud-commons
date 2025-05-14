@@ -116,10 +116,8 @@ public class LoadBalancerAutoConfiguration {
 		@ConditionalOnMissingBean(LoadBalancerRestClientHttpServiceGroupConfigurer.class)
 		LoadBalancerRestClientHttpServiceGroupConfigurer loadBalancerRestClientHttpServiceGroupConfigurer(
 				ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
-				HttpClientServiceProperties properties,
-				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
-			return new LoadBalancerRestClientHttpServiceGroupConfigurer(loadBalancerInterceptorProvider, properties,
-					loadBalancerFactory);
+				HttpClientServiceProperties properties) {
+			return new LoadBalancerRestClientHttpServiceGroupConfigurer(loadBalancerInterceptorProvider, properties);
 		}
 
 	}

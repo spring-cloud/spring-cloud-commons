@@ -121,8 +121,8 @@ public final class LoadBalancerUriTools {
 		return originalOrDefault;
 	}
 
-	public static URI constructInterfaceClientsBaseUrl(String groupName, String defaultScheme) {
-		return UriComponentsBuilder.newInstance().scheme(defaultScheme).host(groupName).encode().build().toUri();
+	public static URI constructInterfaceClientsBaseUrl(String groupName) {
+		return UriComponentsBuilder.newInstance().scheme(DEFAULT_SCHEME).host(groupName).encode().build().toUri();
 	}
 
 	public static boolean isServiceIdUrl(String baseUrlString, String serviceId) {

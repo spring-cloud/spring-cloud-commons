@@ -22,8 +22,6 @@ import org.jspecify.annotations.NonNull;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
@@ -51,20 +49,16 @@ public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestCli
 	// Make sure Boot's configurers run before
 	private static final int ORDER = 10;
 
-	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
-
 	private final SingletonSupplier<DeferringLoadBalancerInterceptor> loadBalancerInterceptorSupplier;
 
 	private final HttpClientServiceProperties clientServiceProperties;
 
 	public LoadBalancerRestClientHttpServiceGroupConfigurer(
 			ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
-			HttpClientServiceProperties clientServiceProperties,
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
+			HttpClientServiceProperties clientServiceProperties) {
 		this.loadBalancerInterceptorSupplier = SingletonSupplier
 			.ofNullable(loadBalancerInterceptorProvider::getIfAvailable);
 		this.clientServiceProperties = clientServiceProperties;
-		this.loadBalancerClientFactory = loadBalancerClientFactory;
 	}
 
 	@Override
@@ -95,9 +89,7 @@ public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestCli
 	}
 
 	private URI constructBaseUrl(String groupName) {
-		LoadBalancerProperties loadBalancerProperties = loadBalancerClientFactory.getProperties(groupName);
-		return constructInterfaceClientsBaseUrl(groupName,
-				loadBalancerProperties.getInterfaceClients().getDefaultScheme());
+		return constructInterfaceClientsBaseUrl(groupName);
 	}
 
 }
