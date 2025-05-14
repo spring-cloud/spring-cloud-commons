@@ -44,18 +44,21 @@ import static org.mockito.Mockito.when;
  *
  * @author Olga Maciaszek-Sharma
  */
-@SuppressWarnings({"unchecked", "removal"})
+@SuppressWarnings({ "unchecked", "removal" })
 class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 
 	private static final String GROUP_NAME = "testService";
+
 	private ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
+
 	private ReactiveHttpClientServiceProperties clientServiceProperties;
+
 	private ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> exchangeFilterFunctionProvider;
 
 	@BeforeEach
 	void setup() {
-		DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> exchangeFilterFunction =
-				mock(DeferringLoadBalancerExchangeFilterFunction.class);
+		DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> exchangeFilterFunction = mock(
+				DeferringLoadBalancerExchangeFilterFunction.class);
 		exchangeFilterFunctionProvider = new SimpleObjectProvider<>(exchangeFilterFunction);
 		loadBalancerClientFactory = mock(ReactiveLoadBalancer.Factory.class);
 		clientServiceProperties = new ReactiveHttpClientServiceProperties();
@@ -65,39 +68,33 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 
 	@Test
 	void shouldAddInterceptorWhenBaseUrlIsNotSet() {
-		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(exchangeFilterFunctionProvider,
-				clientServiceProperties, loadBalancerClientFactory);
+		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(
+				exchangeFilterFunctionProvider, clientServiceProperties, loadBalancerClientFactory);
 		TestGroups groups = new TestGroups();
 
 		configurer.configureGroups(groups);
 
 		groups.builder.filters(filterFunctions -> {
-					assertThat(filterFunctions).hasSize(1);
-					assertThat(filterFunctions.get(0)
-							.getClass()).isEqualTo(DeferringLoadBalancerExchangeFilterFunction.class);
-				}
-		);
+			assertThat(filterFunctions).hasSize(1);
+			assertThat(filterFunctions.get(0).getClass()).isEqualTo(DeferringLoadBalancerExchangeFilterFunction.class);
+		});
 	}
-
-//		properties.getInterfaceClients().setDefaultScheme("https");
 
 	@Test
 	void shouldAddInterceptorWhenBaseUrlIsServiceIdUrl() {
 		ReactiveHttpClientServiceProperties.Group group = new ReactiveHttpClientServiceProperties.Group();
 		group.setBaseUrl("https://" + GROUP_NAME + "/path");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
-		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(exchangeFilterFunctionProvider,
-				clientServiceProperties, loadBalancerClientFactory);
+		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(
+				exchangeFilterFunctionProvider, clientServiceProperties, loadBalancerClientFactory);
 		TestGroups groups = new TestGroups();
 
 		configurer.configureGroups(groups);
 
 		groups.builder.filters(filterFunctions -> {
-					assertThat(filterFunctions).hasSize(1);
-					assertThat(filterFunctions.get(0)
-							.getClass()).isEqualTo(DeferringLoadBalancerExchangeFilterFunction.class);
-				}
-		);
+			assertThat(filterFunctions).hasSize(1);
+			assertThat(filterFunctions.get(0).getClass()).isEqualTo(DeferringLoadBalancerExchangeFilterFunction.class);
+		});
 	}
 
 	@Test
@@ -105,23 +102,18 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 		ReactiveHttpClientServiceProperties.Group group = new ReactiveHttpClientServiceProperties.Group();
 		group.setBaseUrl("https://some-other-service/path");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
-		LoadBalancerWebClientHttpServiceGroupConfigurer configurer =
-				new LoadBalancerWebClientHttpServiceGroupConfigurer(exchangeFilterFunctionProvider,
-						clientServiceProperties, loadBalancerClientFactory);
+		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(
+				exchangeFilterFunctionProvider, clientServiceProperties, loadBalancerClientFactory);
 		TestGroups groups = new TestGroups();
 
 		configurer.configureGroups(groups);
 
-		groups.builder.filters(
-				filterFunctions -> assertThat(filterFunctions).hasSize(0)
-		);
+		groups.builder.filters(filterFunctions -> assertThat(filterFunctions).hasSize(0));
 	}
-
 
 	private static class TestGroups implements HttpServiceGroupConfigurer.Groups<WebClient.Builder> {
 
 		WebClient.Builder builder = WebClient.builder();
-
 
 		@Override
 		public HttpServiceGroupConfigurer.Groups<WebClient.Builder> filterByName(String... groupNames) {
@@ -140,23 +132,27 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 
 		@Override
 		public void configureClient(BiConsumer<HttpServiceGroup, WebClient.Builder> clientConfigurer) {
-			clientConfigurer.accept(new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.WEB_CLIENT, new HashSet<>()), builder);
+			clientConfigurer.accept(new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.WEB_CLIENT, new HashSet<>()),
+					builder);
 		}
 
 		@Override
-		public void configureProxyFactory(BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
+		public void configureProxyFactory(
+				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
 
 		}
 
 		@Override
-		public void configure(BiConsumer<HttpServiceGroup, WebClient.Builder> clientConfigurer, BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
+		public void configure(BiConsumer<HttpServiceGroup, WebClient.Builder> clientConfigurer,
+				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
 
 		}
+
 	}
 
 	private record TestGroup(String name, ClientType clientType,
-							 Set<Class<?>> httpServiceTypes)
-			implements HttpServiceGroup {
+			Set<Class<?>> httpServiceTypes) implements HttpServiceGroup {
 
 	}
+
 }

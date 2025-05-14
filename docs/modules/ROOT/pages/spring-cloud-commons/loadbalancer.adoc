@@ -554,3 +554,14 @@ NOTE: Starting with `4.1.0`, we have introduced the `callGetWithRequestOnDelegat
 
 Since `4.0.0`, Spring Cloud LoadBalancer supports Spring AOT transformations and native images. However, to use this feature, you need to explicitly define your `LoadBalancerClient` service IDs. You can do so by using the `value` or `name` attributes of the `@LoadBalancerClient` annotation or as values of the `spring.cloud.loadbalancer.eager-load.clients` property.
 
+== LoadBalancer Integration for Spring Interface Clients AutoConfiguration
+
+Since `5.0.0`, Spring Cloud LoadBalancer supports https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-interface[Spring Interface Clients] AutoConfiguration through the `LoadBalancerRestClientHttpServiceGroupConfigurer` and `LoadBalancerWebClientHttpServiceGroupConfigurer`.
+
+For each Interface Client group, if the group `baseUrl` (defined under the
+`spring.http.client.service.group.[groupName].base-url` property) is `null`, a `serviceId`-based URL for load-balancing is set up as the `baseUrl`, with `serviceId` resolved from the Interface Client `groupName`. The default scheme for the load-balanced `baseUrl` (`http`, by default) can be set through the `spring.cloud.loadbalancer.interface-clients.default-scheme` property.
+
+If the group `baseUrl` is `null` or it is already a `serviceId`-based URL, a
+`DeferringLoadBalancerInterceptor` instance is picked from the application context for blocking scenarios, and a `DeferringLoadBalancerExchangeFilterFunction` instance for reactive scenarios, and is added to the group's `RestClient.Builder` or `WebClient.Builder` if available, allowing for the requests to be load-balanced.
+
+

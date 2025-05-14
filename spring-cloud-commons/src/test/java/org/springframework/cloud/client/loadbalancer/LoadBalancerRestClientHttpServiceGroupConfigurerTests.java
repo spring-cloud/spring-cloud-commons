@@ -44,12 +44,15 @@ import static org.mockito.Mockito.when;
  *
  * @author Olga Maciaszek-Sharma
  */
-@SuppressWarnings({"unchecked", "removal"})
+@SuppressWarnings({ "unchecked", "removal" })
 class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 
 	private static final String GROUP_NAME = "testService";
+
 	private ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
+
 	private HttpClientServiceProperties clientServiceProperties;
+
 	private ObjectProvider<DeferringLoadBalancerInterceptor> interceptorProvider;
 
 	@BeforeEach
@@ -64,39 +67,33 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 
 	@Test
 	void shouldAddInterceptorWhenBaseUrlIsNotSet() {
-		LoadBalancerRestClientHttpServiceGroupConfigurer configurer = new LoadBalancerRestClientHttpServiceGroupConfigurer(interceptorProvider,
-				clientServiceProperties, loadBalancerClientFactory);
+		LoadBalancerRestClientHttpServiceGroupConfigurer configurer = new LoadBalancerRestClientHttpServiceGroupConfigurer(
+				interceptorProvider, clientServiceProperties, loadBalancerClientFactory);
 		TestGroups groups = new TestGroups();
 
 		configurer.configureGroups(groups);
 
 		groups.builder.requestInterceptors(interceptors -> {
-					assertThat(interceptors).hasSize(1);
-					assertThat(interceptors.get(0)
-							.getClass()).isEqualTo(DeferringLoadBalancerInterceptor.class);
-				}
-		);
+			assertThat(interceptors).hasSize(1);
+			assertThat(interceptors.get(0).getClass()).isEqualTo(DeferringLoadBalancerInterceptor.class);
+		});
 	}
-
-//		properties.getInterfaceClients().setDefaultScheme("https");
 
 	@Test
 	void shouldAddInterceptorWhenBaseUrlIsServiceIdUrl() {
 		Group group = new Group();
 		group.setBaseUrl("https://" + GROUP_NAME + "/path");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
-		LoadBalancerRestClientHttpServiceGroupConfigurer configurer = new LoadBalancerRestClientHttpServiceGroupConfigurer(interceptorProvider,
-				clientServiceProperties, loadBalancerClientFactory);
+		LoadBalancerRestClientHttpServiceGroupConfigurer configurer = new LoadBalancerRestClientHttpServiceGroupConfigurer(
+				interceptorProvider, clientServiceProperties, loadBalancerClientFactory);
 		TestGroups groups = new TestGroups();
 
 		configurer.configureGroups(groups);
 
 		groups.builder.requestInterceptors(interceptors -> {
-					assertThat(interceptors).hasSize(1);
-					assertThat(interceptors.get(0)
-							.getClass()).isEqualTo(DeferringLoadBalancerInterceptor.class);
-				}
-		);
+			assertThat(interceptors).hasSize(1);
+			assertThat(interceptors.get(0).getClass()).isEqualTo(DeferringLoadBalancerInterceptor.class);
+		});
 	}
 
 	@Test
@@ -104,23 +101,18 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 		Group group = new Group();
 		group.setBaseUrl("https://some-other-service/path");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
-		LoadBalancerRestClientHttpServiceGroupConfigurer configurer =
-				new LoadBalancerRestClientHttpServiceGroupConfigurer(interceptorProvider,
-						clientServiceProperties, loadBalancerClientFactory);
+		LoadBalancerRestClientHttpServiceGroupConfigurer configurer = new LoadBalancerRestClientHttpServiceGroupConfigurer(
+				interceptorProvider, clientServiceProperties, loadBalancerClientFactory);
 		TestGroups groups = new TestGroups();
 
 		configurer.configureGroups(groups);
 
-		groups.builder.requestInterceptors(
-				interceptors -> assertThat(interceptors).hasSize(0)
-		);
+		groups.builder.requestInterceptors(interceptors -> assertThat(interceptors).hasSize(0));
 	}
-
 
 	private static class TestGroups implements HttpServiceGroupConfigurer.Groups<RestClient.Builder> {
 
 		RestClient.Builder builder = RestClient.builder();
-
 
 		@Override
 		public HttpServiceGroupConfigurer.Groups<RestClient.Builder> filterByName(String... groupNames) {
@@ -139,24 +131,27 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 
 		@Override
 		public void configureClient(BiConsumer<HttpServiceGroup, RestClient.Builder> clientConfigurer) {
-			clientConfigurer.accept(new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.REST_CLIENT, new HashSet<>()), builder);
+			clientConfigurer.accept(new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.REST_CLIENT, new HashSet<>()),
+					builder);
 		}
 
 		@Override
-		public void configureProxyFactory(BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
+		public void configureProxyFactory(
+				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
 
 		}
 
 		@Override
-		public void configure(BiConsumer<HttpServiceGroup, RestClient.Builder> clientConfigurer, BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
+		public void configure(BiConsumer<HttpServiceGroup, RestClient.Builder> clientConfigurer,
+				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
 
 		}
 
 	}
 
 	private record TestGroup(String name, ClientType clientType,
-							 Set<Class<?>> httpServiceTypes)
-			implements HttpServiceGroup {
+			Set<Class<?>> httpServiceTypes) implements HttpServiceGroup {
 
 	}
+
 }
