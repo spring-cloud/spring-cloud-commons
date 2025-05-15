@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,11 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerWebClientHttpServiceGroupConfigurer;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -154,6 +156,14 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 			});
 	}
 
+	@Test
+	void loadBalancerRestClientHttpServiceGroupConfigurerPresent() {
+		applicationContextRunner.withUserConfiguration(OneRestClientBuilder.class).run(context -> {
+			assertThat(context.getBeansOfType(LoadBalancerRestClientHttpServiceGroupConfigurer.class)).hasSize(1);
+			assertThat(context.getBeansOfType(LoadBalancerWebClientHttpServiceGroupConfigurer.class)).hasSize(0);
+		});
+	}
+
 	protected abstract void assertLoadBalanced(RestClient.Builder restClientBuilder);
 
 	protected abstract void assertLoadBalanced(RestTemplate restTemplate);
@@ -178,6 +188,11 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		@Bean
 		RestClient.Builder loadBalancedRestClientBuilder() {
 			return RestClient.builder();
+		}
+
+		@Bean
+		HttpClientServiceProperties httpClientServiceProperties() {
+			return new HttpClientServiceProperties();
 		}
 
 	}

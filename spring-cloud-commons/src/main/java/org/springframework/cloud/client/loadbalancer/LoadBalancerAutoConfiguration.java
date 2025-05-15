@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
@@ -108,6 +109,15 @@ public class LoadBalancerAutoConfiguration {
 				ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
 				ApplicationContext context) {
 			return new LoadBalancerRestTemplateBuilderBeanPostProcessor<>(loadBalancerInterceptorProvider, context);
+		}
+
+		@Bean
+		@ConditionalOnBean({ HttpClientServiceProperties.class, ReactiveLoadBalancer.Factory.class })
+		@ConditionalOnMissingBean(LoadBalancerRestClientHttpServiceGroupConfigurer.class)
+		LoadBalancerRestClientHttpServiceGroupConfigurer loadBalancerRestClientHttpServiceGroupConfigurer(
+				ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
+				HttpClientServiceProperties properties) {
+			return new LoadBalancerRestClientHttpServiceGroupConfigurer(loadBalancerInterceptorProvider, properties);
 		}
 
 	}
