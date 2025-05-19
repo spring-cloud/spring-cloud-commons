@@ -72,9 +72,9 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 	}
 
 	@Test
-	void shouldAddInterceptorWhenBaseUrlIsServiceIdUrl() {
+	void shouldAddInterceptorWhenBaseUrlHasLbScheme() {
 		Group group = new Group();
-		group.setBaseUrl("https://" + GROUP_NAME + "/path");
+		group.setBaseUrl("lb://" + GROUP_NAME + "/path");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
 		LoadBalancerRestClientHttpServiceGroupConfigurer configurer = new LoadBalancerRestClientHttpServiceGroupConfigurer(
 				interceptorProvider, clientServiceProperties);
@@ -89,9 +89,9 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 	}
 
 	@Test
-	void shouldNotAddInterceptorWhenBaseUrlIsNotServiceIdUrl() {
+	void shouldNotAddInterceptorWhenBaseDoesNotHaveLbScheme() {
 		Group group = new Group();
-		group.setBaseUrl("https://some-other-service/path");
+		group.setBaseUrl("http://" + GROUP_NAME + "/path");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
 		LoadBalancerRestClientHttpServiceGroupConfigurer configurer = new LoadBalancerRestClientHttpServiceGroupConfigurer(
 				interceptorProvider, clientServiceProperties);

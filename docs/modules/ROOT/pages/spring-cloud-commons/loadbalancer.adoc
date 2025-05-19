@@ -204,7 +204,7 @@ WARNING: If using any of the Service Discovery-backed suppliers, adding this hea
 from the Service Registry.
 
 TIP: The `HealthCheckServiceInstanceListSupplier` relies on having updated instances provided by a delegate flux. In the rare cases when you want to use a delegate that does not refresh the instances, even though the list of instances may change (such as the `DiscoveryClientServiceInstanceListSupplier` provided by us), you can set `spring.cloud.loadbalancer.health-check.refetch-instances` to `true` to have the instance list refreshed by the `HealthCheckServiceInstanceListSupplier`. You can then also adjust the refretch intervals by modifying the value of `spring.cloud.loadbalancer.health-check.refetch-instances-interval` and opt to disable the additional healthcheck repetitions by setting `spring.cloud.loadbalancer.health-check.repeat-health-check` to `false` as every instances refetch
-  will also trigger a healthcheck.
+will also trigger a healthcheck.
 
 `HealthCheckServiceInstanceListSupplier` uses properties prefixed with
 `spring.cloud.loadbalancer.health-check`. You can set the `initialDelay` and `interval`
@@ -561,7 +561,7 @@ Since `5.0.0`, Spring Cloud LoadBalancer supports https://docs.spring.io/spring-
 For each Interface Client group, if the group `baseUrl` (defined under the
 `spring.http.client.service.group.[groupName].base-url` property) is `null`, a `serviceId`-based URL for load-balancing is set up as the `baseUrl`, with `serviceId` resolved from the Interface Client `groupName`.
 
-If the group `baseUrl` is `null` or it is already a `serviceId`-based URL, a
+If the group `baseUrl` is `null` or its scheme is set to `lb`, a
 `DeferringLoadBalancerInterceptor` instance is picked from the application context for blocking scenarios, and a `DeferringLoadBalancerExchangeFilterFunction` instance for reactive scenarios, and is added to the group's `RestClient.Builder` or `WebClient.Builder` if available, allowing for the requests to be load-balanced.
 
 For example, in an app with the following Interface Clients configuration:
@@ -579,10 +579,11 @@ public class HttpVerificationClientApplication {
 }
 ----
 
-If the `spring.http.client.service.group.verificationClient.base-url` property is not set, it will be automatically set to `http://verificationClient`. The default scheme (`http`) is used initially; however, if a secure `ServiceInstance` is selected through load-balancing, it will be changed to `https`.
+If the `spring.http.client.service.group.verificationClient.base-url` property is not set, it will be automatically set to `http://verificationClient`.
+The default scheme (`http`) is used initially; however, if a secure `ServiceInstance` is selected through load-balancing, it will be changed to `https`.
 
-If the `spring.http.client.service.group.verificationClient.base-url` property is set to a URL that uses the `groupName` / `serviceId` as the host (for example, `https://verificationClient/path`), it will be left unchanged. In both of these cases, either a `DeferringLoadBalancerInterceptor` or `DeferringLoadBalancerExchangeFilterFunction` will be added to the group's client builder, enabling the requests to be load-balanced.
+If the `spring.http.client.service.group.verificationClient.base-url` property is set to a URL that has the `lb` scheme, (for example, `lb://verificationClient/path`), it will be used with `http` being initially set as the default scheme.
+If a secure `ServiceInstance` is selected through load-balancing, the scheme will be changed to `https`.
+In both of these cases, either a `DeferringLoadBalancerInterceptor` or `DeferringLoadBalancerExchangeFilterFunction` will be added to the group's client builder, enabling the requests to be load-balanced.
 
-If the `spring.http.client.service.group.verificationClient.base-url` property is set to a URL that does not have `verificationClient` as the host (for example, `http://someOtherHost/path`), no load-balancer integration will be applied.
-
-TIP: To use a different default scheme instead of `http` (for example, `ws`, which would be converted to `wss` if a secure `ServiceInstance` is selected), set the `spring.http.client.service.group.verificationClient.base-url` property with the desired scheme.
+If the `spring.http.client.service.group.verificationClient.base-url` property is set to a URL that does not have the scheme set to `lb`, (for example, `lb://verificationClient/path`), no load-balancer integration will be applied.

@@ -25,9 +25,10 @@ import org.springframework.boot.autoconfigure.http.client.service.HttpClientServ
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.DEFAULT_SCHEME;
 import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.constructInterfaceClientsBaseUrl;
-import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.isServiceIdUrl;
 
 /**
  * Load-balancer-specific {@link RestClientHttpServiceGroupConfigurer} implementation. If
@@ -71,12 +72,16 @@ public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestCli
 		groups.configureClient((group, builder) -> {
 			String groupName = group.name();
 			HttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
-			if (groupProperties == null || groupProperties.getBaseUrl() == null) {
+			String baseUrlString = groupProperties == null ? null : groupProperties.getBaseUrl();
+			URI existingBaseUrl = baseUrlString == null ? null : URI.create(baseUrlString);
+			if (existingBaseUrl == null) {
 				URI baseUrl = constructBaseUrl(groupName);
 				builder.baseUrl(baseUrl);
 				builder.requestInterceptor(loadBalancerInterceptor);
 			}
-			else if (isServiceIdUrl(groupProperties.getBaseUrl(), groupName)) {
+			else if ("lb".equalsIgnoreCase(existingBaseUrl.getScheme())) {
+				URI baseUrl = UriComponentsBuilder.fromUri(existingBaseUrl).scheme(DEFAULT_SCHEME).build().toUri();
+				builder.baseUrl(baseUrl);
 				builder.requestInterceptor(loadBalancerInterceptor);
 			}
 		});

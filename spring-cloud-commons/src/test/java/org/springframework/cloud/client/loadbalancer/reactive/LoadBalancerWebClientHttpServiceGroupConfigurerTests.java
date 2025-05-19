@@ -73,9 +73,9 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 	}
 
 	@Test
-	void shouldAddInterceptorWhenBaseUrlIsServiceIdUrl() {
+	void shouldAddInterceptorWhenBaseUrlHasLbScheme() {
 		ReactiveHttpClientServiceProperties.Group group = new ReactiveHttpClientServiceProperties.Group();
-		group.setBaseUrl("https://" + GROUP_NAME + "/path");
+		group.setBaseUrl("lb://" + GROUP_NAME + "/path");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
 		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(
 				exchangeFilterFunctionProvider, clientServiceProperties);
@@ -90,9 +90,9 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 	}
 
 	@Test
-	void shouldNotAddInterceptorWhenBaseUrlIsNotServiceIdUrl() {
+	void shouldNotAddInterceptorWhenBaseDoesNotHaveLbScheme() {
 		ReactiveHttpClientServiceProperties.Group group = new ReactiveHttpClientServiceProperties.Group();
-		group.setBaseUrl("https://some-other-service/path");
+		group.setBaseUrl("https://" + GROUP_NAME + "/path");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
 		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(
 				exchangeFilterFunctionProvider, clientServiceProperties);
