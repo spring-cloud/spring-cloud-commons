@@ -25,9 +25,10 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.DEFAULT_SCHEME;
 import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.constructInterfaceClientsBaseUrl;
-import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools.isServiceIdUrl;
 
 /**
  * Load-balancer-specific {@link WebClientHttpServiceGroupConfigurer} implementation. If
@@ -73,12 +74,19 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 			String groupName = group.name();
 			ReactiveHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup()
 				.get(groupName);
-			if (groupProperties == null || groupProperties.getBaseUrl() == null) {
+			String baseUrlString = groupProperties == null ? null : groupProperties.getBaseUrl();
+			URI existingBaseUrl = baseUrlString == null ? null : URI.create(baseUrlString);
+			if (existingBaseUrl == null) {
 				URI baseUrl = constructBaseUrl(groupName);
 				builder.baseUrl(String.valueOf(baseUrl));
 				builder.filter(loadBalancerFilterFunction);
 			}
-			else if (isServiceIdUrl(groupProperties.getBaseUrl(), groupName)) {
+			else if ("lb".equalsIgnoreCase(existingBaseUrl.getScheme())) {
+				String baseUrl = UriComponentsBuilder.fromUri(existingBaseUrl)
+					.scheme(DEFAULT_SCHEME)
+					.build()
+					.toUriString();
+				builder.baseUrl(baseUrl);
 				builder.filter(loadBalancerFilterFunction);
 			}
 		});

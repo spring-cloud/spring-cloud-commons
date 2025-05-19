@@ -19,19 +19,13 @@ package org.springframework.cloud.client.loadbalancer;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.web.util.InvalidUrlException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link LoadBalancerUriTools}.
@@ -187,29 +181,6 @@ class LoadBalancerUriToolsTests {
 		assertThat(reconstructed.getRawFragment()).isEqualTo(original.getRawFragment());
 		assertThat(reconstructed.getHost()).isEqualTo(serviceInstance.getHost());
 		assertThat(reconstructed.getPort()).isEqualTo(serviceInstance.getPort());
-	}
-
-	@ParameterizedTest(name = "{index} => url={0}, serviceId={1}, expected={2}")
-	@MethodSource("provideUrlAndServiceIdForIsServiceIdUrl")
-	void verifyServiceIdUrl(String url, String serviceId, boolean expected) {
-		assertThat(LoadBalancerUriTools.isServiceIdUrl(url, serviceId)).isEqualTo(expected);
-	}
-
-	@Test
-	void verifyServiceIdIncorrectUrl() {
-		assertThatExceptionOfType(InvalidUrlException.class).isThrownBy(() -> {
-			URI baseUrl = UriComponentsBuilder.fromUriString("https://:testService/xxx").build().toUri();
-
-			LoadBalancerUriTools.isServiceIdUrl(String.valueOf(baseUrl), null);
-		});
-
-	}
-
-	private static Stream<Arguments> provideUrlAndServiceIdForIsServiceIdUrl() {
-		return Stream.of(org.junit.jupiter.params.provider.Arguments.of("https://testService/xxx", "testService", true),
-				org.junit.jupiter.params.provider.Arguments.of("https://test/xxx", "testService", false),
-				org.junit.jupiter.params.provider.Arguments.of("https://testService/xxx", null, false),
-				org.junit.jupiter.params.provider.Arguments.of(null, "testService", false));
 	}
 
 }
