@@ -18,8 +18,6 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -117,26 +115,20 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 		}
 
 		@Override
-		public void configureClient(Consumer<RestClient.Builder> clientConfigurer) {
+		public void forEachClient(HttpServiceGroupConfigurer.ForClient<RestClient.Builder> configurer) {
 
 		}
 
 		@Override
-		public void configureClient(BiConsumer<HttpServiceGroup, RestClient.Builder> clientConfigurer) {
-			clientConfigurer.accept(new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.REST_CLIENT, new HashSet<>()),
-					builder);
-		}
-
-		@Override
-		public void configureProxyFactory(
-				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
+		public void forEachProxyFactory(HttpServiceGroupConfigurer.ForProxyFactory configurer) {
 
 		}
 
 		@Override
-		public void configure(BiConsumer<HttpServiceGroup, RestClient.Builder> clientConfigurer,
-				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
-
+		public void forEachGroup(HttpServiceGroupConfigurer.ForGroup<RestClient.Builder> groupConfigurer) {
+			groupConfigurer.configureGroup(
+					new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.REST_CLIENT, new HashSet<>()), builder,
+					HttpServiceProxyFactory.builder());
 		}
 
 	}

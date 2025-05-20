@@ -18,8 +18,6 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -107,6 +105,7 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 
 		WebClient.Builder builder = WebClient.builder();
 
+		//
 		@Override
 		public HttpServiceGroupConfigurer.Groups<WebClient.Builder> filterByName(String... groupNames) {
 			throw new UnsupportedOperationException("Please, implement me.");
@@ -118,26 +117,20 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 		}
 
 		@Override
-		public void configureClient(Consumer<WebClient.Builder> clientConfigurer) {
+		public void forEachClient(HttpServiceGroupConfigurer.ForClient<WebClient.Builder> configurer) {
 
 		}
 
 		@Override
-		public void configureClient(BiConsumer<HttpServiceGroup, WebClient.Builder> clientConfigurer) {
-			clientConfigurer.accept(new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.WEB_CLIENT, new HashSet<>()),
-					builder);
-		}
-
-		@Override
-		public void configureProxyFactory(
-				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
+		public void forEachProxyFactory(HttpServiceGroupConfigurer.ForProxyFactory configurer) {
 
 		}
 
 		@Override
-		public void configure(BiConsumer<HttpServiceGroup, WebClient.Builder> clientConfigurer,
-				BiConsumer<HttpServiceGroup, HttpServiceProxyFactory.Builder> proxyFactoryConfigurer) {
-
+		public void forEachGroup(HttpServiceGroupConfigurer.ForGroup<WebClient.Builder> groupConfigurer) {
+			groupConfigurer.configureGroup(
+					new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.WEB_CLIENT, new HashSet<>()), builder,
+					HttpServiceProxyFactory.builder());
 		}
 
 	}

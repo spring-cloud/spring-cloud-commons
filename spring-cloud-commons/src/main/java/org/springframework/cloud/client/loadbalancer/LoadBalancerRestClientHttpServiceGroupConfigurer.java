@@ -34,11 +34,10 @@ import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools
  * Load-balancer-specific {@link RestClientHttpServiceGroupConfigurer} implementation. If
  * the group {@code baseUrl} is {@code null}, sets up a {@code baseUrl} with LoadBalancer
  * {@code serviceId} -resolved from Interface Client {@code groupName} set as
- * {@code host}. If the group {@code baseUrl} is {@code null} or
- * {@link LoadBalancerUriTools#isServiceIdUrl(String, String)}, a
- * {@link DeferringLoadBalancerInterceptor} instance picked from application context is
- * added to the group's {@link RestClient.Builder} if available, allowing for the requests
- * to be load-balanced.
+ * {@code host}. If the group {@code baseUrl} is {@code null} or has {@code lb} set as its
+ * scheme, a {@link DeferringLoadBalancerInterceptor} instance picked from application
+ * context is added to the group's {@link RestClient.Builder} if available, allowing for
+ * the requests to be load-balanced.
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
@@ -69,23 +68,23 @@ public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestCli
 			throw new IllegalStateException(
 					DeferringLoadBalancerInterceptor.class.getSimpleName() + " bean not available.");
 		}
-		groups.configureClient((group, builder) -> {
+
+		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
 			HttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
 			String baseUrlString = groupProperties == null ? null : groupProperties.getBaseUrl();
 			URI existingBaseUrl = baseUrlString == null ? null : URI.create(baseUrlString);
 			if (existingBaseUrl == null) {
 				URI baseUrl = constructBaseUrl(groupName);
-				builder.baseUrl(baseUrl);
-				builder.requestInterceptor(loadBalancerInterceptor);
+				clientBuilder.baseUrl(baseUrl);
+				clientBuilder.requestInterceptor(loadBalancerInterceptor);
 			}
 			else if ("lb".equalsIgnoreCase(existingBaseUrl.getScheme())) {
 				URI baseUrl = UriComponentsBuilder.fromUri(existingBaseUrl).scheme(DEFAULT_SCHEME).build().toUri();
-				builder.baseUrl(baseUrl);
-				builder.requestInterceptor(loadBalancerInterceptor);
+				clientBuilder.baseUrl(baseUrl);
+				clientBuilder.requestInterceptor(loadBalancerInterceptor);
 			}
 		});
-
 	}
 
 	@Override

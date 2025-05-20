@@ -21,7 +21,6 @@ import java.net.URI;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.http.client.reactive.service.ReactiveHttpClientServiceProperties;
 import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
-import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
@@ -34,11 +33,10 @@ import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools
  * Load-balancer-specific {@link WebClientHttpServiceGroupConfigurer} implementation. If
  * the group {@code baseUrl} is {@code null}, sets up a {@code baseUrl} with LoadBalancer
  * {@code serviceId} -resolved from Interface Client {@code groupName} set as
- * {@code host}. If the group {@code baseUrl} is {@code null} or
- * {@link LoadBalancerUriTools#isServiceIdUrl(String, String)}, a
- * {@link DeferringLoadBalancerExchangeFilterFunction} instance picked from application
- * context is added to the group's {@link WebClient.Builder} if available, allowing for
- * the requests to be load-balanced.
+ * {@code host}. If the group {@code baseUrl} is {@code null} or has {@code lb} set as its
+ * scheme, a {@link DeferringLoadBalancerExchangeFilterFunction} instance picked from
+ * application context is added to the group's {@link WebClient.Builder} if available,
+ * allowing for the requests to be load-balanced.
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
@@ -70,7 +68,7 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 			throw new IllegalStateException(
 					DeferringLoadBalancerExchangeFilterFunction.class.getSimpleName() + " bean not available.");
 		}
-		groups.configureClient((group, builder) -> {
+		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
 			ReactiveHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup()
 				.get(groupName);
@@ -78,16 +76,16 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 			URI existingBaseUrl = baseUrlString == null ? null : URI.create(baseUrlString);
 			if (existingBaseUrl == null) {
 				URI baseUrl = constructBaseUrl(groupName);
-				builder.baseUrl(String.valueOf(baseUrl));
-				builder.filter(loadBalancerFilterFunction);
+				clientBuilder.baseUrl(String.valueOf(baseUrl));
+				clientBuilder.filter(loadBalancerFilterFunction);
 			}
 			else if ("lb".equalsIgnoreCase(existingBaseUrl.getScheme())) {
 				String baseUrl = UriComponentsBuilder.fromUri(existingBaseUrl)
 					.scheme(DEFAULT_SCHEME)
 					.build()
 					.toUriString();
-				builder.baseUrl(baseUrl);
-				builder.filter(loadBalancerFilterFunction);
+				clientBuilder.baseUrl(baseUrl);
+				clientBuilder.filter(loadBalancerFilterFunction);
 			}
 		});
 	}
