@@ -115,18 +115,18 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 		}
 
 		@Override
-		public void forEachClient(HttpServiceGroupConfigurer.ForClient<RestClient.Builder> configurer) {
+		public void forEachClient(HttpServiceGroupConfigurer.ClientCallback<RestClient.Builder> configurer) {
 
 		}
 
 		@Override
-		public void forEachProxyFactory(HttpServiceGroupConfigurer.ForProxyFactory configurer) {
+		public void forEachProxyFactory(HttpServiceGroupConfigurer.ProxyFactoryCallback configurer) {
 
 		}
 
 		@Override
-		public void forEachGroup(HttpServiceGroupConfigurer.ForGroup<RestClient.Builder> groupConfigurer) {
-			groupConfigurer.configureGroup(
+		public void forEachGroup(HttpServiceGroupConfigurer.GroupCallback<RestClient.Builder> groupConfigurer) {
+			groupConfigurer.withGroup(
 					new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.REST_CLIENT, new HashSet<>()), builder,
 					HttpServiceProxyFactory.builder());
 		}

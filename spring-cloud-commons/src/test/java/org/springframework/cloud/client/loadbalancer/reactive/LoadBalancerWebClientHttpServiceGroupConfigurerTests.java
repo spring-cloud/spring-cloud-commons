@@ -117,18 +117,18 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 		}
 
 		@Override
-		public void forEachClient(HttpServiceGroupConfigurer.ForClient<WebClient.Builder> configurer) {
+		public void forEachClient(HttpServiceGroupConfigurer.ClientCallback<WebClient.Builder> configurer) {
 
 		}
 
 		@Override
-		public void forEachProxyFactory(HttpServiceGroupConfigurer.ForProxyFactory configurer) {
+		public void forEachProxyFactory(HttpServiceGroupConfigurer.ProxyFactoryCallback configurer) {
 
 		}
 
 		@Override
-		public void forEachGroup(HttpServiceGroupConfigurer.ForGroup<WebClient.Builder> groupConfigurer) {
-			groupConfigurer.configureGroup(
+		public void forEachGroup(HttpServiceGroupConfigurer.GroupCallback<WebClient.Builder> groupConfigurer) {
+			groupConfigurer.withGroup(
 					new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.WEB_CLIENT, new HashSet<>()), builder,
 					HttpServiceProxyFactory.builder());
 		}
