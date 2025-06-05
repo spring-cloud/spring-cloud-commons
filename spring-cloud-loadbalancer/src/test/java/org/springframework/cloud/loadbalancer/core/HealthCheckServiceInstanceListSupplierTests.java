@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -703,7 +703,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 	}
 
 	@Test
-	void shouldCheckUseProvidedPortForHealthCheckRequest() {
+	void shouldCheckUserProvidedPortForHealthCheckRequest() {
 		Throwable exception = catchThrowable(() -> {
 			String serviceId = "ignored-service";
 			properties.getHealthCheck().setPort(8888);
@@ -718,7 +718,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			listSupplier.isAlive(serviceInstance).block();
 		});
 
-		assertThat(exception).hasMessageContaining("Connection refused: /127.0.0.1:888");
+		assertThat(exception).hasMessageContaining("Connection refused: /127.0.0.1:8888");
 	}
 
 	private static Stream<Arguments> healthCheckFunctions() {
