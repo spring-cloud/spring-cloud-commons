@@ -1,7 +1,7 @@
 [[introduction]]
 = Introduction
 
-https://pivotal.io/platform-as-a-service/migrating-to-cloud-native-application-architectures-ebook[Cloud Native] is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development.
+Cloud Native is a style of application development that encourages easy adoption of best practices in the areas of continuous delivery and value-driven development.
 A related discipline is that of building https://12factor.net/[12-factor Applications], in which development practices are aligned with delivery and operations goals -- for instance, by using declarative programming and management and monitoring.
 Spring Cloud facilitates these styles of development in a number of specific ways.
  The starting point is a set of features to which all components in a distributed system need easy access.
