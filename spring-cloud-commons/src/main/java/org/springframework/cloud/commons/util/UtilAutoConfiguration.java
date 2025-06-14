@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(value = "spring.cloud.util.enabled", matchIfMissing = true)
 @AutoConfigureOrder(0)
-@EnableConfigurationProperties
+@EnableConfigurationProperties(InetUtilsProperties.class)
 public class UtilAutoConfiguration {
-
-	@Bean
-	public InetUtilsProperties inetUtilsProperties() {
-		return new InetUtilsProperties();
-	}
 
 	@Bean
 	@ConditionalOnMissingBean
