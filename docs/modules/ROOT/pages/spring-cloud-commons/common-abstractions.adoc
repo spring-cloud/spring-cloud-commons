@@ -110,6 +110,7 @@ are using.
 
 By default, the `ServiceRegistry` implementation auto-registers the running service.
 To disable that behavior, you can set:
+
 * `@EnableDiscoveryClient(autoRegister=false)` to permanently disable auto-registration.
 * `spring.cloud.service-registry.auto-registration.enabled=false` to disable the behavior through configuration.
 
