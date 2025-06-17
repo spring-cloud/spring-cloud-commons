@@ -664,7 +664,7 @@ public class MyClass {
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The `LoadBalancerClient` is used to create a full physical address.
 
-WARN: This approach is now deprecated.
+WARNING: This approach is now deprecated.
 We suggest that you use xref:spring-cloud-commons/common-abstractions.adoc#webflux-with-reactive-loadbalancer[WebFlux with reactive Load-Balancer]
 instead.
 

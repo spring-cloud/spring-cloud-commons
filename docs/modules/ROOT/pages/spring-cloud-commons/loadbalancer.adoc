@@ -72,7 +72,7 @@ See the xref:spring-cloud-commons/loadbalancer.adoc#loadbalancer-cache-configura
 If you are using Caffeine, you can also override the default Caffeine Cache setup for the LoadBalancer by passing your own https://static.javadoc.io/com.github.ben-manes.caffeine/caffeine/2.2.2/com/github/benmanes/caffeine/cache/CaffeineSpec.html[Caffeine Specification]
 in the `spring.cloud.loadbalancer.cache.caffeine.spec` property.
 
-WARN: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including xref:spring-cloud-commons/loadbalancer.adoc#loadbalancer-cache-configuration[General LoadBalancer Cache Configuration] fields, such as `ttl` and `capacity`.
+WARNING: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including xref:spring-cloud-commons/loadbalancer.adoc#loadbalancer-cache-configuration[General LoadBalancer Cache Configuration] fields, such as `ttl` and `capacity`.
 
 [[default-loadbalancer-cache-implementation]]
 === Default LoadBalancer Cache Implementation
