@@ -31,6 +31,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.actuator.FeaturesEndpoint;
 import org.springframework.cloud.client.actuator.HasFeatures;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerRestClientHttpServiceGroupConfigurer;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicator;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicatorProperties;
@@ -39,6 +42,7 @@ import org.springframework.cloud.client.discovery.health.DiscoveryHealthIndicato
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Cloud Commons Client.
@@ -49,7 +53,21 @@ import org.springframework.context.annotation.Configuration;
  * @author Omer Naci Soydemir
  */
 @Configuration(proxyBeanMethods = false)
+@EnableConfigurationProperties(CloudHttpClientServiceProperties.class)
 public class CommonsClientAutoConfiguration {
+
+	// FIXME: move instantiation to`spring-cloud-circuitbreaker` project
+	@ConditionalOnClass({ CircuitBreaker.class, RestClientHttpServiceGroupConfigurer.class })
+	@ConditionalOnBean(CircuitBreakerFactory.class)
+	protected static class CircuitBreakerInterfaceClientsAutoConfiguration {
+
+		@Bean
+		public CircuitBreakerRestClientHttpServiceGroupConfigurer circuitBreakerRestClientConfigurer(
+				CloudHttpClientServiceProperties properties, CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
+			return new CircuitBreakerRestClientHttpServiceGroupConfigurer(properties, circuitBreakerFactory);
+		}
+
+	}
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(HealthIndicator.class)
