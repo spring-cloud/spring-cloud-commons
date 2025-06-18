@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,12 @@ import java.util.function.Supplier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.boot.BootstrapContext;
-import org.springframework.boot.BootstrapRegistry;
 import org.springframework.boot.ConfigurableBootstrapContext;
 import org.springframework.boot.DefaultBootstrapContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.boot.env.EnvironmentPostProcessorsFactory;
 import org.springframework.boot.logging.DeferredLogFactory;
-import org.springframework.boot.util.Instantiator;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.config.ContextRefreshedWithApplicationEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
@@ -38,11 +36,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
-import org.springframework.core.io.support.SpringFactoriesLoader;
 
 /**
  * @author Dave Syer
  * @author Venil Noronha
+ * @author Yanming Zhou
  */
 public class ConfigDataContextRefresher extends ContextRefresher
 		implements ApplicationListener<ContextRefreshedWithApplicationEvent> {
@@ -77,17 +75,10 @@ public class ConfigDataContextRefresher extends ContextRefresher
 		// decrypt happen after refresh. The hard coded call to
 		// ConfigDataEnvironmentPostProcessor.applyTo() is now automated as well.
 		DeferredLogFactory logFactory = new PassthruDeferredLogFactory();
-		List<String> classNames = SpringFactoriesLoader.loadFactoryNames(EnvironmentPostProcessor.class,
-				getClass().getClassLoader());
-		Instantiator<EnvironmentPostProcessor> instantiator = new Instantiator<>(EnvironmentPostProcessor.class,
-				(parameters) -> {
-					parameters.add(DeferredLogFactory.class, logFactory);
-					parameters.add(Log.class, logFactory::getLog);
-					parameters.add(ConfigurableBootstrapContext.class, bootstrapContext);
-					parameters.add(BootstrapContext.class, bootstrapContext);
-					parameters.add(BootstrapRegistry.class, bootstrapContext);
-				});
-		List<EnvironmentPostProcessor> postProcessors = instantiator.instantiate(classNames);
+		EnvironmentPostProcessorsFactory postProcessorsFactory = EnvironmentPostProcessorsFactory
+			.fromSpringFactories(getClass().getClassLoader());
+		List<EnvironmentPostProcessor> postProcessors = postProcessorsFactory.getEnvironmentPostProcessors(logFactory,
+				bootstrapContext);
 		for (EnvironmentPostProcessor postProcessor : postProcessors) {
 			postProcessor.postProcessEnvironment(environment, application);
 		}
