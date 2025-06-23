@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -60,6 +61,8 @@ public final class CircuitBreakerRestClientAdapter implements HttpExchangeAdapte
 
 	private final Class<?> fallbacks;
 
+	private Object fallbackProxy;
+
 	private CircuitBreakerRestClientAdapter(RestClient restClient, CircuitBreaker circuitBreaker,
 			// TODO: generics
 			Class<?> fallbacks) {
@@ -81,7 +84,8 @@ public final class CircuitBreakerRestClientAdapter implements HttpExchangeAdapte
 
 	@Override
 	public HttpHeaders exchangeForHeaders(HttpRequestValues values) {
-		return (HttpHeaders) circuitBreaker.run(() -> newRequest(values).retrieve().toBodilessEntity().getHeaders(),
+		return (HttpHeaders) circuitBreaker.run(() -> newRequest(values).retrieve()
+						.toBodilessEntity().getHeaders(),
 				handleThrowable(values));
 	}
 
@@ -98,7 +102,8 @@ public final class CircuitBreakerRestClientAdapter implements HttpExchangeAdapte
 
 	@Override
 	public ResponseEntity<Void> exchangeForBodilessEntity(HttpRequestValues values) {
-		return (ResponseEntity<Void>) circuitBreaker.run(() -> newRequest(values).retrieve().toBodilessEntity(),
+		return (ResponseEntity<Void>) circuitBreaker.run(() -> newRequest(values).retrieve()
+						.toBodilessEntity(),
 				handleThrowable(values));
 	}
 
@@ -108,9 +113,9 @@ public final class CircuitBreakerRestClientAdapter implements HttpExchangeAdapte
 		return (ResponseEntity<T>) circuitBreaker.run(() -> {
 			if (bodyType.getType().equals(InputStream.class)) {
 				return newRequest(values)
-					.exchangeForRequiredValue((request, response) -> ResponseEntity.status(response.getStatusCode())
-						.headers(response.getHeaders())
-						.body(response.getBody()), false);
+						.exchangeForRequiredValue((request, response) -> ResponseEntity.status(response.getStatusCode())
+								.headers(response.getHeaders())
+								.body(response.getBody()), false);
 			}
 			return newRequest(values).retrieve().toEntity(bodyType);
 		}, handleThrowable(values));
@@ -146,10 +151,11 @@ public final class CircuitBreakerRestClientAdapter implements HttpExchangeAdapte
 
 		if (!values.getCookies().isEmpty()) {
 			List<String> cookies = new ArrayList<>();
-			values.getCookies().forEach((name, cookieValues) -> cookieValues.forEach(value -> {
-				HttpCookie cookie = new HttpCookie(name, value);
-				cookies.add(cookie.toString());
-			}));
+			values.getCookies()
+					.forEach((name, cookieValues) -> cookieValues.forEach(value -> {
+						HttpCookie cookie = new HttpCookie(name, value);
+						cookies.add(cookie.toString());
+					}));
 			bodySpec.header(HttpHeaders.COOKIE, String.join("; ", cookies));
 		}
 
@@ -181,7 +187,7 @@ public final class CircuitBreakerRestClientAdapter implements HttpExchangeAdapte
 		}
 		String methodName = String.valueOf(attributes.get(CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME));
 		Class<?>[] parameterTypes = (Class<?>[]) attributes
-			.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
+				.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
 		Method method;
 		try {
 			method = fallbacks.getMethod(methodName, parameterTypes);
@@ -205,9 +211,10 @@ public final class CircuitBreakerRestClientAdapter implements HttpExchangeAdapte
 				if (fallbackMethod == null) {
 					throw new NoFallbackAvailableException("No fallback available.", throwable);
 				}
-				// FIXME: create proxy to invoke method
-				return fallbackMethod.invoke(this,
-						attributes.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME));
+				Object fallbackProxy = getFallbackProxy();
+				Object[] arguments = (Object[]) attributes
+						.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
+				return fallbackMethod.invoke(fallbackProxy, arguments);
 			}
 			catch (IllegalAccessException | InvocationTargetException e) {
 				if (LOG.isErrorEnabled()) {
@@ -216,7 +223,22 @@ public final class CircuitBreakerRestClientAdapter implements HttpExchangeAdapte
 				}
 				throw new RuntimeException(e);
 			}
+			// TODO
+			catch (InstantiationException | NoSuchMethodException e) {
+				throw new RuntimeException(e);
+			}
 		};
+	}
+
+	private Object getFallbackProxy()
+			throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		if (fallbackProxy == null) {
+			Object target = fallbacks.getConstructor().newInstance();
+			ProxyFactory proxyFactory = new ProxyFactory(target);
+			proxyFactory.setProxyTargetClass(true);
+			fallbackProxy = proxyFactory.getProxy();
+		}
+		return fallbackProxy;
 	}
 
 	/**
