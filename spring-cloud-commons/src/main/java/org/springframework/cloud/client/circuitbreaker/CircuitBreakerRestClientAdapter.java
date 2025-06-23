@@ -177,7 +177,6 @@ public final class CircuitBreakerRestClientAdapter implements HttpExchangeAdapte
 				bodySpec.body(body);
 			}
 		}
-
 		return bodySpec;
 	}
 
@@ -223,8 +222,17 @@ public final class CircuitBreakerRestClientAdapter implements HttpExchangeAdapte
 				}
 				throw new RuntimeException(e);
 			}
-			// TODO
-			catch (InstantiationException | NoSuchMethodException e) {
+			catch (NoSuchMethodException e) {
+				if (LOG.isErrorEnabled()) {
+					LOG.error("Default constructor not found in: " + fallbacks.getName()
+							+ ". Fallback class needs to have a default constructor", e);
+				}
+				throw new RuntimeException(e);
+			}
+			catch (InstantiationException e) {
+				if (LOG.isErrorEnabled()) {
+					LOG.error("Could not instantiate fallback class: " + fallbacks.getName(), e);
+				}
 				throw new RuntimeException(e);
 			}
 		};
