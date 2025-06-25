@@ -30,6 +30,7 @@ import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.loadbalancer.core.RandomLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
@@ -59,6 +60,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author BaoLin Zhu
  * @author changjin wei(魏昌进)
  * @author Zhuozhi Ji
+ * @author Haotian Zhang
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnDiscoveryEnabled
@@ -68,10 +70,21 @@ public class LoadBalancerClientConfiguration {
 
 	@Bean
 	@ConditionalOnMissingBean
+	@Conditional(DefaultStrategyCondition.class)
 	public ReactorLoadBalancer<ServiceInstance> reactorServiceInstanceLoadBalancer(Environment environment,
 			LoadBalancerClientFactory loadBalancerClientFactory) {
 		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
 		return new RoundRobinLoadBalancer(
+				loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	@Conditional(RandomStrategyCondition.class)
+	public ReactorLoadBalancer<ServiceInstance> randomLoadBalancer(Environment environment,
+			LoadBalancerClientFactory loadBalancerClientFactory) {
+		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
+		return new RandomLoadBalancer(
 				loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name);
 	}
 
@@ -305,6 +318,26 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier retryAwareDiscoveryClientServiceInstanceListSupplier(
 				ServiceInstanceListSupplier delegate) {
 			return new RetryAwareServiceInstanceListSupplier(delegate);
+		}
+
+	}
+
+	static class DefaultStrategyCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"strategies", "default");
+		}
+
+	}
+
+	static class RandomStrategyCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"strategies", "random");
 		}
 
 	}
