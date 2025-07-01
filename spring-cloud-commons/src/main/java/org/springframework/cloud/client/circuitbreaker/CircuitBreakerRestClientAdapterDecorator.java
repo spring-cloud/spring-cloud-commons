@@ -18,8 +18,10 @@ package org.springframework.cloud.client.circuitbreaker;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,15 +44,15 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 
 	private final CircuitBreaker circuitBreaker;
 
-	private final Class<?> fallbacks;
+	private final Class<?> fallbackClass;
 
-	private Object fallbackProxy;
+	private volatile Object fallbackProxy;
 
 	public CircuitBreakerRestClientAdapterDecorator(HttpExchangeAdapter delegate, CircuitBreaker circuitBreaker,
-			Class<?> fallbacks) {
+			Class<?> fallbackClass) {
 		super(delegate);
 		this.circuitBreaker = circuitBreaker;
-		this.fallbacks = fallbacks;
+		this.fallbackClass = fallbackClass;
 	}
 
 	@Override
@@ -58,34 +60,38 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 		circuitBreaker.run(() -> {
 			super.exchange(requestValues);
 			return null;
-		}, handleThrowable(requestValues));
+		}, createFallbackHandler(requestValues));
 	}
 
 	@Override
 	public HttpHeaders exchangeForHeaders(HttpRequestValues values) {
-		return (HttpHeaders) circuitBreaker.run(() -> super.exchangeForHeaders(values), handleThrowable(values));
+		Object result = circuitBreaker.run(() -> super.exchangeForHeaders(values), createFallbackHandler(values));
+		return castIfPossible(result);
 	}
 
 	@Override
 	public <T> @Nullable T exchangeForBody(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
-		Object result = circuitBreaker.run(() -> super.exchangeForBody(values, bodyType), handleThrowable(values));
-		return handleCast(result);
+		Object result = circuitBreaker.run(() -> super.exchangeForBody(values, bodyType),
+				createFallbackHandler(values));
+		return castIfPossible(result);
 	}
 
 	@Override
 	public ResponseEntity<Void> exchangeForBodilessEntity(HttpRequestValues values) {
-		Object result = circuitBreaker.run(() -> super.exchangeForBodilessEntity(values), handleThrowable(values));
-		return handleCast(result);
+		Object result = circuitBreaker.run(() -> super.exchangeForBodilessEntity(values),
+				createFallbackHandler(values));
+		return castIfPossible(result);
 	}
 
 	@Override
 	public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
-		Object result = circuitBreaker.run(() -> super.exchangeForEntity(values, bodyType), handleThrowable(values));
-		return handleCast(result);
+		Object result = circuitBreaker.run(() -> super.exchangeForEntity(values, bodyType),
+				createFallbackHandler(values));
+		return castIfPossible(result);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T handleCast(Object result) {
+	private <T> T castIfPossible(Object result) {
 		try {
 			return (T) result;
 		}
@@ -97,71 +103,84 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 		}
 	}
 
-	private Function<Throwable, Object> handleThrowable(HttpRequestValues requestValues) {
+	private Function<Throwable, Object> createFallbackHandler(HttpRequestValues requestValues) {
 		Map<String, Object> attributes = requestValues.getAttributes();
-		Method fallbackMethod = getFallbackMethod(attributes);
+		Method fallback = resolveFallbackMethod(attributes, false);
+		Method fallbackWithCause = resolveFallbackMethod(attributes, true);
 
 		return throwable -> {
-			try {
-				if (fallbackMethod == null) {
-					throw new NoFallbackAvailableException("No fallback available.", throwable);
-				}
-				Object fallbackProxy = getFallbackProxy();
-				Object[] arguments = (Object[]) attributes
-					.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
-				return fallbackMethod.invoke(fallbackProxy, arguments);
+			if (fallback != null) {
+				return invokeFallback(fallback, attributes, null);
 			}
-			catch (IllegalAccessException | InvocationTargetException e) {
-				if (LOG.isErrorEnabled()) {
-					LOG.error("Could not invoke fallback method " + fallbackMethod.getName() + " due to exception: "
-							+ e.getMessage(), e);
-				}
-				throw new RuntimeException(e);
+			else if (fallbackWithCause != null) {
+				return invokeFallback(fallbackWithCause, attributes, throwable);
 			}
-			catch (NoSuchMethodException e) {
-				if (LOG.isErrorEnabled()) {
-					LOG.error("Default constructor not found in: " + fallbacks.getName()
-							+ ". Fallback class needs to have a default constructor", e);
-				}
-				throw new RuntimeException(e);
-			}
-			catch (InstantiationException e) {
-				if (LOG.isErrorEnabled()) {
-					LOG.error("Could not instantiate fallback class: " + fallbacks.getName(), e);
-				}
-				throw new RuntimeException(e);
+			else {
+				throw new NoFallbackAvailableException("No fallback available.", throwable);
 			}
 		};
+
 	}
 
-	private Method getFallbackMethod(Map<String, Object> attributes) {
-		if (fallbacks == null) {
+	private Method resolveFallbackMethod(Map<String, Object> attributes, boolean withThrowable) {
+		if (fallbackClass == null) {
 			return null;
 		}
 		String methodName = String.valueOf(attributes.get(CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME));
-		Class<?>[] parameterTypes = (Class<?>[]) attributes
+		Class<?>[] paramTypes = (Class<?>[]) attributes
 			.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
-		Method method;
+		Class<?>[] effectiveTypes = withThrowable
+				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes)).toArray(Class[]::new)
+				: paramTypes;
+
 		try {
-			method = fallbacks.getMethod(methodName, parameterTypes);
+			Method method = fallbackClass.getMethod(methodName, effectiveTypes);
 			method.setAccessible(true);
+			return method;
 		}
-		catch (NoSuchMethodException e) {
+		catch (NoSuchMethodException exception) {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("Could not find fallback method " + methodName + " in class " + fallbacks.getName(), e);
+				LOG.debug("Fallback method not found: " + methodName + " in " + fallbackClass.getName(), exception);
 			}
-			throw new RuntimeException(e);
+			return null;
 		}
-		return method;
 	}
 
-	private Object getFallbackProxy()
-			throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	private Object invokeFallback(Method method, Map<String, Object> attributes, @Nullable Throwable throwable) {
+		try {
+			Object proxy = getFallbackProxy();
+			Object[] args = (Object[]) attributes.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
+			Object[] finalArgs = (throwable != null)
+					? Stream.concat(Stream.of(throwable), Arrays.stream(args)).toArray(Object[]::new) : args;
+			return method.invoke(proxy, finalArgs);
+		}
+		catch (InvocationTargetException | IllegalAccessException exception) {
+			if (LOG.isErrorEnabled()) {
+				LOG.error("Error invoking fallback method: " + method.getName(), exception);
+			}
+			throw new RuntimeException("Failed to invoke fallback method", exception);
+		}
+	}
+
+	private Object getFallbackProxy() {
 		if (fallbackProxy == null) {
-			Object target = fallbacks.getConstructor().newInstance();
-			ProxyFactory proxyFactory = new ProxyFactory(target);
-			proxyFactory.setProxyTargetClass(true);
-			fallbackProxy = proxyFactory.getProxy();
+			synchronized (this) {
+				if (fallbackProxy == null) {
+					try {
+						Object target = fallbackClass.getConstructor().newInstance();
+						ProxyFactory proxyFactory = new ProxyFactory(target);
+						proxyFactory.setProxyTargetClass(true);
+						fallbackProxy = proxyFactory.getProxy();
+					}
+					catch (ReflectiveOperationException exception) {
+						if (LOG.isErrorEnabled()) {
+							LOG.error("Error instantiating fallback proxy for class: " + fallbackClass.getName(),
+									exception);
+						}
+						throw new RuntimeException("Could not create fallback proxy", exception);
+					}
+				}
+			}
 		}
 		return fallbackProxy;
 	}
