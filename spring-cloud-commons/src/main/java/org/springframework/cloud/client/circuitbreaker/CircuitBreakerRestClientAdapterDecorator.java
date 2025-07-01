@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013-2025 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.circuitbreaker;
 
 import java.lang.reflect.InvocationTargetException;
@@ -30,8 +46,8 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 
 	private Object fallbackProxy;
 
-	public CircuitBreakerRestClientAdapterDecorator(HttpExchangeAdapter delegate,
-			CircuitBreaker circuitBreaker, Class<?> fallbacks) {
+	public CircuitBreakerRestClientAdapterDecorator(HttpExchangeAdapter delegate, CircuitBreaker circuitBreaker,
+			Class<?> fallbacks) {
 		super(delegate);
 		this.circuitBreaker = circuitBreaker;
 		this.fallbacks = fallbacks;
@@ -39,33 +55,26 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 
 	@Override
 	public void exchange(HttpRequestValues requestValues) {
-		super.exchange(requestValues);
 		circuitBreaker.run(() -> {
-					super.exchange(requestValues);
-					return null;
-				},
-				handleThrowable(requestValues));
+			super.exchange(requestValues);
+			return null;
+		}, handleThrowable(requestValues));
 	}
-
 
 	@Override
 	public HttpHeaders exchangeForHeaders(HttpRequestValues values) {
-		return (HttpHeaders) circuitBreaker.run(() -> super.exchangeForHeaders(values),
-				handleThrowable(values));
+		return (HttpHeaders) circuitBreaker.run(() -> super.exchangeForHeaders(values), handleThrowable(values));
 	}
-
 
 	@Override
 	public <T> @Nullable T exchangeForBody(HttpRequestValues values, ParameterizedTypeReference<T> bodyType) {
-		Object result = circuitBreaker.run(() -> super.exchangeForBody(values, bodyType),
-				handleThrowable(values));
+		Object result = circuitBreaker.run(() -> super.exchangeForBody(values, bodyType), handleThrowable(values));
 		return handleCast(result);
 	}
 
 	@Override
 	public ResponseEntity<Void> exchangeForBodilessEntity(HttpRequestValues values) {
-		Object result = circuitBreaker.run(() -> super.exchangeForBodilessEntity(values),
-				handleThrowable(values));
+		Object result = circuitBreaker.run(() -> super.exchangeForBodilessEntity(values), handleThrowable(values));
 		return handleCast(result);
 	}
 
@@ -88,7 +97,6 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 		}
 	}
 
-
 	private Function<Throwable, Object> handleThrowable(HttpRequestValues requestValues) {
 		Map<String, Object> attributes = requestValues.getAttributes();
 		Method fallbackMethod = getFallbackMethod(attributes);
@@ -100,7 +108,7 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 				}
 				Object fallbackProxy = getFallbackProxy();
 				Object[] arguments = (Object[]) attributes
-						.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
+					.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
 				return fallbackMethod.invoke(fallbackProxy, arguments);
 			}
 			catch (IllegalAccessException | InvocationTargetException e) {
@@ -132,7 +140,7 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 		}
 		String methodName = String.valueOf(attributes.get(CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME));
 		Class<?>[] parameterTypes = (Class<?>[]) attributes
-				.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
+			.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
 		Method method;
 		try {
 			method = fallbacks.getMethod(methodName, parameterTypes);
@@ -157,4 +165,5 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 		}
 		return fallbackProxy;
 	}
+
 }
