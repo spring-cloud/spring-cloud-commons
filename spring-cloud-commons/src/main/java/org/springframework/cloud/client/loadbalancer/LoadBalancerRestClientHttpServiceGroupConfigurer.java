@@ -21,7 +21,7 @@ import java.net.URI;
 import org.jspecify.annotations.NonNull;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
+import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;

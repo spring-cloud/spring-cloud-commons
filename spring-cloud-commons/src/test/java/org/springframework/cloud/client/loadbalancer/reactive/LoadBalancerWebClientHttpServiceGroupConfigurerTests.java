@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.http.client.reactive.service.ReactiveHttpClientServiceProperties;
+import org.springframework.boot.webclient.autoconfigure.service.ReactiveHttpClientServiceProperties;
 import org.springframework.cloud.client.loadbalancer.SimpleObjectProvider;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
