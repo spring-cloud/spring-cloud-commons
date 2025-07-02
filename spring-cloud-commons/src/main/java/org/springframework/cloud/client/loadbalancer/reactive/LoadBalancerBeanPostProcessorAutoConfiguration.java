@@ -68,6 +68,13 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 			return new DeferringLoadBalancerExchangeFilterFunction<>(exchangeFilterFunctionProvider);
 		}
 
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass(ReactiveHttpClientServiceProperties.class)
+	@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
+	protected static class ReactorDeferringLoadBalancerFilterHttpClientConfig {
+
 		@Bean
 		@ConditionalOnBean({ ReactiveHttpClientServiceProperties.class, ReactiveLoadBalancer.Factory.class })
 		@ConditionalOnMissingBean(LoadBalancerWebClientHttpServiceGroupConfigurer.class)
