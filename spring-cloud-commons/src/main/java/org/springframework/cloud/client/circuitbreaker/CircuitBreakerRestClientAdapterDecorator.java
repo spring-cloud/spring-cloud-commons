@@ -158,6 +158,13 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 			if (LOG.isErrorEnabled()) {
 				LOG.error("Error invoking fallback method: " + method.getName(), exception);
 			}
+			Throwable underlyingException = exception.getCause();
+			if (underlyingException instanceof RuntimeException) {
+				throw (RuntimeException) underlyingException;
+			}
+			if (underlyingException != null) {
+				throw new IllegalStateException("Failed to invoke fallback method", underlyingException);
+			}
 			throw new RuntimeException("Failed to invoke fallback method", exception);
 		}
 	}

@@ -29,7 +29,7 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
 public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 
 	// Make sure Boot's configurers run before
-	private static final int ORDER = 11;
+	private static final int ORDER = 15;
 
 	private static final Log LOG = LogFactory.getLog(CircuitBreakerRestClientHttpServiceGroupConfigurer.class);
 
@@ -37,7 +37,8 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 
 	private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
-	public CircuitBreakerRestClientHttpServiceGroupConfigurer(CloudHttpClientServiceProperties clientServiceProperties,
+	public CircuitBreakerRestClientHttpServiceGroupConfigurer(
+			CloudHttpClientServiceProperties clientServiceProperties,
 			CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
 		this.clientServiceProperties = clientServiceProperties;
 		this.circuitBreakerFactory = circuitBreakerFactory;
@@ -47,32 +48,37 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 	public void configureGroups(Groups<RestClient.Builder> groups) {
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
-			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
-			String fallbackClass = groupProperties == null ? null : groupProperties.getFallbackClass();
+			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup()
+					.get(groupName);
+			String fallbackClassName = (groupProperties != null) ? groupProperties.getFallbackClass() : null;
+			Class<?> fallbackClass = resolveFallbackClass(fallbackClassName);
+
 			factoryBuilder.httpRequestValuesProcessor(new CircuitBreakerRequestValueProcessor());
-			Class<?> fallbacks;
-			try {
-				fallbacks = fallbackClass != null ? Class.forName(fallbackClass) : null;
-			}
-			catch (ClassNotFoundException e) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("Could not load fallback class: " + fallbackClass, e);
-				}
-				throw new RuntimeException(e);
-			}
-			factoryBuilder.exchangeAdapterDecorator(httpExchangeAdapter -> new CircuitBreakerRestClientAdapterDecorator(
-					httpExchangeAdapter, buildCircuitBreaker(resolveCircuitBreakerName(groupName)), fallbacks));
+
+			factoryBuilder.exchangeAdapterDecorator(httpExchangeAdapter ->
+					new CircuitBreakerRestClientAdapterDecorator(
+							httpExchangeAdapter,
+							buildCircuitBreaker(groupName),
+							fallbackClass));
 		});
 	}
 
-	// TODO
-	private String resolveCircuitBreakerName(String groupName) {
-		return groupName;
+	private Class<?> resolveFallbackClass(String className) {
+		if (className == null || className.isBlank()) {
+			return null;
+		}
+		try {
+			return Class.forName(className);
+		} catch (ClassNotFoundException e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Fallback class not found: " + className, e);
+			}
+			throw new IllegalStateException("Unable to load fallback class: " + className, e);
+		}
 	}
 
-	// TODO
-	private CircuitBreaker buildCircuitBreaker(String circuitBreakerName) {
-		return circuitBreakerFactory.create(circuitBreakerName);
+	private CircuitBreaker buildCircuitBreaker(String name) {
+		return circuitBreakerFactory.create(name);
 	}
 
 	@Override
