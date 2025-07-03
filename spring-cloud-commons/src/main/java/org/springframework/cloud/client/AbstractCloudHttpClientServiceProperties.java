@@ -21,14 +21,14 @@ package org.springframework.cloud.client;
  */
 public abstract class AbstractCloudHttpClientServiceProperties {
 
-	private String fallbackClass;
+	private String fallbackClassName;
 
-	public String getFallbackClass() {
-		return fallbackClass;
+	public String getFallbackClassName() {
+		return fallbackClassName;
 	}
 
-	public void setFallbackClass(String fallbackClass) {
-		this.fallbackClass = fallbackClass;
+	public void setFallbackClassName(String fallbackClassName) {
+		this.fallbackClassName = fallbackClassName;
 	}
 
 }

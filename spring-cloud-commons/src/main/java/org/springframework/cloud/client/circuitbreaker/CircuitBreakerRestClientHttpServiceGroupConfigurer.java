@@ -50,7 +50,10 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 			String groupName = group.name();
 			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup()
 					.get(groupName);
-			String fallbackClassName = (groupProperties != null) ? groupProperties.getFallbackClass() : null;
+			String fallbackClassName = (groupProperties != null) ? groupProperties.getFallbackClassName() : null;
+			if (fallbackClassName == null || fallbackClassName.isBlank()) {
+				return;
+			}
 			Class<?> fallbackClass = resolveFallbackClass(fallbackClassName);
 
 			factoryBuilder.httpRequestValuesProcessor(new CircuitBreakerRequestValueProcessor());
@@ -64,12 +67,10 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 	}
 
 	private Class<?> resolveFallbackClass(String className) {
-		if (className == null || className.isBlank()) {
-			return null;
-		}
 		try {
 			return Class.forName(className);
-		} catch (ClassNotFoundException e) {
+		}
+		catch (ClassNotFoundException e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Fallback class not found: " + className, e);
 			}

@@ -90,6 +90,16 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 		return castIfPossible(result);
 	}
 
+	// Visible for tests
+	CircuitBreaker getCircuitBreaker() {
+		return circuitBreaker;
+	}
+
+	// Visible for tests
+	Class<?> getFallbackClass() {
+		return fallbackClass;
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T> T castIfPossible(Object result) {
 		try {
