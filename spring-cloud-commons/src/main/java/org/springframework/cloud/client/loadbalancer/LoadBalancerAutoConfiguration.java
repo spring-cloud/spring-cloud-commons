@@ -52,6 +52,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Gang Li
  * @author Olga Maciaszek-Sharma
  * @author Henning Pöttker
+ * @author Yanming Zhou
  */
 @AutoConfiguration
 @Conditional(BlockingRestClassesPresentCondition.class)
@@ -84,7 +85,7 @@ public class LoadBalancerAutoConfiguration {
 		return new LoadBalancerRequestFactory(loadBalancerClient, transformers);
 	}
 
-	@AutoConfiguration
+	@Configuration(proxyBeanMethods = false)
 	static class DeferringLoadBalancerInterceptorConfig {
 
 		@Bean
@@ -149,7 +150,7 @@ public class LoadBalancerAutoConfiguration {
 
 	}
 
-	@AutoConfiguration
+	@Configuration(proxyBeanMethods = false)
 	@Conditional(RetryMissingOrDisabledCondition.class)
 	static class LoadBalancerInterceptorConfig {
 
@@ -192,7 +193,7 @@ public class LoadBalancerAutoConfiguration {
 	/**
 	 * Auto configuration for retry mechanism.
 	 */
-	@AutoConfiguration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(RetryTemplate.class)
 	public static class RetryAutoConfiguration {
 
