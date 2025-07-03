@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.circuitbreaker;
+package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 import java.lang.reflect.Method;
 

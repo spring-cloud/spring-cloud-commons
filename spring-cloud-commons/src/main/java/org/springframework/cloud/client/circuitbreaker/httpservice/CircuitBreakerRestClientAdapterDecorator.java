@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.circuitbreaker;
+package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,6 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -113,7 +115,8 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 		}
 	}
 
-	private Function<Throwable, Object> createFallbackHandler(HttpRequestValues requestValues) {
+	// Visible for tests
+	Function<Throwable, Object> createFallbackHandler(HttpRequestValues requestValues) {
 		Map<String, Object> attributes = requestValues.getAttributes();
 		Method fallback = resolveFallbackMethod(attributes, false);
 		Method fallbackWithCause = resolveFallbackMethod(attributes, true);
@@ -139,6 +142,7 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 		String methodName = String.valueOf(attributes.get(CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME));
 		Class<?>[] paramTypes = (Class<?>[]) attributes
 			.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
+		paramTypes = paramTypes != null ? paramTypes : new Class<?>[0];
 		Class<?>[] effectiveTypes = withThrowable
 				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes)).toArray(Class[]::new)
 				: paramTypes;
@@ -160,6 +164,7 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 		try {
 			Object proxy = getFallbackProxy();
 			Object[] args = (Object[]) attributes.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
+			args = args != null ? args : new Class<?>[0];
 			Object[] finalArgs = (throwable != null)
 					? Stream.concat(Stream.of(throwable), Arrays.stream(args)).toArray(Object[]::new) : args;
 			return method.invoke(proxy, finalArgs);

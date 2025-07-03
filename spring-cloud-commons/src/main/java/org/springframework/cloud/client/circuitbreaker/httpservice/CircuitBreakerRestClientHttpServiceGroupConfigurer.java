@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.circuitbreaker;
+package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.cloud.client.CloudHttpClientServiceProperties;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 

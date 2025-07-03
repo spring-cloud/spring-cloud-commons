@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.client.circuitbreaker;
+package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +29,8 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.client.CloudHttpClientServiceProperties;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
