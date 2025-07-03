@@ -30,8 +30,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.restclient.RestTemplateBuilder;
+import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.ApplicationContext;
@@ -102,6 +103,19 @@ public class LoadBalancerAutoConfiguration {
 			return new LoadBalancerRestClientBuilderBeanPostProcessor<>(loadBalancerInterceptorProvider, context);
 		}
 
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass(RestTemplateBuilder.class)
+	static class DeferringLoadBalancerInterceptorRestTemplateBuilderConfig {
+
+		@Bean
+		@ConditionalOnMissingBean
+		public static DeferringLoadBalancerInterceptor deferringLoadBalancerInterceptor(
+				ObjectProvider<BlockingLoadBalancerInterceptor> loadBalancerInterceptorObjectProvider) {
+			return new DeferringLoadBalancerInterceptor(loadBalancerInterceptorObjectProvider);
+		}
+
 		@Bean
 		@ConditionalOnBean(DeferringLoadBalancerInterceptor.class)
 		@ConditionalOnMissingBean(LoadBalancerRestTemplateBuilderBeanPostProcessor.class)
@@ -109,6 +123,19 @@ public class LoadBalancerAutoConfiguration {
 				ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
 				ApplicationContext context) {
 			return new LoadBalancerRestTemplateBuilderBeanPostProcessor<>(loadBalancerInterceptorProvider, context);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass(HttpClientServiceProperties.class)
+	static class DeferringLoadBalancerInterceptorHttpClientConfig {
+
+		@Bean
+		@ConditionalOnMissingBean
+		public static DeferringLoadBalancerInterceptor deferringLoadBalancerInterceptor(
+				ObjectProvider<BlockingLoadBalancerInterceptor> loadBalancerInterceptorObjectProvider) {
+			return new DeferringLoadBalancerInterceptor(loadBalancerInterceptorObjectProvider);
 		}
 
 		@Bean

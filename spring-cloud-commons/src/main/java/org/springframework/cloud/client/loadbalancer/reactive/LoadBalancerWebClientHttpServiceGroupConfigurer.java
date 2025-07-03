@@ -19,8 +19,8 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.net.URI;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.http.client.reactive.service.ReactiveHttpClientServiceProperties;
-import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
+import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties;
+import org.springframework.boot.webclient.autoconfigure.service.ReactiveHttpClientServiceProperties;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;

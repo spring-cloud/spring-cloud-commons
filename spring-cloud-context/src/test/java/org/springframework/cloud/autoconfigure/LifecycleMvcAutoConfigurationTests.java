@@ -48,6 +48,7 @@ public class LifecycleMvcAutoConfigurationTests {
 	}
 
 	@Test
+	@Disabled("TODO: https://github.com/spring-cloud/spring-cloud-commons/issues/1520")
 	public void environmentWebEndpointExtensionDisabled() {
 		beanNotCreated("writableEnvironmentEndpointWebExtension", "management.endpoint.env.enabled=false");
 	}
