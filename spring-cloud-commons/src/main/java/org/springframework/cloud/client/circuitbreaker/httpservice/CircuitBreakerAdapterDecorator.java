@@ -40,9 +40,9 @@ import org.springframework.web.service.invoker.HttpRequestValues;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapterDecorator {
+public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator {
 
-	private static final Log LOG = LogFactory.getLog(CircuitBreakerRestClientAdapterDecorator.class);
+	private static final Log LOG = LogFactory.getLog(CircuitBreakerAdapterDecorator.class);
 
 	private final CircuitBreaker circuitBreaker;
 
@@ -50,7 +50,7 @@ public class CircuitBreakerRestClientAdapterDecorator extends HttpExchangeAdapte
 
 	private volatile Object fallbackProxy;
 
-	public CircuitBreakerRestClientAdapterDecorator(HttpExchangeAdapter delegate, CircuitBreaker circuitBreaker,
+	public CircuitBreakerAdapterDecorator(HttpExchangeAdapter delegate, CircuitBreaker circuitBreaker,
 			Class<?> fallbackClass) {
 		super(delegate);
 		this.circuitBreaker = circuitBreaker;

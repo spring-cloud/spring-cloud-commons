@@ -59,6 +59,7 @@ public class CommonsClientAutoConfiguration {
 	// FIXME: move instantiation to`spring-cloud-circuitbreaker` project
 	@ConditionalOnClass({ CircuitBreaker.class, RestClientHttpServiceGroupConfigurer.class })
 	@ConditionalOnBean(CircuitBreakerFactory.class)
+	@Configuration(proxyBeanMethods = false)
 	protected static class CircuitBreakerInterfaceClientsAutoConfiguration {
 
 		@Bean

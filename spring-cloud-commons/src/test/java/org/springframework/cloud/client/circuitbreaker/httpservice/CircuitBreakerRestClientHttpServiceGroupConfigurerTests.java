@@ -59,7 +59,9 @@ class CircuitBreakerRestClientHttpServiceGroupConfigurerTests {
 	private static final String GROUP_NAME = "testService";
 
 	private final CloudHttpClientServiceProperties clientServiceProperties = new CloudHttpClientServiceProperties();
+
 	private final CircuitBreakerFactory<?, ?> circuitBreakerFactory = mock(CircuitBreakerFactory.class);
+
 	private final TestGroups groups = new TestGroups();
 
 	@BeforeEach
@@ -67,24 +69,23 @@ class CircuitBreakerRestClientHttpServiceGroupConfigurerTests {
 		when(circuitBreakerFactory.create(GROUP_NAME)).thenReturn(mock(CircuitBreaker.class));
 	}
 
-
 	@SuppressWarnings("unchecked")
 	@Test
 	void shouldAddCircuitBreakerAdapterDecorator() {
 		CloudHttpClientServiceProperties.Group group = new CloudHttpClientServiceProperties.Group();
 		group.setFallbackClassName(Fallbacks.class.getCanonicalName());
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
-		CircuitBreakerRestClientHttpServiceGroupConfigurer configurer =
-				new CircuitBreakerRestClientHttpServiceGroupConfigurer(clientServiceProperties,
-						circuitBreakerFactory);
-		ArgumentCaptor<Function<HttpExchangeAdapter, HttpExchangeAdapter>> captor =
-				ArgumentCaptor.forClass(Function.class);
+		CircuitBreakerRestClientHttpServiceGroupConfigurer configurer = new CircuitBreakerRestClientHttpServiceGroupConfigurer(
+				clientServiceProperties, circuitBreakerFactory);
+		ArgumentCaptor<Function<HttpExchangeAdapter, HttpExchangeAdapter>> captor = ArgumentCaptor
+			.forClass(Function.class);
 
 		configurer.configureGroups(groups);
 
 		verify(groups.builder).exchangeAdapterDecorator(captor.capture());
 		Function<HttpExchangeAdapter, HttpExchangeAdapter> captured = captor.getValue();
-		CircuitBreakerRestClientAdapterDecorator decorator = (CircuitBreakerRestClientAdapterDecorator) captured.apply(new TestHttpExchangeAdapter());
+		CircuitBreakerAdapterDecorator decorator = (CircuitBreakerAdapterDecorator) captured
+			.apply(new TestHttpExchangeAdapter());
 		assertThat(decorator.getCircuitBreaker()).isNotNull();
 		assertThat(decorator.getFallbackClass()).isAssignableFrom(Fallbacks.class);
 	}
@@ -94,12 +95,10 @@ class CircuitBreakerRestClientHttpServiceGroupConfigurerTests {
 		CloudHttpClientServiceProperties.Group group = new CloudHttpClientServiceProperties.Group();
 		group.setFallbackClassName("org.test.Fallback");
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
-		CircuitBreakerRestClientHttpServiceGroupConfigurer configurer =
-				new CircuitBreakerRestClientHttpServiceGroupConfigurer(clientServiceProperties,
-						circuitBreakerFactory);
+		CircuitBreakerRestClientHttpServiceGroupConfigurer configurer = new CircuitBreakerRestClientHttpServiceGroupConfigurer(
+				clientServiceProperties, circuitBreakerFactory);
 
-		assertThatIllegalStateException()
-				.isThrownBy(() -> configurer.configureGroups(groups));
+		assertThatIllegalStateException().isThrownBy(() -> configurer.configureGroups(groups));
 	}
 
 	@ParameterizedTest
@@ -108,9 +107,8 @@ class CircuitBreakerRestClientHttpServiceGroupConfigurerTests {
 		CloudHttpClientServiceProperties.Group group = new CloudHttpClientServiceProperties.Group();
 		group.setFallbackClassName(fallbackClassName);
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
-		CircuitBreakerRestClientHttpServiceGroupConfigurer configurer =
-				new CircuitBreakerRestClientHttpServiceGroupConfigurer(clientServiceProperties,
-						circuitBreakerFactory);
+		CircuitBreakerRestClientHttpServiceGroupConfigurer configurer = new CircuitBreakerRestClientHttpServiceGroupConfigurer(
+				clientServiceProperties, circuitBreakerFactory);
 
 		assertThatNoException().isThrownBy(() -> configurer.configureGroups(groups));
 		verify(circuitBreakerFactory, never()).create(GROUP_NAME);
@@ -144,14 +142,13 @@ class CircuitBreakerRestClientHttpServiceGroupConfigurerTests {
 		public void forEachGroup(HttpServiceGroupConfigurer.GroupCallback<RestClient.Builder> groupConfigurer) {
 			groupConfigurer.withGroup(
 					new TestGroup(GROUP_NAME, HttpServiceGroup.ClientType.REST_CLIENT, new HashSet<>()),
-					RestClient.builder(),
-					builder);
+					RestClient.builder(), builder);
 		}
 
 	}
 
 	private record TestGroup(String name, ClientType clientType,
-							 Set<Class<?>> httpServiceTypes) implements HttpServiceGroup {
+			Set<Class<?>> httpServiceTypes) implements HttpServiceGroup {
 
 	}
 
@@ -173,7 +170,8 @@ class CircuitBreakerRestClientHttpServiceGroupConfigurerTests {
 		}
 
 		@Override
-		public <T> @Nullable T exchangeForBody(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+		public <T> @Nullable T exchangeForBody(HttpRequestValues requestValues,
+				ParameterizedTypeReference<T> bodyType) {
 			throw new UnsupportedOperationException("Please, implement me.");
 		}
 
@@ -183,9 +181,11 @@ class CircuitBreakerRestClientHttpServiceGroupConfigurerTests {
 		}
 
 		@Override
-		public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+		public <T> ResponseEntity<T> exchangeForEntity(HttpRequestValues requestValues,
+				ParameterizedTypeReference<T> bodyType) {
 			throw new UnsupportedOperationException("Please, implement me.");
 		}
+
 	}
 
 }

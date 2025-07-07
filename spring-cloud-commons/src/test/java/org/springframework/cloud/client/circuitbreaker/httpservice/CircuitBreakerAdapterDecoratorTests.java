@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012-2025 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 import java.util.HashMap;
@@ -11,6 +27,7 @@ import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableExcept
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpRequestValues;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -21,16 +38,20 @@ import static org.springframework.cloud.client.circuitbreaker.httpservice.Circui
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME;
 
 /**
+ * Tests for {@link CircuitBreakerAdapterDecorator}.
+ *
  * @author Olga Maciaszek-Sharma
  */
-class CircuitBreakerRestClientAdapterDecoratorTests {
+class CircuitBreakerAdapterDecoratorTests {
 
 	private final HttpExchangeAdapter adapter = mock(HttpExchangeAdapter.class);
-	private final CircuitBreaker circuitBreaker = mock(CircuitBreaker.class);
-	private final HttpRequestValues httpRequestValues = mock(HttpRequestValues.class);
-	private final CircuitBreakerRestClientAdapterDecorator decorator = new CircuitBreakerRestClientAdapterDecorator(
-			adapter, circuitBreaker, Fallbacks.class);
 
+	private final CircuitBreaker circuitBreaker = mock(CircuitBreaker.class);
+
+	private final HttpRequestValues httpRequestValues = mock(HttpRequestValues.class);
+
+	private final CircuitBreakerAdapterDecorator decorator = new CircuitBreakerAdapterDecorator(
+			adapter, circuitBreaker, Fallbacks.class);
 
 	@Test
 	void shouldWrapAdapterCallsWithCircuitBreakerInvocation() {
@@ -42,16 +63,31 @@ class CircuitBreakerRestClientAdapterDecoratorTests {
 	@Test
 	void shouldCreateFallbackHandler() {
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(METHOD_ATTRIBUTE_NAME, "test");
+		attributes.put(METHOD_ATTRIBUTE_NAME,
+				"test");
 		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] {String.class, Integer.class});
 		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] {"testDescription", 5});
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
-
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
 		Object fallback = fallbackHandler.apply(new RuntimeException("test"));
 
-		System.out.println("test");
+		assertThat(fallback).isEqualTo("testDescription: 5");
+	}
+
+	@Test
+	void shouldCreateFallbackHandlerWithCause() {
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put(METHOD_ATTRIBUTE_NAME,
+				"testThrowable");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] {Throwable.class, String.class, Integer.class});
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] {new Throwable("test!"), "testDescription", 5});
+		when(httpRequestValues.getAttributes()).thenReturn(attributes);
+		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
+
+		Object fallback = fallbackHandler.apply(new RuntimeException("test"));
+
+		assertThat(fallback).isEqualTo("java.lang.Throwable: test! testDescription: 5");
 	}
 
 	@Test
