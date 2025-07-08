@@ -16,12 +16,7 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,13 +24,14 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
-import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapterDecorator;
 import org.springframework.web.service.invoker.HttpRequestValues;
+
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.getFallback;
 
 /**
  * @author Olga Maciaszek-Sharma
@@ -50,8 +46,8 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 
 	private volatile Object fallbackProxy;
 
-	public CircuitBreakerAdapterDecorator(HttpExchangeAdapter delegate, CircuitBreaker circuitBreaker,
-			Class<?> fallbackClass) {
+	public CircuitBreakerAdapterDecorator(HttpExchangeAdapter delegate,
+			CircuitBreaker circuitBreaker, Class<?> fallbackClass) {
 		super(delegate);
 		this.circuitBreaker = circuitBreaker;
 		this.fallbackClass = fallbackClass;
@@ -59,10 +55,11 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 
 	@Override
 	public void exchange(HttpRequestValues requestValues) {
-		circuitBreaker.run(() -> {
-			super.exchange(requestValues);
-			return null;
-		}, createFallbackHandler(requestValues));
+		circuitBreaker.run(
+				() -> {
+					super.exchange(requestValues);
+					return null;
+				}, createFallbackHandler(requestValues));
 	}
 
 	@Override
@@ -117,71 +114,7 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 
 	// Visible for tests
 	Function<Throwable, Object> createFallbackHandler(HttpRequestValues requestValues) {
-		Map<String, Object> attributes = requestValues.getAttributes();
-		Method fallback = resolveFallbackMethod(attributes, false);
-		Method fallbackWithCause = resolveFallbackMethod(attributes, true);
-
-		return throwable -> {
-			if (fallback != null) {
-				return invokeFallback(fallback, attributes, null);
-			}
-			else if (fallbackWithCause != null) {
-				return invokeFallback(fallbackWithCause, attributes, throwable);
-			}
-			else {
-				throw new NoFallbackAvailableException("No fallback available.", throwable);
-			}
-		};
-
-	}
-
-	private Method resolveFallbackMethod(Map<String, Object> attributes, boolean withThrowable) {
-		if (fallbackClass == null) {
-			return null;
-		}
-		String methodName = String.valueOf(attributes.get(CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME));
-		Class<?>[] paramTypes = (Class<?>[]) attributes
-			.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
-		paramTypes = paramTypes != null ? paramTypes : new Class<?>[0];
-		Class<?>[] effectiveTypes = withThrowable
-				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes)).toArray(Class[]::new)
-				: paramTypes;
-
-		try {
-			Method method = fallbackClass.getMethod(methodName, effectiveTypes);
-			method.setAccessible(true);
-			return method;
-		}
-		catch (NoSuchMethodException exception) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Fallback method not found: " + methodName + " in " + fallbackClass.getName(), exception);
-			}
-			return null;
-		}
-	}
-
-	private Object invokeFallback(Method method, Map<String, Object> attributes, @Nullable Throwable throwable) {
-		try {
-			Object proxy = getFallbackProxy();
-			Object[] args = (Object[]) attributes.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
-			args = args != null ? args : new Class<?>[0];
-			Object[] finalArgs = (throwable != null)
-					? Stream.concat(Stream.of(throwable), Arrays.stream(args)).toArray(Object[]::new) : args;
-			return method.invoke(proxy, finalArgs);
-		}
-		catch (InvocationTargetException | IllegalAccessException exception) {
-			if (LOG.isErrorEnabled()) {
-				LOG.error("Error invoking fallback method: " + method.getName(), exception);
-			}
-			Throwable underlyingException = exception.getCause();
-			if (underlyingException instanceof RuntimeException) {
-				throw (RuntimeException) underlyingException;
-			}
-			if (underlyingException != null) {
-				throw new IllegalStateException("Failed to invoke fallback method", underlyingException);
-			}
-			throw new RuntimeException("Failed to invoke fallback method", exception);
-		}
+		return throwable -> getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass);
 	}
 
 	private Object getFallbackProxy() {
