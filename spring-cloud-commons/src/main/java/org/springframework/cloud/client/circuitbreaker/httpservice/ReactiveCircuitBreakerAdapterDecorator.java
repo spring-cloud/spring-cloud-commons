@@ -53,8 +53,7 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	private volatile Object fallbackProxy;
 
 	public ReactiveCircuitBreakerAdapterDecorator(ReactorHttpExchangeAdapter delegate,
-			ReactiveCircuitBreaker reactiveCircuitBreaker, CircuitBreaker circuitBreaker,
-			Class<?> fallbackClass) {
+			ReactiveCircuitBreaker reactiveCircuitBreaker, CircuitBreaker circuitBreaker, Class<?> fallbackClass) {
 		super(delegate);
 		this.reactiveCircuitBreaker = reactiveCircuitBreaker;
 		this.circuitBreaker = circuitBreaker;
@@ -97,8 +96,7 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	}
 
 	public Mono<Void> exchangeForMono(HttpRequestValues requestValues) {
-		return reactiveCircuitBreaker.run(
-				super.exchangeForMono(requestValues),
+		return reactiveCircuitBreaker.run(super.exchangeForMono(requestValues),
 				createBodyMonoFallbackHandler(requestValues));
 	}
 
@@ -122,12 +120,14 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 				createBodyMonoFallbackHandler(requestValues));
 	}
 
-	public <T> Mono<ResponseEntity<T>> exchangeForEntityMono(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+	public <T> Mono<ResponseEntity<T>> exchangeForEntityMono(HttpRequestValues requestValues,
+			ParameterizedTypeReference<T> bodyType) {
 		return reactiveCircuitBreaker.run(super.exchangeForEntityMono(requestValues, bodyType),
 				createBodyMonoFallbackHandler(requestValues));
 	}
 
-	public <T> Mono<ResponseEntity<Flux<T>>> exchangeForEntityFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+	public <T> Mono<ResponseEntity<Flux<T>>> exchangeForEntityFlux(HttpRequestValues requestValues,
+			ParameterizedTypeReference<T> bodyType) {
 		return reactiveCircuitBreaker.run(super.exchangeForEntityFlux(requestValues, bodyType),
 				createBodyMonoFallbackHandler(requestValues));
 	}

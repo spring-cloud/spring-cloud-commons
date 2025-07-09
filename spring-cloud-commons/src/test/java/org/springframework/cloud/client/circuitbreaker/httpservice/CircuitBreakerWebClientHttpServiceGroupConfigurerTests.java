@@ -67,14 +67,16 @@ class CircuitBreakerWebClientHttpServiceGroupConfigurerTests {
 
 	private final CircuitBreakerFactory<?, ?> circuitBreakerFactory = mock(CircuitBreakerFactory.class);
 
-	private final ReactiveCircuitBreakerFactory<?, ?> reactiveCircuitBreakerFactory = mock(ReactiveCircuitBreakerFactory.class);
+	private final ReactiveCircuitBreakerFactory<?, ?> reactiveCircuitBreakerFactory = mock(
+			ReactiveCircuitBreakerFactory.class);
 
 	private final TestGroups groups = new TestGroups();
 
 	@BeforeEach
 	void setUp() {
 		when(circuitBreakerFactory.create(GROUP_NAME)).thenReturn(mock(CircuitBreaker.class));
-		when(reactiveCircuitBreakerFactory.create(GROUP_NAME + "-reactive")).thenReturn(mock(ReactiveCircuitBreaker.class));
+		when(reactiveCircuitBreakerFactory.create(GROUP_NAME + "-reactive"))
+			.thenReturn(mock(ReactiveCircuitBreaker.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -86,14 +88,14 @@ class CircuitBreakerWebClientHttpServiceGroupConfigurerTests {
 		CircuitBreakerWebClientHttpServiceGroupConfigurer configurer = new CircuitBreakerWebClientHttpServiceGroupConfigurer(
 				clientServiceProperties, reactiveCircuitBreakerFactory, circuitBreakerFactory);
 		ArgumentCaptor<Function<HttpExchangeAdapter, HttpExchangeAdapter>> captor = ArgumentCaptor
-				.forClass(Function.class);
+			.forClass(Function.class);
 
 		configurer.configureGroups(groups);
 
 		verify(groups.builder).exchangeAdapterDecorator(captor.capture());
 		Function<HttpExchangeAdapter, HttpExchangeAdapter> captured = captor.getValue();
 		ReactiveCircuitBreakerAdapterDecorator decorator = (ReactiveCircuitBreakerAdapterDecorator) captured
-				.apply(new TestHttpExchangeAdapter());
+			.apply(new TestHttpExchangeAdapter());
 		assertThat(decorator.getCircuitBreaker()).isNotNull();
 		assertThat(decorator.getReactiveCircuitBreaker()).isNotNull();
 		assertThat(decorator.getFallbackClass()).isAssignableFrom(Fallbacks.class);
@@ -157,7 +159,7 @@ class CircuitBreakerWebClientHttpServiceGroupConfigurerTests {
 	}
 
 	private record TestGroup(String name, ClientType clientType,
-							 Set<Class<?>> httpServiceTypes) implements HttpServiceGroup {
+			Set<Class<?>> httpServiceTypes) implements HttpServiceGroup {
 
 	}
 
@@ -216,12 +218,14 @@ class CircuitBreakerWebClientHttpServiceGroupConfigurerTests {
 		}
 
 		@Override
-		public <T> Mono<T> exchangeForBodyMono(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+		public <T> Mono<T> exchangeForBodyMono(HttpRequestValues requestValues,
+				ParameterizedTypeReference<T> bodyType) {
 			throw new UnsupportedOperationException("Please, implement me.");
 		}
 
 		@Override
-		public <T> Flux<T> exchangeForBodyFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+		public <T> Flux<T> exchangeForBodyFlux(HttpRequestValues requestValues,
+				ParameterizedTypeReference<T> bodyType) {
 			throw new UnsupportedOperationException("Please, implement me.");
 		}
 
@@ -231,14 +235,17 @@ class CircuitBreakerWebClientHttpServiceGroupConfigurerTests {
 		}
 
 		@Override
-		public <T> Mono<ResponseEntity<T>> exchangeForEntityMono(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+		public <T> Mono<ResponseEntity<T>> exchangeForEntityMono(HttpRequestValues requestValues,
+				ParameterizedTypeReference<T> bodyType) {
 			throw new UnsupportedOperationException("Please, implement me.");
 		}
 
 		@Override
-		public <T> Mono<ResponseEntity<Flux<T>>> exchangeForEntityFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
+		public <T> Mono<ResponseEntity<Flux<T>>> exchangeForEntityFlux(HttpRequestValues requestValues,
+				ParameterizedTypeReference<T> bodyType) {
 			throw new UnsupportedOperationException("Please, implement me.");
 		}
+
 	}
 
 }

@@ -51,8 +51,7 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 	public void configureGroups(Groups<RestClient.Builder> groups) {
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
-			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup()
-					.get(groupName);
+			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
 			String fallbackClassName = (groupProperties != null) ? groupProperties.getFallbackClassName() : null;
 			if (fallbackClassName == null || fallbackClassName.isBlank()) {
 				return;
@@ -61,8 +60,9 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 
 			factoryBuilder.httpRequestValuesProcessor(new CircuitBreakerRequestValueProcessor());
 
-			factoryBuilder.exchangeAdapterDecorator(httpExchangeAdapter -> new CircuitBreakerAdapterDecorator(
-					httpExchangeAdapter, buildCircuitBreaker(groupName), fallbackClass));
+			factoryBuilder
+				.exchangeAdapterDecorator(httpExchangeAdapter -> new CircuitBreakerAdapterDecorator(httpExchangeAdapter,
+						buildCircuitBreaker(groupName), fallbackClass));
 		});
 	}
 

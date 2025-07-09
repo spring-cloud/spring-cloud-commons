@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
-import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import org.springframework.web.service.invoker.HttpRequestValues;
@@ -33,7 +32,11 @@ import org.springframework.web.service.invoker.HttpRequestValues;
 /**
  * @author Olga Maciaszek-Sharma
  */
-public class CircuitBreakerConfigurerUtils {
+final class CircuitBreakerConfigurerUtils {
+
+	private CircuitBreakerConfigurerUtils() {
+		throw new UnsupportedOperationException("Cannot instantiate a utility class");
+	}
 
 	private static final Log LOG = LogFactory.getLog(CircuitBreakerConfigurerUtils.class);
 
@@ -68,11 +71,10 @@ public class CircuitBreakerConfigurerUtils {
 		}
 		String methodName = String.valueOf(attributes.get(CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME));
 		Class<?>[] paramTypes = (Class<?>[]) attributes
-				.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
+			.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
 		paramTypes = paramTypes != null ? paramTypes : new Class<?>[0];
 		Class<?>[] effectiveTypes = withThrowable
-				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes))
-				.toArray(Class[]::new)
+				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes)).toArray(Class[]::new)
 				: paramTypes;
 
 		try {
@@ -94,8 +96,7 @@ public class CircuitBreakerConfigurerUtils {
 			Object[] args = (Object[]) attributes.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
 			args = args != null ? args : new Class<?>[0];
 			Object[] finalArgs = (throwable != null)
-					? Stream.concat(Stream.of(throwable), Arrays.stream(args))
-					.toArray(Object[]::new) : args;
+					? Stream.concat(Stream.of(throwable), Arrays.stream(args)).toArray(Object[]::new) : args;
 			return method.invoke(fallbackProxy, finalArgs);
 		}
 		catch (InvocationTargetException | IllegalAccessException exception) {
@@ -113,8 +114,8 @@ public class CircuitBreakerConfigurerUtils {
 		}
 	}
 
-	static Object getFallback(HttpRequestValues requestValues, Throwable throwable,
-			Object fallbackProxy, Class<?> fallbackClass) {
+	static Object getFallback(HttpRequestValues requestValues, Throwable throwable, Object fallbackProxy,
+			Class<?> fallbackClass) {
 		Map<String, Object> attributes = requestValues.getAttributes();
 		Method fallback = resolveFallbackMethod(attributes, false, fallbackClass);
 		Method fallbackWithCause = resolveFallbackMethod(attributes, true, fallbackClass);

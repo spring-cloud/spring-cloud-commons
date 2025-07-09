@@ -45,14 +45,13 @@ public class Fallbacks {
 		return Mono.just(throwable + " " + description + ": " + value);
 	}
 
-
 	public Flux<String> testFlux(String description, Integer value) {
 		return Flux.just(description + ": " + value);
 	}
 
 	public Mono<HttpHeaders> testHttpHeadersMono(Throwable throwable, String description, Integer value) {
-		return Mono.just(new HttpHeaders(MultiValueMap.fromSingleValue(Collections.singletonMap(description,
-				String.valueOf(value)))));
+		return Mono.just(new HttpHeaders(
+				MultiValueMap.fromSingleValue(Collections.singletonMap(description, String.valueOf(value)))));
 	}
 
 }

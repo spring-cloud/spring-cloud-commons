@@ -59,8 +59,7 @@ public class CircuitBreakerWebClientHttpServiceGroupConfigurer implements WebCli
 	public void configureGroups(Groups<WebClient.Builder> groups) {
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
-			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup()
-					.get(groupName);
+			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
 			String fallbackClassName = (groupProperties != null) ? groupProperties.getFallbackClassName() : null;
 			if (fallbackClassName == null || fallbackClassName.isBlank()) {
 				return;
@@ -71,8 +70,7 @@ public class CircuitBreakerWebClientHttpServiceGroupConfigurer implements WebCli
 
 			factoryBuilder.exchangeAdapterDecorator(httpExchangeAdapter -> {
 				Assert.isInstanceOf(ReactorHttpExchangeAdapter.class, httpExchangeAdapter);
-				return new ReactiveCircuitBreakerAdapterDecorator(
-						(ReactorHttpExchangeAdapter) httpExchangeAdapter,
+				return new ReactiveCircuitBreakerAdapterDecorator((ReactorHttpExchangeAdapter) httpExchangeAdapter,
 						buildReactiveCircuitBreaker(groupName), buildCircuitBreaker(groupName), fallbackClass);
 			});
 		});
@@ -90,4 +88,5 @@ public class CircuitBreakerWebClientHttpServiceGroupConfigurer implements WebCli
 	public int getOrder() {
 		return ORDER;
 	}
+
 }

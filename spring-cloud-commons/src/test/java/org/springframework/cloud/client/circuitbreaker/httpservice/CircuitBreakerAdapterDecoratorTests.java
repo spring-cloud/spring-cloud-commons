@@ -36,6 +36,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME;
 
 /**
  * Tests for {@link CircuitBreakerAdapterDecorator}.
@@ -50,8 +51,8 @@ class CircuitBreakerAdapterDecoratorTests {
 
 	private final HttpRequestValues httpRequestValues = mock(HttpRequestValues.class);
 
-	private final CircuitBreakerAdapterDecorator decorator = new CircuitBreakerAdapterDecorator(
-			adapter, circuitBreaker, Fallbacks.class);
+	private final CircuitBreakerAdapterDecorator decorator = new CircuitBreakerAdapterDecorator(adapter, circuitBreaker,
+			Fallbacks.class);
 
 	@Test
 	void shouldWrapAdapterCallsWithCircuitBreakerInvocation() {
@@ -63,10 +64,10 @@ class CircuitBreakerAdapterDecoratorTests {
 	@Test
 	void shouldCreateFallbackHandler() {
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(METHOD_ATTRIBUTE_NAME,
-				"test");
-		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] {String.class, Integer.class});
-		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] {"testDescription", 5});
+		attributes.put(METHOD_ATTRIBUTE_NAME, "test");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { "testDescription", 5 });
+		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, String.class);
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
@@ -78,10 +79,10 @@ class CircuitBreakerAdapterDecoratorTests {
 	@Test
 	void shouldCreateFallbackHandlerWithCause() {
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(METHOD_ATTRIBUTE_NAME,
-				"testThrowable");
-		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] {Throwable.class, String.class, Integer.class});
-		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] {new Throwable("test!"), "testDescription", 5});
+		attributes.put(METHOD_ATTRIBUTE_NAME, "testThrowable");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { Throwable.class, String.class, Integer.class });
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { new Throwable("test!"), "testDescription", 5 });
+		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, String.class);
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
@@ -95,7 +96,7 @@ class CircuitBreakerAdapterDecoratorTests {
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
 		assertThatExceptionOfType(NoFallbackAvailableException.class)
-				.isThrownBy(() -> fallbackHandler.apply(new RuntimeException("test")));
+			.isThrownBy(() -> fallbackHandler.apply(new RuntimeException("test")));
 	}
 
 }

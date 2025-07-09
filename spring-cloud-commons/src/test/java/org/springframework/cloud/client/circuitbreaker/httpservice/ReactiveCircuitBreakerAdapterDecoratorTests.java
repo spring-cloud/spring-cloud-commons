@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME;
 
 /**
  * Tests for {@link ReactiveCircuitBreakerAdapterDecorator}.
@@ -50,6 +51,7 @@ import static org.springframework.cloud.client.circuitbreaker.httpservice.Circui
 class ReactiveCircuitBreakerAdapterDecoratorTests {
 
 	private static final String TEST_DESCRIPTION = "testDescription";
+
 	private static final int TEST_VALUE = 5;
 
 	private final ReactorHttpExchangeAdapter adapter = mock(ReactorHttpExchangeAdapter.class);
@@ -60,13 +62,12 @@ class ReactiveCircuitBreakerAdapterDecoratorTests {
 
 	private final HttpRequestValues httpRequestValues = mock(HttpRequestValues.class);
 
-	private final ReactiveCircuitBreakerAdapterDecorator decorator = new ReactiveCircuitBreakerAdapterDecorator(
-			adapter, reactiveCircuitBreaker, circuitBreaker, Fallbacks.class);
+	private final ReactiveCircuitBreakerAdapterDecorator decorator = new ReactiveCircuitBreakerAdapterDecorator(adapter,
+			reactiveCircuitBreaker, circuitBreaker, Fallbacks.class);
 
 	@BeforeEach
 	void setUp() {
-		when(adapter.exchangeForBodyMono(any(), any()))
-				.thenReturn(Mono.just("test"));
+		when(adapter.exchangeForBodyMono(any(), any())).thenReturn(Mono.just("test"));
 	}
 
 	@Test
@@ -79,10 +80,10 @@ class ReactiveCircuitBreakerAdapterDecoratorTests {
 	@Test
 	void shouldCreateFallbackHandler() {
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(METHOD_ATTRIBUTE_NAME,
-				"test");
-		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] {String.class, Integer.class});
-		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] {TEST_DESCRIPTION, TEST_VALUE});
+		attributes.put(METHOD_ATTRIBUTE_NAME, "test");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { TEST_DESCRIPTION, TEST_VALUE });
+		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, String.class);
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
@@ -94,10 +95,10 @@ class ReactiveCircuitBreakerAdapterDecoratorTests {
 	@Test
 	void shouldCreateBodyMonoFallbackHandler() {
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(METHOD_ATTRIBUTE_NAME,
-				"testMono");
-		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] {String.class, Integer.class});
-		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] {TEST_DESCRIPTION, TEST_VALUE});
+		attributes.put(METHOD_ATTRIBUTE_NAME, "testMono");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { TEST_DESCRIPTION, TEST_VALUE });
+		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, Mono.class);
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Mono<Object>> fallbackHandler = decorator.createBodyMonoFallbackHandler(httpRequestValues);
 
@@ -109,15 +110,14 @@ class ReactiveCircuitBreakerAdapterDecoratorTests {
 	@Test
 	void shouldCreateBodyFluxFallbackHandler() {
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(METHOD_ATTRIBUTE_NAME,
-				"testFlux");
-		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] {String.class, Integer.class});
-		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] {TEST_DESCRIPTION, TEST_VALUE});
+		attributes.put(METHOD_ATTRIBUTE_NAME, "testFlux");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { TEST_DESCRIPTION, TEST_VALUE });
+		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, Flux.class);
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Flux<Object>> fallbackHandler = decorator.createBodyFluxFallbackHandler(httpRequestValues);
 
-		Object fallback = fallbackHandler.apply(new RuntimeException("test"))
-				.blockFirst();
+		Object fallback = fallbackHandler.apply(new RuntimeException("test")).blockFirst();
 
 		assertThat(fallback).isEqualTo(TEST_DESCRIPTION + ": " + TEST_VALUE);
 	}
@@ -126,50 +126,47 @@ class ReactiveCircuitBreakerAdapterDecoratorTests {
 	@Test
 	void shouldCreateHttpHeadersMonoFallbackHandler() {
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(METHOD_ATTRIBUTE_NAME,
-				"testHttpHeadersMono");
-		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] {String.class, Integer.class});
-		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] {TEST_DESCRIPTION, TEST_VALUE});
+		attributes.put(METHOD_ATTRIBUTE_NAME, "testHttpHeadersMono");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { TEST_DESCRIPTION, TEST_VALUE });
+		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, Mono.class);
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
-		Function<Throwable, Mono<HttpHeaders>> fallbackHandler = decorator.createHttpHeadersMonoFallbackHandler(httpRequestValues);
+		Function<Throwable, Mono<HttpHeaders>> fallbackHandler = decorator
+			.createHttpHeadersMonoFallbackHandler(httpRequestValues);
 
-		HttpHeaders fallback = fallbackHandler.apply(new RuntimeException("test"))
-				.block();
+		HttpHeaders fallback = fallbackHandler.apply(new RuntimeException("test")).block();
 
-		assertThat(fallback.get(TEST_DESCRIPTION)
-				.get(0)).isEqualTo(String.valueOf(TEST_VALUE));
+		assertThat(fallback.get(TEST_DESCRIPTION).get(0)).isEqualTo(String.valueOf(TEST_VALUE));
 	}
 
 	@Test
 	void shouldCreateFallbackHandlerWithCause() {
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(METHOD_ATTRIBUTE_NAME,
-				"testThrowable");
-		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] {Throwable.class, String.class, Integer.class});
-		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] {new Throwable("test!"), TEST_DESCRIPTION, TEST_VALUE});
+		attributes.put(METHOD_ATTRIBUTE_NAME, "testThrowable");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { Throwable.class, String.class, Integer.class });
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { new Throwable("test!"), TEST_DESCRIPTION, TEST_VALUE });
+		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, String.class);
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
 		Object fallback = fallbackHandler.apply(new RuntimeException("test"));
 
-		assertThat(fallback).isEqualTo("java.lang.Throwable: test! " + TEST_DESCRIPTION + ": "
-				+ TEST_VALUE);
+		assertThat(fallback).isEqualTo("java.lang.Throwable: test! " + TEST_DESCRIPTION + ": " + TEST_VALUE);
 	}
 
 	@Test
 	void shouldCreateReactiveFallbackHandlerWithCause() {
 		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(METHOD_ATTRIBUTE_NAME,
-				"testThrowableMono");
-		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] {Throwable.class, String.class, Integer.class});
-		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] {new Throwable("test!"), TEST_DESCRIPTION, TEST_VALUE});
+		attributes.put(METHOD_ATTRIBUTE_NAME, "testThrowableMono");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { Throwable.class, String.class, Integer.class });
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { new Throwable("test!"), TEST_DESCRIPTION, TEST_VALUE });
+		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, Mono.class);
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Mono<Object>> fallbackHandler = decorator.createBodyMonoFallbackHandler(httpRequestValues);
 
 		Object fallback = fallbackHandler.apply(new RuntimeException("test")).block();
 
-		assertThat(fallback).isEqualTo("java.lang.Throwable: test! " + TEST_DESCRIPTION + ": "
-				+ TEST_VALUE);
+		assertThat(fallback).isEqualTo("java.lang.Throwable: test! " + TEST_DESCRIPTION + ": " + TEST_VALUE);
 	}
 
 	@Test
@@ -177,7 +174,7 @@ class ReactiveCircuitBreakerAdapterDecoratorTests {
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
 		assertThatExceptionOfType(NoFallbackAvailableException.class)
-				.isThrownBy(() -> fallbackHandler.apply(new RuntimeException("test")));
+			.isThrownBy(() -> fallbackHandler.apply(new RuntimeException("test")));
 	}
 
 }

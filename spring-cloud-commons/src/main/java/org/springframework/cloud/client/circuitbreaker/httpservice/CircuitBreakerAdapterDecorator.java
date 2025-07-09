@@ -46,8 +46,8 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 
 	private volatile Object fallbackProxy;
 
-	public CircuitBreakerAdapterDecorator(HttpExchangeAdapter delegate,
-			CircuitBreaker circuitBreaker, Class<?> fallbackClass) {
+	public CircuitBreakerAdapterDecorator(HttpExchangeAdapter delegate, CircuitBreaker circuitBreaker,
+			Class<?> fallbackClass) {
 		super(delegate);
 		this.circuitBreaker = circuitBreaker;
 		this.fallbackClass = fallbackClass;
@@ -55,11 +55,10 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 
 	@Override
 	public void exchange(HttpRequestValues requestValues) {
-		circuitBreaker.run(
-				() -> {
-					super.exchange(requestValues);
-					return null;
-				}, createFallbackHandler(requestValues));
+		circuitBreaker.run(() -> {
+			super.exchange(requestValues);
+			return null;
+		}, createFallbackHandler(requestValues));
 	}
 
 	@Override

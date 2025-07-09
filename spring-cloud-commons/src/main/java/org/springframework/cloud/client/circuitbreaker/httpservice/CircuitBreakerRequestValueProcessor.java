@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.web.service.invoker.HttpRequestValues;
 
 /**
@@ -42,11 +43,18 @@ public class CircuitBreakerRequestValueProcessor implements HttpRequestValues.Pr
 	 */
 	public static final String ARGUMENTS_ATTRIBUTE_NAME = "spring.cloud.method.arguments";
 
+	/**
+	 * Spring Cloud-specific attribute name for storing method return types.
+	 */
+	public static final String RETURN_TYPE_ATTRIBUTE_NAME = "spring.cloud.method.return-type";
+
 	@Override
-	public void process(Method method, @Nullable Object[] arguments, HttpRequestValues.Builder builder) {
+	public void process(Method method, MethodParameter[] parameters, @Nullable Object[] arguments,
+			HttpRequestValues.Builder builder) {
 		builder.addAttribute(METHOD_ATTRIBUTE_NAME, method.getName());
 		builder.addAttribute(PARAMETER_TYPES_ATTRIBUTE_NAME, method.getParameterTypes());
 		builder.addAttribute(ARGUMENTS_ATTRIBUTE_NAME, arguments);
+		builder.addAttribute(RETURN_TYPE_ATTRIBUTE_NAME, method.getReturnType());
 	}
 
 }
