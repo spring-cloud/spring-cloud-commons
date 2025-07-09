@@ -16,10 +16,18 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
+import java.util.Collections;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.util.MultiValueMap;
+
 /**
  * @author Olga Maciaszek-Sharma
  */
- public class Fallbacks {
+public class Fallbacks {
 
 	public String test(String description, Integer value) {
 		return description + ": " + value;
@@ -27,6 +35,24 @@ package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 	public String testThrowable(Throwable throwable, String description, Integer value) {
 		return throwable + " " + description + ": " + value;
+	}
+
+	public Mono<String> testMono(String description, Integer value) {
+		return Mono.just(description + ": " + value);
+	}
+
+	public Mono<String> testThrowableMono(Throwable throwable, String description, Integer value) {
+		return Mono.just(throwable + " " + description + ": " + value);
+	}
+
+
+	public Flux<String> testFlux(String description, Integer value) {
+		return Flux.just(description + ": " + value);
+	}
+
+	public Mono<HttpHeaders> testHttpHeadersMono(Throwable throwable, String description, Integer value) {
+		return Mono.just(new HttpHeaders(MultiValueMap.fromSingleValue(Collections.singletonMap(description,
+				String.valueOf(value)))));
 	}
 
 }

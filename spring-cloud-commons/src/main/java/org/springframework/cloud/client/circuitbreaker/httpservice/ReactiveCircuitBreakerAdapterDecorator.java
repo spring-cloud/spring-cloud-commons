@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013-2025 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 import java.util.function.Function;
@@ -83,37 +99,37 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	public Mono<Void> exchangeForMono(HttpRequestValues requestValues) {
 		return reactiveCircuitBreaker.run(
 				super.exchangeForMono(requestValues),
-				createMonoFallbackHandler(requestValues));
+				createBodyMonoFallbackHandler(requestValues));
 	}
 
 	public Mono<HttpHeaders> exchangeForHeadersMono(HttpRequestValues requestValues) {
 		return reactiveCircuitBreaker.run(super.exchangeForHeadersMono(requestValues),
-				createHttpHeadersFallbackHandler(requestValues));
+				createHttpHeadersMonoFallbackHandler(requestValues));
 	}
 
 	public <T> Mono<T> exchangeForBodyMono(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 		return reactiveCircuitBreaker.run(super.exchangeForBodyMono(requestValues, bodyType),
-				createMonoFallbackHandler(requestValues));
+				createBodyMonoFallbackHandler(requestValues));
 	}
 
 	public <T> Flux<T> exchangeForBodyFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 		return reactiveCircuitBreaker.run(super.exchangeForBodyFlux(requestValues, bodyType),
-				createFluxFallbackHandler(requestValues));
+				createBodyFluxFallbackHandler(requestValues));
 	}
 
 	public Mono<ResponseEntity<Void>> exchangeForBodilessEntityMono(HttpRequestValues requestValues) {
 		return reactiveCircuitBreaker.run(super.exchangeForBodilessEntityMono(requestValues),
-				createMonoFallbackHandler(requestValues));
+				createBodyMonoFallbackHandler(requestValues));
 	}
 
 	public <T> Mono<ResponseEntity<T>> exchangeForEntityMono(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 		return reactiveCircuitBreaker.run(super.exchangeForEntityMono(requestValues, bodyType),
-				createMonoFallbackHandler(requestValues));
+				createBodyMonoFallbackHandler(requestValues));
 	}
 
 	public <T> Mono<ResponseEntity<Flux<T>>> exchangeForEntityFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 		return reactiveCircuitBreaker.run(super.exchangeForEntityFlux(requestValues, bodyType),
-				createMonoFallbackHandler(requestValues));
+				createBodyMonoFallbackHandler(requestValues));
 	}
 
 	// Visible for tests
@@ -121,25 +137,16 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 		return throwable -> getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass);
 	}
 
-	<T> Function<Throwable, Mono<T>> createMonoFallbackHandler(HttpRequestValues requestValues) {
-		return throwable -> {
-			T fallback = castIfPossible(getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
-			return Mono.just(fallback);
-		};
+	<T> Function<Throwable, Mono<T>> createBodyMonoFallbackHandler(HttpRequestValues requestValues) {
+		return throwable -> castIfPossible(getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
 	}
 
-	<T> Function<Throwable, Flux<T>> createFluxFallbackHandler(HttpRequestValues requestValues) {
-		return throwable -> {
-			T fallback = castIfPossible(getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
-			return Flux.just(fallback);
-		};
+	<T> Function<Throwable, Flux<T>> createBodyFluxFallbackHandler(HttpRequestValues requestValues) {
+		return throwable -> castIfPossible(getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
 	}
 
-	Function<Throwable, Mono<HttpHeaders>> createHttpHeadersFallbackHandler(HttpRequestValues requestValues) {
-		return throwable -> {
-			HttpHeaders fallback = castIfPossible(getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
-			return Mono.just(fallback);
-		};
+	Function<Throwable, Mono<HttpHeaders>> createHttpHeadersMonoFallbackHandler(HttpRequestValues requestValues) {
+		return throwable -> castIfPossible(getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
 	}
 
 	// Visible for tests
