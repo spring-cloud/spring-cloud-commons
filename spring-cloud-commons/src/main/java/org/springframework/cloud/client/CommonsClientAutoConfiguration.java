@@ -33,7 +33,10 @@ import org.springframework.cloud.client.actuator.FeaturesEndpoint;
 import org.springframework.cloud.client.actuator.HasFeatures;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRestClientHttpServiceGroupConfigurer;
+import org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerWebClientHttpServiceGroupConfigurer;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicator;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicatorProperties;
@@ -43,6 +46,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
+import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Cloud Commons Client.
@@ -57,6 +61,7 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
 public class CommonsClientAutoConfiguration {
 
 	// FIXME: move instantiation to`spring-cloud-circuitbreaker` project
+	// TODO: add property flag
 	@ConditionalOnClass({ CircuitBreaker.class, RestClientHttpServiceGroupConfigurer.class })
 	@ConditionalOnBean(CircuitBreakerFactory.class)
 	@Configuration(proxyBeanMethods = false)
@@ -66,6 +71,25 @@ public class CommonsClientAutoConfiguration {
 		public CircuitBreakerRestClientHttpServiceGroupConfigurer circuitBreakerRestClientConfigurer(
 				CloudHttpClientServiceProperties properties, CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
 			return new CircuitBreakerRestClientHttpServiceGroupConfigurer(properties, circuitBreakerFactory);
+		}
+
+	}
+
+	// FIXME: move instantiation to`spring-cloud-circuitbreaker` project
+	// TODO: add property flag
+	@ConditionalOnClass({ CircuitBreaker.class, ReactiveCircuitBreaker.class,
+			WebClientHttpServiceGroupConfigurer.class })
+	@ConditionalOnBean({ CircuitBreakerFactory.class, ReactiveCircuitBreakerFactory.class })
+	@Configuration(proxyBeanMethods = false)
+	protected static class ReactiveCircuitBreakerInterfaceClientsAutoConfiguration {
+
+		@Bean
+		public CircuitBreakerWebClientHttpServiceGroupConfigurer circuitBreakerWebClientConfigurer(
+				CloudHttpClientServiceProperties properties,
+				ReactiveCircuitBreakerFactory<?, ?> reactiveCircuitBreakerFactory,
+				CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
+			return new CircuitBreakerWebClientHttpServiceGroupConfigurer(properties, reactiveCircuitBreakerFactory,
+					circuitBreakerFactory);
 		}
 
 	}
