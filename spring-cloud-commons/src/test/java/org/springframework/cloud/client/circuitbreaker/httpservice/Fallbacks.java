@@ -29,6 +29,10 @@ import org.springframework.util.MultiValueMap;
  */
 public class Fallbacks {
 
+	public void post(String test) {
+		System.err.println("Fallback String: " + test);
+	}
+
 	public String test(String description, Integer value) {
 		return description + ": " + value;
 	}

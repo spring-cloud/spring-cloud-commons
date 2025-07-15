@@ -138,15 +138,52 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	}
 
 	<T> Function<Throwable, Mono<T>> createBodyMonoFallbackHandler(HttpRequestValues requestValues) {
-		return throwable -> castIfPossible(getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
+		if (((requestValues.getAttributes()
+				.get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME))
+				.equals(Mono.class))) {
+			return throwable -> castIfPossible(
+					getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
+		}
+		return throwable -> {
+			Object fallback = getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass);
+			if (fallback == null) {
+				return Mono.empty();
+			}
+			return castIfPossible(Mono.just(fallback));
+		};
 	}
 
 	<T> Function<Throwable, Flux<T>> createBodyFluxFallbackHandler(HttpRequestValues requestValues) {
-		return throwable -> castIfPossible(getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
+		if (((requestValues.getAttributes()
+				.get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME)))
+				.equals(Flux.class)) {
+			return throwable -> castIfPossible(
+					getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
+		}
+		return throwable -> {
+			Object fallback = getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass);
+
+			if (fallback == null) {
+				return Flux.empty();
+			}
+			return castIfPossible(Flux.just(fallback));
+		};
 	}
 
 	Function<Throwable, Mono<HttpHeaders>> createHttpHeadersMonoFallbackHandler(HttpRequestValues requestValues) {
-		return throwable -> castIfPossible(getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
+		if ((requestValues.getAttributes()
+				.get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME))
+				.equals(Mono.class)) {
+			return throwable -> castIfPossible(
+					getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
+		}
+		return throwable -> {
+			Object fallback = getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass);
+			if (fallback == null) {
+				return Mono.empty();
+			}
+			return castIfPossible(Mono.just(fallback));
+		};
 	}
 
 	// Visible for tests

@@ -71,10 +71,11 @@ final class CircuitBreakerConfigurerUtils {
 		}
 		String methodName = String.valueOf(attributes.get(CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME));
 		Class<?>[] paramTypes = (Class<?>[]) attributes
-			.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
+				.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
 		paramTypes = paramTypes != null ? paramTypes : new Class<?>[0];
 		Class<?>[] effectiveTypes = withThrowable
-				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes)).toArray(Class[]::new)
+				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes))
+				.toArray(Class[]::new)
 				: paramTypes;
 
 		try {
@@ -96,7 +97,8 @@ final class CircuitBreakerConfigurerUtils {
 			Object[] args = (Object[]) attributes.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
 			args = args != null ? args : new Class<?>[0];
 			Object[] finalArgs = (throwable != null)
-					? Stream.concat(Stream.of(throwable), Arrays.stream(args)).toArray(Object[]::new) : args;
+					? Stream.concat(Stream.of(throwable), Arrays.stream(args))
+					.toArray(Object[]::new) : args;
 			return method.invoke(fallbackProxy, finalArgs);
 		}
 		catch (InvocationTargetException | IllegalAccessException exception) {
