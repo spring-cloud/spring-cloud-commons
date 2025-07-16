@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -31,6 +30,7 @@ import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapterDecorator;
 import org.springframework.web.service.invoker.HttpRequestValues;
 
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.createProxy;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.getFallback;
 
 /**
@@ -120,19 +120,7 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 		if (fallbackProxy == null) {
 			synchronized (this) {
 				if (fallbackProxy == null) {
-					try {
-						Object target = fallbackClass.getConstructor().newInstance();
-						ProxyFactory proxyFactory = new ProxyFactory(target);
-						proxyFactory.setProxyTargetClass(true);
-						fallbackProxy = proxyFactory.getProxy();
-					}
-					catch (ReflectiveOperationException exception) {
-						if (LOG.isErrorEnabled()) {
-							LOG.error("Error instantiating fallback proxy for class: " + fallbackClass.getName(),
-									exception);
-						}
-						throw new RuntimeException("Could not create fallback proxy", exception);
-					}
+					fallbackProxy = createProxy(fallbackClass);
 				}
 			}
 		}

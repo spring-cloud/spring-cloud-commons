@@ -26,6 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import org.springframework.web.service.invoker.HttpRequestValues;
 
@@ -71,11 +72,10 @@ final class CircuitBreakerConfigurerUtils {
 		}
 		String methodName = String.valueOf(attributes.get(CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME));
 		Class<?>[] paramTypes = (Class<?>[]) attributes
-				.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
+			.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
 		paramTypes = paramTypes != null ? paramTypes : new Class<?>[0];
 		Class<?>[] effectiveTypes = withThrowable
-				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes))
-				.toArray(Class[]::new)
+				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes)).toArray(Class[]::new)
 				: paramTypes;
 
 		try {
@@ -97,8 +97,7 @@ final class CircuitBreakerConfigurerUtils {
 			Object[] args = (Object[]) attributes.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
 			args = args != null ? args : new Class<?>[0];
 			Object[] finalArgs = (throwable != null)
-					? Stream.concat(Stream.of(throwable), Arrays.stream(args))
-					.toArray(Object[]::new) : args;
+					? Stream.concat(Stream.of(throwable), Arrays.stream(args)).toArray(Object[]::new) : args;
 			return method.invoke(fallbackProxy, finalArgs);
 		}
 		catch (InvocationTargetException | IllegalAccessException exception) {
@@ -129,6 +128,22 @@ final class CircuitBreakerConfigurerUtils {
 		}
 		else {
 			throw new NoFallbackAvailableException("No fallback available.", throwable);
+		}
+	}
+
+	static Object createProxy(Class<?> fallbackClass) {
+		try {
+			Object target = fallbackClass.getConstructor().newInstance();
+			ProxyFactory proxyFactory = new ProxyFactory(target);
+			proxyFactory.setProxyTargetClass(true);
+			return proxyFactory.getProxy();
+		}
+		catch (ReflectiveOperationException exception) {
+			if (LOG.isErrorEnabled()) {
+				LOG.error("Error instantiating fallback proxy for class: " + fallbackClass.getName() + ", exception: "
+						+ exception.getMessage(), exception);
+			}
+			throw new FallbackProxyCreationException("Could not create fallback proxy", exception);
 		}
 	}
 

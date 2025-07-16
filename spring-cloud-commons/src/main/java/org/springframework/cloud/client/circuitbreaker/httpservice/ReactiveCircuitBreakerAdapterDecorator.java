@@ -24,7 +24,6 @@ import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
 import org.springframework.core.ParameterizedTypeReference;
@@ -35,6 +34,7 @@ import org.springframework.web.service.invoker.ReactorHttpExchangeAdapter;
 import org.springframework.web.service.invoker.ReactorHttpExchangeAdapterDecorator;
 
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.castIfPossible;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.createProxy;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.getFallback;
 
 /**
@@ -95,37 +95,44 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 		return castIfPossible(result);
 	}
 
+	@Override
 	public Mono<Void> exchangeForMono(HttpRequestValues requestValues) {
 		return reactiveCircuitBreaker.run(super.exchangeForMono(requestValues),
 				createBodyMonoFallbackHandler(requestValues));
 	}
 
+	@Override
 	public Mono<HttpHeaders> exchangeForHeadersMono(HttpRequestValues requestValues) {
 		return reactiveCircuitBreaker.run(super.exchangeForHeadersMono(requestValues),
 				createHttpHeadersMonoFallbackHandler(requestValues));
 	}
 
+	@Override
 	public <T> Mono<T> exchangeForBodyMono(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 		return reactiveCircuitBreaker.run(super.exchangeForBodyMono(requestValues, bodyType),
 				createBodyMonoFallbackHandler(requestValues));
 	}
 
+	@Override
 	public <T> Flux<T> exchangeForBodyFlux(HttpRequestValues requestValues, ParameterizedTypeReference<T> bodyType) {
 		return reactiveCircuitBreaker.run(super.exchangeForBodyFlux(requestValues, bodyType),
 				createBodyFluxFallbackHandler(requestValues));
 	}
 
+	@Override
 	public Mono<ResponseEntity<Void>> exchangeForBodilessEntityMono(HttpRequestValues requestValues) {
 		return reactiveCircuitBreaker.run(super.exchangeForBodilessEntityMono(requestValues),
 				createBodyMonoFallbackHandler(requestValues));
 	}
 
+	@Override
 	public <T> Mono<ResponseEntity<T>> exchangeForEntityMono(HttpRequestValues requestValues,
 			ParameterizedTypeReference<T> bodyType) {
 		return reactiveCircuitBreaker.run(super.exchangeForEntityMono(requestValues, bodyType),
 				createBodyMonoFallbackHandler(requestValues));
 	}
 
+	@Override
 	public <T> Mono<ResponseEntity<Flux<T>>> exchangeForEntityFlux(HttpRequestValues requestValues,
 			ParameterizedTypeReference<T> bodyType) {
 		return reactiveCircuitBreaker.run(super.exchangeForEntityFlux(requestValues, bodyType),
@@ -138,9 +145,8 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	}
 
 	<T> Function<Throwable, Mono<T>> createBodyMonoFallbackHandler(HttpRequestValues requestValues) {
-		if (((requestValues.getAttributes()
-				.get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME))
-				.equals(Mono.class))) {
+		if (((requestValues.getAttributes().get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME))
+			.equals(Mono.class))) {
 			return throwable -> castIfPossible(
 					getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
 		}
@@ -154,9 +160,8 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	}
 
 	<T> Function<Throwable, Flux<T>> createBodyFluxFallbackHandler(HttpRequestValues requestValues) {
-		if (((requestValues.getAttributes()
-				.get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME)))
-				.equals(Flux.class)) {
+		if (((requestValues.getAttributes().get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME)))
+			.equals(Flux.class)) {
 			return throwable -> castIfPossible(
 					getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
 		}
@@ -171,9 +176,8 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	}
 
 	Function<Throwable, Mono<HttpHeaders>> createHttpHeadersMonoFallbackHandler(HttpRequestValues requestValues) {
-		if ((requestValues.getAttributes()
-				.get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME))
-				.equals(Mono.class)) {
+		if ((requestValues.getAttributes().get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME))
+			.equals(Mono.class)) {
 			return throwable -> castIfPossible(
 					getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
 		}
@@ -205,19 +209,7 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 		if (fallbackProxy == null) {
 			synchronized (this) {
 				if (fallbackProxy == null) {
-					try {
-						Object target = fallbackClass.getConstructor().newInstance();
-						ProxyFactory proxyFactory = new ProxyFactory(target);
-						proxyFactory.setProxyTargetClass(true);
-						fallbackProxy = proxyFactory.getProxy();
-					}
-					catch (ReflectiveOperationException exception) {
-						if (LOG.isErrorEnabled()) {
-							LOG.error("Error instantiating fallback proxy for class: " + fallbackClass.getName(),
-									exception);
-						}
-						throw new RuntimeException("Could not create fallback proxy", exception);
-					}
+					fallbackProxy = createProxy(fallbackClass);
 				}
 			}
 		}
