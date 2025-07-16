@@ -28,10 +28,15 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
+import org.springframework.web.service.invoker.HttpExchangeAdapterDecorator;
 import org.springframework.web.service.invoker.HttpRequestValues;
 
 /**
+ * Utility class used by CircuitBreaker-specific {@link HttpExchangeAdapterDecorator}
+ * implementations.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 final class CircuitBreakerConfigurerUtils {
 

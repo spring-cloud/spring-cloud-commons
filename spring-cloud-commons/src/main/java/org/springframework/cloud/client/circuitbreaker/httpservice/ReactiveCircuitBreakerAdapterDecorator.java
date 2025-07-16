@@ -29,6 +29,7 @@ import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.service.invoker.HttpExchangeAdapterDecorator;
 import org.springframework.web.service.invoker.HttpRequestValues;
 import org.springframework.web.service.invoker.ReactorHttpExchangeAdapter;
 import org.springframework.web.service.invoker.ReactorHttpExchangeAdapterDecorator;
@@ -38,7 +39,23 @@ import static org.springframework.cloud.client.circuitbreaker.httpservice.Circui
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.getFallback;
 
 /**
+ * Reactive implementation of {@link HttpExchangeAdapterDecorator} that wraps
+ * {@code @HttpExchange}
+ * <p>
+ * In the event of a CircuitBreaker fallback, this class uses the user-provided fallback
+ * class to create a proxy. The fallback method is selected by matching either:
+ * <ul>
+ * <li>A method with the same name and argument types as the original method, or</li>
+ * <li>A method with the same name and the original arguments preceded by a
+ * {@link Throwable}, allowing the user to access the {@code throwable} within the
+ * fallback.</li>
+ * </ul>
+ * Once a matching method is found, it is invoked to provide the fallback behavior. Both
+ * the fallback class and the fallback methods must be public.
+ * </p>
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeAdapterDecorator {
 

@@ -25,6 +25,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
 
 /**
+ * Test fallback class.
+ *
  * @author Olga Maciaszek-Sharma
  */
 public class Fallbacks {

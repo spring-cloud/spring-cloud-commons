@@ -28,7 +28,13 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveFallbackClass;
 
 /**
+ * An implementation of {@link RestClientHttpServiceGroupConfigurer} that provides
+ * CircuitBreaker integration for configured groups. This configurer applies
+ * CircuitBreaker logic to each HTTP service group and provides fallback behavior based on
+ * group-specific properties.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 

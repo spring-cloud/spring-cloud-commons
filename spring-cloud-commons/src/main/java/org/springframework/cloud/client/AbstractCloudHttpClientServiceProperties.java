@@ -16,11 +16,25 @@
 
 package org.springframework.cloud.client;
 
+import org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerAdapterDecorator;
+import org.springframework.cloud.client.circuitbreaker.httpservice.ReactiveCircuitBreakerAdapterDecorator;
+
 /**
+ * Spring Cloud-specific {@code HttpClientServiceProperties}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 public abstract class AbstractCloudHttpClientServiceProperties {
 
+	/**
+	 * Name of the class that contains fallback methods to be called by
+	 * {@link CircuitBreakerAdapterDecorator} or
+	 * {@link ReactiveCircuitBreakerAdapterDecorator} in case a fallback is triggered.
+	 * <p>
+	 * Both the fallback class and the fallback methods must be public.
+	 * </p>
+	 */
 	private String fallbackClassName;
 
 	public String getFallbackClassName() {

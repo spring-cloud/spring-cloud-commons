@@ -17,7 +17,10 @@
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 /**
+ * Exception thrown when a fallback proxy cannot be created.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 public class FallbackProxyCreationException extends RuntimeException {
 

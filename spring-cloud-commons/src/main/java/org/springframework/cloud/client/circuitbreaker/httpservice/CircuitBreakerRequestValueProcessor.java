@@ -24,7 +24,19 @@ import org.springframework.core.MethodParameter;
 import org.springframework.web.service.invoker.HttpRequestValues;
 
 /**
+ * A {@link HttpRequestValues.Processor} that adds information necessary for
+ * circuit-breaking to {@link HttpRequestValues}. The following attributes are added to
+ * the builder:
+ * <ul>
+ * <li>{@link #METHOD_ATTRIBUTE_NAME} - The name of the method being invoked.</li>
+ * <li>{@link #PARAMETER_TYPES_ATTRIBUTE_NAME} - The types of the parameters of the
+ * method.</li>
+ * <li>{@link #ARGUMENTS_ATTRIBUTE_NAME} - The actual arguments passed to the method.</li>
+ * <li>{@link #RETURN_TYPE_ATTRIBUTE_NAME} - The return type of the method.</li>
+ * </ul>
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 public class CircuitBreakerRequestValueProcessor implements HttpRequestValues.Processor {
 

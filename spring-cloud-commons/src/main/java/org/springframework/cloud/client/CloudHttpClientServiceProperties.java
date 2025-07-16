@@ -22,7 +22,10 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * Group specific implementation of {@link AbstractCloudHttpClientServiceProperties}.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 @ConfigurationProperties("spring.cloud.http.client.service")
 public class CloudHttpClientServiceProperties extends AbstractCloudHttpClientServiceProperties {

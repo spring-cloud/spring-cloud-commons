@@ -32,7 +32,13 @@ import org.springframework.web.service.invoker.ReactorHttpExchangeAdapter;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveFallbackClass;
 
 /**
+ * An implementation of {@link WebClientHttpServiceGroupConfigurer} that provides
+ * CircuitBreaker integration for configured groups. This configurer applies
+ * CircuitBreaker logic to each HTTP service group and provides fallback behavior based on
+ * group-specific properties.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 public class CircuitBreakerWebClientHttpServiceGroupConfigurer implements WebClientHttpServiceGroupConfigurer {
 
