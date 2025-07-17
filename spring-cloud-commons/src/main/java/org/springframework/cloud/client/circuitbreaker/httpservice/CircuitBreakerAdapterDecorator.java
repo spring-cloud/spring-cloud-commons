@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
+import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
@@ -30,7 +31,7 @@ import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpExchangeAdapterDecorator;
 import org.springframework.web.service.invoker.HttpRequestValues;
 
-import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.createProxy;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.createProxies;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.getFallback;
 
 /**
@@ -58,15 +59,15 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 
 	private final CircuitBreaker circuitBreaker;
 
-	private final Class<?> fallbackClass;
+	private final Map<Object, Class<?>> fallbackClasses;
 
-	private volatile Object fallbackProxy;
+	private volatile Map<Object, Object> fallbackProxies;
 
 	public CircuitBreakerAdapterDecorator(HttpExchangeAdapter delegate, CircuitBreaker circuitBreaker,
-			Class<?> fallbackClass) {
+			Map<Object, Class<?>> fallbackClasses) {
 		super(delegate);
 		this.circuitBreaker = circuitBreaker;
-		this.fallbackClass = fallbackClass;
+		this.fallbackClasses = fallbackClasses;
 	}
 
 	@Override
@@ -110,8 +111,8 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 	}
 
 	// Visible for tests
-	Class<?> getFallbackClass() {
-		return fallbackClass;
+	Map<Object, Class<?>> getFallbackClasses() {
+		return fallbackClasses;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -129,18 +130,18 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 
 	// Visible for tests
 	Function<Throwable, Object> createFallbackHandler(HttpRequestValues requestValues) {
-		return throwable -> getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass);
+		return throwable -> getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses);
 	}
 
-	private Object getFallbackProxy() {
-		if (fallbackProxy == null) {
+	private Map<Object, Object> getFallbackProxies() {
+		if (fallbackProxies == null) {
 			synchronized (this) {
-				if (fallbackProxy == null) {
-					fallbackProxy = createProxy(fallbackClass);
+				if (fallbackProxies == null) {
+					fallbackProxies = createProxies(fallbackClasses);
 				}
 			}
 		}
-		return fallbackProxy;
+		return fallbackProxies;
 	}
 
 }

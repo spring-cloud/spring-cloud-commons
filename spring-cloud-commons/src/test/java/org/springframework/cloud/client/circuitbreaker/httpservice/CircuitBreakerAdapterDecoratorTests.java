@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,6 +34,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.DEFAULT_FALLBACK_KEY;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME;
@@ -52,7 +54,7 @@ class CircuitBreakerAdapterDecoratorTests {
 	private final HttpRequestValues httpRequestValues = mock(HttpRequestValues.class);
 
 	private final CircuitBreakerAdapterDecorator decorator = new CircuitBreakerAdapterDecorator(adapter, circuitBreaker,
-			Fallbacks.class);
+			Collections.singletonMap(DEFAULT_FALLBACK_KEY, Fallbacks.class));
 
 	@Test
 	void shouldWrapAdapterCallsWithCircuitBreakerInvocation() {

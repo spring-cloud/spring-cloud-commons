@@ -16,7 +16,9 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -48,6 +50,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.DEFAULT_FALLBACK_KEY;
 
 /**
  * Tests for {@link CircuitBreakerRestClientHttpServiceGroupConfigurer}.
@@ -73,7 +76,7 @@ class CircuitBreakerRestClientHttpServiceGroupConfigurerTests {
 	@Test
 	void shouldAddCircuitBreakerAdapterDecorator() {
 		CloudHttpClientServiceProperties.Group group = new CloudHttpClientServiceProperties.Group();
-		group.setFallbackClassName(Fallbacks.class.getCanonicalName());
+		group.setFallbackClassNames(Collections.singletonMap(DEFAULT_FALLBACK_KEY, Fallbacks.class.getCanonicalName()));
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
 		CircuitBreakerRestClientHttpServiceGroupConfigurer configurer = new CircuitBreakerRestClientHttpServiceGroupConfigurer(
 				clientServiceProperties, circuitBreakerFactory);
@@ -87,13 +90,13 @@ class CircuitBreakerRestClientHttpServiceGroupConfigurerTests {
 		CircuitBreakerAdapterDecorator decorator = (CircuitBreakerAdapterDecorator) captured
 			.apply(new TestHttpExchangeAdapter());
 		assertThat(decorator.getCircuitBreaker()).isNotNull();
-		assertThat(decorator.getFallbackClass()).isAssignableFrom(Fallbacks.class);
+		assertThat(decorator.getFallbackClasses().get(DEFAULT_FALLBACK_KEY)).isAssignableFrom(Fallbacks.class);
 	}
 
 	@Test
 	void shouldThrowExceptionWhenCantLoadClass() {
 		CloudHttpClientServiceProperties.Group group = new CloudHttpClientServiceProperties.Group();
-		group.setFallbackClassName("org.test.Fallback");
+		group.setFallbackClassNames(Collections.singletonMap(DEFAULT_FALLBACK_KEY, "org.test.Fallback"));
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
 		CircuitBreakerRestClientHttpServiceGroupConfigurer configurer = new CircuitBreakerRestClientHttpServiceGroupConfigurer(
 				clientServiceProperties, circuitBreakerFactory);
@@ -103,9 +106,9 @@ class CircuitBreakerRestClientHttpServiceGroupConfigurerTests {
 
 	@ParameterizedTest
 	@NullAndEmptySource
-	void shouldNotAddDecoratorWhenFallbackClassNameIsNull(String fallbackClassName) {
+	void shouldNotAddDecoratorWhenFallbackClassNamesNullOrEmpty(Map<String, String> fallbackClassNames) {
 		CloudHttpClientServiceProperties.Group group = new CloudHttpClientServiceProperties.Group();
-		group.setFallbackClassName(fallbackClassName);
+		group.setFallbackClassNames(fallbackClassNames);
 		clientServiceProperties.getGroup().put(GROUP_NAME, group);
 		CircuitBreakerRestClientHttpServiceGroupConfigurer configurer = new CircuitBreakerRestClientHttpServiceGroupConfigurer(
 				clientServiceProperties, circuitBreakerFactory);

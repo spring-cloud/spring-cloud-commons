@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -28,7 +29,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.service.invoker.HttpRequestValues;
 import org.springframework.web.service.invoker.ReactorHttpExchangeAdapter;
 
@@ -39,6 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.DEFAULT_FALLBACK_KEY;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME;
@@ -64,7 +65,7 @@ class ReactiveCircuitBreakerAdapterDecoratorTests {
 	private final HttpRequestValues httpRequestValues = mock(HttpRequestValues.class);
 
 	private final ReactiveCircuitBreakerAdapterDecorator decorator = new ReactiveCircuitBreakerAdapterDecorator(adapter,
-			reactiveCircuitBreaker, circuitBreaker, Fallbacks.class);
+			reactiveCircuitBreaker, circuitBreaker, Collections.singletonMap(DEFAULT_FALLBACK_KEY, Fallbacks.class));
 
 	@BeforeEach
 	void setUp() {
@@ -198,23 +199,6 @@ class ReactiveCircuitBreakerAdapterDecoratorTests {
 		Object fallback = fallbackHandler.apply(new RuntimeException("test")).blockFirst();
 
 		assertThat(fallback).isEqualTo(TEST_DESCRIPTION + ": " + TEST_VALUE);
-	}
-
-	@SuppressWarnings("DataFlowIssue")
-	@Test
-	void shouldCreateHttpHeadersMonoFallbackHandler() {
-		Map<String, Object> attributes = new HashMap<>();
-		attributes.put(METHOD_ATTRIBUTE_NAME, "testHttpHeadersMono");
-		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
-		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { TEST_DESCRIPTION, TEST_VALUE });
-		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, Mono.class);
-		when(httpRequestValues.getAttributes()).thenReturn(attributes);
-		Function<Throwable, Mono<HttpHeaders>> fallbackHandler = decorator
-			.createHttpHeadersMonoFallbackHandler(httpRequestValues);
-
-		HttpHeaders fallback = fallbackHandler.apply(new RuntimeException("test")).block();
-
-		assertThat(fallback.get(TEST_DESCRIPTION).get(0)).isEqualTo(String.valueOf(TEST_VALUE));
 	}
 
 	@Test

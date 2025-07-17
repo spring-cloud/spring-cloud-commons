@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,7 +27,7 @@ import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 
-import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveFallbackClass;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveFallbackClasses;
 
 /**
  * An implementation of {@link RestClientHttpServiceGroupConfigurer} that provides
@@ -58,17 +60,18 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
 			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
-			String fallbackClassName = (groupProperties != null) ? groupProperties.getFallbackClassName() : null;
-			if (fallbackClassName == null || fallbackClassName.isBlank()) {
+			Map<String, String> fallbackClassNames = (groupProperties != null) ? groupProperties.getFallbackClassNames()
+					: null;
+			if (fallbackClassNames == null || fallbackClassNames.isEmpty()) {
 				return;
 			}
-			Class<?> fallbackClass = resolveFallbackClass(fallbackClassName);
+			Map<Object, Class<?>> fallbackClasses = resolveFallbackClasses(fallbackClassNames);
 
 			factoryBuilder.httpRequestValuesProcessor(new CircuitBreakerRequestValueProcessor());
 
 			factoryBuilder
 				.exchangeAdapterDecorator(httpExchangeAdapter -> new CircuitBreakerAdapterDecorator(httpExchangeAdapter,
-						buildCircuitBreaker(groupName), fallbackClass));
+						buildCircuitBreaker(groupName), fallbackClasses));
 		});
 	}
 

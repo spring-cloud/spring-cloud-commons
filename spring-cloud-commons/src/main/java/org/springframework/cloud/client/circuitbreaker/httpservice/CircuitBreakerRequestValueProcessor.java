@@ -60,6 +60,11 @@ public class CircuitBreakerRequestValueProcessor implements HttpRequestValues.Pr
 	 */
 	public static final String RETURN_TYPE_ATTRIBUTE_NAME = "spring.cloud.method.return-type";
 
+	/**
+	 * Spring Cloud-specific attribute name for storing method declaring class name.
+	 */
+	public static final String DECLARING_CLASS_ATTRIBUTE_NAME = "spring.cloud.method.declaring-class";
+
 	@Override
 	public void process(Method method, MethodParameter[] parameters, @Nullable Object[] arguments,
 			HttpRequestValues.Builder builder) {
@@ -67,6 +72,7 @@ public class CircuitBreakerRequestValueProcessor implements HttpRequestValues.Pr
 		builder.addAttribute(PARAMETER_TYPES_ATTRIBUTE_NAME, method.getParameterTypes());
 		builder.addAttribute(ARGUMENTS_ATTRIBUTE_NAME, arguments);
 		builder.addAttribute(RETURN_TYPE_ATTRIBUTE_NAME, method.getReturnType());
+		builder.addAttribute(DECLARING_CLASS_ATTRIBUTE_NAME, method.getDeclaringClass());
 	}
 
 }

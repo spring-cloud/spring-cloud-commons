@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.client;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerAdapterDecorator;
 import org.springframework.cloud.client.circuitbreaker.httpservice.ReactiveCircuitBreakerAdapterDecorator;
 
@@ -35,14 +38,14 @@ public abstract class AbstractCloudHttpClientServiceProperties {
 	 * Both the fallback class and the fallback methods must be public.
 	 * </p>
 	 */
-	private String fallbackClassName;
+	private Map<String, String> fallbackClassNames = new HashMap<>();
 
-	public String getFallbackClassName() {
-		return fallbackClassName;
+	public Map<String, String> getFallbackClassNames() {
+		return fallbackClassNames;
 	}
 
-	public void setFallbackClassName(String fallbackClassName) {
-		this.fallbackClassName = fallbackClassName;
+	public void setFallbackClassNames(Map<String, String> fallbackClassNames) {
+		this.fallbackClassNames = fallbackClassNames;
 	}
 
 }

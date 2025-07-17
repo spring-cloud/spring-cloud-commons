@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
+import java.util.Map;
 import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
@@ -35,7 +36,7 @@ import org.springframework.web.service.invoker.ReactorHttpExchangeAdapter;
 import org.springframework.web.service.invoker.ReactorHttpExchangeAdapterDecorator;
 
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.castIfPossible;
-import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.createProxy;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.createProxies;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.getFallback;
 
 /**
@@ -65,16 +66,17 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 
 	private final CircuitBreaker circuitBreaker;
 
-	private final Class<?> fallbackClass;
+	private final Map<Object, Class<?>> fallbackClasses;
 
-	private volatile Object fallbackProxy;
+	private volatile Map<Object, Object> fallbackProxies;
 
 	public ReactiveCircuitBreakerAdapterDecorator(ReactorHttpExchangeAdapter delegate,
-			ReactiveCircuitBreaker reactiveCircuitBreaker, CircuitBreaker circuitBreaker, Class<?> fallbackClass) {
+			ReactiveCircuitBreaker reactiveCircuitBreaker, CircuitBreaker circuitBreaker,
+			Map<Object, Class<?>> fallbackClasses) {
 		super(delegate);
 		this.reactiveCircuitBreaker = reactiveCircuitBreaker;
 		this.circuitBreaker = circuitBreaker;
-		this.fallbackClass = fallbackClass;
+		this.fallbackClasses = fallbackClasses;
 	}
 
 	@Override
@@ -158,17 +160,17 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 
 	// Visible for tests
 	Function<Throwable, Object> createFallbackHandler(HttpRequestValues requestValues) {
-		return throwable -> getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass);
+		return throwable -> getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses);
 	}
 
 	<T> Function<Throwable, Mono<T>> createBodyMonoFallbackHandler(HttpRequestValues requestValues) {
 		if (((requestValues.getAttributes().get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME))
 			.equals(Mono.class))) {
 			return throwable -> castIfPossible(
-					getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
+					getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses));
 		}
 		return throwable -> {
-			Object fallback = getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass);
+			Object fallback = getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses);
 			if (fallback == null) {
 				return Mono.empty();
 			}
@@ -180,10 +182,10 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 		if (((requestValues.getAttributes().get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME)))
 			.equals(Flux.class)) {
 			return throwable -> castIfPossible(
-					getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
+					getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses));
 		}
 		return throwable -> {
-			Object fallback = getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass);
+			Object fallback = getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses);
 
 			if (fallback == null) {
 				return Flux.empty();
@@ -196,10 +198,10 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 		if ((requestValues.getAttributes().get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME))
 			.equals(Mono.class)) {
 			return throwable -> castIfPossible(
-					getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass));
+					getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses));
 		}
 		return throwable -> {
-			Object fallback = getFallback(requestValues, throwable, getFallbackProxy(), fallbackClass);
+			Object fallback = getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses);
 			if (fallback == null) {
 				return Mono.empty();
 			}
@@ -218,19 +220,19 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	}
 
 	// Visible for tests
-	Class<?> getFallbackClass() {
-		return fallbackClass;
+	Map<Object, Class<?>> getFallbackClasses() {
+		return fallbackClasses;
 	}
 
-	private Object getFallbackProxy() {
-		if (fallbackProxy == null) {
+	private Map<Object, Object> getFallbackProxies() {
+		if (fallbackProxies == null) {
 			synchronized (this) {
-				if (fallbackProxy == null) {
-					fallbackProxy = createProxy(fallbackClass);
+				if (fallbackProxies == null) {
+					fallbackProxies = createProxies(fallbackClasses);
 				}
 			}
 		}
-		return fallbackProxy;
+		return fallbackProxies;
 	}
 
 }

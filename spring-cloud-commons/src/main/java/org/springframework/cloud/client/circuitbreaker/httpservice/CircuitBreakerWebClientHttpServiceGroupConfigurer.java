@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.Map;
 
 import org.springframework.cloud.client.CloudHttpClientServiceProperties;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
@@ -29,7 +28,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
 import org.springframework.web.service.invoker.ReactorHttpExchangeAdapter;
 
-import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveFallbackClass;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveFallbackClasses;
 
 /**
  * An implementation of {@link WebClientHttpServiceGroupConfigurer} that provides
@@ -44,8 +43,6 @@ public class CircuitBreakerWebClientHttpServiceGroupConfigurer implements WebCli
 
 	// Make sure Boot's configurers run before
 	private static final int ORDER = 16;
-
-	private static final Log LOG = LogFactory.getLog(CircuitBreakerWebClientHttpServiceGroupConfigurer.class);
 
 	private final CloudHttpClientServiceProperties clientServiceProperties;
 
@@ -66,18 +63,19 @@ public class CircuitBreakerWebClientHttpServiceGroupConfigurer implements WebCli
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
 			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
-			String fallbackClassName = (groupProperties != null) ? groupProperties.getFallbackClassName() : null;
-			if (fallbackClassName == null || fallbackClassName.isBlank()) {
+			Map<String, String> fallbackClassNames = (groupProperties != null) ? groupProperties.getFallbackClassNames()
+					: null;
+			if (fallbackClassNames == null || fallbackClassNames.isEmpty()) {
 				return;
 			}
-			Class<?> fallbackClass = resolveFallbackClass(fallbackClassName);
+			Map<Object, Class<?>> fallbackClasses = resolveFallbackClasses(fallbackClassNames);
 
 			factoryBuilder.httpRequestValuesProcessor(new CircuitBreakerRequestValueProcessor());
 
 			factoryBuilder.exchangeAdapterDecorator(httpExchangeAdapter -> {
 				Assert.isInstanceOf(ReactorHttpExchangeAdapter.class, httpExchangeAdapter);
 				return new ReactiveCircuitBreakerAdapterDecorator((ReactorHttpExchangeAdapter) httpExchangeAdapter,
-						buildReactiveCircuitBreaker(groupName), buildCircuitBreaker(groupName), fallbackClass);
+						buildReactiveCircuitBreaker(groupName), buildCircuitBreaker(groupName), fallbackClasses);
 			});
 		});
 	}

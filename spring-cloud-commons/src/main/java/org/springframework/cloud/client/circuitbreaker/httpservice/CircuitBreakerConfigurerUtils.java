@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
@@ -31,6 +32,8 @@ import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableExcept
 import org.springframework.web.service.invoker.HttpExchangeAdapterDecorator;
 import org.springframework.web.service.invoker.HttpRequestValues;
 
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.DECLARING_CLASS_ATTRIBUTE_NAME;
+
 /**
  * Utility class used by CircuitBreaker-specific {@link HttpExchangeAdapterDecorator}
  * implementations.
@@ -40,22 +43,18 @@ import org.springframework.web.service.invoker.HttpRequestValues;
  */
 final class CircuitBreakerConfigurerUtils {
 
+	public static final String DEFAULT_FALLBACK_KEY = "default";
+
 	private CircuitBreakerConfigurerUtils() {
 		throw new UnsupportedOperationException("Cannot instantiate a utility class");
 	}
 
 	private static final Log LOG = LogFactory.getLog(CircuitBreakerConfigurerUtils.class);
 
-	static Class<?> resolveFallbackClass(String className) {
-		try {
-			return Class.forName(className);
-		}
-		catch (ClassNotFoundException e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Fallback class not found: " + className, e);
-			}
-			throw new IllegalStateException("Unable to load fallback class: " + className, e);
-		}
+	static Map<Object, Class<?>> resolveFallbackClasses(Map<String, String> fallbackClassNames) {
+		return fallbackClassNames.entrySet()
+			.stream()
+			.collect(Collectors.toMap(java.util.Map.Entry::getKey, entry -> resolveFallbackClass(entry.getValue())));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -120,19 +119,43 @@ final class CircuitBreakerConfigurerUtils {
 		}
 	}
 
-	static Object getFallback(HttpRequestValues requestValues, Throwable throwable, Object fallbackProxy,
-			Class<?> fallbackClass) {
+	static Object getFallback(HttpRequestValues requestValues, Throwable throwable, Map<Object, Object> fallbackProxies,
+			Map<Object, Class<?>> fallbackClasses) {
 		Map<String, Object> attributes = requestValues.getAttributes();
+		Class<?> fallbackClass = fallbackClasses.get(attributes.get(DECLARING_CLASS_ATTRIBUTE_NAME)) != null
+				? fallbackClasses.get(attributes.get(DECLARING_CLASS_ATTRIBUTE_NAME))
+				: fallbackClasses.get(DEFAULT_FALLBACK_KEY);
 		Method fallback = resolveFallbackMethod(attributes, false, fallbackClass);
 		Method fallbackWithCause = resolveFallbackMethod(attributes, true, fallbackClass);
+		Object fallbackProxy = fallbackProxies.get(attributes.get(DECLARING_CLASS_ATTRIBUTE_NAME)) != null
+				? fallbackProxies.get(attributes.get(DECLARING_CLASS_ATTRIBUTE_NAME))
+				: fallbackProxies.get(DEFAULT_FALLBACK_KEY);
 		if (fallback != null) {
 			return invokeFallback(fallback, attributes, null, fallbackProxy);
 		}
 		else if (fallbackWithCause != null) {
-			return invokeFallback(fallbackWithCause, attributes, throwable, fallbackProxy);
+			return invokeFallback(fallbackWithCause, attributes, throwable, fallbackProxies);
 		}
 		else {
 			throw new NoFallbackAvailableException("No fallback available.", throwable);
+		}
+	}
+
+	static Map<Object, Object> createProxies(Map<Object, Class<?>> fallbackClasses) {
+		return fallbackClasses.entrySet()
+			.stream()
+			.collect(Collectors.toMap(Map.Entry::getKey, entry -> createProxy(entry.getValue())));
+	}
+
+	private static Class<?> resolveFallbackClass(String className) {
+		try {
+			return Class.forName(className);
+		}
+		catch (ClassNotFoundException e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Fallback class not found: " + className, e);
+			}
+			throw new IllegalStateException("Unable to load fallback class: " + className, e);
 		}
 	}
 
