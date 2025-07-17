@@ -47,7 +47,7 @@ import static org.springframework.cloud.client.circuitbreaker.httpservice.Circui
  * <ul>
  * <li>A method with the same name and argument types as the original method, or</li>
  * <li>A method with the same name and the original arguments preceded by a
- * {@link Throwable}, allowing the user to access the {@code throwable} within the
+ * {@link Throwable}, allowing the user to access the cause of failure within the
  * fallback.</li>
  * </ul>
  * Once a matching method is found, it is invoked to provide the fallback behavior. Both
