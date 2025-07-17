@@ -102,3 +102,49 @@ Customizer.once(circuitBreaker -> {
     .onStateTransition(event -> log.info("{}: {}", event.getCircuitBreakerName(), event.getStateTransition()));
 }, CircuitBreaker::getName)
 ----
+
+[[interface-clients]]
+== Spring Interface Clients support
+
+We provide integration for Spring Interface Clients through the `CircuitBreakerRestClientHttpServiceGroupConfigurer` and `CircuitBreakerWebClientHttpServiceGroupConfigurer`. If for a given https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-interface-group-config[Spring Interface Clients Group], a fallback class name has been set through `spring.cloud.http.client.service.group.[groupName].fallback-class-name`, a `CircuitBreakerAdapterDecorator` or `ReactiveCircuitBreakerAdapterDecorator` -depending on whether `RestClient` or `WebClient` is being used under the hood- will be added for that group.
+
+The adapters wrap `@HttpExchange` calls with CircuitBreaker invocation. In the event of a CircuitBreaker fallback, they use the user-provided fallback
+class to create a proxy. The fallback method is selected by matching either:
+
+* A method with the same name and argument types as the original method, or
+* A method with the same name and the original arguments preceded by a
+`Throwable`, allowing the user to access the cause of failure within the
+fallback.
+
+For example, for the following interface:
+
+[source, java]
+----
+@HttpExchange("/test")
+public interface TestService {
+
+	@GetExchange("/{id}")
+	Person test(@PathVariable UUID id);
+
+	@GetExchange
+	String test();
+}
+----
+
+the following fallback class would have matching methods:
+
+[source, java]
+----
+public class TestServiceFallback {
+
+	Person test(UUID id);
+
+	String test(Throwable cause);
+}
+----
+
+Once a matching method is found, it is invoked to provide the fallback behavior. Both the fallback class and the fallback methods must be public.
+
+A single fallback class is required for the entire group, so fallback methods for various interface methods can be placed there.
+
+TIP: The fallback class methods should not have the `@HttpExchange`-related annotations in its methods.
