@@ -60,10 +60,10 @@ import org.springframework.web.reactive.function.client.support.WebClientHttpSer
 @EnableConfigurationProperties(CloudHttpClientServiceProperties.class)
 public class CommonsClientAutoConfiguration {
 
-	// FIXME: move instantiation to`spring-cloud-circuitbreaker` project
-	// TODO: add property flag
-	@ConditionalOnClass({ CircuitBreaker.class, RestClientHttpServiceGroupConfigurer.class })
+	@ConditionalOnClass({CircuitBreaker.class, RestClientHttpServiceGroupConfigurer.class})
 	@ConditionalOnBean(CircuitBreakerFactory.class)
+	@ConditionalOnProperty(value = "spring.cloud.circuitbreaker.interface-clients.enabled",
+			havingValue = "true", matchIfMissing = true)
 	@Configuration(proxyBeanMethods = false)
 	protected static class CircuitBreakerInterfaceClientsAutoConfiguration {
 
@@ -75,11 +75,12 @@ public class CommonsClientAutoConfiguration {
 
 	}
 
-	// FIXME: move instantiation to`spring-cloud-circuitbreaker` project
-	// TODO: add property flag
-	@ConditionalOnClass({ CircuitBreaker.class, ReactiveCircuitBreaker.class,
-			WebClientHttpServiceGroupConfigurer.class })
-	@ConditionalOnBean({ CircuitBreakerFactory.class, ReactiveCircuitBreakerFactory.class })
+
+	@ConditionalOnClass({CircuitBreaker.class, ReactiveCircuitBreaker.class,
+			WebClientHttpServiceGroupConfigurer.class})
+	@ConditionalOnBean({CircuitBreakerFactory.class, ReactiveCircuitBreakerFactory.class})
+	@ConditionalOnProperty(value = "spring.cloud.circuitbreaker.reactive-interface-clients.enabled",
+			havingValue = "true", matchIfMissing = true)
 	@Configuration(proxyBeanMethods = false)
 	protected static class ReactiveCircuitBreakerInterfaceClientsAutoConfiguration {
 
@@ -112,7 +113,7 @@ public class CommonsClientAutoConfiguration {
 		@Bean
 		@ConditionalOnProperty(value = "spring.cloud.discovery.client.composite-indicator.enabled",
 				matchIfMissing = true)
-		@ConditionalOnBean({ DiscoveryHealthIndicator.class })
+		@ConditionalOnBean({DiscoveryHealthIndicator.class})
 		public DiscoveryCompositeHealthContributor discoveryCompositeHealthContributor(
 				List<DiscoveryHealthIndicator> indicators) {
 			return new DiscoveryCompositeHealthContributor(indicators);
