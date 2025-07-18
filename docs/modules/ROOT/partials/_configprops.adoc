@@ -23,6 +23,8 @@
 |spring.cloud.discovery.client.simple.order |  | 
 |spring.cloud.discovery.enabled | `+++true+++` | Enables discovery client health indicators.
 |spring.cloud.features.enabled | `+++true+++` | Enables the features endpoint.
+|spring.cloud.http.client.service.fallback-class-names |  | 
+|spring.cloud.http.client.service.group |  | Maps properties to groups by group name.
 |spring.cloud.httpclientfactories.apache.enabled | `+++true+++` | Enables creation of Apache Http Client factory beans.
 |spring.cloud.httpclientfactories.ok.enabled | `+++true+++` | Enables creation of OK Http Client factory beans.
 |spring.cloud.hypermedia.refresh.fixed-delay | `+++5000+++` | 

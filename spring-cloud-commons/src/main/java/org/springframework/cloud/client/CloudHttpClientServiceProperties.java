@@ -30,6 +30,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("spring.cloud.http.client.service")
 public class CloudHttpClientServiceProperties extends AbstractCloudHttpClientServiceProperties {
 
+	/**
+	 * Maps properties to groups by group name.
+	 */
 	private Map<String, Group> group = new LinkedHashMap<>();
 
 	public Map<String, Group> getGroup() {
