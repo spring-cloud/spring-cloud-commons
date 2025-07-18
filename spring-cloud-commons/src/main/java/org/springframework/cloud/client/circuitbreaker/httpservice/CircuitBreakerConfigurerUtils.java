@@ -19,6 +19,7 @@ package org.springframework.cloud.client.circuitbreaker.httpservice;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,7 +29,10 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.cloud.client.CloudHttpClientServiceProperties;
 import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.service.invoker.HttpExchangeAdapterDecorator;
 import org.springframework.web.service.invoker.HttpRequestValues;
 
@@ -53,8 +57,8 @@ final class CircuitBreakerConfigurerUtils {
 
 	static Map<String, Class<?>> resolveFallbackClasses(Map<String, String> fallbackClassNames) {
 		return fallbackClassNames.entrySet()
-			.stream()
-			.collect(Collectors.toMap(java.util.Map.Entry::getKey, entry -> resolveFallbackClass(entry.getValue())));
+				.stream()
+				.collect(Collectors.toMap(java.util.Map.Entry::getKey, entry -> resolveFallbackClass(entry.getValue())));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -70,16 +74,81 @@ final class CircuitBreakerConfigurerUtils {
 		}
 	}
 
+	static Map<String, Class<?>> resolveDefaultFallbackClasses(org.springframework.context.ApplicationContext applicationContext,
+			String groupName, CloudHttpClientServiceProperties clientServiceProperties) {
+		Map<String, Class<?>> defaultAnnotationFallbackClasses = resolveAnnotatedFallbackClasses(applicationContext,
+				groupName);
+		Map<String, Class<?>> defaultPropertiesFallbackClasses = resolveFallbackClasses(clientServiceProperties.getFallbackClassNames());
+		return mergeFallbackMaps(defaultAnnotationFallbackClasses, defaultPropertiesFallbackClasses);
+	}
+
+	static Map<String, Class<?>> resolvePerGroupFallbackClasses(ApplicationContext applicationContext,
+			String groupName, CloudHttpClientServiceProperties clientServiceProperties) {
+		Map<String, Class<?>> perGroupAnnotationFallbackClasses = resolveAnnotatedFallbackClasses(applicationContext,
+				groupName);
+		CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup()
+				.get(groupName);
+		Map<String, String> perGroupPropertyFallbackClassNames = (groupProperties != null) ? groupProperties.getFallbackClassNames()
+				: new HashMap<>();
+		return perGroupPropertyFallbackClassNames != null
+				? mergeFallbackMaps(perGroupAnnotationFallbackClasses, resolveFallbackClasses(perGroupPropertyFallbackClassNames))
+				: perGroupAnnotationFallbackClasses;
+	}
+
+	private static Map<String, Class<?>> resolveAnnotatedFallbackClasses(ApplicationContext context,
+			String groupName) {
+		Map<String, Object> fallbackBeans = context.getBeansWithAnnotation(Fallback.class);
+		Map<String, Class<?>> fallbackClasses = new HashMap<>();
+
+		for (Object fallbackBean : fallbackBeans.values()) {
+			Fallback annotation = AnnotationUtils.findAnnotation(fallbackBean.getClass(), Fallback.class);
+			if (annotation == null) continue;
+
+			String group = annotation.forGroup();
+			if (!groupName.equals(group)) {
+				continue;
+			}
+
+			Class<?>[] services = annotation.forService();
+			if (services.length == 0) {
+				addFallbackEntry(fallbackClasses, "default", fallbackBean.getClass());
+			}
+			else {
+				for (Class<?> serviceClass : services) {
+					addFallbackEntry(fallbackClasses, serviceClass.getName(), fallbackBean.getClass());
+				}
+			}
+		}
+		return fallbackClasses;
+	}
+
+	private static void addFallbackEntry(Map<String, Class<?>> map, String key, Class<?> fallbackClass) {
+		if (map.containsKey(key)) {
+			throw new IllegalStateException("Duplicate fallback key: " + key);
+		}
+		map.put(key, fallbackClass);
+	}
+
+
+	private static Map<String, Class<?>> mergeFallbackMaps(Map<String, Class<?>> primary, Map<String, Class<?>> secondary) {
+		Map<String, Class<?>> merged = new HashMap<>(primary);
+		for (Map.Entry<String, Class<?>> entry : secondary.entrySet()) {
+			merged.putIfAbsent(entry.getKey(), entry.getValue());
+		}
+		return merged;
+	}
+
 	static Method resolveFallbackMethod(Map<String, Object> attributes, boolean withThrowable, Class<?> fallbackClass) {
 		if (fallbackClass == null) {
 			return null;
 		}
 		String methodName = String.valueOf(attributes.get(CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME));
 		Class<?>[] paramTypes = (Class<?>[]) attributes
-			.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
+				.get(CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME);
 		paramTypes = paramTypes != null ? paramTypes : new Class<?>[0];
 		Class<?>[] effectiveTypes = withThrowable
-				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes)).toArray(Class[]::new)
+				? Stream.concat(Stream.of(Throwable.class), Arrays.stream(paramTypes))
+				.toArray(Class[]::new)
 				: paramTypes;
 
 		try {
@@ -101,7 +170,8 @@ final class CircuitBreakerConfigurerUtils {
 			Object[] args = (Object[]) attributes.get(CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME);
 			args = args != null ? args : new Class<?>[0];
 			Object[] finalArgs = (throwable != null)
-					? Stream.concat(Stream.of(throwable), Arrays.stream(args)).toArray(Object[]::new) : args;
+					? Stream.concat(Stream.of(throwable), Arrays.stream(args))
+					.toArray(Object[]::new) : args;
 			return method.invoke(fallbackProxy, finalArgs);
 		}
 		catch (InvocationTargetException | IllegalAccessException exception) {
@@ -142,8 +212,8 @@ final class CircuitBreakerConfigurerUtils {
 
 	static Map<String, Object> createProxies(Map<String, Class<?>> fallbackClasses) {
 		return fallbackClasses.entrySet()
-			.stream()
-			.collect(Collectors.toMap(Map.Entry::getKey, entry -> createProxy(entry.getValue())));
+				.stream()
+				.collect(Collectors.toMap(Map.Entry::getKey, entry -> createProxy(entry.getValue())));
 	}
 
 	private static Class<?> resolveFallbackClass(String className) {

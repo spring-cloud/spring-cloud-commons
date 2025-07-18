@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.client;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -33,7 +33,7 @@ public class CloudHttpClientServiceProperties extends AbstractCloudHttpClientSer
 	/**
 	 * Maps properties to groups by group name.
 	 */
-	private Map<String, Group> group = new LinkedHashMap<>();
+	private Map<String, Group> group = new HashMap<>();
 
 	public Map<String, Group> getGroup() {
 		return this.group;

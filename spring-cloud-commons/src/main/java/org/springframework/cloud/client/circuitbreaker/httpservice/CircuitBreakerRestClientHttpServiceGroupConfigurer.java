@@ -18,16 +18,17 @@ package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.springframework.beans.BeansException;
 import org.springframework.cloud.client.CloudHttpClientServiceProperties;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 
-import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveFallbackClasses;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveDefaultFallbackClasses;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolvePerGroupFallbackClasses;
 
 /**
  * An implementation of {@link RestClientHttpServiceGroupConfigurer} that provides
@@ -38,16 +39,17 @@ import static org.springframework.cloud.client.circuitbreaker.httpservice.Circui
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
  */
-public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
+public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer,
+		ApplicationContextAware {
 
 	// Make sure Boot's configurers run before
 	private static final int ORDER = 15;
 
-	private static final Log LOG = LogFactory.getLog(CircuitBreakerRestClientHttpServiceGroupConfigurer.class);
-
 	private final CloudHttpClientServiceProperties clientServiceProperties;
 
 	private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
+
+	private org.springframework.context.ApplicationContext applicationContext;
 
 	public CircuitBreakerRestClientHttpServiceGroupConfigurer(CloudHttpClientServiceProperties clientServiceProperties,
 			CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
@@ -59,21 +61,18 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 	public void configureGroups(Groups<RestClient.Builder> groups) {
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
-			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
-			Map<String, String> fallbackClassNames = (groupProperties != null) ? groupProperties.getFallbackClassNames()
-					: clientServiceProperties.getFallbackClassNames();
-			if (fallbackClassNames == null || fallbackClassNames.isEmpty()) {
-				return;
-			}
-			Map<String, Class<?>> fallbackClasses = resolveFallbackClasses(fallbackClassNames);
-
+			Map<String, Class<?>> fallbackClasses = !resolvePerGroupFallbackClasses(applicationContext,
+					groupName, clientServiceProperties).isEmpty()
+					? resolvePerGroupFallbackClasses(applicationContext, groupName, clientServiceProperties)
+					: resolveDefaultFallbackClasses(applicationContext, groupName, clientServiceProperties);
 			factoryBuilder.httpRequestValuesProcessor(new CircuitBreakerRequestValueProcessor());
 
 			factoryBuilder
-				.exchangeAdapterDecorator(httpExchangeAdapter -> new CircuitBreakerAdapterDecorator(httpExchangeAdapter,
-						buildCircuitBreaker(groupName), fallbackClasses));
+					.exchangeAdapterDecorator(httpExchangeAdapter -> new CircuitBreakerAdapterDecorator(httpExchangeAdapter,
+							buildCircuitBreaker(groupName), fallbackClasses));
 		});
 	}
+
 
 	private CircuitBreaker buildCircuitBreaker(String groupName) {
 		return circuitBreakerFactory.create(groupName);
@@ -84,4 +83,8 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 		return ORDER;
 	}
 
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
+	}
 }
