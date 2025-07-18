@@ -134,7 +134,7 @@ final class CircuitBreakerConfigurerUtils {
 			return invokeFallback(fallback, attributes, null, fallbackProxy);
 		}
 		else if (fallbackWithCause != null) {
-			return invokeFallback(fallbackWithCause, attributes, throwable, fallbackProxies);
+			return invokeFallback(fallbackWithCause, attributes, throwable, fallbackProxy);
 		}
 		else {
 			throw new NoFallbackAvailableException("No fallback available.", throwable);

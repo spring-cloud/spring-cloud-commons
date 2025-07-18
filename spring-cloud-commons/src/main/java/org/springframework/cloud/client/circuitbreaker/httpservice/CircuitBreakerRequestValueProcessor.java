@@ -72,7 +72,7 @@ public class CircuitBreakerRequestValueProcessor implements HttpRequestValues.Pr
 		builder.addAttribute(PARAMETER_TYPES_ATTRIBUTE_NAME, method.getParameterTypes());
 		builder.addAttribute(ARGUMENTS_ATTRIBUTE_NAME, arguments);
 		builder.addAttribute(RETURN_TYPE_ATTRIBUTE_NAME, method.getReturnType());
-		builder.addAttribute(DECLARING_CLASS_ATTRIBUTE_NAME, method.getDeclaringClass());
+		builder.addAttribute(DECLARING_CLASS_ATTRIBUTE_NAME, method.getDeclaringClass().getName());
 	}
 
 }
