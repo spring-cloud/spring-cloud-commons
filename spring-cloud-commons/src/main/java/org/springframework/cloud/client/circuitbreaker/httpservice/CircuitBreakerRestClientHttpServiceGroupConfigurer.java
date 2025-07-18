@@ -65,7 +65,7 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 			if (fallbackClassNames == null || fallbackClassNames.isEmpty()) {
 				return;
 			}
-			Map<Object, Class<?>> fallbackClasses = resolveFallbackClasses(fallbackClassNames);
+			Map<String, Class<?>> fallbackClasses = resolveFallbackClasses(fallbackClassNames);
 
 			factoryBuilder.httpRequestValuesProcessor(new CircuitBreakerRequestValueProcessor());
 

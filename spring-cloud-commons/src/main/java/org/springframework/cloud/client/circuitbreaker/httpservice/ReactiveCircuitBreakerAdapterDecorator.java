@@ -66,13 +66,13 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 
 	private final CircuitBreaker circuitBreaker;
 
-	private final Map<Object, Class<?>> fallbackClasses;
+	private final Map<String, Class<?>> fallbackClasses;
 
-	private volatile Map<Object, Object> fallbackProxies;
+	private volatile Map<String, Object> fallbackProxies;
 
 	public ReactiveCircuitBreakerAdapterDecorator(ReactorHttpExchangeAdapter delegate,
 			ReactiveCircuitBreaker reactiveCircuitBreaker, CircuitBreaker circuitBreaker,
-			Map<Object, Class<?>> fallbackClasses) {
+			Map<String, Class<?>> fallbackClasses) {
 		super(delegate);
 		this.reactiveCircuitBreaker = reactiveCircuitBreaker;
 		this.circuitBreaker = circuitBreaker;
@@ -220,11 +220,11 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	}
 
 	// Visible for tests
-	Map<Object, Class<?>> getFallbackClasses() {
+	Map<String, Class<?>> getFallbackClasses() {
 		return fallbackClasses;
 	}
 
-	private Map<Object, Object> getFallbackProxies() {
+	private Map<String, Object> getFallbackProxies() {
 		if (fallbackProxies == null) {
 			synchronized (this) {
 				if (fallbackProxies == null) {

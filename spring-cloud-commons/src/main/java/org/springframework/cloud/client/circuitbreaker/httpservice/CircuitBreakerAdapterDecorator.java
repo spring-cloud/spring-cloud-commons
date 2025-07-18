@@ -59,12 +59,12 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 
 	private final CircuitBreaker circuitBreaker;
 
-	private final Map<Object, Class<?>> fallbackClasses;
+	private final Map<String, Class<?>> fallbackClasses;
 
-	private volatile Map<Object, Object> fallbackProxies;
+	private volatile Map<String, Object> fallbackProxies;
 
 	public CircuitBreakerAdapterDecorator(HttpExchangeAdapter delegate, CircuitBreaker circuitBreaker,
-			Map<Object, Class<?>> fallbackClasses) {
+			Map<String, Class<?>> fallbackClasses) {
 		super(delegate);
 		this.circuitBreaker = circuitBreaker;
 		this.fallbackClasses = fallbackClasses;
@@ -111,7 +111,7 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 	}
 
 	// Visible for tests
-	Map<Object, Class<?>> getFallbackClasses() {
+	Map<String, Class<?>> getFallbackClasses() {
 		return fallbackClasses;
 	}
 
@@ -133,7 +133,7 @@ public class CircuitBreakerAdapterDecorator extends HttpExchangeAdapterDecorator
 		return throwable -> getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses);
 	}
 
-	private Map<Object, Object> getFallbackProxies() {
+	private Map<String, Object> getFallbackProxies() {
 		if (fallbackProxies == null) {
 			synchronized (this) {
 				if (fallbackProxies == null) {

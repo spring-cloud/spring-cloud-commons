@@ -51,7 +51,7 @@ final class CircuitBreakerConfigurerUtils {
 
 	private static final Log LOG = LogFactory.getLog(CircuitBreakerConfigurerUtils.class);
 
-	static Map<Object, Class<?>> resolveFallbackClasses(Map<String, String> fallbackClassNames) {
+	static Map<String, Class<?>> resolveFallbackClasses(Map<String, String> fallbackClassNames) {
 		return fallbackClassNames.entrySet()
 			.stream()
 			.collect(Collectors.toMap(java.util.Map.Entry::getKey, entry -> resolveFallbackClass(entry.getValue())));
@@ -119,17 +119,16 @@ final class CircuitBreakerConfigurerUtils {
 		}
 	}
 
-	static Object getFallback(HttpRequestValues requestValues, Throwable throwable, Map<Object, Object> fallbackProxies,
-			Map<Object, Class<?>> fallbackClasses) {
+	static Object getFallback(HttpRequestValues requestValues, Throwable throwable, Map<String, Object> fallbackProxies,
+			Map<String, Class<?>> fallbackClasses) {
 		Map<String, Object> attributes = requestValues.getAttributes();
-		Class<?> fallbackClass = fallbackClasses.get(attributes.get(DECLARING_CLASS_ATTRIBUTE_NAME)) != null
-				? fallbackClasses.get(attributes.get(DECLARING_CLASS_ATTRIBUTE_NAME))
-				: fallbackClasses.get(DEFAULT_FALLBACK_KEY);
+		String declaringClassName = (String) attributes.get(DECLARING_CLASS_ATTRIBUTE_NAME);
+		Class<?> fallbackClass = fallbackClasses.getOrDefault(declaringClassName,
+				fallbackClasses.get(DEFAULT_FALLBACK_KEY));
 		Method fallback = resolveFallbackMethod(attributes, false, fallbackClass);
 		Method fallbackWithCause = resolveFallbackMethod(attributes, true, fallbackClass);
-		Object fallbackProxy = fallbackProxies.get(attributes.get(DECLARING_CLASS_ATTRIBUTE_NAME)) != null
-				? fallbackProxies.get(attributes.get(DECLARING_CLASS_ATTRIBUTE_NAME))
-				: fallbackProxies.get(DEFAULT_FALLBACK_KEY);
+		Object fallbackProxy = fallbackProxies.getOrDefault(declaringClassName,
+				fallbackProxies.get(DEFAULT_FALLBACK_KEY));
 		if (fallback != null) {
 			return invokeFallback(fallback, attributes, null, fallbackProxy);
 		}
@@ -141,7 +140,7 @@ final class CircuitBreakerConfigurerUtils {
 		}
 	}
 
-	static Map<Object, Object> createProxies(Map<Object, Class<?>> fallbackClasses) {
+	static Map<String, Object> createProxies(Map<String, Class<?>> fallbackClasses) {
 		return fallbackClasses.entrySet()
 			.stream()
 			.collect(Collectors.toMap(Map.Entry::getKey, entry -> createProxy(entry.getValue())));

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -54,8 +53,10 @@ class CircuitBreakerAdapterDecoratorTests {
 
 	private final HttpRequestValues httpRequestValues = mock(HttpRequestValues.class);
 
+	// Also verifies class fallback won't override default fallback for other classes
 	private final CircuitBreakerAdapterDecorator decorator = new CircuitBreakerAdapterDecorator(adapter, circuitBreaker,
-			Collections.singletonMap(DEFAULT_FALLBACK_KEY, Fallbacks.class));
+			Map.of(DEFAULT_FALLBACK_KEY, Fallbacks.class, UnusedTestService.class.getCanonicalName(),
+					EmptyFallbacks.class));
 
 	@Test
 	void shouldWrapAdapterCallsWithCircuitBreakerInvocation() {
@@ -71,6 +72,7 @@ class CircuitBreakerAdapterDecoratorTests {
 		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
 		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { "testDescription", 5 });
 		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, String.class);
+		attributes.put(DECLARING_CLASS_ATTRIBUTE_NAME, TestService.class.getCanonicalName());
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
@@ -81,8 +83,8 @@ class CircuitBreakerAdapterDecoratorTests {
 
 	@Test
 	void shouldCreateFallbackHandlerFromPerClassFallbackClassNames() {
-		Map<Object, Class<?>> perClassFallbackClassNames = Map.of(DEFAULT_FALLBACK_KEY, EmptyFallbacks.class,
-				TestService.class, Fallbacks.class);
+		Map<String, Class<?>> perClassFallbackClassNames = Map.of(DEFAULT_FALLBACK_KEY, EmptyFallbacks.class,
+				TestService.class.getCanonicalName(), Fallbacks.class);
 		CircuitBreakerAdapterDecorator decorator = new CircuitBreakerAdapterDecorator(adapter, circuitBreaker,
 				perClassFallbackClassNames);
 		Map<String, Object> attributes = new HashMap<>();
@@ -90,7 +92,7 @@ class CircuitBreakerAdapterDecoratorTests {
 		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
 		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { "testDescription", 5 });
 		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, String.class);
-		attributes.put(DECLARING_CLASS_ATTRIBUTE_NAME, TestService.class);
+		attributes.put(DECLARING_CLASS_ATTRIBUTE_NAME, TestService.class.getCanonicalName());
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
@@ -106,6 +108,7 @@ class CircuitBreakerAdapterDecoratorTests {
 		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { Throwable.class, String.class, Integer.class });
 		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { new Throwable("test!"), "testDescription", 5 });
 		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, String.class);
+		attributes.put(DECLARING_CLASS_ATTRIBUTE_NAME, TestService.class.getCanonicalName());
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
@@ -116,6 +119,9 @@ class CircuitBreakerAdapterDecoratorTests {
 
 	@Test
 	void shouldThrowExceptionWhenNoFallbackAvailable() {
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put(DECLARING_CLASS_ATTRIBUTE_NAME, TestService.class.getCanonicalName());
+		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 
 		assertThatExceptionOfType(NoFallbackAvailableException.class)
