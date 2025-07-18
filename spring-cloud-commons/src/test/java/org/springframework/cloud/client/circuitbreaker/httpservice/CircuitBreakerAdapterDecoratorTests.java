@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.DEFAULT_FALLBACK_KEY;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.DECLARING_CLASS_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME;
@@ -70,6 +71,26 @@ class CircuitBreakerAdapterDecoratorTests {
 		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
 		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { "testDescription", 5 });
 		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, String.class);
+		when(httpRequestValues.getAttributes()).thenReturn(attributes);
+		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
+
+		Object fallback = fallbackHandler.apply(new RuntimeException("test"));
+
+		assertThat(fallback).isEqualTo("testDescription: 5");
+	}
+
+	@Test
+	void shouldCreateFallbackHandlerFromPerClassFallbackClassNames() {
+		Map<Object, Class<?>> perClassFallbackClassNames = Map.of(DEFAULT_FALLBACK_KEY, EmptyFallbacks.class,
+				TestService.class, Fallbacks.class);
+		CircuitBreakerAdapterDecorator decorator = new CircuitBreakerAdapterDecorator(adapter, circuitBreaker,
+				perClassFallbackClassNames);
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put(METHOD_ATTRIBUTE_NAME, "test");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { "testDescription", 5 });
+		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, String.class);
+		attributes.put(DECLARING_CLASS_ATTRIBUTE_NAME, TestService.class);
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Object> fallbackHandler = decorator.createFallbackHandler(httpRequestValues);
 

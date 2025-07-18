@@ -61,7 +61,7 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 			String groupName = group.name();
 			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
 			Map<String, String> fallbackClassNames = (groupProperties != null) ? groupProperties.getFallbackClassNames()
-					: null;
+					: clientServiceProperties.getFallbackClassNames();
 			if (fallbackClassNames == null || fallbackClassNames.isEmpty()) {
 				return;
 			}

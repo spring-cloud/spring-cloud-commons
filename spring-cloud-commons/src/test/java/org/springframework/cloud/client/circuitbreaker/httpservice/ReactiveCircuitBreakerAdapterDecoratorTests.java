@@ -42,6 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.DEFAULT_FALLBACK_KEY;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.ARGUMENTS_ATTRIBUTE_NAME;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.DECLARING_CLASS_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.METHOD_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.PARAMETER_TYPES_ATTRIBUTE_NAME;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME;
@@ -102,6 +103,26 @@ class ReactiveCircuitBreakerAdapterDecoratorTests {
 		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
 		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { TEST_DESCRIPTION, TEST_VALUE });
 		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, Mono.class);
+		when(httpRequestValues.getAttributes()).thenReturn(attributes);
+		Function<Throwable, Mono<Object>> fallbackHandler = decorator.createBodyMonoFallbackHandler(httpRequestValues);
+
+		Object fallback = fallbackHandler.apply(new RuntimeException("test")).block();
+
+		assertThat(fallback).isEqualTo(TEST_DESCRIPTION + ": " + TEST_VALUE);
+	}
+
+	@Test
+	void shouldCreateBodyMonoFallbackHandlerFromPerClassFallbackClassNames() {
+		Map<Object, Class<?>> perClassFallbackClassNames = Map.of(DEFAULT_FALLBACK_KEY, EmptyFallbacks.class,
+				TestService.class, Fallbacks.class);
+		ReactiveCircuitBreakerAdapterDecorator decorator = new ReactiveCircuitBreakerAdapterDecorator(adapter,
+				reactiveCircuitBreaker, circuitBreaker, perClassFallbackClassNames);
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put(METHOD_ATTRIBUTE_NAME, "testMono");
+		attributes.put(PARAMETER_TYPES_ATTRIBUTE_NAME, new Class<?>[] { String.class, Integer.class });
+		attributes.put(ARGUMENTS_ATTRIBUTE_NAME, new Object[] { TEST_DESCRIPTION, TEST_VALUE });
+		attributes.put(RETURN_TYPE_ATTRIBUTE_NAME, Mono.class);
+		attributes.put(DECLARING_CLASS_ATTRIBUTE_NAME, TestService.class);
 		when(httpRequestValues.getAttributes()).thenReturn(attributes);
 		Function<Throwable, Mono<Object>> fallbackHandler = decorator.createBodyMonoFallbackHandler(httpRequestValues);
 
