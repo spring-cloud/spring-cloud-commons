@@ -57,6 +57,7 @@ import static org.springframework.cloud.client.circuitbreaker.httpservice.Circui
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
+ * @see Fallback
  */
 public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeAdapterDecorator {
 

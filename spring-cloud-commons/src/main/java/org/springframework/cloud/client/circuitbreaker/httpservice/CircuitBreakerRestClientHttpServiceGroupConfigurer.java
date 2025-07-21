@@ -19,7 +19,6 @@ package org.springframework.cloud.client.circuitbreaker.httpservice;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
-import org.springframework.cloud.client.CloudHttpClientServiceProperties;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.context.ApplicationContext;
@@ -27,33 +26,29 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
 
-import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveDefaultFallbackClasses;
-import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolvePerGroupFallbackClasses;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveAnnotatedFallbackClasses;
 
 /**
  * An implementation of {@link RestClientHttpServiceGroupConfigurer} that provides
  * CircuitBreaker integration for configured groups. This configurer applies
  * CircuitBreaker logic to each HTTP service group and provides fallback behavior based on
- * group-specific properties.
+ * the {@link Fallback} annotations configured by the user.
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
+ * @see Fallback
  */
-public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer,
-		ApplicationContextAware {
+public class CircuitBreakerRestClientHttpServiceGroupConfigurer
+		implements RestClientHttpServiceGroupConfigurer, ApplicationContextAware {
 
 	// Make sure Boot's configurers run before
 	private static final int ORDER = 15;
 
-	private final CloudHttpClientServiceProperties clientServiceProperties;
-
 	private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
-	private org.springframework.context.ApplicationContext applicationContext;
+	private ApplicationContext applicationContext;
 
-	public CircuitBreakerRestClientHttpServiceGroupConfigurer(CloudHttpClientServiceProperties clientServiceProperties,
-			CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
-		this.clientServiceProperties = clientServiceProperties;
+	public CircuitBreakerRestClientHttpServiceGroupConfigurer(CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
 		this.circuitBreakerFactory = circuitBreakerFactory;
 	}
 
@@ -61,18 +56,17 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 	public void configureGroups(Groups<RestClient.Builder> groups) {
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
-			Map<String, Class<?>> fallbackClasses = !resolvePerGroupFallbackClasses(applicationContext,
-					groupName, clientServiceProperties).isEmpty()
-					? resolvePerGroupFallbackClasses(applicationContext, groupName, clientServiceProperties)
-					: resolveDefaultFallbackClasses(applicationContext, groupName, clientServiceProperties);
+			Map<String, Class<?>> perGroupFallbackClasses = resolveAnnotatedFallbackClasses(applicationContext,
+					groupName);
+			Map<String, Class<?>> fallbackClasses = !perGroupFallbackClasses.isEmpty() ? perGroupFallbackClasses
+					: resolveAnnotatedFallbackClasses(applicationContext, null);
 			factoryBuilder.httpRequestValuesProcessor(new CircuitBreakerRequestValueProcessor());
 
 			factoryBuilder
-					.exchangeAdapterDecorator(httpExchangeAdapter -> new CircuitBreakerAdapterDecorator(httpExchangeAdapter,
-							buildCircuitBreaker(groupName), fallbackClasses));
+				.exchangeAdapterDecorator(httpExchangeAdapter -> new CircuitBreakerAdapterDecorator(httpExchangeAdapter,
+						buildCircuitBreaker(groupName), fallbackClasses));
 		});
 	}
-
 
 	private CircuitBreaker buildCircuitBreaker(String groupName) {
 		return circuitBreakerFactory.create(groupName);
@@ -87,4 +81,5 @@ public class CircuitBreakerRestClientHttpServiceGroupConfigurer implements RestC
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		this.applicationContext = applicationContext;
 	}
+
 }

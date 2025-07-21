@@ -57,7 +57,6 @@ import org.springframework.web.reactive.function.client.support.WebClientHttpSer
  * @author Omer Naci Soydemir
  */
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties(CloudHttpClientServiceProperties.class)
 public class CommonsClientAutoConfiguration {
 
 	@ConditionalOnClass({ CircuitBreaker.class, RestClientHttpServiceGroupConfigurer.class })
@@ -69,8 +68,8 @@ public class CommonsClientAutoConfiguration {
 
 		@Bean
 		public CircuitBreakerRestClientHttpServiceGroupConfigurer circuitBreakerRestClientConfigurer(
-				CloudHttpClientServiceProperties properties, CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
-			return new CircuitBreakerRestClientHttpServiceGroupConfigurer(properties, circuitBreakerFactory);
+				CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
+			return new CircuitBreakerRestClientHttpServiceGroupConfigurer(circuitBreakerFactory);
 		}
 
 	}
@@ -85,10 +84,9 @@ public class CommonsClientAutoConfiguration {
 
 		@Bean
 		public CircuitBreakerWebClientHttpServiceGroupConfigurer circuitBreakerWebClientConfigurer(
-				CloudHttpClientServiceProperties properties,
 				ReactiveCircuitBreakerFactory<?, ?> reactiveCircuitBreakerFactory,
 				CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
-			return new CircuitBreakerWebClientHttpServiceGroupConfigurer(properties, reactiveCircuitBreakerFactory,
+			return new CircuitBreakerWebClientHttpServiceGroupConfigurer(reactiveCircuitBreakerFactory,
 					circuitBreakerFactory);
 		}
 

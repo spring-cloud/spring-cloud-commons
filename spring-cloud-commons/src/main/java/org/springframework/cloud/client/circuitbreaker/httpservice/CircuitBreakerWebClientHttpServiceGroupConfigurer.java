@@ -18,42 +18,45 @@ package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 import java.util.Map;
 
-import org.springframework.cloud.client.CloudHttpClientServiceProperties;
+import org.springframework.beans.BeansException;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreakerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
 import org.springframework.web.service.invoker.ReactorHttpExchangeAdapter;
 
-import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveFallbackClasses;
+import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.resolveAnnotatedFallbackClasses;
 
 /**
  * An implementation of {@link WebClientHttpServiceGroupConfigurer} that provides
  * CircuitBreaker integration for configured groups. This configurer applies
  * CircuitBreaker logic to each HTTP service group and provides fallback behavior based on
- * group-specific properties.
+ * the {@link Fallback} annotations configured by the user.
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
+ * @see Fallback
  */
-public class CircuitBreakerWebClientHttpServiceGroupConfigurer implements WebClientHttpServiceGroupConfigurer {
+public class CircuitBreakerWebClientHttpServiceGroupConfigurer
+		implements WebClientHttpServiceGroupConfigurer, ApplicationContextAware {
 
 	// Make sure Boot's configurers run before
 	private static final int ORDER = 16;
-
-	private final CloudHttpClientServiceProperties clientServiceProperties;
 
 	private final ReactiveCircuitBreakerFactory<?, ?> reactiveCircuitBreakerFactory;
 
 	private final CircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
-	public CircuitBreakerWebClientHttpServiceGroupConfigurer(CloudHttpClientServiceProperties clientServiceProperties,
+	private ApplicationContext applicationContext;
+
+	public CircuitBreakerWebClientHttpServiceGroupConfigurer(
 			ReactiveCircuitBreakerFactory<?, ?> reactiveCircuitBreakerFactory,
 			CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
-		this.clientServiceProperties = clientServiceProperties;
 		this.reactiveCircuitBreakerFactory = reactiveCircuitBreakerFactory;
 		this.circuitBreakerFactory = circuitBreakerFactory;
 	}
@@ -62,14 +65,10 @@ public class CircuitBreakerWebClientHttpServiceGroupConfigurer implements WebCli
 	public void configureGroups(Groups<WebClient.Builder> groups) {
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
-			CloudHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
-			Map<String, String> fallbackClassNames = (groupProperties != null) ? groupProperties.getFallbackClassNames()
-					: null;
-			if (fallbackClassNames == null || fallbackClassNames.isEmpty()) {
-				return;
-			}
-			Map<String, Class<?>> fallbackClasses = resolveFallbackClasses(fallbackClassNames);
-
+			Map<String, Class<?>> perGroupFallbackClasses = resolveAnnotatedFallbackClasses(applicationContext,
+					groupName);
+			Map<String, Class<?>> fallbackClasses = !perGroupFallbackClasses.isEmpty() ? perGroupFallbackClasses
+					: resolveAnnotatedFallbackClasses(applicationContext, null);
 			factoryBuilder.httpRequestValuesProcessor(new CircuitBreakerRequestValueProcessor());
 
 			factoryBuilder.exchangeAdapterDecorator(httpExchangeAdapter -> {
@@ -91,6 +90,11 @@ public class CircuitBreakerWebClientHttpServiceGroupConfigurer implements WebCli
 	@Override
 	public int getOrder() {
 		return ORDER;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 
 }

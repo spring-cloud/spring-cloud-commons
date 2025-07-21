@@ -17,27 +17,26 @@
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.cloud.client.CloudHttpClientServiceProperties;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreakerFactory;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.HttpHeaders;
@@ -51,10 +50,7 @@ import org.springframework.web.service.registry.HttpServiceGroup;
 import org.springframework.web.service.registry.HttpServiceGroupConfigurer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerConfigurerUtils.DEFAULT_FALLBACK_KEY;
@@ -68,14 +64,14 @@ class CircuitBreakerWebClientHttpServiceGroupConfigurerTests {
 
 	private static final String GROUP_NAME = "testService";
 
-	private final CloudHttpClientServiceProperties clientServiceProperties = new CloudHttpClientServiceProperties();
-
 	private final CircuitBreakerFactory<?, ?> circuitBreakerFactory = mock(CircuitBreakerFactory.class);
 
 	private final ReactiveCircuitBreakerFactory<?, ?> reactiveCircuitBreakerFactory = mock(
 			ReactiveCircuitBreakerFactory.class);
 
 	private final TestGroups groups = new TestGroups();
+
+	private final GenericApplicationContext applicationContext = new GenericApplicationContext();
 
 	@BeforeEach
 	void setUp() {
@@ -85,49 +81,36 @@ class CircuitBreakerWebClientHttpServiceGroupConfigurerTests {
 	}
 
 	@SuppressWarnings("unchecked")
-	@Test
-	void shouldAddCircuitBreakerAdapterDecorator() {
-		CloudHttpClientServiceProperties.Group group = new CloudHttpClientServiceProperties.Group();
-		group.setFallbackClassNames(Collections.singletonMap(DEFAULT_FALLBACK_KEY, Fallbacks.class.getCanonicalName()));
-		clientServiceProperties.getGroup().put(GROUP_NAME, group);
+	@ParameterizedTest(name = "[{index}] should configure circuit breaker with config class: {0}")
+	@MethodSource("fallbackConfigurations")
+	void shouldAddCircuitBreakerAdapterDecoratorWithFallbacks(Class<?> configClass) {
+		applicationContext.registerBean(configClass);
+		applicationContext.refresh();
+
 		CircuitBreakerWebClientHttpServiceGroupConfigurer configurer = new CircuitBreakerWebClientHttpServiceGroupConfigurer(
-				clientServiceProperties, reactiveCircuitBreakerFactory, circuitBreakerFactory);
+				reactiveCircuitBreakerFactory, circuitBreakerFactory);
+		configurer.setApplicationContext(applicationContext);
+
 		ArgumentCaptor<Function<HttpExchangeAdapter, HttpExchangeAdapter>> captor = ArgumentCaptor
 			.forClass(Function.class);
 
 		configurer.configureGroups(groups);
 
 		verify(groups.builder).exchangeAdapterDecorator(captor.capture());
+
 		Function<HttpExchangeAdapter, HttpExchangeAdapter> captured = captor.getValue();
 		ReactiveCircuitBreakerAdapterDecorator decorator = (ReactiveCircuitBreakerAdapterDecorator) captured
 			.apply(new TestHttpExchangeAdapter());
+
 		assertThat(decorator.getCircuitBreaker()).isNotNull();
-		assertThat(decorator.getReactiveCircuitBreaker()).isNotNull();
-		assertThat(decorator.getFallbackClasses().get(DEFAULT_FALLBACK_KEY)).isAssignableFrom(Fallbacks.class);
+		assertThat(decorator.getFallbackClasses().get(DEFAULT_FALLBACK_KEY)).isAssignableFrom(EmptyFallbacks.class);
+		assertThat(decorator.getFallbackClasses().get(TestService.class.getCanonicalName()))
+			.isAssignableFrom(Fallbacks.class);
 	}
 
-	@Test
-	void shouldThrowExceptionWhenCantLoadClass() {
-		CloudHttpClientServiceProperties.Group group = new CloudHttpClientServiceProperties.Group();
-		group.setFallbackClassNames(Collections.singletonMap(DEFAULT_FALLBACK_KEY, "org.test.Fallback"));
-		clientServiceProperties.getGroup().put(GROUP_NAME, group);
-		CircuitBreakerWebClientHttpServiceGroupConfigurer configurer = new CircuitBreakerWebClientHttpServiceGroupConfigurer(
-				clientServiceProperties, reactiveCircuitBreakerFactory, circuitBreakerFactory);
-
-		assertThatIllegalStateException().isThrownBy(() -> configurer.configureGroups(groups));
-	}
-
-	@ParameterizedTest
-	@NullAndEmptySource
-	void shouldNotAddDecoratorWhenFallbackClassNamesNullOrEmpty(Map<String, String> fallbackClassNames) {
-		CloudHttpClientServiceProperties.Group group = new CloudHttpClientServiceProperties.Group();
-		group.setFallbackClassNames(fallbackClassNames);
-		clientServiceProperties.getGroup().put(GROUP_NAME, group);
-		CircuitBreakerWebClientHttpServiceGroupConfigurer configurer = new CircuitBreakerWebClientHttpServiceGroupConfigurer(
-				clientServiceProperties, reactiveCircuitBreakerFactory, circuitBreakerFactory);
-
-		assertThatNoException().isThrownBy(() -> configurer.configureGroups(groups));
-		verify(circuitBreakerFactory, never()).create(GROUP_NAME);
+	static Stream<Arguments> fallbackConfigurations() {
+		return Stream.of(Arguments.of(FallbacksPerGroupConfiguration.class),
+				Arguments.of(DefaultFallbacksConfiguration.class));
 	}
 
 	private static class TestGroups implements HttpServiceGroupConfigurer.Groups<WebClient.Builder> {
