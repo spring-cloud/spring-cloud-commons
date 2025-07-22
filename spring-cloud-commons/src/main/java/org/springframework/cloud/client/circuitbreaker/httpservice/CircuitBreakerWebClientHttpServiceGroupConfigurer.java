@@ -36,11 +36,11 @@ import static org.springframework.cloud.client.circuitbreaker.httpservice.Circui
  * An implementation of {@link WebClientHttpServiceGroupConfigurer} that provides
  * CircuitBreaker integration for configured groups. This configurer applies
  * CircuitBreaker logic to each HTTP service group and provides fallback behavior based on
- * the {@link Fallback} annotations configured by the user.
+ * the {@link HttpServiceFallback} annotations configured by the user.
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
- * @see Fallback
+ * @see HttpServiceFallback
  */
 public class CircuitBreakerWebClientHttpServiceGroupConfigurer
 		implements WebClientHttpServiceGroupConfigurer, ApplicationContextAware {

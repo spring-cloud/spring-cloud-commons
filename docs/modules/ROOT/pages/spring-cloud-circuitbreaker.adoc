@@ -107,25 +107,73 @@ Customizer.once(circuitBreaker -> {
 [[interface-clients]]
 == Spring Interface Clients Support
 
-We provide support for Spring Interface Clients integration through the following configurers:
+Spring Cloud provides support for Spring Interface Clients integration through the following configurers:
 
 - `CircuitBreakerRestClientHttpServiceGroupConfigurer`
 - `CircuitBreakerWebClientHttpServiceGroupConfigurer`
 
 These configurers enable CircuitBreaker support for https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-interface-group-config[Spring Interface Client Groups].
 
-When fallback class names are configured using:
-
-- `spring.cloud.http.client.service.group.[groupName].fallback-class-names` (for a specific group), or
-- `spring.cloud.http.client.service.fallback-class-names` (as a default for all groups),
-
-a CircuitBreaker adapter is added to the respective group:
+When fallback classes are configured using the `@HttpServiceFallbackAnnotation`,
+CircuitBreaker adapter decorators are added:
 - `CircuitBreakerAdapterDecorator` is used with `RestClient`
 - `ReactiveCircuitBreakerAdapterDecorator` is used with `WebClient`
 
+[NOTE]
+====
+You can disable CircuitBreaker integration for HTTP service clients by setting the appropriate property:
+
+- For blocking (`RestClient`) clients: `spring.cloud.circuitbreaker.http-services.enabled=false`
+- For reactive (`WebClient`) clients: `spring.cloud.circuitbreaker.reactive-http-services.enabled=false`
+
+This prevents CircuitBreaker decorators from being applied to interface-based HTTP client groups.
+====
+
+=== Declaring Fallbacks with Annotations
+
+Fallbacks are configured using the `@HttpServiceFallback` annotation on configuration classes.
+This annotation allows you to declare:
+
+- The fallback implementation class (via `value`)
+- The service interfaces the fallback supports (via `forService`, optional)
+- The group the fallback applies to (via `forGroup`, optional)
+
+Multiple `@HttpServiceFallback` annotations can be declared on the same class using Java’s `@Repeatable` annotation mechanism.
+If no group is specified, the fallback applies to all groups that do not have an explicit per-group fallback for the given service interfaces.
+
+Fallback classes are resolved using the following precedence:
+
+. A fallback class with both matching `forService` and `forGroup`
+. A fallback class with matching `forService` and no `forGroup` (global fallback for service)
+. A fallback class with no `forService` or `forGroup` (default for all services in group or globally)
+
+==== Example
+
+[source,java]
+----
+@HttpServiceFallback(value = DefaultFallbacks.class)
+@HttpServiceFallback(value = GroupAndServiceSpecificFallbacks.class, forService = {BillingService.class, ShippingService.class}, forGroup = "billing")
+public class MyFallbackConfig {
+    ...
+}
+----
+
+This configuration results in:
+
+- `DefaultFallbacks` used as a global fallback for all services not explicitly handled
+- `GroupAndServiceSpecificFallbacks` used only for `BillingService` and `ShippingService` within the `"billing"` group
+
+[NOTE]
+====
+- The fallback class and its methods must be `public`
+- Fallback methods must not be annotated with `@HttpExchange`-specific annotations
+====
+
 === How CircuitBreaker Adapters Work
 
-The adapters wrap `@HttpExchange` method calls with CircuitBreaker logic. When a fallback is triggered, a proxy is created using the user-defined fallback class. The appropriate fallback method is selected by matching:
+The adapters wrap `@HttpExchange` method calls with CircuitBreaker logic.
+When a fallback is triggered, a proxy is created using the user-defined fallback class.
+The appropriate fallback method is selected by matching:
 
 - A method with the same name and parameter types, or
 - A method with the same name and parameter types preceded by a `Throwable` argument (to access the cause of failure)
@@ -155,52 +203,4 @@ public class TestServiceFallback {
 
     public String test(Throwable cause);
 }
-----
-
-[NOTE]
-====
-Both the fallback class and its methods must be `public`.
-====
-
-[TIP]
-====
-Fallback methods must *not* include `@HttpExchange` or any related annotations.
-====
-
-=== Configuring Fallbacks
-
-Fallback class names are configured via properties as a map:
-
-- *Key:* Fully qualified interface class name (or use `default` to specify a fallback class for all interfaces)
-- *Value:* Fully qualified fallback class name
-
-The following example applies to all client groups and the setup will result in using `com.example.http.verification.client.fallback.PersonServiceFallbacks` as fallback class for `PersonService` and `com.example.http.verification.client.fallback.DefaultFallbacks` for all other services for all the groups.
-
-[source,yml]
-----
-spring:
-  cloud:
-    http:
-      client:
-        service:
-          fallback-class-names:
-            -default: com.example.http.verification.client.fallback.DefaultFallbacks
-            -com.example.http.verification.client.clients.PersonService: com.example.http.verification.client.fallback.PersonServiceFallbacks
-----
-
-
-The example below applies only to the `verification` group:
-
-[source,yml]
-----
-spring:
-  cloud:
-    http:
-      client:
-        service:
-          group:
-            -verification:
-                fallback-class-names:
-                  -default: com.example.http.verification.client.fallback.DefaultFallbacks
-                  -com.example.http.verification.client.clients.PersonService: com.example.http.verification.client.fallback.PersonServiceFallbacks
 ----

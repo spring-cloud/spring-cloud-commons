@@ -22,11 +22,11 @@ import static org.springframework.cloud.client.circuitbreaker.httpservice.Circui
  * @author Olga Maciaszek-Sharma
  */
 // Group specified, no services specified, "default" config key
-@Fallback(value = EmptyFallbacks.class, forGroup = GROUP_NAME)
+@HttpServiceFallback(value = EmptyFallbacks.class, forGroup = GROUP_NAME)
 // Group specified, service specified, service name key
-@Fallback(value = Fallbacks.class, forService = TestService.class, forGroup = GROUP_NAME)
+@HttpServiceFallback(value = Fallbacks.class, forService = TestService.class, forGroup = GROUP_NAME)
 // Ignored as overridden by per-group configuration
-@Fallback(value = EmptyFallbacks.class, forService = TestService.class)
+@HttpServiceFallback(value = EmptyFallbacks.class, forService = TestService.class)
 class FallbacksPerGroupConfiguration {
 
 }

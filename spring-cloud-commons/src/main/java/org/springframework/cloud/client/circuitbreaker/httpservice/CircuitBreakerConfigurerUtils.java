@@ -77,13 +77,14 @@ final class CircuitBreakerConfigurerUtils {
 
 	static Map<String, Class<?>> resolveAnnotatedFallbackClasses(ApplicationContext context,
 			@Nullable String groupName) {
-		Map<String, Object> fallbackConfigurationBeans = context.getBeansWithAnnotation(Fallback.class);
+		Map<String, Object> fallbackConfigurationBeans = context.getBeansWithAnnotation(HttpServiceFallback.class);
 		Map<String, Class<?>> fallbackClasses = new HashMap<>();
 
 		for (Object fallbackConfigurationBean : fallbackConfigurationBeans.values()) {
 			MergedAnnotations annotations = MergedAnnotations.from(fallbackConfigurationBean.getClass(),
 					MergedAnnotations.SearchStrategy.TYPE_HIERARCHY);
-			for (MergedAnnotation<Fallback> annotation : annotations.stream(Fallback.class).toList()) {
+			for (MergedAnnotation<HttpServiceFallback> annotation : annotations.stream(HttpServiceFallback.class)
+				.toList()) {
 				String group = annotation.getString("forGroup");
 				if ((StringUtils.hasText(groupName) && groupName.equals(group))
 						|| !StringUtils.hasText(groupName) && !StringUtils.hasText(group)) {

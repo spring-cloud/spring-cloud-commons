@@ -61,7 +61,7 @@ public class CommonsClientAutoConfiguration {
 
 	@ConditionalOnClass({ CircuitBreaker.class, RestClientHttpServiceGroupConfigurer.class })
 	@ConditionalOnBean(CircuitBreakerFactory.class)
-	@ConditionalOnProperty(value = "spring.cloud.circuitbreaker.interface-clients.enabled", havingValue = "true",
+	@ConditionalOnProperty(value = "spring.cloud.circuitbreaker.http-services.enabled", havingValue = "true",
 			matchIfMissing = true)
 	@Configuration(proxyBeanMethods = false)
 	protected static class CircuitBreakerInterfaceClientsAutoConfiguration {
@@ -77,8 +77,8 @@ public class CommonsClientAutoConfiguration {
 	@ConditionalOnClass({ CircuitBreaker.class, ReactiveCircuitBreaker.class,
 			WebClientHttpServiceGroupConfigurer.class })
 	@ConditionalOnBean({ CircuitBreakerFactory.class, ReactiveCircuitBreakerFactory.class })
-	@ConditionalOnProperty(value = "spring.cloud.circuitbreaker.reactive-interface-clients.enabled",
-			havingValue = "true", matchIfMissing = true)
+	@ConditionalOnProperty(value = "spring.cloud.circuitbreaker.reactive-http-services.enabled", havingValue = "true",
+			matchIfMissing = true)
 	@Configuration(proxyBeanMethods = false)
 	protected static class ReactiveCircuitBreakerInterfaceClientsAutoConfiguration {
 

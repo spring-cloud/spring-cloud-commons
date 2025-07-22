@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  * <p>
  * This annotation is used in conjunction with a circuit-breaker mechanism to specify
  * which fallback class should be used when a service call fails using the
- * {@link Fallback#value()} attribute.
+ * {@link HttpServiceFallback#value()} attribute.
  * </p>
  *
  * <p>
@@ -38,10 +38,11 @@ import java.lang.annotation.Target;
  * support different service interfaces or configuration groups.
  *
  * <p>
- * If {@link Fallback#forGroup()} is specified, the fallback will apply only to the
- * specified group. Otherwise, it is treated as a default and will be used for all groups
- * that do not have an explicit per-group fallback configured for the associated service
- * interfaces. Per-group fallback configurations always take precedence over default ones.
+ * If {@link HttpServiceFallback#forGroup()} is specified, the fallback will apply only to
+ * the specified group. Otherwise, it is treated as a default and will be used for all
+ * groups that do not have an explicit per-group fallback configured for the associated
+ * service interfaces. Per-group fallback configurations always take precedence over
+ * default ones.
  * </p>
  * <p>
  * {@code forService()} attribute can be used to specify service interfaces that the
@@ -62,8 +63,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Repeatable(Fallback.Container.class)
-public @interface Fallback {
+@Repeatable(HttpServiceFallback.Container.class)
+public @interface HttpServiceFallback {
 
 	/**
 	 * The class that contains fallback methods to be called by
@@ -95,8 +96,8 @@ public @interface Fallback {
 	String forGroup() default "";
 
 	/**
-	 * Container annotation to allow multiple {@link Fallback} declarations on the same
-	 * class.
+	 * Container annotation to allow multiple {@link HttpServiceFallback} declarations on
+	 * the same class.
 	 */
 	@Target({ ElementType.TYPE })
 	@Retention(RetentionPolicy.RUNTIME)
@@ -104,10 +105,10 @@ public @interface Fallback {
 	@interface Container {
 
 		/**
-		 * The set of {@link Fallback} annotations.
+		 * The set of {@link HttpServiceFallback} annotations.
 		 * @return array of fallback declarations
 		 */
-		Fallback[] value();
+		HttpServiceFallback[] value();
 
 	}
 
