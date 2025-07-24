@@ -152,7 +152,7 @@ Fallback classes are resolved using the following precedence:
 [source,java]
 ----
 @HttpServiceFallback(value = DefaultFallbacks.class)
-@HttpServiceFallback(value = GroupAndServiceSpecificFallbacks.class, forService = {BillingService.class, ShippingService.class}, forGroup = "billing")
+@HttpServiceFallback(value = GroupAndServiceSpecificFallbacks.class, service = {BillingService.class, ShippingService.class}, group = "billing")
 public class MyFallbackConfig {
     ...
 }

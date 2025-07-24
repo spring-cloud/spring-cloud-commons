@@ -22,7 +22,7 @@ package org.springframework.cloud.client.circuitbreaker.httpservice;
 // No group specified, no services specified, "default" config key
 @HttpServiceFallback(EmptyFallbacks.class)
 // No group specified, service specified, service name key
-@HttpServiceFallback(value = Fallbacks.class, forService = TestService.class)
+@HttpServiceFallback(value = Fallbacks.class, service = TestService.class)
 public class DefaultFallbacksConfiguration {
 
 }

@@ -85,11 +85,11 @@ final class CircuitBreakerConfigurerUtils {
 					MergedAnnotations.SearchStrategy.TYPE_HIERARCHY);
 			for (MergedAnnotation<HttpServiceFallback> annotation : annotations.stream(HttpServiceFallback.class)
 				.toList()) {
-				String group = annotation.getString("forGroup");
+				String group = annotation.getString("group");
 				if ((StringUtils.hasText(groupName) && groupName.equals(group))
 						|| !StringUtils.hasText(groupName) && !StringUtils.hasText(group)) {
-					addFallbackEntries(annotation.getClass(MergedAnnotation.VALUE),
-							annotation.getClassArray("forService"), fallbackClasses);
+					addFallbackEntries(annotation.getClass(MergedAnnotation.VALUE), annotation.getClassArray("service"),
+							fallbackClasses);
 				}
 			}
 		}

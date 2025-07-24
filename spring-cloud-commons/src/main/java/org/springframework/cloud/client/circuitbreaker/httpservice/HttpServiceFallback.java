@@ -38,16 +38,16 @@ import java.lang.annotation.Target;
  * support different service interfaces or configuration groups.
  *
  * <p>
- * If {@link HttpServiceFallback#forGroup()} is specified, the fallback will apply only to
+ * If {@link HttpServiceFallback#group()} is specified, the fallback will apply only to
  * the specified group. Otherwise, it is treated as a default and will be used for all
  * groups that do not have an explicit per-group fallback configured for the associated
  * service interfaces. Per-group fallback configurations always take precedence over
  * default ones.
  * </p>
  * <p>
- * {@code forService()} attribute can be used to specify service interfaces that the
- * fallback class should be used for. If none has been specified, it will be used as a
- * default for all the services that don't have a per-service configuration specified.
+ * {@code service()} attribute can be used to specify service interfaces that the fallback
+ * class should be used for. If none has been specified, it will be used as a default for
+ * all the services that don't have a per-service configuration specified.
  * </p>
  *
  * <p>
@@ -84,7 +84,7 @@ public @interface HttpServiceFallback {
 	 * </p>
 	 * @return the service interfaces this fallback applies to
 	 */
-	Class<?>[] forService() default {};
+	Class<?>[] service() default {};
 
 	/**
 	 * The optional name of the Http Service Group this fallback applies to.
@@ -93,7 +93,7 @@ public @interface HttpServiceFallback {
 	 * </p>
 	 * @return the group name
 	 */
-	String forGroup() default "";
+	String group() default "";
 
 	/**
 	 * Container annotation to allow multiple {@link HttpServiceFallback} declarations on
