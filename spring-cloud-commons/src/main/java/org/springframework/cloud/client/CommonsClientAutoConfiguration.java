@@ -31,6 +31,12 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.cloud.client.actuator.FeaturesEndpoint;
 import org.springframework.cloud.client.actuator.HasFeatures;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
+import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreakerFactory;
+import org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerRestClientHttpServiceGroupConfigurer;
+import org.springframework.cloud.client.circuitbreaker.httpservice.CircuitBreakerWebClientHttpServiceGroupConfigurer;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicator;
 import org.springframework.cloud.client.discovery.health.DiscoveryClientHealthIndicatorProperties;
@@ -39,6 +45,8 @@ import org.springframework.cloud.client.discovery.health.DiscoveryHealthIndicato
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
+import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Cloud Commons Client.
@@ -50,6 +58,39 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration(proxyBeanMethods = false)
 public class CommonsClientAutoConfiguration {
+
+	@ConditionalOnClass({ CircuitBreaker.class, RestClientHttpServiceGroupConfigurer.class })
+	@ConditionalOnBean(CircuitBreakerFactory.class)
+	@ConditionalOnProperty(value = "spring.cloud.circuitbreaker.http-services.enabled", havingValue = "true",
+			matchIfMissing = true)
+	@Configuration(proxyBeanMethods = false)
+	protected static class CircuitBreakerInterfaceClientsAutoConfiguration {
+
+		@Bean
+		public CircuitBreakerRestClientHttpServiceGroupConfigurer circuitBreakerRestClientConfigurer(
+				CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
+			return new CircuitBreakerRestClientHttpServiceGroupConfigurer(circuitBreakerFactory);
+		}
+
+	}
+
+	@ConditionalOnClass({ CircuitBreaker.class, ReactiveCircuitBreaker.class,
+			WebClientHttpServiceGroupConfigurer.class })
+	@ConditionalOnBean({ CircuitBreakerFactory.class, ReactiveCircuitBreakerFactory.class })
+	@ConditionalOnProperty(value = "spring.cloud.circuitbreaker.reactive-http-services.enabled", havingValue = "true",
+			matchIfMissing = true)
+	@Configuration(proxyBeanMethods = false)
+	protected static class ReactiveCircuitBreakerInterfaceClientsAutoConfiguration {
+
+		@Bean
+		public CircuitBreakerWebClientHttpServiceGroupConfigurer circuitBreakerWebClientConfigurer(
+				ReactiveCircuitBreakerFactory<?, ?> reactiveCircuitBreakerFactory,
+				CircuitBreakerFactory<?, ?> circuitBreakerFactory) {
+			return new CircuitBreakerWebClientHttpServiceGroupConfigurer(reactiveCircuitBreakerFactory,
+					circuitBreakerFactory);
+		}
+
+	}
 
 	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(HealthIndicator.class)
