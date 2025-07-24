@@ -166,7 +166,7 @@ This configuration results in:
 [NOTE]
 ====
 - The fallback class and its methods must be `public`
-- Fallback methods must not be annotated with `@HttpExchange`-specific annotations
+- Fallback methods must not be annotated with `@HttpExchange` annotations
 ====
 
 === How CircuitBreaker Adapters Work
