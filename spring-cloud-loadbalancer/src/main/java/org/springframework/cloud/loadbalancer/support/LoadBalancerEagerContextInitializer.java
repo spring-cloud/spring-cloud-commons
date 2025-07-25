@@ -16,15 +16,23 @@
 
 package org.springframework.cloud.loadbalancer.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.context.ApplicationListener;
+import reactor.core.publisher.Mono;
+
 import java.util.List;
 
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationListener;
-
 /**
- * @author Andrii Bohutskyi
+ * @author Andrii Bohutskyi, Haotian Zhang
  */
 public class LoadBalancerEagerContextInitializer implements ApplicationListener<ApplicationReadyEvent> {
+
+	private static final Log log = LogFactory.getLog(LoadBalancerEagerContextInitializer.class);
 
 	private final LoadBalancerClientFactory factory;
 
@@ -37,7 +45,17 @@ public class LoadBalancerEagerContextInitializer implements ApplicationListener<
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-		serviceNames.forEach(factory::getInstance);
+		serviceNames.forEach(serviceName -> {
+			ReactiveLoadBalancer<ServiceInstance> loadBalancer = factory.getInstance(serviceName);
+			if (loadBalancer != null) {
+				Response<ServiceInstance> loadBalancerResponse = Mono.from(loadBalancer.choose()).block();
+				if (log.isDebugEnabled() && loadBalancerResponse != null) {
+					log.debug("LoadBalancer for service: " + serviceName + " initialized with chosen instance: "
+							+ loadBalancerResponse.getServer().getHost() + ":" + loadBalancerResponse.getServer().getPort());
+				}
+				log.info("LoadBalancer for service: " + serviceName + " initialized");
+			}
+		});
 	}
 
 }
