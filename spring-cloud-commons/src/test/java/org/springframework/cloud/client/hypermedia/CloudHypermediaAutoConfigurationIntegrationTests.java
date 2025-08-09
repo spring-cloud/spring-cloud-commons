@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	}
 
 	@Test
-	public void doesNotCreateCloudHypermediaPropertiesifNotActive() {
+	public void doesNotCreateCloudHypermediaPropertiesIfNotActive() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class)) {
 			then(context.getBeanNamesForType(CloudHypermediaProperties.class)).hasSize(0);
@@ -71,7 +71,7 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	}
 
 	@Test
-	public void registersResourceRefresherIfDiscoverredResourceIsDefined() {
+	public void registersResourceRefresherIfDiscoveredResourceIsDefined() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(ConfigWithRemoteResource.class)) {
 
