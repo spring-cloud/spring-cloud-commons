@@ -314,14 +314,8 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 	}
 
 	private String[] resolvePlaceholdersInProfiles(String profiles, ConfigurableEnvironment environment) {
-		return Arrays.stream(StringUtils.tokenizeToStringArray(profiles, ",")).map(s -> {
-			if (s.startsWith("${") && s.endsWith("}")) {
-				return environment.resolvePlaceholders(s);
-			}
-			else {
-				return s;
-			}
-		}).toArray(String[]::new);
+		String resolvedProfiles = environment.resolvePlaceholders(profiles);
+		return StringUtils.tokenizeToStringArray(resolvedProfiles, ",");
 	}
 
 	/*
