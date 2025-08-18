@@ -76,7 +76,6 @@ public class CachingServiceInstanceListSupplier extends DelegatingServiceInstanc
 					}
 				}
 				else {
-					System.out.println("Will cache " + key);
 					cache.put(key, instances);
 				}
 			}).then());
