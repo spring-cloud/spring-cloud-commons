@@ -48,17 +48,15 @@ import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSup
  *
  * @author Olga Maciaszek-Sharma
  */
-@SpringBootTest(classes = CachingServiceInstanceListSupplierTests.TestConfig.class)
+@SpringBootTest(classes = CachingServiceInstanceListSupplierTests.TestConfig.class, properties = {
+	"loadbalancer.client.name=test"
+})
 class CachingServiceInstanceListSupplierTests {
 
-	public static final String SERVICE_ID = "test";
-
-	static {
-		System.setProperty("loadbalancer.client.name", SERVICE_ID);
-	}
+	private static final String SERVICE_ID = "test";
 
 	@Autowired
-	BlockingLoadBalancerClient blockingLoadBalancerClient;
+	private BlockingLoadBalancerClient blockingLoadBalancerClient;
 
 	private static DefaultServiceInstance instance(String host, boolean secure) {
 		return new DefaultServiceInstance(SERVICE_ID, SERVICE_ID, host, 80, secure);
@@ -74,10 +72,10 @@ class CachingServiceInstanceListSupplierTests {
 
 	@Configuration(proxyBeanMethods = false)
 	@Import(LoadBalancerCacheAutoConfiguration.class)
-	protected static class TestConfig {
+	static class TestConfig {
 
 		@Bean
-		public ReactiveDiscoveryClient reactiveDiscoveryClient() {
+		ReactiveDiscoveryClient reactiveDiscoveryClient() {
 			return new ReactiveDiscoveryClient() {
 				@Override
 				public String description() {
@@ -107,18 +105,17 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
-		BlockingLoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
-				LoadBalancerProperties properties) {
+		BlockingLoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory) {
 			return new BlockingLoadBalancerClient(loadBalancerClientFactory);
 		}
 
 		@Bean
-		public LoadBalancerClientsProperties loadBalancerClientsProperties() {
+		LoadBalancerClientsProperties loadBalancerClientsProperties() {
 			return new LoadBalancerClientsProperties();
 		}
 
 		@Bean
-		public WebClient.Builder webClientBuilder() {
+		WebClient.Builder webClientBuilder() {
 			return WebClient.builder();
 		}
 
