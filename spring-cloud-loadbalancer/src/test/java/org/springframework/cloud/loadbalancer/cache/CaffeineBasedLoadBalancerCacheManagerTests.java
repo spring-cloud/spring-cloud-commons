@@ -72,7 +72,7 @@ class CaffeineBasedLoadBalancerCacheManagerTests {
 
 	/**
 	 * <pre>
-	 *     - cache has a TTL of 1 second 3
+	 *     - cache has a TTL of 3 seconds
 	 *     - we issue a GET and its not in the cache (counter is incremented)
 	 *     - we issue a second GET and it's in the cache this time (counter stays the same)
 	 *     - we wait for 4 seconds (entry in the cache is evicted)
@@ -98,7 +98,7 @@ class CaffeineBasedLoadBalancerCacheManagerTests {
 		// the underlying list supplier is not called
 		assertThat(StubServiceInstanceListSupplier.counter.get()).isEqualTo(1);
 
-		Thread.sleep(3_000);
+		Thread.sleep(4_000);
 
 		List<ServiceInstance> serviceInstancesNotInTheCache = cachingServiceInstanceListSupplier.get().blockFirst();
 		assertThat(serviceInstancesNotInTheCache).hasSize(1);
