@@ -20,14 +20,17 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
-import reactor.core.publisher.Flux;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier.SERVICE_INSTANCE_CACHE_NAME;
 
 /**
  * @author wind57
@@ -35,6 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CaffeineBasedLoadBalancerCacheManagerTests {
 
 	private static final String SERVICE_ID = "mock-service-id";
+
+	private final CaffeineBasedLoadBalancerCacheManager caffeineBasedLoadBalancerCacheManager = new CaffeineBasedLoadBalancerCacheManager(
+			SERVICE_INSTANCE_CACHE_NAME, getLoadBalancerCacheProperties());
 
 	/**
 	 * <pre>
@@ -46,19 +52,10 @@ class CaffeineBasedLoadBalancerCacheManagerTests {
 	@Test
 	void testSecondGetRetrievedFromCache() {
 
-		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
-		properties.setCapacity(100);
-		properties.setTtl(Duration.ofSeconds(3));
-
-		CaffeineBasedLoadBalancerCacheManager caffeineBasedLoadBalancerCacheManager =
-				new CaffeineBasedLoadBalancerCacheManager(
-						CachingServiceInstanceListSupplier.SERVICE_INSTANCE_CACHE_NAME, properties);
-
 		ServiceInstanceListSupplier serviceInstanceListSupplier = new StubServiceInstanceListSupplier();
 
 		CachingServiceInstanceListSupplier cachingServiceInstanceListSupplier = new CachingServiceInstanceListSupplier(
-				serviceInstanceListSupplier, caffeineBasedLoadBalancerCacheManager
-		);
+				serviceInstanceListSupplier, caffeineBasedLoadBalancerCacheManager);
 
 		List<ServiceInstance> serviceInstances = cachingServiceInstanceListSupplier.get().blockFirst();
 		assertThat(serviceInstances).hasSize(1);
@@ -85,19 +82,10 @@ class CaffeineBasedLoadBalancerCacheManagerTests {
 	@Test
 	void testSecondGetNoInTheCache() throws Exception {
 
-		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
-		properties.setCapacity(100);
-		properties.setTtl(Duration.ofSeconds(3));
-
-		CaffeineBasedLoadBalancerCacheManager caffeineBasedLoadBalancerCacheManager =
-				new CaffeineBasedLoadBalancerCacheManager(
-						CachingServiceInstanceListSupplier.SERVICE_INSTANCE_CACHE_NAME, properties);
-
 		ServiceInstanceListSupplier serviceInstanceListSupplier = new StubServiceInstanceListSupplier();
 
 		CachingServiceInstanceListSupplier cachingServiceInstanceListSupplier = new CachingServiceInstanceListSupplier(
-				serviceInstanceListSupplier, caffeineBasedLoadBalancerCacheManager
-		);
+				serviceInstanceListSupplier, caffeineBasedLoadBalancerCacheManager);
 
 		List<ServiceInstance> serviceInstances = cachingServiceInstanceListSupplier.get().blockFirst();
 		assertThat(serviceInstances).hasSize(1);
@@ -120,6 +108,18 @@ class CaffeineBasedLoadBalancerCacheManagerTests {
 
 	}
 
+	@AfterEach
+	void afterEach() {
+		StubServiceInstanceListSupplier.counter.set(0);
+	}
+
+	private static LoadBalancerCacheProperties getLoadBalancerCacheProperties() {
+		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
+		properties.setCapacity(100);
+		properties.setTtl(Duration.ofSeconds(3));
+		return properties;
+	}
+
 	static class StubServiceInstanceListSupplier implements ServiceInstanceListSupplier {
 
 		static AtomicInteger counter = new AtomicInteger(0);
@@ -131,12 +131,13 @@ class CaffeineBasedLoadBalancerCacheManagerTests {
 
 		@Override
 		public Flux<List<ServiceInstance>> get() {
-			List<ServiceInstance> serviceInstances = List.of(new DefaultServiceInstance(SERVICE_ID, SERVICE_ID, "localhost", 80, false));
-			return Flux.just(serviceInstances)
-					.doOnNext(x -> {
-						counter.incrementAndGet();
-					});
+			List<ServiceInstance> serviceInstances = List
+				.of(new DefaultServiceInstance(SERVICE_ID, SERVICE_ID, "localhost", 80, false));
+			return Flux.just(serviceInstances).doOnNext(x -> {
+				counter.incrementAndGet();
+			});
 		}
+
 	}
 
 }

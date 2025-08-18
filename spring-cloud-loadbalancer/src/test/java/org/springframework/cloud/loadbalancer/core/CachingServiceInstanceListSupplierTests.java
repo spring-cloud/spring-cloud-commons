@@ -48,9 +48,8 @@ import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSup
  *
  * @author Olga Maciaszek-Sharma
  */
-@SpringBootTest(classes = CachingServiceInstanceListSupplierTests.TestConfig.class, properties = {
-	"loadbalancer.client.name=test"
-})
+@SpringBootTest(classes = CachingServiceInstanceListSupplierTests.TestConfig.class,
+		properties = { "loadbalancer.client.name=test" })
 class CachingServiceInstanceListSupplierTests {
 
 	private static final String SERVICE_ID = "test";
