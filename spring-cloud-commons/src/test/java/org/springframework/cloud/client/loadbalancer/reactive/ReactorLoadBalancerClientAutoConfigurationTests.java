@@ -229,6 +229,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 		}
 
 		@Bean
+		@Primary
 		ReactiveHttpClientServiceProperties reactiveHttpClientServiceProperties() {
 			return new ReactiveHttpClientServiceProperties();
 		}
