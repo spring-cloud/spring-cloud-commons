@@ -15,7 +15,7 @@
 	<name>spring-cloud-commons-dependencies</name>
 	<description>Spring Cloud Commons Dependencies</description>
 	<properties>
-		<okhttp.version>4.12.0</okhttp.version>
+		<okhttp.version>5.1.0</okhttp.version>
 		<spring-retry.version>2.0.12</spring-retry.version>
 	</properties>
 	<dependencyManagement>
