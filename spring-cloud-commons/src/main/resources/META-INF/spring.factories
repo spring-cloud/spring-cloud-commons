@@ -1,5 +1,5 @@
 # Environment Post Processors
-org.springframework.boot.env.EnvironmentPostProcessor=\
+org.springframework.boot.EnvironmentPostProcessor=\
 org.springframework.cloud.client.HostInfoEnvironmentPostProcessor
 # Failure Analyzers
 org.springframework.boot.diagnostics.FailureAnalyzer=\

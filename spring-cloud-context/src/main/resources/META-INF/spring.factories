@@ -10,11 +10,11 @@ org.springframework.cloud.bootstrap.encrypt.EncryptionBootstrapConfiguration,\
 org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration,\
 org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration
 # Spring Boot BootstrapRegistryInitializer
-org.springframework.boot.BootstrapRegistryInitializer=\
+org.springframework.boot.bootstrap.BootstrapRegistryInitializer=\
 org.springframework.cloud.bootstrap.RefreshBootstrapRegistryInitializer,\
 org.springframework.cloud.bootstrap.TextEncryptorConfigBootstrapper
 # Environment Post Processors
-org.springframework.boot.env.EnvironmentPostProcessor=\
+org.springframework.boot.EnvironmentPostProcessor=\
 org.springframework.cloud.bootstrap.BootstrapConfigFileApplicationListener,\
 org.springframework.cloud.bootstrap.encrypt.DecryptEnvironmentPostProcessor,\
 org.springframework.cloud.util.random.CachedRandomPropertySourceEnvironmentPostProcessor

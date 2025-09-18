@@ -124,7 +124,8 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 			@Override
 			public Object onFailure(ConfigurationPropertyName name, Bindable<?> target, BindContext context,
 					Exception error) throws Exception {
-				LOG.info("Error binding " + CONFIG_IMPORT_PROPERTY, error);
+				ConfigDataMissingEnvironmentPostProcessor.this.LOG.info("Error binding " + CONFIG_IMPORT_PROPERTY,
+						error);
 				return EMPTY_ARRAY;
 			}
 		}).orElse(EMPTY_ARRAY);

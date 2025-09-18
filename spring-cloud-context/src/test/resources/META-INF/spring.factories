@@ -3,7 +3,7 @@ org.springframework.cloud.bootstrap.BootstrapConfiguration=\
 org.springframework.cloud.bootstrap.TestBootstrapConfiguration,\
 org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapConfiguration
 
-org.springframework.boot.env.EnvironmentPostProcessor=\
+org.springframework.boot.EnvironmentPostProcessor=\
 org.springframework.cloud.context.test.TestEnvPostProcessor
 
 # ConfigData Location Resolvers
