@@ -22,12 +22,12 @@ import java.util.function.Supplier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.boot.BootstrapContext;
-import org.springframework.boot.BootstrapRegistry;
-import org.springframework.boot.ConfigurableBootstrapContext;
-import org.springframework.boot.DefaultBootstrapContext;
+import org.springframework.boot.EnvironmentPostProcessor;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.boot.bootstrap.BootstrapContext;
+import org.springframework.boot.bootstrap.BootstrapRegistry;
+import org.springframework.boot.bootstrap.ConfigurableBootstrapContext;
+import org.springframework.boot.bootstrap.DefaultBootstrapContext;
 import org.springframework.boot.logging.DeferredLogFactory;
 import org.springframework.boot.util.Instantiator;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
