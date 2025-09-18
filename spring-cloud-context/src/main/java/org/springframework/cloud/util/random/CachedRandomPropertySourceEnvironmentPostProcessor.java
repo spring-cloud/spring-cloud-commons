@@ -19,10 +19,10 @@ package org.springframework.cloud.util.random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.boot.EnvironmentPostProcessor;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.boot.env.RandomValuePropertySource;
-import org.springframework.boot.env.RandomValuePropertySourceEnvironmentPostProcessor;
+import org.springframework.boot.support.RandomValuePropertySourceEnvironmentPostProcessor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
