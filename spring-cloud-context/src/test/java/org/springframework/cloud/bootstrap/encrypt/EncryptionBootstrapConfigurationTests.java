@@ -18,6 +18,7 @@ package org.springframework.cloud.bootstrap.encrypt;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -100,7 +101,7 @@ public class EncryptionBootstrapConfigurationTests {
 			then(false).as("Should not create an application context with invalid keystore location").isTrue();
 		}
 		catch (Exception e) {
-			then(e).isInstanceOf(IllegalStateException.class);
+			then(e).isInstanceOf(BeanCreationException.class).as("Invalid keystore location");
 		}
 	}
 
