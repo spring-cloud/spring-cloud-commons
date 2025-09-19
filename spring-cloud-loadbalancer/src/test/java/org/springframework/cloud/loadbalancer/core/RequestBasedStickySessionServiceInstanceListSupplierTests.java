@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +32,8 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
-import org.springframework.http.HttpHeaders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,8 +74,8 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldReturnInstanceBasedOnCookieFromClientRequest() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(properties.getStickySession().getInstanceIdCookieName(), "test-1");
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+		headers.put(properties.getStickySession().getInstanceIdCookieName(), Collections.singletonList("test-1"));
 		when(clientRequest.cookies()).thenReturn(headers);
 		Request<RequestDataContext> request = new DefaultRequest<>(
 				new RequestDataContext(new RequestData(clientRequest)));
@@ -86,8 +88,8 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldReturnAllDelegateInstancesIfInstanceBasedOnCookieFromClientRequestNotFound() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(properties.getStickySession().getInstanceIdCookieName(), "test-4");
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+		headers.put(properties.getStickySession().getInstanceIdCookieName(), Collections.singletonList("test-4"));
 		when(clientRequest.cookies()).thenReturn(headers);
 		Request<RequestDataContext> request = new DefaultRequest<>(
 				new RequestDataContext(new RequestData(clientRequest)));
@@ -99,7 +101,7 @@ class RequestBasedStickySessionServiceInstanceListSupplierTests {
 
 	@Test
 	void shouldReturnAllInstancesFromDelegateIfClientRequestHasNoCookie() {
-		when(clientRequest.cookies()).thenReturn(new HttpHeaders());
+		when(clientRequest.cookies()).thenReturn(new LinkedMultiValueMap<>());
 		Request<RequestDataContext> request = new DefaultRequest<>(
 				new RequestDataContext(new RequestData(clientRequest)));
 

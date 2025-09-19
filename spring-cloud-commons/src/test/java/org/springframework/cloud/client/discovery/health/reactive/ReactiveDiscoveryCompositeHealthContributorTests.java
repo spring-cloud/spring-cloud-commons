@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,9 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.NamedContributor;
-import org.springframework.boot.actuate.health.ReactiveHealthContributor;
-import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.ReactiveHealthContributors;
+import org.springframework.boot.health.contributor.ReactiveHealthIndicator;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -63,15 +62,15 @@ class ReactiveDiscoveryCompositeHealthContributorTests {
 				singletonList(indicator));
 
 		assertThat(healthContributor.getContributor("known")).isNotNull();
-		Iterator<NamedContributor<ReactiveHealthContributor>> iterator = healthContributor.iterator();
+		Iterator<ReactiveHealthContributors.Entry> iterator = healthContributor.iterator();
 		assertThat(iterator.hasNext()).isTrue();
-		NamedContributor<ReactiveHealthContributor> contributor = iterator.next();
-		assertThat(contributor).isNotNull();
-		assertThat(contributor.getName()).isEqualTo("known");
-		assertThat(contributor.getContributor()).isNotNull();
-		assertThat(contributor.getContributor()).isInstanceOf(ReactiveHealthIndicator.class);
-		ReactiveHealthIndicator healthIndicator = (ReactiveHealthIndicator) contributor.getContributor();
-		StepVerifier.create(healthIndicator.getHealth(true)).expectNext(health).expectComplete().verify();
+		ReactiveHealthContributors.Entry entry = iterator.next();
+		assertThat(entry).isNotNull();
+		assertThat(entry.name()).isEqualTo("known");
+		assertThat(entry.contributor()).isNotNull();
+		assertThat(entry.contributor()).isInstanceOf(ReactiveHealthIndicator.class);
+		ReactiveHealthIndicator healthIndicator = (ReactiveHealthIndicator) entry.contributor();
+		StepVerifier.create(healthIndicator.health(true)).expectNext(health).expectComplete().verify();
 	}
 
 }

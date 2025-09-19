@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,9 +65,9 @@ class XForwardedHeadersTransformerTests {
 
 		HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
 
-		assertThat(newRequest.getHeaders()).containsKey("X-Forwarded-Host");
+		assertThat(newRequest.getHeaders().containsHeader("X-Forwarded-Host")).isTrue();
 		assertThat(newRequest.getHeaders().getFirst("X-Forwarded-Host")).isEqualTo("google.com");
-		assertThat(newRequest.getHeaders()).containsKey("X-Forwarded-Proto");
+		assertThat(newRequest.getHeaders().containsHeader("X-Forwarded-Proto")).isTrue();
 		assertThat(newRequest.getHeaders().getFirst("X-Forwarded-Proto")).isEqualTo("https");
 	}
 
@@ -78,8 +78,8 @@ class XForwardedHeadersTransformerTests {
 		XForwardedHeadersTransformer transformer = new XForwardedHeadersTransformer(loadBalancerClientFactory);
 
 		HttpRequest newRequest = transformer.transformRequest(request, serviceInstance);
-		assertThat(newRequest.getHeaders()).doesNotContainKey("X-Forwarded-Host");
-		assertThat(newRequest.getHeaders()).doesNotContainKey("X-Forwarded-Proto");
+		assertThat(newRequest.getHeaders().containsHeader("X-Forwarded-Host")).isFalse();
+		assertThat(newRequest.getHeaders().containsHeader("X-Forwarded-Proto")).isFalse();
 	}
 
 }

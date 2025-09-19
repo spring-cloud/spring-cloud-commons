@@ -110,6 +110,7 @@ are using.
 
 By default, the `ServiceRegistry` implementation auto-registers the running service.
 To disable that behavior, you can set:
+
 * `@EnableDiscoveryClient(autoRegister=false)` to permanently disable auto-registration.
 * `spring.cloud.service-registry.auto-registration.enabled=false` to disable the behavior through configuration.
 
@@ -663,7 +664,7 @@ public class MyClass {
 The URI needs to use a virtual host name (that is, a service name, not a host name).
 The `LoadBalancerClient` is used to create a full physical address.
 
-WARN: This approach is now deprecated.
+WARNING: This approach is now deprecated.
 We suggest that you use xref:spring-cloud-commons/common-abstractions.adoc#webflux-with-reactive-loadbalancer[WebFlux with reactive Load-Balancer]
 instead.
 
@@ -707,16 +708,6 @@ spring:
 ----
 
 See https://docs.oracle.com/javase/8/docs/api/java/net/Inet4Address.html#isSiteLocalAddress--[Inet4Address.html.isSiteLocalAddress()] for more details about what constitutes a site-local address.
-
-[[http-clients]]
-== HTTP Client Factories
-
-Spring Cloud Commons provides beans for creating both Apache HTTP clients (`ApacheHttpClientFactory`) and OK HTTP clients (`OkHttpClientFactory`).
-The `OkHttpClientFactory` bean is created only if the OK HTTP jar is on the classpath.
-In addition, Spring Cloud Commons provides beans for creating the connection managers used by both clients: `ApacheHttpClientConnectionManagerFactory` for the Apache HTTP client and `OkHttpClientConnectionPoolFactory` for the OK HTTP client.
-If you would like to customize how the HTTP clients are created in downstream projects, you can provide your own implementation of these beans.
-In addition, if you provide a bean of type `HttpClientBuilder` or `OkHttpClient.Builder`, the default factories use these builders as the basis for the builders returned to downstream projects.
-You can also disable the creation of these beans by setting `spring.cloud.httpclientfactories.apache.enabled` or `spring.cloud.httpclientfactories.ok.enabled` to `false`.
 
 [[enabled-features]]
 == Enabled Features

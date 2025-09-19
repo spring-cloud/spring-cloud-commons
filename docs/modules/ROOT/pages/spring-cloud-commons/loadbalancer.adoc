@@ -72,7 +72,7 @@ See the xref:spring-cloud-commons/loadbalancer.adoc#loadbalancer-cache-configura
 If you are using Caffeine, you can also override the default Caffeine Cache setup for the LoadBalancer by passing your own https://static.javadoc.io/com.github.ben-manes.caffeine/caffeine/2.2.2/com/github/benmanes/caffeine/cache/CaffeineSpec.html[Caffeine Specification]
 in the `spring.cloud.loadbalancer.cache.caffeine.spec` property.
 
-WARN: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including xref:spring-cloud-commons/loadbalancer.adoc#loadbalancer-cache-configuration[General LoadBalancer Cache Configuration] fields, such as `ttl` and `capacity`.
+WARNING: Passing your own Caffeine specification will override any other LoadBalancerCache settings, including xref:spring-cloud-commons/loadbalancer.adoc#loadbalancer-cache-configuration[General LoadBalancer Cache Configuration] fields, such as `ttl` and `capacity`.
 
 [[default-loadbalancer-cache-implementation]]
 === Default LoadBalancer Cache Implementation
@@ -204,7 +204,7 @@ WARNING: If using any of the Service Discovery-backed suppliers, adding this hea
 from the Service Registry.
 
 TIP: The `HealthCheckServiceInstanceListSupplier` relies on having updated instances provided by a delegate flux. In the rare cases when you want to use a delegate that does not refresh the instances, even though the list of instances may change (such as the `DiscoveryClientServiceInstanceListSupplier` provided by us), you can set `spring.cloud.loadbalancer.health-check.refetch-instances` to `true` to have the instance list refreshed by the `HealthCheckServiceInstanceListSupplier`. You can then also adjust the refretch intervals by modifying the value of `spring.cloud.loadbalancer.health-check.refetch-instances-interval` and opt to disable the additional healthcheck repetitions by setting `spring.cloud.loadbalancer.health-check.repeat-health-check` to `false` as every instances refetch
-  will also trigger a healthcheck.
+will also trigger a healthcheck.
 
 `HealthCheckServiceInstanceListSupplier` uses properties prefixed with
 `spring.cloud.loadbalancer.health-check`. You can set the `initialDelay` and `interval`
@@ -549,8 +549,41 @@ NOTE: For the properties where maps where already used, where you can specify a 
 
 NOTE: Starting with `4.1.0`, we have introduced the `callGetWithRequestOnDelegates` flag in `LoadBalancerProperties`. If this flag is set to `true`, `ServiceInstanceListSupplier#get(Request request)` method will be implemented to call `delegate.get(request)` in classes assignable from `DelegatingServiceInstanceListSupplier` that don't already implement that method, with the exclusion of `CachingServiceInstanceListSupplier` and `HealthCheckServiceInstanceListSupplier`, which should be placed in the instance supplier hierarchy directly after the supplier performing instance retrieval over the network, before any request-based filtering is done. It is set to `true` by default.
 
-[[-aot-and-native-image-support]]
+[[aot-and-native-image-support]]
 ==  AOT and Native Image Support
 
 Since `4.0.0`, Spring Cloud LoadBalancer supports Spring AOT transformations and native images. However, to use this feature, you need to explicitly define your `LoadBalancerClient` service IDs. You can do so by using the `value` or `name` attributes of the `@LoadBalancerClient` annotation or as values of the `spring.cloud.loadbalancer.eager-load.clients` property.
 
+== LoadBalancer Integration for Spring Interface Clients AutoConfiguration
+
+Since `5.0.0`, Spring Cloud LoadBalancer supports https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-interface[Spring Interface Clients] AutoConfiguration through the `LoadBalancerRestClientHttpServiceGroupConfigurer` and `LoadBalancerWebClientHttpServiceGroupConfigurer`.
+
+For each Interface Client group, if the group `baseUrl` (defined under the
+`spring.http.client.service.group.[groupName].base-url` property) is `null`, a `serviceId`-based URL for load-balancing is set up as the `baseUrl`, with `serviceId` resolved from the Interface Client `groupName`.
+
+If the group `baseUrl` is `null` or its scheme is set to `lb`, a
+`DeferringLoadBalancerInterceptor` instance is picked from the application context for blocking scenarios, and a `DeferringLoadBalancerExchangeFilterFunction` instance for reactive scenarios, and is added to the group's `RestClient.Builder` or `WebClient.Builder` if available, allowing for the requests to be load-balanced.
+
+For example, in an app with the following Interface Clients configuration:
+
+[source,java,indent=0]
+----
+@SpringBootApplication
+@ImportHttpServices(group = "verificationClient", types = {VerificationService.class,
+		PersonService.class})
+public class HttpVerificationClientApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(HttpVerificationClientApplication.class, args);
+	}
+}
+----
+
+If the `spring.http.client.service.group.verificationClient.base-url` property is not set, it will be automatically set to `http://verificationClient`.
+The default scheme (`http`) is used initially; however, if a secure `ServiceInstance` is selected through load-balancing, it will be changed to `https`.
+
+If the `spring.http.client.service.group.verificationClient.base-url` property is set to a URL that has the `lb` scheme, (for example, `lb://verificationClient/path`), it will be used with `http` being initially set as the default scheme.
+If a secure `ServiceInstance` is selected through load-balancing, the scheme will be changed to `https`.
+In both of these cases, either a `DeferringLoadBalancerInterceptor` or `DeferringLoadBalancerExchangeFilterFunction` will be added to the group's client builder, enabling the requests to be load-balanced.
+
+If the `spring.http.client.service.group.verificationClient.base-url` property is set to a URL that does not have the scheme set to `lb`, (for example, `lb://verificationClient/path`), no load-balancer integration will be applied.

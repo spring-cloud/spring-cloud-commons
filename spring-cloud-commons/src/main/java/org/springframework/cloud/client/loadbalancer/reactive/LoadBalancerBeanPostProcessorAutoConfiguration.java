@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.webclient.autoconfigure.service.ReactiveHttpClientServiceProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.ApplicationContext;
@@ -64,6 +66,22 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 		static DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> reactorDeferringLoadBalancerExchangeFilterFunction(
 				ObjectProvider<LoadBalancedExchangeFilterFunction> exchangeFilterFunctionProvider) {
 			return new DeferringLoadBalancerExchangeFilterFunction<>(exchangeFilterFunctionProvider);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass(ReactiveHttpClientServiceProperties.class)
+	@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
+	protected static class ReactorDeferringLoadBalancerFilterHttpClientConfig {
+
+		@Bean
+		@ConditionalOnBean({ ReactiveHttpClientServiceProperties.class, ReactiveLoadBalancer.Factory.class })
+		@ConditionalOnMissingBean(LoadBalancerWebClientHttpServiceGroupConfigurer.class)
+		LoadBalancerWebClientHttpServiceGroupConfigurer loadBalancerWebClientHttpServiceGroupConfigurer(
+				ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> deferringExchangeFilterFunction,
+				ReactiveHttpClientServiceProperties properties) {
+			return new LoadBalancerWebClientHttpServiceGroupConfigurer(deferringExchangeFilterFunction, properties);
 		}
 
 	}

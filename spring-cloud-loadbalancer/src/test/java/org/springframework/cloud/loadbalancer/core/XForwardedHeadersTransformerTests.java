@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,9 +66,9 @@ class XForwardedHeadersTransformerTests {
 
 		ClientRequest newRequest = transformer.transformRequest(request, serviceInstance);
 
-		assertThat(newRequest.headers()).containsKey("X-Forwarded-Host");
+		assertThat(newRequest.headers().containsHeader("X-Forwarded-Host")).isTrue();
 		assertThat(newRequest.headers().getFirst("X-Forwarded-Host")).isEqualTo("spring.io");
-		assertThat(newRequest.headers()).containsKey("X-Forwarded-Proto");
+		assertThat(newRequest.headers().containsHeader("X-Forwarded-Proto")).isTrue();
 		assertThat(newRequest.headers().getFirst("X-Forwarded-Proto")).isEqualTo("https");
 	}
 
@@ -79,8 +79,8 @@ class XForwardedHeadersTransformerTests {
 
 		ClientRequest newRequest = transformer.transformRequest(request, serviceInstance);
 
-		assertThat(newRequest.headers()).doesNotContainKey("X-Forwarded-Host");
-		assertThat(newRequest.headers()).doesNotContainKey("X-Forwarded-Proto");
+		assertThat(newRequest.headers().containsHeader("X-Forwarded-Host")).isFalse();
+		assertThat(newRequest.headers().containsHeader("X-Forwarded-Proto")).isFalse();
 	}
 
 }

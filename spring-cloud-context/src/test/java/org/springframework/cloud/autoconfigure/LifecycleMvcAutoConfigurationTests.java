@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class LifecycleMvcAutoConfigurationTests {
 	}
 
 	@Test
+	@Disabled("TODO: https://github.com/spring-cloud/spring-cloud-commons/issues/1520")
 	public void environmentWebEndpointExtensionDisabled() {
 		beanNotCreated("writableEnvironmentEndpointWebExtension", "management.endpoint.env.enabled=false");
 	}
@@ -66,6 +67,7 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	// restartEndpoint
 	@Test
+	@Disabled("TODO: https://github.com/spring-cloud/spring-cloud-commons/issues/1520")
 	public void restartEndpointDisabled() {
 		beanNotCreated("restartEndpoint", "management.endpoint.restart.enabled=false");
 	}

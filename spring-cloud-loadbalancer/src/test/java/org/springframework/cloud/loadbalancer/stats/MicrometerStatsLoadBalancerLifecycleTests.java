@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalanc
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -71,7 +72,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 	@Test
 	void shouldRecordSuccessfulTimedRequest() {
 		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
-				new HttpHeaders(), new HashMap<>());
+				new LinkedMultiValueMap<>(), new HashMap<>());
 		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
 		Response<ServiceInstance> lbResponse = new DefaultResponse(
 				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
@@ -93,6 +94,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 				Tag.of("serviceInstance.port", "8080"), Tag.of("status", "200"), Tag.of("uri", "/test"));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	void shouldNotAddPathValueWhenDisabled() {
 		ReactiveLoadBalancer.Factory<ServiceInstance> factory = mock(ReactiveLoadBalancer.Factory.class);
@@ -102,7 +104,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		MicrometerStatsLoadBalancerLifecycle statsLifecycle = new MicrometerStatsLoadBalancerLifecycle(meterRegistry,
 				factory);
 		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
-				new HttpHeaders(), new HashMap<>());
+				new LinkedMultiValueMap<>(), new HashMap<>());
 		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
 		Response<ServiceInstance> lbResponse = new DefaultResponse(
 				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
@@ -126,7 +128,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		String uriTemplate = "/test/{pathParam}/test";
 		attributes.put(attributeName, uriTemplate);
 		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test/123/test"),
-				new HttpHeaders(), new HttpHeaders(), attributes);
+				new HttpHeaders(), new LinkedMultiValueMap<>(), attributes);
 		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
 		Response<ServiceInstance> lbResponse = new DefaultResponse(
 				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
@@ -152,7 +154,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 	@Test
 	void shouldRecordFailedTimedRequest() {
 		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
-				new HttpHeaders(), new HashMap<>());
+				new LinkedMultiValueMap<>(), new HashMap<>());
 		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
 		Response<ServiceInstance> lbResponse = new DefaultResponse(
 				new DefaultServiceInstance("test-1", "test", "test.org", 8080, false, new HashMap<>()));
@@ -175,7 +177,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 	@Test
 	void shouldNotRecordDiscardedRequest() {
 		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
-				new HttpHeaders(), new HashMap<>());
+				new LinkedMultiValueMap<>(), new HashMap<>());
 		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
 		Response<ServiceInstance> lbResponse = new EmptyResponse();
 		statsLifecycle.onStartRequest(lbRequest, lbResponse);
@@ -247,7 +249,7 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 	@Test
 	void shouldHandleNullLoadBalancerResponse() {
 		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://test.org/test"), new HttpHeaders(),
-				new HttpHeaders(), new HashMap<>());
+				new LinkedMultiValueMap<>(), new HashMap<>());
 		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext(requestData));
 		assertThatCode(() -> {
 			statsLifecycle.onStartRequest(lbRequest, null);

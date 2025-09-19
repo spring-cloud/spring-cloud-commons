@@ -60,12 +60,6 @@
 			"type": "java.time.Duration"
 		},
 		{
-			"name": "spring.cloud.loadbalancer.health-check.interval ",
-			"defaultValue": "25s",
-			"description": "Interval for rerunning the HealthCheck scheduler.",
-			"type": "java.time.Duration"
-		},
-		{
 			"name": "spring.cloud.loadbalancer.health-check.path",
 			"description": "Path at which the health-check request should be made. Can be set up per `serviceId`. A `default` value can be set up as well. If none is set up, `/actuator/health` will be used.",
 			"type": "java.util.Map"

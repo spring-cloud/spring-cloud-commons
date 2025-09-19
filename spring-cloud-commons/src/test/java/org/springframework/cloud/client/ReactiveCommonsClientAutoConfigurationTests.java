@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2020 the original author or authors.
+ * Copyright 2019-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,8 +105,8 @@ public class ReactiveCommonsClientAutoConfigurationTests {
 	}
 
 	@Test
-	public void worksWithoutActuator() {
-		applicationContextRunner.withClassLoader(new FilteredClassLoader("org.springframework.boot.actuate"))
+	public void worksWithoutHealth() {
+		applicationContextRunner.withClassLoader(new FilteredClassLoader("org.springframework.boot.health"))
 			.run(context -> {
 				assertThat(context).doesNotHaveBean(ReactiveDiscoveryClientHealthIndicator.class);
 				assertThat(context).doesNotHaveBean(ReactiveDiscoveryCompositeHealthContributor.class);

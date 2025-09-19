@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,11 +37,14 @@ public final class LoadBalancerUriTools {
 
 	private static final String PERCENTAGE_SIGN = "%";
 
-	private static final String DEFAULT_SCHEME = "http";
-
 	private static final String DEFAULT_SECURE_SCHEME = "https";
 
 	private static final Map<String, String> INSECURE_SCHEME_MAPPINGS;
+
+	/**
+	 * Default scheme.
+	 */
+	public static final String DEFAULT_SCHEME = "http";
 
 	static {
 		INSECURE_SCHEME_MAPPINGS = new HashMap<>();
@@ -113,6 +116,10 @@ public final class LoadBalancerUriTools {
 			return INSECURE_SCHEME_MAPPINGS.get(originalOrDefault);
 		}
 		return originalOrDefault;
+	}
+
+	public static URI constructInterfaceClientsBaseUrl(String groupName) {
+		return UriComponentsBuilder.newInstance().scheme(DEFAULT_SCHEME).host(groupName).encode().build().toUri();
 	}
 
 }

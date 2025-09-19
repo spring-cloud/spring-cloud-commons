@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,14 @@
 package org.springframework.cloud.client.discovery.health.reactive;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.springframework.boot.actuate.health.CompositeReactiveHealthContributor;
-import org.springframework.boot.actuate.health.NamedContributor;
-import org.springframework.boot.actuate.health.ReactiveHealthContributor;
-import org.springframework.boot.actuate.health.ReactiveHealthIndicator;
+import org.springframework.boot.health.contributor.CompositeReactiveHealthContributor;
+import org.springframework.boot.health.contributor.ReactiveHealthContributor;
+import org.springframework.boot.health.contributor.ReactiveHealthIndicator;
 import org.springframework.util.Assert;
 
 /**
@@ -44,29 +43,15 @@ public class ReactiveDiscoveryCompositeHealthContributor implements CompositeRea
 	}
 
 	@Override
-	public ReactiveHealthContributor getContributor(String name) {
-		return asHealthIndicator(indicators.get(name));
+	public Stream<Entry> stream() {
+		return indicators.entrySet()
+			.stream()
+			.map((entry) -> new Entry(entry.getKey(), asHealthIndicator(entry.getValue())));
 	}
 
 	@Override
-	public Iterator<NamedContributor<ReactiveHealthContributor>> iterator() {
-		return indicators.values().stream().map(this::asNamedContributor).iterator();
-	}
-
-	private NamedContributor<ReactiveHealthContributor> asNamedContributor(ReactiveDiscoveryHealthIndicator indicator) {
-		return new NamedContributor<>() {
-
-			@Override
-			public String getName() {
-				return indicator.getName();
-			}
-
-			@Override
-			public ReactiveHealthContributor getContributor() {
-				return asHealthIndicator(indicator);
-			}
-
-		};
+	public ReactiveHealthContributor getContributor(String name) {
+		return asHealthIndicator(indicators.get(name));
 	}
 
 	private ReactiveHealthIndicator asHealthIndicator(ReactiveDiscoveryHealthIndicator indicator) {

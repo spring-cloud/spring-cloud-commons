@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2023 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplierBuilder.getUri;
@@ -46,9 +47,10 @@ final class ServiceInstanceListSuppliersTestUtils {
 	static BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunction(WebClient webClient) {
 		return (serviceInstance, healthCheckPath) -> webClient.get()
 			.uri(UriComponentsBuilder.fromUriString(getUri(serviceInstance, healthCheckPath)).build().toUri())
-			.exchange()
-			.flatMap(clientResponse -> clientResponse.releaseBody()
-				.thenReturn(HttpStatus.OK.equals(clientResponse.statusCode())));
+			.retrieve()
+			.toBodilessEntity()
+			.map(response -> HttpStatus.OK.equals(response.getStatusCode()))
+			.onErrorReturn(throwable -> !(throwable instanceof WebClientRequestException), false);
 	}
 
 	static BiFunction<ServiceInstance, String, Mono<Boolean>> healthCheckFunction(RestTemplate restTemplate) {

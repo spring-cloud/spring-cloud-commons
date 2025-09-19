@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,13 @@
 
 package org.springframework.cloud.client.discovery.health;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.boot.actuate.health.Health;
-import org.springframework.boot.actuate.health.HealthContributor;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.actuate.health.NamedContributor;
+import org.springframework.boot.health.contributor.Health;
+import org.springframework.boot.health.contributor.HealthIndicator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -60,17 +57,13 @@ public class DiscoveryCompositeHealthContributorTests {
 	}
 
 	@Test
-	public void iteratorIteratesNamedContributors() {
+	public void iteratorIteratesNamedContributorEntries() {
 		TestDiscoveryHealthIndicator indicator1 = new TestDiscoveryHealthIndicator("test1", Health.up().build());
 		TestDiscoveryHealthIndicator indicator2 = new TestDiscoveryHealthIndicator("test2", Health.down().build());
 		DiscoveryCompositeHealthContributor composite = new DiscoveryCompositeHealthContributor(
 				Arrays.asList(indicator1, indicator2));
-		List<NamedContributor<HealthContributor>> contributors = new ArrayList<>();
-		for (NamedContributor<HealthContributor> contributor : composite) {
-			contributors.add(contributor);
-		}
-		assertThat(contributors).hasSize(2);
-		assertThat(contributors).extracting("name").containsExactlyInAnyOrder("test1", "test2");
+		assertThat(composite).hasSize(2);
+		assertThat(composite).extracting("name").containsExactlyInAnyOrder("test1", "test2");
 		// TODO: HealthContributor no longer has a health method
 		// assertThat(contributors).extracting("contributor").extracting("health")
 		// .containsExactlyInAnyOrder(indicator1.health(), indicator2.health());

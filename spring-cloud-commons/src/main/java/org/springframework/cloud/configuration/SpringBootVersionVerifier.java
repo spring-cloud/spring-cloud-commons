@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.boot.SpringBootVersion;
 import org.springframework.util.StringUtils;
 
 /**
- * Verifies if Spring Boot has proper version.
+ * Verifies if Spring Boot has the proper version.
  */
 class SpringBootVersionVerifier implements CompatibilityVerifier {
 
@@ -35,7 +35,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<>() {
 		{
-			this.put("3.5", is3_5());
+			this.put("4.0", is4_0());
 		}
 	};
 
@@ -70,12 +70,12 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		return SpringBootVersion.getVersion();
 	}
 
-	CompatibilityPredicate is3_5() {
+	CompatibilityPredicate is4_0() {
 		return new CompatibilityPredicate() {
 
 			@Override
 			public String toString() {
-				return "Predicate for Boot 3.5";
+				return "Predicate for Boot 4.0";
 			}
 
 			@Override
