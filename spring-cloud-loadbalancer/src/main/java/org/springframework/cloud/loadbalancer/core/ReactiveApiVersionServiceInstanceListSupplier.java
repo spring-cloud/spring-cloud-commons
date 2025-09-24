@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2025-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import java.util.Map;
 
 import reactor.core.publisher.Flux;
 
-import org.springframework.boot.webflux.autoconfigure.WebFluxProperties;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
@@ -32,8 +32,11 @@ import org.springframework.http.codec.support.DefaultServerCodecConfigurer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.StringUtils;
+import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.reactive.accept.ApiVersionResolver;
 import org.springframework.web.reactive.accept.ApiVersionStrategy;
+import org.springframework.web.reactive.accept.MediaTypeParamApiVersionResolver;
+import org.springframework.web.reactive.accept.PathApiVersionResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
@@ -48,22 +51,31 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
  * @author Olga Maciaszek-Sharma
  * @since 5.0.x
  */
-public class ApiVersionServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
+public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
 	private static final String VERSION = "VERSION";
 
-	// TODO: handle reactive and blocking strategy
-	// TODO: Construct strategy using properties
-	private final ApiVersionStrategy apiVersionStrategy;
-
 	private final boolean callGetWithRequestOnDelegates;
 
-	public ApiVersionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
-			ApiVersionStrategy apiVersionStrategy, LoadBalancerClientFactory loadBalancerClientFactory) {
+	private final LoadBalancerProperties.ApiVersion apiVersionProperties;
+
+	private final ApiVersionParser<?> apiVersionParser;
+
+	// TODO: handle reactive and blocking strategy
+	private final ApiVersionStrategy apiVersionStrategy;
+
+	public ReactiveApiVersionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+			LoadBalancerClientFactory loadBalancerClientFactory) {
 		super(delegate);
-		this.apiVersionStrategy = apiVersionStrategy;
-		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
-				.isCallGetWithRequestOnDelegates();
+		String serviceId = getServiceId();
+		LoadBalancerProperties properties = loadBalancerClientFactory.getProperties(serviceId);
+		callGetWithRequestOnDelegates = properties.isCallGetWithRequestOnDelegates();
+		apiVersionProperties = properties.getApiVersion();
+		apiVersionParser = loadBalancerClientFactory.getInstance(serviceId, ApiVersionParser.class);
+		ApiVersionStrategy userProvidedVersionStrategy = loadBalancerClientFactory.getInstance(serviceId,
+				ApiVersionStrategy.class);
+		apiVersionStrategy = userProvidedVersionStrategy != null ? userProvidedVersionStrategy
+				: buildApiVersionStrategy();
 	}
 
 	@Override
@@ -71,18 +83,16 @@ public class ApiVersionServiceInstanceListSupplier extends DelegatingServiceInst
 		Object requestContext = request.getContext();
 		if (callGetWithRequestOnDelegates && requestContext instanceof RequestDataContext requestDataContext) {
 			return getDelegate().get(request)
-					.map(serviceInstances -> filteredByVersion(serviceInstances,
-							getVersionFromRequest(requestDataContext.getClientRequest())));
+				.map(serviceInstances -> filteredByVersion(serviceInstances,
+						getVersionFromRequest(requestDataContext.getClientRequest())));
 		}
 		return get();
 	}
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		Comparable<?> defaultVersion = reactiveApiVersionStrategy.getDefaultVersion();
-		return getDelegate().get()
-				.map(serviceInstances ->
-						filteredByVersion(serviceInstances, defaultVersion));
+		Comparable<?> defaultVersion = apiVersionStrategy.getDefaultVersion();
+		return getDelegate().get().map(serviceInstances -> filteredByVersion(serviceInstances, defaultVersion));
 	}
 
 	private List<ServiceInstance> filteredByVersion(List<ServiceInstance> serviceInstances,
@@ -90,22 +100,19 @@ public class ApiVersionServiceInstanceListSupplier extends DelegatingServiceInst
 
 		if (requestedVersion != null) {
 			List<ServiceInstance> filteredInstances = serviceInstances.stream()
-					.filter(instance -> requestedVersion.equals(getVersion(instance)))
-					.toList();
+				.filter(instance -> requestedVersion.equals(getVersion(instance)))
+				.toList();
 
 			if (!filteredInstances.isEmpty()) {
 				return filteredInstances;
 			}
 		}
-		// TODO: evaluate if this logic makes sense in this scenario
-		// If the version is not specified in the request or no instances match,
-		// we return all instances retrieved for the given service id.
-		return serviceInstances;
+		return apiVersionProperties.isFallbackToAvailableInstances() ? serviceInstances : List.of();
 	}
 
 	private Comparable<?> getVersionFromRequest(RequestData requestData) {
 		ServerWebExchange exchange = buildServerWebExchange(requestData);
-		return reactiveApiVersionStrategy.resolveParseAndValidateVersion(exchange);
+		return apiVersionStrategy.resolveParseAndValidateVersion(exchange);
 	}
 
 	private Comparable<?> getVersion(ServiceInstance serviceInstance) {
@@ -113,28 +120,41 @@ public class ApiVersionServiceInstanceListSupplier extends DelegatingServiceInst
 		if (metadata != null) {
 			String version = metadata.get(VERSION);
 			if (version != null) {
-				return reactiveApiVersionStrategy.parseVersion(version);
+				return apiVersionStrategy.parseVersion(version);
 			}
 		}
 		return null;
 	}
 
-	private ApiVersionStrategy buildApiVersionStrategy(WebFluxProperties.Apiversion apiVersionProperties) {
-		List<ApiVersionResolver> versionResolvers =  new ArrayList<>();
-		WebFluxProperties.Apiversion.Use use = apiVersionProperties.getUse();
-		if(StringUtils.hasText(use.getHeader())) {
-			versionResolvers.add(e)
-		}
-		use.getHeader()
+	private static ServerWebExchange buildServerWebExchange(RequestData requestData) {
+		ServerHttpRequest serverRequest = new LoadBalancerServerHttpRequest(requestData);
+		ServerHttpResponse serverResponse = new EmptyServerHttpResponse();
+		return new DefaultServerWebExchange(serverRequest, serverResponse, new DefaultWebSessionManager(),
+				new DefaultServerCodecConfigurer(), new AcceptHeaderLocaleContextResolver());
 	}
 
-	private static ServerWebExchange buildServerWebExchange(RequestData requestData) {
-		ServerHttpRequest serverRequest = new LoadBalancerServerHttpRequest(
-				requestData);
-		ServerHttpResponse serverResponse = new EmptyServerHttpResponse();
-		return new DefaultServerWebExchange(serverRequest,
-				serverResponse, new DefaultWebSessionManager(), new DefaultServerCodecConfigurer(),
-				new AcceptHeaderLocaleContextResolver());
+	private ApiVersionStrategy buildApiVersionStrategy() {
+		List<ApiVersionResolver> versionResolvers = new ArrayList<>();
+
+		if (StringUtils.hasText(apiVersionProperties.getHeader())) {
+			versionResolvers
+				.add(exchange -> exchange.getRequest().getHeaders().getFirst(apiVersionProperties.getHeader()));
+		}
+		if (StringUtils.hasText(apiVersionProperties.getQueryParameter())) {
+			versionResolvers.add(exchange -> exchange.getRequest()
+				.getQueryParams()
+				.getFirst(apiVersionProperties.getQueryParameter()));
+		}
+
+		if (apiVersionProperties.getPathSegment() != null) {
+			versionResolvers.add(new PathApiVersionResolver(apiVersionProperties.getPathSegment()));
+		}
+		apiVersionProperties.getMediaTypeParameters()
+			.forEach((mediaType, paramName) -> versionResolvers
+				.add(new MediaTypeParamApiVersionResolver(mediaType, paramName)));
+
+		return new ReactiveLoadBalancerApiVersionStrategy(versionResolvers, apiVersionParser,
+				apiVersionProperties.getRequired(), apiVersionProperties.getDefaultVersion(), false, null, null);
 	}
 
 }

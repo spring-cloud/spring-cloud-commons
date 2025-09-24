@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2025-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * An {@link AbstractServerHttpRequest} implementation that is built from a
- * {@link RequestData} object. This is used to be able to pass a
- * {@code ServerWebExchange} to components that require it,
- * but for which we only have {@link RequestData} to  construct it.
+ * {@link RequestData} object. This is used to be able to pass a {@code ServerWebExchange}
+ * to components that require it, but for which we only have {@link RequestData} to
+ * construct it.
  *
  * <p>
  * Note: This is a lightweight implementation. Operations like {@link #getBody()} or
@@ -40,7 +40,7 @@ import org.springframework.util.MultiValueMap;
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
- * @see ApiVersionServiceInstanceListSupplier
+ * @see ReactiveApiVersionServiceInstanceListSupplier
  */
 final class LoadBalancerServerHttpRequest extends AbstractServerHttpRequest {
 
@@ -56,8 +56,8 @@ final class LoadBalancerServerHttpRequest extends AbstractServerHttpRequest {
 		MultiValueMap<String, HttpCookie> httpCookies = new LinkedMultiValueMap<>();
 		MultiValueMap<String, String> originalCookies = requestData.getCookies();
 		if (originalCookies != null) {
-			originalCookies.forEach((name, values) -> values
-					.forEach(value -> httpCookies.add(name, new HttpCookie(name, value))));
+			originalCookies
+				.forEach((name, values) -> values.forEach(value -> httpCookies.add(name, new HttpCookie(name, value))));
 		}
 		return httpCookies;
 	}
@@ -76,4 +76,5 @@ final class LoadBalancerServerHttpRequest extends AbstractServerHttpRequest {
 	public Flux<DataBuffer> getBody() {
 		throw new UnsupportedOperationException("Not available for " + getClass().getSimpleName());
 	}
+
 }

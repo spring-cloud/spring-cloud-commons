@@ -143,7 +143,8 @@ public class AbstractAutoServiceRegistrationTests {
 
 	}
 
-	public static class TestRegistrationPostEventListener implements ApplicationListener<InstanceRegisteredEvent<TestRegistration>> {
+	public static class TestRegistrationPostEventListener
+			implements ApplicationListener<InstanceRegisteredEvent<TestRegistration>> {
 
 		public boolean wasFired = false;
 

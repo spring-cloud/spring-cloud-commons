@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2025-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 
 /**
- * A dummy {@link ServerHttpResponse} implementation that allows
- * for integration with Spring Framework's API versioning features.
+ * A dummy {@link ServerHttpResponse} implementation that allows for integration with
+ * Spring Framework's API versioning features.
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
@@ -95,4 +95,5 @@ class EmptyServerHttpResponse implements ServerHttpResponse {
 	public HttpHeaders getHeaders() {
 		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
+
 }
