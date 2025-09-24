@@ -27,6 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.webflux.autoconfigure.WebFluxProperties;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
@@ -343,6 +345,18 @@ public final class ServiceInstanceListSupplierBuilder {
 		return this;
 	}
 
+
+	ServiceInstanceListSupplierBuilder withApiVersioning() {
+		DelegateCreator creator = (context, delegate) -> {
+			WebFluxProperties.Apiversion apiVersion = context.getBean(WebFluxProperties.class)
+					.getApiversion();
+			LoadBalancerClientFactory factory = context.getBean(LoadBalancerClientFactory.class);
+			return new ApiVersionServiceInstanceListSupplier(delegate, apiVersion, factory);
+		};
+		creators.add(creator);
+		return this;
+	}
+
 	/**
 	 * Support {@link ServiceInstanceListSupplierBuilder} can be added to the expansion
 	 * implementation of {@link ServiceInstanceListSupplier} by this method.
@@ -428,6 +442,7 @@ public final class ServiceInstanceListSupplierBuilder {
 		}
 		return serviceInstance.getUri().toString();
 	}
+
 
 	/**
 	 * Allows creating a {@link ServiceInstanceListSupplier} instance based on provided

@@ -16,11 +16,13 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import reactor.core.publisher.Flux;
 
+import org.springframework.boot.webflux.autoconfigure.WebFluxProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
@@ -29,6 +31,8 @@ import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.http.codec.support.DefaultServerCodecConfigurer;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.accept.ApiVersionResolver;
 import org.springframework.web.reactive.accept.ApiVersionStrategy;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
@@ -48,6 +52,7 @@ public class ApiVersionServiceInstanceListSupplier extends DelegatingServiceInst
 
 	private static final String VERSION = "VERSION";
 
+	// TODO: handle reactive and blocking strategy
 	// TODO: Construct strategy using properties
 	private final ApiVersionStrategy apiVersionStrategy;
 
@@ -74,7 +79,7 @@ public class ApiVersionServiceInstanceListSupplier extends DelegatingServiceInst
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		Comparable<?> defaultVersion = apiVersionStrategy.getDefaultVersion();
+		Comparable<?> defaultVersion = reactiveApiVersionStrategy.getDefaultVersion();
 		return getDelegate().get()
 				.map(serviceInstances ->
 						filteredByVersion(serviceInstances, defaultVersion));
@@ -100,7 +105,7 @@ public class ApiVersionServiceInstanceListSupplier extends DelegatingServiceInst
 
 	private Comparable<?> getVersionFromRequest(RequestData requestData) {
 		ServerWebExchange exchange = buildServerWebExchange(requestData);
-		return apiVersionStrategy.resolveParseAndValidateVersion(exchange);
+		return reactiveApiVersionStrategy.resolveParseAndValidateVersion(exchange);
 	}
 
 	private Comparable<?> getVersion(ServiceInstance serviceInstance) {
@@ -108,13 +113,21 @@ public class ApiVersionServiceInstanceListSupplier extends DelegatingServiceInst
 		if (metadata != null) {
 			String version = metadata.get(VERSION);
 			if (version != null) {
-				return apiVersionStrategy.parseVersion(version);
+				return reactiveApiVersionStrategy.parseVersion(version);
 			}
 		}
 		return null;
 	}
 
-	// FIXME: if FW adjusted, generate ServerHttpRequest only
+	private ApiVersionStrategy buildApiVersionStrategy(WebFluxProperties.Apiversion apiVersionProperties) {
+		List<ApiVersionResolver> versionResolvers =  new ArrayList<>();
+		WebFluxProperties.Apiversion.Use use = apiVersionProperties.getUse();
+		if(StringUtils.hasText(use.getHeader())) {
+			versionResolvers.add(e)
+		}
+		use.getHeader()
+	}
+
 	private static ServerWebExchange buildServerWebExchange(RequestData requestData) {
 		ServerHttpRequest serverRequest = new LoadBalancerServerHttpRequest(
 				requestData);

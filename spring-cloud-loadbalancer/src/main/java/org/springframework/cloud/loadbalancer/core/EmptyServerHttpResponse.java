@@ -30,65 +30,69 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.MultiValueMap;
 
-// FIXME if FW API not adjusted to use the request alone
 /**
+ * A dummy {@link ServerHttpResponse} implementation that allows
+ * for integration with Spring Framework's API versioning features.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 class EmptyServerHttpResponse implements ServerHttpResponse {
 
+	private static final String ERROR_MESSAGE = "Not supported by " + EmptyServerHttpResponse.class.getSimpleName();
 
 	@Override
 	public boolean setStatusCode(@Nullable HttpStatusCode status) {
-		throw new UnsupportedOperationException("Please, implement me.");
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 
 	@Override
 	public @Nullable HttpStatusCode getStatusCode() {
-		throw new UnsupportedOperationException("Please, implement me.");
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
-		throw new UnsupportedOperationException("Please, implement me.");
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 
 	@Override
 	public void addCookie(ResponseCookie cookie) {
-
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 
 	@Override
 	public DataBufferFactory bufferFactory() {
-		throw new UnsupportedOperationException("Please, implement me.");
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 
 	@Override
 	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
-
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 
 	@Override
 	public boolean isCommitted() {
-		throw new UnsupportedOperationException("Please, implement me.");
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 
 	@Override
 	public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-		throw new UnsupportedOperationException("Please, implement me.");
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 
 	@Override
 	public Mono<Void> writeAndFlushWith(Publisher<? extends Publisher<? extends DataBuffer>> body) {
-		throw new UnsupportedOperationException("Please, implement me.");
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 
 	@Override
 	public Mono<Void> setComplete() {
-		throw new UnsupportedOperationException("Please, implement me.");
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
-		throw new UnsupportedOperationException("Please, implement me.");
+		throw new UnsupportedOperationException(ERROR_MESSAGE);
 	}
 }

@@ -168,6 +168,18 @@ public class LoadBalancerClientConfiguration {
 				.build(context);
 		}
 
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+//	TODO:	@Conditional(ApiVersionCondition.class)
+		public ServiceInstanceListSupplier apiVersionServiceInstanceListSupplier(ConfigurableApplicationContext context){
+			return ServiceInstanceListSupplier.builder()
+					.withBlockingDiscoveryClient()
+					.withApiVersioning()
+					.withCaching()
+					.build(context);
+		}
+
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -300,7 +312,7 @@ public class LoadBalancerClientConfiguration {
 	public static class ReactiveRetryConfiguration {
 
 		@Bean
-		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@Primary
 		public ServiceInstanceListSupplier retryAwareDiscoveryClientServiceInstanceListSupplier(
 				ServiceInstanceListSupplier delegate) {
