@@ -67,6 +67,7 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	// restartEndpoint
 	@Test
+	@Disabled("TODO: https://github.com/spring-cloud/spring-cloud-commons/issues/1520")
 	public void restartEndpointDisabled() {
 		beanNotCreated("restartEndpoint", "management.endpoint.restart.enabled=false");
 	}

@@ -20,10 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
@@ -77,7 +76,7 @@ public class EnvironmentManagerIntegrationTests {
 		then(this.properties.getMessage()).isEqualTo("Foo");
 	}
 
-	private String property(String name, String value) throws JsonProcessingException {
+	private String property(String name, String value) {
 		// Change the dynamic property source...
 		Map<String, String> property = new HashMap<>();
 		property.put("name", name);
