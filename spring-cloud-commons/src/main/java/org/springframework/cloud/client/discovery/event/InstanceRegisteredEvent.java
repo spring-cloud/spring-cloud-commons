@@ -51,4 +51,5 @@ public class InstanceRegisteredEvent<T> extends ApplicationEvent implements Reso
 	public ResolvableType getResolvableType() {
 		return ResolvableType.forClassWithGenerics(getClass(), ResolvableType.forInstance(this.config));
 	}
+
 }

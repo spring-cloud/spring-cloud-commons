@@ -163,8 +163,8 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier subsetServiceInstanceListSupplier(ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder()
 				.withDiscoveryClient()
-				.withSubset()
 				.withCaching()
+				.withSubset()
 				.build(context);
 		}
 
@@ -266,8 +266,8 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier subsetServiceInstanceListSupplier(ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder()
 				.withBlockingDiscoveryClient()
-				.withSubset()
 				.withCaching()
+				.withSubset()
 				.build(context);
 		}
 
