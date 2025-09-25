@@ -184,8 +184,8 @@ public class LoadBalancerClientConfiguration {
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder()
 				.withDiscoveryClient()
-				.withReactiveApiVersioning()
 				.withCaching()
+				.withReactiveApiVersioning()
 				.build(context);
 		}
 
