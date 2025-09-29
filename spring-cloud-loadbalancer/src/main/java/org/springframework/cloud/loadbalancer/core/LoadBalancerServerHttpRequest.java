@@ -29,9 +29,9 @@ import org.springframework.util.MultiValueMap;
 
 /**
  * An {@link AbstractServerHttpRequest} implementation that is built from a
- * {@link RequestData} object. This is used to be able to pass a {@code ServerWebExchange}
- * to components that require it, but for which we only have {@link RequestData} to
- * construct it.
+ * {@link RequestData} object. This is used to allow for passing a
+ * {@code ServerWebExchange} to components that require it, but for which we only have
+ * {@link RequestData} to construct it.
  *
  * <p>
  * Note: This is a lightweight implementation. Operations like {@link #getBody()} or

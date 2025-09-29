@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
@@ -30,22 +31,16 @@ import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
-import org.springframework.http.codec.support.DefaultServerCodecConfigurer;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ApiVersionParser;
-import org.springframework.web.reactive.accept.ApiVersionResolver;
-import org.springframework.web.reactive.accept.ApiVersionStrategy;
-import org.springframework.web.reactive.accept.MediaTypeParamApiVersionResolver;
-import org.springframework.web.reactive.accept.PathApiVersionResolver;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.i18n.AcceptHeaderLocaleContextResolver;
-import org.springframework.web.server.session.DefaultWebSessionManager;
+import org.springframework.web.accept.ApiVersionResolver;
+import org.springframework.web.accept.ApiVersionStrategy;
+import org.springframework.web.accept.MediaTypeParamApiVersionResolver;
+import org.springframework.web.accept.PathApiVersionResolver;
+import org.springframework.web.accept.QueryApiVersionResolver;
 
 /**
- * A reactive version of the {@link ServiceInstanceListSupplier} that filters service
+ * A blocking version of a {@link ServiceInstanceListSupplier} that filters service
  * instances based on the API version specified in the request. The version is extracted
  * from the request using an {@link ApiVersionStrategy} and matched against the
  * {@code VERSION} metadata field of the service instances.
@@ -53,11 +48,11 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
  * @author Olga Maciaszek-Sharma
  * @since 5.0.x
  */
-public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
+public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
 	private static final String API_VERSION = "API_VERSION";
 
-	private static final Log LOG = LogFactory.getLog(ReactiveApiVersionServiceInstanceListSupplier.class);
+	private static final Log LOG = LogFactory.getLog(BlockingApiVersionServiceInstanceListSupplier.class);
 
 	private final boolean callGetWithRequestOnDelegates;
 
@@ -69,7 +64,7 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 
 	private ApiVersionStrategy apiVersionStrategy;
 
-	public ReactiveApiVersionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
+	public BlockingApiVersionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerClientFactory loadBalancerClientFactory) {
 		super(delegate);
 		String serviceId = getServiceId();
@@ -128,8 +123,8 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 	}
 
 	private Comparable<?> getVersionFromRequest(RequestData requestData) {
-		ServerWebExchange exchange = buildServerWebExchange(requestData);
-		Comparable<?> apiVersion = getApiVersionStrategy().resolveParseAndValidateVersion(exchange);
+		HttpServletRequest servletRequest = new LoadBalancerHttpServletRequest(requestData);
+		Comparable<?> apiVersion = getApiVersionStrategy().resolveParseAndValidateVersion(servletRequest);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Resolved Api Version from request: " + apiVersion);
 		}
@@ -145,13 +140,6 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 			}
 		}
 		return null;
-	}
-
-	private static ServerWebExchange buildServerWebExchange(RequestData requestData) {
-		ServerHttpRequest serverRequest = new LoadBalancerServerHttpRequest(requestData);
-		ServerHttpResponse serverResponse = new EmptyServerHttpResponse();
-		return new DefaultServerWebExchange(serverRequest, serverResponse, new DefaultWebSessionManager(),
-				new DefaultServerCodecConfigurer(), new AcceptHeaderLocaleContextResolver());
 	}
 
 	private ApiVersionParser getApiVersionParser() {
@@ -175,13 +163,10 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 		List<ApiVersionResolver> versionResolvers = new ArrayList<>();
 
 		if (StringUtils.hasText(apiVersionProperties.getHeader())) {
-			versionResolvers
-				.add(exchange -> exchange.getRequest().getHeaders().getFirst(apiVersionProperties.getHeader()));
+			versionResolvers.add(request -> request.getHeader(apiVersionProperties.getHeader()));
 		}
 		if (StringUtils.hasText(apiVersionProperties.getQueryParameter())) {
-			versionResolvers.add(exchange -> exchange.getRequest()
-				.getQueryParams()
-				.getFirst(apiVersionProperties.getQueryParameter()));
+			versionResolvers.add(new QueryApiVersionResolver(apiVersionProperties.getQueryParameter()));
 		}
 		if (apiVersionProperties.getPathSegment() != null) {
 			versionResolvers.add(new PathApiVersionResolver(apiVersionProperties.getPathSegment()));
@@ -190,7 +175,7 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 			.forEach((mediaType, paramName) -> versionResolvers
 				.add(new MediaTypeParamApiVersionResolver(mediaType, paramName)));
 
-		return new ReactiveLoadBalancerApiVersionStrategy(versionResolvers, getApiVersionParser(),
+		return new BlockingLoadBalancerApiVersionStrategy(versionResolvers, getApiVersionParser(),
 				apiVersionProperties.getRequired(), apiVersionProperties.getDefaultVersion(), false, null, null);
 	}
 

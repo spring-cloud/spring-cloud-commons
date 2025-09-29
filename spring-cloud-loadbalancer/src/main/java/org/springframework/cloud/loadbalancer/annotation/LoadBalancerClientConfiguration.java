@@ -292,19 +292,18 @@ public class LoadBalancerClientConfiguration {
 				.build(context);
 		}
 
-		// TODO
-		// @Bean
-		// @ConditionalOnBean(DiscoveryClient.class)
-		// @ConditionalOnMissingBean
-		// @Conditional(ApiVersionCondition.class)
-		// public ServiceInstanceListSupplier apiVersionServiceInstanceListSupplier(
-		// ConfigurableApplicationContext context) {
-		// return ServiceInstanceListSupplier.builder()
-		// .withBlockingDiscoveryClient()
-		// .withBlockingApiVersioning()
-		// .withCaching()
-		// .build(context);
-		// }
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(ApiVersionCondition.class)
+		public ServiceInstanceListSupplier apiVersionServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder()
+				.withBlockingDiscoveryClient()
+				.withBlockingApiVersioning()
+				.withCaching()
+				.build(context);
+		}
 
 	}
 

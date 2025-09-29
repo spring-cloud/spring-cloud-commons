@@ -352,6 +352,15 @@ public final class ServiceInstanceListSupplierBuilder {
 		return this;
 	}
 
+	public ServiceInstanceListSupplierBuilder withBlockingApiVersioning() {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory factory = context.getBean(LoadBalancerClientFactory.class);
+			return new BlockingApiVersionServiceInstanceListSupplier(delegate, factory);
+		};
+		creators.add(creator);
+		return this;
+	}
+
 	/**
 	 * Support {@link ServiceInstanceListSupplierBuilder} can be added to the expansion
 	 * implementation of {@link ServiceInstanceListSupplier} by this method.
