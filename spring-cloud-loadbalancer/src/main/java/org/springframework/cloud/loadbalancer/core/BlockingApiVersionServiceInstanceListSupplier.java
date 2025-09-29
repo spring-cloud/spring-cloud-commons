@@ -50,7 +50,7 @@ import org.springframework.web.accept.QueryApiVersionResolver;
  */
 public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
-	private static final String API_VERSION = "API_VERSION";
+	public static final String API_VERSION = "API_VERSION";
 
 	private static final Log LOG = LogFactory.getLog(BlockingApiVersionServiceInstanceListSupplier.class);
 
@@ -120,6 +120,11 @@ public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingSer
 			LOG.debug("No matching instances found by Api Version: " + requestedVersion + ". Returning empty list.");
 		}
 		return List.of();
+	}
+
+	// Visible for tests
+	void setApiVersionParser(ApiVersionParser<?> apiVersionParser) {
+		this.apiVersionParser = apiVersionParser;
 	}
 
 	private Comparable<?> getVersionFromRequest(RequestData requestData) {
