@@ -48,7 +48,7 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
  * A reactive version of the {@link ServiceInstanceListSupplier} that filters service
  * instances based on the API version specified in the request. The version is extracted
  * from the request using an {@link ApiVersionStrategy} and matched against the
- * {@code VERSION} metadata field of the service instances.
+ * {@link  ReactiveApiVersionServiceInstanceListSupplier#API_VERSION} metadata field of the service instances.
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.x

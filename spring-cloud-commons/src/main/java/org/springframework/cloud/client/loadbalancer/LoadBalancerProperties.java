@@ -626,11 +626,11 @@ public class LoadBalancerProperties {
 		 */
 		private boolean fallbackToAvailableInstances = false;
 
-		public Boolean getRequired() {
+		public boolean getRequired() {
 			return required;
 		}
 
-		public void setRequired(Boolean required) {
+		public void setRequired(boolean required) {
 			this.required = required;
 		}
 
