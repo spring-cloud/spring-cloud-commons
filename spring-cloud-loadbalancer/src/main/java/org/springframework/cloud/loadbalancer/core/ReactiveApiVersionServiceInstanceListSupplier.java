@@ -103,7 +103,7 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 		}
 
 		if (requestedVersion != null) {
-			List<ServiceInstance> filteredInstances = serviceInstances.stream()
+			List<ServiceInstance> filteredInstances = serviceInstances.parallelStream()
 				.filter(instance -> requestedVersion.equals(getVersion(instance)))
 				.toList();
 

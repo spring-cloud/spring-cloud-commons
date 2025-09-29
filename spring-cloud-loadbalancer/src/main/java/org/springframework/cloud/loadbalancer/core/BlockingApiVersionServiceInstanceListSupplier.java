@@ -99,9 +99,9 @@ public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingSer
 		}
 
 		if (requestedVersion != null) {
-			List<ServiceInstance> filteredInstances = serviceInstances.stream()
-				.filter(instance -> requestedVersion.equals(getVersion(instance)))
-				.toList();
+			List<ServiceInstance> filteredInstances = serviceInstances.parallelStream()
+					.filter(instance -> requestedVersion.equals(getVersion(instance)))
+					.toList();
 
 			if (!filteredInstances.isEmpty()) {
 				if (LOG.isDebugEnabled()) {

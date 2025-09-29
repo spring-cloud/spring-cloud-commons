@@ -180,7 +180,7 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
 		@Conditional(ApiVersionCondition.class)
-		public ServiceInstanceListSupplier apiVersionServiceInstanceListSupplier(
+		public ServiceInstanceListSupplier reactiveApiVersionServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder()
 				.withDiscoveryClient()
@@ -296,7 +296,7 @@ public class LoadBalancerClientConfiguration {
 		@ConditionalOnBean(DiscoveryClient.class)
 		@ConditionalOnMissingBean
 		@Conditional(ApiVersionCondition.class)
-		public ServiceInstanceListSupplier apiVersionServiceInstanceListSupplier(
+		public ServiceInstanceListSupplier blockingApiVersionServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder()
 				.withBlockingDiscoveryClient()
