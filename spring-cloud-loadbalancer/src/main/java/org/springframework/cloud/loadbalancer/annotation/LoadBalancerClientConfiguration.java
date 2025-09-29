@@ -300,8 +300,8 @@ public class LoadBalancerClientConfiguration {
 				ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder()
 				.withBlockingDiscoveryClient()
-				.withBlockingApiVersioning()
 				.withCaching()
+				.withBlockingApiVersioning()
 				.build(context);
 		}
 
