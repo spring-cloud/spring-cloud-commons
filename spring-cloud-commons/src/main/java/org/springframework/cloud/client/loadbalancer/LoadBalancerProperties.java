@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
@@ -27,11 +28,13 @@ import java.util.concurrent.TimeoutException;
 import reactor.util.retry.RetryBackoffSpec;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Name;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.commons.util.IdUtils;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.client.RestTemplate;
 
@@ -105,6 +108,11 @@ public class LoadBalancerProperties {
 	 */
 	private Stats stats = new Stats();
 
+	/**
+	 * Properties for API version-based load-balancing.
+	 */
+	private ApiVersion apiVersion = new ApiVersion();
+
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
 	}
@@ -175,6 +183,14 @@ public class LoadBalancerProperties {
 
 	public void setStats(Stats stats) {
 		this.stats = stats;
+	}
+
+	public ApiVersion getApiVersion() {
+		return apiVersion;
+	}
+
+	public void setApiVersion(ApiVersion apiVersion) {
+		this.apiVersion = apiVersion;
 	}
 
 	public static class StickySession {
@@ -567,6 +583,103 @@ public class LoadBalancerProperties {
 
 		public void setIncludePath(boolean includePath) {
 			this.includePath = includePath;
+		}
+
+	}
+
+	public static class ApiVersion {
+
+		/**
+		 * Indicates whether the API version is required with each request.
+		 */
+		private boolean required = false;
+
+		/**
+		 * Sets default version that should be used for each request.
+		 */
+		@Name("default")
+		private String defaultVersion;
+
+		/**
+		 * Uses the HTTP header with the given name to obtain the version.
+		 */
+		private String header;
+
+		/**
+		 * Uses the query parameter with the given name to obtain the version.
+		 */
+		private String queryParameter;
+
+		/**
+		 * Uses the path segment at the given index to obtain the version.
+		 */
+		private Integer pathSegment;
+
+		/**
+		 * Uses the media type parameter with the given name to obtain the version.
+		 */
+		private Map<MediaType, String> mediaTypeParameters = new LinkedHashMap<>();
+
+		/**
+		 * Indicates whether all the available instances should be returned if no
+		 * instances for the specified version are available.
+		 */
+		private boolean fallbackToAvailableInstances = false;
+
+		public boolean getRequired() {
+			return required;
+		}
+
+		public void setRequired(boolean required) {
+			this.required = required;
+		}
+
+		public String getDefaultVersion() {
+			return defaultVersion;
+		}
+
+		public void setDefaultVersion(String defaultVersion) {
+			this.defaultVersion = defaultVersion;
+		}
+
+		public String getHeader() {
+			return header;
+		}
+
+		public void setHeader(String header) {
+			this.header = header;
+		}
+
+		public String getQueryParameter() {
+			return queryParameter;
+		}
+
+		public void setQueryParameter(String queryParameter) {
+			this.queryParameter = queryParameter;
+		}
+
+		public Integer getPathSegment() {
+			return pathSegment;
+		}
+
+		public void setPathSegment(Integer pathSegment) {
+			this.pathSegment = pathSegment;
+		}
+
+		public Map<MediaType, String> getMediaTypeParameters() {
+			return mediaTypeParameters;
+		}
+
+		public void setMediaTypeParameters(Map<MediaType, String> mediaTypeParameters) {
+			this.mediaTypeParameters = mediaTypeParameters;
+		}
+
+		public boolean isFallbackToAvailableInstances() {
+			return fallbackToAvailableInstances;
+		}
+
+		public void setFallbackToAvailableInstances(boolean fallbackToAvailableInstances) {
+			this.fallbackToAvailableInstances = fallbackToAvailableInstances;
 		}
 
 	}
