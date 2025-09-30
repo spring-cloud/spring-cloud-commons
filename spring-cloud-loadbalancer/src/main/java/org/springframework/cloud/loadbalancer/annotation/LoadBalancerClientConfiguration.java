@@ -334,7 +334,7 @@ public class LoadBalancerClientConfiguration {
 	public static class ReactiveRetryConfiguration {
 
 		@Bean
-		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnBean(DiscoveryClient.class)
 		@Primary
 		public ServiceInstanceListSupplier retryAwareDiscoveryClientServiceInstanceListSupplier(
 				ServiceInstanceListSupplier delegate) {

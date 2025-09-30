@@ -30,7 +30,13 @@ import org.springframework.web.reactive.accept.DefaultApiVersionStrategy;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
+ * A LoadBalancer-specific implementation of {@link DefaultApiVersionStrategy}. It
+ * overrides the
+ * {@link DefaultApiVersionStrategy#validateVersion(Comparable, ServerWebExchange)} method
+ * in order to skip any version validation.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 public class ReactiveLoadBalancerApiVersionStrategy extends DefaultApiVersionStrategy {
 

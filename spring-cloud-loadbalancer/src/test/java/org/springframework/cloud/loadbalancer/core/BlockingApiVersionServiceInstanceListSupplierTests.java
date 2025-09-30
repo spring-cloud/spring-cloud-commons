@@ -61,7 +61,9 @@ class BlockingApiVersionServiceInstanceListSupplierTests {
 	private final LoadBalancerProperties properties = new LoadBalancerProperties();
 
 	private final ServiceInstance first = serviceInstance("test-1", buildApiVersionMetadata("1"));
+
 	private final ServiceInstance second = serviceInstance("test-2", buildApiVersionMetadata("2"));
+
 	private final ServiceInstance third = serviceInstance("test-2", Collections.emptyMap());
 
 	@BeforeEach
@@ -78,13 +80,11 @@ class BlockingApiVersionServiceInstanceListSupplierTests {
 		properties.getApiVersion().setHeader("X-Api-Version");
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("X-Api-Version", "1.0");
-		RequestData requestData = new RequestData(HttpMethod.GET,
-				URI.create("http://localhost/test"), headers, new LinkedMultiValueMap<>(),
-				Collections.emptyMap());
+		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://localhost/test"), headers,
+				new LinkedMultiValueMap<>(), Collections.emptyMap());
 
-		List<ServiceInstance> filtered = supplier.get(new DefaultRequest<>(
-						new RequestDataContext(requestData)))
-				.blockFirst();
+		List<ServiceInstance> filtered = supplier.get(new DefaultRequest<>(new RequestDataContext(requestData)))
+			.blockFirst();
 
 		assertThat(filtered).containsExactly(first);
 	}
@@ -93,13 +93,11 @@ class BlockingApiVersionServiceInstanceListSupplierTests {
 	void shouldReturnEmptyListWhenRequestedVersionIsNull() {
 		properties.getApiVersion().setHeader("X-Api-Version");
 		HttpHeaders headers = new HttpHeaders();
-		RequestData requestData = new RequestData(HttpMethod.GET,
-				URI.create("http://localhost/test"), headers, new LinkedMultiValueMap<>(),
-				Collections.emptyMap());
+		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://localhost/test"), headers,
+				new LinkedMultiValueMap<>(), Collections.emptyMap());
 
-		List<ServiceInstance> filtered = supplier.get(new DefaultRequest<>(
-						new RequestDataContext(requestData)))
-				.blockFirst();
+		List<ServiceInstance> filtered = supplier.get(new DefaultRequest<>(new RequestDataContext(requestData)))
+			.blockFirst();
 
 		assertThat(filtered).isEmpty();
 	}
@@ -109,13 +107,11 @@ class BlockingApiVersionServiceInstanceListSupplierTests {
 		properties.getApiVersion().setHeader("X-Api-Version");
 		properties.getApiVersion().setFallbackToAvailableInstances(true);
 		HttpHeaders headers = new HttpHeaders();
-		RequestData requestData = new RequestData(HttpMethod.GET,
-				URI.create("http://localhost/test"), headers, new LinkedMultiValueMap<>(),
-				Collections.emptyMap());
+		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://localhost/test"), headers,
+				new LinkedMultiValueMap<>(), Collections.emptyMap());
 
-		List<ServiceInstance> filtered = supplier.get(new DefaultRequest<>(
-						new RequestDataContext(requestData)))
-				.blockFirst();
+		List<ServiceInstance> filtered = supplier.get(new DefaultRequest<>(new RequestDataContext(requestData)))
+			.blockFirst();
 
 		assertThat(filtered).containsExactly(first, second, third);
 	}
@@ -125,8 +121,7 @@ class BlockingApiVersionServiceInstanceListSupplierTests {
 		properties.getApiVersion().setHeader("X-Api-Version");
 		properties.getApiVersion().setDefaultVersion("2");
 
-		List<ServiceInstance> filtered = supplier.get()
-				.blockFirst();
+		List<ServiceInstance> filtered = supplier.get().blockFirst();
 
 		assertThat(filtered).containsExactly(second);
 	}

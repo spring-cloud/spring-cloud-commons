@@ -66,7 +66,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
- * @see ReactiveApiVersionServiceInstanceListSupplier
+ * @see BlockingApiVersionServiceInstanceListSupplier
  */
 public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 

@@ -43,13 +43,18 @@ import org.springframework.web.accept.QueryApiVersionResolver;
  * A blocking version of a {@link ServiceInstanceListSupplier} that filters service
  * instances based on the API version specified in the request. The version is extracted
  * from the request using an {@link ApiVersionStrategy} and matched against the
- * {@link BlockingApiVersionServiceInstanceListSupplier#API_VERSION} metadata field of the service instances.
+ * {@link BlockingApiVersionServiceInstanceListSupplier#API_VERSION} metadata field of the
+ * service instances.
  *
  * @author Olga Maciaszek-Sharma
  * @since 5.0.x
  */
 public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
+	/**
+	 * Service instance metadata map key that service instance API version is retrieved
+	 * from.
+	 */
 	public static final String API_VERSION = "API_VERSION";
 
 	private static final Log LOG = LogFactory.getLog(BlockingApiVersionServiceInstanceListSupplier.class);
@@ -79,8 +84,8 @@ public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingSer
 		Object requestContext = request.getContext();
 		if (callGetWithRequestOnDelegates && requestContext instanceof RequestDataContext requestDataContext) {
 			return getDelegate().get(request)
-					.map(serviceInstances -> filteredByVersion(serviceInstances,
-							getVersionFromRequest(requestDataContext.getClientRequest())));
+				.map(serviceInstances -> filteredByVersion(serviceInstances,
+						getVersionFromRequest(requestDataContext.getClientRequest())));
 		}
 		return get();
 	}
@@ -88,8 +93,7 @@ public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingSer
 	@Override
 	public Flux<List<ServiceInstance>> get() {
 		Comparable<?> defaultVersion = getApiVersionStrategy().getDefaultVersion();
-		return getDelegate().get()
-				.map(serviceInstances -> filteredByVersion(serviceInstances, defaultVersion));
+		return getDelegate().get().map(serviceInstances -> filteredByVersion(serviceInstances, defaultVersion));
 	}
 
 	private List<ServiceInstance> filteredByVersion(List<ServiceInstance> serviceInstances,
@@ -100,8 +104,8 @@ public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingSer
 
 		if (requestedVersion != null) {
 			List<ServiceInstance> filteredInstances = serviceInstances.parallelStream()
-					.filter(instance -> requestedVersion.equals(getVersion(instance)))
-					.toList();
+				.filter(instance -> requestedVersion.equals(getVersion(instance)))
+				.toList();
 
 			if (!filteredInstances.isEmpty()) {
 				if (LOG.isDebugEnabled()) {
@@ -178,8 +182,8 @@ public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingSer
 			versionResolvers.add(new PathApiVersionResolver(apiVersionProperties.getPathSegment()));
 		}
 		apiVersionProperties.getMediaTypeParameters()
-				.forEach((mediaType, paramName) -> versionResolvers
-						.add(new MediaTypeParamApiVersionResolver(mediaType, paramName)));
+			.forEach((mediaType, paramName) -> versionResolvers
+				.add(new MediaTypeParamApiVersionResolver(mediaType, paramName)));
 
 		return new BlockingLoadBalancerApiVersionStrategy(versionResolvers, getApiVersionParser(),
 				apiVersionProperties.getRequired(), apiVersionProperties.getDefaultVersion(), false, null, null);

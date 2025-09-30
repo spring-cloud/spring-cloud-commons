@@ -450,6 +450,7 @@ If no service instance with matching version is found, an empty instance list wi
 TIP: We use delegates to work with `ServiceInstanceListSupplier` beans.
 We suggest using a `DiscoveryClientServiceInstanceListSupplier` delegate, wrapping it with a `CachingServiceInstanceListSupplier` to leverage xref:spring-cloud-commons/loadbalancer.adoc#loadbalancer-caching[LoadBalancer caching mechanism], and then passing the resulting bean in the constructor of `ReactiveApiVersionServiceInstanceListSupplier` or `BlockingApiVersionServiceInstanceListSupplier`.
 
+NOTE: By default, we use `org.springframework.web.accept.SemanticApiVersionParser` for version parsing. You can provide your own `ApiVersionParser` bean in the context to override it.
 
 [[spring-cloud-loadbalancer-starter]]
 == Spring Cloud LoadBalancer Starter

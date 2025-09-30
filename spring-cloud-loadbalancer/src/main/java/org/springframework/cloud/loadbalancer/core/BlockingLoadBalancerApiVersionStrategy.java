@@ -30,7 +30,13 @@ import org.springframework.web.accept.InvalidApiVersionException;
 import org.springframework.web.accept.MissingApiVersionException;
 
 /**
+ * A LoadBalancer-specific implementation of {@link DefaultApiVersionStrategy}. It
+ * overrides the
+ * {@link DefaultApiVersionStrategy#validateVersion(Comparable, HttpServletRequest)}
+ * method in order to skip any version validation.
+ *
  * @author Olga Maciaszek-Sharma
+ * @since 5.0.0
  */
 public class BlockingLoadBalancerApiVersionStrategy extends DefaultApiVersionStrategy {
 
