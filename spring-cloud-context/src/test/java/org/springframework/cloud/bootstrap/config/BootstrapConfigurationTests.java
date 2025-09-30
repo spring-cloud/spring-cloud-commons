@@ -666,15 +666,15 @@ public class BootstrapConfigurationTests {
 	}
 
 	private void activeAndIncludeProfileFromBootstrapPropertySourceWithReplacement(String... properties) {
-		PropertySourceConfiguration.MAP.put("spring.profiles.active", "${barreplacement},baz");
+		PropertySourceConfiguration.MAP.put("spring.profiles.active", "before_${barreplacement}_after,baz");
 		PropertySourceConfiguration.MAP.put("spring.profiles.include", "${barreplacement},baz,hello");
 		context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 			.properties(properties)
 			.profiles("foo")
 			.sources(BareConfiguration.class)
 			.run();
-		then(context.getEnvironment().acceptsProfiles("baz", "bar", "hello", "foo")).isTrue();
-		then(context.getEnvironment().getActiveProfiles()).contains("baz", "bar", "foo", "hello");
+		then(context.getEnvironment().acceptsProfiles("baz", "bar", "hello", "foo", "before_bar_after")).isTrue();
+		then(context.getEnvironment().getActiveProfiles()).contains("baz", "bar", "foo", "hello", "before_bar_after");
 	}
 
 	@Test
@@ -738,6 +738,7 @@ public class BootstrapConfigurationTests {
 			.map(p -> p.getProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME))
 			.anyMatch("local"::equals)).isTrue();
 	}
+
 
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
