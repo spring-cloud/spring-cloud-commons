@@ -99,7 +99,7 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 	private List<ServiceInstance> filteredByVersion(List<ServiceInstance> serviceInstances,
 			Comparable<?> requestedVersion) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Matching instances by Api Version: " + requestedVersion);
+			LOG.debug("Matching instances by API Version: " + requestedVersion);
 		}
 
 		if (requestedVersion != null) {
@@ -109,20 +109,20 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 
 			if (!filteredInstances.isEmpty()) {
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("Found matching instances by Api Version: " + filteredInstances);
+					LOG.debug("Found matching instances by API Version: " + filteredInstances);
 				}
 				return filteredInstances;
 			}
 		}
 		if (apiVersionProperties.isFallbackToAvailableInstances()) {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("No matching instances found by Api Version: " + requestedVersion
+				LOG.debug("No matching instances found by API Version: " + requestedVersion
 						+ ". Falling back to all available instances.");
 			}
 			return serviceInstances;
 		}
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("No matching instances found by Api Version: " + requestedVersion + ". Returning empty list.");
+			LOG.debug("No matching instances found by API Version: " + requestedVersion + ". Returning empty list.");
 		}
 		return List.of();
 	}
