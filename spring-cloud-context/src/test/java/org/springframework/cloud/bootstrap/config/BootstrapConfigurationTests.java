@@ -739,7 +739,6 @@ public class BootstrapConfigurationTests {
 			.anyMatch("local"::equals)).isTrue();
 	}
 
-
 	@Configuration(proxyBeanMethods = false)
 	@EnableConfigurationProperties
 	protected static class BareConfiguration {
