@@ -32,7 +32,7 @@ import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools
 /**
  * Load-balancer-specific {@link WebClientHttpServiceGroupConfigurer} implementation. If
  * the group {@code baseUrl} is {@code null}, sets up a {@code baseUrl} with LoadBalancer
- * {@code serviceId} -resolved from Interface Client {@code groupName} set as
+ * {@code serviceId} -resolved from HTTP Service Client {@code groupName} set as
  * {@code host}. If the group {@code baseUrl} is {@code null} or has {@code lb} set as its
  * scheme, a {@link DeferringLoadBalancerExchangeFilterFunction} instance picked from
  * application context is added to the group's {@link WebClient.Builder} if available,

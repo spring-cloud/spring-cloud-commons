@@ -104,15 +104,15 @@ Customizer.once(circuitBreaker -> {
 }, CircuitBreaker::getName)
 ----
 
-[[interface-clients]]
-== Spring Interface Clients Support
+[[service-clients]]
+== Spring HTTP Service Clients Support
 
-Spring Cloud provides support for Spring Interface Clients integration through the following configurers:
+Spring Cloud provides support for Spring HTTP Service Clients integration through the following configurers:
 
 - `CircuitBreakerRestClientHttpServiceGroupConfigurer`
 - `CircuitBreakerWebClientHttpServiceGroupConfigurer`
 
-These configurers enable CircuitBreaker support for https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-interface-group-config[Spring Interface Client Groups].
+These configurers enable CircuitBreaker support for https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-service-client-group-config[Spring HTTP Service Client Groups].
 
 When fallback classes are configured using the `@HttpServiceFallbackAnnotation`,
 CircuitBreaker adapter decorators are added:
