@@ -28,6 +28,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
+import org.springframework.boot.env.DefaultPropertiesPropertySource;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
@@ -51,16 +53,23 @@ public abstract class ContextRefresher {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	protected static final String REFRESH_ARGS_PROPERTY_SOURCE = "refreshArgs";
+
+	/**
+	 * see {@link ConfigurationPropertySources#ATTACHED_PROPERTY_SOURCE_NAME}.
+	 */
+	private static final String ATTACHED_PROPERTY_SOURCE_NAME = "configurationProperties";
+
 	protected static final String[] DEFAULT_PROPERTY_SOURCES = new String[] {
 			// order matters, if cli args aren't first, things get messy
-			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME, "defaultProperties" };
+			CommandLinePropertySource.COMMAND_LINE_PROPERTY_SOURCE_NAME, DefaultPropertiesPropertySource.NAME };
 
 	protected Set<String> standardSources = new HashSet<>(
 			Arrays.asList(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME,
 					StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.JNDI_PROPERTY_SOURCE_NAME,
 					StandardServletEnvironment.SERVLET_CONFIG_PROPERTY_SOURCE_NAME,
-					StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, "configurationProperties"));
+					StandardServletEnvironment.SERVLET_CONTEXT_PROPERTY_SOURCE_NAME, ATTACHED_PROPERTY_SOURCE_NAME));
 
 	protected final List<String> additionalPropertySourcesToRetain;
 
