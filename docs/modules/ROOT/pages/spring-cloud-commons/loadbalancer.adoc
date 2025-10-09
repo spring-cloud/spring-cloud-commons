@@ -592,17 +592,17 @@ NOTE: Starting with `4.1.0`, we have introduced the `callGetWithRequestOnDelegat
 
 Since `4.0.0`, Spring Cloud LoadBalancer supports Spring AOT transformations and native images. However, to use this feature, you need to explicitly define your `LoadBalancerClient` service IDs. You can do so by using the `value` or `name` attributes of the `@LoadBalancerClient` annotation or as values of the `spring.cloud.loadbalancer.eager-load.clients` property.
 
-== LoadBalancer Integration for Spring Interface Clients AutoConfiguration
+== LoadBalancer Integration for Spring HTTP Service Clients AutoConfiguration
 
-Since `5.0.0`, Spring Cloud LoadBalancer supports https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-interface[Spring Interface Clients] AutoConfiguration through the `LoadBalancerRestClientHttpServiceGroupConfigurer` and `LoadBalancerWebClientHttpServiceGroupConfigurer`.
+Since `5.0.0`, Spring Cloud LoadBalancer supports https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-service-client[Spring HTTP Service Clients] AutoConfiguration through the `LoadBalancerRestClientHttpServiceGroupConfigurer` and `LoadBalancerWebClientHttpServiceGroupConfigurer`.
 
-For each Interface Client group, if the group `baseUrl` (defined under the
-`spring.http.client.service.group.[groupName].base-url` property) is `null`, a `serviceId`-based URL for load-balancing is set up as the `baseUrl`, with `serviceId` resolved from the Interface Client `groupName`.
+For each HTTP Service Client group, if the group `baseUrl` (defined under the
+`spring.http.client.service.group.[groupName].base-url` property) is `null`, a `serviceId`-based URL for load-balancing is set up as the `baseUrl`, with `serviceId` resolved from the HTTP Service Client `groupName`.
 
 If the group `baseUrl` is `null` or its scheme is set to `lb`, a
 `DeferringLoadBalancerInterceptor` instance is picked from the application context for blocking scenarios, and a `DeferringLoadBalancerExchangeFilterFunction` instance for reactive scenarios, and is added to the group's `RestClient.Builder` or `WebClient.Builder` if available, allowing for the requests to be load-balanced.
 
-For example, in an app with the following Interface Clients configuration:
+For example, in an app with the following HTTP Service Clients configuration:
 
 [source,java,indent=0]
 ----
