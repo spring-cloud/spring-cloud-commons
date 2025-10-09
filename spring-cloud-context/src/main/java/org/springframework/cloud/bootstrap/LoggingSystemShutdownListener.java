@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.bootstrap;
 
+import java.util.Optional;
+
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.context.ApplicationListener;
@@ -42,12 +45,14 @@ public class LoggingSystemShutdownListener
 
 	@Override
 	public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
-		shutdownLogging();
+		Optional<ClassLoader> classLoader = Optional.ofNullable(event)
+				.map(ApplicationEnvironmentPreparedEvent::getSpringApplication).map(SpringApplication::getClassLoader);
+		shutdownLogging(classLoader);
 	}
 
-	private void shutdownLogging() {
+	private void shutdownLogging(Optional<ClassLoader> classLoader) {
 		// TODO: only enable if bootstrap and legacy
-		LoggingSystem loggingSystem = LoggingSystem.get(ClassUtils.getDefaultClassLoader());
+		LoggingSystem loggingSystem = LoggingSystem.get(classLoader.orElse(ClassUtils.getDefaultClassLoader()));
 		loggingSystem.cleanUp();
 		loggingSystem.beforeInitialize();
 	}
