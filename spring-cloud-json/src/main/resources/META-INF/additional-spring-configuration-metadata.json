@@ -1,0 +1,9 @@
+{
+	"properties": [
+		{
+			"name": "spring.cloud.preferred-json-mapper",
+			"type": "java.lang.String",
+			"description": "Spring Cloud preferred json mapper. Valid values are jackson2, jackson3 or gson"
+		}
+	]
+}

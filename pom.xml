@@ -232,6 +232,7 @@
 		<module>spring-cloud-starter</module>
 		<module>spring-cloud-starter-bootstrap</module>
 		<module>spring-cloud-starter-loadbalancer</module>
+		<module>spring-cloud-json</module>
 		<module>docs</module>
 	</modules>
 </project>

@@ -1,0 +1,31 @@
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            myservice:
+              - service-id: myservice
+                uri: http://ahost
+              - service-id: myservice
+                uri: http://chost
+              - service-id: myservice
+                uri: https://bhostsecure
+            anotherservice:
+              - service-id: myservice
+                uri: http://dhost
+              - service-id: myservice
+                uri: https://fhost
+              - service-id: myservice
+                uri: http://ehost
+            thirdservice:
+              - service-id: myservice
+                uri: http://ghost
+              - service-id: myservice
+                uri: http://hhost
+              - service-id: myservice
+                uri: http://ihost
+  autoconfigure.exclude:
+    - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+    - org.springframework.boot.autoconfigure.security.oauth2.OAuth2AutoConfiguration
+    - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
