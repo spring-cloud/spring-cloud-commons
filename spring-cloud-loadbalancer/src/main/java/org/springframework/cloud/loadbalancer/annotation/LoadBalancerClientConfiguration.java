@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.accept.ApiVersionParser;
+import org.springframework.web.accept.SemanticApiVersionParser;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -76,6 +78,12 @@ public class LoadBalancerClientConfiguration {
 		String name = environment.getProperty(LoadBalancerClientFactory.PROPERTY_NAME);
 		return new RoundRobinLoadBalancer(
 				loadBalancerClientFactory.getLazyProvider(name, ServiceInstanceListSupplier.class), name);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public ApiVersionParser<?> loadBalancerApiVersionParser() {
+		return new SemanticApiVersionParser();
 	}
 
 	@Bean
@@ -176,8 +184,21 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier subsetServiceInstanceListSupplier(ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder()
 				.withDiscoveryClient()
-				.withSubset()
 				.withCaching()
+				.withSubset()
+				.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(ApiVersionCondition.class)
+		public ServiceInstanceListSupplier reactiveApiVersionServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder()
+				.withDiscoveryClient()
+				.withCaching()
+				.withReactiveApiVersioning()
 				.build(context);
 		}
 
@@ -279,8 +300,21 @@ public class LoadBalancerClientConfiguration {
 		public ServiceInstanceListSupplier subsetServiceInstanceListSupplier(ConfigurableApplicationContext context) {
 			return ServiceInstanceListSupplier.builder()
 				.withBlockingDiscoveryClient()
-				.withSubset()
 				.withCaching()
+				.withSubset()
+				.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(ApiVersionCondition.class)
+		public ServiceInstanceListSupplier blockingApiVersionServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder()
+				.withBlockingDiscoveryClient()
+				.withCaching()
+				.withBlockingApiVersioning()
 				.build(context);
 		}
 
@@ -455,6 +489,16 @@ public class LoadBalancerClientConfiguration {
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
 					"configurations", "subset");
+		}
+
+	}
+
+	static class ApiVersionCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"configurations", "api-version");
 		}
 
 	}

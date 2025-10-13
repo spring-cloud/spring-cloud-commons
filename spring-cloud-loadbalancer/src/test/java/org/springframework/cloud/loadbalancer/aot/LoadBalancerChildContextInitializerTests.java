@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2022 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.aot.AotDetector;
 import org.springframework.aot.test.generate.TestGenerationContext;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
-import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
 import org.springframework.boot.context.annotation.UserConfigurations;
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.boot.web.servlet.context.AnnotationConfigServletWebApplicationContext;
-import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
+import org.springframework.boot.tomcat.autoconfigure.servlet.TomcatServletWebServerAutoConfiguration;
+import org.springframework.boot.web.context.servlet.AnnotationConfigServletWebApplicationContext;
+import org.springframework.boot.web.server.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerExchangeFilterFunction;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
@@ -80,7 +80,7 @@ public class LoadBalancerChildContextInitializerTests {
 	void shouldStartLBChildContextsFromAotContributions(CapturedOutput output) {
 		WebApplicationContextRunner contextRunner = new WebApplicationContextRunner(
 				AnnotationConfigServletWebApplicationContext::new)
-			.withConfiguration(AutoConfigurations.of(ServletWebServerFactoryAutoConfiguration.class,
+			.withConfiguration(AutoConfigurations.of(TomcatServletWebServerAutoConfiguration.class,
 					LoadBalancerAutoConfiguration.class))
 			.withConfiguration(UserConfigurations.of(TestLoadBalancerConfiguration.class));
 		contextRunner.withPropertyValues("spring.cloud.loadbalancer.eager-load.clients[0]=test1").prepare(context -> {

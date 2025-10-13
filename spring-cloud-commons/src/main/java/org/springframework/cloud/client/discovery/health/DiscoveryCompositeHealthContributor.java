@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,14 @@ package org.springframework.cloud.client.discovery.health;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.springframework.boot.actuate.health.CompositeHealthContributor;
-import org.springframework.boot.actuate.health.HealthContributor;
-import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.boot.actuate.health.NamedContributor;
+import org.springframework.boot.health.contributor.CompositeHealthContributor;
+import org.springframework.boot.health.contributor.HealthContributor;
+import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.util.Assert;
 
 /**
@@ -47,29 +46,15 @@ public class DiscoveryCompositeHealthContributor implements CompositeHealthContr
 	}
 
 	@Override
-	public HealthContributor getContributor(String name) {
-		return asHealthIndicator(this.indicators.get(name));
+	public Stream<Entry> stream() {
+		return indicators.entrySet()
+			.stream()
+			.map((entry) -> new Entry(entry.getKey(), asHealthIndicator(entry.getValue())));
 	}
 
 	@Override
-	public Iterator<NamedContributor<HealthContributor>> iterator() {
-		return this.indicators.values().stream().map(this::asNamedContributor).iterator();
-	}
-
-	private NamedContributor<HealthContributor> asNamedContributor(DiscoveryHealthIndicator indicator) {
-		return new NamedContributor<>() {
-
-			@Override
-			public String getName() {
-				return indicator.getName();
-			}
-
-			@Override
-			public HealthIndicator getContributor() {
-				return asHealthIndicator(indicator);
-			}
-
-		};
+	public HealthContributor getContributor(String name) {
+		return asHealthIndicator(this.indicators.get(name));
 	}
 
 	private HealthIndicator asHealthIndicator(DiscoveryHealthIndicator indicator) {

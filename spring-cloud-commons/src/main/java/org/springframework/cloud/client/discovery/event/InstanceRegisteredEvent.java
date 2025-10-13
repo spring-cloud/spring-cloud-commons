@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.cloud.client.discovery.event;
 
 import org.springframework.context.ApplicationEvent;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.ResolvableTypeProvider;
 
 /**
  * Event to be published after the local service instance registers itself with a
@@ -24,9 +26,10 @@ import org.springframework.context.ApplicationEvent;
  *
  * @param <T> - type of configuration
  * @author Spencer Gibb
+ * @author Yanming Zhou
  */
 @SuppressWarnings("serial")
-public class InstanceRegisteredEvent<T> extends ApplicationEvent {
+public class InstanceRegisteredEvent<T> extends ApplicationEvent implements ResolvableTypeProvider {
 
 	private T config;
 
@@ -42,6 +45,11 @@ public class InstanceRegisteredEvent<T> extends ApplicationEvent {
 
 	public T getConfig() {
 		return this.config;
+	}
+
+	@Override
+	public ResolvableType getResolvableType() {
+		return ResolvableType.forClassWithGenerics(getClass(), ResolvableType.forInstance(this.config));
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
@@ -77,7 +76,7 @@ public class EnvironmentManagerIntegrationTests {
 		then(this.properties.getMessage()).isEqualTo("Foo");
 	}
 
-	private String property(String name, String value) throws JsonProcessingException {
+	private String property(String name, String value) {
 		// Change the dynamic property source...
 		Map<String, String> property = new HashMap<>();
 		property.put("name", name);

@@ -16,6 +16,7 @@
 	<description>Spring Cloud Commons Dependencies</description>
 	<properties>
 		<okhttp.version>4.12.0</okhttp.version>
+		<spring-retry.version>2.0.12</spring-retry.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -65,6 +66,11 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
+			<dependency>
+				<groupId>org.springframework.retry</groupId>
+				<artifactId>spring-retry</artifactId>
+				<version>${spring-retry.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<profiles>
@@ -81,14 +87,6 @@
 					<releases>
 						<enabled>false</enabled>
 					</releases>
-				</repository>
-				<repository>
-					<id>spring-milestones</id>
-					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/milestone</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
 				</repository>
 				<repository>
 					<id>spring-releases</id>
@@ -110,14 +108,6 @@
 					<releases>
 						<enabled>false</enabled>
 					</releases>
-				</pluginRepository>
-				<pluginRepository>
-					<id>spring-milestones</id>
-					<name>Spring Milestones</name>
-					<url>https://repo.spring.io/milestone</url>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
 				</pluginRepository>
 			</pluginRepositories>
 		</profile>

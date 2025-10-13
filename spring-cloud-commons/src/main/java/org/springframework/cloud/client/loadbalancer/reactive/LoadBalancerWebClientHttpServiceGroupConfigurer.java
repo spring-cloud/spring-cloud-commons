@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.net.URI;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.http.client.reactive.service.ReactiveHttpClientServiceProperties;
-import org.springframework.boot.autoconfigure.http.client.service.HttpClientServiceProperties;
+import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties;
+import org.springframework.boot.webclient.autoconfigure.service.ReactiveHttpClientServiceProperties;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
@@ -32,7 +32,7 @@ import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools
 /**
  * Load-balancer-specific {@link WebClientHttpServiceGroupConfigurer} implementation. If
  * the group {@code baseUrl} is {@code null}, sets up a {@code baseUrl} with LoadBalancer
- * {@code serviceId} -resolved from Interface Client {@code groupName} set as
+ * {@code serviceId} -resolved from HTTP Service Client {@code groupName} set as
  * {@code host}. If the group {@code baseUrl} is {@code null} or has {@code lb} set as its
  * scheme, a {@link DeferringLoadBalancerExchangeFilterFunction} instance picked from
  * application context is added to the group's {@link WebClient.Builder} if available,
