@@ -31,8 +31,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.http.client.autoconfigure.service.HttpServiceClientProperties;
 import org.springframework.boot.restclient.RestTemplateBuilder;
-import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.ApplicationContext;
@@ -129,7 +129,7 @@ public class LoadBalancerAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass(HttpClientServiceProperties.class)
+	@ConditionalOnClass(HttpServiceClientProperties.class)
 	static class DeferringLoadBalancerInterceptorHttpClientConfig {
 
 		@Bean
@@ -140,11 +140,11 @@ public class LoadBalancerAutoConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnBean({ HttpClientServiceProperties.class, ReactiveLoadBalancer.Factory.class })
+		@ConditionalOnBean({ HttpServiceClientProperties.class, ReactiveLoadBalancer.Factory.class })
 		@ConditionalOnMissingBean(LoadBalancerRestClientHttpServiceGroupConfigurer.class)
 		LoadBalancerRestClientHttpServiceGroupConfigurer loadBalancerRestClientHttpServiceGroupConfigurer(
 				ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
-				HttpClientServiceProperties properties) {
+				HttpServiceClientProperties properties) {
 			return new LoadBalancerRestClientHttpServiceGroupConfigurer(loadBalancerInterceptorProvider, properties);
 		}
 

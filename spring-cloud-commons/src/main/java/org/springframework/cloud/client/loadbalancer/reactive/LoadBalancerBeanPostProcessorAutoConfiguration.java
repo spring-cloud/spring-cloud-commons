@@ -22,7 +22,7 @@ import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.webclient.autoconfigure.service.ReactiveHttpClientServiceProperties;
+import org.springframework.boot.http.client.autoconfigure.service.HttpServiceClientProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.context.ApplicationContext;
@@ -71,16 +71,16 @@ public class LoadBalancerBeanPostProcessorAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass(ReactiveHttpClientServiceProperties.class)
+	@ConditionalOnClass(HttpServiceClientProperties.class)
 	@ConditionalOnBean(ReactiveLoadBalancer.Factory.class)
 	protected static class ReactorDeferringLoadBalancerFilterHttpClientConfig {
 
 		@Bean
-		@ConditionalOnBean({ ReactiveHttpClientServiceProperties.class, ReactiveLoadBalancer.Factory.class })
+		@ConditionalOnBean({ HttpServiceClientProperties.class, ReactiveLoadBalancer.Factory.class })
 		@ConditionalOnMissingBean(LoadBalancerWebClientHttpServiceGroupConfigurer.class)
 		LoadBalancerWebClientHttpServiceGroupConfigurer loadBalancerWebClientHttpServiceGroupConfigurer(
 				ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> deferringExchangeFilterFunction,
-				ReactiveHttpClientServiceProperties properties) {
+				HttpServiceClientProperties properties) {
 			return new LoadBalancerWebClientHttpServiceGroupConfigurer(deferringExchangeFilterFunction, properties);
 		}
 

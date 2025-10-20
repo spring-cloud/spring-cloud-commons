@@ -19,8 +19,8 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.net.URI;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties;
-import org.springframework.boot.webclient.autoconfigure.service.ReactiveHttpClientServiceProperties;
+import org.springframework.boot.http.client.autoconfigure.HttpClientProperties;
+import org.springframework.boot.http.client.autoconfigure.service.HttpServiceClientProperties;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
@@ -41,7 +41,7 @@ import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
  * @see WebClient.Builder
- * @see HttpClientServiceProperties
+ * @see HttpServiceClientProperties
  */
 public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClientHttpServiceGroupConfigurer {
 
@@ -50,14 +50,14 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 
 	private final SingletonSupplier<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> loadBalancerFilterFunctionSupplier;
 
-	private final ReactiveHttpClientServiceProperties clientServiceProperties;
+	private final HttpServiceClientProperties httpServiceClientProperties;
 
 	public LoadBalancerWebClientHttpServiceGroupConfigurer(
 			ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> exchangeFilterFunctionProvider,
-			ReactiveHttpClientServiceProperties clientServiceProperties) {
+			HttpServiceClientProperties httpServiceClientProperties) {
 		this.loadBalancerFilterFunctionSupplier = SingletonSupplier
 			.ofNullable(exchangeFilterFunctionProvider::getIfAvailable);
-		this.clientServiceProperties = clientServiceProperties;
+		this.httpServiceClientProperties = httpServiceClientProperties;
 	}
 
 	@Override
@@ -70,8 +70,7 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 		}
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
-			ReactiveHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup()
-				.get(groupName);
+			HttpClientProperties groupProperties = httpServiceClientProperties.get(groupName);
 			String baseUrlString = groupProperties == null ? null : groupProperties.getBaseUrl();
 			URI existingBaseUrl = baseUrlString == null ? null : URI.create(baseUrlString);
 			if (existingBaseUrl == null) {

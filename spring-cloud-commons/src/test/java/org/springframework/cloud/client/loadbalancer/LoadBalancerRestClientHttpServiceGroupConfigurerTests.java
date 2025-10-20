@@ -24,8 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties;
-import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties.Group;
+import org.springframework.boot.http.client.autoconfigure.HttpClientProperties;
+import org.springframework.boot.http.client.autoconfigure.service.HttpServiceClientProperties;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 import org.springframework.web.service.registry.HttpServiceGroup;
@@ -44,7 +44,7 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 
 	private static final String GROUP_NAME = "testService";
 
-	private HttpClientServiceProperties clientServiceProperties;
+	private HttpServiceClientProperties clientServiceProperties;
 
 	private ObjectProvider<DeferringLoadBalancerInterceptor> interceptorProvider;
 
@@ -52,7 +52,7 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 	void setup() {
 		DeferringLoadBalancerInterceptor interceptor = mock(DeferringLoadBalancerInterceptor.class);
 		interceptorProvider = new SimpleObjectProvider<>(interceptor);
-		clientServiceProperties = new HttpClientServiceProperties();
+		clientServiceProperties = new HttpServiceClientProperties();
 	}
 
 	@Test
@@ -71,9 +71,9 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 
 	@Test
 	void shouldAddInterceptorWhenBaseUrlHasLbScheme() {
-		Group group = new Group();
+		HttpClientProperties group = new HttpClientProperties();
 		group.setBaseUrl("lb://" + GROUP_NAME + "/path");
-		clientServiceProperties.getGroup().put(GROUP_NAME, group);
+		clientServiceProperties.put(GROUP_NAME, group);
 		LoadBalancerRestClientHttpServiceGroupConfigurer configurer = new LoadBalancerRestClientHttpServiceGroupConfigurer(
 				interceptorProvider, clientServiceProperties);
 		TestGroups groups = new TestGroups();
@@ -88,9 +88,9 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 
 	@Test
 	void shouldNotAddInterceptorWhenBaseDoesNotHaveLbScheme() {
-		Group group = new Group();
+		HttpClientProperties group = new HttpClientProperties();
 		group.setBaseUrl("http://" + GROUP_NAME + "/path");
-		clientServiceProperties.getGroup().put(GROUP_NAME, group);
+		clientServiceProperties.put(GROUP_NAME, group);
 		LoadBalancerRestClientHttpServiceGroupConfigurer configurer = new LoadBalancerRestClientHttpServiceGroupConfigurer(
 				interceptorProvider, clientServiceProperties);
 		TestGroups groups = new TestGroups();

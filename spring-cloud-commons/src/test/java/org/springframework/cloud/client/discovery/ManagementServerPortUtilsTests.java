@@ -27,7 +27,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
-@ClassPathExclusions({ "spring-boot-actuator-autoconfigure-*" })
+@ClassPathExclusions({ "spring-boot-actuator-*" })
 public class ManagementServerPortUtilsTests {
 
 	@Test

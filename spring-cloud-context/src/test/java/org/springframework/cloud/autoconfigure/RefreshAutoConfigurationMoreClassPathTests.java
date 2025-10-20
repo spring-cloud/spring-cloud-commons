@@ -33,7 +33,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * @author Spencer Gibb
  */
-@ClassPathExclusions({ "spring-boot-actuator-autoconfigure-*.jar", "spring-boot-starter-actuator-*.jar" })
+@ClassPathExclusions({ "spring-boot-actuator-*.jar", "spring-boot-starter-actuator-*.jar" })
 @ExtendWith(OutputCaptureExtension.class)
 public class RefreshAutoConfigurationMoreClassPathTests {
 

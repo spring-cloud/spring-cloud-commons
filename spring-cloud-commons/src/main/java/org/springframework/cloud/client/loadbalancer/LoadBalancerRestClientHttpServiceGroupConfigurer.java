@@ -21,7 +21,8 @@ import java.net.URI;
 import org.jspecify.annotations.NonNull;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties;
+import org.springframework.boot.http.client.autoconfigure.HttpClientProperties;
+import org.springframework.boot.http.client.autoconfigure.service.HttpServiceClientProperties;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
@@ -42,7 +43,7 @@ import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
  * @see RestClientHttpServiceGroupConfigurer
- * @see HttpClientServiceProperties
+ * @see HttpServiceClientProperties
  */
 public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestClientHttpServiceGroupConfigurer {
 
@@ -51,11 +52,11 @@ public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestCli
 
 	private final SingletonSupplier<DeferringLoadBalancerInterceptor> loadBalancerInterceptorSupplier;
 
-	private final HttpClientServiceProperties clientServiceProperties;
+	private final HttpServiceClientProperties clientServiceProperties;
 
 	public LoadBalancerRestClientHttpServiceGroupConfigurer(
 			ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
-			HttpClientServiceProperties clientServiceProperties) {
+			HttpServiceClientProperties clientServiceProperties) {
 		this.loadBalancerInterceptorSupplier = SingletonSupplier
 			.ofNullable(loadBalancerInterceptorProvider::getIfAvailable);
 		this.clientServiceProperties = clientServiceProperties;
@@ -71,7 +72,7 @@ public class LoadBalancerRestClientHttpServiceGroupConfigurer implements RestCli
 
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
-			HttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup().get(groupName);
+			HttpClientProperties groupProperties = clientServiceProperties.get(groupName);
 			String baseUrlString = groupProperties == null ? null : groupProperties.getBaseUrl();
 			URI existingBaseUrl = baseUrlString == null ? null : URI.create(baseUrlString);
 			if (existingBaseUrl == null) {

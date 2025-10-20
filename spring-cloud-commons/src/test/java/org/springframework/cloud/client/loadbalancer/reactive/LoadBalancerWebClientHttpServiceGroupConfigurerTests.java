@@ -24,7 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.webclient.autoconfigure.service.ReactiveHttpClientServiceProperties;
+import org.springframework.boot.http.client.autoconfigure.HttpClientProperties;
+import org.springframework.boot.http.client.autoconfigure.service.HttpServiceClientProperties;
 import org.springframework.cloud.client.loadbalancer.SimpleObjectProvider;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
@@ -44,7 +45,7 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 
 	private static final String GROUP_NAME = "testService";
 
-	private ReactiveHttpClientServiceProperties clientServiceProperties;
+	private HttpServiceClientProperties clientServiceProperties;
 
 	private ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> exchangeFilterFunctionProvider;
 
@@ -53,7 +54,7 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 		DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction> exchangeFilterFunction = mock(
 				DeferringLoadBalancerExchangeFilterFunction.class);
 		exchangeFilterFunctionProvider = new SimpleObjectProvider<>(exchangeFilterFunction);
-		clientServiceProperties = new ReactiveHttpClientServiceProperties();
+		clientServiceProperties = new HttpServiceClientProperties();
 	}
 
 	@Test
@@ -72,9 +73,9 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 
 	@Test
 	void shouldAddInterceptorWhenBaseUrlHasLbScheme() {
-		ReactiveHttpClientServiceProperties.Group group = new ReactiveHttpClientServiceProperties.Group();
+		HttpClientProperties group = new HttpClientProperties();
 		group.setBaseUrl("lb://" + GROUP_NAME + "/path");
-		clientServiceProperties.getGroup().put(GROUP_NAME, group);
+		clientServiceProperties.put(GROUP_NAME, group);
 		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(
 				exchangeFilterFunctionProvider, clientServiceProperties);
 		TestGroups groups = new TestGroups();
@@ -89,9 +90,9 @@ class LoadBalancerWebClientHttpServiceGroupConfigurerTests {
 
 	@Test
 	void shouldNotAddInterceptorWhenBaseDoesNotHaveLbScheme() {
-		ReactiveHttpClientServiceProperties.Group group = new ReactiveHttpClientServiceProperties.Group();
+		HttpClientProperties group = new HttpClientProperties();
 		group.setBaseUrl("https://" + GROUP_NAME + "/path");
-		clientServiceProperties.getGroup().put(GROUP_NAME, group);
+		clientServiceProperties.put(GROUP_NAME, group);
 		LoadBalancerWebClientHttpServiceGroupConfigurer configurer = new LoadBalancerWebClientHttpServiceGroupConfigurer(
 				exchangeFilterFunctionProvider, clientServiceProperties);
 		TestGroups groups = new TestGroups();
