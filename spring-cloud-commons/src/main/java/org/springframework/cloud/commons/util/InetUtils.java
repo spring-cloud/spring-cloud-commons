@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @author Spencer Gibb
@@ -71,7 +72,7 @@ public class InetUtils implements Closeable {
 		return hostInfo;
 	}
 
-	public InetAddress findFirstNonLoopbackAddress() {
+	public @Nullable InetAddress findFirstNonLoopbackAddress() {
 		InetAddress result = null;
 		try {
 			int lowest = Integer.MAX_VALUE;
