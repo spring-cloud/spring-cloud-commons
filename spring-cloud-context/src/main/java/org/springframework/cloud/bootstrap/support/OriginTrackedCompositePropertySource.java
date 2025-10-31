@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.bootstrap.support;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.boot.origin.Origin;
 import org.springframework.boot.origin.OriginLookup;
 import org.springframework.core.env.CompositePropertySource;
@@ -33,7 +35,7 @@ public class OriginTrackedCompositePropertySource extends CompositePropertySourc
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Origin getOrigin(String name) {
+	public @Nullable Origin getOrigin(String name) {
 		for (PropertySource<?> propertySource : getPropertySources()) {
 			if (propertySource instanceof OriginLookup lookup) {
 				Origin origin = lookup.getOrigin(name);

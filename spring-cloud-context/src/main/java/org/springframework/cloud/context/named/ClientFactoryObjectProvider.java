@@ -22,9 +22,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.lang.Nullable;
 
 /**
  * Special ObjectProvider that allows the actual ObjectProvider to be resolved later
@@ -54,8 +55,7 @@ class ClientFactoryObjectProvider<T> implements ObjectProvider<T> {
 	}
 
 	@Override
-	@Nullable
-	public T getIfAvailable() throws BeansException {
+	public @Nullable T getIfAvailable() throws BeansException {
 		return delegate().getIfAvailable();
 	}
 
@@ -70,8 +70,7 @@ class ClientFactoryObjectProvider<T> implements ObjectProvider<T> {
 	}
 
 	@Override
-	@Nullable
-	public T getIfUnique() throws BeansException {
+	public @Nullable T getIfUnique() throws BeansException {
 		return delegate().getIfUnique();
 	}
 

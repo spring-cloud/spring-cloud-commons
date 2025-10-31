@@ -19,6 +19,8 @@ package org.springframework.cloud.client;
 import java.net.URI;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Represents an instance of a service in a discovery system.
  *
@@ -30,7 +32,7 @@ public interface ServiceInstance {
 	/**
 	 * @return The unique instance ID as registered.
 	 */
-	default String getInstanceId() {
+	default @Nullable String getInstanceId() {
 		return null;
 	}
 
@@ -67,7 +69,7 @@ public interface ServiceInstance {
 	/**
 	 * @return The scheme of the service instance.
 	 */
-	default String getScheme() {
+	default @Nullable String getScheme() {
 		return null;
 	}
 

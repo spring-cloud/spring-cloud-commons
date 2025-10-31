@@ -87,6 +87,7 @@
 		<bintray.package>commons</bintray.package>
 		<evictor.version>1.0.0</evictor.version>
 		<bouncycastle-bcprov-jdk18on.version>1.81</bouncycastle-bcprov-jdk18on.version>
+		<jspecify.enabled>true</jspecify.enabled>
 	</properties>
 	<build>
 		<plugins>

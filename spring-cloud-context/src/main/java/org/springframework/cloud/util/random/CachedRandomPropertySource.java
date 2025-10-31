@@ -19,6 +19,8 @@ package org.springframework.cloud.util.random;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.StringUtils;
 
@@ -44,7 +46,7 @@ public class CachedRandomPropertySource extends PropertySource<PropertySource> {
 	}
 
 	@Override
-	public Object getProperty(String name) {
+	public @Nullable Object getProperty(String name) {
 		if (!name.startsWith(PREFIX) || name.length() == PREFIX.length()) {
 			return null;
 		}
