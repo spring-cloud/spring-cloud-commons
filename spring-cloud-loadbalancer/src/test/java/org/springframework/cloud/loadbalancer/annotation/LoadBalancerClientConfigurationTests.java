@@ -35,8 +35,11 @@ import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSup
 import org.springframework.cloud.loadbalancer.core.DelegatingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.HealthCheckServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.RandomLoadBalancer;
+import org.springframework.cloud.loadbalancer.core.ReactorLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.RequestBasedStickySessionServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.RoundRobinLoadBalancer;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.WeightedServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ZonePreferenceServiceInstanceListSupplier;
@@ -54,6 +57,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  *
  * @author Olga Maciaszek-Sharma
  * @author Zhuozhi Ji
+ * @author Haotian Zhang
  */
 class LoadBalancerClientConfigurationTests {
 
@@ -219,6 +223,24 @@ class LoadBalancerClientConfigurationTests {
 				then(((DelegatingServiceInstanceListSupplier) delegate).getDelegate())
 					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
 			});
+	}
+
+	@Test
+	void shouldInstantiateRoundRobinLoadBalancer() {
+		blockingDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.strategies=default")
+				.run(context -> {
+					ReactorLoadBalancer<?> reactorLoadBalancer = context.getBean(ReactorLoadBalancer.class);
+					then(reactorLoadBalancer).isInstanceOf(RoundRobinLoadBalancer.class);
+				});
+	}
+
+	@Test
+	void shouldInstantiateRandomLoadBalancer() {
+		blockingDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.strategies=random")
+				.run(context -> {
+					ReactorLoadBalancer<?> reactorLoadBalancer = context.getBean(ReactorLoadBalancer.class);
+					then(reactorLoadBalancer).isInstanceOf(RandomLoadBalancer.class);
+				});
 	}
 
 	private static Stream<Arguments> blockingConfigurations() {
