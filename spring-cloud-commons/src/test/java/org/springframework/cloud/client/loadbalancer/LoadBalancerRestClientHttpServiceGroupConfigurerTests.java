@@ -120,6 +120,11 @@ class LoadBalancerRestClientHttpServiceGroupConfigurerTests {
 		}
 
 		@Override
+		public void forEachClient(HttpServiceGroupConfigurer.InitializingClientCallback<RestClient.Builder> callback) {
+
+		}
+
+		@Override
 		public void forEachProxyFactory(HttpServiceGroupConfigurer.ProxyFactoryCallback configurer) {
 
 		}

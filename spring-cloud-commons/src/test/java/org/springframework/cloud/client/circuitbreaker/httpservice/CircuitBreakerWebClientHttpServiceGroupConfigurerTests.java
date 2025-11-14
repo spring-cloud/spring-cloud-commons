@@ -133,6 +133,11 @@ class CircuitBreakerWebClientHttpServiceGroupConfigurerTests {
 		}
 
 		@Override
+		public void forEachClient(HttpServiceGroupConfigurer.InitializingClientCallback<WebClient.Builder> callback) {
+
+		}
+
+		@Override
 		public void forEachProxyFactory(HttpServiceGroupConfigurer.ProxyFactoryCallback configurer) {
 
 		}
