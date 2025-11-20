@@ -56,20 +56,24 @@ public class RetryLoadBalancerInterceptor implements BlockingLoadBalancerInterce
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory;
 
+	private final ServiceAddressResolver serviceAddressResolver;
+
 	public RetryLoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRequestFactory requestFactory,
-			LoadBalancedRetryFactory lbRetryFactory,
-			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+										LoadBalancedRetryFactory lbRetryFactory,
+										ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory,
+										ServiceAddressResolver serviceAddressResolver) {
 		this.loadBalancer = loadBalancer;
 		this.requestFactory = requestFactory;
 		this.lbRetryFactory = lbRetryFactory;
 		this.loadBalancerFactory = loadBalancerFactory;
+		this.serviceAddressResolver = serviceAddressResolver;
 	}
 
 	@Override
 	public ClientHttpResponse intercept(final HttpRequest request, final byte[] body,
 			final ClientHttpRequestExecution execution) throws IOException {
 		final URI originalUri = request.getURI();
-		final String serviceName = originalUri.getHost();
+		final String serviceName = serviceAddressResolver.getServiceId(originalUri);
 		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
 		final LoadBalancedRetryPolicy retryPolicy = lbRetryFactory.createRetryPolicy(serviceName, loadBalancer);
 		RetryTemplate template = createRetryTemplate(serviceName, request, retryPolicy);
