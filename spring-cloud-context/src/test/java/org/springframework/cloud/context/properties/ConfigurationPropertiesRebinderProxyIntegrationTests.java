@@ -33,6 +33,7 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderProxyIntegrationTests.TestConfiguration;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -92,6 +93,10 @@ public class ConfigurationPropertiesRebinderProxyIntegrationTests {
 
 		@Configuration(proxyBeanMethods = false)
 		protected static class RebinderConfiguration extends ConfigurationPropertiesRebinderAutoConfiguration {
+
+			public RebinderConfiguration(ApplicationContext context) {
+				super(context);
+			}
 
 		}
 

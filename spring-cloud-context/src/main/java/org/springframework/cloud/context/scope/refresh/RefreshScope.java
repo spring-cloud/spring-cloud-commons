@@ -119,6 +119,7 @@ public class RefreshScope extends GenericScope
 		}
 	}
 
+	@SuppressWarnings("ReturnValueIgnored")
 	private void eagerlyInitialize() {
 		for (String name : this.context.getBeanDefinitionNames()) {
 			BeanDefinition definition = this.registry.getBeanDefinition(name);
