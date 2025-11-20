@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpMethod;
 
 /**
@@ -38,12 +40,16 @@ public class RequestDataContext extends DefaultRequestContext {
 		super(requestData, hint);
 	}
 
-	public RequestData getClientRequest() {
+	public @Nullable RequestData getClientRequest() {
 		return (RequestData) super.getClientRequest();
 	}
 
-	public HttpMethod method() {
-		return ((RequestData) super.getClientRequest()).getHttpMethod();
+	public @Nullable HttpMethod method() {
+		RequestData clientRequest = (RequestData) super.getClientRequest();
+		if (clientRequest == null) {
+			return null;
+		}
+		return clientRequest.getHttpMethod();
 	}
 
 }

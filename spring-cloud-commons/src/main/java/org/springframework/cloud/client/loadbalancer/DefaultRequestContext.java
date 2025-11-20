@@ -18,6 +18,8 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.style.ToStringCreator;
 
 /**
@@ -31,22 +33,22 @@ public class DefaultRequestContext extends HintRequestContext {
 	 * The request to be executed against the service instance selected by the
 	 * LoadBalancer.
 	 */
-	private final Object clientRequest;
+	private final @Nullable Object clientRequest;
 
 	public DefaultRequestContext() {
 		clientRequest = null;
 	}
 
-	public DefaultRequestContext(Object clientRequest) {
+	public DefaultRequestContext(@Nullable Object clientRequest) {
 		this.clientRequest = clientRequest;
 	}
 
-	public DefaultRequestContext(Object clientRequest, String hint) {
+	public DefaultRequestContext(@Nullable Object clientRequest, String hint) {
 		super(hint);
 		this.clientRequest = clientRequest;
 	}
 
-	public Object getClientRequest() {
+	public @Nullable Object getClientRequest() {
 		return clientRequest;
 	}
 

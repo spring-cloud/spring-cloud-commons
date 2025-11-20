@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ import org.springframework.boot.test.web.server.LocalManagementPort;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.client.discovery.event.InstancePreRegisteredEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -94,8 +96,8 @@ public class AbstractAutoServiceRegistrationTests {
 	public static class Config {
 
 		@Bean
-		public TestAutoServiceRegistration testAutoServiceRegistration() {
-			return new TestAutoServiceRegistration();
+		public TestAutoServiceRegistration testAutoServiceRegistration(ApplicationContext context) {
+			return new TestAutoServiceRegistration(context);
 		}
 
 		@Bean
@@ -213,7 +215,7 @@ public class AbstractAutoServiceRegistrationTests {
 		private boolean deregistered = false;
 
 		@Override
-		public void register(TestRegistration registration) {
+		public void register(@Nullable TestRegistration registration) {
 			if (registration == null) {
 				throw new NullPointerException();
 			}
@@ -242,7 +244,7 @@ public class AbstractAutoServiceRegistrationTests {
 		}
 
 		@Override
-		public Object getStatus(TestRegistration registration) {
+		public @Nullable Object getStatus(TestRegistration registration) {
 			// TODO: test getStatus
 			return null;
 		}
@@ -261,12 +263,12 @@ public class AbstractAutoServiceRegistrationTests {
 
 		private int port = 0;
 
-		public TestAutoServiceRegistration(AutoServiceRegistrationProperties properties) {
-			super(null, properties);
+		public TestAutoServiceRegistration(ApplicationContext context, AutoServiceRegistrationProperties properties) {
+			super(context, null, properties);
 		}
 
-		protected TestAutoServiceRegistration() {
-			super(new TestServiceRegistry(), new AutoServiceRegistrationProperties());
+		protected TestAutoServiceRegistration(ApplicationContext context) {
+			super(context, new TestServiceRegistry(), new AutoServiceRegistrationProperties());
 		}
 
 		@Override

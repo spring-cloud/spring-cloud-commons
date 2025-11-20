@@ -39,12 +39,16 @@ public interface ServiceInstance {
 	/**
 	 * @return The service ID as registered.
 	 */
-	String getServiceId();
+	default @Nullable String getServiceId() {
+		return null;
+	}
 
 	/**
 	 * @return The hostname of the registered service instance.
 	 */
-	String getHost();
+	default @Nullable String getHost() {
+		return null;
+	}
 
 	/**
 	 * @return The port of the registered service instance.

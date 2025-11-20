@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerWebClientBuilderBeanPostProcessor;
@@ -38,17 +40,17 @@ public class SimpleObjectProvider<T> implements ObjectProvider<T> {
 	}
 
 	@Override
-	public T getObject(Object... args) throws BeansException {
+	public T getObject(@Nullable Object... args) throws BeansException {
 		return this.object;
 	}
 
 	@Override
-	public T getIfAvailable() throws BeansException {
+	public @Nullable T getIfAvailable() throws BeansException {
 		return this.object;
 	}
 
 	@Override
-	public T getIfUnique() throws BeansException {
+	public @Nullable T getIfUnique() throws BeansException {
 		return this.object;
 	}
 

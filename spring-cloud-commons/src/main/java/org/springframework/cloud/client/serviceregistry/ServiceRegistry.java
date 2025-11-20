@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.serviceregistry;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Contract to register and deregister instances with a Service Registry.
  *
@@ -30,13 +32,13 @@ public interface ServiceRegistry<R extends Registration> {
 	 * instance, such as its hostname and port.
 	 * @param registration registration meta data
 	 */
-	void register(R registration);
+	void register(@Nullable R registration);
 
 	/**
 	 * Deregisters the registration.
 	 * @param registration registration meta data
 	 */
-	void deregister(R registration);
+	void deregister(@Nullable R registration);
 
 	/**
 	 * Closes the ServiceRegistry. This is a lifecycle method.

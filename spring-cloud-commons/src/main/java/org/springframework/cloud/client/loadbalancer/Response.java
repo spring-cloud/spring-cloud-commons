@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Response created for each request.
  *
@@ -26,6 +28,8 @@ public interface Response<T> {
 
 	boolean hasServer();
 
-	T getServer();
+	default @Nullable T getServer() {
+		return null;
+	}
 
 }

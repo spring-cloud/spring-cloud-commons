@@ -18,6 +18,8 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.net.URI;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.retry.RecoveryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryException;
@@ -39,8 +41,9 @@ public abstract class LoadBalancedRecoveryCallback<T, R> implements RecoveryCall
 	 * @param uri The URI the response is from.
 	 * @return The response to be returned.
 	 */
-	protected abstract T createResponse(R response, URI uri);
+	protected abstract T createResponse(R response, @Nullable URI uri);
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public T recover(RetryContext context) throws Exception {
 		Throwable lastThrowable = context.getLastThrowable();

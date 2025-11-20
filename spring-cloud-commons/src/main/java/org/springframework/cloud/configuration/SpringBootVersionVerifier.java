@@ -33,11 +33,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	private static final Log log = LogFactory.getLog(SpringBootVersionVerifier.class);
 
-	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<>() {
-		{
-			this.put("4.0", is4_0());
-		}
-	};
+	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<>(Map.of("4.0", is4_0()));
 
 	private final List<String> acceptedVersions;
 
