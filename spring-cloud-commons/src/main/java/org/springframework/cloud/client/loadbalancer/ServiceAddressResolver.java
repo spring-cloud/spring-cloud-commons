@@ -5,10 +5,6 @@ import org.springframework.cloud.client.ServiceInstance;
 
 import java.net.URI;
 
-import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
-import org.springframework.cloud.client.loadbalancer.Request;
-import org.springframework.cloud.client.loadbalancer.RequestData;
-
 /**
  * ServiceAddressResolver is responsible for resolving service addresses to ServiceInstance objects.
  * 
