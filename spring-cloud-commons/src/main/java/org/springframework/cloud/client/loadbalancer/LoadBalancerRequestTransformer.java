@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpRequest;
@@ -34,6 +36,6 @@ public interface LoadBalancerRequestTransformer {
 	 */
 	int DEFAULT_ORDER = 0;
 
-	HttpRequest transformRequest(HttpRequest request, ServiceInstance instance);
+	HttpRequest transformRequest(HttpRequest request, @Nullable ServiceInstance instance);
 
 }

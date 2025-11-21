@@ -22,6 +22,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.AbstractServerHttpRequest;
 import org.springframework.http.server.reactive.SslInfo;
 import org.springframework.util.LinkedMultiValueMap;
@@ -47,7 +48,8 @@ final class LoadBalancerServerHttpRequest extends AbstractServerHttpRequest {
 	private final RequestData requestData;
 
 	LoadBalancerServerHttpRequest(RequestData requestData) {
-		super(requestData.getHttpMethod(), requestData.getUrl(), null, requestData.getHeaders());
+		super(requestData.getHttpMethod(), requestData.getUrl(), null,
+				(requestData.getHeaders() != null) ? requestData.getHeaders() : new HttpHeaders());
 		this.requestData = requestData;
 	}
 

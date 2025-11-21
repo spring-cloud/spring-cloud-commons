@@ -48,6 +48,9 @@ import static org.springframework.cloud.client.circuitbreaker.httpservice.Circui
  */
 final class CircuitBreakerConfigurerUtils {
 
+	/**
+	 * Default fallback key.
+	 */
 	public static final String DEFAULT_FALLBACK_KEY = "default";
 
 	private CircuitBreakerConfigurerUtils() {

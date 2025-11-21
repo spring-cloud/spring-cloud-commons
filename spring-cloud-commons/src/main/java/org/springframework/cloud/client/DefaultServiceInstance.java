@@ -56,13 +56,15 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param metadata a map containing metadata.
 	 */
 	public DefaultServiceInstance(@Nullable String instanceId, @Nullable String serviceId, @Nullable String host,
-			int port, boolean secure, Map<String, String> metadata) {
+			int port, boolean secure, @Nullable Map<String, String> metadata) {
 		this.instanceId = instanceId;
 		this.serviceId = serviceId;
 		this.host = host;
 		this.port = port;
 		this.secure = secure;
-		this.metadata = metadata;
+		if (metadata != null) {
+			this.metadata = metadata;
+		}
 	}
 
 	/**

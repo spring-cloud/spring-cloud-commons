@@ -59,7 +59,7 @@ public final class ServiceInstanceListSupplierBuilder {
 
 	private static final Log LOG = LogFactory.getLog(ServiceInstanceListSupplierBuilder.class);
 
-	private Creator baseCreator;
+	private @Nullable Creator baseCreator;
 
 	private final List<DelegateCreator> creators = new ArrayList<>();
 

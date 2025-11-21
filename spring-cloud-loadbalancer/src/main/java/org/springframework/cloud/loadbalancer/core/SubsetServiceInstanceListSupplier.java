@@ -48,6 +48,9 @@ public class SubsetServiceInstanceListSupplier extends DelegatingServiceInstance
 			ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
 		super(delegate);
 		LoadBalancerProperties properties = factory.getProperties(getServiceId());
+		if (properties == null) {
+			properties = new LoadBalancerProperties();
+		}
 		this.instanceId = resolveInstanceId(properties, resolver);
 		this.size = properties.getSubset().getSize();
 	}

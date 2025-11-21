@@ -197,9 +197,14 @@ public class LoadBalancerProperties {
 	public static class StickySession {
 
 		/**
+		 * The default name of the cookie holding the preferred instance id.
+		 */
+		public static final String DEFAULT_INSTANCE_ID_COOKIE_NAME = "sc-lb-instance-id";
+
+		/**
 		 * The name of the cookie holding the preferred instance id.
 		 */
-		private String instanceIdCookieName = "sc-lb-instance-id";
+		private String instanceIdCookieName = DEFAULT_INSTANCE_ID_COOKIE_NAME;
 
 		/**
 		 * Indicates whether a cookie with the newly selected instance should be added by

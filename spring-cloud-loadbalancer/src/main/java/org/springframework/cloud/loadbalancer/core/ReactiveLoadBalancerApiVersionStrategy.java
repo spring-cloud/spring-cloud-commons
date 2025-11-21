@@ -40,12 +40,16 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class ReactiveLoadBalancerApiVersionStrategy extends DefaultApiVersionStrategy {
 
+	private static final ApiVersionParser<String> EMPTY_API_VERSION_PARSER = version -> {
+		throw new InvalidApiVersionException("No valid ApiVersionParserFound: " + version);
+	};
+
 	public ReactiveLoadBalancerApiVersionStrategy(List<ApiVersionResolver> versionResolvers,
-			ApiVersionParser<?> versionParser, boolean versionRequired, @Nullable String defaultVersion,
+			@Nullable ApiVersionParser<?> versionParser, boolean versionRequired, @Nullable String defaultVersion,
 			boolean detectSupportedVersions, @Nullable Predicate<Comparable<?>> supportedVersionPredicate,
 			@Nullable ApiVersionDeprecationHandler deprecationHandler) {
-		super(versionResolvers, versionParser, versionRequired, defaultVersion, detectSupportedVersions,
-				supportedVersionPredicate, deprecationHandler);
+		super(versionResolvers, (versionParser != null) ? versionParser : EMPTY_API_VERSION_PARSER, versionRequired,
+				defaultVersion, detectSupportedVersions, supportedVersionPredicate, deprecationHandler);
 	}
 
 	@Override

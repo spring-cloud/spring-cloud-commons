@@ -86,6 +86,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 			.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
 
+	@SuppressWarnings("NullAway") // guarded by hasServer()
 	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,
 			List<ServiceInstance> serviceInstances) {
 		Response<ServiceInstance> serviceInstanceResponse = getInstanceResponse(serviceInstances);

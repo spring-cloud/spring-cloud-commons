@@ -21,11 +21,13 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.util.MultiValueMap;
@@ -41,7 +43,7 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 
 	private static final Log LOG = LogFactory.getLog(RequestBasedStickySessionServiceInstanceListSupplier.class);
 
-	private final LoadBalancerProperties properties;
+	private final @Nullable LoadBalancerProperties properties;
 
 	public RequestBasedStickySessionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
@@ -57,10 +59,17 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Flux<List<ServiceInstance>> get(Request request) {
-		String instanceIdCookieName = properties.getStickySession().getInstanceIdCookieName();
+		String instanceIdCookieName = LoadBalancerProperties.StickySession.DEFAULT_INSTANCE_ID_COOKIE_NAME;
+		if (properties != null) {
+			instanceIdCookieName = properties.getStickySession().getInstanceIdCookieName();
+		}
 		Object context = request.getContext();
 		if ((context instanceof RequestDataContext)) {
-			MultiValueMap<String, String> cookies = ((RequestDataContext) context).getClientRequest().getCookies();
+			RequestData clientRequest = ((RequestDataContext) context).getClientRequest();
+			MultiValueMap<String, String> cookies = null;
+			if (clientRequest != null) {
+				cookies = clientRequest.getCookies();
+			}
 			if (cookies == null) {
 				return delegate.get(request);
 			}
