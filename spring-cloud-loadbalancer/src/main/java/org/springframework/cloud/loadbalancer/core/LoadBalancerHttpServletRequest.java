@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.security.Principal;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -48,6 +49,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.Part;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.http.HttpHeaders;
@@ -70,14 +72,17 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 
-	private final RequestData requestData;
+	private final @Nullable RequestData requestData;
 
-	public LoadBalancerHttpServletRequest(RequestData requestData) {
+	public LoadBalancerHttpServletRequest(@Nullable RequestData requestData) {
 		this.requestData = requestData;
 	}
 
 	@Override
-	public String getAuthType() {
+	public @Nullable String getAuthType() {
+		if (requestData == null || requestData.getHeaders() == null) {
+			return null;
+		}
 		String authHeader = requestData.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 		if (authHeader == null) {
 			return null;
@@ -96,6 +101,9 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public Cookie[] getCookies() {
+		if (requestData == null) {
+			return new Cookie[0];
+		}
 		MultiValueMap<String, String> cookies = requestData.getCookies();
 		if (cookies == null || cookies.isEmpty()) {
 			return new Cookie[0];
@@ -110,7 +118,8 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public long getDateHeader(String name) {
-		String headerValue = requestData.getHeaders().getFirst(name);
+		String headerValue = (requestData == null || requestData.getHeaders() == null) ? null
+				: requestData.getHeaders().getFirst(name);
 		if (headerValue == null) {
 			return -1L;
 		}
@@ -126,18 +135,27 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public String getHeader(String name) {
+	public @Nullable String getHeader(String name) {
+		if (requestData == null || requestData.getHeaders() == null) {
+			return null;
+		}
 		return requestData.getHeaders().getFirst(name);
 	}
 
 	@Override
 	public Enumeration<String> getHeaders(String name) {
+		if (requestData == null || requestData.getHeaders() == null) {
+			return Collections.emptyEnumeration();
+		}
 		List<String> headerValues = requestData.getHeaders().get(name);
 		return headerValues != null ? Collections.enumeration(headerValues) : Collections.emptyEnumeration();
 	}
 
 	@Override
 	public Enumeration<String> getHeaderNames() {
+		if (requestData == null || requestData.getHeaders() == null) {
+			return Collections.emptyEnumeration();
+		}
 		HttpHeaders headers = requestData.getHeaders();
 		Set<String> headerNames = headers.headerNames();
 		return Collections.enumeration(headerNames);
@@ -145,6 +163,9 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getIntHeader(String name) {
+		if (requestData == null || requestData.getHeaders() == null) {
+			return -1;
+		}
 		String headerValue = requestData.getHeaders().getFirst(name);
 		if (headerValue == null) {
 			return -1;
@@ -158,12 +179,18 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public String getMethod() {
+	public @Nullable String getMethod() {
+		if (requestData == null) {
+			return null;
+		}
 		return requestData.getHttpMethod().name();
 	}
 
 	@Override
-	public String getPathInfo() {
+	public @Nullable String getPathInfo() {
+		if (requestData == null) {
+			return null;
+		}
 		URI uri = requestData.getUrl();
 		return uri.getPath();
 	}
@@ -179,12 +206,15 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public String getQueryString() {
+	public @Nullable String getQueryString() {
+		if (requestData == null) {
+			return null;
+		}
 		return requestData.getUrl().getRawQuery();
 	}
 
 	@Override
-	public String getRemoteUser() {
+	public @Nullable String getRemoteUser() {
 		Principal principal = getUserPrincipal();
 		return principal != null ? principal.getName() : null;
 	}
@@ -195,7 +225,10 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public Principal getUserPrincipal() {
+	public @Nullable Principal getUserPrincipal() {
+		if (requestData == null) {
+			return null;
+		}
 		Object principal = requestData.getAttributes().get(Principal.class.getName());
 		if (principal instanceof Principal) {
 			return (Principal) principal;
@@ -209,12 +242,18 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public String getRequestURI() {
+	public @Nullable String getRequestURI() {
+		if (requestData == null) {
+			return null;
+		}
 		return requestData.getUrl().getRawPath();
 	}
 
 	@Override
-	public StringBuffer getRequestURL() {
+	public @Nullable StringBuffer getRequestURL() {
+		if (requestData == null) {
+			return null;
+		}
 		URI uri = requestData.getUrl();
 		StringBuffer url = new StringBuffer();
 		url.append(uri.getScheme()).append("://").append(uri.getHost());
@@ -284,7 +323,7 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public Part getPart(String name) throws IOException, ServletException {
+	public @Nullable Part getPart(String name) throws IOException, ServletException {
 		return null;
 	}
 
@@ -295,23 +334,36 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public Object getAttribute(String name) {
+	public @Nullable Object getAttribute(String name) {
+		if (requestData == null) {
+			return null;
+		}
 		return requestData.getAttributes().get(name);
 	}
 
 	@Override
 	public Enumeration<String> getAttributeNames() {
+		if (requestData == null) {
+			return Collections.emptyEnumeration();
+		}
 		return Collections.enumeration(requestData.getAttributes().keySet());
 	}
 
 	@Override
-	public String getCharacterEncoding() {
+	public @Nullable String getCharacterEncoding() {
+		if (requestData == null || requestData.getHeaders() == null) {
+			return null;
+		}
 		String contentTypeHeader = requestData.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
 		if (contentTypeHeader == null) {
 			return null;
 		}
 		try {
-			return MediaType.parseMediaType(contentTypeHeader).getCharset().name();
+			Charset charset = MediaType.parseMediaType(contentTypeHeader).getCharset();
+			if (charset == null) {
+				return null;
+			}
+			return charset.name();
 		}
 		catch (Exception e) {
 			return null;
@@ -334,6 +386,9 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public long getContentLengthLong() {
+		if (requestData == null || requestData.getHeaders() == null) {
+			return -1L;
+		}
 		String contentLength = requestData.getHeaders().getFirst(HttpHeaders.CONTENT_LENGTH);
 		if (contentLength == null) {
 			return -1L;
@@ -347,7 +402,10 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public String getContentType() {
+	public @Nullable String getContentType() {
+		if (requestData == null || requestData.getHeaders() == null) {
+			return null;
+		}
 		return requestData.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
 	}
 
@@ -357,7 +415,7 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public String getParameter(String name) {
+	public @Nullable String getParameter(String name) {
 		String[] values = getParameterMap().get(name);
 		return values != null && values.length > 0 ? values[0] : null;
 	}
@@ -368,12 +426,16 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public String[] getParameterValues(String name) {
 		return getParameterMap().get(name);
 	}
 
 	@Override
 	public Map<String, String[]> getParameterMap() {
+		if (requestData == null) {
+			return Collections.emptyMap();
+		}
 		return UriComponentsBuilder.fromUri(requestData.getUrl())
 			.build()
 			.getQueryParams()
@@ -388,18 +450,27 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public String getScheme() {
+	public @Nullable String getScheme() {
+		if (requestData == null) {
+			return null;
+		}
 		return requestData.getUrl().getScheme();
 	}
 
 	@Override
-	public String getServerName() {
+	public @Nullable String getServerName() {
+		if (requestData == null) {
+			return null;
+		}
 		return requestData.getUrl().getHost();
 	}
 
 	@Override
 	public int getServerPort() {
-		int port = requestData.getUrl().getPort();
+		int port = -1;
+		if (requestData != null) {
+			port = requestData.getUrl().getPort();
+		}
 		if (port == -1) {
 			return "https".equals(getScheme()) ? 443 : 80;
 		}
@@ -422,18 +493,20 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public void setAttribute(String name, Object o) {
+	public void setAttribute(String name, @Nullable Object o) {
 		if (o == null) {
 			removeAttribute(name);
 		}
-		else {
+		else if (requestData != null) {
 			requestData.getAttributes().put(name, o);
 		}
 	}
 
 	@Override
 	public void removeAttribute(String name) {
-		requestData.getAttributes().remove(name);
+		if (requestData != null) {
+			requestData.getAttributes().remove(name);
+		}
 	}
 
 	@Override
@@ -448,6 +521,9 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public boolean isSecure() {
+		if (requestData == null) {
+			return false;
+		}
 		return "https".equalsIgnoreCase(requestData.getUrl().getScheme());
 	}
 
@@ -462,7 +538,7 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public String getLocalName() {
+	public @Nullable String getLocalName() {
 		return getServerName();
 	}
 
@@ -503,7 +579,7 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
-	public AsyncContext getAsyncContext() {
+	public @Nullable AsyncContext getAsyncContext() {
 		return null;
 	}
 

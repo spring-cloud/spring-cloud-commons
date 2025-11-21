@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Retry logic to use for the {@link LoadBalancerClient}.
  *
@@ -71,6 +73,6 @@ public interface LoadBalancedRetryPolicy {
 	 * @param exception the {@link Throwable} to evaluate
 	 * @return true to retry on the provided exception
 	 */
-	boolean retryableException(Throwable exception);
+	boolean retryableException(@Nullable Throwable exception);
 
 }

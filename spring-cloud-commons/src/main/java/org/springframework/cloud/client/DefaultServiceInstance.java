@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Default implementation of {@link ServiceInstance}.
  *
@@ -31,11 +33,11 @@ import java.util.Objects;
  */
 public class DefaultServiceInstance implements ServiceInstance {
 
-	private String instanceId;
+	private @Nullable String instanceId;
 
-	private String serviceId;
+	private @Nullable String serviceId;
 
-	private String host;
+	private @Nullable String host;
 
 	private int port;
 
@@ -43,7 +45,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private Map<String, String> metadata = new LinkedHashMap<>();
 
-	private URI uri;
+	private @Nullable URI uri;
 
 	/**
 	 * @param instanceId the id of the instance.
@@ -53,14 +55,16 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param secure indicates whether or not the connection needs to be secure.
 	 * @param metadata a map containing metadata.
 	 */
-	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
-			Map<String, String> metadata) {
+	public DefaultServiceInstance(@Nullable String instanceId, @Nullable String serviceId, @Nullable String host,
+			int port, boolean secure, @Nullable Map<String, String> metadata) {
 		this.instanceId = instanceId;
 		this.serviceId = serviceId;
 		this.host = host;
 		this.port = port;
 		this.secure = secure;
-		this.metadata = metadata;
+		if (metadata != null) {
+			this.metadata = metadata;
+		}
 	}
 
 	/**
@@ -70,7 +74,8 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param port the port on which the service is running.
 	 * @param secure indicates whether or not the connection needs to be secure.
 	 */
-	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure) {
+	public DefaultServiceInstance(@Nullable String instanceId, @Nullable String serviceId, @Nullable String host,
+			int port, boolean secure) {
 		this(instanceId, serviceId, host, port, secure, new LinkedHashMap<>());
 	}
 
@@ -104,17 +109,17 @@ public class DefaultServiceInstance implements ServiceInstance {
 	}
 
 	@Override
-	public String getInstanceId() {
+	public @Nullable String getInstanceId() {
 		return instanceId;
 	}
 
 	@Override
-	public String getServiceId() {
+	public @Nullable String getServiceId() {
 		return serviceId;
 	}
 
 	@Override
-	public String getHost() {
+	public @Nullable String getHost() {
 		return host;
 	}
 

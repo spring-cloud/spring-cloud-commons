@@ -19,11 +19,13 @@ package org.springframework.cloud.loadbalancer.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerRequestTransformer;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer.Factory;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -38,20 +40,25 @@ import org.springframework.util.StringUtils;
  */
 public class LoadBalancerServiceInstanceCookieTransformer implements LoadBalancerRequestTransformer {
 
-	private ReactiveLoadBalancer.Factory<ServiceInstance> factory;
+	private @Nullable Factory<ServiceInstance> factory;
 
-	public LoadBalancerServiceInstanceCookieTransformer(ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
+	public LoadBalancerServiceInstanceCookieTransformer(@Nullable Factory<ServiceInstance> factory) {
 		this.factory = factory;
 	}
 
 	@Override
-	public HttpRequest transformRequest(HttpRequest request, ServiceInstance instance) {
+	@SuppressWarnings("NullAway")
+	public HttpRequest transformRequest(HttpRequest request, @Nullable ServiceInstance instance) {
 		if (instance == null) {
 			return request;
 		}
-		LoadBalancerProperties.StickySession stickySession = factory != null
-				? factory.getProperties(instance.getServiceId()).getStickySession()
-				: new LoadBalancerProperties.StickySession();
+		LoadBalancerProperties.StickySession stickySession;
+		if (factory != null && factory.getProperties(instance.getServiceId()) != null) {
+			stickySession = factory.getProperties(instance.getServiceId()).getStickySession();
+		}
+		else {
+			stickySession = new LoadBalancerProperties.StickySession();
+		}
 		if (!stickySession.isAddServiceInstanceCookie()) {
 			return request;
 		}

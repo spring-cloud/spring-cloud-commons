@@ -30,8 +30,9 @@ public class DefaultRequest<T> implements Request<T> {
 
 	private T context;
 
+	@SuppressWarnings("unchecked")
 	public DefaultRequest() {
-		new DefaultRequestContext();
+		this((T) new DefaultRequestContext());
 	}
 
 	public DefaultRequest(T context) {

@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -70,9 +71,9 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 
 	private final LoadBalancerClientFactory loadBalancerClientFactory;
 
-	private ApiVersionParser<?> apiVersionParser;
+	private @Nullable ApiVersionParser<?> apiVersionParser;
 
-	private ApiVersionStrategy apiVersionStrategy;
+	private @Nullable ApiVersionStrategy apiVersionStrategy;
 
 	public ReactiveApiVersionServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			LoadBalancerClientFactory loadBalancerClientFactory) {
@@ -80,8 +81,14 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 		String serviceId = getServiceId();
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
 		LoadBalancerProperties properties = loadBalancerClientFactory.getProperties(serviceId);
-		callGetWithRequestOnDelegates = properties.isCallGetWithRequestOnDelegates();
-		apiVersionProperties = properties.getApiVersion();
+		if (properties != null) {
+			callGetWithRequestOnDelegates = properties.isCallGetWithRequestOnDelegates();
+			apiVersionProperties = properties.getApiVersion();
+		}
+		else {
+			callGetWithRequestOnDelegates = true;
+			apiVersionProperties = new LoadBalancerProperties.ApiVersion();
+		}
 	}
 
 	@Override
@@ -102,7 +109,7 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 	}
 
 	private List<ServiceInstance> filteredByVersion(List<ServiceInstance> serviceInstances,
-			Comparable<?> requestedVersion) {
+			@Nullable Comparable<?> requestedVersion) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Matching instances by API Version: " + requestedVersion);
 		}
@@ -137,7 +144,10 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 		this.apiVersionParser = apiVersionParser;
 	}
 
-	private Comparable<?> getVersionFromRequest(RequestData requestData) {
+	private @Nullable Comparable<?> getVersionFromRequest(@Nullable RequestData requestData) {
+		if (requestData == null) {
+			return null;
+		}
 		ServerWebExchange exchange = buildServerWebExchange(requestData);
 		Comparable<?> apiVersion = getApiVersionStrategy().resolveParseAndValidateVersion(exchange);
 		if (LOG.isDebugEnabled()) {
@@ -146,7 +156,7 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 		return apiVersion;
 	}
 
-	private Comparable<?> getVersion(ServiceInstance serviceInstance) {
+	private @Nullable Comparable<?> getVersion(ServiceInstance serviceInstance) {
 		Map<String, String> metadata = serviceInstance.getMetadata();
 		if (metadata != null) {
 			String version = metadata.get(API_VERSION);
@@ -164,7 +174,8 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 				new DefaultServerCodecConfigurer(), new AcceptHeaderLocaleContextResolver());
 	}
 
-	private ApiVersionParser getApiVersionParser() {
+	@SuppressWarnings("rawtypes")
+	private @Nullable ApiVersionParser getApiVersionParser() {
 		if (apiVersionParser == null) {
 			apiVersionParser = loadBalancerClientFactory.getInstance(getServiceId(), ApiVersionParser.class);
 		}
@@ -181,6 +192,7 @@ public class ReactiveApiVersionServiceInstanceListSupplier extends DelegatingSer
 		return apiVersionStrategy;
 	}
 
+	@SuppressWarnings("NullAway") // guarded by hasText()
 	private ApiVersionStrategy buildApiVersionStrategy() {
 		List<ApiVersionResolver> versionResolvers = new ArrayList<>();
 

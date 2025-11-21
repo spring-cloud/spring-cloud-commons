@@ -46,6 +46,7 @@ public class TextEncryptorConfigBootstrapper implements BootstrapRegistryInitial
 	public static final boolean BCPROV_IS_PRESENT = ClassUtils.isPresent("org.bouncycastle.asn1.ASN1Sequence", null);
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void initialize(BootstrapRegistry registry) {
 		if (!ClassUtils.isPresent("org.springframework.security.crypto.encrypt.TextEncryptor", null)) {
 			return;

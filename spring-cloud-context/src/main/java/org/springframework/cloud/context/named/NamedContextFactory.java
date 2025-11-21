@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.AotDetector;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -196,7 +198,7 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 		return this.getClass().getSimpleName() + "-" + name;
 	}
 
-	public <T> T getInstance(String name, Class<T> type) {
+	public <T> @Nullable T getInstance(String name, Class<T> type) {
 		GenericApplicationContext context = getContext(name);
 		try {
 			return context.getBean(type);

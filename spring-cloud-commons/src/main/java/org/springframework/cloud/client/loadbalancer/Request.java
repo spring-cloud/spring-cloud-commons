@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Marker interface for a request.
  *
@@ -25,7 +27,7 @@ package org.springframework.cloud.client.loadbalancer;
 public interface Request<C> {
 
 	// Avoid breaking backward compatibility
-	default C getContext() {
+	default @Nullable C getContext() {
 		return null;
 	}
 

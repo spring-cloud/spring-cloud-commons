@@ -45,6 +45,7 @@ public class LoggingSystemShutdownListener
 		shutdownLogging();
 	}
 
+	@SuppressWarnings("NullAway")
 	private void shutdownLogging() {
 		// TODO: only enable if bootstrap and legacy
 		LoggingSystem loggingSystem = LoggingSystem.get(ClassUtils.getDefaultClassLoader());

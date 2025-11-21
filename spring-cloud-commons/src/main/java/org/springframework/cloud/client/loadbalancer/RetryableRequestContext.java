@@ -18,6 +18,8 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.style.ToStringCreator;
 
@@ -29,28 +31,28 @@ import org.springframework.core.style.ToStringCreator;
  */
 public class RetryableRequestContext extends RequestDataContext {
 
-	private ServiceInstance previousServiceInstance;
+	private @Nullable ServiceInstance previousServiceInstance;
 
-	public RetryableRequestContext(ServiceInstance previousServiceInstance) {
+	public RetryableRequestContext(@Nullable ServiceInstance previousServiceInstance) {
 		this.previousServiceInstance = previousServiceInstance;
 	}
 
-	public RetryableRequestContext(ServiceInstance previousServiceInstance, RequestData clientRequestData) {
+	public RetryableRequestContext(@Nullable ServiceInstance previousServiceInstance, RequestData clientRequestData) {
 		super(clientRequestData);
 		this.previousServiceInstance = previousServiceInstance;
 	}
 
-	public RetryableRequestContext(ServiceInstance previousServiceInstance, RequestData clientRequestData,
+	public RetryableRequestContext(@Nullable ServiceInstance previousServiceInstance, RequestData clientRequestData,
 			String hint) {
 		super(clientRequestData, hint);
 		this.previousServiceInstance = previousServiceInstance;
 	}
 
-	public ServiceInstance getPreviousServiceInstance() {
+	public @Nullable ServiceInstance getPreviousServiceInstance() {
 		return previousServiceInstance;
 	}
 
-	public void setPreviousServiceInstance(ServiceInstance previousServiceInstance) {
+	public void setPreviousServiceInstance(@Nullable ServiceInstance previousServiceInstance) {
 		this.previousServiceInstance = previousServiceInstance;
 	}
 

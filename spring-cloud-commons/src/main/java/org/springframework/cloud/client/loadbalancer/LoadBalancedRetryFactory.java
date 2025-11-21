@@ -54,7 +54,7 @@ public interface LoadBalancedRetryFactory {
 	 * @param service The service to create the {@link BackOffPolicy} for.
 	 * @return The {@link BackOffPolicy}.
 	 */
-	default BackOffPolicy createBackOffPolicy(String service) {
+	default @Nullable BackOffPolicy createBackOffPolicy(String service) {
 		return new NoBackOffPolicy();
 	}
 

@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
@@ -29,7 +31,7 @@ public class EmptyResponse implements Response<ServiceInstance> {
 	}
 
 	@Override
-	public ServiceInstance getServer() {
+	public @Nullable ServiceInstance getServer() {
 		return null;
 	}
 

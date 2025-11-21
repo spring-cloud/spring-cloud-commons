@@ -18,6 +18,8 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.style.ToStringCreator;
 
@@ -27,7 +29,7 @@ import org.springframework.core.style.ToStringCreator;
  */
 public class DefaultResponse implements Response<ServiceInstance> {
 
-	private final ServiceInstance serviceInstance;
+	private final @Nullable ServiceInstance serviceInstance;
 
 	public DefaultResponse(ServiceInstance serviceInstance) {
 		this.serviceInstance = serviceInstance;
@@ -39,7 +41,7 @@ public class DefaultResponse implements Response<ServiceInstance> {
 	}
 
 	@Override
-	public ServiceInstance getServer() {
+	public @Nullable ServiceInstance getServer() {
 		return this.serviceInstance;
 	}
 

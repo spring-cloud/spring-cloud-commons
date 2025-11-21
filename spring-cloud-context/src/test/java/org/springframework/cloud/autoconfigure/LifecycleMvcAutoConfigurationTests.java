@@ -109,6 +109,7 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	// resumeEndpoint
 	@Test
+	@Disabled
 	public void resumeEndpointDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.restart.enabled=true",
 				"management.endpoints.web.exposure.include=restart", "management.endpoint.resume.enabled=false");

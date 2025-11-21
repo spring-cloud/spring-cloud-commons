@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
+import org.jspecify.annotations.Nullable;
 import reactor.util.retry.RetryBackoffSpec;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -196,9 +197,14 @@ public class LoadBalancerProperties {
 	public static class StickySession {
 
 		/**
+		 * The default name of the cookie holding the preferred instance id.
+		 */
+		public static final String DEFAULT_INSTANCE_ID_COOKIE_NAME = "sc-lb-instance-id";
+
+		/**
 		 * The name of the cookie holding the preferred instance id.
 		 */
-		private String instanceIdCookieName = "sc-lb-instance-id";
+		private String instanceIdCookieName = DEFAULT_INSTANCE_ID_COOKIE_NAME;
 
 		/**
 		 * Indicates whether a cookie with the newly selected instance should be added by
@@ -269,7 +275,7 @@ public class LoadBalancerProperties {
 		 * Port at which the health-check request should be made. If none is set, the port
 		 * under which the requested service is available at the service instance.
 		 */
-		private Integer port;
+		private @Nullable Integer port;
 
 		/**
 		 * Indicates whether the instances should be refetched by the
@@ -342,11 +348,11 @@ public class LoadBalancerProperties {
 			this.interval = interval;
 		}
 
-		public Integer getPort() {
+		public @Nullable Integer getPort() {
 			return port;
 		}
 
-		public void setPort(Integer port) {
+		public void setPort(@Nullable Integer port) {
 			this.port = port;
 		}
 
@@ -598,22 +604,22 @@ public class LoadBalancerProperties {
 		 * Sets default version that should be used for each request.
 		 */
 		@Name("default")
-		private String defaultVersion;
+		private @Nullable String defaultVersion;
 
 		/**
 		 * Uses the HTTP header with the given name to obtain the version.
 		 */
-		private String header;
+		private @Nullable String header;
 
 		/**
 		 * Uses the query parameter with the given name to obtain the version.
 		 */
-		private String queryParameter;
+		private @Nullable String queryParameter;
 
 		/**
 		 * Uses the path segment at the given index to obtain the version.
 		 */
-		private Integer pathSegment;
+		private @Nullable Integer pathSegment;
 
 		/**
 		 * Uses the media type parameter with the given name to obtain the version.
@@ -634,35 +640,35 @@ public class LoadBalancerProperties {
 			this.required = required;
 		}
 
-		public String getDefaultVersion() {
+		public @Nullable String getDefaultVersion() {
 			return defaultVersion;
 		}
 
-		public void setDefaultVersion(String defaultVersion) {
+		public void setDefaultVersion(@Nullable String defaultVersion) {
 			this.defaultVersion = defaultVersion;
 		}
 
-		public String getHeader() {
+		public @Nullable String getHeader() {
 			return header;
 		}
 
-		public void setHeader(String header) {
+		public void setHeader(@Nullable String header) {
 			this.header = header;
 		}
 
-		public String getQueryParameter() {
+		public @Nullable String getQueryParameter() {
 			return queryParameter;
 		}
 
-		public void setQueryParameter(String queryParameter) {
+		public void setQueryParameter(@Nullable String queryParameter) {
 			this.queryParameter = queryParameter;
 		}
 
-		public Integer getPathSegment() {
+		public @Nullable Integer getPathSegment() {
 			return pathSegment;
 		}
 
-		public void setPathSegment(Integer pathSegment) {
+		public void setPathSegment(@Nullable Integer pathSegment) {
 			this.pathSegment = pathSegment;
 		}
 

@@ -40,12 +40,17 @@ import org.springframework.web.accept.MissingApiVersionException;
  */
 public class BlockingLoadBalancerApiVersionStrategy extends DefaultApiVersionStrategy {
 
+	private static final ApiVersionParser<String> EMPTY_API_VERSION_PARSER = version -> {
+		throw new InvalidApiVersionException("No valid ApiVersionParserFound: " + version);
+	};
+
 	public BlockingLoadBalancerApiVersionStrategy(List<ApiVersionResolver> versionResolvers,
-			ApiVersionParser<?> versionParser, @Nullable Boolean versionRequired, @Nullable String defaultVersion,
-			boolean detectSupportedVersions, @Nullable Predicate<Comparable<?>> supportedVersionPredicate,
+			@Nullable ApiVersionParser<?> versionParser, @Nullable Boolean versionRequired,
+			@Nullable String defaultVersion, boolean detectSupportedVersions,
+			@Nullable Predicate<Comparable<?>> supportedVersionPredicate,
 			@Nullable ApiVersionDeprecationHandler deprecationHandler) {
-		super(versionResolvers, versionParser, versionRequired, defaultVersion, detectSupportedVersions,
-				supportedVersionPredicate, deprecationHandler);
+		super(versionResolvers, (versionParser != null) ? versionParser : EMPTY_API_VERSION_PARSER, versionRequired,
+				defaultVersion, detectSupportedVersions, supportedVersionPredicate, deprecationHandler);
 	}
 
 	@Override

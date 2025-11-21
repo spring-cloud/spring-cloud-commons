@@ -43,7 +43,10 @@ public class EnableDiscoveryClientImportSelector extends SpringFactoryImportSele
 		AnnotationAttributes attributes = AnnotationAttributes
 			.fromMap(metadata.getAnnotationAttributes(getAnnotationClass().getName(), true));
 
-		boolean autoRegister = attributes.getBoolean("autoRegister");
+		boolean autoRegister = true;
+		if (attributes != null) {
+			autoRegister = attributes.getBoolean("autoRegister");
+		}
 
 		if (autoRegister) {
 			List<String> importsList = new ArrayList<>(Arrays.asList(imports));

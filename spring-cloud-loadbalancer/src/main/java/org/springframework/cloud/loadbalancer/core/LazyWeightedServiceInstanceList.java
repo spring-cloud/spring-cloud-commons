@@ -21,6 +21,8 @@ import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Queue;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cloud.client.ServiceInstance;
 
 /**
@@ -36,7 +38,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 
 	private final Object expandingLock = new Object();
 
-	private WeightedServiceInstanceSelector selector;
+	private @Nullable WeightedServiceInstanceSelector selector;
 
 	private volatile int position = 0;
 
@@ -58,7 +60,9 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 		if (index >= position) {
 			synchronized (expandingLock) {
 				for (; position <= index && position < expanded.length; position++) {
-					expanded[position] = selector.next();
+					if (selector != null) {
+						expanded[position] = selector.next();
+					}
 				}
 				if (position == expanded.length) {
 					selector = null; // for gc
@@ -102,6 +106,7 @@ class LazyWeightedServiceInstanceList extends AbstractList<ServiceInstance> {
 			}
 		}
 
+		@SuppressWarnings("NullAway") // see comment below
 		ServiceInstance next() {
 			if (active.isEmpty()) {
 				Queue<Entry> temp = active;

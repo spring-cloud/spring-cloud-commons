@@ -39,12 +39,12 @@ public interface ServiceInstance {
 	/**
 	 * @return The service ID as registered.
 	 */
-	String getServiceId();
+	@Nullable String getServiceId();
 
 	/**
 	 * @return The hostname of the registered service instance.
 	 */
-	String getHost();
+	@Nullable String getHost();
 
 	/**
 	 * @return The port of the registered service instance.
@@ -64,7 +64,7 @@ public interface ServiceInstance {
 	/**
 	 * @return The key / value pair metadata associated with the service instance.
 	 */
-	Map<String, String> getMetadata();
+	@Nullable Map<String, String> getMetadata();
 
 	/**
 	 * @return The scheme of the service instance.
