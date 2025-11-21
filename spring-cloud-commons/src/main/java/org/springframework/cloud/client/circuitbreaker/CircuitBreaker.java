@@ -19,6 +19,8 @@ package org.springframework.cloud.client.circuitbreaker;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Spring Cloud circuit breaker.
  *
@@ -32,6 +34,6 @@ public interface CircuitBreaker {
 		});
 	}
 
-	<T> T run(Supplier<T> toRun, Function<Throwable, T> fallback);
+	<T> T run(Supplier<T> toRun, Function<@Nullable Throwable, T> fallback);
 
 }
