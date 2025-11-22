@@ -285,7 +285,7 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 
 		@Override
 		public URI reconstructURI(ServiceInstance instance, URI original) {
-			return DefaultServiceInstance.getUri(instance);
+			return ServiceInstance.getUri(instance);
 		}
 
 	}
