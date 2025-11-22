@@ -35,9 +35,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private @Nullable String instanceId;
 
-	private @Nullable String serviceId;
+	private String serviceId;
 
-	private @Nullable String host;
+	private String host;
 
 	private int port;
 
@@ -55,8 +55,8 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param secure indicates whether or not the connection needs to be secure.
 	 * @param metadata a map containing metadata.
 	 */
-	public DefaultServiceInstance(@Nullable String instanceId, @Nullable String serviceId, @Nullable String host,
-			int port, boolean secure, @Nullable Map<String, String> metadata) {
+	public DefaultServiceInstance(@Nullable String instanceId, String serviceId, String host, int port, boolean secure,
+			@Nullable Map<String, String> metadata) {
 		this.instanceId = instanceId;
 		this.serviceId = serviceId;
 		this.host = host;
@@ -74,12 +74,9 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param port the port on which the service is running.
 	 * @param secure indicates whether or not the connection needs to be secure.
 	 */
-	public DefaultServiceInstance(@Nullable String instanceId, @Nullable String serviceId, @Nullable String host,
-			int port, boolean secure) {
+	public DefaultServiceInstance(@Nullable String instanceId, String serviceId, String host, int port,
+			boolean secure) {
 		this(instanceId, serviceId, host, port, secure, new LinkedHashMap<>());
-	}
-
-	public DefaultServiceInstance() {
 	}
 
 	/**
@@ -100,7 +97,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	@Override
 	public URI getUri() {
-		return getUri(this);
+		return ServiceInstance.getUri(this);
 	}
 
 	@Override
@@ -114,12 +111,12 @@ public class DefaultServiceInstance implements ServiceInstance {
 	}
 
 	@Override
-	public @Nullable String getServiceId() {
+	public String getServiceId() {
 		return serviceId;
 	}
 
 	@Override
-	public @Nullable String getHost() {
+	public String getHost() {
 		return host;
 	}
 

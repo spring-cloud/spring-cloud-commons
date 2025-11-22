@@ -30,9 +30,9 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.simple.InstanceProperties;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
@@ -76,10 +76,10 @@ abstract class AbstractLoadBalancerExchangeFilterFunctionIntegrationTests {
 
 	@BeforeEach
 	protected void setUp() {
-		DefaultServiceInstance instance = new DefaultServiceInstance();
+		InstanceProperties instance = new InstanceProperties();
 		instance.setServiceId("testservice");
 		instance.setUri(URI.create("http://localhost:" + port));
-		DefaultServiceInstance instanceWithNoLifecycleProcessors = new DefaultServiceInstance();
+		InstanceProperties instanceWithNoLifecycleProcessors = new InstanceProperties();
 		instanceWithNoLifecycleProcessors.setServiceId("serviceWithNoLifecycleProcessors");
 		instanceWithNoLifecycleProcessors.setUri(URI.create("http://localhost:" + port));
 		properties.getInstances().put("testservice", Collections.singletonList(instance));

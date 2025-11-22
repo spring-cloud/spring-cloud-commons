@@ -20,6 +20,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.client.discovery.simple.InstanceProperties;
 
 /**
  * A {@link ReactiveDiscoveryClient} that will use the properties file as a source of
@@ -42,7 +43,10 @@ public class SimpleReactiveDiscoveryClient implements ReactiveDiscoveryClient {
 
 	@Override
 	public Flux<ServiceInstance> getInstances(String serviceId) {
-		return this.simpleDiscoveryProperties.getInstances(serviceId);
+		return Flux.fromIterable(this.simpleDiscoveryProperties.getInstances(serviceId)
+			.stream()
+			.map(InstanceProperties::toServiceInstance)
+			.toList());
 	}
 
 	@Override
