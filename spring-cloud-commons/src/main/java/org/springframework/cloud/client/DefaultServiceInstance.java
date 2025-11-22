@@ -81,7 +81,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	@Override
 	public URI getUri() {
-		return ServiceInstance.getUri(this);
+		return ServiceInstance.createUri(this);
 	}
 
 	@Override
