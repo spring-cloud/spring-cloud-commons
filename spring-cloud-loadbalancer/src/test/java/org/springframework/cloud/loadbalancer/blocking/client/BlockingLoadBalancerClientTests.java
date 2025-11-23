@@ -32,9 +32,9 @@ import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.simple.InstanceProperties;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
@@ -80,8 +80,12 @@ class BlockingLoadBalancerClientTests {
 
 	@BeforeEach
 	void setUp() {
-		DefaultServiceInstance serviceInstance = new DefaultServiceInstance(null, null, "test.example", 9999, true);
+		InstanceProperties serviceInstance = new InstanceProperties();
+		serviceInstance.setHost("test.example");
+		serviceInstance.setPort(9999);
+		serviceInstance.setSecure(true);
 		properties.getInstances().put("myservice", Collections.singletonList(serviceInstance));
+		properties.afterPropertiesSet();
 	}
 
 	@Test

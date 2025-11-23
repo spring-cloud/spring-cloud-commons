@@ -207,7 +207,8 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 	@Test
 	void shouldNotCreateNullTagsWhenNullDataObjects() {
 		Request<Object> lbRequest = new DefaultRequest<>(new DefaultRequestContext());
-		Response<ServiceInstance> lbResponse = new DefaultResponse(new DefaultServiceInstance());
+		Response<ServiceInstance> lbResponse = new DefaultResponse(
+				new DefaultServiceInstance(null, "serviceId", "host", 0, false));
 		statsLifecycle.onStartRequest(lbRequest, lbResponse);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
 
@@ -219,8 +220,8 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		assertThat(meterRegistry.get("loadbalancer.requests.success").timers()).hasSize(1);
 		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().count()).isEqualTo(1);
 		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId().getTags()).contains(
-				Tag.of("method", UNKNOWN), Tag.of("outcome", UNKNOWN), Tag.of("serviceId", UNKNOWN),
-				Tag.of("serviceInstance.host", UNKNOWN), Tag.of("serviceInstance.instanceId", UNKNOWN),
+				Tag.of("method", UNKNOWN), Tag.of("outcome", UNKNOWN), Tag.of("serviceId", "serviceId"),
+				Tag.of("serviceInstance.host", "host"), Tag.of("serviceInstance.instanceId", UNKNOWN),
 				Tag.of("serviceInstance.port", "0"), Tag.of("status", UNKNOWN), Tag.of("uri", UNKNOWN));
 	}
 
@@ -228,7 +229,8 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 	void shouldNotCreateNullTagsWhenEmptyDataObjects() {
 		RequestData requestData = new RequestData(null, null, null, null, null);
 		Request<Object> lbRequest = new DefaultRequest<>(new RequestDataContext());
-		Response<ServiceInstance> lbResponse = new DefaultResponse(new DefaultServiceInstance());
+		Response<ServiceInstance> lbResponse = new DefaultResponse(
+				new DefaultServiceInstance(null, "serviceId", "host", 0, false));
 		ResponseData responseData = new ResponseData(null, null, null, requestData);
 		statsLifecycle.onStartRequest(lbRequest, lbResponse);
 		assertThat(meterRegistry.get("loadbalancer.requests.active").gauge().value()).isEqualTo(1);
@@ -241,8 +243,8 @@ class MicrometerStatsLoadBalancerLifecycleTests {
 		assertThat(meterRegistry.get("loadbalancer.requests.success").timers()).hasSize(1);
 		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().count()).isEqualTo(1);
 		assertThat(meterRegistry.get("loadbalancer.requests.success").timer().getId().getTags()).contains(
-				Tag.of("method", UNKNOWN), Tag.of("outcome", "SUCCESS"), Tag.of("serviceId", UNKNOWN),
-				Tag.of("serviceInstance.host", UNKNOWN), Tag.of("serviceInstance.instanceId", UNKNOWN),
+				Tag.of("method", UNKNOWN), Tag.of("outcome", "SUCCESS"), Tag.of("serviceId", "serviceId"),
+				Tag.of("serviceInstance.host", "host"), Tag.of("serviceInstance.instanceId", UNKNOWN),
 				Tag.of("serviceInstance.port", "0"), Tag.of("status", "200"), Tag.of("uri", UNKNOWN));
 	}
 

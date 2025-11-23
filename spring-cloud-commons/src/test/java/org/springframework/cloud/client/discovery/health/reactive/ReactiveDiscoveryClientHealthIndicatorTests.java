@@ -156,7 +156,7 @@ class ReactiveDiscoveryClientHealthIndicatorTests {
 
 		@Override
 		public Flux<ServiceInstance> getInstances(String serviceId) {
-			return Flux.just(new DefaultServiceInstance());
+			return Flux.just(new DefaultServiceInstance(null, serviceId, serviceId + "host", 80, false));
 		}
 
 		@Override

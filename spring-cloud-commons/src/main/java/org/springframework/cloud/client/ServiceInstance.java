@@ -39,12 +39,12 @@ public interface ServiceInstance {
 	/**
 	 * @return The service ID as registered.
 	 */
-	@Nullable String getServiceId();
+	String getServiceId();
 
 	/**
 	 * @return The hostname of the registered service instance.
 	 */
-	@Nullable String getHost();
+	String getHost();
 
 	/**
 	 * @return The port of the registered service instance.
@@ -71,6 +71,22 @@ public interface ServiceInstance {
 	 */
 	default @Nullable String getScheme() {
 		return null;
+	}
+
+	/**
+	 * Creates a URI from the given ServiceInstance's host:port.
+	 * @param instance the ServiceInstance.
+	 * @return URI of the form (secure)?https:http + "host:port". Scheme port default used
+	 * if port not set.
+	 */
+	static URI createUri(ServiceInstance instance) {
+		String scheme = (instance.isSecure()) ? "https" : "http";
+		int port = instance.getPort();
+		if (port <= 0) {
+			port = (instance.isSecure()) ? 443 : 80;
+		}
+		String uri = String.format("%s://%s:%s", scheme, instance.getHost(), port);
+		return URI.create(uri);
 	}
 
 }
