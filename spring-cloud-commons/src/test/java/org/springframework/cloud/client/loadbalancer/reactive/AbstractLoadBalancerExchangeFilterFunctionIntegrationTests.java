@@ -47,14 +47,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * Base class for {@link LoadBalancedExchangeFilterFunction} integration tests.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Haotian Zhang
  */
 @SuppressWarnings("DataFlowIssue")
 abstract class AbstractLoadBalancerExchangeFilterFunctionIntegrationTests {
