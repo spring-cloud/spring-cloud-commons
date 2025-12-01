@@ -118,8 +118,14 @@ public class LoadBalancerAutoConfiguration {
 
 		@Bean
 		public LoadBalancerInterceptor loadBalancerInterceptor(LoadBalancerClient loadBalancerClient,
-				LoadBalancerRequestFactory requestFactory) {
-			return new LoadBalancerInterceptor(loadBalancerClient, requestFactory);
+				LoadBalancerRequestFactory requestFactory, ServiceAddressResolver serviceAddressResolver) {
+			return new LoadBalancerInterceptor(loadBalancerClient, requestFactory, serviceAddressResolver);
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public ServiceAddressResolver serviceAddressResolver() {
+			return new ServiceAddressResolver();
 		}
 
 		@Bean
@@ -181,9 +187,15 @@ public class LoadBalancerAutoConfiguration {
 		@ConditionalOnMissingBean
 		public RetryLoadBalancerInterceptor loadBalancerInterceptor(LoadBalancerClient loadBalancerClient,
 				LoadBalancerRequestFactory requestFactory, LoadBalancedRetryFactory loadBalancedRetryFactory,
-				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory) {
+				ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerFactory, ServiceAddressResolver serviceAddressResolver) {
 			return new RetryLoadBalancerInterceptor(loadBalancerClient, requestFactory, loadBalancedRetryFactory,
-					loadBalancerFactory);
+					loadBalancerFactory, serviceAddressResolver);
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		public ServiceAddressResolver serviceAddressResolver() {
+			return new ServiceAddressResolver();
 		}
 
 		@Bean
