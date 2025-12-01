@@ -597,7 +597,7 @@ Since `4.0.0`, Spring Cloud LoadBalancer supports Spring AOT transformations and
 Since `5.0.0`, Spring Cloud LoadBalancer supports https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-service-client[Spring HTTP Service Clients] AutoConfiguration through the `LoadBalancerRestClientHttpServiceGroupConfigurer` and `LoadBalancerWebClientHttpServiceGroupConfigurer`.
 
 For each HTTP Service Client group, if the group `baseUrl` (defined under the
-`spring.http.client.service.group.[groupName].base-url` property) is `null`, a `serviceId`-based URL for load-balancing is set up as the `baseUrl`, with `serviceId` resolved from the HTTP Service Client `groupName`.
+`spring.http.serviceclient.[groupName].base-url` property) is `null`, a `serviceId`-based URL for load-balancing is set up as the `baseUrl`, with `serviceId` resolved from the HTTP Service Client `groupName`.
 
 If the group `baseUrl` is `null` or its scheme is set to `lb`, a
 `DeferringLoadBalancerInterceptor` instance is picked from the application context for blocking scenarios, and a `DeferringLoadBalancerExchangeFilterFunction` instance for reactive scenarios, and is added to the group's `RestClient.Builder` or `WebClient.Builder` if available, allowing for the requests to be load-balanced.
@@ -617,11 +617,11 @@ public class HttpVerificationClientApplication {
 }
 ----
 
-If the `spring.http.client.service.group.verificationClient.base-url` property is not set, it will be automatically set to `http://verificationClient`.
+If the `spring.http.serviceclient.verificationClient.base-url` property is not set, it will be automatically set to `http://verificationClient`.
 The default scheme (`http`) is used initially; however, if a secure `ServiceInstance` is selected through load-balancing, it will be changed to `https`.
 
-If the `spring.http.client.service.group.verificationClient.base-url` property is set to a URL that has the `lb` scheme, (for example, `lb://verificationClient/path`), it will be used with `http` being initially set as the default scheme.
+If the `spring.http.serviceclient.verificationClient.base-url` property is set to a URL that has the `lb` scheme, (for example, `lb://verificationClient/path`), it will be used with `http` being initially set as the default scheme.
 If a secure `ServiceInstance` is selected through load-balancing, the scheme will be changed to `https`.
 In both of these cases, either a `DeferringLoadBalancerInterceptor` or `DeferringLoadBalancerExchangeFilterFunction` will be added to the group's client builder, enabling the requests to be load-balanced.
 
-If the `spring.http.client.service.group.verificationClient.base-url` property is set to a URL that does not have the scheme set to `lb`, (for example, `lb://verificationClient/path`), no load-balancer integration will be applied.
+If the `spring.http.serviceclient.verificationClient.base-url` property is set to a URL that does not have the scheme set to `lb`, (for example, `http://verificationClient/path`), no load-balancer integration will be applied.
