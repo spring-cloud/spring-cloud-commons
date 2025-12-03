@@ -25,6 +25,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
+import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.commons.util.IdUtils;
 import org.springframework.core.env.PropertyResolver;
@@ -54,7 +55,12 @@ public class SubsetServiceInstanceListSupplier extends DelegatingServiceInstance
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		return delegate.get().map(instances -> {
+		return get(null);
+	}
+
+	@Override
+	public Flux<List<ServiceInstance>> get(Request request) {
+		return delegate.get(request).map(instances -> {
 			if (instances.size() <= size) {
 				return instances;
 			}
