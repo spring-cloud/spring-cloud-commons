@@ -59,7 +59,6 @@ public class LifecycleMvcAutoConfigurationTests {
 	}
 
 	@Test
-	@Disabled("TODO: https://github.com/spring-cloud/spring-cloud-commons/issues/1362")
 	public void environmentWebEndpointExtensionEnabled() {
 		beanCreated("writableEnvironmentEndpointWebExtension", "management.endpoint.env.enabled=true",
 				"management.endpoint.env.post.enabled=true", "management.endpoints.web.exposure.include=env");
@@ -79,7 +78,7 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	@Test
 	public void restartEndpointEnabled() {
-		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class, RestartEndpoint::restart,
+		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class, RestartEndpoint::getTimeout,
 				"management.endpoint.restart.enabled=true", "management.endpoints.web.exposure.include=restart");
 	}
 
