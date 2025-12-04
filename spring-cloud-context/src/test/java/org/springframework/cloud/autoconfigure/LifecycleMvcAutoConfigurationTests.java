@@ -77,7 +77,7 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	@Test
 	public void restartEndpointEnabled() {
-		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class, RestartEndpoint::restart,
+		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class, RestartEndpoint::getTimeout,
 				"management.endpoint.restart.enabled=true", "management.endpoints.web.exposure.include=restart");
 	}
 
