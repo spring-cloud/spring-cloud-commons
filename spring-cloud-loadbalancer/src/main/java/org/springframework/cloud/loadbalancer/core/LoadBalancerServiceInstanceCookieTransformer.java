@@ -32,7 +32,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.util.StringUtils;
 
 /**
- * A {@link LoadBalancerRequestTransformer} that allows passing the {@code} instanceId) of
+ * A {@link LoadBalancerRequestTransformer} that allows passing the {@code instanceId}) of
  * the {@link ServiceInstance} selected by the {@link LoadBalancerClient} in a cookie.
  *
  * @author Olga Maciaszek-Sharma
