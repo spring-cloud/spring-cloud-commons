@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,22 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
+import org.jspecify.annotations.Nullable;
 import reactor.util.retry.RetryBackoffSpec;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Name;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.commons.util.IdUtils;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.web.client.RestTemplate;
 
@@ -105,6 +109,11 @@ public class LoadBalancerProperties {
 	 */
 	private Stats stats = new Stats();
 
+	/**
+	 * Properties for API version-based load-balancing.
+	 */
+	private ApiVersion apiVersion = new ApiVersion();
+
 	public HealthCheck getHealthCheck() {
 		return healthCheck;
 	}
@@ -177,12 +186,25 @@ public class LoadBalancerProperties {
 		this.stats = stats;
 	}
 
+	public ApiVersion getApiVersion() {
+		return apiVersion;
+	}
+
+	public void setApiVersion(ApiVersion apiVersion) {
+		this.apiVersion = apiVersion;
+	}
+
 	public static class StickySession {
+
+		/**
+		 * The default name of the cookie holding the preferred instance id.
+		 */
+		public static final String DEFAULT_INSTANCE_ID_COOKIE_NAME = "sc-lb-instance-id";
 
 		/**
 		 * The name of the cookie holding the preferred instance id.
 		 */
-		private String instanceIdCookieName = "sc-lb-instance-id";
+		private String instanceIdCookieName = DEFAULT_INSTANCE_ID_COOKIE_NAME;
 
 		/**
 		 * Indicates whether a cookie with the newly selected instance should be added by
@@ -253,7 +275,7 @@ public class LoadBalancerProperties {
 		 * Port at which the health-check request should be made. If none is set, the port
 		 * under which the requested service is available at the service instance.
 		 */
-		private Integer port;
+		private @Nullable Integer port;
 
 		/**
 		 * Indicates whether the instances should be refetched by the
@@ -326,11 +348,11 @@ public class LoadBalancerProperties {
 			this.interval = interval;
 		}
 
-		public Integer getPort() {
+		public @Nullable Integer getPort() {
 			return port;
 		}
 
-		public void setPort(Integer port) {
+		public void setPort(@Nullable Integer port) {
 			this.port = port;
 		}
 
@@ -567,6 +589,103 @@ public class LoadBalancerProperties {
 
 		public void setIncludePath(boolean includePath) {
 			this.includePath = includePath;
+		}
+
+	}
+
+	public static class ApiVersion {
+
+		/**
+		 * Indicates whether the API version is required with each request.
+		 */
+		private boolean required = false;
+
+		/**
+		 * Sets default version that should be used for each request.
+		 */
+		@Name("default")
+		private @Nullable String defaultVersion;
+
+		/**
+		 * Uses the HTTP header with the given name to obtain the version.
+		 */
+		private @Nullable String header;
+
+		/**
+		 * Uses the query parameter with the given name to obtain the version.
+		 */
+		private @Nullable String queryParameter;
+
+		/**
+		 * Uses the path segment at the given index to obtain the version.
+		 */
+		private @Nullable Integer pathSegment;
+
+		/**
+		 * Uses the media type parameter with the given name to obtain the version.
+		 */
+		private Map<MediaType, String> mediaTypeParameters = new LinkedHashMap<>();
+
+		/**
+		 * Indicates whether all the available instances should be returned if no
+		 * instances for the specified version are available.
+		 */
+		private boolean fallbackToAvailableInstances = false;
+
+		public boolean getRequired() {
+			return required;
+		}
+
+		public void setRequired(boolean required) {
+			this.required = required;
+		}
+
+		public @Nullable String getDefaultVersion() {
+			return defaultVersion;
+		}
+
+		public void setDefaultVersion(@Nullable String defaultVersion) {
+			this.defaultVersion = defaultVersion;
+		}
+
+		public @Nullable String getHeader() {
+			return header;
+		}
+
+		public void setHeader(@Nullable String header) {
+			this.header = header;
+		}
+
+		public @Nullable String getQueryParameter() {
+			return queryParameter;
+		}
+
+		public void setQueryParameter(@Nullable String queryParameter) {
+			this.queryParameter = queryParameter;
+		}
+
+		public @Nullable Integer getPathSegment() {
+			return pathSegment;
+		}
+
+		public void setPathSegment(@Nullable Integer pathSegment) {
+			this.pathSegment = pathSegment;
+		}
+
+		public Map<MediaType, String> getMediaTypeParameters() {
+			return mediaTypeParameters;
+		}
+
+		public void setMediaTypeParameters(Map<MediaType, String> mediaTypeParameters) {
+			this.mediaTypeParameters = mediaTypeParameters;
+		}
+
+		public boolean isFallbackToAvailableInstances() {
+			return fallbackToAvailableInstances;
+		}
+
+		public void setFallbackToAvailableInstances(boolean fallbackToAvailableInstances) {
+			this.fallbackToAvailableInstances = fallbackToAvailableInstances;
 		}
 
 	}

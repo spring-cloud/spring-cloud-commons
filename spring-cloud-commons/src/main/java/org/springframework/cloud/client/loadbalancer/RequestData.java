@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpCookie;
@@ -46,14 +48,14 @@ public class RequestData {
 
 	private final URI url;
 
-	private final HttpHeaders headers;
+	private final @Nullable HttpHeaders headers;
 
 	private final MultiValueMap<String, String> cookies;
 
 	private final Map<String, Object> attributes;
 
-	public RequestData(HttpMethod httpMethod, URI url, HttpHeaders headers, MultiValueMap<String, String> cookies,
-			Map<String, Object> attributes) {
+	public RequestData(HttpMethod httpMethod, URI url, @Nullable HttpHeaders headers,
+			MultiValueMap<String, String> cookies, Map<String, Object> attributes) {
 		this.httpMethod = httpMethod;
 		this.url = url;
 		this.headers = headers;
@@ -115,11 +117,11 @@ public class RequestData {
 		return url;
 	}
 
-	public HttpHeaders getHeaders() {
+	public @Nullable HttpHeaders getHeaders() {
 		return headers;
 	}
 
-	public MultiValueMap<String, String> getCookies() {
+	public @Nullable MultiValueMap<String, String> getCookies() {
 		return cookies;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesBindin
 import org.springframework.cloud.context.properties.ConfigurationPropertiesBeans;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,14 +34,12 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(ConfigurationPropertiesBindingPostProcessor.class)
-public class ConfigurationPropertiesRebinderAutoConfiguration
-		implements ApplicationContextAware, SmartInitializingSingleton {
+public class ConfigurationPropertiesRebinderAutoConfiguration implements SmartInitializingSingleton {
 
-	private ApplicationContext context;
+	private final ApplicationContext context;
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.context = applicationContext;
+	public ConfigurationPropertiesRebinderAutoConfiguration(ApplicationContext context) {
+		this.context = context;
 	}
 
 	@Bean

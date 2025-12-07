@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.cloud.client.loadbalancer;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.annotation.Order;
@@ -34,6 +36,6 @@ public interface LoadBalancerRequestTransformer {
 	 */
 	int DEFAULT_ORDER = 0;
 
-	HttpRequest transformRequest(HttpRequest request, ServiceInstance instance);
+	HttpRequest transformRequest(HttpRequest request, @Nullable ServiceInstance instance);
 
 }

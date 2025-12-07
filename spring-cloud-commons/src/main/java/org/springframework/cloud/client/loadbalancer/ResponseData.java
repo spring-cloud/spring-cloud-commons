@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -40,7 +42,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
  */
 public class ResponseData {
 
-	private final HttpStatusCode httpStatus;
+	private final @Nullable HttpStatusCode httpStatus;
 
 	private final HttpHeaders headers;
 
@@ -48,8 +50,8 @@ public class ResponseData {
 
 	private final RequestData requestData;
 
-	public ResponseData(HttpStatusCode httpStatus, HttpHeaders headers, MultiValueMap<String, ResponseCookie> cookies,
-			RequestData requestData) {
+	public ResponseData(@Nullable HttpStatusCode httpStatus, HttpHeaders headers,
+			MultiValueMap<String, ResponseCookie> cookies, RequestData requestData) {
 		this.httpStatus = httpStatus;
 		this.headers = headers;
 		this.cookies = cookies;
@@ -69,7 +71,7 @@ public class ResponseData {
 				buildCookiesFromHeaders(clientHttpResponse.getHeaders()), requestData);
 	}
 
-	public HttpStatusCode getHttpStatus() {
+	public @Nullable HttpStatusCode getHttpStatus() {
 		return httpStatus;
 	}
 

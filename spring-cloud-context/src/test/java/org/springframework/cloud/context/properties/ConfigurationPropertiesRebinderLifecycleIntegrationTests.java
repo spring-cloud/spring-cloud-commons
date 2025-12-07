@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.cloud.autoconfigure.ConfigurationPropertiesRebinderAutoConfiguration;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderLifecycleIntegrationTests.TestConfiguration;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -79,6 +80,10 @@ public class ConfigurationPropertiesRebinderLifecycleIntegrationTests {
 
 		@Configuration(proxyBeanMethods = false)
 		protected static class RebinderConfiguration extends ConfigurationPropertiesRebinderAutoConfiguration {
+
+			public RebinderConfiguration(ApplicationContext context) {
+				super(context);
+			}
 
 		}
 

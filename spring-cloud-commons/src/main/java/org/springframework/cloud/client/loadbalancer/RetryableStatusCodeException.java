@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.cloud.client.loadbalancer;
 import java.io.IOException;
 import java.net.URI;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Exception to be thrown when the status code is deemed to be retryable.
  *
@@ -30,9 +32,9 @@ public class RetryableStatusCodeException extends IOException {
 
 	private final Object response;
 
-	private final URI uri;
+	private final @Nullable URI uri;
 
-	public RetryableStatusCodeException(String serviceId, int statusCode, Object response, URI uri) {
+	public RetryableStatusCodeException(String serviceId, int statusCode, Object response, @Nullable URI uri) {
 		super(String.format(MESSAGE, serviceId, statusCode));
 		this.response = response;
 		this.uri = uri;
@@ -42,7 +44,7 @@ public class RetryableStatusCodeException extends IOException {
 		return this.response;
 	}
 
-	public URI getUri() {
+	public @Nullable URI getUri() {
 		return this.uri;
 	}
 

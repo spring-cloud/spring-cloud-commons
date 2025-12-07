@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -43,10 +42,22 @@ public class SimpleDiscoveryClientTests {
 	public void setUp() {
 		SimpleDiscoveryProperties simpleDiscoveryProperties = new SimpleDiscoveryProperties();
 
-		Map<String, List<DefaultServiceInstance>> map = new HashMap<>();
-		DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null, "host1", 8080, false);
-		DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null, "host2", 0, true);
-		DefaultServiceInstance service1Inst3 = new DefaultServiceInstance(null, null, "host3", 0, false);
+		Map<String, List<InstanceProperties>> map = new HashMap<>();
+		InstanceProperties service1Inst1 = new InstanceProperties();
+		service1Inst1.setServiceId("service1");
+		service1Inst1.setHost("host1");
+		service1Inst1.setPort(8080);
+		service1Inst1.setSecure(false);
+		InstanceProperties service1Inst2 = new InstanceProperties();
+		service1Inst2.setServiceId("service1");
+		service1Inst2.setHost("host2");
+		service1Inst2.setPort(0);
+		service1Inst2.setSecure(true);
+		InstanceProperties service1Inst3 = new InstanceProperties();
+		service1Inst3.setServiceId("service1");
+		service1Inst3.setHost("host3");
+		service1Inst3.setPort(0);
+		service1Inst3.setSecure(false);
 		map.put("service1", Arrays.asList(service1Inst1, service1Inst2, service1Inst3));
 		simpleDiscoveryProperties.setInstances(map);
 		simpleDiscoveryProperties.afterPropertiesSet();

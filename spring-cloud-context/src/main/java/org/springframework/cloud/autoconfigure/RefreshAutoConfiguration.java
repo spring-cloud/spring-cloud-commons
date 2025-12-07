@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 
 package org.springframework.cloud.autoconfigure;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
@@ -133,7 +136,7 @@ public class RefreshAutoConfiguration {
 		 * property sources are retained. This property allows property sources, such as
 		 * property sources created by EnvironmentPostProcessors to be retained as well.
 		 */
-		private List<String> additionalPropertySourcesToRetain;
+		private List<String> additionalPropertySourcesToRetain = new ArrayList<>();
 
 		public List<String> getAdditionalPropertySourcesToRetain() {
 			return this.additionalPropertySourcesToRetain;
@@ -157,7 +160,7 @@ public class RefreshAutoConfiguration {
 	protected static class RefreshScopeBeanDefinitionEnhancer
 			implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
 
-		private Environment environment;
+		private @Nullable Environment environment;
 
 		private boolean bound = false;
 

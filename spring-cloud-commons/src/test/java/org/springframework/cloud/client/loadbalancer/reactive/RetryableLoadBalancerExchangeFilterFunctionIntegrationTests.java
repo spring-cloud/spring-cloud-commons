@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.client.discovery.simple.InstanceProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -76,10 +76,10 @@ class RetryableLoadBalancerExchangeFilterFunctionIntegrationTests
 	void correctResponseReturnedAfterRetryingOnNextServiceInstanceWithBackoff() {
 		loadBalancerProperties.getRetry().getBackoff().setEnabled(true);
 		loadBalancerProperties.getRetry().setMaxRetriesOnSameServiceInstance(1);
-		DefaultServiceInstance goodRetryTestInstance = new DefaultServiceInstance();
+		InstanceProperties goodRetryTestInstance = new InstanceProperties();
 		goodRetryTestInstance.setServiceId("retrytest");
 		goodRetryTestInstance.setUri(URI.create("http://localhost:" + port));
-		DefaultServiceInstance badRetryTestInstance = new DefaultServiceInstance();
+		InstanceProperties badRetryTestInstance = new InstanceProperties();
 		badRetryTestInstance.setServiceId("retrytest");
 		badRetryTestInstance.setUri(URI.create("http://localhost:" + 8080));
 		properties.getInstances().put("retrytest", Arrays.asList(badRetryTestInstance, goodRetryTestInstance));

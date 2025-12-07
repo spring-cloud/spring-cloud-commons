@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package org.springframework.cloud.client;
 import java.net.URI;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Represents an instance of a service in a discovery system.
  *
@@ -30,7 +32,7 @@ public interface ServiceInstance {
 	/**
 	 * @return The unique instance ID as registered.
 	 */
-	default String getInstanceId() {
+	default @Nullable String getInstanceId() {
 		return null;
 	}
 
@@ -62,13 +64,29 @@ public interface ServiceInstance {
 	/**
 	 * @return The key / value pair metadata associated with the service instance.
 	 */
-	Map<String, String> getMetadata();
+	@Nullable Map<String, String> getMetadata();
 
 	/**
 	 * @return The scheme of the service instance.
 	 */
-	default String getScheme() {
+	default @Nullable String getScheme() {
 		return null;
+	}
+
+	/**
+	 * Creates a URI from the given ServiceInstance's host:port.
+	 * @param instance the ServiceInstance.
+	 * @return URI of the form (secure)?https:http + "host:port". Scheme port default used
+	 * if port not set.
+	 */
+	static URI createUri(ServiceInstance instance) {
+		String scheme = (instance.isSecure()) ? "https" : "http";
+		int port = instance.getPort();
+		if (port <= 0) {
+			port = (instance.isSecure()) ? 443 : 80;
+		}
+		String uri = String.format("%s://%s:%s", scheme, instance.getHost(), port);
+		return URI.create(uri);
 	}
 
 }

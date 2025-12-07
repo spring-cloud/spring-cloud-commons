@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Default implementation of {@link ServiceInstance}.
  *
@@ -31,7 +33,7 @@ import java.util.Objects;
  */
 public class DefaultServiceInstance implements ServiceInstance {
 
-	private String instanceId;
+	private @Nullable String instanceId;
 
 	private String serviceId;
 
@@ -43,7 +45,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 
 	private Map<String, String> metadata = new LinkedHashMap<>();
 
-	private URI uri;
+	private @Nullable URI uri;
 
 	/**
 	 * @param instanceId the id of the instance.
@@ -53,14 +55,16 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param secure indicates whether or not the connection needs to be secure.
 	 * @param metadata a map containing metadata.
 	 */
-	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure,
-			Map<String, String> metadata) {
+	public DefaultServiceInstance(@Nullable String instanceId, String serviceId, String host, int port, boolean secure,
+			@Nullable Map<String, String> metadata) {
 		this.instanceId = instanceId;
 		this.serviceId = serviceId;
 		this.host = host;
 		this.port = port;
 		this.secure = secure;
-		this.metadata = metadata;
+		if (metadata != null) {
+			this.metadata = metadata;
+		}
 	}
 
 	/**
@@ -70,32 +74,14 @@ public class DefaultServiceInstance implements ServiceInstance {
 	 * @param port the port on which the service is running.
 	 * @param secure indicates whether or not the connection needs to be secure.
 	 */
-	public DefaultServiceInstance(String instanceId, String serviceId, String host, int port, boolean secure) {
+	public DefaultServiceInstance(@Nullable String instanceId, String serviceId, String host, int port,
+			boolean secure) {
 		this(instanceId, serviceId, host, port, secure, new LinkedHashMap<>());
-	}
-
-	public DefaultServiceInstance() {
-	}
-
-	/**
-	 * Creates a URI from the given ServiceInstance's host:port.
-	 * @param instance the ServiceInstance.
-	 * @return URI of the form (secure)?https:http + "host:port". Scheme port default used
-	 * if port not set.
-	 */
-	public static URI getUri(ServiceInstance instance) {
-		String scheme = (instance.isSecure()) ? "https" : "http";
-		int port = instance.getPort();
-		if (port <= 0) {
-			port = (instance.isSecure()) ? 443 : 80;
-		}
-		String uri = String.format("%s://%s:%s", scheme, instance.getHost(), port);
-		return URI.create(uri);
 	}
 
 	@Override
 	public URI getUri() {
-		return getUri(this);
+		return ServiceInstance.createUri(this);
 	}
 
 	@Override
@@ -104,7 +90,7 @@ public class DefaultServiceInstance implements ServiceInstance {
 	}
 
 	@Override
-	public String getInstanceId() {
+	public @Nullable String getInstanceId() {
 		return instanceId;
 	}
 

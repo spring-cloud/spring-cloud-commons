@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import java.util.concurrent.ConcurrentMap;
 import com.stoyanr.evictor.ConcurrentMapWithTimedEviction;
 import com.stoyanr.evictor.map.ConcurrentHashMapWithTimedEviction;
 import com.stoyanr.evictor.scheduler.DelayedTaskEvictionScheduler;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.AbstractValueAdaptingCache;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -107,8 +107,7 @@ public class DefaultLoadBalancerCache extends AbstractValueAdaptingCache {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	@Nullable
-	public <T> T get(Object key, Callable<T> valueLoader) {
+	public @Nullable <T> T get(Object key, Callable<T> valueLoader) {
 		return (T) fromStoreValue(cache.computeIfAbsent(key, k -> {
 			try {
 				return toStoreValue(valueLoader.call());
@@ -124,14 +123,12 @@ public class DefaultLoadBalancerCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
-	@Nullable
-	public ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
+	public @Nullable ValueWrapper putIfAbsent(Object key, @Nullable Object value) {
 		Object existing = cache.putIfAbsent(key, toStoreValue(value), evictMs);
 		return toValueWrapper(existing);
 	}
 
-	@Nullable
-	public ValueWrapper putIfAbsent(Object key, @Nullable Object value, long evictMs) {
+	public @Nullable ValueWrapper putIfAbsent(Object key, @Nullable Object value, long evictMs) {
 		Object existing = cache.putIfAbsent(key, toStoreValue(value), evictMs);
 		return toValueWrapper(existing);
 	}

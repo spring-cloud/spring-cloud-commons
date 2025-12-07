@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,14 +40,15 @@ import static org.mockito.Mockito.when;
  */
 class RandomLoadBalancerTests {
 
-	private final ServiceInstance serviceInstance = new DefaultServiceInstance();
+	private final ServiceInstance serviceInstance = new DefaultServiceInstance(null, "service", "host", 0, false);
 
 	private RandomLoadBalancer loadBalancer;
 
 	@Test
 	void shouldReturnOneServiceInstance() {
 		DiscoveryClientServiceInstanceListSupplier supplier = mock(DiscoveryClientServiceInstanceListSupplier.class);
-		when(supplier.get(any())).thenReturn(Flux.just(Arrays.asList(serviceInstance, new DefaultServiceInstance())));
+		when(supplier.get(any())).thenReturn(Flux
+			.just(Arrays.asList(serviceInstance, new DefaultServiceInstance(null, "service", "host2", 0, false))));
 		loadBalancer = new RandomLoadBalancer(new SimpleObjectProvider<>(supplier), "test");
 
 		Response<ServiceInstance> response = loadBalancer.choose().block();

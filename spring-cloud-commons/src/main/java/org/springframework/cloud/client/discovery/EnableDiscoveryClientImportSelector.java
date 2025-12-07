@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,10 @@ public class EnableDiscoveryClientImportSelector extends SpringFactoryImportSele
 		AnnotationAttributes attributes = AnnotationAttributes
 			.fromMap(metadata.getAnnotationAttributes(getAnnotationClass().getName(), true));
 
-		boolean autoRegister = attributes.getBoolean("autoRegister");
+		boolean autoRegister = true;
+		if (attributes != null) {
+			autoRegister = attributes.getBoolean("autoRegister");
+		}
 
 		if (autoRegister) {
 			List<String> importsList = new ArrayList<>(Arrays.asList(imports));

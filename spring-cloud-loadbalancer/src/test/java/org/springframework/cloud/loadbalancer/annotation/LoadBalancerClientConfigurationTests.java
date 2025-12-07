@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceList
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.WeightedServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ZonePreferenceServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.support.RetryTemplate;
@@ -75,17 +76,20 @@ class LoadBalancerClientConfigurationTests {
 
 	@Test
 	void shouldInstantiateDefaultServiceInstanceListSupplierWhenConfigurationsPropertyNotSet() {
-		reactiveDiscoveryClientRunner.run(context -> {
-			ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-			then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
-			then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
-				.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-		});
+		reactiveDiscoveryClientRunner.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice")
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+				then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
+					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	@Test
 	void shouldInstantiateDefaultServiceInstanceListSupplier() {
-		reactiveDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=default")
+		reactiveDiscoveryClientRunner
+			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice",
+					"spring.cloud.loadbalancer.configurations=default")
 			.run(context -> {
 				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 				then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
@@ -96,7 +100,9 @@ class LoadBalancerClientConfigurationTests {
 
 	@Test
 	void shouldInstantiateZonePreferenceServiceInstanceListSupplier() {
-		reactiveDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=zone-preference")
+		reactiveDiscoveryClientRunner
+			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice",
+					"spring.cloud.loadbalancer.configurations=zone-preference")
 			.run(context -> {
 				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 				then(supplier).isInstanceOf(ZonePreferenceServiceInstanceListSupplier.class);
@@ -111,7 +117,8 @@ class LoadBalancerClientConfigurationTests {
 	@Test
 	void shouldInstantiateHealthCheckServiceInstanceListSupplier() {
 		reactiveDiscoveryClientRunner.withUserConfiguration(TestConfig.class)
-			.withPropertyValues("spring.cloud.loadbalancer.configurations=health-check")
+			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice",
+					"spring.cloud.loadbalancer.configurations=health-check")
 			.run(context -> {
 				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 				then(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
@@ -123,7 +130,8 @@ class LoadBalancerClientConfigurationTests {
 	@Test
 	void shouldInstantiateWeightedServiceInstanceListSupplier() {
 		reactiveDiscoveryClientRunner.withUserConfiguration(TestConfig.class)
-			.withPropertyValues("spring.cloud.loadbalancer.configurations=weighted")
+			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice",
+					"spring.cloud.loadbalancer.configurations=weighted")
 			.run(context -> {
 				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 				then(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);
@@ -138,7 +146,8 @@ class LoadBalancerClientConfigurationTests {
 	@Test
 	void shouldInstantiateRequestBasedStickySessionServiceInstanceListSupplierTests() {
 		reactiveDiscoveryClientRunner.withUserConfiguration(TestConfig.class)
-			.withPropertyValues("spring.cloud.loadbalancer.configurations=request-based-sticky-session")
+			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice",
+					"spring.cloud.loadbalancer.configurations=request-based-sticky-session")
 			.run(context -> {
 				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 				then(supplier).isInstanceOf(RequestBasedStickySessionServiceInstanceListSupplier.class);
@@ -152,17 +161,20 @@ class LoadBalancerClientConfigurationTests {
 
 	@Test
 	void shouldInstantiateDefaultBlockingServiceInstanceListSupplierWhenConfigurationsPropertyNotSet() {
-		blockingDiscoveryClientRunner.run(context -> {
-			ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-			then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
-			then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
-				.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-		});
+		blockingDiscoveryClientRunner.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice")
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+				then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
+					.isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	@Test
 	void shouldInstantiateDefaultBlockingServiceInstanceListSupplier() {
-		blockingDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=default")
+		blockingDiscoveryClientRunner
+			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice",
+					"spring.cloud.loadbalancer.configurations=default")
 			.run(context -> {
 				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 				then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
@@ -173,19 +185,23 @@ class LoadBalancerClientConfigurationTests {
 
 	@Test
 	void shouldWrapWithRetryAwareSupplierWhenRetryTemplateOnClasspath() {
-		blockingDiscoveryClientRunnerWithRetry.run(context -> {
-			ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
-			then(supplier).isInstanceOf(RetryAwareServiceInstanceListSupplier.class);
-			then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
-				.isInstanceOf(CachingServiceInstanceListSupplier.class);
-			then(((DelegatingServiceInstanceListSupplier) ((DelegatingServiceInstanceListSupplier) supplier)
-				.getDelegate()).getDelegate()).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
-		});
+		blockingDiscoveryClientRunnerWithRetry
+			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice")
+			.run(context -> {
+				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+				then(supplier).isInstanceOf(RetryAwareServiceInstanceListSupplier.class);
+				then(((DelegatingServiceInstanceListSupplier) supplier).getDelegate())
+					.isInstanceOf(CachingServiceInstanceListSupplier.class);
+				then(((DelegatingServiceInstanceListSupplier) ((DelegatingServiceInstanceListSupplier) supplier)
+					.getDelegate()).getDelegate()).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+			});
 	}
 
 	@Test
 	void shouldNotWrapWithRetryAwareSupplierWhenRetryTemplateOnClasspath() {
-		blockingDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.retry.avoidPreviousInstance=false")
+		blockingDiscoveryClientRunner
+			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice",
+					"spring.cloud.loadbalancer.retry.avoidPreviousInstance=false")
 			.run(context -> {
 				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 				then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
@@ -199,7 +215,8 @@ class LoadBalancerClientConfigurationTests {
 	@MethodSource("blockingConfigurations")
 	void shouldInstantiateBlockingHealthCheckServiceInstanceListSupplier(Class<?> configurationClass) {
 		blockingDiscoveryClientRunner.withUserConfiguration(configurationClass)
-			.withPropertyValues("spring.cloud.loadbalancer.configurations=health-check")
+			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice",
+					"spring.cloud.loadbalancer.configurations=health-check")
 			.run(context -> {
 				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 				then(supplier).isInstanceOf(HealthCheckServiceInstanceListSupplier.class);
@@ -210,7 +227,9 @@ class LoadBalancerClientConfigurationTests {
 
 	@Test
 	void shouldInstantiateBlockingWeightedServiceInstanceListSupplier() {
-		blockingDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=weighted")
+		blockingDiscoveryClientRunner
+			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice",
+					"spring.cloud.loadbalancer.configurations=weighted")
 			.run(context -> {
 				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 				then(supplier).isInstanceOf(WeightedServiceInstanceListSupplier.class);

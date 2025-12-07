@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -667,15 +667,15 @@ public class BootstrapConfigurationTests {
 	}
 
 	private void activeAndIncludeProfileFromBootstrapPropertySourceWithReplacement(String... properties) {
-		PropertySourceConfiguration.MAP.put("spring.profiles.active", "${barreplacement},baz");
+		PropertySourceConfiguration.MAP.put("spring.profiles.active", "before_${barreplacement}_after,baz");
 		PropertySourceConfiguration.MAP.put("spring.profiles.include", "${barreplacement},baz,hello");
 		context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 			.properties(properties)
 			.profiles("foo")
 			.sources(BareConfiguration.class)
 			.run();
-		then(context.getEnvironment().acceptsProfiles("baz", "bar", "hello", "foo")).isTrue();
-		then(context.getEnvironment().getActiveProfiles()).contains("baz", "bar", "foo", "hello");
+		then(context.getEnvironment().acceptsProfiles("baz", "bar", "hello", "foo", "before_bar_after")).isTrue();
+		then(context.getEnvironment().getActiveProfiles()).contains("baz", "bar", "foo", "hello", "before_bar_after");
 	}
 
 	@Test

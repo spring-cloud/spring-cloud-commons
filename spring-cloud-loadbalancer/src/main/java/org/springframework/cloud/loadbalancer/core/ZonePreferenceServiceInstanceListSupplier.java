@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
@@ -39,11 +41,11 @@ import org.springframework.cloud.loadbalancer.config.LoadBalancerZoneConfig;
  */
 public class ZonePreferenceServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier {
 
-	private static final String ZONE = "zone";
+	private static final String ZONE_KEY = "zone";
 
 	private final LoadBalancerZoneConfig zoneConfig;
 
-	private String zone;
+	private @Nullable String zone;
 
 	private boolean callGetWithRequestOnDelegates;
 
@@ -58,8 +60,13 @@ public class ZonePreferenceServiceInstanceListSupplier extends DelegatingService
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		super(delegate);
 		this.zoneConfig = zoneConfig;
-		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
-			.isCallGetWithRequestOnDelegates();
+		LoadBalancerProperties properties = loadBalancerClientFactory.getProperties(getServiceId());
+		if (properties != null) {
+			callGetWithRequestOnDelegates = properties.isCallGetWithRequestOnDelegates();
+		}
+		else {
+			callGetWithRequestOnDelegates = true;
+		}
 	}
 
 	@Override
@@ -87,7 +94,7 @@ public class ZonePreferenceServiceInstanceListSupplier extends DelegatingService
 					filteredInstances.add(serviceInstance);
 				}
 			}
-			if (filteredInstances.size() > 0) {
+			if (!filteredInstances.isEmpty()) {
 				return filteredInstances;
 			}
 		}
@@ -96,10 +103,10 @@ public class ZonePreferenceServiceInstanceListSupplier extends DelegatingService
 		return serviceInstances;
 	}
 
-	private String getZone(ServiceInstance serviceInstance) {
+	private @Nullable String getZone(ServiceInstance serviceInstance) {
 		Map<String, String> metadata = serviceInstance.getMetadata();
 		if (metadata != null) {
-			return metadata.get(ZONE);
+			return metadata.get(ZONE_KEY);
 		}
 		return null;
 	}

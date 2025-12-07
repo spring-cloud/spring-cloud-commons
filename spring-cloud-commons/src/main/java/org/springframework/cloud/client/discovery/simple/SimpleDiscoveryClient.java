@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.cloud.client.discovery.simple;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 
@@ -47,10 +46,9 @@ public class SimpleDiscoveryClient implements DiscoveryClient {
 	@Override
 	public List<ServiceInstance> getInstances(String serviceId) {
 		List<ServiceInstance> serviceInstances = new ArrayList<>();
-		List<DefaultServiceInstance> serviceInstanceForService = this.simpleDiscoveryProperties.getInstances()
-			.get(serviceId);
-		if (serviceInstanceForService != null) {
-			serviceInstances.addAll(serviceInstanceForService);
+		List<InstanceProperties> instanceProperties = this.simpleDiscoveryProperties.getInstances().get(serviceId);
+		if (instanceProperties != null) {
+			instanceProperties.stream().map(InstanceProperties::toServiceInstance).forEach(serviceInstances::add);
 		}
 		return serviceInstances;
 	}

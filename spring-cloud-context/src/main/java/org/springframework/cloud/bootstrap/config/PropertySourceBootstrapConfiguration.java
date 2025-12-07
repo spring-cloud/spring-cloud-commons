@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -314,14 +314,9 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 	}
 
 	private String[] resolvePlaceholdersInProfiles(String profiles, ConfigurableEnvironment environment) {
-		return Arrays.stream(StringUtils.tokenizeToStringArray(profiles, ",")).map(s -> {
-			if (s.startsWith("${") && s.endsWith("}")) {
-				return environment.resolvePlaceholders(s);
-			}
-			else {
-				return s;
-			}
-		}).toArray(String[]::new);
+		return Arrays.stream(StringUtils.tokenizeToStringArray(profiles, ","))
+			.map(environment::resolvePlaceholders)
+			.toArray(String[]::new);
 	}
 
 	/*

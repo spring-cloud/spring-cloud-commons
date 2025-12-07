@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.Banner.Mode;
@@ -118,19 +120,24 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		apply(context, event.getSpringApplication(), environment);
 	}
 
-	private ConfigurableApplicationContext findBootstrapContext(ParentContextApplicationContextInitializer initializer,
-			String configName) {
+	private @Nullable ConfigurableApplicationContext findBootstrapContext(
+			ParentContextApplicationContextInitializer initializer, String configName) {
+		ConfigurableApplicationContext parent = null;
 		Field field = ReflectionUtils.findField(ParentContextApplicationContextInitializer.class, "parent");
-		ReflectionUtils.makeAccessible(field);
-		ConfigurableApplicationContext parent = safeCast(ConfigurableApplicationContext.class,
-				ReflectionUtils.getField(field, initializer));
-		if (parent != null && !configName.equals(parent.getId())) {
-			parent = safeCast(ConfigurableApplicationContext.class, parent.getParent());
+		if (field != null) {
+			ReflectionUtils.makeAccessible(field);
+			Object value = ReflectionUtils.getField(field, initializer);
+			if (value != null) {
+				parent = safeCast(ConfigurableApplicationContext.class, value);
+			}
+			if (parent != null && !configName.equals(parent.getId()) && parent.getParent() != null) {
+				parent = safeCast(ConfigurableApplicationContext.class, parent.getParent());
+			}
 		}
 		return parent;
 	}
 
-	private <T> T safeCast(Class<T> type, Object object) {
+	private <T> @Nullable T safeCast(Class<T> type, Object object) {
 		try {
 			return type.cast(object);
 		}
@@ -177,7 +184,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 			.logStartupInfo(false)
 			.web(WebApplicationType.NONE);
 		final SpringApplication builderApplication = builder.application();
-		if (builderApplication.getMainApplicationClass() == null) {
+		if (builderApplication.getMainApplicationClass() == null && application.getMainApplicationClass() != null) {
 			// gh_425:
 			// SpringApplication cannot deduce the MainApplicationClass here
 			// if it is booted from SpringBootServletInitializer due to the
@@ -225,7 +232,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		String name = DEFAULT_PROPERTIES;
 		if (bootstrap.contains(name)) {
 			PropertySource<?> source = bootstrap.get(name);
-			if (!environment.contains(name)) {
+			if (!environment.contains(name) && source != null) {
 				environment.addLast(source);
 			}
 			else {
@@ -246,6 +253,9 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 
 	private void mergeAdditionalPropertySources(MutablePropertySources environment, MutablePropertySources bootstrap) {
 		PropertySource<?> defaultProperties = environment.get(DEFAULT_PROPERTIES);
+		if (defaultProperties == null) {
+			defaultProperties = new MapPropertySource(DEFAULT_PROPERTIES, new LinkedHashMap<>());
+		}
 		ExtendedDefaultPropertySource result = defaultProperties instanceof ExtendedDefaultPropertySource
 				? (ExtendedDefaultPropertySource) defaultProperties
 				: new ExtendedDefaultPropertySource(DEFAULT_PROPERTIES, defaultProperties);
@@ -456,7 +466,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		}
 
 		@Override
-		public Object getProperty(String name) {
+		public @Nullable Object getProperty(String name) {
 			if (this.sources.containsProperty(name)) {
 				return this.sources.getProperty(name);
 			}
@@ -480,7 +490,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		}
 
 		@Override
-		public Origin getOrigin(String name) {
+		public @Nullable Origin getOrigin(String name) {
 			return this.sources.getOrigin(name);
 		}
 

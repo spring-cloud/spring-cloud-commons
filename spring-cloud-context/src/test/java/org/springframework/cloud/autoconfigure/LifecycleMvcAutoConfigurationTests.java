@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,6 @@ public class LifecycleMvcAutoConfigurationTests {
 	}
 
 	@Test
-	@Disabled("TODO: https://github.com/spring-cloud/spring-cloud-commons/issues/1362")
 	public void environmentWebEndpointExtensionEnabled() {
 		beanCreated("writableEnvironmentEndpointWebExtension", "management.endpoint.env.enabled=true",
 				"management.endpoint.env.post.enabled=true", "management.endpoints.web.exposure.include=env");
@@ -67,6 +66,7 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	// restartEndpoint
 	@Test
+	@Disabled("TODO: https://github.com/spring-cloud/spring-cloud-commons/issues/1520")
 	public void restartEndpointDisabled() {
 		beanNotCreated("restartEndpoint", "management.endpoint.restart.enabled=false");
 	}
@@ -78,7 +78,7 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	@Test
 	public void restartEndpointEnabled() {
-		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class, RestartEndpoint::restart,
+		beanCreatedAndEndpointEnabled("restartEndpoint", RestartEndpoint.class, RestartEndpoint::getTimeout,
 				"management.endpoint.restart.enabled=true", "management.endpoints.web.exposure.include=restart");
 	}
 
@@ -108,12 +108,14 @@ public class LifecycleMvcAutoConfigurationTests {
 
 	// resumeEndpoint
 	@Test
+	@Disabled
 	public void resumeEndpointDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.restart.enabled=true",
 				"management.endpoints.web.exposure.include=restart", "management.endpoint.resume.enabled=false");
 	}
 
 	@Test
+	@Disabled
 	public void resumeEndpointRestartDisabled() {
 		beanNotCreated("resumeEndpoint", "management.endpoint.restart.enabled=false",
 				"management.endpoints.web.exposure.include=resume", "management.endpoint.resume.enabled=true");

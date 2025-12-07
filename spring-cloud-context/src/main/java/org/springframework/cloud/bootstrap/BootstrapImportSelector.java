@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.DeferredImportSelector;
@@ -48,7 +51,7 @@ import org.springframework.util.StringUtils;
  */
 public class BootstrapImportSelector implements EnvironmentAware, DeferredImportSelector {
 
-	private Environment environment;
+	private @Nullable Environment environment;
 
 	private MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 
@@ -63,8 +66,11 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 		// Use names and ensure unique to protect against duplicates
 		List<String> names = new ArrayList<>(
 				SpringFactoriesLoader.loadFactoryNames(BootstrapConfiguration.class, classLoader));
-		names.addAll(Arrays.asList(StringUtils
-			.commaDelimitedListToStringArray(this.environment.getProperty("spring.cloud.bootstrap.sources", ""))));
+		String property = "";
+		if (this.environment != null) {
+			property = this.environment.getProperty("spring.cloud.bootstrap.sources", "");
+		}
+		names.addAll(Arrays.asList(StringUtils.commaDelimitedListToStringArray(property)));
 
 		List<OrderedAnnotatedElement> elements = new ArrayList<>();
 		for (String name : names) {
@@ -86,14 +92,14 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 
 		private final String name;
 
-		private Order order = null;
+		private @Nullable Order order = null;
 
-		private Integer value;
+		private @Nullable Integer value;
 
 		OrderedAnnotatedElement(MetadataReaderFactory metadataReaderFactory, String name) throws IOException {
 			MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(name);
 			AnnotationMetadata metadata = metadataReader.getAnnotationMetadata();
-			Map<String, Object> attributes = metadata.getAnnotationAttributes(Order.class.getName());
+			Map<String, @Nullable Object> attributes = metadata.getAnnotationAttributes(Order.class.getName());
 			this.name = name;
 			if (attributes != null && attributes.containsKey("value")) {
 				this.value = (Integer) attributes.get("value");
@@ -104,8 +110,23 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 					}
 
 					@Override
+					@SuppressWarnings("NullAway")
 					public int value() {
 						return OrderedAnnotatedElement.this.value;
+					}
+
+					@Override
+					public boolean equals(Object o) {
+						if (o == null || getClass() != o.getClass()) {
+							return false;
+						}
+						Order that = (Order) o;
+						return Objects.equals(value, that.value());
+					}
+
+					@Override
+					public int hashCode() {
+						return Objects.hash(value);
 					}
 				};
 			}
@@ -113,7 +134,7 @@ public class BootstrapImportSelector implements EnvironmentAware, DeferredImport
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+		public <T extends Annotation> @Nullable T getAnnotation(Class<T> annotationClass) {
 			if (annotationClass == Order.class) {
 				return (T) this.order;
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,17 @@ import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.test.LocalManagementPort;
-import org.springframework.boot.web.server.test.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalManagementPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.client.discovery.event.InstancePreRegisteredEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +41,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 /**
  * @author Spencer Gibb
  * @author Tim Ysewyn
+ * @author Yanming Zhou
  */
 // @checkstyle:off
 @SpringBootTest(classes = AbstractAutoServiceRegistrationTests.Config.class, properties = "management.port=0",
@@ -48,6 +51,9 @@ public class AbstractAutoServiceRegistrationTests {
 
 	@Autowired
 	public PostEventListener postEventListener;
+
+	@Autowired
+	public TestRegistrationPostEventListener testRegistrationPostEventListener;
 
 	@Autowired
 	private TestAutoServiceRegistration autoRegistration;
@@ -81,6 +87,8 @@ public class AbstractAutoServiceRegistrationTests {
 		then(this.preEventListener.registration.getServiceId()).isEqualTo("testRegistration2");
 		then(this.postEventListener.wasFired).isTrue();
 		then(this.postEventListener.config.getServiceId()).isEqualTo("testRegistration2");
+		then(this.testRegistrationPostEventListener.wasFired).isTrue();
+		then(this.testRegistrationPostEventListener.config.getServiceId()).isEqualTo("testRegistration2");
 	}
 
 	@EnableAutoConfiguration
@@ -88,8 +96,8 @@ public class AbstractAutoServiceRegistrationTests {
 	public static class Config {
 
 		@Bean
-		public TestAutoServiceRegistration testAutoServiceRegistration() {
-			return new TestAutoServiceRegistration();
+		public TestAutoServiceRegistration testAutoServiceRegistration(ApplicationContext context) {
+			return new TestAutoServiceRegistration(context);
 		}
 
 		@Bean
@@ -100,6 +108,11 @@ public class AbstractAutoServiceRegistrationTests {
 		@Bean
 		public PostEventListener postEventListener() {
 			return new PostEventListener();
+		}
+
+		@Bean
+		public TestRegistrationPostEventListener testRegistrationPostEventListener() {
+			return new TestRegistrationPostEventListener();
 		}
 
 	}
@@ -127,6 +140,21 @@ public class AbstractAutoServiceRegistrationTests {
 		@Override
 		public void onApplicationEvent(InstanceRegisteredEvent event) {
 			this.config = (Registration) event.getConfig();
+			this.wasFired = true;
+		}
+
+	}
+
+	public static class TestRegistrationPostEventListener
+			implements ApplicationListener<InstanceRegisteredEvent<TestRegistration>> {
+
+		public boolean wasFired = false;
+
+		public TestRegistration config;
+
+		@Override
+		public void onApplicationEvent(InstanceRegisteredEvent<TestRegistration> event) {
+			this.config = event.getConfig();
 			this.wasFired = true;
 		}
 
@@ -187,7 +215,7 @@ public class AbstractAutoServiceRegistrationTests {
 		private boolean deregistered = false;
 
 		@Override
-		public void register(TestRegistration registration) {
+		public void register(@Nullable TestRegistration registration) {
 			if (registration == null) {
 				throw new NullPointerException();
 			}
@@ -216,7 +244,7 @@ public class AbstractAutoServiceRegistrationTests {
 		}
 
 		@Override
-		public Object getStatus(TestRegistration registration) {
+		public @Nullable Object getStatus(TestRegistration registration) {
 			// TODO: test getStatus
 			return null;
 		}
@@ -235,12 +263,12 @@ public class AbstractAutoServiceRegistrationTests {
 
 		private int port = 0;
 
-		public TestAutoServiceRegistration(AutoServiceRegistrationProperties properties) {
-			super(null, properties);
+		public TestAutoServiceRegistration(ApplicationContext context, AutoServiceRegistrationProperties properties) {
+			super(context, null, properties);
 		}
 
-		protected TestAutoServiceRegistration() {
-			super(new TestServiceRegistry(), new AutoServiceRegistrationProperties());
+		protected TestAutoServiceRegistration(ApplicationContext context) {
+			super(context, new TestServiceRegistry(), new AutoServiceRegistrationProperties());
 		}
 
 		@Override

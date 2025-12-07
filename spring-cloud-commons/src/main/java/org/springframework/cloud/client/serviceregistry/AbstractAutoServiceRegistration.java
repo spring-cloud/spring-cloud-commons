@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PreDestroy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.beans.BeansException;
 import org.springframework.boot.web.server.context.ConfigurableWebServerApplicationContext;
 import org.springframework.boot.web.server.context.WebServerInitializedEvent;
 import org.springframework.cloud.client.discovery.ManagementServerPortUtils;
 import org.springframework.cloud.client.discovery.event.InstancePreRegisteredEvent;
 import org.springframework.cloud.client.discovery.event.InstanceRegisteredEvent;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 
@@ -47,7 +46,7 @@ import org.springframework.core.env.Environment;
  * @author Zen Huifer
  */
 public abstract class AbstractAutoServiceRegistration<R extends Registration>
-		implements AutoServiceRegistration, ApplicationContextAware, ApplicationListener<WebServerInitializedEvent> {
+		implements AutoServiceRegistration, ApplicationListener<WebServerInitializedEvent> {
 
 	private static final Log logger = LogFactory.getLog(AbstractAutoServiceRegistration.class);
 
@@ -71,24 +70,30 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 
 	private List<RegistrationLifecycle<R>> registrationLifecycles = new ArrayList<>();
 
-	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry,
+	protected AbstractAutoServiceRegistration(ApplicationContext context, ServiceRegistry<R> serviceRegistry,
 			AutoServiceRegistrationProperties properties) {
+		this.context = context;
+		this.environment = context.getEnvironment();
 		this.serviceRegistry = serviceRegistry;
 		this.properties = properties;
 	}
 
-	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry,
+	protected AbstractAutoServiceRegistration(ApplicationContext context, ServiceRegistry<R> serviceRegistry,
 			AutoServiceRegistrationProperties properties,
 			List<RegistrationManagementLifecycle<R>> registrationManagementLifecycles,
 			List<RegistrationLifecycle<R>> registrationLifecycles) {
+		this.context = context;
+		this.environment = context.getEnvironment();
 		this.serviceRegistry = serviceRegistry;
 		this.properties = properties;
 		this.registrationManagementLifecycles = registrationManagementLifecycles;
 		this.registrationLifecycles = registrationLifecycles;
 	}
 
-	protected AbstractAutoServiceRegistration(ServiceRegistry<R> serviceRegistry,
+	protected AbstractAutoServiceRegistration(ApplicationContext context, ServiceRegistry<R> serviceRegistry,
 			AutoServiceRegistrationProperties properties, List<RegistrationLifecycle<R>> registrationLifecycles) {
+		this.context = context;
+		this.environment = context.getEnvironment();
 		this.serviceRegistry = serviceRegistry;
 		this.properties = properties;
 		this.registrationLifecycles = registrationLifecycles;
@@ -117,12 +122,6 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 		}
 		this.port.compareAndSet(0, event.getWebServer().getPort());
 		this.start();
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.context = applicationContext;
-		this.environment = this.context.getEnvironment();
 	}
 
 	@Deprecated
@@ -216,7 +215,7 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	 * @return The management server port.
 	 */
 	@Deprecated
-	protected Integer getManagementPort() {
+	protected @Nullable Integer getManagementPort() {
 		return ManagementServerPortUtils.getPort(this.context);
 	}
 

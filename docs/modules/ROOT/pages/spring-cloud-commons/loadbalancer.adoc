@@ -414,6 +414,44 @@ TIP: By default, each service instance is assigned a unique `instanceId`, and di
 
 TIP: By default, the size of the subset is set to 100. You can also set it with `spring.cloud.loadbalancer.subset.size`.
 
+[[api-version-based-load-balancing]]
+== API Version-Based Load-Balancing
+
+To enable API version-based load-balancing, we provide the `BlockingApiVersionServiceInstanceListSupplier` and `ReactiveApiVersionServiceInstanceListSupplier`, that you can use depending on whether you client uses Spring `RestClient` or `WebClient`.
+
+You can enable API versioning by setting `spring.cloud.loadbalancer.configurations` to `api-version` or by providing a `ServiceInstanceListSupplier` bean configured for API versioning for all or specific LoadBalancer `serviceIds`:
+
+[[api-version-based-custom-loadbalancer-configuration]]
+[source,java,indent=0]
+----
+public class CustomLoadBalancerConfiguration {
+
+	@Bean
+	public ServiceInstanceListSupplier discoveryClientServiceInstanceListSupplier(
+			ConfigurableApplicationContext context) {
+		return ServiceInstanceListSupplier.builder()
+					.withDiscoveryClient()
+                    .withCaching()
+					// Use withBlockingApiVersioning() for blocking clients
+					.withReactiveApiVersioning()
+					.build(context);
+	}
+}
+----
+
+Under the hood, we use Spring Framework's https://docs.spring.io/spring-framework/reference/7.0/web/webmvc-versioning.html#mvc-versioning-strategy[blocking] and https://docs.spring.io/spring-framework/reference/7.0/web/webflux-versioning.html#webflux-versioning-strategy[reactive] API versioning support. Please see the Framework documentation on how versions are parsed, compared, and matched based on request elements. One point in which the provided LoadBalancer API versioning strategies differ from the default one is we do not perform validation of the versions, instead allowing the users to pass any desired version.
+
+In order to use this feature, you need to specify the request elements that you need to retrieve the version from using `LoadBalancerProperties.ApiVersion`. Using the `spring.cloud.load-balancer.clients.<serviceId>.api-version` property prefix, you can specify a `header`, `queryParameter`, `pathSegment` or `mediaTypeParameters` to be used to pass the desired version in the request. You can also set the `defaultVersion` (used when no version passed in the request) and whether passing the API version is `required`.
+
+Once the API versioning feature has been enabled and a version has been provided through any of the request elements of through `defaultVersion`, we will look for service instances with matching `API_VERSION` set in their `metadata` map.
+
+If no service instance with matching version is found, an empty instance list will be returned. You can modify this behaviour by setting `spring.cloud.load-balancer.clients.<serviceId>.api-version.fallbackToAvailableInstances` to `true`, which will trigger returning all available instances if no instances matching by API version are found.
+
+TIP: We use delegates to work with `ServiceInstanceListSupplier` beans.
+We suggest using a `DiscoveryClientServiceInstanceListSupplier` delegate, wrapping it with a `CachingServiceInstanceListSupplier` to leverage xref:spring-cloud-commons/loadbalancer.adoc#loadbalancer-caching[LoadBalancer caching mechanism], and then passing the resulting bean in the constructor of `ReactiveApiVersionServiceInstanceListSupplier` or `BlockingApiVersionServiceInstanceListSupplier`.
+
+NOTE: By default, we use `org.springframework.web.accept.SemanticApiVersionParser` for version parsing. You can provide your own `ApiVersionParser` bean in the context to override it.
+
 [[spring-cloud-loadbalancer-starter]]
 == Spring Cloud LoadBalancer Starter
 
@@ -554,17 +592,17 @@ NOTE: Starting with `4.1.0`, we have introduced the `callGetWithRequestOnDelegat
 
 Since `4.0.0`, Spring Cloud LoadBalancer supports Spring AOT transformations and native images. However, to use this feature, you need to explicitly define your `LoadBalancerClient` service IDs. You can do so by using the `value` or `name` attributes of the `@LoadBalancerClient` annotation or as values of the `spring.cloud.loadbalancer.eager-load.clients` property.
 
-== LoadBalancer Integration for Spring Interface Clients AutoConfiguration
+== LoadBalancer Integration for Spring HTTP Service Clients AutoConfiguration
 
-Since `5.0.0`, Spring Cloud LoadBalancer supports https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-interface[Spring Interface Clients] AutoConfiguration through the `LoadBalancerRestClientHttpServiceGroupConfigurer` and `LoadBalancerWebClientHttpServiceGroupConfigurer`.
+Since `5.0.0`, Spring Cloud LoadBalancer supports https://docs.spring.io/spring-framework/reference/7.0-SNAPSHOT/integration/rest-clients.html#rest-http-service-client[Spring HTTP Service Clients] AutoConfiguration through the `LoadBalancerRestClientHttpServiceGroupConfigurer` and `LoadBalancerWebClientHttpServiceGroupConfigurer`.
 
-For each Interface Client group, if the group `baseUrl` (defined under the
-`spring.http.client.service.group.[groupName].base-url` property) is `null`, a `serviceId`-based URL for load-balancing is set up as the `baseUrl`, with `serviceId` resolved from the Interface Client `groupName`.
+For each HTTP Service Client group, if the group `baseUrl` (defined under the
+`spring.http.serviceclient.[groupName].base-url` property) is `null`, a `serviceId`-based URL for load-balancing is set up as the `baseUrl`, with `serviceId` resolved from the HTTP Service Client `groupName`.
 
 If the group `baseUrl` is `null` or its scheme is set to `lb`, a
 `DeferringLoadBalancerInterceptor` instance is picked from the application context for blocking scenarios, and a `DeferringLoadBalancerExchangeFilterFunction` instance for reactive scenarios, and is added to the group's `RestClient.Builder` or `WebClient.Builder` if available, allowing for the requests to be load-balanced.
 
-For example, in an app with the following Interface Clients configuration:
+For example, in an app with the following HTTP Service Clients configuration:
 
 [source,java,indent=0]
 ----
@@ -579,11 +617,11 @@ public class HttpVerificationClientApplication {
 }
 ----
 
-If the `spring.http.client.service.group.verificationClient.base-url` property is not set, it will be automatically set to `http://verificationClient`.
+If the `spring.http.serviceclient.verificationClient.base-url` property is not set, it will be automatically set to `http://verificationClient`.
 The default scheme (`http`) is used initially; however, if a secure `ServiceInstance` is selected through load-balancing, it will be changed to `https`.
 
-If the `spring.http.client.service.group.verificationClient.base-url` property is set to a URL that has the `lb` scheme, (for example, `lb://verificationClient/path`), it will be used with `http` being initially set as the default scheme.
+If the `spring.http.serviceclient.verificationClient.base-url` property is set to a URL that has the `lb` scheme, (for example, `lb://verificationClient/path`), it will be used with `http` being initially set as the default scheme.
 If a secure `ServiceInstance` is selected through load-balancing, the scheme will be changed to `https`.
 In both of these cases, either a `DeferringLoadBalancerInterceptor` or `DeferringLoadBalancerExchangeFilterFunction` will be added to the group's client builder, enabling the requests to be load-balanced.
 
-If the `spring.http.client.service.group.verificationClient.base-url` property is set to a URL that does not have the scheme set to `lb`, (for example, `lb://verificationClient/path`), no load-balancer integration will be applied.
+If the `spring.http.serviceclient.verificationClient.base-url` property is set to a URL that does not have the scheme set to `lb`, (for example, `http://verificationClient/path`), no load-balancer integration will be applied.

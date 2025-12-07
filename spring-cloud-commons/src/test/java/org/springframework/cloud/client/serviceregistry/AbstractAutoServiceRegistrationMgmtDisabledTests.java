@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -54,8 +55,9 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 	public static class Config {
 
 		@Bean
-		public TestAutoServiceRegistration testAutoServiceRegistration(AutoServiceRegistrationProperties properties) {
-			return new TestAutoServiceRegistration(properties);
+		public TestAutoServiceRegistration testAutoServiceRegistration(ApplicationContext context,
+				AutoServiceRegistrationProperties properties) {
+			return new TestAutoServiceRegistration(context, properties);
 		}
 
 	}
@@ -163,12 +165,12 @@ public class AbstractAutoServiceRegistrationMgmtDisabledTests {
 
 		private int port = 0;
 
-		public TestAutoServiceRegistration(AutoServiceRegistrationProperties properties) {
-			super(new TestServiceRegistry(), properties);
+		public TestAutoServiceRegistration(ApplicationContext context, AutoServiceRegistrationProperties properties) {
+			super(context, new TestServiceRegistry(), properties);
 		}
 
-		protected TestAutoServiceRegistration() {
-			super(new TestServiceRegistry(), new AutoServiceRegistrationProperties());
+		protected TestAutoServiceRegistration(ApplicationContext context) {
+			super(context, new TestServiceRegistry(), new AutoServiceRegistrationProperties());
 		}
 
 		@Override

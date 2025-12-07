@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2025 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
@@ -58,7 +59,7 @@ public final class ServiceInstanceListSupplierBuilder {
 
 	private static final Log LOG = LogFactory.getLog(ServiceInstanceListSupplierBuilder.class);
 
-	private Creator baseCreator;
+	private @Nullable Creator baseCreator;
 
 	private final List<DelegateCreator> creators = new ArrayList<>();
 
@@ -343,13 +344,31 @@ public final class ServiceInstanceListSupplierBuilder {
 		return this;
 	}
 
+	public ServiceInstanceListSupplierBuilder withReactiveApiVersioning() {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory factory = context.getBean(LoadBalancerClientFactory.class);
+			return new ReactiveApiVersionServiceInstanceListSupplier(delegate, factory);
+		};
+		creators.add(creator);
+		return this;
+	}
+
+	public ServiceInstanceListSupplierBuilder withBlockingApiVersioning() {
+		DelegateCreator creator = (context, delegate) -> {
+			LoadBalancerClientFactory factory = context.getBean(LoadBalancerClientFactory.class);
+			return new BlockingApiVersionServiceInstanceListSupplier(delegate, factory);
+		};
+		creators.add(creator);
+		return this;
+	}
+
 	/**
 	 * Support {@link ServiceInstanceListSupplierBuilder} can be added to the expansion
 	 * implementation of {@link ServiceInstanceListSupplier} by this method.
 	 * @param delegateCreator a {@link DelegateCreator} object
 	 * @return the {@link ServiceInstanceListSupplierBuilder} object
 	 */
-	public ServiceInstanceListSupplierBuilder with(DelegateCreator delegateCreator) {
+	public ServiceInstanceListSupplierBuilder with(@Nullable DelegateCreator delegateCreator) {
 		if (delegateCreator != null) {
 			creators.add(delegateCreator);
 		}

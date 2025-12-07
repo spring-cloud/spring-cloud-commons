@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
-import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.client.discovery.simple.InstanceProperties;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,14 +36,24 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class SimpleReactiveDiscoveryClientTests {
 
-	private final DefaultServiceInstance service1Inst1 = new DefaultServiceInstance(null, null, "host1", 8080, false);
+	private final InstanceProperties service1Inst1 = new InstanceProperties();
 
-	private final DefaultServiceInstance service1Inst2 = new DefaultServiceInstance(null, null, "host2", 8443, true);
+	private final InstanceProperties service1Inst2 = new InstanceProperties();
 
 	private SimpleReactiveDiscoveryClient client;
 
 	@BeforeEach
 	public void setUp() {
+		service1Inst1.setServiceId("service1");
+		service1Inst1.setHost("host1");
+		service1Inst1.setPort(8080);
+		service1Inst1.setSecure(false);
+
+		service1Inst2.setServiceId("service1");
+		service1Inst2.setHost("host2");
+		service1Inst2.setPort(8443);
+		service1Inst2.setSecure(true);
+
 		SimpleReactiveDiscoveryProperties simpleReactiveDiscoveryProperties = new SimpleReactiveDiscoveryProperties();
 		simpleReactiveDiscoveryProperties
 			.setInstances(singletonMap("service", Arrays.asList(service1Inst1, service1Inst2)));
@@ -72,7 +82,11 @@ public class SimpleReactiveDiscoveryClientTests {
 	@Test
 	public void shouldReturnFluxOfServiceInstances() {
 		Flux<ServiceInstance> services = this.client.getInstances("service");
-		StepVerifier.create(services).expectNext(service1Inst1).expectNext(service1Inst2).expectComplete().verify();
+		StepVerifier.create(services)
+			.expectNext(service1Inst1.toServiceInstance())
+			.expectNext(service1Inst2.toServiceInstance())
+			.expectComplete()
+			.verify();
 	}
 
 }

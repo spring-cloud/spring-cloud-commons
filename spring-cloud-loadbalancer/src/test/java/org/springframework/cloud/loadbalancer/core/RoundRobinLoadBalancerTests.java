@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,8 @@ class RoundRobinLoadBalancerTests {
 	@Test
 	void shouldNotMovePositionIfOnlyOneInstance() {
 		ServiceInstanceListSupplier supplier = mock(ServiceInstanceListSupplier.class);
-		when(supplier.get(any())).thenReturn(Flux.just(Collections.singletonList(new DefaultServiceInstance())));
+		when(supplier.get(any())).thenReturn(
+				Flux.just(Collections.singletonList(new DefaultServiceInstance(null, "service", "host", 0, false))));
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(new SimpleObjectProvider<>(supplier),
 				"shouldNotMovePositionIfOnlyOneInstance", 0);
 
@@ -75,7 +76,8 @@ class RoundRobinLoadBalancerTests {
 	void shouldCallSelectedServiceInstanceIfSupplierOrItsDelegateIsInstanceOf() {
 		TestSelectedServiceInstanceSupplier delegate = mock(TestSelectedServiceInstanceSupplier.class);
 		DelegatingServiceInstanceListSupplier supplier = new RetryAwareServiceInstanceListSupplier(delegate);
-		when(delegate.get(any())).thenReturn(Flux.just(Collections.singletonList(new DefaultServiceInstance())));
+		when(delegate.get(any())).thenReturn(
+				Flux.just(Collections.singletonList(new DefaultServiceInstance(null, "service", "host", 0, false))));
 		RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer(new SimpleObjectProvider<>(supplier),
 				"shouldNotMovePositionIfOnlyOneInstance", 0);
 

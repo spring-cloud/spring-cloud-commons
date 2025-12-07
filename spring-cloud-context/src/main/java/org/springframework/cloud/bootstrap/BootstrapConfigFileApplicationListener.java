@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2024 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,11 +41,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.boot.DefaultPropertiesPropertySource;
+import org.springframework.boot.EnvironmentPostProcessor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.context.config.ConfigDataLocation;
@@ -55,7 +56,7 @@ import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver;
 import org.springframework.boot.context.properties.source.ConfigurationPropertySources;
-import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.boot.env.DefaultPropertiesPropertySource;
 import org.springframework.boot.env.PropertySourceLoader;
 import org.springframework.boot.env.RandomValuePropertySource;
 import org.springframework.boot.logging.DeferredLog;
@@ -179,9 +180,9 @@ public class BootstrapConfigFileApplicationListener
 
 	private static final Comparator<File> FILE_COMPARATOR = Comparator.comparing(File::getAbsolutePath);
 
-	private String searchLocations;
+	private @Nullable String searchLocations;
 
-	private String names;
+	private @Nullable String names;
 
 	private int order = DEFAULT_ORDER;
 
@@ -217,7 +218,7 @@ public class BootstrapConfigFileApplicationListener
 	 * @param resourceLoader the resource loader
 	 * @see #addPostProcessors(ConfigurableApplicationContext)
 	 */
-	protected void addPropertySources(ConfigurableEnvironment environment, ResourceLoader resourceLoader) {
+	protected void addPropertySources(ConfigurableEnvironment environment, @Nullable ResourceLoader resourceLoader) {
 		RandomValuePropertySource.addToEnvironment(environment);
 		new Loader(environment, resourceLoader).load();
 	}
@@ -306,17 +307,17 @@ public class BootstrapConfigFileApplicationListener
 
 		private final List<PropertySourceLoader> propertySourceLoaders;
 
-		private Deque<Profile> profiles;
+		private Deque<@Nullable Profile> profiles = new LinkedList<>();
 
-		private List<Profile> processedProfiles;
+		private List<@Nullable Profile> processedProfiles = new LinkedList<>();
 
-		private boolean activatedProfiles;
+		private boolean activatedProfiles = false;
 
-		private Map<Profile, MutablePropertySources> loaded;
+		private Map<Profile, MutablePropertySources> loaded = new LinkedHashMap<>();
 
 		private Map<DocumentsCacheKey, List<Document>> loadDocumentsCache = new HashMap<>();
 
-		Loader(ConfigurableEnvironment environment, ResourceLoader resourceLoader) {
+		Loader(ConfigurableEnvironment environment, @Nullable ResourceLoader resourceLoader) {
 			this.environment = environment;
 			this.placeholdersResolver = new PropertySourcesPlaceholdersResolver(this.environment);
 			this.resourceLoader = (resourceLoader != null) ? resourceLoader : new DefaultResourceLoader(null);
@@ -330,10 +331,6 @@ public class BootstrapConfigFileApplicationListener
 		}
 
 		private void loadWithFilteredProperties(PropertySource<?> defaultProperties) {
-			this.profiles = new LinkedList<>();
-			this.processedProfiles = new LinkedList<>();
-			this.activatedProfiles = false;
-			this.loaded = new LinkedHashMap<>();
 			initializeProfiles();
 			while (!this.profiles.isEmpty()) {
 				Profile profile = this.profiles.poll();
@@ -353,6 +350,7 @@ public class BootstrapConfigFileApplicationListener
 		 * profiles and any {@code spring.profiles.active}/{@code spring.profiles.include}
 		 * properties that are already set.
 		 */
+		@SuppressWarnings("NullAway")
 		private void initializeProfiles() {
 			// The default profile for these purposes is represented as null. We add it
 			// first so that it is processed first and has lowest priority.
@@ -409,7 +407,8 @@ public class BootstrapConfigFileApplicationListener
 			this.profiles.removeIf((profile) -> (profile != null && profile.isDefaultProfile()));
 		}
 
-		private DocumentFilter getPositiveProfileFilter(Profile profile) {
+		@SuppressWarnings("NullAway")
+		private DocumentFilter getPositiveProfileFilter(@Nullable Profile profile) {
 			return (Document document) -> {
 				if (profile == null) {
 					return ObjectUtils.isEmpty(document.getProfiles());
@@ -419,7 +418,8 @@ public class BootstrapConfigFileApplicationListener
 			};
 		}
 
-		private DocumentFilter getNegativeProfileFilter(Profile profile) {
+		@SuppressWarnings("NullAway")
+		private DocumentFilter getNegativeProfileFilter(@Nullable Profile profile) {
 			return (Document document) -> (profile == null && !ObjectUtils.isEmpty(document.getProfiles())
 					&& this.environment.acceptsProfiles(Profiles.of(document.getProfiles())));
 		}
@@ -440,7 +440,7 @@ public class BootstrapConfigFileApplicationListener
 			};
 		}
 
-		private void load(Profile profile, DocumentFilterFactory filterFactory, DocumentConsumer consumer) {
+		private void load(@Nullable Profile profile, DocumentFilterFactory filterFactory, DocumentConsumer consumer) {
 			getSearchLocations().forEach((location) -> {
 				String nonOptionalLocation = ConfigDataLocation.of(location).getValue();
 				boolean isDirectory = location.endsWith("/");
@@ -449,7 +449,7 @@ public class BootstrapConfigFileApplicationListener
 			});
 		}
 
-		private void load(String location, String name, Profile profile, DocumentFilterFactory filterFactory,
+		private void load(String location, String name, @Nullable Profile profile, DocumentFilterFactory filterFactory,
 				DocumentConsumer consumer) {
 			if (!StringUtils.hasText(name)) {
 				for (PropertySourceLoader loader : this.propertySourceLoaders) {
@@ -479,7 +479,7 @@ public class BootstrapConfigFileApplicationListener
 		}
 
 		private void loadForFileExtension(PropertySourceLoader loader, String prefix, String fileExtension,
-				Profile profile, DocumentFilterFactory filterFactory, DocumentConsumer consumer) {
+				@Nullable Profile profile, DocumentFilterFactory filterFactory, DocumentConsumer consumer) {
 			DocumentFilter defaultFilter = filterFactory.getDocumentFilter(null);
 			DocumentFilter profileFilter = filterFactory.getDocumentFilter(profile);
 			if (profile != null) {
@@ -499,9 +499,9 @@ public class BootstrapConfigFileApplicationListener
 			load(loader, prefix + fileExtension, profile, profileFilter, consumer);
 		}
 
-		private void load(PropertySourceLoader loader, String location, Profile profile, DocumentFilter filter,
-				DocumentConsumer consumer) {
-			Resource[] resources = getResources(location);
+		private void load(PropertySourceLoader loader, String location, @Nullable Profile profile,
+				DocumentFilter filter, DocumentConsumer consumer) {
+			@Nullable Resource[] resources = getResources(location);
 			for (Resource resource : resources) {
 				try {
 					if (resource == null || !resource.exists()) {
@@ -584,7 +584,7 @@ public class BootstrapConfigFileApplicationListener
 			return resource.getDescription();
 		}
 
-		private Resource[] getResources(String locationReference) {
+		private @Nullable Resource[] getResources(String locationReference) {
 			try {
 				if (isPatternLocation(locationReference)) {
 					return getResourcesFromPatternLocationReference(locationReference);
@@ -637,7 +637,8 @@ public class BootstrapConfigFileApplicationListener
 			return documents;
 		}
 
-		private List<Document> asDocuments(List<PropertySource<?>> loaded) {
+		@SuppressWarnings("NullAway")
+		private List<Document> asDocuments(@Nullable List<PropertySource<?>> loaded) {
 			if (loaded == null) {
 				return Collections.emptyList();
 			}
@@ -651,8 +652,8 @@ public class BootstrapConfigFileApplicationListener
 			}).collect(Collectors.toList());
 		}
 
-		private StringBuilder getDescription(String prefix, String locationReference, Resource resource,
-				Profile profile) {
+		private StringBuilder getDescription(String prefix, String locationReference, @Nullable Resource resource,
+				@Nullable Profile profile) {
 			StringBuilder result = new StringBuilder(prefix);
 			try {
 				if (resource != null) {
@@ -745,9 +746,10 @@ public class BootstrapConfigFileApplicationListener
 			return asResolvedSet(BootstrapConfigFileApplicationListener.this.names, DEFAULT_NAMES);
 		}
 
-		private Set<String> asResolvedSet(String value, String fallback) {
-			List<String> list = Arrays.asList(StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(
-					(value != null) ? this.environment.resolvePlaceholders(value) : fallback)));
+		private Set<String> asResolvedSet(@Nullable String value, @Nullable String fallback) {
+			List<@Nullable String> list = Arrays
+				.asList(StringUtils.trimArrayElements(StringUtils.commaDelimitedListToStringArray(
+						(value != null) ? this.environment.resolvePlaceholders(value) : fallback)));
 			Collections.reverse(list);
 			return new LinkedHashSet<>(list);
 		}
@@ -772,7 +774,7 @@ public class BootstrapConfigFileApplicationListener
 			}
 		}
 
-		private void addLoadedPropertySource(MutablePropertySources destination, String lastAdded,
+		private void addLoadedPropertySource(MutablePropertySources destination, @Nullable String lastAdded,
 				PropertySource<?> source) {
 			if (lastAdded == null) {
 				if (destination.contains(DefaultPropertiesPropertySource.NAME)) {
@@ -787,7 +789,8 @@ public class BootstrapConfigFileApplicationListener
 			}
 		}
 
-		private void applyActiveProfiles(PropertySource<?> defaultProperties) {
+		@SuppressWarnings("NullAway")
+		private void applyActiveProfiles(@Nullable PropertySource<?> defaultProperties) {
 			List<String> activeProfiles = new ArrayList<>();
 			if (defaultProperties != null) {
 				Binder binder = new Binder(ConfigurationPropertySources.from(defaultProperties),
@@ -804,7 +807,7 @@ public class BootstrapConfigFileApplicationListener
 			this.environment.setActiveProfiles(activeProfiles.toArray(new String[0]));
 		}
 
-		private boolean isDefaultProfile(Profile profile) {
+		private boolean isDefaultProfile(@Nullable Profile profile) {
 			return profile != null && !profile.isDefaultProfile();
 		}
 
@@ -904,13 +907,13 @@ public class BootstrapConfigFileApplicationListener
 
 		private final PropertySource<?> propertySource;
 
-		private String[] profiles;
+		private @Nullable String[] profiles;
 
 		private final Set<Profile> activeProfiles;
 
 		private final Set<Profile> includeProfiles;
 
-		Document(PropertySource<?> propertySource, String[] profiles, Set<Profile> activeProfiles,
+		Document(PropertySource<?> propertySource, @Nullable String[] profiles, Set<Profile> activeProfiles,
 				Set<Profile> includeProfiles) {
 			this.propertySource = propertySource;
 			this.profiles = profiles;
@@ -922,7 +925,7 @@ public class BootstrapConfigFileApplicationListener
 			return this.propertySource;
 		}
 
-		String[] getProfiles() {
+		public @Nullable String[] getProfiles() {
 			return this.profiles;
 		}
 
@@ -952,7 +955,7 @@ public class BootstrapConfigFileApplicationListener
 		 * @param profile the profile or {@code null}
 		 * @return the filter
 		 */
-		DocumentFilter getDocumentFilter(Profile profile);
+		DocumentFilter getDocumentFilter(@Nullable Profile profile);
 
 	}
 
@@ -972,7 +975,7 @@ public class BootstrapConfigFileApplicationListener
 	@FunctionalInterface
 	private interface DocumentConsumer {
 
-		void accept(Profile profile, Document document);
+		void accept(@Nullable Profile profile, Document document);
 
 	}
 
@@ -993,7 +996,7 @@ public class BootstrapConfigFileApplicationListener
 		}
 
 		@Override
-		public Object getProperty(String name) {
+		public @Nullable Object getProperty(String name) {
 			if (this.filteredProperties.contains(name)) {
 				return null;
 			}

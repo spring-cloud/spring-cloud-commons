@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.http.client.autoconfigure.service.HttpServiceClientProperties;
 import org.springframework.boot.restclient.RestTemplateBuilder;
-import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 import org.springframework.context.ApplicationContext;
@@ -52,6 +52,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Gang Li
  * @author Olga Maciaszek-Sharma
  * @author Henning Pöttker
+ * @author Yanming Zhou
  */
 @AutoConfiguration
 @Conditional(BlockingRestClassesPresentCondition.class)
@@ -84,7 +85,7 @@ public class LoadBalancerAutoConfiguration {
 		return new LoadBalancerRequestFactory(loadBalancerClient, transformers);
 	}
 
-	@AutoConfiguration
+	@Configuration(proxyBeanMethods = false)
 	static class DeferringLoadBalancerInterceptorConfig {
 
 		@Bean
@@ -128,7 +129,7 @@ public class LoadBalancerAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass(HttpClientServiceProperties.class)
+	@ConditionalOnClass(HttpServiceClientProperties.class)
 	static class DeferringLoadBalancerInterceptorHttpClientConfig {
 
 		@Bean
@@ -139,17 +140,17 @@ public class LoadBalancerAutoConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnBean({ HttpClientServiceProperties.class, ReactiveLoadBalancer.Factory.class })
+		@ConditionalOnBean({ HttpServiceClientProperties.class, ReactiveLoadBalancer.Factory.class })
 		@ConditionalOnMissingBean(LoadBalancerRestClientHttpServiceGroupConfigurer.class)
 		LoadBalancerRestClientHttpServiceGroupConfigurer loadBalancerRestClientHttpServiceGroupConfigurer(
 				ObjectProvider<DeferringLoadBalancerInterceptor> loadBalancerInterceptorProvider,
-				HttpClientServiceProperties properties) {
+				HttpServiceClientProperties properties) {
 			return new LoadBalancerRestClientHttpServiceGroupConfigurer(loadBalancerInterceptorProvider, properties);
 		}
 
 	}
 
-	@AutoConfiguration
+	@Configuration(proxyBeanMethods = false)
 	@Conditional(RetryMissingOrDisabledCondition.class)
 	static class LoadBalancerInterceptorConfig {
 
@@ -192,7 +193,7 @@ public class LoadBalancerAutoConfiguration {
 	/**
 	 * Auto configuration for retry mechanism.
 	 */
-	@AutoConfiguration
+	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass(RetryTemplate.class)
 	public static class RetryAutoConfiguration {
 

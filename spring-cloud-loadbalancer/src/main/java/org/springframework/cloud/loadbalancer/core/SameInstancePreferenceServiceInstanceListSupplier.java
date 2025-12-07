@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,11 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
 
@@ -40,7 +42,7 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 
 	private static final Log LOG = LogFactory.getLog(SameInstancePreferenceServiceInstanceListSupplier.class);
 
-	private ServiceInstance previouslyReturnedInstance;
+	private @Nullable ServiceInstance previouslyReturnedInstance;
 
 	private boolean callGetWithRequestOnDelegates;
 
@@ -51,13 +53,13 @@ public class SameInstancePreferenceServiceInstanceListSupplier extends Delegatin
 	public SameInstancePreferenceServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
 		super(delegate);
-		callGetWithRequestOnDelegates = loadBalancerClientFactory.getProperties(getServiceId())
-			.isCallGetWithRequestOnDelegates();
-	}
-
-	@Override
-	public String getServiceId() {
-		return delegate.getServiceId();
+		LoadBalancerProperties properties = loadBalancerClientFactory.getProperties(getServiceId());
+		if (properties != null) {
+			callGetWithRequestOnDelegates = properties.isCallGetWithRequestOnDelegates();
+		}
+		else {
+			callGetWithRequestOnDelegates = true;
+		}
 	}
 
 	@Override

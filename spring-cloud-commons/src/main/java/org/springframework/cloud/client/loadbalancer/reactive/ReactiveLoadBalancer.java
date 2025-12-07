@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
@@ -54,7 +55,7 @@ public interface ReactiveLoadBalancer<T> {
 
 	interface Factory<T> {
 
-		default LoadBalancerProperties getProperties(String serviceId) {
+		default @Nullable LoadBalancerProperties getProperties(String serviceId) {
 			return null;
 		}
 

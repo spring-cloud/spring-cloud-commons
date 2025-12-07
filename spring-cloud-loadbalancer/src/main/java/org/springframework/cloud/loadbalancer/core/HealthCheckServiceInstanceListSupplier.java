@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2023 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.function.BiFunction;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -56,7 +57,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 
 	private final Flux<List<ServiceInstance>> aliveInstancesReplay;
 
-	private Disposable healthCheckDisposable;
+	private @Nullable Disposable healthCheckDisposable;
 
 	private final BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction;
 
@@ -64,7 +65,9 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 			ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory,
 			BiFunction<ServiceInstance, String, Mono<Boolean>> aliveFunction) {
 		super(delegate);
-		this.healthCheck = loadBalancerClientFactory.getProperties(getServiceId()).getHealthCheck();
+		LoadBalancerProperties properties = loadBalancerClientFactory.getProperties(getServiceId());
+		this.healthCheck = (properties == null) ? new LoadBalancerProperties.HealthCheck()
+				: properties.getHealthCheck();
 		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default", "/actuator/health");
 		this.aliveFunction = aliveFunction;
 		Repeat<Object> aliveInstancesReplayRepeat = Repeat
@@ -72,7 +75,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 			.fixedBackoff(healthCheck.getRefetchInstancesInterval());
 		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate)
 			.repeatWhen(aliveInstancesReplayRepeat)
-			.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(alive -> List.copyOf(alive)));
+			.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(List::copyOf));
 		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay())
 			.replay(1)
 			.refCount(1);

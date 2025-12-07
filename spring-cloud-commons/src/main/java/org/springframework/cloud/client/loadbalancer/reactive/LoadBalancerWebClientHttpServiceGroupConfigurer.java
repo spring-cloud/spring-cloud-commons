@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.cloud.client.loadbalancer.reactive;
 import java.net.URI;
 
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.restclient.autoconfigure.service.HttpClientServiceProperties;
-import org.springframework.boot.webclient.autoconfigure.service.ReactiveHttpClientServiceProperties;
+import org.springframework.boot.http.client.autoconfigure.HttpClientProperties;
+import org.springframework.boot.http.client.autoconfigure.service.HttpServiceClientProperties;
 import org.springframework.util.function.SingletonSupplier;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientHttpServiceGroupConfigurer;
@@ -32,7 +32,7 @@ import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools
 /**
  * Load-balancer-specific {@link WebClientHttpServiceGroupConfigurer} implementation. If
  * the group {@code baseUrl} is {@code null}, sets up a {@code baseUrl} with LoadBalancer
- * {@code serviceId} -resolved from Interface Client {@code groupName} set as
+ * {@code serviceId} -resolved from HTTP Service Client {@code groupName} set as
  * {@code host}. If the group {@code baseUrl} is {@code null} or has {@code lb} set as its
  * scheme, a {@link DeferringLoadBalancerExchangeFilterFunction} instance picked from
  * application context is added to the group's {@link WebClient.Builder} if available,
@@ -41,7 +41,7 @@ import static org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools
  * @author Olga Maciaszek-Sharma
  * @since 5.0.0
  * @see WebClient.Builder
- * @see HttpClientServiceProperties
+ * @see HttpServiceClientProperties
  */
 public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClientHttpServiceGroupConfigurer {
 
@@ -50,14 +50,14 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 
 	private final SingletonSupplier<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> loadBalancerFilterFunctionSupplier;
 
-	private final ReactiveHttpClientServiceProperties clientServiceProperties;
+	private final HttpServiceClientProperties httpServiceClientProperties;
 
 	public LoadBalancerWebClientHttpServiceGroupConfigurer(
 			ObjectProvider<DeferringLoadBalancerExchangeFilterFunction<LoadBalancedExchangeFilterFunction>> exchangeFilterFunctionProvider,
-			ReactiveHttpClientServiceProperties clientServiceProperties) {
+			HttpServiceClientProperties httpServiceClientProperties) {
 		this.loadBalancerFilterFunctionSupplier = SingletonSupplier
 			.ofNullable(exchangeFilterFunctionProvider::getIfAvailable);
-		this.clientServiceProperties = clientServiceProperties;
+		this.httpServiceClientProperties = httpServiceClientProperties;
 	}
 
 	@Override
@@ -70,8 +70,7 @@ public class LoadBalancerWebClientHttpServiceGroupConfigurer implements WebClien
 		}
 		groups.forEachGroup((group, clientBuilder, factoryBuilder) -> {
 			String groupName = group.name();
-			ReactiveHttpClientServiceProperties.Group groupProperties = clientServiceProperties.getGroup()
-				.get(groupName);
+			HttpClientProperties groupProperties = httpServiceClientProperties.get(groupName);
 			String baseUrlString = groupProperties == null ? null : groupProperties.getBaseUrl();
 			URI existingBaseUrl = baseUrlString == null ? null : URI.create(baseUrlString);
 			if (existingBaseUrl == null) {

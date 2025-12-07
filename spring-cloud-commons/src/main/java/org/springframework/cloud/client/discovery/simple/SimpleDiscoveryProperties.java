@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.util.Map;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.core.style.ToStringCreator;
 
 /**
  * Properties to hold the details of a
@@ -42,7 +42,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 @ConfigurationProperties(prefix = "spring.cloud.discovery.client.simple")
 public class SimpleDiscoveryProperties implements InitializingBean {
 
-	private Map<String, List<DefaultServiceInstance>> instances = new HashMap<>();
+	private Map<String, List<InstanceProperties>> instances = new HashMap<>();
 
 	/**
 	 * The properties of the local instance (if it exists). Users should set these
@@ -50,19 +50,19 @@ public class SimpleDiscoveryProperties implements InitializingBean {
 	 * identified by the service instance.
 	 */
 	@NestedConfigurationProperty
-	private DefaultServiceInstance local = new DefaultServiceInstance(null, null, null, 0, false);
+	private InstanceProperties local = new InstanceProperties();
 
 	private int order = DiscoveryClient.DEFAULT_ORDER;
 
-	public Map<String, List<DefaultServiceInstance>> getInstances() {
+	public Map<String, List<InstanceProperties>> getInstances() {
 		return this.instances;
 	}
 
-	public void setInstances(Map<String, List<DefaultServiceInstance>> instances) {
+	public void setInstances(Map<String, List<InstanceProperties>> instances) {
 		this.instances = instances;
 	}
 
-	public DefaultServiceInstance getLocal() {
+	public InstanceProperties getLocal() {
 		return this.local;
 	}
 
@@ -77,14 +77,18 @@ public class SimpleDiscoveryProperties implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() {
 		for (String key : this.instances.keySet()) {
-			for (DefaultServiceInstance instance : this.instances.get(key)) {
+			for (InstanceProperties instance : this.instances.get(key)) {
 				instance.setServiceId(key);
 			}
 		}
 	}
 
-	public void setInstance(String serviceId, String host, int port) {
-		local = new DefaultServiceInstance(null, serviceId, host, port, false);
+	@Override
+	public String toString() {
+		return new ToStringCreator(this).append("instances", instances)
+			.append("local", local)
+			.append("order", order)
+			.toString();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.http.HttpRequest;
 import org.springframework.retry.RetryContext;
@@ -31,9 +33,9 @@ public class LoadBalancedRetryContext extends RetryContextSupport {
 
 	private HttpRequest request;
 
-	private ServiceInstance serviceInstance;
+	private @Nullable ServiceInstance serviceInstance;
 
-	private ServiceInstance previousServiceInstance;
+	private @Nullable ServiceInstance previousServiceInstance;
 
 	/**
 	 * Creates a new load-balanced context.
@@ -65,7 +67,7 @@ public class LoadBalancedRetryContext extends RetryContextSupport {
 	 * Gets the service instance used during the retry.
 	 * @return The service instance used during the retry.
 	 */
-	public ServiceInstance getServiceInstance() {
+	public @Nullable ServiceInstance getServiceInstance() {
 		return this.serviceInstance;
 	}
 
@@ -73,16 +75,16 @@ public class LoadBalancedRetryContext extends RetryContextSupport {
 	 * Sets the service instance to use during the retry.
 	 * @param serviceInstance The service instance to use during the retry.
 	 */
-	public void setServiceInstance(ServiceInstance serviceInstance) {
+	public void setServiceInstance(@Nullable ServiceInstance serviceInstance) {
 		setPreviousServiceInstance(this.serviceInstance);
 		this.serviceInstance = serviceInstance;
 	}
 
-	public ServiceInstance getPreviousServiceInstance() {
+	public @Nullable ServiceInstance getPreviousServiceInstance() {
 		return previousServiceInstance;
 	}
 
-	public void setPreviousServiceInstance(ServiceInstance previousServiceInstance) {
+	public void setPreviousServiceInstance(@Nullable ServiceInstance previousServiceInstance) {
 		this.previousServiceInstance = previousServiceInstance;
 	}
 

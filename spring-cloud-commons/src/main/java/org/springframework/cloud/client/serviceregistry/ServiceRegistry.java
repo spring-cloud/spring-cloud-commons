@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.serviceregistry;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Contract to register and deregister instances with a Service Registry.
  *
@@ -30,13 +32,13 @@ public interface ServiceRegistry<R extends Registration> {
 	 * instance, such as its hostname and port.
 	 * @param registration registration meta data
 	 */
-	void register(R registration);
+	void register(@Nullable R registration);
 
 	/**
 	 * Deregisters the registration.
 	 * @param registration registration meta data
 	 */
-	void deregister(R registration);
+	void deregister(@Nullable R registration);
 
 	/**
 	 * Closes the ServiceRegistry. This is a lifecycle method.

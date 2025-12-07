@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.core.env.Environment;
+import org.springframework.util.Assert;
 
 import static org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory.PROPERTY_NAME;
 
@@ -59,7 +60,9 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 	private final Flux<List<ServiceInstance>> serviceInstances;
 
 	public DiscoveryClientServiceInstanceListSupplier(DiscoveryClient delegate, Environment environment) {
-		this.serviceId = environment.getProperty(PROPERTY_NAME);
+		String property = environment.getProperty(PROPERTY_NAME);
+		Assert.hasText(property, "'serviceId' must not be empty");
+		this.serviceId = property;
 		resolveTimeout(environment);
 		this.serviceInstances = Flux.defer(() -> Mono.fromCallable(() -> delegate.getInstances(serviceId)))
 			.timeout(timeout, Flux.defer(() -> {
@@ -73,7 +76,9 @@ public class DiscoveryClientServiceInstanceListSupplier implements ServiceInstan
 	}
 
 	public DiscoveryClientServiceInstanceListSupplier(ReactiveDiscoveryClient delegate, Environment environment) {
-		this.serviceId = environment.getProperty(PROPERTY_NAME);
+		String property = environment.getProperty(PROPERTY_NAME);
+		Assert.hasText(property, "'serviceId' must not be empty");
+		this.serviceId = property;
 		resolveTimeout(environment);
 		this.serviceInstances = Flux
 			.defer(() -> delegate.getInstances(serviceId).collectList().flux().timeout(timeout, Flux.defer(() -> {

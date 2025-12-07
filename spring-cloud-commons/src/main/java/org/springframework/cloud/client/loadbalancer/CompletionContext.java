@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.client.loadbalancer;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.style.ToStringCreator;
 
 /**
@@ -29,11 +31,11 @@ public class CompletionContext<RES, T, C> {
 
 	private final Status status;
 
-	private final Throwable throwable;
+	private final @Nullable Throwable throwable;
 
-	private final Response<T> loadBalancerResponse;
+	private final @Nullable Response<T> loadBalancerResponse;
 
-	private final RES clientResponse;
+	private final @Nullable RES clientResponse;
 
 	private final Request<C> loadBalancerRequest;
 
@@ -41,22 +43,22 @@ public class CompletionContext<RES, T, C> {
 		this(status, null, loadBalancerRequest, null, null);
 	}
 
-	public CompletionContext(Status status, Request<C> loadBalancerRequest, Response<T> response) {
+	public CompletionContext(Status status, Request<C> loadBalancerRequest, @Nullable Response<T> response) {
 		this(status, null, loadBalancerRequest, response, null);
 	}
 
 	public CompletionContext(Status status, Throwable throwable, Request<C> loadBalancerRequest,
-			Response<T> loadBalancerResponse) {
+			@Nullable Response<T> loadBalancerResponse) {
 		this(status, throwable, loadBalancerRequest, loadBalancerResponse, null);
 	}
 
-	public CompletionContext(Status status, Request<C> loadBalancerRequest, Response<T> loadBalancerResponse,
-			RES clientResponse) {
+	public CompletionContext(Status status, Request<C> loadBalancerRequest, @Nullable Response<T> loadBalancerResponse,
+			@Nullable RES clientResponse) {
 		this(status, null, loadBalancerRequest, loadBalancerResponse, clientResponse);
 	}
 
-	public CompletionContext(Status status, Throwable throwable, Request<C> loadBalancerRequest,
-			Response<T> loadBalancerResponse, RES clientResponse) {
+	public CompletionContext(Status status, @Nullable Throwable throwable, Request<C> loadBalancerRequest,
+			@Nullable Response<T> loadBalancerResponse, @Nullable RES clientResponse) {
 		this.status = status;
 		this.throwable = throwable;
 		this.loadBalancerRequest = loadBalancerRequest;
@@ -68,15 +70,15 @@ public class CompletionContext<RES, T, C> {
 		return this.status;
 	}
 
-	public Throwable getThrowable() {
+	public @Nullable Throwable getThrowable() {
 		return this.throwable;
 	}
 
-	public Response<T> getLoadBalancerResponse() {
+	public @Nullable Response<T> getLoadBalancerResponse() {
 		return loadBalancerResponse;
 	}
 
-	public RES getClientResponse() {
+	public @Nullable RES getClientResponse() {
 		return clientResponse;
 	}
 

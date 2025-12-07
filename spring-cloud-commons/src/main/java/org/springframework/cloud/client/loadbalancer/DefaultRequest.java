@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,9 @@ public class DefaultRequest<T> implements Request<T> {
 
 	private T context;
 
+	@SuppressWarnings("unchecked")
 	public DefaultRequest() {
-		new DefaultRequestContext();
+		this((T) new DefaultRequestContext());
 	}
 
 	public DefaultRequest(T context) {

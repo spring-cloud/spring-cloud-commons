@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.springframework.cloud.client.loadbalancer;
 
 import java.util.Objects;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.core.style.ToStringCreator;
 
@@ -27,7 +29,7 @@ import org.springframework.core.style.ToStringCreator;
  */
 public class DefaultResponse implements Response<ServiceInstance> {
 
-	private final ServiceInstance serviceInstance;
+	private final @Nullable ServiceInstance serviceInstance;
 
 	public DefaultResponse(ServiceInstance serviceInstance) {
 		this.serviceInstance = serviceInstance;
@@ -39,7 +41,7 @@ public class DefaultResponse implements Response<ServiceInstance> {
 	}
 
 	@Override
-	public ServiceInstance getServer() {
+	public @Nullable ServiceInstance getServer() {
 		return this.serviceInstance;
 	}
 

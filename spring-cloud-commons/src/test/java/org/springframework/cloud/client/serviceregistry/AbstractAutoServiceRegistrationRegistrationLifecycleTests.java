@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -94,11 +95,11 @@ class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 	static class Config {
 
 		@Bean
-		public TestAutoServiceRegistrationLifecycle testAutoServiceRegistration(
+		public TestAutoServiceRegistrationLifecycle testAutoServiceRegistration(ApplicationContext applicationContext,
 				AutoServiceRegistrationProperties properties) {
 			List<RegistrationLifecycle<TestRegistrationLifecycleRegistration>> registrationLifecycles = new ArrayList<>();
 			registrationLifecycles.add(new RegistrationLifecycleImpl());
-			return new TestAutoServiceRegistrationLifecycle(properties, registrationLifecycles);
+			return new TestAutoServiceRegistrationLifecycle(applicationContext, properties, registrationLifecycles);
 		}
 
 	}
@@ -110,24 +111,24 @@ class AbstractAutoServiceRegistrationRegistrationLifecycleTests {
 
 		TestRegistrationLifecycleRegistration testRegistrationLifecycleRegistration = new TestRegistrationLifecycleRegistration();
 
-		protected TestAutoServiceRegistrationLifecycle() {
-			super(new TestRegistrationLifecycleServiceRegistration(), new AutoServiceRegistrationProperties());
+		protected TestAutoServiceRegistrationLifecycle(ApplicationContext context) {
+			super(context, new TestRegistrationLifecycleServiceRegistration(), new AutoServiceRegistrationProperties());
 		}
 
-		TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties) {
-			super(new TestRegistrationLifecycleServiceRegistration(), properties);
+		TestAutoServiceRegistrationLifecycle(ApplicationContext context, AutoServiceRegistrationProperties properties) {
+			super(context, new TestRegistrationLifecycleServiceRegistration(), properties);
 		}
 
-		TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties,
+		TestAutoServiceRegistrationLifecycle(ApplicationContext context, AutoServiceRegistrationProperties properties,
 				List<RegistrationManagementLifecycle<TestRegistrationLifecycleRegistration>> registrationManagementLifecycles,
 				List<RegistrationLifecycle<TestRegistrationLifecycleRegistration>> registrationLifecycles) {
-			super(new TestRegistrationLifecycleServiceRegistration(), properties, registrationManagementLifecycles,
-					registrationLifecycles);
+			super(context, new TestRegistrationLifecycleServiceRegistration(), properties,
+					registrationManagementLifecycles, registrationLifecycles);
 		}
 
-		TestAutoServiceRegistrationLifecycle(AutoServiceRegistrationProperties properties,
+		TestAutoServiceRegistrationLifecycle(ApplicationContext context, AutoServiceRegistrationProperties properties,
 				List<RegistrationLifecycle<TestRegistrationLifecycleRegistration>> registrationLifecycles) {
-			super(new TestRegistrationLifecycleServiceRegistration(), properties, registrationLifecycles);
+			super(context, new TestRegistrationLifecycleServiceRegistration(), properties, registrationLifecycles);
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.cloud.client.loadbalancer;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -38,17 +40,17 @@ public class SimpleObjectProvider<T> implements ObjectProvider<T> {
 	}
 
 	@Override
-	public T getObject(Object... args) throws BeansException {
+	public T getObject(@Nullable Object... args) throws BeansException {
 		return this.object;
 	}
 
 	@Override
-	public T getIfAvailable() throws BeansException {
+	public @Nullable T getIfAvailable() throws BeansException {
 		return this.object;
 	}
 
 	@Override
-	public T getIfUnique() throws BeansException {
+	public @Nullable T getIfUnique() throws BeansException {
 		return this.object;
 	}
 

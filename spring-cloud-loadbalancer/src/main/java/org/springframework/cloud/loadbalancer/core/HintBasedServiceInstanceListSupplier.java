@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2021 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.cloud.loadbalancer.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -41,10 +42,12 @@ public class HintBasedServiceInstanceListSupplier extends DelegatingServiceInsta
 
 	private final LoadBalancerProperties properties;
 
+	@SuppressWarnings("NullAway")
 	public HintBasedServiceInstanceListSupplier(ServiceInstanceListSupplier delegate,
 			ReactiveLoadBalancer.Factory<ServiceInstance> factory) {
 		super(delegate);
-		this.properties = factory.getProperties(getServiceId());
+		this.properties = (factory.getProperties(getServiceId()) != null) ? factory.getProperties(getServiceId())
+				: new LoadBalancerProperties();
 	}
 
 	@Override
@@ -57,7 +60,7 @@ public class HintBasedServiceInstanceListSupplier extends DelegatingServiceInsta
 		return delegate.get(request).map(instances -> filteredByHint(instances, getHint(request.getContext())));
 	}
 
-	private String getHint(Object requestContext) {
+	private @Nullable String getHint(@Nullable Object requestContext) {
 		if (requestContext == null) {
 			return null;
 		}
@@ -71,7 +74,7 @@ public class HintBasedServiceInstanceListSupplier extends DelegatingServiceInsta
 		return hint;
 	}
 
-	private String getHintFromHeader(RequestDataContext context) {
+	private @Nullable String getHintFromHeader(RequestDataContext context) {
 		if (context.getClientRequest() != null) {
 			HttpHeaders headers = context.getClientRequest().getHeaders();
 			if (headers != null) {
@@ -81,17 +84,18 @@ public class HintBasedServiceInstanceListSupplier extends DelegatingServiceInsta
 		return null;
 	}
 
-	private List<ServiceInstance> filteredByHint(List<ServiceInstance> instances, String hint) {
+	private List<ServiceInstance> filteredByHint(List<ServiceInstance> instances, @Nullable String hint) {
 		if (!StringUtils.hasText(hint)) {
 			return instances;
 		}
 		List<ServiceInstance> filteredInstances = new ArrayList<>();
 		for (ServiceInstance serviceInstance : instances) {
-			if (serviceInstance.getMetadata().getOrDefault("hint", "").equals(hint)) {
+			if (serviceInstance.getMetadata() != null
+					&& serviceInstance.getMetadata().getOrDefault("hint", "").equals(hint)) {
 				filteredInstances.add(serviceInstance);
 			}
 		}
-		if (filteredInstances.size() > 0) {
+		if (!filteredInstances.isEmpty()) {
 			return filteredInstances;
 		}
 

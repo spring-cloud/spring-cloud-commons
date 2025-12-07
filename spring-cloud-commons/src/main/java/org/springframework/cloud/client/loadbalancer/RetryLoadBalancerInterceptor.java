@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
@@ -35,6 +36,7 @@ import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.policy.NeverRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StreamUtils;
 
 /**
@@ -135,14 +137,14 @@ public class RetryLoadBalancerInterceptor implements BlockingLoadBalancerInterce
 			// LoadBalancedRecoveryCallback are
 			// the same. In most cases they would be different.
 			@Override
-			protected ClientHttpResponse createResponse(ClientHttpResponse response, URI uri) {
+			protected ClientHttpResponse createResponse(ClientHttpResponse response, @Nullable URI uri) {
 				return response;
 			}
 		});
 	}
 
 	private RetryTemplate createRetryTemplate(String serviceName, HttpRequest request,
-			LoadBalancedRetryPolicy retryPolicy) {
+			@Nullable LoadBalancedRetryPolicy retryPolicy) {
 		RetryTemplate template = new RetryTemplate();
 		BackOffPolicy backOffPolicy = lbRetryFactory.createBackOffPolicy(serviceName);
 		template.setBackOffPolicy(backOffPolicy == null ? new NoBackOffPolicy() : backOffPolicy);
@@ -151,15 +153,16 @@ public class RetryLoadBalancerInterceptor implements BlockingLoadBalancerInterce
 		if (retryListeners != null && retryListeners.length != 0) {
 			template.setListeners(retryListeners);
 		}
-		template.setRetryPolicy(
-				!loadBalancerFactory.getProperties(serviceName).getRetry().isEnabled() || retryPolicy == null
-						? new NeverRetryPolicy()
-						: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer, serviceName));
+		LoadBalancerProperties properties = loadBalancerFactory.getProperties(serviceName);
+		boolean retryEnabled = properties == null || properties.getRetry().isEnabled();
+		template.setRetryPolicy(!retryEnabled || retryPolicy == null ? new NeverRetryPolicy()
+				: new InterceptorRetryPolicy(request, retryPolicy, loadBalancer, serviceName));
 		return template;
 	}
 
 	private String getHint(String serviceId) {
-		Map<String, String> hint = loadBalancerFactory.getProperties(serviceId).getHint();
+		LoadBalancerProperties properties = loadBalancerFactory.getProperties(serviceId);
+		Map<String, String> hint = (properties != null) ? properties.getHint() : new LinkedCaseInsensitiveMap<>();
 		String defaultHint = hint.getOrDefault("default", "default");
 		String hintPropertyValue = hint.get(serviceId);
 		return hintPropertyValue != null ? hintPropertyValue : defaultHint;

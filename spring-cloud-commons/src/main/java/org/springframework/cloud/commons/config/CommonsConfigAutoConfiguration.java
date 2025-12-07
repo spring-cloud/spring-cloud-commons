@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,11 @@ package org.springframework.cloud.commons.config;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -34,7 +35,7 @@ public class CommonsConfigAutoConfiguration {
 
 	@Bean
 	public DefaultsBindHandlerAdvisor defaultsBindHandlerAdvisor(
-			@Nullable DefaultsBindHandlerAdvisor.MappingsProvider[] providers) {
+			DefaultsBindHandlerAdvisor.@Nullable MappingsProvider @Nullable [] providers) {
 		Map<ConfigurationPropertyName, ConfigurationPropertyName> additionalMappings = new HashMap<>();
 		if (!ObjectUtils.isEmpty(providers)) {
 			for (DefaultsBindHandlerAdvisor.MappingsProvider mappingsProvider : providers) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 /**
  * @author Spencer Gibb
@@ -71,7 +72,7 @@ public class InetUtils implements Closeable {
 		return hostInfo;
 	}
 
-	public InetAddress findFirstNonLoopbackAddress() {
+	public @Nullable InetAddress findFirstNonLoopbackAddress() {
 		InetAddress result = null;
 		try {
 			int lowest = Integer.MAX_VALUE;

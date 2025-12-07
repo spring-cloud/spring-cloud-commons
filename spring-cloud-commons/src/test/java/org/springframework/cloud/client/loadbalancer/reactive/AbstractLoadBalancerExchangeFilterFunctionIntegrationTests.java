@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2025 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.server.test.LocalServerPort;
-import org.springframework.cloud.client.DefaultServiceInstance;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.discovery.simple.InstanceProperties;
 import org.springframework.cloud.client.discovery.simple.SimpleDiscoveryProperties;
 import org.springframework.cloud.client.loadbalancer.CompletionContext;
 import org.springframework.cloud.client.loadbalancer.DefaultRequestContext;
@@ -47,14 +47,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
  * Base class for {@link LoadBalancedExchangeFilterFunction} integration tests.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Haotian Zhang
  */
 @SuppressWarnings("DataFlowIssue")
 abstract class AbstractLoadBalancerExchangeFilterFunctionIntegrationTests {
@@ -76,10 +77,10 @@ abstract class AbstractLoadBalancerExchangeFilterFunctionIntegrationTests {
 
 	@BeforeEach
 	protected void setUp() {
-		DefaultServiceInstance instance = new DefaultServiceInstance();
+		InstanceProperties instance = new InstanceProperties();
 		instance.setServiceId("testservice");
 		instance.setUri(URI.create("http://localhost:" + port));
-		DefaultServiceInstance instanceWithNoLifecycleProcessors = new DefaultServiceInstance();
+		InstanceProperties instanceWithNoLifecycleProcessors = new InstanceProperties();
 		instanceWithNoLifecycleProcessors.setServiceId("serviceWithNoLifecycleProcessors");
 		instanceWithNoLifecycleProcessors.setUri(URI.create("http://localhost:" + port));
 		properties.getInstances().put("testservice", Collections.singletonList(instance));

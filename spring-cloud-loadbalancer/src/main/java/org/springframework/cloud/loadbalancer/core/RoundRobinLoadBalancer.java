@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2024 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,6 +86,7 @@ public class RoundRobinLoadBalancer implements ReactorServiceInstanceLoadBalance
 			.map(serviceInstances -> processInstanceResponse(supplier, serviceInstances));
 	}
 
+	@SuppressWarnings("NullAway") // guarded by hasServer()
 	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,
 			List<ServiceInstance> serviceInstances) {
 		Response<ServiceInstance> serviceInstanceResponse = getInstanceResponse(serviceInstances);

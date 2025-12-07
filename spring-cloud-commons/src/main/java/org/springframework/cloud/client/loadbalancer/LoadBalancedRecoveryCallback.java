@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 package org.springframework.cloud.client.loadbalancer;
 
 import java.net.URI;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.retry.RecoveryCallback;
 import org.springframework.retry.RetryContext;
@@ -39,8 +41,9 @@ public abstract class LoadBalancedRecoveryCallback<T, R> implements RecoveryCall
 	 * @param uri The URI the response is from.
 	 * @return The response to be returned.
 	 */
-	protected abstract T createResponse(R response, URI uri);
+	protected abstract T createResponse(R response, @Nullable URI uri);
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public T recover(RetryContext context) throws Exception {
 		Throwable lastThrowable = context.getLastThrowable();

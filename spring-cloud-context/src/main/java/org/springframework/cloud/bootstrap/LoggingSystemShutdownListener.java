@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2020 the original author or authors.
+ * Copyright 2012-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ public class LoggingSystemShutdownListener
 		shutdownLogging();
 	}
 
+	@SuppressWarnings("NullAway")
 	private void shutdownLogging() {
 		// TODO: only enable if bootstrap and legacy
 		LoggingSystem loggingSystem = LoggingSystem.get(ClassUtils.getDefaultClassLoader());

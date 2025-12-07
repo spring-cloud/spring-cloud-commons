@@ -1,5 +1,5 @@
 /*
- * Copyright 2013-2020 the original author or authors.
+ * Copyright 2013-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.cloud.bootstrap.support;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.boot.origin.Origin;
 import org.springframework.boot.origin.OriginLookup;
@@ -33,7 +35,7 @@ public class OriginTrackedCompositePropertySource extends CompositePropertySourc
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Origin getOrigin(String name) {
+	public @Nullable Origin getOrigin(String name) {
 		for (PropertySource<?> propertySource : getPropertySources()) {
 			if (propertySource instanceof OriginLookup lookup) {
 				Origin origin = lookup.getOrigin(name);
