@@ -53,7 +53,7 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	}
 
 	@Test
-	public void doesNotCreateCloudHypermediaPropertiesifNotActive() {
+	public void doesNotCreateCloudHypermediaPropertiesIfNotActive() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(Config.class)) {
 			then(context.getBeanNamesForType(CloudHypermediaProperties.class)).hasSize(0);
@@ -71,7 +71,7 @@ public class CloudHypermediaAutoConfigurationIntegrationTests {
 	}
 
 	@Test
-	public void registersResourceRefresherIfDiscoverredResourceIsDefined() {
+	public void registersResourceRefresherIfDiscoveredResourceIsDefined() {
 
 		try (ConfigurableApplicationContext context = getApplicationContext(ConfigWithRemoteResource.class)) {
 

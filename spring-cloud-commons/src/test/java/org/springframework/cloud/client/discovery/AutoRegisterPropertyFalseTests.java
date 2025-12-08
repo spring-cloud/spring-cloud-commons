@@ -48,7 +48,7 @@ public class AutoRegisterPropertyFalseTests {
 	Boolean autoRegisterProperty;
 
 	@Test
-	public void veryifyBeans() {
+	public void verifyBeans() {
 		then(this.autoConfiguration).isNull();
 		then(this.autoServiceRegistration).isNull();
 		then(this.autoServiceRegistrationProperties).isNull();
