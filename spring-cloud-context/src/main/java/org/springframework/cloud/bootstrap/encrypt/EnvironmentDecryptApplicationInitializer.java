@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.bootstrap.encrypt;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +52,7 @@ public class EnvironmentDecryptApplicationInitializer extends AbstractEnvironmen
 
 	private int order = Ordered.HIGHEST_PRECEDENCE + 15;
 
-	private TextEncryptor encryptor;
+	private final TextEncryptor encryptor;
 
 	public EnvironmentDecryptApplicationInitializer(TextEncryptor encryptor) {
 		this.encryptor = encryptor;
@@ -83,7 +82,9 @@ public class EnvironmentDecryptApplicationInitializer extends AbstractEnvironmen
 			PropertySource<?> bootstrap = propertySources
 				.get(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME);
 			if (bootstrap != null) {
-				Map<String, Object> map = decrypt(bootstrap);
+				MutablePropertySources bootstrapSources = new MutablePropertySources();
+				bootstrapSources.addFirst(bootstrap);
+				Map<String, Object> map = decrypt(this.encryptor, bootstrapSources);
 				if (!map.isEmpty()) {
 					found.addAll(map.keySet());
 					insert(applicationContext,
@@ -92,7 +93,7 @@ public class EnvironmentDecryptApplicationInitializer extends AbstractEnvironmen
 			}
 		}
 		removeDecryptedProperties(applicationContext);
-		Map<String, Object> map = decrypt(this.encryptor, propertySources);
+		Map<String, Object> map = decrypt(this.encryptor, environment.getPropertySources());
 		if (!map.isEmpty()) {
 			// We have some decrypted properties
 			found.addAll(map.keySet());
@@ -143,18 +144,6 @@ public class EnvironmentDecryptApplicationInitializer extends AbstractEnvironmen
 			}
 			parent = parent.getParent();
 		}
-	}
-
-	private Map<String, Object> decrypt(PropertySource<?> source) {
-		Map<String, Object> properties = merge(source);
-		decrypt(this.encryptor, properties);
-		return properties;
-	}
-
-	private Map<String, Object> merge(PropertySource<?> source) {
-		Map<String, Object> properties = new LinkedHashMap<>();
-		merge(source, properties);
-		return properties;
 	}
 
 }

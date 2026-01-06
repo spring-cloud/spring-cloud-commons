@@ -16,20 +16,19 @@
 
 package org.springframework.cloud.bootstrap.encrypt;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
+import org.springframework.core.env.SystemEnvironmentPropertySource;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 /**
@@ -66,78 +65,73 @@ public abstract class AbstractEnvironmentDecrypt {
 	}
 
 	protected Map<String, Object> decrypt(TextEncryptor encryptor, PropertySources propertySources) {
-		Map<String, Object> properties = merge(propertySources);
-		decrypt(encryptor, properties);
-		return properties;
-	}
+		Map<String, Object> decryptedProperties = new LinkedHashMap<>();
+		var visitor = new PropertyVisitor();
 
-	protected Map<String, Object> merge(PropertySources propertySources) {
-		Map<String, Object> properties = new LinkedHashMap<>();
-		List<PropertySource<?>> sources = new ArrayList<>();
-		for (PropertySource<?> source : propertySources) {
-			sources.add(0, source);
-		}
-		for (PropertySource<?> source : sources) {
-			merge(source, properties);
-		}
-		return properties;
-	}
-
-	protected void merge(PropertySource<?> source, Map<String, Object> properties) {
-		if (source instanceof CompositePropertySource) {
-
-			List<PropertySource<?>> sources = new ArrayList<>(((CompositePropertySource) source).getPropertySources());
-			Collections.reverse(sources);
-
-			for (PropertySource<?> nested : sources) {
-				merge(nested, properties);
-			}
-
-		}
-		else if (source instanceof EnumerablePropertySource<?> enumerable) {
-			Map<String, Object> otherCollectionProperties = new LinkedHashMap<>();
-			boolean sourceHasDecryptedCollection = false;
-
-			for (String key : enumerable.getPropertyNames()) {
-				Object property = source.getProperty(key);
-				if (property != null) {
-					String value = property.toString();
-					if (value.startsWith(ENCRYPTED_PROPERTY_PREFIX)) {
-						properties.put(key, value);
-						if (COLLECTION_PROPERTY.matcher(key).matches()) {
-							sourceHasDecryptedCollection = true;
-						}
+		for (PropertySource<?> propertySource : propertySources) {
+			if (propertySource instanceof EnumerablePropertySource<?> enumerable) {
+				for (String propertyName : enumerable.getPropertyNames()) {
+					if (visitor.isVisited(propertyName)) {
+						continue;
 					}
-					else if (COLLECTION_PROPERTY.matcher(key).matches()) {
-						// put non-encrypted properties so merging of index properties
-						// happens correctly
-						otherCollectionProperties.put(key, value);
+
+					var collectionMatcher = COLLECTION_PROPERTY.matcher(propertyName);
+					if (collectionMatcher.matches()) {
+						// It is an indexed property. All items should be checked.
+						var prefix = collectionMatcher.group(1);
+						if (prefix == null) {
+							prefix = "";
+						}
+						var indexed = getPropertyValues(enumerable, encryptor, prefix);
+						// Include only if contains decrypted values
+						if (indexed.containsDecrypted) {
+							decryptedProperties.putAll(indexed.values);
+						}
+						visitor.visited(indexed.values.keySet());
 					}
 					else {
-						// override previously encrypted with non-encrypted property
-						properties.remove(key);
+						var single = getPropertyValue(enumerable, encryptor, propertyName);
+						// Include only if decrypted
+						if (single.isDecrypted) {
+							decryptedProperties.put(propertyName, single.value);
+						}
+						visitor.visited(propertyName);
 					}
 				}
 			}
-			// copy all indexed properties even if not encrypted
-			if (sourceHasDecryptedCollection && !otherCollectionProperties.isEmpty()) {
-				properties.putAll(otherCollectionProperties);
-			}
-
 		}
+
+		return decryptedProperties;
 	}
 
-	protected void decrypt(TextEncryptor encryptor, Map<String, Object> properties) {
-		properties.replaceAll((key, value) -> {
-			String valueString = value.toString();
-			if (!valueString.startsWith(ENCRYPTED_PROPERTY_PREFIX)) {
-				return value;
+	private IndexedValue getPropertyValues(EnumerablePropertySource<?> source, TextEncryptor encryptor, String prefix) {
+		boolean containsDecrypted = false;
+		Map<String, Object> elements = new HashMap<>();
+		for (String name : source.getPropertyNames()) {
+			if (COLLECTION_PROPERTY.matcher(name).matches() && name.startsWith(prefix)) {
+				var value = getPropertyValue(source, encryptor, name);
+				elements.put(name, value.value);
+				if (value.isDecrypted) {
+					containsDecrypted = true;
+				}
 			}
-			return decrypt(encryptor, key, valueString);
-		});
+		}
+
+		return new IndexedValue(elements, containsDecrypted);
 	}
 
-	protected String decrypt(TextEncryptor encryptor, String key, String original) {
+	private SingleValue getPropertyValue(PropertySource<?> source, TextEncryptor encryptor, String name) {
+		var value = source.getProperty(name);
+		if (value != null) {
+			var valueString = value.toString();
+			if (valueString.startsWith(ENCRYPTED_PROPERTY_PREFIX)) {
+				return new SingleValue(this.decrypt(encryptor, name, valueString), true);
+			}
+		}
+		return new SingleValue(value, false);
+	}
+
+	private String decrypt(TextEncryptor encryptor, String key, String original) {
 		String value = original.substring(ENCRYPTED_PROPERTY_PREFIX.length());
 		try {
 			value = encryptor.decrypt(value);
@@ -159,6 +153,40 @@ public abstract class AbstractEnvironmentDecrypt {
 			}
 			return "";
 		}
+	}
+
+	private record SingleValue(Object value, boolean isDecrypted) {
+	}
+
+	private record IndexedValue(Map<String, Object> values, boolean containsDecrypted) {
+	}
+
+	private static final class PropertyVisitor {
+
+		/**
+		 * Using SystemEnvironmentPropertySource, instead of a simple Map, just to cover
+		 * relaxed-binding cases.
+		 * <p>
+		 * See {@link SystemEnvironmentPropertySource#containsProperty(String) } for more
+		 * details.
+		 */
+		private final SystemEnvironmentPropertySource propertySource = new SystemEnvironmentPropertySource("visitor",
+				new HashMap<>());
+
+		boolean isVisited(String name) {
+			return this.propertySource.containsProperty(name);
+		}
+
+		void visited(String name) {
+			propertySource.getSource().put(name, "");
+		}
+
+		void visited(Set<String> names) {
+			for (String name : names) {
+				propertySource.getSource().put(name, "");
+			}
+		}
+
 	}
 
 }
