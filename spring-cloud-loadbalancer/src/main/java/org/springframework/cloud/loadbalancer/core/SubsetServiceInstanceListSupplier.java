@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -58,7 +59,12 @@ public class SubsetServiceInstanceListSupplier extends DelegatingServiceInstance
 
 	@Override
 	public Flux<List<ServiceInstance>> get() {
-		return get(null);
+		return get(new Request() {
+			@Override
+			public @Nullable Object getContext() {
+				return Request.super.getContext();
+			}
+		});
 	}
 
 	@Override
