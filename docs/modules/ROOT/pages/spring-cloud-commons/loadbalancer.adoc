@@ -118,8 +118,8 @@ public class CustomLoadBalancerConfiguration {
 			ConfigurableApplicationContext context) {
 		return ServiceInstanceListSupplier.builder()
 					.withDiscoveryClient()
-					.withWeighted()
 					.withCaching()
+					.withWeighted()
 					.build(context);
 	}
 }
@@ -139,8 +139,8 @@ public class CustomLoadBalancerConfiguration {
 			ConfigurableApplicationContext context) {
 		return ServiceInstanceListSupplier.builder()
 					.withDiscoveryClient()
-					.withWeighted(instance -> ThreadLocalRandom.current().nextInt(1, 101))
 					.withCaching()
+					.withWeighted(instance -> ThreadLocalRandom.current().nextInt(1, 101))
 					.build(context);
 	}
 }
@@ -403,8 +403,8 @@ public class CustomLoadBalancerConfiguration {
 			ConfigurableApplicationContext context) {
 		return ServiceInstanceListSupplier.builder()
 					.withDiscoveryClient()
-					.withSubset()
 					.withCaching()
+					.withSubset()
 					.build(context);
 	    }
 	}
