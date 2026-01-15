@@ -150,7 +150,7 @@ any additional `PropertySources` with profiles.
 If you use Spring Boot to configure log settings, you should place this configuration in `bootstrap.[yml | properties]` if you would like it to apply to all events.
 
 NOTE: For Spring Cloud to initialize logging configuration properly, you cannot use a custom prefix.
-For example, using `custom.loggin.logpath` is not recognized by Spring Cloud when initializing the logging system.
+For example, using `custom.logging.logpath` is not recognized by Spring Cloud when initializing the logging system.
 
 [[environment-changes]]
 == Environment Changes
@@ -186,7 +186,7 @@ Then, the next time something borrows a connection from the pool, it gets one wi
 Sometimes, it might even be mandatory to apply the `@RefreshScope` annotation on some beans that can be only initialized once.
 If a bean is "`immutable`", you have to either annotate the bean with `@RefreshScope` or specify the classname under the property key: `spring.cloud.refresh.extra-refreshable`.
 
-WARNING: If you hava a `DataSource` bean that is a `HikariDataSource`, it can not be
+WARNING: If you have a `DataSource` bean that is a `HikariDataSource`, it can not be
 refreshed. It is the default value for `spring.cloud.refresh.never-refreshable`. Choose a
 different `DataSource` implementation if you need it to be refreshed.
 
