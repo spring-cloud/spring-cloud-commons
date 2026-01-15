@@ -61,9 +61,7 @@ public class DecryptEnvironmentPostProcessor extends AbstractEnvironmentDecrypt
 
 		MutablePropertySources propertySources = environment.getPropertySources();
 
-		environment.getPropertySources().remove(DECRYPTED_PROPERTY_SOURCE_NAME);
-
-		Map<String, Object> map = TextEncryptorUtils.decrypt(this, environment, propertySources);
+		Map<String, Object> map = TextEncryptorUtils.decrypt(this, environment);
 		if (!map.isEmpty()) {
 			// We have some decrypted properties
 			propertySources.addFirst(new SystemEnvironmentPropertySource(DECRYPTED_PROPERTY_SOURCE_NAME, map));

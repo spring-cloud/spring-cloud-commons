@@ -30,7 +30,6 @@ import org.springframework.cloud.util.PropertyUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.MutablePropertySources;
 import org.springframework.security.crypto.encrypt.KeyStoreKeyFactory;
 import org.springframework.security.crypto.encrypt.RsaSecretEncryptor;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
@@ -45,13 +44,12 @@ public abstract class TextEncryptorUtils {
 	 * Decrypt environment. See {@link DecryptEnvironmentPostProcessor}.
 	 * @param decryptor the {@link AbstractEnvironmentDecrypt}
 	 * @param environment the environment to get key properties from.
-	 * @param propertySources the property sources to decrypt.
 	 * @return the decrypted properties.
 	 */
-	static Map<String, Object> decrypt(AbstractEnvironmentDecrypt decryptor, ConfigurableEnvironment environment,
-			MutablePropertySources propertySources) {
+	static Map<String, Object> decrypt(AbstractEnvironmentDecrypt decryptor, ConfigurableEnvironment environment) {
 		TextEncryptor encryptor = getTextEncryptor(decryptor, environment);
-		return decryptor.decrypt(encryptor, propertySources);
+
+		return decryptor.decrypt(encryptor, environment.getPropertySources());
 	}
 
 	static TextEncryptor getTextEncryptor(AbstractEnvironmentDecrypt decryptor, ConfigurableEnvironment environment) {
