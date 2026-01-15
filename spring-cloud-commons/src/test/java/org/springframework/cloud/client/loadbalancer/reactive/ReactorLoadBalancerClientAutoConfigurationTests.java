@@ -42,6 +42,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.mockito.Mockito.mock;
 import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerTestUtils.assertLoadBalanced;
 import static org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerTestUtils.getFilters;
 
@@ -230,8 +231,8 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 		@Bean
 		@Primary
-		HttpServiceClientProperties httpServiceClientProperties() {
-			return new HttpServiceClientProperties();
+		HttpServiceClientProperties customeHttpServiceClientProperties() {
+			return mock(HttpServiceClientProperties.class);
 		}
 
 		private static final class TestService {
