@@ -75,6 +75,7 @@ public class LoadBalancerCacheAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
 	@Conditional(OnCaffeineCacheMissingCondition.class)
+	@ConditionalOnClass(ConcurrentMapWithTimedEviction.class)
 	protected static class LoadBalancerCacheManagerWarnConfiguration {
 
 		@Bean
