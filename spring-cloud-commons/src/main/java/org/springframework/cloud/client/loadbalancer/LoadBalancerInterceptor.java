@@ -35,22 +35,25 @@ public class LoadBalancerInterceptor implements BlockingLoadBalancerInterceptor 
 	private final LoadBalancerClient loadBalancer;
 
 	private final LoadBalancerRequestFactory requestFactory;
+	private final ServiceAddressResolver serviceAddressResolver;
 
-	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRequestFactory requestFactory) {
+	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer, LoadBalancerRequestFactory requestFactory,
+								   ServiceAddressResolver serviceAddressResolver) {
 		this.loadBalancer = loadBalancer;
 		this.requestFactory = requestFactory;
+		this.serviceAddressResolver = serviceAddressResolver;
 	}
 
-	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer) {
+	public LoadBalancerInterceptor(LoadBalancerClient loadBalancer, ServiceAddressResolver serviceAddressResolver) {
 		// for backwards compatibility
-		this(loadBalancer, new LoadBalancerRequestFactory(loadBalancer));
+		this(loadBalancer, new LoadBalancerRequestFactory(loadBalancer), serviceAddressResolver);
 	}
 
 	@Override
 	public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
 			throws IOException {
 		URI originalUri = request.getURI();
-		String serviceName = originalUri.getHost();
+		final String serviceName = serviceAddressResolver.getServiceId(originalUri);
 		Assert.state(serviceName != null, "Request URI does not contain a valid hostname: " + originalUri);
 		return loadBalancer.execute(serviceName, requestFactory.createRequest(request, body, execution));
 	}
