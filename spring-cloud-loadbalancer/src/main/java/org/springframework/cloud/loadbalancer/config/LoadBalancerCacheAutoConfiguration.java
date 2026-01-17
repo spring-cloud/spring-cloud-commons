@@ -74,32 +74,6 @@ import org.springframework.util.ClassUtils;
 public class LoadBalancerCacheAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
-	@Conditional(OnCaffeineCacheMissingCondition.class)
-	protected static class LoadBalancerCacheManagerWarnConfiguration {
-
-		@Bean
-		LoadBalancerCaffeineWarnLogger caffeineWarnLogger() {
-			return new LoadBalancerCaffeineWarnLogger();
-		}
-
-	}
-
-	static class LoadBalancerCaffeineWarnLogger implements InitializingBean {
-
-		private static final Log LOG = LogFactory.getLog(LoadBalancerCaffeineWarnLogger.class);
-
-		@Override
-		public void afterPropertiesSet() {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn("Spring Cloud LoadBalancer is currently working with the default cache. "
-						+ "While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production."
-						+ "You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.");
-			}
-		}
-
-	}
-
-	@Configuration(proxyBeanMethods = false)
 	@ConditionalOnClass({ Caffeine.class, CaffeineCacheManager.class })
 	protected static class CaffeineLoadBalancerCacheManagerConfiguration {
 
@@ -120,6 +94,11 @@ public class LoadBalancerCacheAutoConfiguration {
 		@ConditionalOnMissingBean
 		LoadBalancerCacheManager defaultLoadBalancerCacheManager(LoadBalancerCacheProperties cacheProperties) {
 			return new DefaultLoadBalancerCacheManager(cacheProperties);
+		}
+
+		@Bean
+		LoadBalancerCaffeineWarnLogger caffeineWarnLogger() {
+			return new LoadBalancerCaffeineWarnLogger();
 		}
 
 	}
@@ -156,6 +135,21 @@ public class LoadBalancerCacheAutoConfiguration {
 		@ConditionalOnProperty(value = "spring.cloud.loadbalancer.cache.enabled", matchIfMissing = true)
 		static class LoadBalancerCacheEnabled {
 
+		}
+
+	}
+
+	static class LoadBalancerCaffeineWarnLogger implements InitializingBean {
+
+		private static final Log LOG = LogFactory.getLog(LoadBalancerCaffeineWarnLogger.class);
+
+		@Override
+		public void afterPropertiesSet() {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("Spring Cloud LoadBalancer is currently working with the default cache. "
+						+ "While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production."
+						+ "You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.");
+			}
 		}
 
 	}
