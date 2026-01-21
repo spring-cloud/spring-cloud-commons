@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -37,7 +36,6 @@ import static org.springframework.cloud.bootstrap.TestHigherPriorityBootstrapCon
  */
 @Order(0)
 @Configuration(proxyBeanMethods = false)
-@EnableConfigurationProperties
 public class TestBootstrapConfiguration {
 
 	public static List<String> fooSightings = null;
