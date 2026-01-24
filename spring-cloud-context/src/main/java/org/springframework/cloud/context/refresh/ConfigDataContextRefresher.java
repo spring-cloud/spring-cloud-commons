@@ -106,14 +106,13 @@ public class ConfigDataContextRefresher extends ContextRefresher
 				else {
 					if (targetName != null) {
 						target.addAfter(targetName, source);
-						// update targetName to preserve ordering
-						targetName = name;
 					}
 					else {
 						// targetName was null so we are at the start of the list
 						target.addFirst(source);
-						targetName = name;
 					}
+					// update targetName to preserve ordering
+					targetName = name;
 				}
 			}
 		}

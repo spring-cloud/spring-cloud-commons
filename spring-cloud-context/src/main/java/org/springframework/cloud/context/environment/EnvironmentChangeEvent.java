@@ -25,13 +25,17 @@ import org.springframework.core.env.Environment;
  * Event published to signal a change in the {@link Environment}.
  *
  * @author Dave Syer
- *
+ * @author Mikhail Polivakha
  */
 @SuppressWarnings("serial")
 public class EnvironmentChangeEvent extends ApplicationEvent {
 
-	private Set<String> keys;
+	private final Set<String> keys;
 
+	/**
+	 * @param keys Key set that represents the difference between old and new versions of
+	 * the {@link Environment}.
+	 */
 	public EnvironmentChangeEvent(Set<String> keys) {
 		// Backwards compatible constructor with less utility (practically no use at all)
 		this(keys, keys);
@@ -43,7 +47,8 @@ public class EnvironmentChangeEvent extends ApplicationEvent {
 	}
 
 	/**
-	 * @return The keys.
+	 * @return Key set that represents the difference between old and new versions of the
+	 * {@link Environment}.
 	 */
 	public Set<String> getKeys() {
 		return this.keys;
