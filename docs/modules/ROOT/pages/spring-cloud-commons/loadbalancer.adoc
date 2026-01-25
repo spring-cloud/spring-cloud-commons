@@ -18,8 +18,8 @@ You can choose to load those contexts eagerly. In order to do that, specify the 
 
 [source]
 ----
-spring.cloud-loadbalancer.eager-load.clients[0]=my-first-client
-spring.cloud-loadbalancer.eager-load.clients[1]=my-second-client
+spring.cloud.loadbalancer.eager-load.clients[0]=my-first-client
+spring.cloud.loadbalancer.eager-load.clients[1]=my-second-client
 ----
 
 [[switching-between-the-load-balancing-algorithms]]
