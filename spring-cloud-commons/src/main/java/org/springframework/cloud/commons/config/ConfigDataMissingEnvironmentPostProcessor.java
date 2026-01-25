@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.springframework.cloud.commons;
+package org.springframework.cloud.commons.config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.NullMarked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +43,9 @@ import org.springframework.core.env.PropertySource;
 
 /**
  * @author Ryan Baxter
- * @deprecated Deprecated in favor of
- * {@link org.springframework.cloud.commons.config.ConfigDataMissingEnvironmentPostProcessor}
+ * @author Mikhail Polivakha
  */
-// TODO: 4.0.0 move to org.springframework.cloud.commons.config
-@Deprecated(forRemoval = true, since = "5.0.0")
+@NullMarked
 public abstract class ConfigDataMissingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
 	/**
@@ -80,39 +79,41 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 		if (!shouldProcessEnvironment(environment)) {
 			return;
 		}
-		List<Object> property = getConfigImports(environment);
-		if (property == null || property.isEmpty()) {
-			throw new ImportException("No spring.config.import set", false);
-		}
-		if (!property.stream().anyMatch(impt -> ((String) impt).contains(getPrefix()))) {
+
+		List<String> property = getConfigImports(environment);
+
+		if (property.stream().noneMatch(impt -> impt.contains(getPrefix()))) {
 			throw new ImportException("spring.config.import missing " + getPrefix(), true);
 		}
 	}
 
-	private List<Object> getConfigImports(ConfigurableEnvironment environment) {
+	private List<String> getConfigImports(ConfigurableEnvironment environment) {
 		MutablePropertySources propertySources = environment.getPropertySources();
-		List<Object> property = propertySources.stream()
-			.filter(this::propertySourceWithConfigImport)
-			.flatMap(propertySource -> {
-				List<Object> configImports = new ArrayList<>();
-				if (propertySource.getProperty(CONFIG_IMPORT_PROPERTY) != null) {
-					configImports.add(propertySource.getProperty(CONFIG_IMPORT_PROPERTY));
-				}
-				else {
-					configImports.addAll(Arrays.asList(getConfigImportArray(propertySource)));
-				}
-				return configImports.stream();
-			})
-			.collect(Collectors.toList());
-		return property;
+		return propertySources.stream().filter(it -> propertySourceWithConfigImport(it, 0)).flatMap(propertySource -> {
+			List<String> configImports = new ArrayList<>();
+			Object configProperty = propertySource.getProperty(CONFIG_IMPORT_PROPERTY);
+			if (configProperty instanceof String stringProperty) {
+				configImports.add(stringProperty);
+			}
+			else {
+				configImports.addAll(Arrays.asList(getConfigImportArray(propertySource)));
+			}
+			return configImports.stream();
+		}).collect(Collectors.toList());
 	}
 
-	private boolean propertySourceWithConfigImport(PropertySource propertySource) {
+	private boolean propertySourceWithConfigImport(PropertySource propertySource, int epoch) {
+		if (epoch > 1000) {
+			throw new IllegalStateException(
+					"The nesting of property sources is too deep. Preventing further recursion for security purposes");
+		}
+
 		if (propertySource instanceof CompositePropertySource) {
 			return ((CompositePropertySource) propertySource).getPropertySources()
 				.stream()
-				.anyMatch(this::propertySourceWithConfigImport);
+				.anyMatch(it -> propertySourceWithConfigImport(it, epoch + 1));
 		}
+
 		return propertySource.containsProperty(CONFIG_IMPORT_PROPERTY)
 				|| getConfigImportArray(propertySource).length > 0;
 	}
