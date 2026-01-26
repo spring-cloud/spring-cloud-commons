@@ -40,6 +40,7 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.mockito.Mockito.mock;
 import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer.REQUEST;
 
 /**
@@ -191,8 +192,8 @@ public abstract class AbstractLoadBalancerAutoConfigurationTests {
 		}
 
 		@Bean
-		HttpServiceClientProperties httpServiceClientProperties() {
-			return new HttpServiceClientProperties();
+		HttpServiceClientProperties customHttpServiceClientProperties() {
+			return mock(HttpServiceClientProperties.class);
 		}
 
 	}

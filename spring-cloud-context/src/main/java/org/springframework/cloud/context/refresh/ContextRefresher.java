@@ -46,6 +46,7 @@ import org.springframework.web.context.support.StandardServletEnvironment;
 /**
  * @author Dave Syer
  * @author Venil Noronha
+ * @author Mikhail Polivakha
  */
 public abstract class ContextRefresher {
 
@@ -64,9 +65,9 @@ public abstract class ContextRefresher {
 
 	protected final List<String> additionalPropertySourcesToRetain;
 
-	private ConfigurableApplicationContext context;
+	private final ConfigurableApplicationContext context;
 
-	private RefreshScope scope;
+	private final RefreshScope scope;
 
 	@Deprecated
 	protected ContextRefresher(ConfigurableApplicationContext context, RefreshScope scope) {
@@ -96,18 +97,22 @@ public abstract class ContextRefresher {
 	}
 
 	public synchronized Set<String> refreshEnvironment() {
-		Map<String, Object> before = extract(this.context.getEnvironment().getPropertySources());
+		Map<String, Object> before = getCurrentEnvironmentProperties();
 		updateEnvironment();
-		Set<String> keys = changes(before, extract(this.context.getEnvironment().getPropertySources())).keySet();
+		Set<String> keys = changes(before, getCurrentEnvironmentProperties()).keySet();
 		this.context.publishEvent(new EnvironmentChangeEvent(this.context, keys));
 		return keys;
+	}
+
+	private Map<String, Object> getCurrentEnvironmentProperties() {
+		return extract(this.context.getEnvironment().getPropertySources());
 	}
 
 	protected abstract void updateEnvironment();
 
 	// Don't use ConfigurableEnvironment.merge() in case there are clashes with property
 	// source names
-	protected StandardEnvironment copyEnvironment(ConfigurableEnvironment input) {
+	protected StandardEnvironment copyEnvironment(ConfigurableEnvironment sourceEnv) {
 		StandardEnvironment environment = new StandardEnvironment();
 		MutablePropertySources capturedPropertySources = environment.getPropertySources();
 		// Only copy the default property source(s) and the profiles over from the main
@@ -117,18 +122,17 @@ public abstract class ContextRefresher {
 			propertySourcesToRetain.addAll(additionalPropertySourcesToRetain);
 		}
 
-		for (String name : propertySourcesToRetain) {
-			if (input.getPropertySources().contains(name)) {
-				if (capturedPropertySources.contains(name)) {
-					capturedPropertySources.replace(name, input.getPropertySources().get(name));
-				}
-				else {
-					capturedPropertySources.addLast(input.getPropertySources().get(name));
-				}
+		propertySourcesToRetain.stream().filter(s -> sourceEnv.getPropertySources().contains(s)).forEach(s -> {
+			if (capturedPropertySources.contains(s)) {
+				capturedPropertySources.replace(s, sourceEnv.getPropertySources().get(s));
 			}
-		}
-		environment.setActiveProfiles(input.getActiveProfiles());
-		environment.setDefaultProfiles(input.getDefaultProfiles());
+			else {
+				capturedPropertySources.addLast(sourceEnv.getPropertySources().get(s));
+			}
+		});
+
+		environment.setActiveProfiles(sourceEnv.getActiveProfiles());
+		environment.setDefaultProfiles(sourceEnv.getDefaultProfiles());
 		return environment;
 	}
 
@@ -164,13 +168,15 @@ public abstract class ContextRefresher {
 		return result;
 	}
 
-	private void extract(PropertySource<?> parent, Map<String, Object> result) {
-		if (parent instanceof CompositePropertySource) {
+	private void extract(PropertySource<?> propertySource, Map<String, Object> result) {
+		if (propertySource instanceof CompositePropertySource cps) {
 			try {
 				List<PropertySource<?>> sources = new ArrayList<>();
-				for (PropertySource<?> source : ((CompositePropertySource) parent).getPropertySources()) {
+
+				for (PropertySource<?> source : cps.getPropertySources()) {
 					sources.add(0, source);
 				}
+
 				for (PropertySource<?> source : sources) {
 					extract(source, result);
 				}
@@ -179,9 +185,9 @@ public abstract class ContextRefresher {
 				return;
 			}
 		}
-		else if (parent instanceof EnumerablePropertySource) {
-			for (String key : ((EnumerablePropertySource<?>) parent).getPropertyNames()) {
-				result.put(key, parent.getProperty(key));
+		else if (propertySource instanceof EnumerablePropertySource<?> eps) {
+			for (String key : eps.getPropertyNames()) {
+				result.put(key, propertySource.getProperty(key));
 			}
 		}
 	}

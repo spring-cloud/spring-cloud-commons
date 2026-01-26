@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.bootstrap.encrypt;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +52,7 @@ public class EnvironmentDecryptApplicationInitializer extends AbstractEnvironmen
 
 	private int order = Ordered.HIGHEST_PRECEDENCE + 15;
 
-	private TextEncryptor encryptor;
+	private final TextEncryptor encryptor;
 
 	public EnvironmentDecryptApplicationInitializer(TextEncryptor encryptor) {
 		this.encryptor = encryptor;
@@ -80,10 +79,11 @@ public class EnvironmentDecryptApplicationInitializer extends AbstractEnvironmen
 		Set<String> found = new LinkedHashSet<>();
 		if (!propertySources.contains(DECRYPTED_BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
 			// No reason to decrypt bootstrap twice
-			PropertySource<?> bootstrap = propertySources
-				.get(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME);
+			var bootstrap = propertySources.get(BootstrapApplicationListener.BOOTSTRAP_PROPERTY_SOURCE_NAME);
 			if (bootstrap != null) {
-				Map<String, Object> map = decrypt(bootstrap);
+				var bootstrapSources = new MutablePropertySources();
+				bootstrapSources.addFirst(bootstrap);
+				Map<String, Object> map = decrypt(this.encryptor, bootstrapSources);
 				if (!map.isEmpty()) {
 					found.addAll(map.keySet());
 					insert(applicationContext,
@@ -143,18 +143,6 @@ public class EnvironmentDecryptApplicationInitializer extends AbstractEnvironmen
 			}
 			parent = parent.getParent();
 		}
-	}
-
-	private Map<String, Object> decrypt(PropertySource<?> source) {
-		Map<String, Object> properties = merge(source);
-		decrypt(this.encryptor, properties);
-		return properties;
-	}
-
-	private Map<String, Object> merge(PropertySource<?> source) {
-		Map<String, Object> properties = new LinkedHashMap<>();
-		merge(source, properties);
-		return properties;
 	}
 
 }

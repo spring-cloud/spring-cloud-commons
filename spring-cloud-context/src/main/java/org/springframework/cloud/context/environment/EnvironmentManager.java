@@ -77,7 +77,6 @@ public class EnvironmentManager implements ApplicationEventPublisherAware {
 
 	@ManagedOperation
 	public void setProperty(String name, String value) {
-
 		if (!this.environment.getPropertySources().contains(MANAGER_PROPERTY_SOURCE)) {
 			synchronized (this.map) {
 				if (!this.environment.getPropertySources().contains(MANAGER_PROPERTY_SOURCE)) {
