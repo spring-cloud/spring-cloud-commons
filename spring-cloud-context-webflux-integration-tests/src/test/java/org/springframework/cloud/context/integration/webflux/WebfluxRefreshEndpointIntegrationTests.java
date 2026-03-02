@@ -18,9 +18,11 @@ package org.springframework.cloud.context.integration.webflux;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +41,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  */
 @SpringBootTest(classes = WebfluxRefreshEndpointIntegrationTests.ClientApp.class,
 		properties = { "management.endpoints.web.exposure.include=*" }, webEnvironment = RANDOM_PORT)
+@AutoConfigureTestRestTemplate
 public class WebfluxRefreshEndpointIntegrationTests {
 
 	private static final String BASE_PATH = new WebEndpointProperties().getBasePath();
@@ -46,9 +49,11 @@ public class WebfluxRefreshEndpointIntegrationTests {
 	@LocalServerPort
 	private int port;
 
+	@Autowired
+	private TestRestTemplate template;
+
 	@Test
 	public void webAccess() throws Exception {
-		TestRestTemplate template = new TestRestTemplate();
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity request = new HttpEntity(headers);
