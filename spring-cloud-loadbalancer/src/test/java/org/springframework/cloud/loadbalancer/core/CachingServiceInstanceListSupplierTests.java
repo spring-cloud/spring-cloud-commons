@@ -17,6 +17,7 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.cloud.client.loadbalancer.ServiceAddressResolver;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -94,6 +95,11 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
+		ServiceAddressResolver serviceAddressResolver() {
+			return new ServiceAddressResolver();
+		}
+
+		@Bean
 		ReactorLoadBalancer<ServiceInstance> reactorLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> provider) {
 			return new RoundRobinLoadBalancer(provider, SERVICE_ID);
 		}
@@ -104,8 +110,9 @@ class CachingServiceInstanceListSupplierTests {
 		}
 
 		@Bean
-		BlockingLoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory) {
-			return new BlockingLoadBalancerClient(loadBalancerClientFactory);
+		BlockingLoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
+															  ServiceAddressResolver serviceAddressResolver) {
+			return new BlockingLoadBalancerClient(loadBalancerClientFactory, serviceAddressResolver);
 		}
 
 		@Bean
