@@ -63,11 +63,28 @@ public class TestConfigDataLocationResolver implements ConfigDataLocationResolve
 			.bind("createfailsafedelegate", Bindable.of(Boolean.class))
 			.orElse(Boolean.FALSE);
 		if (createFailsafeDelegate) {
+			KeyProperties keyProperties = context.getBinder()
+				.bindOrCreate(KeyProperties.PREFIX, Bindable.of(KeyProperties.class));
+			// Due to
+			// https://github.com/spring-projects/spring-boot/commit/646db448ae938161279783a2d5d0bcaf297e7389
+			// in Spring Boo 4.0.3 and beyond the initial call to resolve may not have
+			// application-failsafe.properties
+			// loaded so EncryptionIntegrationTests.failsafeShouldHaveDelegate will fail
+			// when we assert TextEncryptorUtils.keysConfigured(keyProperties)
+			// is true. application-failsafe.properties will only be available on
+			// subsequent calls to resolve so we return
+			// if TextEncryptorUtils.keysConfigured(keyProperties) is false. We need to
+			// get TextEncryptor from the context
+			// before we return so FailSafeTextEncryptor is created and used in subsequent
+			// calls to resolve.
+			if (!TextEncryptorUtils.keysConfigured(keyProperties)) {
+				assertThat(context.getBootstrapContext().isRegistered(TextEncryptor.class)).isTrue();
+				context.getBootstrapContext().get(TextEncryptor.class);
+				return Collections.emptyList();
+			}
 			assertThat(context.getBootstrapContext().isRegistered(TextEncryptor.class)).isTrue();
 			TextEncryptor textEncryptor = context.getBootstrapContext().get(TextEncryptor.class);
 			assertThat(textEncryptor).isInstanceOf(TextEncryptorUtils.FailsafeTextEncryptor.class);
-			KeyProperties keyProperties = context.getBinder()
-				.bindOrCreate(KeyProperties.PREFIX, Bindable.of(KeyProperties.class));
 			assertThat(TextEncryptorUtils.keysConfigured(keyProperties)).isTrue();
 			RsaProperties rsaProperties = context.getBinder()
 				.bindOrCreate(RsaProperties.PREFIX, Bindable.of(RsaProperties.class));
