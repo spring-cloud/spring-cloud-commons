@@ -16,7 +16,7 @@
 	<description>Spring Cloud Test Support</description>
 	<properties>
 		<maven-resolver.version>1.9.24</maven-resolver.version>
-		<maven.version>3.9.13</maven.version>
+		<maven.version>3.9.14</maven.version>
 	</properties>
 	<dependencies>
 		<dependency>
