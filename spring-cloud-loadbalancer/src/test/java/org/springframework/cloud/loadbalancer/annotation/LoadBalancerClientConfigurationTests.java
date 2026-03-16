@@ -31,10 +31,12 @@ import org.springframework.cloud.client.discovery.composite.reactive.ReactiveCom
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerCacheAutoConfiguration;
+import org.springframework.cloud.loadbalancer.config.LoadBalancerCacheDataManagerConfiguration;
 import org.springframework.cloud.loadbalancer.core.CachingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.DelegatingServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.DiscoveryClientServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.HealthCheckServiceInstanceListSupplier;
+import org.springframework.cloud.loadbalancer.core.MultiAZFailoverServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.RequestBasedStickySessionServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.RetryAwareServiceInstanceListSupplier;
 import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
@@ -55,13 +57,14 @@ import static org.assertj.core.api.BDDAssertions.then;
  *
  * @author Olga Maciaszek-Sharma
  * @author Zhuozhi Ji
+ * @author Jiwon Jeon
  */
 class LoadBalancerClientConfigurationTests {
 
 	ApplicationContextRunner reactiveDiscoveryClientRunner = new ApplicationContextRunner()
 		.withConfiguration(AutoConfigurations.of(ReactiveCompositeDiscoveryClientAutoConfiguration.class,
-				LoadBalancerCacheAutoConfiguration.class, LoadBalancerAutoConfiguration.class,
-				LoadBalancerClientConfiguration.class));
+				LoadBalancerCacheAutoConfiguration.class, LoadBalancerCacheDataManagerConfiguration.class,
+        LoadBalancerAutoConfiguration.class, LoadBalancerClientConfiguration.class));
 
 	ApplicationContextRunner blockingDiscoveryClientRunner = new ApplicationContextRunner()
 		.withClassLoader(new FilteredClassLoader(RetryTemplate.class))
@@ -141,6 +144,21 @@ class LoadBalancerClientConfigurationTests {
 					.getDelegate();
 				then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
 			});
+	}
+
+	@Test
+	void shouldInstantiateMultiAZFailoverServiceInstanceListSupplierTests() {
+		reactiveDiscoveryClientRunner.withPropertyValues("spring.cloud.loadbalancer.configurations=multi-az-failover")
+				.run(context -> {
+					ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
+					then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);
+					ServiceInstanceListSupplier delegate = ((DelegatingServiceInstanceListSupplier) supplier)
+							.getDelegate();
+					then(delegate).isInstanceOf(MultiAZFailoverServiceInstanceListSupplier.class);
+					ServiceInstanceListSupplier secondDelegate = ((DelegatingServiceInstanceListSupplier) delegate)
+							.getDelegate();
+					then(secondDelegate).isInstanceOf(DiscoveryClientServiceInstanceListSupplier.class);
+				});
 	}
 
 	@Test
