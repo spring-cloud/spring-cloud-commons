@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
@@ -125,18 +126,28 @@ public class ConfigurationPropertiesRebinder
 	private boolean rebind(String name, ApplicationContext appContext) {
 		try {
 			Object bean = appContext.getBean(name);
+			Object target = bean;
+			boolean proxied = false;
 			if (AopUtils.isAopProxy(bean)) {
-				bean = ProxyUtils.getTargetObject(bean);
+				target = ProxyUtils.getTargetObject(bean);
+				proxied = true;
 			}
-			if (bean != null) {
+			if (target != null) {
 				// TODO: determine a more general approach to fix this.
 				// see
 				// https://github.com/spring-cloud/spring-cloud-commons/issues/571
-				if (getNeverRefreshable().contains(bean.getClass().getName()) || getNeverRefreshable().contains(name)) {
+				if (getNeverRefreshable().contains(target.getClass().getName())
+						|| getNeverRefreshable().contains(name)) {
 					return false; // ignore
 				}
-				appContext.getAutowireCapableBeanFactory().destroyBean(bean);
-				appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
+				appContext.getAutowireCapableBeanFactory().destroyBean(target);
+				if (proxied && bean instanceof Advised advised) {
+					Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(target.getClass());
+					advised.setTargetSource(new org.springframework.aop.target.SingletonTargetSource(freshBean));
+				}
+				else {
+					appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
+				}
 				return true;
 			}
 		}
