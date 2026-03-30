@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Set;
 
+import org.springframework.cloud.client.loadbalancer.ServiceAddressResolver;
 import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -59,9 +60,12 @@ import static org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoa
 public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	private final ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory;
+	private final ServiceAddressResolver serviceAddressResolver;
 
-	public BlockingLoadBalancerClient(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory) {
+	public BlockingLoadBalancerClient(ReactiveLoadBalancer.Factory<ServiceInstance> loadBalancerClientFactory,
+									  ServiceAddressResolver serviceAddressResolver) {
 		this.loadBalancerClientFactory = loadBalancerClientFactory;
+		this.serviceAddressResolver = serviceAddressResolver;
 	}
 
 	@Override
@@ -156,6 +160,10 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	@Override
 	public <T> ServiceInstance choose(String serviceId, Request<T> request) {
+		// If it is a direct connection address
+		if(serviceAddressResolver.isDirectAddress(request)) {
+			return serviceAddressResolver.createDirectServiceInstance(request);
+		}
 		ReactiveLoadBalancer<ServiceInstance> loadBalancer = loadBalancerClientFactory.getInstance(serviceId);
 		if (loadBalancer == null) {
 			return null;

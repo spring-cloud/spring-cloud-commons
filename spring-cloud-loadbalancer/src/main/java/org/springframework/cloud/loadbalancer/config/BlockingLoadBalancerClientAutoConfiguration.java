@@ -25,6 +25,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.BlockingRestClassesPresentCondition;
+import org.springframework.cloud.client.loadbalancer.ServiceAddressResolver;
 import org.springframework.cloud.client.loadbalancer.LoadBalancedRetryFactory;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
@@ -58,8 +59,9 @@ public class BlockingLoadBalancerClientAutoConfiguration {
 	@Bean
 	@ConditionalOnBean(LoadBalancerClientFactory.class)
 	@ConditionalOnMissingBean
-	public LoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory) {
-		return new BlockingLoadBalancerClient(loadBalancerClientFactory);
+	public LoadBalancerClient blockingLoadBalancerClient(LoadBalancerClientFactory loadBalancerClientFactory,
+														 ServiceAddressResolver serviceAddressResolver) {
+		return new BlockingLoadBalancerClient(loadBalancerClientFactory, serviceAddressResolver);
 	}
 
 	@Bean
