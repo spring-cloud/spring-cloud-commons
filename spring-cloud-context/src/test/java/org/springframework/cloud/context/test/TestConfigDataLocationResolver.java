@@ -67,7 +67,7 @@ public class TestConfigDataLocationResolver implements ConfigDataLocationResolve
 				.bindOrCreate(KeyProperties.PREFIX, Bindable.of(KeyProperties.class));
 			// Due to
 			// https://github.com/spring-projects/spring-boot/commit/646db448ae938161279783a2d5d0bcaf297e7389
-			// in Spring Boo 4.0.3 and beyond the initial call to resolve may not have
+			// in Spring Boot 3.5.12 and beyond the initial call to resolve may not have
 			// application-failsafe.properties
 			// loaded so EncryptionIntegrationTests.failsafeShouldHaveDelegate will fail
 			// when we assert TextEncryptorUtils.keysConfigured(keyProperties)
