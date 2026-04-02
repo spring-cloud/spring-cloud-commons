@@ -36,8 +36,32 @@ public class LoadBalancerClientsProperties extends LoadBalancerProperties {
 
 	private final Map<String, LoadBalancerProperties> clients = new HashMap<>();
 
+	private GrpcClient grpcClient = new GrpcClient();
+
 	public Map<String, LoadBalancerProperties> getClients() {
 		return this.clients;
+	}
+
+	public GrpcClient getGrpcClient() {
+		return grpcClient;
+	}
+
+	public void setGrpcClient(GrpcClient grpcClient) {
+		this.grpcClient = grpcClient;
+	}
+
+	public static class GrpcClient {
+
+		private boolean enabled = false;
+
+		public boolean isEnabled() {
+			return enabled;
+		}
+
+		public void setEnabled(boolean enabled) {
+			this.enabled = enabled;
+		}
+
 	}
 
 }

@@ -18,25 +18,37 @@ package org.springframework.cloud.loadbalancer.config;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
+import io.grpc.netty.NettyChannelBuilder;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerEagerLoadProperties;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancerBeanPostProcessorAutoConfiguration;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerClientAutoConfiguration;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
+import org.springframework.cloud.loadbalancer.annotation.grpc.GrpcClientBeanPostProcessor;
 import org.springframework.cloud.loadbalancer.aot.LoadBalancerChildContextInitializer;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerEagerContextInitializer;
+import org.springframework.cloud.loadbalancer.support.grpc.DiscoveryGrpcChannelFactory;
+import org.springframework.cloud.loadbalancer.support.grpc.DiscoveryNameResolverProvider;
+import org.springframework.cloud.loadbalancer.support.grpc.DiscoveryNameResolverRegister;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.grpc.client.ClientInterceptorsConfigurer;
+import org.springframework.grpc.client.GrpcChannelBuilderCustomizer;
+import org.springframework.grpc.client.GrpcClientFactory;
 
 /**
  * @author Spencer Gibb
@@ -75,6 +87,39 @@ public class LoadBalancerAutoConfiguration {
 	static LoadBalancerChildContextInitializer loadBalancerChildContextInitializer(
 			LoadBalancerClientFactory loadBalancerClientFactory, ApplicationContext parentContext) {
 		return new LoadBalancerChildContextInitializer(loadBalancerClientFactory, parentContext);
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnClass({ DiscoveryClient.class, GrpcClientFactory.class, ClientInterceptorsConfigurer.class,
+			ExecutorService.class })
+	@ConditionalOnProperty(prefix = "spring.cloud.loadbalancer.grpc-client", name = "enabled", havingValue = "true",
+			matchIfMissing = true)
+	static class GrpcClientConfiguration {
+
+		@Bean
+		DiscoveryNameResolverProvider discoveryNameResolverProvider(DiscoveryClient discoveryClient,
+				ExecutorService executorService) {
+			return new DiscoveryNameResolverProvider(discoveryClient, executorService);
+		}
+
+		@Bean
+		DiscoveryNameResolverRegister discoveryNameResolverRegister(
+				DiscoveryNameResolverProvider discoveryNameResolverProvider) {
+			return new DiscoveryNameResolverRegister(discoveryNameResolverProvider);
+		}
+
+		@Bean
+		GrpcClientBeanPostProcessor grpcClientBeanPostProcessor(GrpcClientFactory grpcClientFactory) {
+			return new GrpcClientBeanPostProcessor(grpcClientFactory);
+		}
+
+		@Bean
+		DiscoveryGrpcChannelFactory discoveryGrpcChannelFactory(
+				List<GrpcChannelBuilderCustomizer<@NonNull NettyChannelBuilder>> globalCustomizers,
+				ClientInterceptorsConfigurer interceptorsConfigurer) {
+			return new DiscoveryGrpcChannelFactory(globalCustomizers, interceptorsConfigurer);
+		}
+
 	}
 
 }

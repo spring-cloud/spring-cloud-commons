@@ -44,6 +44,12 @@
 			"name": "spring.cloud.loadbalancer.stats.micrometer.enabled",
 			"description": "Enables Spring Cloud LoadBalancer Micrometer stats.",
 			"type": "java.lang.Boolean"
-		}
+		},
+        {
+          "defaultValue": "false",
+          "name": "spring.cloud.loadbalancer.grpc-client.enabled",
+          "description": "Enables Spring Cloud LoadBalancer Grpc Client.",
+          "type": "java.lang.Boolean"
+        }
 	]
 }
