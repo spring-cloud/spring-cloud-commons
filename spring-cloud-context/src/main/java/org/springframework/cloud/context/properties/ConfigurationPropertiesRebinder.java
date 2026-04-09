@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.context.properties;
 
+import java.beans.PropertyDescriptor;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +25,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -136,6 +141,7 @@ public class ConfigurationPropertiesRebinder
 					return false; // ignore
 				}
 				appContext.getAutowireCapableBeanFactory().destroyBean(bean);
+				resetBeanToDefaults(bean);
 				appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
 				return true;
 			}
@@ -149,6 +155,41 @@ public class ConfigurationPropertiesRebinder
 			throw new IllegalStateException("Cannot rebind to " + name, e);
 		}
 		return false;
+	}
+
+	/**
+	 * Reset bean properties to their class-level defaults so that removed properties do
+	 * not retain stale values after rebinding.
+	 */
+	private void resetBeanToDefaults(Object bean) {
+		try {
+			Object freshInstance = BeanUtils.instantiateClass(bean.getClass());
+			BeanWrapper target = new BeanWrapperImpl(bean);
+			BeanWrapper defaults = new BeanWrapperImpl(freshInstance);
+			for (PropertyDescriptor pd : target.getPropertyDescriptors()) {
+				String propertyName = pd.getName();
+				if ("class".equals(propertyName)) {
+					continue;
+				}
+				if (target.isWritableProperty(propertyName) && defaults.isReadableProperty(propertyName)) {
+					Object defaultValue = defaults.getPropertyValue(propertyName);
+					target.setPropertyValue(propertyName, defaultValue);
+				}
+				else if (target.isReadableProperty(propertyName)) {
+					Object value = target.getPropertyValue(propertyName);
+					if (value instanceof Collection<?> collection) {
+						collection.clear();
+					}
+					else if (value instanceof Map<?, ?> map) {
+						map.clear();
+					}
+				}
+			}
+		}
+		catch (Exception ex) {
+			// If we cannot create a default instance (e.g. no default constructor),
+			// skip the reset and rely on the existing rebind behavior.
+		}
 	}
 
 	@ManagedAttribute
