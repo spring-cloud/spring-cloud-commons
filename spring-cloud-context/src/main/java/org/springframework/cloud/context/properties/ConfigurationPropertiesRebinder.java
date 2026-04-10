@@ -23,8 +23,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -60,6 +65,8 @@ import org.springframework.util.StringUtils;
 @ManagedResource
 public class ConfigurationPropertiesRebinder
 		implements ApplicationContextAware, ApplicationListener<EnvironmentChangeEvent> {
+
+	private static final Log logger = LogFactory.getLog(ConfigurationPropertiesRebinder.class);
 
 	private ConfigurationPropertiesBeans beans;
 
@@ -130,19 +137,26 @@ public class ConfigurationPropertiesRebinder
 	private boolean rebind(String name, ApplicationContext appContext) {
 		try {
 			Object bean = appContext.getBean(name);
-			if (AopUtils.isAopProxy(bean)) {
-				bean = ProxyUtils.getTargetObject(bean);
-			}
 			if (bean != null) {
+				Class<?> targetClass = AopUtils.getTargetClass(bean);
 				// TODO: determine a more general approach to fix this.
 				// see
 				// https://github.com/spring-cloud/spring-cloud-commons/issues/571
-				if (getNeverRefreshable().contains(bean.getClass().getName()) || getNeverRefreshable().contains(name)) {
+				if (getNeverRefreshable().contains(targetClass.getName()) || getNeverRefreshable().contains(name)) {
 					return false; // ignore
 				}
-				appContext.getAutowireCapableBeanFactory().destroyBean(bean);
-				resetBeanToDefaults(bean);
-				appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
+				if (AopUtils.isAopProxy(bean)) {
+					Object target = ProxyUtils.getTargetObject(bean);
+					appContext.getAutowireCapableBeanFactory().destroyBean(target);
+					Object freshTarget = BeanUtils.instantiateClass(targetClass);
+					appContext.getAutowireCapableBeanFactory().initializeBean(freshTarget, name);
+					((Advised) bean).setTargetSource(new SingletonTargetSource(freshTarget));
+				}
+				else {
+					appContext.getAutowireCapableBeanFactory().destroyBean(bean);
+					resetBeanToDefaults(bean);
+					appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
+				}
 				return true;
 			}
 		}
@@ -162,15 +176,24 @@ public class ConfigurationPropertiesRebinder
 	 * not retain stale values after rebinding.
 	 */
 	private void resetBeanToDefaults(Object bean) {
+		Class<?> targetClass = AopUtils.getTargetClass(bean);
+		Object freshInstance;
 		try {
-			Object freshInstance = BeanUtils.instantiateClass(bean.getClass());
-			BeanWrapper target = new BeanWrapperImpl(bean);
-			BeanWrapper defaults = new BeanWrapperImpl(freshInstance);
-			for (PropertyDescriptor pd : target.getPropertyDescriptors()) {
-				String propertyName = pd.getName();
-				if ("class".equals(propertyName)) {
-					continue;
-				}
+			freshInstance = BeanUtils.instantiateClass(targetClass);
+		}
+		catch (Exception ex) {
+			logger.warn("Cannot create default instance of " + targetClass.getName()
+					+ " for reset; skipping property reset", ex);
+			return;
+		}
+		BeanWrapper target = new BeanWrapperImpl(bean);
+		BeanWrapper defaults = new BeanWrapperImpl(freshInstance);
+		for (PropertyDescriptor pd : target.getPropertyDescriptors()) {
+			String propertyName = pd.getName();
+			if ("class".equals(propertyName)) {
+				continue;
+			}
+			try {
 				if (target.isWritableProperty(propertyName) && defaults.isReadableProperty(propertyName)) {
 					Object defaultValue = defaults.getPropertyValue(propertyName);
 					target.setPropertyValue(propertyName, defaultValue);
@@ -185,10 +208,11 @@ public class ConfigurationPropertiesRebinder
 					}
 				}
 			}
-		}
-		catch (Exception ex) {
-			// If we cannot create a default instance (e.g. no default constructor),
-			// skip the reset and rely on the existing rebind behavior.
+			catch (Exception ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to reset property '" + propertyName + "' on " + targetClass.getName(), ex);
+				}
+			}
 		}
 	}
 
