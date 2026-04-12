@@ -140,12 +140,22 @@ public class ConfigurationPropertiesRebinder
 						|| getNeverRefreshable().contains(name)) {
 					return false; // ignore
 				}
-				appContext.getAutowireCapableBeanFactory().destroyBean(target);
 				if (proxied && bean instanceof Advised advised) {
 					Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(target.getClass());
-					advised.setTargetSource(new org.springframework.aop.target.SingletonTargetSource(freshBean));
+					if (AopUtils.isAopProxy(freshBean)) {
+						freshBean = ProxyUtils.getTargetObject(freshBean);
+					}
+					try {
+						advised.setTargetSource(new org.springframework.aop.target.SingletonTargetSource(freshBean));
+					}
+					catch (Exception ex) {
+						appContext.getAutowireCapableBeanFactory().destroyBean(freshBean);
+						throw ex;
+					}
+					appContext.getAutowireCapableBeanFactory().destroyBean(target);
 				}
 				else {
+					appContext.getAutowireCapableBeanFactory().destroyBean(target);
 					appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
 				}
 				return true;
