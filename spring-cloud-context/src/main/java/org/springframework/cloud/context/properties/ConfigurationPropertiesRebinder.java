@@ -145,12 +145,13 @@ public class ConfigurationPropertiesRebinder
 				if (getNeverRefreshable().contains(targetClass.getName()) || getNeverRefreshable().contains(name)) {
 					return false; // ignore
 				}
-				if (AopUtils.isAopProxy(bean)) {
+				if (AopUtils.isAopProxy(bean) && bean instanceof Advised advised) {
 					Object target = ProxyUtils.getTargetObject(bean);
+					Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(targetClass);
+					Object freshTarget = AopUtils.isAopProxy(freshBean) ? ProxyUtils.getTargetObject(freshBean)
+							: freshBean;
+					advised.setTargetSource(new SingletonTargetSource(freshTarget));
 					appContext.getAutowireCapableBeanFactory().destroyBean(target);
-					Object freshTarget = BeanUtils.instantiateClass(targetClass);
-					appContext.getAutowireCapableBeanFactory().initializeBean(freshTarget, name);
-					((Advised) bean).setTargetSource(new SingletonTargetSource(freshTarget));
 				}
 				else {
 					appContext.getAutowireCapableBeanFactory().destroyBean(bean);
