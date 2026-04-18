@@ -203,19 +203,23 @@ public class ConfigurationPropertiesRebinder
 					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
 					target.setPropertyValue(propertyName, defaultValue);
 				}
-				else if (target.isReadableProperty(propertyName)) {
+				else if (target.isReadableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
 					Object value = target.getPropertyValue(propertyName);
-					if (value instanceof Collection<?> collection) {
+					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
+					if (value instanceof Collection collection) {
 						collection.clear();
-					}
-					else if (value instanceof Map<?, ?> map) {
-						map.clear();
-					}
-					else if (value != null && defaultsWrapper.isReadableProperty(propertyName)) {
-						Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
-						if (defaultValue != null && !BeanUtils.isSimpleValueType(value.getClass())) {
-							resetProperties(value, defaultValue);
+						if (defaultValue instanceof Collection defaultCollection) {
+							collection.addAll(defaultCollection);
 						}
+					}
+					else if (value instanceof Map map) {
+						map.clear();
+						if (defaultValue instanceof Map defaultMap) {
+							map.putAll(defaultMap);
+						}
+					}
+					else if (value != null && defaultValue != null && !BeanUtils.isSimpleValueType(value.getClass())) {
+						resetProperties(value, defaultValue);
 					}
 				}
 			}

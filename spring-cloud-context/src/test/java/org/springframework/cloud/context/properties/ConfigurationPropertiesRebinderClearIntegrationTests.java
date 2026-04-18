@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.context.properties;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -105,6 +108,38 @@ public class ConfigurationPropertiesRebinderClearIntegrationTests {
 
 	@Test
 	@DirtiesContext
+	public void testCollectionWithDefaultsRestoredOnRemoval() {
+		then(this.properties.getTags()).containsExactly("alpha", "beta");
+		// Override the collection
+		TestPropertyValues.of("test.tags[0]=custom").applyTo(this.environment);
+		this.rebinder.rebind();
+		then(this.properties.getTags()).containsExactly("custom");
+		// Remove the property
+		Map<String, Object> map = findTestProperties();
+		map.remove("test.tags[0]");
+		this.rebinder.rebind();
+		// Should revert to field initializer defaults
+		then(this.properties.getTags()).containsExactly("alpha", "beta");
+	}
+
+	@Test
+	@DirtiesContext
+	public void testMapWithDefaultsRestoredOnRemoval() {
+		then(this.properties.getDefaults()).containsEntry("key1", "value1").containsEntry("key2", "value2");
+		// Override the map
+		TestPropertyValues.of("test.defaults.key1=custom").applyTo(this.environment);
+		this.rebinder.rebind();
+		then(this.properties.getDefaults()).containsEntry("key1", "custom");
+		// Remove the property
+		Map<String, Object> map = findTestProperties();
+		map.remove("test.defaults.key1");
+		this.rebinder.rebind();
+		// Should revert to field initializer defaults
+		then(this.properties.getDefaults()).containsEntry("key1", "value1").containsEntry("key2", "value2");
+	}
+
+	@Test
+	@DirtiesContext
 	public void testNestedPropertyWithoutSetterRestoredOnRemoval() {
 		then(this.properties.getNested().getHost()).isEqualTo("default-host");
 		// Set a nested value
@@ -165,6 +200,10 @@ public class ConfigurationPropertiesRebinderClearIntegrationTests {
 
 		private String name = "default-name";
 
+		private final List<String> tags = new ArrayList<>(List.of("alpha", "beta"));
+
+		private final Map<String, String> defaults = new LinkedHashMap<>(Map.of("key1", "value1", "key2", "value2"));
+
 		private final NestedProperties nested = new NestedProperties();
 
 		public String getMessage() {
@@ -189,6 +228,14 @@ public class ConfigurationPropertiesRebinderClearIntegrationTests {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+
+		public List<String> getTags() {
+			return this.tags;
+		}
+
+		public Map<String, String> getDefaults() {
+			return this.defaults;
 		}
 
 		public NestedProperties getNested() {
