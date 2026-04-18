@@ -103,6 +103,22 @@ public class ConfigurationPropertiesRebinderClearIntegrationTests {
 		then(this.properties.getMessage()).isEqualTo("World");
 	}
 
+	@Test
+	@DirtiesContext
+	public void testNestedPropertyWithoutSetterRestoredOnRemoval() {
+		then(this.properties.getNested().getHost()).isEqualTo("default-host");
+		// Set a nested value
+		TestPropertyValues.of("test.nested.host=custom-host").applyTo(this.environment);
+		this.rebinder.rebind();
+		then(this.properties.getNested().getHost()).isEqualTo("custom-host");
+		// Remove the property
+		Map<String, Object> map = findTestProperties();
+		map.remove("test.nested.host");
+		this.rebinder.rebind();
+		// Should revert to nested field initializer default
+		then(this.properties.getNested().getHost()).isEqualTo("default-host");
+	}
+
 	private Map<String, Object> findTestProperties() {
 		for (PropertySource<?> source : this.environment.getPropertySources()) {
 			if (source.getName().toLowerCase().contains("test")) {
@@ -149,6 +165,8 @@ public class ConfigurationPropertiesRebinderClearIntegrationTests {
 
 		private String name = "default-name";
 
+		private final NestedProperties nested = new NestedProperties();
+
 		public String getMessage() {
 			return this.message;
 		}
@@ -171,6 +189,24 @@ public class ConfigurationPropertiesRebinderClearIntegrationTests {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+
+		public NestedProperties getNested() {
+			return this.nested;
+		}
+
+	}
+
+	protected static class NestedProperties {
+
+		private String host = "default-host";
+
+		public String getHost() {
+			return this.host;
+		}
+
+		public void setHost(String host) {
+			this.host = host;
 		}
 
 	}

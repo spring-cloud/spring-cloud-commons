@@ -187,16 +187,20 @@ public class ConfigurationPropertiesRebinder
 					+ " for reset; skipping property reset", ex);
 			return;
 		}
+		resetProperties(bean, freshInstance);
+	}
+
+	private void resetProperties(Object bean, Object defaults) {
 		BeanWrapper target = new BeanWrapperImpl(bean);
-		BeanWrapper defaults = new BeanWrapperImpl(freshInstance);
+		BeanWrapper defaultsWrapper = new BeanWrapperImpl(defaults);
 		for (PropertyDescriptor pd : target.getPropertyDescriptors()) {
 			String propertyName = pd.getName();
 			if ("class".equals(propertyName)) {
 				continue;
 			}
 			try {
-				if (target.isWritableProperty(propertyName) && defaults.isReadableProperty(propertyName)) {
-					Object defaultValue = defaults.getPropertyValue(propertyName);
+				if (target.isWritableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
+					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
 					target.setPropertyValue(propertyName, defaultValue);
 				}
 				else if (target.isReadableProperty(propertyName)) {
@@ -207,11 +211,18 @@ public class ConfigurationPropertiesRebinder
 					else if (value instanceof Map<?, ?> map) {
 						map.clear();
 					}
+					else if (value != null && defaultsWrapper.isReadableProperty(propertyName)) {
+						Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
+						if (defaultValue != null && !BeanUtils.isSimpleValueType(value.getClass())) {
+							resetProperties(value, defaultValue);
+						}
+					}
 				}
 			}
 			catch (Exception ex) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Failed to reset property '" + propertyName + "' on " + targetClass.getName(), ex);
+					logger.debug("Failed to reset property '" + propertyName + "' on "
+							+ AopUtils.getTargetClass(bean).getName(), ex);
 				}
 			}
 		}
