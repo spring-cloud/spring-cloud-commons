@@ -19,7 +19,6 @@ package org.springframework.cloud.context.properties;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -65,7 +64,6 @@ public class ConfigurationPropertiesRebinderListIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	@Disabled("Can't rebind to list and re-initialize it (need refresh scope for this to work)")
 	public void testReplaceProperties() {
 		then(this.properties.getMessages()).containsOnly("one", "two");
 		Map<String, Object> map = findTestProperties();

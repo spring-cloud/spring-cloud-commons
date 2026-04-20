@@ -16,13 +16,24 @@
 
 package org.springframework.cloud.context.properties;
 
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -55,6 +66,8 @@ import org.springframework.util.StringUtils;
 @ManagedResource
 public class ConfigurationPropertiesRebinder
 		implements ApplicationContextAware, ApplicationListener<EnvironmentChangeEvent> {
+
+	private static final Log logger = LogFactory.getLog(ConfigurationPropertiesRebinder.class);
 
 	private ConfigurationPropertiesBeans beans;
 
@@ -125,18 +138,35 @@ public class ConfigurationPropertiesRebinder
 	private boolean rebind(String name, ApplicationContext appContext) {
 		try {
 			Object bean = appContext.getBean(name);
-			if (AopUtils.isAopProxy(bean)) {
-				bean = ProxyUtils.getTargetObject(bean);
-			}
 			if (bean != null) {
+				Class<?> targetClass = AopUtils.getTargetClass(bean);
 				// TODO: determine a more general approach to fix this.
 				// see
 				// https://github.com/spring-cloud/spring-cloud-commons/issues/571
-				if (getNeverRefreshable().contains(bean.getClass().getName()) || getNeverRefreshable().contains(name)) {
+				if (getNeverRefreshable().contains(targetClass.getName()) || getNeverRefreshable().contains(name)) {
 					return false; // ignore
 				}
-				appContext.getAutowireCapableBeanFactory().destroyBean(bean);
-				appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
+				if (AopUtils.isAopProxy(bean) && bean instanceof Advised advised) {
+					Object target = ProxyUtils.getTargetObject(bean);
+					if (target != bean && !targetClass.isInterface()
+							&& !Modifier.isAbstract(targetClass.getModifiers())) {
+						Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(targetClass);
+						Object freshTarget = AopUtils.isAopProxy(freshBean) ? ProxyUtils.getTargetObject(freshBean)
+								: freshBean;
+						advised.setTargetSource(new SingletonTargetSource(freshTarget));
+						appContext.getAutowireCapableBeanFactory().destroyBean(target);
+					}
+					else {
+						appContext.getAutowireCapableBeanFactory().destroyBean(target);
+						resetBeanToDefaults(target);
+						appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
+					}
+				}
+				else {
+					appContext.getAutowireCapableBeanFactory().destroyBean(bean);
+					resetBeanToDefaults(bean);
+					appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
+				}
 				return true;
 			}
 		}
@@ -149,6 +179,66 @@ public class ConfigurationPropertiesRebinder
 			throw new IllegalStateException("Cannot rebind to " + name, e);
 		}
 		return false;
+	}
+
+	/**
+	 * Reset bean properties to their class-level defaults so that removed properties do
+	 * not retain stale values after rebinding.
+	 */
+	private void resetBeanToDefaults(Object bean) {
+		Class<?> targetClass = AopUtils.getTargetClass(bean);
+		Object freshInstance;
+		try {
+			freshInstance = BeanUtils.instantiateClass(targetClass);
+		}
+		catch (Exception ex) {
+			logger.warn("Cannot create default instance of " + targetClass.getName()
+					+ " for reset; skipping property reset", ex);
+			return;
+		}
+		resetProperties(bean, freshInstance);
+	}
+
+	private void resetProperties(Object bean, Object defaults) {
+		BeanWrapper target = new BeanWrapperImpl(bean);
+		BeanWrapper defaultsWrapper = new BeanWrapperImpl(defaults);
+		for (PropertyDescriptor pd : target.getPropertyDescriptors()) {
+			String propertyName = pd.getName();
+			if ("class".equals(propertyName)) {
+				continue;
+			}
+			try {
+				if (target.isWritableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
+					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
+					target.setPropertyValue(propertyName, defaultValue);
+				}
+				else if (target.isReadableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
+					Object value = target.getPropertyValue(propertyName);
+					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
+					if (value instanceof Collection collection) {
+						collection.clear();
+						if (defaultValue instanceof Collection defaultCollection) {
+							collection.addAll(defaultCollection);
+						}
+					}
+					else if (value instanceof Map map) {
+						map.clear();
+						if (defaultValue instanceof Map defaultMap) {
+							map.putAll(defaultMap);
+						}
+					}
+					else if (value != null && defaultValue != null && !BeanUtils.isSimpleValueType(value.getClass())) {
+						resetProperties(value, defaultValue);
+					}
+				}
+			}
+			catch (Exception ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Failed to reset property '" + propertyName + "' on "
+							+ AopUtils.getTargetClass(bean).getName(), ex);
+				}
+			}
+		}
 	}
 
 	@ManagedAttribute
