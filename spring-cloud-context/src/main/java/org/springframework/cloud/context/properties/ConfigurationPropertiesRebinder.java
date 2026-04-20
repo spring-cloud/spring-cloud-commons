@@ -17,6 +17,7 @@
 package org.springframework.cloud.context.properties;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -147,11 +148,19 @@ public class ConfigurationPropertiesRebinder
 				}
 				if (AopUtils.isAopProxy(bean) && bean instanceof Advised advised) {
 					Object target = ProxyUtils.getTargetObject(bean);
-					Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(targetClass);
-					Object freshTarget = AopUtils.isAopProxy(freshBean) ? ProxyUtils.getTargetObject(freshBean)
-							: freshBean;
-					advised.setTargetSource(new SingletonTargetSource(freshTarget));
-					appContext.getAutowireCapableBeanFactory().destroyBean(target);
+					if (target != bean && !targetClass.isInterface()
+							&& !Modifier.isAbstract(targetClass.getModifiers())) {
+						Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(targetClass);
+						Object freshTarget = AopUtils.isAopProxy(freshBean) ? ProxyUtils.getTargetObject(freshBean)
+								: freshBean;
+						advised.setTargetSource(new SingletonTargetSource(freshTarget));
+						appContext.getAutowireCapableBeanFactory().destroyBean(target);
+					}
+					else {
+						appContext.getAutowireCapableBeanFactory().destroyBean(target);
+						resetBeanToDefaults(target);
+						appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
+					}
 				}
 				else {
 					appContext.getAutowireCapableBeanFactory().destroyBean(bean);
