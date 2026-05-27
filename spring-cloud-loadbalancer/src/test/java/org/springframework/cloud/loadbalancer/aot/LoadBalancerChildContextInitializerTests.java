@@ -98,7 +98,7 @@ public class LoadBalancerChildContextInitializerTests {
 						"Refreshing LoadBalancerClientFactory-test-2", "Refreshing LoadBalancerClientFactory-test_3");
 				assertThat(output).doesNotContain("Instantiating bean from Test 2 custom config",
 						"Instantiating bean from default custom config");
-				TestPropertyValues.of(AotDetector.AOT_ENABLED + "=true")
+				TestPropertyValues.of(AotDetector.AOT_ENABLED + "=true", "server.port=0")
 					.applyToSystemProperties(freshApplicationContext::refresh);
 				WebClient webClient = freshApplicationContext.getBean(WebClient.class);
 				webClient.get().uri(URI.create("http://test-2/")).retrieve().bodyToMono(String.class).subscribe();
