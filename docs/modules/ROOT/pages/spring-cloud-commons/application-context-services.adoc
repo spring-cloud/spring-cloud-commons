@@ -226,6 +226,24 @@ WARNING: Context Refresh is not supported for Spring AOT transformations and nat
 
 Seamlessly refreshing beans on restart is especially useful for applications that run with JVM Checkpoint Restore (such as https://github.com/CRaC[Project CRaC]). To allow this ability, we now instantiate a `RefreshScopeLifecycle` bean that triggers Context Refresh on restart, resulting in rebinding configuration properties and refreshing any beans annotated with `@RefreshScope`. You can disable this behavior by setting `spring.cloud.refresh.on-restart.enabled` to `false`.
 
+[[refresh-scope-health-indicator]]
+=== Refresh Scope Health Indicator
+
+When Spring Cloud Context is on the classpath together with Spring Boot Actuator, a `RefreshScopeHealthIndicator` is auto-configured.
+This health indicator reports `UP` when there are no errors associated with the refresh scope, and `DOWN` (with the error details) when a `@RefreshScope` bean or a `@ConfigurationProperties`-bound bean failed to re-bind after a configuration refresh.
+
+This makes it easy to detect post-refresh failures via the `/actuator/health` endpoint.
+
+To disable the indicator, set the following property:
+
+[source,yaml]
+----
+management:
+  health:
+    refresh:
+      enabled: false
+----
+
 [[encryption-and-decryption]]
 == Encryption and Decryption
 
