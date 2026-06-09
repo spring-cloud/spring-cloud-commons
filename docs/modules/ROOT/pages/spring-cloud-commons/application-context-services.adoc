@@ -214,6 +214,10 @@ Specifically, anything that depends on those beans cannot rely on them being upd
 In that case, it is rebuilt on a refresh and its dependencies are re-injected.
 At that point, they are re-initialized from the refreshed `@Configuration`).
 
+WARNING: Do not combine `@RefreshScope` with Spring MVC lifecycle beans such as `@ControllerAdvice`.
+Spring MVC detects `@ControllerAdvice` beans both through the scope proxy and directly, which causes `@ModelAttribute` methods to execute twice per request.
+Instead, extract refreshable configuration into a separate `@RefreshScope` bean (or a `@ConfigurationProperties` bean) that your `@ControllerAdvice` injects as a regular dependency.
+
 NOTE:  Removing a configuration value and then performing a refresh will not update the presence of the configuration value.
 The configuration property must be present in order to update the value after a refresh.  If you are relying on the presence of
 a value in your application you might want to switch your logic to rely on its absence instead.  Another option would be to rely
