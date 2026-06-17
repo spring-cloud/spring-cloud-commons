@@ -16,11 +16,13 @@
 
 package org.springframework.cloud.autoconfigure;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.SearchStrategy;
 import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
+import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration.RefreshProperties;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesBeans;
 import org.springframework.cloud.context.properties.ConfigurationPropertiesRebinder;
 import org.springframework.context.ApplicationContext;
@@ -50,9 +52,13 @@ public class ConfigurationPropertiesRebinderAutoConfiguration implements SmartIn
 
 	@Bean
 	@ConditionalOnMissingBean(search = SearchStrategy.CURRENT)
-	public ConfigurationPropertiesRebinder configurationPropertiesRebinder(ConfigurationPropertiesBeans beans) {
-		ConfigurationPropertiesRebinder rebinder = new ConfigurationPropertiesRebinder(beans);
-		return rebinder;
+	public ConfigurationPropertiesRebinder configurationPropertiesRebinder(ConfigurationPropertiesBeans beans,
+			ObjectProvider<RefreshProperties> refreshProperties) {
+		RefreshProperties properties = refreshProperties.getIfAvailable();
+		if (properties != null) {
+			return new ConfigurationPropertiesRebinder(beans, properties);
+		}
+		return new ConfigurationPropertiesRebinder(beans);
 	}
 
 	@Override

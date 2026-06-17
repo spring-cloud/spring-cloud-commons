@@ -170,6 +170,18 @@ The `EnvironmentChangeEvent` covers a large class of refresh use cases, as long 
 Note that those APIs are public and part of core Spring.
 You can verify that the changes are bound to `@ConfigurationProperties` beans by visiting the `/configprops` endpoint (a standard Spring Boot Actuator feature).
 For instance, a `DataSource` can have its `maxPoolSize` changed at runtime (the default `DataSource` created by Spring Boot is a `@ConfigurationProperties` bean) and grow capacity dynamically.
+
+When a `@ConfigurationProperties` bean is re-bound, its properties are first reset to their class-level defaults so that values for properties that have been removed from the `Environment` do not linger.
+This reset also recurses into nested `@ConfigurationProperties` objects (for example a nested object that has no setter).
+To avoid descending into object graphs that are not configuration properties, the reset never recurses into JDK types or types in the standard `jakarta.*` and `javax.*` API namespaces.
+If you have a `@ConfigurationProperties` bean that holds a reference to some other library type that should not be recursed into (for example, a type with a cyclic object graph or one that holds internal state that must not be mutated), you can exclude it by setting `spring.cloud.refresh.never-reset-nested-types`.
+The value is a comma-separated list of fully qualified class names or package prefixes, each matched against the type's class name with a prefix comparison:
+
+[source,properties]
+----
+spring.cloud.refresh.never-reset-nested-types=com.example.MyClient,com.acme.sdk.
+----
+
 Re-binding `@ConfigurationProperties` does not cover another large class of use cases, where you need more control over the refresh and where you need a change to be atomic over the whole `ApplicationContext`.
 To address those concerns, we have `@RefreshScope`.
 

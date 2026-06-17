@@ -19,7 +19,9 @@ package org.springframework.cloud.context.properties;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,6 +39,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration.RefreshProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.util.ProxyUtils;
@@ -75,8 +78,19 @@ public class ConfigurationPropertiesRebinder
 
 	private Map<String, Exception> errors = new ConcurrentHashMap<>();
 
+	private final Set<String> neverResetNestedTypes;
+
 	public ConfigurationPropertiesRebinder(ConfigurationPropertiesBeans beans) {
+		this(beans, Collections.emptySet());
+	}
+
+	public ConfigurationPropertiesRebinder(ConfigurationPropertiesBeans beans, RefreshProperties refreshProperties) {
+		this(beans, refreshProperties.getNeverResetNestedTypes());
+	}
+
+	private ConfigurationPropertiesRebinder(ConfigurationPropertiesBeans beans, Set<String> neverResetNestedTypes) {
 		this.beans = beans;
+		this.neverResetNestedTypes = neverResetNestedTypes;
 	}
 
 	@Override
@@ -196,10 +210,14 @@ public class ConfigurationPropertiesRebinder
 					+ " for reset; skipping property reset", ex);
 			return;
 		}
-		resetProperties(bean, freshInstance);
+		resetProperties(bean, freshInstance, Collections.newSetFromMap(new IdentityHashMap<>()));
 	}
 
-	private void resetProperties(Object bean, Object defaults) {
+	private void resetProperties(Object bean, Object defaults, Set<Object> visited) {
+		// Guard against cyclic object graphs so that recursion always terminates.
+		if (bean == null || !visited.add(bean)) {
+			return;
+		}
 		BeanWrapper target = new BeanWrapperImpl(bean);
 		BeanWrapper defaultsWrapper = new BeanWrapperImpl(defaults);
 		for (PropertyDescriptor pd : target.getPropertyDescriptors()) {
@@ -227,8 +245,8 @@ public class ConfigurationPropertiesRebinder
 							map.putAll(defaultMap);
 						}
 					}
-					else if (value != null && defaultValue != null && !BeanUtils.isSimpleValueType(value.getClass())) {
-						resetProperties(value, defaultValue);
+					else if (value != null && defaultValue != null && isResettableNestedType(value.getClass())) {
+						resetProperties(value, defaultValue, visited);
 					}
 				}
 			}
@@ -239,6 +257,51 @@ public class ConfigurationPropertiesRebinder
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determine whether a nested property value should be recursively reset. Only
+	 * user-defined types are descended into. Recursing into JDK or standard API types
+	 * (for example {@link javax.net.ssl.SSLContext}) is both unnecessary and unsafe:
+	 * their object graphs may be cyclic, which previously led to a
+	 * {@link StackOverflowError} (see gh-1698), and they may expose internal collections
+	 * or maps that must not be cleared. Additional types can be excluded via the
+	 * {@code spring.cloud.refresh.never-reset-nested-types} property.
+	 */
+	boolean isResettableNestedType(Class<?> type) {
+		if (type.isArray() || BeanUtils.isSimpleValueType(type) || isJdkClass(type) || isStandardApiClass(type)) {
+			return false;
+		}
+		String typeName = type.getName();
+		for (String excluded : this.neverResetNestedTypes) {
+			if (typeName.startsWith(excluded)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Whether the given type is provided by the JDK itself. JDK types are loaded either
+	 * by the bootstrap class loader (for example everything in {@code java.base}, which
+	 * reports a {@code null} class loader) or by the platform class loader (the other
+	 * platform modules); application and library types are loaded by the application
+	 * class loader.
+	 */
+	private boolean isJdkClass(Class<?> type) {
+		ClassLoader classLoader = type.getClassLoader();
+		return classLoader == null || classLoader == ClassLoader.getPlatformClassLoader();
+	}
+
+	/**
+	 * Whether the given type belongs to a standard API namespace (Jakarta EE or the
+	 * legacy {@code javax} packages). These namespaces are reserved for specifications
+	 * and, unlike the JDK modules, are loaded by the application class loader, so they
+	 * are not detected by {@link #isJdkClass}.
+	 */
+	private boolean isStandardApiClass(Class<?> type) {
+		String packageName = type.getPackageName();
+		return packageName.startsWith("jakarta.") || packageName.startsWith("javax.");
 	}
 
 	@ManagedAttribute

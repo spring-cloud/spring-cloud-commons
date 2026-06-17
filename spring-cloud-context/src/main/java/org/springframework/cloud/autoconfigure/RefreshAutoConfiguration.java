@@ -18,6 +18,7 @@ package org.springframework.cloud.autoconfigure;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -138,6 +139,16 @@ public class RefreshAutoConfiguration {
 		 */
 		private List<String> additionalPropertySourcesToRetain = new ArrayList<>();
 
+		/**
+		 * Fully qualified class name prefixes of nested configuration properties values
+		 * that should never be recursively reset when a bean is rebound. JDK and standard
+		 * API types are always skipped; use this to additionally exclude library types
+		 * whose object graphs are cyclic or hold internal state that must not be mutated.
+		 * Each entry is matched against the fully qualified class name using a prefix
+		 * comparison, so either a package or an individual class name can be supplied.
+		 */
+		private Set<String> neverResetNestedTypes = new LinkedHashSet<>();
+
 		public List<String> getAdditionalPropertySourcesToRetain() {
 			return this.additionalPropertySourcesToRetain;
 		}
@@ -146,10 +157,19 @@ public class RefreshAutoConfiguration {
 			this.additionalPropertySourcesToRetain = additionalPropertySourcesToRetain;
 		}
 
+		public Set<String> getNeverResetNestedTypes() {
+			return this.neverResetNestedTypes;
+		}
+
+		public void setNeverResetNestedTypes(Set<String> neverResetNestedTypes) {
+			this.neverResetNestedTypes = neverResetNestedTypes;
+		}
+
 		@Override
 		public String toString() {
 			return new ToStringCreator(this)
 				.append("additionalPropertySourcesToRetain", additionalPropertySourcesToRetain)
+				.append("neverResetNestedTypes", neverResetNestedTypes)
 				.toString();
 
 		}
