@@ -21,6 +21,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.SSLContext;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -154,6 +156,21 @@ public class ConfigurationPropertiesRebinderClearIntegrationTests {
 		then(this.properties.getNested().getHost()).isEqualTo("default-host");
 	}
 
+	@Test
+	@DirtiesContext
+	public void testRebindWithJdkTypePropertyDoesNotStackOverflow() {
+		// gh-1698: a property whose value is a JDK type with a cyclic object graph (e.g.
+		// SSLContext) previously caused infinite recursion in resetProperties.
+		then(this.properties.getSslContext()).isNotNull();
+		SSLContext original = this.properties.getSslContext();
+		Map<String, Object> map = findTestProperties();
+		map.remove("test.message");
+		// Should not throw StackOverflowError
+		this.rebinder.rebind();
+		// The JDK-typed property must be left untouched by the reset
+		then(this.properties.getSslContext()).isSameAs(original);
+	}
+
 	private Map<String, Object> findTestProperties() {
 		for (PropertySource<?> source : this.environment.getPropertySources()) {
 			if (source.getName().toLowerCase().contains("test")) {
@@ -206,6 +223,8 @@ public class ConfigurationPropertiesRebinderClearIntegrationTests {
 
 		private final NestedProperties nested = new NestedProperties();
 
+		private transient SSLContext sslContext;
+
 		public String getMessage() {
 			return this.message;
 		}
@@ -240,6 +259,19 @@ public class ConfigurationPropertiesRebinderClearIntegrationTests {
 
 		public NestedProperties getNested() {
 			return this.nested;
+		}
+
+		public synchronized SSLContext getSslContext() {
+			if (this.sslContext != null) {
+				return this.sslContext;
+			}
+			try {
+				this.sslContext = SSLContext.getDefault();
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException(ex);
+			}
+			return this.sslContext;
 		}
 
 	}
