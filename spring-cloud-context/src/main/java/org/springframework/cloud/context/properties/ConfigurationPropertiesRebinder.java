@@ -17,6 +17,7 @@
 package org.springframework.cloud.context.properties;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
@@ -201,6 +202,18 @@ public class ConfigurationPropertiesRebinder
 	 */
 	private void resetBeanToDefaults(Object bean) {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
+		if (!hasDefaultConstructor(targetClass)) {
+			// Beans that have no default constructor (for example constructor-bound beans
+			// or beans with required dependencies) cannot be instantiated to obtain their
+			// defaults, so the reset is skipped. The bean is still re-bound from the
+			// Environment afterwards; only reverting removed properties to their defaults
+			// is skipped.
+			if (logger.isDebugEnabled()) {
+				logger.debug("No default constructor for " + targetClass.getName()
+						+ "; skipping property reset before rebinding");
+			}
+			return;
+		}
 		Object freshInstance;
 		try {
 			freshInstance = BeanUtils.instantiateClass(targetClass);
@@ -211,6 +224,20 @@ public class ConfigurationPropertiesRebinder
 			return;
 		}
 		resetProperties(bean, freshInstance, Collections.newSetFromMap(new IdentityHashMap<>()));
+	}
+
+	/**
+	 * Whether the given type declares a no-argument constructor (of any visibility),
+	 * which is what {@link BeanUtils#instantiateClass(Class)} needs to build a defaults
+	 * template.
+	 */
+	private boolean hasDefaultConstructor(Class<?> type) {
+		for (Constructor<?> constructor : type.getDeclaredConstructors()) {
+			if (constructor.getParameterCount() == 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void resetProperties(Object bean, Object defaults, Set<Object> visited) {
