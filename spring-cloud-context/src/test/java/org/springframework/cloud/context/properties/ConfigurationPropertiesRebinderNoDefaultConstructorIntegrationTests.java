@@ -42,7 +42,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 /**
  * Verifies that a {@code @ConfigurationProperties} bean without a default constructor
  * (for example a bean with a required dependency) can be rebound without failing or
- * logging a warning. See spring-cloud-config gh-3252.
+ * logging a warning.
  *
  * @author Ryan Baxter
  */
