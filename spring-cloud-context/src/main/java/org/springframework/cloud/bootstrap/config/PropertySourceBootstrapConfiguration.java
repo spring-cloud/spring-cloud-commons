@@ -34,6 +34,8 @@ import org.springframework.boot.context.config.Profiles;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.bind.PropertySourcesPlaceholdersResolver;
+import org.springframework.boot.context.properties.source.ConfigurationPropertySource;
 import org.springframework.boot.logging.LogFile;
 import org.springframework.boot.logging.LoggingInitializationContext;
 import org.springframework.boot.logging.LoggingSystem;
@@ -46,6 +48,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.CompositePropertySource;
@@ -54,13 +57,13 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
-import org.springframework.util.StringUtils;
 
 import static org.springframework.cloud.bootstrap.encrypt.AbstractEnvironmentDecrypt.DECRYPTED_PROPERTY_SOURCE_NAME;
 import static org.springframework.core.env.StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME;
 
 /**
  * @author Dave Syer
+ * @author Yanming Zhou
  *
  */
 @Configuration(proxyBeanMethods = false)
@@ -294,6 +297,7 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 		return addProfilesTo(profiles, propertySource, AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, environment);
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T extends Collection<String>> T addProfilesTo(T profiles, PropertySource<?> propertySource,
 			String property, ConfigurableEnvironment environment) {
 		if (propertySource instanceof CompositePropertySource) {
@@ -303,20 +307,17 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 			}
 		}
 		else {
-			Collections.addAll(profiles, getProfilesForValue(propertySource.getProperty(property), environment));
+			// bootstrapProperties is loaded as package-private
+			// ConfigurationPropertySourcesPropertySource
+			ResolvableType requiredType = ResolvableType.forClassWithGenerics(PropertySource.class,
+					ResolvableType.forClassWithGenerics(Iterable.class, ConfigurationPropertySource.class));
+			if (requiredType.isInstance(propertySource)) {
+				Binder binder = new Binder((Iterable<ConfigurationPropertySource>) propertySource.getSource(),
+						new PropertySourcesPlaceholdersResolver(environment));
+				binder.bind(property, Bindable.listOf(String.class)).ifBound(profiles::addAll);
+			}
 		}
 		return profiles;
-	}
-
-	private String[] getProfilesForValue(Object property, ConfigurableEnvironment environment) {
-		final String value = (property == null ? null : property.toString());
-		return property == null ? new String[0] : resolvePlaceholdersInProfiles(value, environment);
-	}
-
-	private String[] resolvePlaceholdersInProfiles(String profiles, ConfigurableEnvironment environment) {
-		return Arrays.stream(StringUtils.tokenizeToStringArray(profiles, ","))
-			.map(environment::resolvePlaceholders)
-			.toArray(String[]::new);
 	}
 
 	/*
