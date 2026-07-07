@@ -1,6 +1,6 @@
 {
 	"properties": [
-		{
+	    {
 			"name": "management.health.refresh.enabled",
 			"type": "java.lang.Boolean",
 			"description": "Enable the health endpoint for the refresh scope.",
@@ -11,6 +11,12 @@
 			"type": "java.lang.Boolean",
 			"description": "Enable changing the Environment through a POST to /env.",
 			"defaultValue": false
+		},
+		{
+			"name": "management.endpoint.env.post.valid-keys-regex",
+			"type": "java.lang.String",
+			"description": "Regex for matching property keys allowed to be changed through a POST to /env.",
+			"defaultValue": null
 		},
 		{
 			"name": "management.endpoint.refresh.enabled",
