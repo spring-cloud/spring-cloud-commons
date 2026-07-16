@@ -29,13 +29,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(value = "spring.cloud.util.enabled", matchIfMissing = true)
 @AutoConfigureOrder(0)
-@EnableConfigurationProperties
+@EnableConfigurationProperties(InetUtilsProperties.class)
 public class UtilAutoConfiguration {
-
-	@Bean
-	public InetUtilsProperties inetUtilsProperties() {
-		return new InetUtilsProperties();
-	}
 
 	@Bean
 	@ConditionalOnMissingBean
