@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.bootstrap.encrypt;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -228,6 +229,20 @@ public class AbstractEnvironmentDecryptTests {
 		then(environment.getProperty("foo[0]")).isEqualTo("plain");
 		then(environment.getProperty("foo[1]")).isEqualTo("cipher");
 		then(environment.getProperty("fooBar[0]")).isEqualTo("updated");
+	}
+
+	@Test
+	void nullKeyedPropertyNamesAreIgnored() {
+		// Simulates OS environment blocks (seen on Linux/Docker) that can contain
+		// entries with a null key.
+		Map<String, Object> sourceWithNullKey = new HashMap<>();
+		sourceWithNullKey.put(null, "some-value");
+		sourceWithNullKey.put("foo", "{cipher}bar");
+		environment.getPropertySources().addFirst(new MapPropertySource("source-1", sourceWithNullKey));
+
+		decrypt();
+
+		then(environment.getProperty("foo")).isEqualTo("bar");
 	}
 
 	private void decrypt() {
