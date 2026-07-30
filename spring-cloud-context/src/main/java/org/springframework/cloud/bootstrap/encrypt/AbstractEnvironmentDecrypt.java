@@ -71,7 +71,7 @@ public abstract class AbstractEnvironmentDecrypt {
 		for (PropertySource<?> propertySource : propertySources) {
 			if (propertySource instanceof EnumerablePropertySource<?> enumerable) {
 				for (String propertyName : enumerable.getPropertyNames()) {
-					if (visitor.isVisited(propertyName)) {
+					if (propertyName == null || visitor.isVisited(propertyName)) {
 						continue;
 					}
 
@@ -136,7 +136,7 @@ public abstract class AbstractEnvironmentDecrypt {
 		boolean containsDecrypted = false;
 		Map<String, Object> elements = new HashMap<>();
 		for (String name : source.getPropertyNames()) {
-			if (COLLECTION_PROPERTY.matcher(name).matches() && name.startsWith(prefix)) {
+			if (name != null && COLLECTION_PROPERTY.matcher(name).matches() && name.startsWith(prefix)) {
 				var value = getPropertyValue(source, encryptor, name);
 				elements.put(name, value.value);
 				if (value.isDecrypted) {
