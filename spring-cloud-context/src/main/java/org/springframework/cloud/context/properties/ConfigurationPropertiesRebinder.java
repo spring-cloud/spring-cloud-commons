@@ -196,11 +196,16 @@ public class ConfigurationPropertiesRebinder
 		return false;
 	}
 
+	public static boolean skipReset = false;
+
 	/**
 	 * Reset bean properties to their class-level defaults so that removed properties do
 	 * not retain stale values after rebinding.
 	 */
 	private void resetBeanToDefaults(Object bean) {
+		if (skipReset) {
+			return;
+		}
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!hasDefaultConstructor(targetClass)) {
 			// Beans that have no default constructor (for example constructor-bound beans
