@@ -42,8 +42,11 @@ public class RefreshEndpoint {
 	}
 
 	@WriteOperation
-	public Collection<String> refresh() {
-		Set<String> keys = this.contextRefresher.refresh();
+    public Collection<String> refresh(Set<String> propertiesToRefresh) {
+        RefreshStrategy strategy = (propertiesToRefresh != null && !propertiesToRefresh.isEmpty())
+                ? new RefreshSpecificPropertiesStrategy()
+                : new RefreshAllStrategy();
+        Set<String> keys = this.contextRefresher.refresh(propertiesToRefresh, strategy);
 		LOG.info("Refreshed keys : " + keys);
 		return keys;
 	}
