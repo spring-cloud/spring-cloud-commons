@@ -47,6 +47,7 @@ import org.springframework.cloud.util.ProxyUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
@@ -69,7 +70,7 @@ import org.springframework.util.StringUtils;
 @Component
 @ManagedResource
 public class ConfigurationPropertiesRebinder
-		implements ApplicationContextAware, ApplicationListener<EnvironmentChangeEvent> {
+		implements ApplicationContextAware, ApplicationListener<EnvironmentChangeEvent>, Ordered {
 
 	private static final Log logger = LogFactory.getLog(ConfigurationPropertiesRebinder.class);
 
@@ -350,6 +351,11 @@ public class ConfigurationPropertiesRebinder
 				|| event.getKeys().equals(event.getSource())) {
 			rebind();
 		}
+	}
+
+	@Override
+	public int getOrder() {
+		return Ordered.HIGHEST_PRECEDENCE + 10;
 	}
 
 }
