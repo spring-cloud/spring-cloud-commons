@@ -50,9 +50,4 @@ public class CompatibilityVerifierAutoConfiguration {
 		return new SpringBootVersionVerifier(properties.getCompatibleBootVersions());
 	}
 
-	@Bean
-	SleuthPresentVerifier sleuthPresentVerifier() {
-		return new SleuthPresentVerifier();
-	}
-
 }

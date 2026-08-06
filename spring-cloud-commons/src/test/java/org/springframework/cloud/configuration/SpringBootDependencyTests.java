@@ -176,20 +176,8 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_manifest() {
-		try {
-			verifyCurrentVersionFromManifest("4.0");
-			verifyCurrentVersionFromManifest("4.0.x");
-		}
-		catch (AssertionError e) {
-			if (e.getMessage() != null && e.getMessage().contains("4.1.")) {
-				// we're likely running a boot 4.1 compatibility test, try 4.1
-				verifyCurrentVersionFromManifest("4.1");
-				verifyCurrentVersionFromManifest("4.1.x");
-			}
-			else {
-				throw e;
-			}
-		}
+		verifyCurrentVersionFromManifest("4.2");
+		verifyCurrentVersionFromManifest("4.2.x");
 	}
 
 	private void verifyCurrentVersionFromManifest(String version) {
@@ -205,7 +193,7 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_predicate() {
-		List<String> acceptedVersions = Collections.singletonList("4.0");
+		List<String> acceptedVersions = Collections.singletonList("4.2");
 		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
@@ -213,7 +201,7 @@ public class SpringBootDependencyTests {
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("4.0", versionVerifier.is4_0());
+		versionVerifier.ACCEPTED_VERSIONS.put("4.2", versionVerifier.is4_2());
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
@@ -223,7 +211,7 @@ public class SpringBootDependencyTests {
 
 	@Test
 	public void should_match_against_current_predicate_with_version_ending_with_x() {
-		List<String> acceptedVersions = Collections.singletonList("4.0.x");
+		List<String> acceptedVersions = Collections.singletonList("4.2.x");
 		SpringBootVersionVerifier versionVerifier = new SpringBootVersionVerifier(acceptedVersions) {
 			@Override
 			String getVersionFromManifest() {
@@ -231,7 +219,7 @@ public class SpringBootDependencyTests {
 			}
 		};
 		versionVerifier.ACCEPTED_VERSIONS.clear();
-		versionVerifier.ACCEPTED_VERSIONS.put("4.0", versionVerifier.is4_0());
+		versionVerifier.ACCEPTED_VERSIONS.put("4.2", versionVerifier.is4_2());
 
 		VerificationResult verificationResult = versionVerifier.verify();
 
