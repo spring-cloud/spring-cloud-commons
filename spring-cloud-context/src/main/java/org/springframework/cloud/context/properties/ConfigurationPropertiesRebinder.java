@@ -174,12 +174,14 @@ public class ConfigurationPropertiesRebinder
 					else {
 						appContext.getAutowireCapableBeanFactory().destroyBean(target);
 						resetBeanToDefaults(target);
+						appContext.getAutowireCapableBeanFactory().autowireBean(target);
 						appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
 					}
 				}
 				else {
 					appContext.getAutowireCapableBeanFactory().destroyBean(bean);
 					resetBeanToDefaults(bean);
+					appContext.getAutowireCapableBeanFactory().autowireBean(bean);
 					appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
 				}
 				return true;
