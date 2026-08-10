@@ -182,6 +182,10 @@ The value is a comma-separated list of fully qualified class names or package pr
 spring.cloud.refresh.never-reset-nested-types=com.example.MyClient,com.acme.sdk.
 ----
 
+NOTE: Re-binding mutates the `@ConfigurationProperties` bean's fields in place, destroying and re-initializing the same instance rather than swapping it out for a new one.
+Concurrent rebinds of the same bean are serialized internally, but this does not make the bean safe to read from other threads while a rebind is in progress: a concurrent reader can observe transient, partially-updated state (for example, a property briefly reset to its class-level default before the new value is applied).
+If your application needs a consistent view of a bean's properties across a refresh, use `@RefreshScope` instead, which serializes reads against refreshes for beans in that scope.
+
 Re-binding `@ConfigurationProperties` does not cover another large class of use cases, where you need more control over the refresh and where you need a change to be atomic over the whole `ApplicationContext`.
 To address those concerns, we have `@RefreshScope`.
 

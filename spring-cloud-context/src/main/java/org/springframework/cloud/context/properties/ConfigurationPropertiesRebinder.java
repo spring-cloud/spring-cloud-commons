@@ -26,6 +26,9 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,6 +64,17 @@ import org.springframework.util.StringUtils;
  * re-initialized, the changes are available immediately to any component that is using
  * the <code>@ConfigurationProperties</code> bean.
  *
+ * <p>
+ * Rebinding a given bean is serialized against other concurrent rebinds of that same
+ * bean, so two overlapping refreshes (for example a manual {@link #rebind(String)} call
+ * racing with an {@link EnvironmentChangeEvent}-triggered {@link #rebind()}) cannot
+ * interleave their destroy/reset/re-initialize steps. That does not, however, make the
+ * bean safe to read concurrently from other threads while a rebind is in progress: the
+ * bean is mutated in place, field by field, so a concurrent reader can observe transient
+ * intermediate state. Beans that need a consistent view across a refresh should use
+ * {@link RefreshScope} instead, which serializes reads against refreshes via a per-bean
+ * {@link java.util.concurrent.locks.ReadWriteLock}.
+ *
  * @author Dave Syer
  * @author Yanming Zhou
  * @see RefreshScope for a deeper and optionally more focused refresh of bean components.
@@ -78,6 +92,8 @@ public class ConfigurationPropertiesRebinder
 	private ApplicationContext applicationContext;
 
 	private Map<String, Exception> errors = new ConcurrentHashMap<>();
+
+	private final ConcurrentMap<String, Lock> rebindLocks = new ConcurrentHashMap<>();
 
 	private final Set<String> neverResetNestedTypes;
 
@@ -151,51 +167,62 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	private boolean rebind(String name, ApplicationContext appContext) {
+		// Serialize concurrent rebinds of the *same* bean (for example a manual
+		// rebind(name) racing with an EnvironmentChangeEvent-triggered rebind()) so
+		// their destroy/reset/re-initialize steps cannot interleave on the live bean.
+		// This does not protect concurrent readers of the bean; see the class Javadoc.
+		Lock lock = this.rebindLocks.computeIfAbsent(name, key -> new ReentrantLock());
+		lock.lock();
 		try {
-			Object bean = appContext.getBean(name);
-			if (bean != null) {
-				Class<?> targetClass = AopUtils.getTargetClass(bean);
-				// TODO: determine a more general approach to fix this.
-				// see
-				// https://github.com/spring-cloud/spring-cloud-commons/issues/571
-				if (getNeverRefreshable().contains(targetClass.getName()) || getNeverRefreshable().contains(name)) {
-					return false; // ignore
-				}
-				if (AopUtils.isAopProxy(bean) && bean instanceof Advised advised) {
-					Object target = ProxyUtils.getTargetObject(bean);
-					if (target != bean && !targetClass.isInterface()
-							&& !Modifier.isAbstract(targetClass.getModifiers())) {
-						Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(targetClass);
-						Object freshTarget = AopUtils.isAopProxy(freshBean) ? ProxyUtils.getTargetObject(freshBean)
-								: freshBean;
-						advised.setTargetSource(new SingletonTargetSource(freshTarget));
-						appContext.getAutowireCapableBeanFactory().destroyBean(target);
+			try {
+				Object bean = appContext.getBean(name);
+				if (bean != null) {
+					Class<?> targetClass = AopUtils.getTargetClass(bean);
+					// TODO: determine a more general approach to fix this.
+					// see
+					// https://github.com/spring-cloud/spring-cloud-commons/issues/571
+					if (getNeverRefreshable().contains(targetClass.getName()) || getNeverRefreshable().contains(name)) {
+						return false; // ignore
+					}
+					if (AopUtils.isAopProxy(bean) && bean instanceof Advised advised) {
+						Object target = ProxyUtils.getTargetObject(bean);
+						if (target != bean && !targetClass.isInterface()
+								&& !Modifier.isAbstract(targetClass.getModifiers())) {
+							Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(targetClass);
+							Object freshTarget = AopUtils.isAopProxy(freshBean) ? ProxyUtils.getTargetObject(freshBean)
+									: freshBean;
+							advised.setTargetSource(new SingletonTargetSource(freshTarget));
+							appContext.getAutowireCapableBeanFactory().destroyBean(target);
+						}
+						else {
+							appContext.getAutowireCapableBeanFactory().destroyBean(target);
+							resetBeanToDefaults(target);
+							appContext.getAutowireCapableBeanFactory().autowireBean(target);
+							appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
+						}
 					}
 					else {
-						appContext.getAutowireCapableBeanFactory().destroyBean(target);
-						resetBeanToDefaults(target);
-						appContext.getAutowireCapableBeanFactory().autowireBean(target);
-						appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
+						appContext.getAutowireCapableBeanFactory().destroyBean(bean);
+						resetBeanToDefaults(bean);
+						appContext.getAutowireCapableBeanFactory().autowireBean(bean);
+						appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
 					}
+					return true;
 				}
-				else {
-					appContext.getAutowireCapableBeanFactory().destroyBean(bean);
-					resetBeanToDefaults(bean);
-					appContext.getAutowireCapableBeanFactory().autowireBean(bean);
-					appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
-				}
-				return true;
 			}
+			catch (RuntimeException e) {
+				this.errors.put(name, e);
+				throw e;
+			}
+			catch (Exception e) {
+				this.errors.put(name, e);
+				throw new IllegalStateException("Cannot rebind to " + name, e);
+			}
+			return false;
 		}
-		catch (RuntimeException e) {
-			this.errors.put(name, e);
-			throw e;
+		finally {
+			lock.unlock();
 		}
-		catch (Exception e) {
-			this.errors.put(name, e);
-			throw new IllegalStateException("Cannot rebind to " + name, e);
-		}
-		return false;
 	}
 
 	/**
