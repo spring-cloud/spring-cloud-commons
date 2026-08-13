@@ -559,7 +559,7 @@ TIP: You can further configure the behavior of those metrics (for example, add h
 [[configuring-individual-loadbalancerclients]]
 == Configuring Individual LoadBalancerClients
 
-Individual Loadbalancer clients may be configured individually with a different prefix `spring.cloud.loadbalancer.clients.<clientId>.\*` where `clientId` is the name of the loadbalancer. Default configuration values may be set in the `spring.cloud.loadbalancer.*` namespace and will be merged with the client specific values taking precedence
+Individual Loadbalancer clients may be configured individually with a different prefix `spring.cloud.loadbalancer.clients.<clientId>.\*` where `clientId` is the name of the loadbalancer. Default configuration values may be set in the `spring.cloud.loadbalancer.\*` namespace and will be merged with the client specific values taking precedence
 
 .application.yml
 ----
