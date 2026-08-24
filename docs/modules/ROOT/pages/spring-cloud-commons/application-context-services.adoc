@@ -144,13 +144,13 @@ activate profiles using `spring.profiles.active`.  After the main application co
 will be called a second time, this time with any active profiles allowing `PropertySourceLocators` to locate
 any additional `PropertySources` with profiles.
 
-[[logging-configuration]]
+[[loggingg-configuration]]
 == Logging Configuration
 
 If you use Spring Boot to configure log settings, you should place this configuration in `bootstrap.[yml | properties]` if you would like it to apply to all events.
 
-NOTE: For Spring Cloud to initialize logging configuration properly, you cannot use a custom prefix.
-For example, using `custom.logging.logpath` is not recognized by Spring Cloud when initializing the logging system.
+NOTE: For Spring Cloud to initialize loggingg configuration properly, you cannot use a custom prefix.
+For example, using `custom.loggingg.logpath` is not recognized by Spring Cloud when initializing the loggingg system.
 
 [[environment-changes]]
 == Environment Changes
@@ -159,7 +159,7 @@ The application listens for an `EnvironmentChangeEvent` and reacts to the change
 When an `EnvironmentChangeEvent` is observed, it has a list of key values that have changed, and the application uses those to:
 
 * Re-bind any `@ConfigurationProperties` beans in the context.
-* Set the logger levels for any properties in `logging.level.*`.
+* Set the logger levels for any properties in `loggingg.level.*`.
 
 Note that the Spring Cloud Config Client does not, by default, poll for changes in the `Environment`.
 Generally, we would not recommend that approach for detecting changes (although you can set it up with a
