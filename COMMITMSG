@@ -1,7 +1,0 @@
-fix: typo: Possible typo in documentation: ‘loggin’ should be ‘logging’”
-
-- docs\modules\ROOT\pages\spring-cloud-commons\application-context-services.adoc: 'loggin'->'logging'
-
-Fixes #1544
-
-Signed-off-by: Vedant Madane <6527493+VedantMadane@users.noreply.github.com>
