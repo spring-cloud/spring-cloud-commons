@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.configuration;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.boot.SpringBootVersion;
-import org.springframework.boot.info.ProcessInfo;
+import org.springframework.boot.system.ApplicationHome;
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,7 +34,7 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 
 	private static final Log log = LogFactory.getLog(SpringBootVersionVerifier.class);
 
-	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<>(Map.of("4.0", is4_0(), "4.1", is4_1()));
+	final Map<String, CompatibilityPredicate> ACCEPTED_VERSIONS = new HashMap<>(Map.of("4.2", is4_2()));
 
 	private final List<String> acceptedVersions;
 
@@ -68,39 +67,18 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 		return SpringBootVersion.getVersion();
 	}
 
-	CompatibilityPredicate is4_0() {
+	CompatibilityPredicate is4_2() {
 		return new CompatibilityPredicate() {
 
 			@Override
 			public String toString() {
-				return "Predicate for Boot 4.0";
+				return "Predicate for Boot 4.2";
 			}
 
 			@Override
 			public boolean isCompatible() {
 				try {
-					Class.forName("org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty");
-					return true;
-				}
-				catch (ClassNotFoundException e) {
-					return false;
-				}
-			}
-		};
-	}
-
-	CompatibilityPredicate is4_1() {
-		return new CompatibilityPredicate() {
-
-			@Override
-			public String toString() {
-				return "Predicate for Boot 4.1";
-			}
-
-			@Override
-			public boolean isCompatible() {
-				try {
-					ProcessInfo.class.getMethod("getUptime", Duration.class);
+					ApplicationHome.class.getMethod("getSourcePath");
 					return true;
 				}
 				catch (NoSuchMethodException e) {
