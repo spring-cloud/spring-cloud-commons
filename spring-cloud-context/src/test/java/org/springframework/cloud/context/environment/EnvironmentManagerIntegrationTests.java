@@ -41,13 +41,15 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.BDDAssertions.then;
+import static org.springframework.cloud.context.environment.WritableEnvironmentEndpointWebExtension.VALID_KEYS_REGEX_PROPERTY;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = TestConfiguration.class,
-		properties = { "management.endpoints.web.exposure.include=*", "management.endpoint.env.post.enabled=true" })
+		properties = { "management.endpoints.web.exposure.include=*", "management.endpoint.env.post.enabled=true",
+				VALID_KEYS_REGEX_PROPERTY + "=mess.ge|delay" })
 @AutoConfigureMockMvc
 public class EnvironmentManagerIntegrationTests {
 
@@ -99,6 +101,19 @@ public class EnvironmentManagerIntegrationTests {
 			// The underlying BindException is not handled by the dispatcher servlet
 		}
 		then(this.properties.getDelay()).isEqualTo(0);
+	}
+
+	@Test
+	public void testPostInvalidKey() throws Exception {
+		String content = property("xmessage", "Foo");
+
+		try {
+			this.mvc.perform(post(BASE_PATH + "/env").content(content).contentType(MediaType.APPLICATION_JSON));
+			fail("expected ServletException");
+		}
+		catch (ServletException e) {
+			then(e.getCause().getMessage()).contains("Invalid key xmessage");
+		}
 	}
 
 	@Test

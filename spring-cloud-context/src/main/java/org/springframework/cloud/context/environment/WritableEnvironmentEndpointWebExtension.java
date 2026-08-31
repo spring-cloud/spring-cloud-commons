@@ -19,12 +19,14 @@ package org.springframework.cloud.context.environment;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.springframework.boot.actuate.endpoint.Show;
 import org.springframework.boot.actuate.endpoint.annotation.DeleteOperation;
 import org.springframework.boot.actuate.endpoint.annotation.WriteOperation;
 import org.springframework.boot.actuate.endpoint.web.annotation.EndpointWebExtension;
 import org.springframework.boot.actuate.env.EnvironmentEndpointWebExtension;
+import org.springframework.util.StringUtils;
 
 /**
  * MVC endpoint for the {@link EnvironmentManager}, providing a POST to /env as a simple
@@ -36,18 +38,35 @@ import org.springframework.boot.actuate.env.EnvironmentEndpointWebExtension;
 @EndpointWebExtension(endpoint = WritableEnvironmentEndpoint.class)
 public class WritableEnvironmentEndpointWebExtension extends EnvironmentEndpointWebExtension {
 
+	/**
+	 * The property for writable valid keys regular expression.
+	 */
+	public static final String VALID_KEYS_REGEX_PROPERTY = "management.endpoint.env.post.valid-keys-regex";
+
+	private final Pattern validKeysPattern;
+
 	private EnvironmentManager environment;
 
 	public WritableEnvironmentEndpointWebExtension(WritableEnvironmentEndpoint endpoint, EnvironmentManager environment,
 			Show showValues, Set<String> roles) {
 		super(endpoint, showValues, roles);
 		this.environment = environment;
+		String validKeysRegex = this.environment.getEnvironment().getProperty(VALID_KEYS_REGEX_PROPERTY);
+		if (StringUtils.hasText(validKeysRegex)) {
+			validKeysPattern = Pattern.compile(validKeysRegex);
+		}
+		else {
+			validKeysPattern = null;
+		}
 	}
 
 	@WriteOperation
 	public Object write(String name, String value) {
-		this.environment.setProperty(name, value);
-		return Collections.singletonMap(name, value);
+		if (validKeysPattern != null && validKeysPattern.matcher(name).matches()) {
+			this.environment.setProperty(name, value);
+			return Collections.singletonMap(name, value);
+		}
+		throw new IllegalArgumentException("Invalid key " + name);
 	}
 
 	@DeleteOperation

@@ -37,7 +37,7 @@ public class LoadBalancerCacheProperties {
 	 * in keeping with the appropriate syntax as specified in Spring Boot
 	 * <code>StringToDurationConverter</code>.
 	 * @see <a href=
-	 * "https://github.com/spring-projects/spring-boot/blob/master/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java">StringToDurationConverter.java</a>
+	 * "https://github.com/spring-projects/spring-boot/blob/main/core/spring-boot/src/main/java/org/springframework/boot/convert/StringToDurationConverter.java">StringToDurationConverter.java</a>
 	 */
 	private Duration ttl = Duration.ofSeconds(35);
 

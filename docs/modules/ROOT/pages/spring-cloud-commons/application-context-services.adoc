@@ -173,7 +173,7 @@ For instance, a `DataSource` can have its `maxPoolSize` changed at runtime (the 
 
 When a `@ConfigurationProperties` bean is re-bound, its properties are first reset to their class-level defaults so that values for properties that have been removed from the `Environment` do not linger.
 This reset also recurses into nested `@ConfigurationProperties` objects (for example a nested object that has no setter).
-To avoid descending into object graphs that are not configuration properties, the reset never recurses into JDK types or types in the standard `jakarta.*` and `javax.*` API namespaces.
+To avoid descending into object graphs that are not configuration properties, the reset never recurses into JDK types or types in the standard `jakarta.\*` and `javax.*` API namespaces.
 If you have a `@ConfigurationProperties` bean that holds a reference to some other library type that should not be recursed into (for example, a type with a cyclic object graph or one that holds internal state that must not be mutated), you can exclude it by setting `spring.cloud.refresh.never-reset-nested-types`.
 The value is a comma-separated list of fully qualified class names or package prefixes, each matched against the type's class name with a prefix comparison:
 
@@ -181,6 +181,10 @@ The value is a comma-separated list of fully qualified class names or package pr
 ----
 spring.cloud.refresh.never-reset-nested-types=com.example.MyClient,com.acme.sdk.
 ----
+
+NOTE: Re-binding mutates the `@ConfigurationProperties` bean's fields in place, destroying and re-initializing the same instance rather than swapping it out for a new one.
+Concurrent rebinds of the same bean are serialized internally, but this does not make the bean safe to read from other threads while a rebind is in progress: a concurrent reader can observe transient, partially-updated state (for example, a property briefly reset to its class-level default before the new value is applied).
+If your application needs a consistent view of a bean's properties across a refresh, use `@RefreshScope` instead, which serializes reads against refreshes for beans in that scope.
 
 Re-binding `@ConfigurationProperties` does not cover another large class of use cases, where you need more control over the refresh and where you need a change to be atomic over the whole `ApplicationContext`.
 To address those concerns, we have `@RefreshScope`.
@@ -277,13 +281,13 @@ Extract the files into the JDK/jre/lib/security folder for whichever version of 
 For a Spring Boot Actuator application, some additional management endpoints are available. You can use:
 
 * `POST` to `/actuator/env` to update the `Environment` and rebind `@ConfigurationProperties` and log levels.
-  To enabled this endpoint you must set `management.endpoint.env.post.enabled=true`.
+  To enabled this endpoint you must set `management.endpoint.env.post.enabled=true` and set a regular expression to limit what properties may be set at `management.endpoint.env.post.valid-keys-regex`.
 * `/actuator/refresh` to re-load the boot strap context and refresh the `@RefreshScope` beans.
 * `/actuator/restart` to close the `ApplicationContext` and restart it (disabled by default).
 * `/actuator/pause` and `/actuator/resume` for calling the `Lifecycle` methods (`stop()` and `start()` on the `ApplicationContext`).
 
 NOTE: While enabling the `POST` method for `/actuator/env` endpoint can provide flexibility and convenience in managing your application environment variables,
-it's critical to ensure that the endpoint is secured and monitored to prevent potential security risks.
+it's critical to ensure that the endpoint is secured, monitored and valid keys to update are set to prevent potential security risks.
 Add a `spring-boot-starter-security` dependency to configure access control for the actuator’s endpoint.
 
 NOTE: If you disable the `/actuator/restart` endpoint then the `/actuator/pause` and `/actuator/resume` endpoints

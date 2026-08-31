@@ -17,6 +17,7 @@
 	<properties>
 		<okhttp.version>4.12.0</okhttp.version>
 		<spring-retry.version>2.0.13</spring-retry.version>
+		<bouncycastle.version>1.85.2</bouncycastle.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -70,6 +71,13 @@
 				<groupId>org.springframework.retry</groupId>
 				<artifactId>spring-retry</artifactId>
 				<version>${spring-retry.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bc-jdk18on-bom</artifactId>
+				<version>${bouncycastle.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
