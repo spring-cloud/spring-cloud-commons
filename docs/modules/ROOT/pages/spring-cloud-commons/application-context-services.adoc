@@ -182,6 +182,10 @@ The value is a comma-separated list of fully qualified class names or package pr
 spring.cloud.refresh.never-reset-nested-types=com.example.MyClient,com.acme.sdk.
 ----
 
+NOTE: The reset to class-level defaults only happens for a bean whose class declares a no-argument constructor as its *only* constructor.
+If a `@ConfigurationProperties` bean's class declares a no-argument constructor alongside another constructor that takes arguments (for example, a no-arg constructor kept only for a framework's benefit, next to a constructor that takes a collaborator and uses it to compute the bean's real defaults), the reset is skipped entirely for that bean, and only the values already carried by the `Environment` are re-bound on top of whatever the bean currently holds.
+This is deliberate: instantiating such a class through its no-argument constructor would not reproduce the defaults the bean was actually constructed with, and resetting to it would wipe out values that no property source ever carried.
+
 NOTE: Re-binding mutates the `@ConfigurationProperties` bean's fields in place, destroying and re-initializing the same instance rather than swapping it out for a new one.
 Concurrent rebinds of the same bean are serialized internally, but this does not make the bean safe to read from other threads while a rebind is in progress: a concurrent reader can observe transient, partially-updated state (for example, a property briefly reset to its class-level default before the new value is applied).
 If your application needs a consistent view of a bean's properties across a refresh, use `@RefreshScope` instead, which serializes reads against refreshes for beans in that scope.

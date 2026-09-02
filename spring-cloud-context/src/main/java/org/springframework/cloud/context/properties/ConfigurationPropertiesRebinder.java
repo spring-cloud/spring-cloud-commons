@@ -232,11 +232,12 @@ public class ConfigurationPropertiesRebinder
 	private void resetBeanToDefaults(Object bean) {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!hasDefaultConstructor(targetClass)) {
-			// Beans that have no default constructor (for example constructor-bound beans
-			// or beans with required dependencies) cannot be instantiated to obtain their
-			// defaults, so the reset is skipped. The bean is still re-bound from the
-			// Environment afterwards; only reverting removed properties to their defaults
-			// is skipped.
+			// Beans whose no-arg constructor (if any) is not their only constructor
+			// (for example constructor-bound beans, beans with required dependencies, or
+			// beans with an extra no-arg constructor kept only for a framework's benefit)
+			// cannot be instantiated to obtain trustworthy defaults, so the reset is
+			// skipped. The bean is still re-bound from the Environment afterwards; only
+			// reverting removed properties to their defaults is skipped.
 			if (logger.isDebugEnabled()) {
 				logger.debug("No default constructor for " + targetClass.getName()
 						+ "; skipping property reset before rebinding");
@@ -256,17 +257,25 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	/**
-	 * Whether the given type declares a no-argument constructor (of any visibility),
+	 * Whether the given type's <em>only</em> declared constructor is a no-argument one,
 	 * which is what {@link BeanUtils#instantiateClass(Class)} needs to build a defaults
-	 * template.
+	 * template that is actually representative of the bean's defaults.
+	 * <p>
+	 * A no-arg constructor that sits alongside another, parameterized constructor is
+	 * deliberately not enough here, regardless of its visibility: some beans declare one
+	 * purely for a framework's benefit (for example Jackson deserialization) next to
+	 * another constructor that takes collaborators and computes the bean's real defaults
+	 * (for example from the current host). Instantiating the type through the no-arg
+	 * constructor then produces a template with the wrong defaults - typically
+	 * {@code null} or zero-valued fields - for anything the other constructor would have
+	 * computed, and resetting the bean to that template before rebinding wipes out values
+	 * no property source ever carried (see gh-1733). Only a type whose sole constructor
+	 * takes no arguments can be assumed to have one intended, complete way of producing a
+	 * default instance.
 	 */
 	private boolean hasDefaultConstructor(Class<?> type) {
-		for (Constructor<?> constructor : type.getDeclaredConstructors()) {
-			if (constructor.getParameterCount() == 0) {
-				return true;
-			}
-		}
-		return false;
+		Constructor<?>[] constructors = type.getDeclaredConstructors();
+		return constructors.length == 1 && constructors[0].getParameterCount() == 0;
 	}
 
 	private void resetProperties(Object bean, Object defaults, Set<Object> visited) {
