@@ -59,4 +59,16 @@ public interface ScopeCache {
 	 */
 	Object put(String name, Object value);
 
+	/**
+	 * Returns whether instances stored in this cache can be accessed concurrently by
+	 * multiple threads, in which case {@link GenericScope} guards proxied invocations
+	 * with read/write locks to protect them from concurrent destruction. Caches whose
+	 * instances are confined to a single thread (e.g. backed by a thread local) should
+	 * return {@code false} so that locking can be skipped (see gh-630).
+	 * @return whether proxied invocations require locking; default {@code true}
+	 */
+	default boolean requiresLocking() {
+		return true;
+	}
+
 }
