@@ -45,6 +45,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Ryan Baxter
  */
 @SpringBootTest(classes = TestConfiguration.class, properties = { "test.nested.host=custom-host",
+		"test.writable.host=custom-host",
 		"spring.cloud.refresh.never-reset-nested-types=org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderResetExclusionIntegrationTests$NestedProperties" })
 public class ConfigurationPropertiesRebinderResetExclusionIntegrationTests {
 
@@ -68,6 +69,22 @@ public class ConfigurationPropertiesRebinderResetExclusionIntegrationTests {
 		// Because the nested type is excluded, it is not descended into and its value is
 		// left untouched rather than being reset to the field default.
 		then(this.properties.getNested().getHost()).isEqualTo("custom-host");
+	}
+
+	@Test
+	@DirtiesContext
+	public void excludedNestedTypeIsNotResetWhenTheValueIsWritable() {
+		then(this.properties.getWritable().getHost()).isEqualTo("custom-host");
+		NestedProperties before = this.properties.getWritable();
+		// Remove the nested property and rebind
+		Map<String, Object> map = findTestProperties();
+		map.remove("test.writable.host");
+		this.rebinder.rebind();
+		// The exclusion has to hold for a property that carries a setter too, otherwise
+		// the value is overwritten with the default instance's own value, which is null
+		// here, and every reader of the bean sees null until the rebind completes.
+		then(this.properties.getWritable()).isSameAs(before);
+		then(this.properties.getWritable().getHost()).isEqualTo("custom-host");
 	}
 
 	private Map<String, Object> findTestProperties() {
@@ -112,8 +129,18 @@ public class ConfigurationPropertiesRebinderResetExclusionIntegrationTests {
 
 		private final NestedProperties nested = new NestedProperties();
 
+		private NestedProperties writable;
+
 		public NestedProperties getNested() {
 			return this.nested;
+		}
+
+		public NestedProperties getWritable() {
+			return this.writable;
+		}
+
+		public void setWritable(NestedProperties writable) {
+			this.writable = writable;
 		}
 
 	}
