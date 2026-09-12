@@ -28,6 +28,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.boot.env.ConfigTreePropertySource;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
@@ -47,6 +48,7 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * @author Dave Syer
  * @author Venil Noronha
  * @author Mikhail Polivakha
+ * @author arimu1
  */
 public abstract class ContextRefresher {
 
@@ -142,7 +144,7 @@ public abstract class ContextRefresher {
 			if (!after.containsKey(key)) {
 				result.put(key, null);
 			}
-			else if (!Objects.equals(before.get(key), after.get(key))) {
+			else if (!equal(before.get(key), after.get(key))) {
 				result.put(key, after.get(key));
 			}
 		}
@@ -152,6 +154,17 @@ public abstract class ContextRefresher {
 			}
 		}
 		return result;
+	}
+
+	private boolean equal(Object one, Object two) {
+		if (Objects.equals(one, two)) {
+			return true;
+		}
+		if (one instanceof ConfigTreePropertySource.Value oneValue
+				&& two instanceof ConfigTreePropertySource.Value twoValue) {
+			return oneValue.toString().contentEquals(twoValue);
+		}
+		return false;
 	}
 
 	private Map<String, Object> extract(MutablePropertySources propertySources) {
