@@ -90,10 +90,13 @@ public abstract class ContextRefresher {
 		return this.scope;
 	}
 
-	public synchronized Set<String> refresh() {
-		Set<String> keys = refreshEnvironment();
-		this.scope.refreshAll();
-		return keys;
+	public Set<String> refresh(Set<String> propertiesToRefresh, RefreshStrategy strategy) {
+        return strategy.refresh(this, propertiesToRefresh);
+    }
+
+	public synchronized Set<String> refreshSpecificEnvironment(Set<String> propertiesToRefresh){
+		//TODO: Implement this.
+		return propertiesToRefresh;
 	}
 
 	public synchronized Set<String> refreshEnvironment() {
