@@ -38,7 +38,7 @@ You can disable the bootstrap process completely by setting `spring.cloud.bootst
 == Application Context Hierarchies
 
 If you build an application context from `SpringApplication` or `SpringApplicationBuilder`, the Bootstrap context is added as a parent to that context.
-It is a feature of Spring that child contexts inherit property sources and profiles from their parent, so the "`main`" application context contains additional property sources, compared to building the same context without Spring Cloud Config.
+It is a feature of Spring that child contexts inherit property sources and profiles from their parent, so the `main` application context contains additional property sources, compared to building the same context without Spring Cloud Config.
 The additional property sources are:
 
 * "`bootstrap`": If any `PropertySourceLocators` are found in the bootstrap context and if they have non-empty properties, an optional `CompositePropertySource` appears with high priority.
@@ -99,7 +99,7 @@ Any beans that you want to be available to the main application context for auto
 There is a special contract for `@Beans` of type `ApplicationContextInitializer`.
 If you want to control the startup sequence, you can mark classes with the `@Order` annotation (the default order is `last`).
 
-WARNING: When adding custom `BootstrapConfiguration`, be careful that the classes you add are not `@ComponentScanned` by mistake into your "`main`" application context, where they might not be needed.
+WARNING: When adding custom `BootstrapConfiguration`, be careful that the classes you add are not scanned by mistake into your `main` application context, where they might not be needed.
 Use a separate package name for boot configuration classes and make sure that name is not already covered by your `@ComponentScan` or `@SpringBootApplication` annotated configuration classes.
 
 The bootstrap process ends by injecting initializers into the main `SpringApplication` instance (which is the normal Spring Boot startup sequence, whether it runs as a standalone application or is deployed in an application server).
