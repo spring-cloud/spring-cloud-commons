@@ -20,9 +20,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.cache.CacheFlux;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -52,33 +50,33 @@ public class CachingServiceInstanceListSupplier extends DelegatingServiceInstanc
 	@SuppressWarnings("unchecked")
 	public CachingServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, CacheManager cacheManager) {
 		super(delegate);
-		this.serviceInstances = CacheFlux.lookup(key -> {
+		String serviceId = delegate.getServiceId();
+		this.serviceInstances = Flux.defer(() -> {
 			// TODO: configurable cache name
 			Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
 			if (cache == null) {
 				if (log.isErrorEnabled()) {
 					log.error("Unable to find cache: " + SERVICE_INSTANCE_CACHE_NAME);
 				}
-				return Mono.empty();
 			}
-			List<ServiceInstance> list = cache.get(key, List.class);
-			if (list == null || list.isEmpty()) {
-				return Mono.empty();
+			else {
+				List<ServiceInstance> list = cache.get(serviceId, List.class);
+				if (list != null && !list.isEmpty()) {
+					return Flux.just(list);
+				}
 			}
-			return Flux.just(list).materialize().collectList();
-		}, delegate.getServiceId())
-			.onCacheMissResume(delegate.get().take(1))
-			.andWriteWith((key, signals) -> Flux.fromIterable(signals).dematerialize().doOnNext(instances -> {
-				Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
-				if (cache == null) {
+			return delegate.get().take(1).doOnNext(instances -> {
+				Cache writeCache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
+				if (writeCache == null) {
 					if (log.isErrorEnabled()) {
 						log.error("Unable to find cache for writing: " + SERVICE_INSTANCE_CACHE_NAME);
 					}
 				}
 				else {
-					cache.put(key, instances);
+					writeCache.put(serviceId, instances);
 				}
-			}).then());
+			});
+		});
 	}
 
 	@Override
