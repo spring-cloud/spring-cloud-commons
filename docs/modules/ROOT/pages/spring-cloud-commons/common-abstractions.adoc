@@ -9,7 +9,7 @@ Patterns such as service discovery, load balancing, and circuit breakers lend th
 Spring Cloud Commons provides the `@EnableDiscoveryClient` annotation.
 This looks for implementations of the `DiscoveryClient` and `ReactiveDiscoveryClient` interfaces with `META-INF/spring.factories`.
 Implementations of the discovery client add a configuration class to `spring.factories` under the `org.springframework.cloud.client.discovery.EnableDiscoveryClient` key.
-Examples of `DiscoveryClient` implementations include https://cloud.spring.io/spring-cloud-netflix/[Spring Cloud Netflix Eureka], https://cloud.spring.io/spring-cloud-consul/[Spring Cloud Consul Discovery], and https://cloud.spring.io/spring-cloud-zookeeper/[Spring Cloud Zookeeper Discovery].
+Examples of `DiscoveryClient` implementations include https://docs.spring.io/spring-cloud-netflix/reference/{spring-cloud-version}[Spring Cloud Netflix Eureka], https://docs.spring.io/spring-cloud-consul/reference/{spring-cloud-version}[Spring Cloud Consul Discovery], and https://docs.spring.io/spring-cloud-zookeeper/reference/{spring-cloud-version}[Spring Cloud Zookeeper Discovery].
 
 Spring Cloud will provide both the blocking and reactive service discovery clients by default.
 You can disable the blocking and/or reactive clients easily by setting `spring.cloud.discovery.blocking.enabled=false` or `spring.cloud.discovery.reactive.enabled=false`.
@@ -34,7 +34,7 @@ This health indicator is based on the currently registered `DiscoveryClient` imp
 * To disable the description field, set `spring.cloud.discovery.client.health-indicator.include-description=false`.
 Otherwise, it can bubble up as the `description` of the rolled up `HealthIndicator`.
 * To disable service retrieval, set `spring.cloud.discovery.client.health-indicator.use-services-query=false`.
-By default, the indicator invokes the client's `getServices` method. In deployments with many registered services it may too
+By default, the indicator invokes the client's `getServices` method. In deployments with many registered services it may be too
 costly to retrieve all services during every check. This will skip the service retrieval and instead use the client's `probe` method.
 
 [[discoverycompositehealthcontributor]]
@@ -305,7 +305,7 @@ public class MyClass {
     private RestTemplateBuilder loadBalanced;
 
     public String doOtherStuff() {
-        return loadBalanced.getForObject("http://stores/stores", String.class);
+        return loadBalanced.build().getForObject("http://stores/stores", String.class);
     }
 
     public String doStuff() {
@@ -517,7 +517,7 @@ public class MyClass {
 
 A load-balanced `RestTemplate` can be configured to retry failed requests.
 By default, this logic is disabled.
-For the non-reactive version (with `RestTemplate`), you can enable it by adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath. For the reactive version (with `WebTestClient`), you need to set `spring.cloud.loadbalancer.retry.enabled=true`.
+For the non-reactive version (with `RestTemplate`), you can enable it by adding link:https://github.com/spring-projects/spring-retry[Spring Retry] to your application's classpath. For the reactive version (with `WebClient`), you need to set `spring.cloud.loadbalancer.retry.enabled=true`.
 
 If you would like to disable the retry logic with Spring Retry or Reactive Retry on the classpath, you can set `spring.cloud.loadbalancer.retry.enabled=false`.
 
@@ -532,9 +532,10 @@ You can set:
 - `spring.cloud.loadbalancer.retry.retryableStatusCodes` - the status codes on which to always retry a failed request.
 
 For the reactive implementation, you can additionally set:
- - `spring.cloud.loadbalancer.retry.backoff.minBackoff` - Sets the minimum backoff duration (by default, 5 milliseconds)
- - `spring.cloud.loadbalancer.retry.backoff.maxBackoff` - Sets the maximum backoff duration (by default, max long value of milliseconds)
- - `spring.cloud.loadbalancer.retry.backoff.jitter` - Sets the jitter used for calculating the actual backoff duration for each call (by default, 0.5).
+
+- `spring.cloud.loadbalancer.retry.backoff.minBackoff` - Sets the minimum backoff duration (by default, 5 milliseconds)
+- `spring.cloud.loadbalancer.retry.backoff.maxBackoff` - Sets the maximum backoff duration (by default, max long value of milliseconds)
+- `spring.cloud.loadbalancer.retry.backoff.jitter` - Sets the jitter used for calculating the actual backoff duration for each call (by default, 0.5).
 
 For the reactive implementation, you can also implement your own `LoadBalancerRetryPolicy` to have more detailed control over the load-balanced call retries.
 
@@ -563,7 +564,7 @@ public class MyConfiguration {
 ----
 
 If you want to add one or more `RetryListener` implementations to your retry functionality, you need to
-create a bean of type `LoadBalancedRetryListenerFactory` and return the `RetryListener` array
+create a bean of type `LoadBalancedRetryFactory` and return the `RetryListener` array
 you would like to use for a given service, as the following example shows:
 
 [source,java,indent=0]
@@ -571,8 +572,8 @@ you would like to use for a given service, as the following example shows:
 @Configuration
 public class MyConfiguration {
     @Bean
-    LoadBalancedRetryListenerFactory retryListenerFactory() {
-        return new LoadBalancedRetryListenerFactory() {
+    LoadBalancedRetryFactory retryListenerFactory() {
+        return new LoadBalancedRetryFactory() {
             @Override
             public RetryListener[] createRetryListeners(String service) {
                 return new RetryListener[]{new RetryListener() {
@@ -638,7 +639,7 @@ The `ReactorLoadBalancer` is used to create a full physical address.
 [[load-balancer-exchange-filter-function]]
 === Spring WebFlux `WebClient` with a Non-reactive Load Balancer Client
 
-If `spring-webflux` is on the classpath, `LoadBalancerExchangeFilterFunction`
+If `spring-webflux` is on the classpath, `LoadBalancedExchangeFilterFunction`
 is auto-configured. Note, however, that this
 uses a non-reactive client under the hood.
 The following example shows how to configure a `WebClient` to use load-balancer:
@@ -676,6 +677,7 @@ A list of regular expressions can be set to cause the desired network interfaces
 The following configuration ignores the `docker0` interface and all interfaces that start with `veth`:
 
 .application.yml
+[source,yaml]
 ----
 spring:
   cloud:
@@ -688,6 +690,7 @@ spring:
 You can also force the use of only specified network addresses by using a list of regular expressions, as the following example shows:
 
 .bootstrap.yml
+[source,yaml]
 ----
 spring:
   cloud:
@@ -700,6 +703,7 @@ spring:
 You can also force the use of only site-local addresses, as the following example shows:
 
 .application.yml
+[source,yaml]
 ----
 spring:
   cloud:
@@ -748,11 +752,9 @@ public HasFeatures consulFeatures() {
 
 @Bean
 HasFeatures localFeatures() {
-  return HasFeatures.builder()
-      .abstractFeature(Something.class)
-      .namedFeature(new NamedFeature("Some Other Feature", Someother.class))
-      .abstractFeature(Somethingelse.class)
-      .build();
+  return new HasFeatures(
+    List.of(Something.class, Somethingelse.class),
+    List.of(new NamedFeature("Some Other Feature", Someother.class)));
 }
 ----
 

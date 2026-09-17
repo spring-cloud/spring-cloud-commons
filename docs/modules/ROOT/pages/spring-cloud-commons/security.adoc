@@ -5,8 +5,7 @@
 == Single Sign On
 
 NOTE: All of the OAuth2 SSO and resource server features moved to Spring Boot
-in version 1.3. You can find documentation in the
-https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/[Spring Boot user guide].
+in version 1.3. You can find documentation in the https://docs.spring.io/spring-boot/docs/1.4.0.RELEASE/reference/htmlsingle/#boot-features-security-oauth2-single-sign-on[Spring Boot user guide].
 
 [[spring-cloud-security-client-token-relay]]
 === Client Token Relay
