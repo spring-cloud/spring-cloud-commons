@@ -16,12 +16,15 @@
 
 package org.springframework.cloud.client.discovery.composite.reactive;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
+import reactor.test.publisher.PublisherProbe;
 import reactor.test.publisher.TestPublisher;
 
 import org.springframework.cloud.client.DefaultServiceInstance;
@@ -119,6 +122,59 @@ class ReactiveCompositeDiscoveryClientTests {
 			.expectNext(serviceInstance2)
 			.expectComplete()
 			.verify();
+	}
+
+	@Test
+	void shouldPreferOrderedClientEvenWhenItsResponseIsDelayed() {
+		ServiceInstance preferred = new DefaultServiceInstance("preferred", "service", "localhost", 8080, false);
+		ServiceInstance second = new DefaultServiceInstance("second", "service", "localhost", 8081, false);
+		PublisherProbe<ServiceInstance> fallback = PublisherProbe.of(Flux.just(second));
+		when(discoveryClient1.getOrder()).thenReturn(-1);
+		when(discoveryClient1.getInstances("service"))
+			.thenAnswer(invocation -> Flux.just(preferred, second).delayElements(Duration.ofSeconds(1)));
+		when(discoveryClient2.getInstances("service")).thenReturn(fallback.flux());
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient2, discoveryClient1));
+
+		StepVerifier.withVirtualTime(() -> client.getInstances("service"))
+			.thenAwait(Duration.ofSeconds(2))
+			.expectNext(preferred, second)
+			.verifyComplete();
+		fallback.assertWasNotSubscribed();
+	}
+
+	@Test
+	void shouldFallBackWhenPreferredClientIsEmpty() {
+		ServiceInstance instance = new DefaultServiceInstance("instance", "service", "localhost", 8080, false);
+		when(discoveryClient1.getInstances("service")).thenReturn(Flux.empty());
+		when(discoveryClient2.getInstances("service")).thenReturn(Flux.just(instance));
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient1, discoveryClient2));
+
+		StepVerifier.create(client.getInstances("service")).expectNext(instance).verifyComplete();
+	}
+
+	@Test
+	void shouldPropagatePreferredClientErrorWithoutSubscribingToFallback() {
+		IllegalStateException error = new IllegalStateException("discovery failed");
+		PublisherProbe<ServiceInstance> fallback = PublisherProbe.empty();
+		when(discoveryClient1.getInstances("service")).thenReturn(Flux.error(error));
+		when(discoveryClient2.getInstances("service")).thenReturn(fallback.flux());
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient1, discoveryClient2));
+
+		StepVerifier.create(client.getInstances("service")).expectErrorMatches(actual -> actual == error).verify();
+		fallback.assertWasNotSubscribed();
+	}
+
+	@Test
+	void shouldCompleteWhenAllClientsAreEmpty() {
+		when(discoveryClient1.getInstances("service")).thenReturn(Flux.empty());
+		when(discoveryClient2.getInstances("service")).thenReturn(Flux.empty());
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient1, discoveryClient2));
+
+		StepVerifier.create(client.getInstances("service")).verifyComplete();
 	}
 
 }
