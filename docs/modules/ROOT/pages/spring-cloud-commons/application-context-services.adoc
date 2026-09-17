@@ -18,6 +18,7 @@ Instead of `application.yml` (or `.properties`), you can use `bootstrap.yml`, ke
 The following listing shows an example:
 
 .bootstrap.yml
+[source,yaml]
 ----
 spring:
   application:
@@ -286,7 +287,7 @@ For a Spring Boot Actuator application, some additional management endpoints are
 
 * `POST` to `/actuator/env` to update the `Environment` and rebind `@ConfigurationProperties` and log levels.
   To enabled this endpoint you must set `management.endpoint.env.post.enabled=true` and set a regular expression to limit what properties may be set at `management.endpoint.env.post.valid-keys-regex`.
-* `/actuator/refresh` to re-load the boot strap context and refresh the `@RefreshScope` beans.
+* `/actuator/refresh` to re-load the bootstrap context and refresh the `@RefreshScope` beans.
 * `/actuator/restart` to close the `ApplicationContext` and restart it (disabled by default).
 * `/actuator/pause` and `/actuator/resume` for calling the `Lifecycle` methods (`stop()` and `start()` on the `ApplicationContext`).
 
