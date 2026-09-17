@@ -292,6 +292,10 @@ public class ConfigurationPropertiesRebinder
 			}
 			try {
 				if (target.isWritableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
+					if (isNeverReset(pd.getPropertyType()) || (target.isReadableProperty(propertyName)
+							&& isNeverReset(target.getPropertyValue(propertyName)))) {
+						continue;
+					}
 					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
 					target.setPropertyValue(propertyName, defaultValue);
 				}
@@ -337,13 +341,35 @@ public class ConfigurationPropertiesRebinder
 		if (type.isArray() || BeanUtils.isSimpleValueType(type) || isJdkClass(type) || isStandardApiClass(type)) {
 			return false;
 		}
+		return !isNeverReset(type);
+	}
+
+	/**
+	 * Whether the given value was excluded through the
+	 * {@code spring.cloud.refresh.never-reset-nested-types} property.
+	 */
+	private boolean isNeverReset(Object value) {
+		return value != null && isNeverReset(value.getClass());
+	}
+
+	/**
+	 * Whether the given type was excluded through the
+	 * {@code spring.cloud.refresh.never-reset-nested-types} property. The exclusion
+	 * applies to a property that carries a setter as well, so that a type the user asked
+	 * us to leave alone is neither descended into nor overwritten with the default
+	 * instance's value.
+	 */
+	private boolean isNeverReset(Class<?> type) {
+		if (type == null) {
+			return false;
+		}
 		String typeName = type.getName();
 		for (String excluded : this.neverResetNestedTypes) {
 			if (typeName.startsWith(excluded)) {
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
