@@ -290,10 +290,16 @@ public class ConfigurationPropertiesRebinder
 			if ("class".equals(propertyName)) {
 				continue;
 			}
+			// A property whose declared type the user excluded is left alone whatever its
+			// accessors look like: a read-only property is not descended into and a
+			// writable one is not overwritten with the default instance's value.
+			if (isNeverReset(pd.getPropertyType())) {
+				continue;
+			}
 			try {
 				if (target.isWritableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
-					if (isNeverReset(pd.getPropertyType()) || (target.isReadableProperty(propertyName)
-							&& isNeverReset(target.getPropertyValue(propertyName)))) {
+					if (target.isReadableProperty(propertyName)
+							&& isNeverReset(target.getPropertyValue(propertyName))) {
 						continue;
 					}
 					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
@@ -354,10 +360,11 @@ public class ConfigurationPropertiesRebinder
 
 	/**
 	 * Whether the given type was excluded through the
-	 * {@code spring.cloud.refresh.never-reset-nested-types} property. The exclusion
-	 * applies to a property that carries a setter as well, so that a type the user asked
-	 * us to leave alone is neither descended into nor overwritten with the default
-	 * instance's value.
+	 * {@code spring.cloud.refresh.never-reset-nested-types} property. The exclusion is
+	 * matched against a property's declared type as well as the runtime class of its
+	 * value, so that a type the user asked us to leave alone is neither descended into
+	 * nor overwritten with the default instance's value, whether or not the value happens
+	 * to be an instance of a subtype whose own name does not carry the excluded prefix.
 	 */
 	private boolean isNeverReset(Class<?> type) {
 		if (type == null) {

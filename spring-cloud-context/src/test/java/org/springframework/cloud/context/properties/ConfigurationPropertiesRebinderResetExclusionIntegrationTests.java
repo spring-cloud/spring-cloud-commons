@@ -45,7 +45,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Ryan Baxter
  */
 @SpringBootTest(classes = TestConfiguration.class, properties = { "test.nested.host=custom-host",
-		"test.writable.host=custom-host",
+		"test.writable.host=custom-host", "test.subclassed.host=custom-host",
 		"spring.cloud.refresh.never-reset-nested-types=org.springframework.cloud.context.properties.ConfigurationPropertiesRebinderResetExclusionIntegrationTests$NestedProperties" })
 public class ConfigurationPropertiesRebinderResetExclusionIntegrationTests {
 
@@ -85,6 +85,20 @@ public class ConfigurationPropertiesRebinderResetExclusionIntegrationTests {
 		// here, and every reader of the bean sees null until the rebind completes.
 		then(this.properties.getWritable()).isSameAs(before);
 		then(this.properties.getWritable().getHost()).isEqualTo("custom-host");
+	}
+
+	@Test
+	@DirtiesContext
+	public void excludedNestedTypeIsNotResetWhenTheValueIsASubclass() {
+		then(this.properties.getSubclassed().getHost()).isEqualTo("custom-host");
+		// Remove the nested property and rebind
+		Map<String, Object> map = findTestProperties();
+		map.remove("test.subclassed.host");
+		this.rebinder.rebind();
+		// The exclusion is matched as a name prefix, so a value whose own class sits
+		// under a different package or name than the excluded type is only recognised
+		// through the property's declared type.
+		then(this.properties.getSubclassed().getHost()).isEqualTo("custom-host");
 	}
 
 	private Map<String, Object> findTestProperties() {
@@ -131,6 +145,12 @@ public class ConfigurationPropertiesRebinderResetExclusionIntegrationTests {
 
 		private NestedProperties writable;
 
+		private final NestedProperties subclassed = new SubclassedNestedProperties();
+
+		public NestedProperties getSubclassed() {
+			return this.subclassed;
+		}
+
 		public NestedProperties getNested() {
 			return this.nested;
 		}
@@ -142,6 +162,10 @@ public class ConfigurationPropertiesRebinderResetExclusionIntegrationTests {
 		public void setWritable(NestedProperties writable) {
 			this.writable = writable;
 		}
+
+	}
+
+	protected static class SubclassedNestedProperties extends NestedProperties {
 
 	}
 
