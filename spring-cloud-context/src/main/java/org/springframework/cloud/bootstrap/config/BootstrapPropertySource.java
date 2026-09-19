@@ -16,13 +16,8 @@
 
 package org.springframework.cloud.bootstrap.config;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
-import org.springframework.util.StringUtils;
 
 import static org.springframework.cloud.bootstrap.config.PropertySourceBootstrapConfiguration.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
@@ -30,6 +25,7 @@ import static org.springframework.cloud.bootstrap.config.PropertySourceBootstrap
  * Enumerable wrapper for a property source.
  *
  * @author Ryan Baxter
+ * @author Nan Chiu
  */
 public class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
 
@@ -47,9 +43,7 @@ public class BootstrapPropertySource<T> extends EnumerablePropertySource<T> {
 
 	@Override
 	public String[] getPropertyNames() {
-		Set<String> names = new LinkedHashSet<>(Arrays.asList(this.delegate.getPropertyNames()));
-
-		return StringUtils.toStringArray(names);
+		return this.delegate.getPropertyNames();
 	}
 
 	public PropertySource<T> getDelegate() {
