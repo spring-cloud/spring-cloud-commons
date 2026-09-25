@@ -157,8 +157,8 @@ final class CircuitBreakerConfigurerUtils {
 				LOG.error("Error invoking fallback method: " + method.getName(), exception);
 			}
 			Throwable underlyingException = exception.getCause();
-			if (underlyingException instanceof RuntimeException) {
-				throw (RuntimeException) underlyingException;
+			if (underlyingException instanceof RuntimeException ex) {
+				throw ex;
 			}
 			if (underlyingException != null) {
 				throw new IllegalStateException("Failed to invoke fallback method", underlyingException);

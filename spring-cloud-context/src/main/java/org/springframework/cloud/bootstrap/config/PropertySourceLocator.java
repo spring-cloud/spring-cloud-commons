@@ -51,8 +51,8 @@ public interface PropertySourceLocator {
 		if (propertySource == null) {
 			return Collections.emptyList();
 		}
-		if (propertySource instanceof CompositePropertySource) {
-			Collection<PropertySource<?>> sources = ((CompositePropertySource) propertySource).getPropertySources();
+		if (propertySource instanceof CompositePropertySource compositePropertySource) {
+			Collection<PropertySource<?>> sources = compositePropertySource.getPropertySources();
 			List<PropertySource<?>> filteredSources = new ArrayList<>();
 			for (PropertySource<?> p : sources) {
 				if (p != null) {

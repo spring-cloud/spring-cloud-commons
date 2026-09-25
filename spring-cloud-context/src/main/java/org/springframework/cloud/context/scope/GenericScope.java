@@ -88,11 +88,11 @@ public class GenericScope
 	private final ConcurrentMap<String, ReadWriteLock> locks = new ConcurrentHashMap<>();
 
 	static RuntimeException wrapIfNecessary(Throwable throwable) {
-		if (throwable instanceof RuntimeException) {
-			return (RuntimeException) throwable;
+		if (throwable instanceof RuntimeException ex) {
+			return ex;
 		}
-		if (throwable instanceof Error) {
-			throw (Error) throwable;
+		if (throwable instanceof Error error) {
+			throw error;
 		}
 		return new IllegalStateException(throwable);
 	}
@@ -266,11 +266,11 @@ public class GenericScope
 	 */
 	private void setSerializationId(ConfigurableListableBeanFactory beanFactory) {
 
-		if (beanFactory instanceof DefaultListableBeanFactory) {
+		if (beanFactory instanceof DefaultListableBeanFactory defaultListableBeanFactory) {
 
 			String id = this.id;
 			if (id == null) {
-				List<String> list = new ArrayList<>(Arrays.asList(beanFactory.getBeanDefinitionNames()));
+				List<String> list = new ArrayList<>(Arrays.asList(defaultListableBeanFactory.getBeanDefinitionNames()));
 				Collections.sort(list);
 				String names = list.toString();
 				logger.debug("Generating bean factory id from names: " + names);
@@ -278,7 +278,7 @@ public class GenericScope
 			}
 
 			logger.info("BeanFactory id=" + id);
-			((DefaultListableBeanFactory) beanFactory).setSerializationId(id);
+			defaultListableBeanFactory.setSerializationId(id);
 
 		}
 		else {

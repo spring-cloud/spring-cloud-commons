@@ -51,8 +51,8 @@ public abstract class LoadBalancedRecoveryCallback<T, R> implements RecoveryCall
 			if (lastThrowable instanceof RetryableStatusCodeException ex) {
 				return createResponse((R) ex.getResponse(), ex.getUri());
 			}
-			else if (lastThrowable instanceof Exception) {
-				throw (Exception) lastThrowable;
+			else if (lastThrowable instanceof Exception ex) {
+				throw ex;
 			}
 		}
 		throw new RetryException("Could not recover", lastThrowable);

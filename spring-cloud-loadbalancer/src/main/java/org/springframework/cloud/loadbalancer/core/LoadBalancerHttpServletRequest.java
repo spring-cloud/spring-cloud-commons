@@ -230,8 +230,8 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 			return null;
 		}
 		Object principal = requestData.getAttributes().get(Principal.class.getName());
-		if (principal instanceof Principal) {
-			return (Principal) principal;
+		if (principal instanceof Principal userPrincipal) {
+			return userPrincipal;
 		}
 		return null;
 	}

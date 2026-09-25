@@ -64,8 +64,8 @@ public class RequestBasedStickySessionServiceInstanceListSupplier extends Delega
 			instanceIdCookieName = properties.getStickySession().getInstanceIdCookieName();
 		}
 		Object context = request.getContext();
-		if ((context instanceof RequestDataContext)) {
-			RequestData clientRequest = ((RequestDataContext) context).getClientRequest();
+		if (context instanceof RequestDataContext requestDataContext) {
+			RequestData clientRequest = requestDataContext.getClientRequest();
 			MultiValueMap<String, String> cookies = null;
 			if (clientRequest != null) {
 				cookies = clientRequest.getCookies();
