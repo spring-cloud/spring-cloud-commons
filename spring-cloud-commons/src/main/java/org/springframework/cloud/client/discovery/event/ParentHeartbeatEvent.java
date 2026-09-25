@@ -27,7 +27,7 @@ import org.springframework.context.ApplicationEvent;
  * @author Spencer Gibb
  */
 @SuppressWarnings("serial")
-// WARNING: do not extend HearbeatEvent because of a parent context forwarding
+// WARNING: do not extend HeartbeatEvent because of a parent context forwarding
 // Heartbeat events to a child. Avoids a stack overflow.
 public class ParentHeartbeatEvent extends ApplicationEvent {
 

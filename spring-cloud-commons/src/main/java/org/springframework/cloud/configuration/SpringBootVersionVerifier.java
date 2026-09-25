@@ -122,8 +122,8 @@ class SpringBootVersionVerifier implements CompatibilityVerifier {
 	private String action() {
 		return String
 			.format("""
-					Change Spring Boot version to one of the following versions %s .
-					You can find the latest Spring Boot versions here [%s].\s
+					Change Spring Boot version to one of the following versions %s.
+					You can find the latest Spring Boot versions here [%s].
 					If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [%s] and check the [Release Trains] section.
 					If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]""",
 					this.acceptedVersions, "https://spring.io/projects/spring-boot#learn",
