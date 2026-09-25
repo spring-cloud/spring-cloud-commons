@@ -788,7 +788,7 @@ Action:
 
 Consider applying the following actions:
 
-- Change Spring Boot version to one of the following versions [1.2.x, 1.3.x] .
+- Change Spring Boot version to one of the following versions [1.2.x, 1.3.x].
 You can find the latest Spring Boot versions here [https://spring.io/projects/spring-boot#learn].
 If you want to learn more about the Spring Cloud Release train compatibility, you can visit this page [https://spring.io/projects/spring-cloud#overview] and check the [Release Trains] section.
 ----
