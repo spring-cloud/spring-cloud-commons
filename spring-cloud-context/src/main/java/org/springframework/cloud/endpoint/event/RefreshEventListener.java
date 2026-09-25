@@ -54,11 +54,11 @@ public class RefreshEventListener implements SmartApplicationListener {
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
-		if (event instanceof ApplicationReadyEvent) {
-			handle((ApplicationReadyEvent) event);
+		if (event instanceof ApplicationReadyEvent applicationReadyEvent) {
+			handle(applicationReadyEvent);
 		}
-		else if (event instanceof RefreshEvent) {
-			handle((RefreshEvent) event);
+		else if (event instanceof RefreshEvent refreshEvent) {
+			handle(refreshEvent);
 		}
 	}
 

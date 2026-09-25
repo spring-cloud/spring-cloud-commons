@@ -71,8 +71,8 @@ public class RandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
 	private Response<ServiceInstance> processInstanceResponse(ServiceInstanceListSupplier supplier,
 			List<ServiceInstance> serviceInstances) {
 		Response<ServiceInstance> serviceInstanceResponse = getInstanceResponse(serviceInstances);
-		if (supplier instanceof SelectedInstanceCallback && serviceInstanceResponse.hasServer()) {
-			((SelectedInstanceCallback) supplier).selectedServiceInstance(serviceInstanceResponse.getServer());
+		if (supplier instanceof SelectedInstanceCallback callback && serviceInstanceResponse.hasServer()) {
+			callback.selectedServiceInstance(serviceInstanceResponse.getServer());
 		}
 		return serviceInstanceResponse;
 	}
