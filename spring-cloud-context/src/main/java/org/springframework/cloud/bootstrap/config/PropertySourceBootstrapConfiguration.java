@@ -319,9 +319,9 @@ public class PropertySourceBootstrapConfiguration implements ApplicationListener
 	}
 
 	/*
-	 * The ConextRefreshedEvent gets called at the end of the boostrap phase after config
+	 * The ContextRefreshedEvent gets called at the end of the boostrap phase after config
 	 * data is loaded during bootstrap. This will run and do an "initial fetch" of
-	 * configuration data during bootstrap but before the main applicaiton context starts.
+	 * configuration data during bootstrap but before the main application context starts.
 	 */
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event) {
