@@ -16,14 +16,12 @@
 
 package org.springframework.cloud.client.discovery.composite.reactive;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
-import org.springframework.cloud.commons.publisher.CloudFlux;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
@@ -51,11 +49,11 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 		if (discoveryClients == null || discoveryClients.isEmpty()) {
 			return Flux.empty();
 		}
-		List<Flux<ServiceInstance>> serviceInstances = new ArrayList<>();
+		Flux<ServiceInstance> serviceInstances = Flux.empty();
 		for (ReactiveDiscoveryClient discoveryClient : discoveryClients) {
-			serviceInstances.add(discoveryClient.getInstances(serviceId));
+			serviceInstances = serviceInstances.switchIfEmpty(discoveryClient.getInstances(serviceId));
 		}
-		return CloudFlux.firstNonEmpty(serviceInstances);
+		return serviceInstances;
 	}
 
 	@Override
