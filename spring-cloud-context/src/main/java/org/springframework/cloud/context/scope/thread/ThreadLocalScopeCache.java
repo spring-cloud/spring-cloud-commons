@@ -58,4 +58,9 @@ public class ThreadLocalScopeCache implements ScopeCache {
 		return value;
 	}
 
+	@Override
+	public boolean requiresLocking() {
+		return false;
+	}
+
 }

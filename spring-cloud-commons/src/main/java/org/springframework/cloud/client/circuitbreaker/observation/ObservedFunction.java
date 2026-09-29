@@ -34,13 +34,13 @@ class ObservedFunction<T> implements Function<Throwable, T> {
 	private final Observation observation;
 
 	ObservedFunction(CircuitBreakerObservationConvention customConvention, CircuitBreakerObservationContext context,
-			String conextualName, ObservationRegistry observationRegistry, Function<Throwable, T> toRun) {
+			String contextualName, ObservationRegistry observationRegistry, Function<Throwable, T> toRun) {
 		this.delegate = toRun;
 		this.observation = CircuitBreakerObservationDocumentation.CIRCUIT_BREAKER_SUPPLIER_OBSERVATION
 			.observation(customConvention, DefaultCircuitBreakerObservationConvention.INSTANCE, () -> context,
 					observationRegistry)
 			.parentObservation(observationRegistry.getCurrentObservation());
-		this.observation.contextualName(conextualName);
+		this.observation.contextualName(contextualName);
 	}
 
 	@Override

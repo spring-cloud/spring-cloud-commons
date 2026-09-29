@@ -33,8 +33,8 @@ public final class ProxyUtils {
 	public static <T> T getTargetObject(Object candidate) {
 		Assert.notNull(candidate, "Candidate must not be null");
 		try {
-			if (AopUtils.isAopProxy(candidate) && candidate instanceof Advised) {
-				Object target = ((Advised) candidate).getTargetSource().getTarget();
+			if (AopUtils.isAopProxy(candidate) && candidate instanceof Advised advised) {
+				Object target = advised.getTargetSource().getTarget();
 				if (target != null) {
 					return (T) getTargetObject(target);
 				}

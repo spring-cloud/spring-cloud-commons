@@ -108,8 +108,8 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 		ConfigurableApplicationContext context = null;
 		String configName = environment.resolvePlaceholders("${spring.cloud.bootstrap.name:bootstrap}");
 		for (ApplicationContextInitializer<?> initializer : event.getSpringApplication().getInitializers()) {
-			if (initializer instanceof ParentContextApplicationContextInitializer) {
-				context = findBootstrapContext((ParentContextApplicationContextInitializer) initializer, configName);
+			if (initializer instanceof ParentContextApplicationContextInitializer contextInitializer) {
+				context = findBootstrapContext(contextInitializer, configName);
 			}
 		}
 		if (context == null) {
@@ -237,9 +237,10 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 			}
 			else {
 				PropertySource<?> target = environment.get(name);
-				if (target instanceof MapPropertySource && target != source && source instanceof MapPropertySource) {
-					Map<String, Object> targetMap = ((MapPropertySource) target).getSource();
-					Map<String, Object> map = ((MapPropertySource) source).getSource();
+				if (target instanceof MapPropertySource targetMapPropertySource && target != source
+						&& source instanceof MapPropertySource sourceMapPropertySource) {
+					Map<String, Object> targetMap = targetMapPropertySource.getSource();
+					Map<String, Object> map = sourceMapPropertySource.getSource();
 					for (String key : map.keySet()) {
 						if (!target.containsProperty(key)) {
 							targetMap.put(key, map.get(key));
@@ -283,10 +284,10 @@ public class BootstrapApplicationListener implements ApplicationListener<Applica
 	private void addAncestorInitializer(SpringApplication application, ConfigurableApplicationContext context) {
 		boolean installed = false;
 		for (ApplicationContextInitializer<?> initializer : application.getInitializers()) {
-			if (initializer instanceof AncestorInitializer) {
+			if (initializer instanceof AncestorInitializer ancestorInitializer) {
 				installed = true;
 				// New parent
-				((AncestorInitializer) initializer).setParent(context);
+				ancestorInitializer.setParent(context);
 			}
 		}
 		if (!installed) {

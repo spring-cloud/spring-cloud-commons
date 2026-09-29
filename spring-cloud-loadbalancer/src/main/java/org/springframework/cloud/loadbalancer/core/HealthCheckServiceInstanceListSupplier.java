@@ -26,7 +26,6 @@ import org.jspecify.annotations.Nullable;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.retry.Repeat;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -70,11 +69,9 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 				: properties.getHealthCheck();
 		defaultHealthCheckPath = healthCheck.getPath().getOrDefault("default", "/actuator/health");
 		this.aliveFunction = aliveFunction;
-		Repeat<Object> aliveInstancesReplayRepeat = Repeat
-			.onlyIf(repeatContext -> this.healthCheck.getRefetchInstances())
-			.fixedBackoff(healthCheck.getRefetchInstancesInterval());
 		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate)
-			.repeatWhen(aliveInstancesReplayRepeat)
+			.repeatWhen(completed -> completed.takeWhile(emitted -> this.healthCheck.getRefetchInstances())
+				.delayElements(healthCheck.getRefetchInstancesInterval()))
 			.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(List::copyOf));
 		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay())
 			.replay(1)
@@ -91,8 +88,6 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 	}
 
 	protected Flux<List<ServiceInstance>> healthCheckFlux(List<ServiceInstance> instances) {
-		Repeat<Object> healthCheckFluxRepeat = Repeat.onlyIf(repeatContext -> healthCheck.getRepeatHealthCheck())
-			.fixedBackoff(healthCheck.getInterval());
 		return Flux.defer(() -> {
 			List<Mono<ServiceInstance>> checks = new ArrayList<>(instances.size());
 			for (ServiceInstance instance : instances) {
@@ -126,7 +121,9 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 				}).defaultIfEmpty(result);
 			}
 			return Flux.merge(checks).collectList();
-		}).repeatWhen(healthCheckFluxRepeat);
+		})
+			.repeatWhen(completed -> completed.takeWhile(emitted -> healthCheck.getRepeatHealthCheck())
+				.delayElements(healthCheck.getInterval()));
 	}
 
 	@Override

@@ -59,7 +59,7 @@ public class LoadBalancerWebClientBuilderBeanPostProcessor implements BeanPostPr
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-		if (bean instanceof WebClient.Builder) {
+		if (bean instanceof WebClient.Builder builder) {
 			if (context.findAnnotationOnBean(beanName, LoadBalanced.class) == null) {
 				return bean;
 			}
@@ -68,7 +68,7 @@ public class LoadBalancerWebClientBuilderBeanPostProcessor implements BeanPostPr
 			if (exchangeFilterFunction == null) {
 				throw new IllegalStateException("LoadBalancerExchangeFilterFunction not found");
 			}
-			((WebClient.Builder) bean).filter(exchangeFilterFunctionObjectProvider.getIfAvailable());
+			builder.filter(exchangeFilterFunctionObjectProvider.getIfAvailable());
 		}
 		return bean;
 	}

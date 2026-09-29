@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.context.refresh;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.boot.env.ConfigTreePropertySource;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
@@ -47,6 +50,7 @@ import org.springframework.web.context.support.StandardServletEnvironment;
  * @author Dave Syer
  * @author Venil Noronha
  * @author Mikhail Polivakha
+ * @author arimu1
  */
 public abstract class ContextRefresher {
 
@@ -142,7 +146,7 @@ public abstract class ContextRefresher {
 			if (!after.containsKey(key)) {
 				result.put(key, null);
 			}
-			else if (!Objects.equals(before.get(key), after.get(key))) {
+			else if (!equal(before.get(key), after.get(key))) {
 				result.put(key, after.get(key));
 			}
 		}
@@ -152,6 +156,35 @@ public abstract class ContextRefresher {
 			}
 		}
 		return result;
+	}
+
+	private boolean equal(Object one, Object two) {
+		if (Objects.equals(one, two)) {
+			return true;
+		}
+		if (one instanceof ConfigTreePropertySource.Value oneValue
+				&& two instanceof ConfigTreePropertySource.Value twoValue) {
+			return configTreeValuesEqual(oneValue, twoValue);
+		}
+		return false;
+	}
+
+	private boolean configTreeValuesEqual(ConfigTreePropertySource.Value one, ConfigTreePropertySource.Value two) {
+		try {
+			return Arrays.equals(readAllBytes(one), readAllBytes(two));
+		}
+		catch (Exception ex) {
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug("Unable to compare config tree property values", ex);
+			}
+			return false;
+		}
+	}
+
+	private byte[] readAllBytes(ConfigTreePropertySource.Value value) throws IOException {
+		try (InputStream inputStream = value.getInputStream()) {
+			return inputStream.readAllBytes();
+		}
 	}
 
 	private Map<String, Object> extract(MutablePropertySources propertySources) {

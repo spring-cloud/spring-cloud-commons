@@ -88,11 +88,11 @@ public class GenericScope
 	private final ConcurrentMap<String, ReadWriteLock> locks = new ConcurrentHashMap<>();
 
 	static RuntimeException wrapIfNecessary(Throwable throwable) {
-		if (throwable instanceof RuntimeException) {
-			return (RuntimeException) throwable;
+		if (throwable instanceof RuntimeException ex) {
+			return ex;
 		}
-		if (throwable instanceof Error) {
-			throw (Error) throwable;
+		if (throwable instanceof Error error) {
+			throw error;
 		}
 		return new IllegalStateException(throwable);
 	}
@@ -266,11 +266,11 @@ public class GenericScope
 	 */
 	private void setSerializationId(ConfigurableListableBeanFactory beanFactory) {
 
-		if (beanFactory instanceof DefaultListableBeanFactory) {
+		if (beanFactory instanceof DefaultListableBeanFactory defaultListableBeanFactory) {
 
 			String id = this.id;
 			if (id == null) {
-				List<String> list = new ArrayList<>(Arrays.asList(beanFactory.getBeanDefinitionNames()));
+				List<String> list = new ArrayList<>(Arrays.asList(defaultListableBeanFactory.getBeanDefinitionNames()));
 				Collections.sort(list);
 				String names = list.toString();
 				logger.debug("Generating bean factory id from names: " + names);
@@ -278,7 +278,7 @@ public class GenericScope
 			}
 
 			logger.info("BeanFactory id=" + id);
-			((DefaultListableBeanFactory) beanFactory).setSerializationId(id);
+			defaultListableBeanFactory.setSerializationId(id);
 
 		}
 		else {
@@ -304,12 +304,20 @@ public class GenericScope
 		return this.locks.get(beanName);
 	}
 
+	boolean requiresProxyLocking() {
+		return this.cache.requiresLocking();
+	}
+
 	private static class BeanLifecycleWrapperCache {
 
 		private final ScopeCache cache;
 
 		BeanLifecycleWrapperCache(ScopeCache cache) {
 			this.cache = cache;
+		}
+
+		boolean requiresLocking() {
+			return this.cache.requiresLocking();
 		}
 
 		public BeanLifecycleWrapper remove(String name) {
@@ -368,7 +376,7 @@ public class GenericScope
 
 		public Object getBean() {
 			if (this.bean == null) {
-				synchronized (this.name) {
+				synchronized (this) {
 					if (this.bean == null) {
 						this.bean = this.objectFactory.getObject();
 					}
@@ -381,7 +389,7 @@ public class GenericScope
 			if (this.callback == null) {
 				return;
 			}
-			synchronized (this.name) {
+			synchronized (this) {
 				Runnable callback = this.callback;
 				if (callback != null) {
 					callback.run();
@@ -464,16 +472,19 @@ public class GenericScope
 				return invocation.proceed();
 			}
 			Object proxy = getObject();
-			ReadWriteLock readWriteLock = this.scope.getLock(this.targetBeanName);
-			if (readWriteLock == null) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("For bean with name [" + this.targetBeanName
-							+ "] there is no read write lock. Will create a new one to avoid NPE");
+			Lock lock = null;
+			if (this.scope.requiresProxyLocking()) {
+				ReadWriteLock readWriteLock = this.scope.getLock(this.targetBeanName);
+				if (readWriteLock == null) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("For bean with name [" + this.targetBeanName
+								+ "] there is no read write lock. Will create a new one to avoid NPE");
+					}
+					readWriteLock = new ReentrantReadWriteLock();
 				}
-				readWriteLock = new ReentrantReadWriteLock();
+				lock = readWriteLock.readLock();
+				lock.lock();
 			}
-			Lock lock = readWriteLock.readLock();
-			lock.lock();
 			try {
 				if (proxy instanceof Advised advised) {
 					ReflectionUtils.makeAccessible(method);
@@ -488,7 +499,9 @@ public class GenericScope
 				throw e.getUndeclaredThrowable();
 			}
 			finally {
-				lock.unlock();
+				if (lock != null) {
+					lock.unlock();
+				}
 			}
 		}
 

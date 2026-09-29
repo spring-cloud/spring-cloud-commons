@@ -53,8 +53,8 @@ public class TextEncryptorBindHandler extends AbstractBindHandler {
 
 	@Override
 	public Object onSuccess(ConfigurationPropertyName name, Bindable<?> target, BindContext context, Object result) {
-		if (result instanceof String && ((String) result).startsWith(ENCRYPTED_PROPERTY_PREFIX)) {
-			return decrypt(name.toString(), (String) result);
+		if (result instanceof String string && string.startsWith(ENCRYPTED_PROPERTY_PREFIX)) {
+			return decrypt(name.toString(), string);
 		}
 		return result;
 	}

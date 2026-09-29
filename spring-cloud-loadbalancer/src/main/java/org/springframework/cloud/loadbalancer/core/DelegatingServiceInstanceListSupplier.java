@@ -57,15 +57,15 @@ public abstract class DelegatingServiceInstanceListSupplier
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if (delegate instanceof InitializingBean) {
-			((InitializingBean) delegate).afterPropertiesSet();
+		if (delegate instanceof InitializingBean initializingBean) {
+			initializingBean.afterPropertiesSet();
 		}
 	}
 
 	@Override
 	public void destroy() throws Exception {
-		if (delegate instanceof DisposableBean) {
-			((DisposableBean) delegate).destroy();
+		if (delegate instanceof DisposableBean disposableBean) {
+			disposableBean.destroy();
 		}
 	}
 

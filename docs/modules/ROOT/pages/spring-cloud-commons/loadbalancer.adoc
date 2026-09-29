@@ -16,7 +16,7 @@ Spring Cloud LoadBalancer creates a separate Spring child context for each servi
 
 You can choose to load those contexts eagerly. In order to do that, specify the service ids for which you want to do eager load using the `spring.cloud.loadbalancer.eager-load.clients` property, for example:
 
-[source]
+[source,properties]
 ----
 spring.cloud-loadbalancer.eager-load.clients[0]=my-first-client
 spring.cloud-loadbalancer.eager-load.clients[1]=my-second-client
@@ -85,7 +85,7 @@ TIP: To use Caffeine instead of the default cache, add the `com.github.ben-manes
 [[loadbalancer-cache-configuration]]
 === LoadBalancer Cache Configuration
 
-You can set your own `ttl` value (the time after write after which entries should be expired), expressed as `Duration`, by passing a `String` compliant with the https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration[Spring Boot `String` to `Duration` converter syntax].
+You can set your own `ttl` value (the time after write after which entries should be expired), expressed as `Duration`, by passing a `String` compliant with the https://docs.spring.io/spring-boot/docs/current/reference/html/spring-boot-features.html#boot-features-external-config-conversion-duration[Spring Boot `String` to `Duration` converter syntax]
 as the value of the `spring.cloud.loadbalancer.cache.ttl` property.
 You can also set your own LoadBalancer cache initial capacity by setting the value of the `spring.cloud.loadbalancer.cache.capacity` property.
 
@@ -203,7 +203,7 @@ in order to avoid retrying calls on a failing instance.
 WARNING: If using any of the Service Discovery-backed suppliers, adding this health-check mechanism is usually not necessary, as we retrieve the health state of the instances directly
 from the Service Registry.
 
-TIP: The `HealthCheckServiceInstanceListSupplier` relies on having updated instances provided by a delegate flux. In the rare cases when you want to use a delegate that does not refresh the instances, even though the list of instances may change (such as the `DiscoveryClientServiceInstanceListSupplier` provided by us), you can set `spring.cloud.loadbalancer.health-check.refetch-instances` to `true` to have the instance list refreshed by the `HealthCheckServiceInstanceListSupplier`. You can then also adjust the refretch intervals by modifying the value of `spring.cloud.loadbalancer.health-check.refetch-instances-interval` and opt to disable the additional healthcheck repetitions by setting `spring.cloud.loadbalancer.health-check.repeat-health-check` to `false` as every instances refetch
+TIP: The `HealthCheckServiceInstanceListSupplier` relies on having updated instances provided by a delegate flux. In the rare cases when you want to use a delegate that does not refresh the instances, even though the list of instances may change (such as the `DiscoveryClientServiceInstanceListSupplier` provided by us), you can set `spring.cloud.loadbalancer.health-check.refetch-instances` to `true` to have the instance list refreshed by the `HealthCheckServiceInstanceListSupplier`. You can then also adjust the refetch intervals by modifying the value of `spring.cloud.loadbalancer.health-check.refetch-instances-interval` and opt to disable the additional healthcheck repetitions by setting `spring.cloud.loadbalancer.health-check.repeat-health-check` to `false` as every instance refetch
 will also trigger a healthcheck.
 
 `HealthCheckServiceInstanceListSupplier` uses properties prefixed with
@@ -459,7 +459,7 @@ We also provide a starter that allows you to easily add Spring Cloud LoadBalance
 In order to use it, just add `org.springframework.cloud:spring-cloud-starter-loadbalancer` to your Spring Cloud dependencies in your build file.
 
 NOTE: Spring Cloud LoadBalancer starter includes
-https://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-caching.html[Spring Boot Caching]
+https://docs.spring.io/spring-boot/reference/io/caching.html[Spring Boot Caching]
 and https://github.com/stoyanr/Evictor[Evictor].
 
 [[custom-loadbalancer-configuration]]
@@ -533,7 +533,7 @@ NOTE: In the preceding method calls, `RC` means `RequestContext` type, `RES` mea
 We provide a `LoadBalancerLifecycle` bean called `MicrometerStatsLoadBalancerLifecycle`, which uses Micrometer to provide statistics for load-balanced calls.
 
 In order to get this bean added to your application context,
-set the value of the `spring.cloud.loadbalancer.stats.micrometer.enabled` to `true` and have a `MeterRegistry` available (for example, by adding https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html[Spring Boot Actuator] to your project).
+set the value of the `spring.cloud.loadbalancer.stats.micrometer.enabled` to `true` and have a `MeterRegistry` available (for example, by adding https://docs.spring.io/spring-boot/reference/actuator/enabling.html[Spring Boot Actuator] to your project).
 
 `MicrometerStatsLoadBalancerLifecycle` registers the following meters in `MeterRegistry`:
 
@@ -554,7 +554,7 @@ NOTE: For some implementations, such as `BlockingLoadBalancerClient`, request an
 
 NOTE: The meters are registered in the registry when at least one record is added for a given meter.
 
-TIP: You can further configure the behavior of those metrics (for example, add https://micrometer.io/docs/concepts#_histograms_and_percentiles[publishing percentiles and histograms]) by https://docs.spring.io/spring-boot/docs/current/reference/html/production-ready-features.html#production-ready-metrics-per-meter-properties[adding `MeterFilters`].
+TIP: You can further configure the behavior of those metrics (for example, add https://docs.micrometer.io/micrometer/reference/concepts/histogram-quantiles.html[publishing percentiles and histograms]) by https://docs.spring.io/spring-boot/reference/actuator/metrics.html#actuator.metrics.customizing.per-meter-properties[adding `MeterFilters`].
 
 [[configuring-individual-loadbalancerclients]]
 == Configuring Individual LoadBalancerClients
@@ -562,6 +562,7 @@ TIP: You can further configure the behavior of those metrics (for example, add h
 Individual Loadbalancer clients may be configured individually with a different prefix `spring.cloud.loadbalancer.clients.<clientId>.\*` where `clientId` is the name of the loadbalancer. Default configuration values may be set in the `spring.cloud.loadbalancer.*` namespace and will be merged with the client specific values taking precedence
 
 .application.yml
+[source,yaml]
 ----
 spring:
   cloud:
@@ -617,11 +618,11 @@ public class HttpVerificationClientApplication {
 }
 ----
 
-If the `spring.http.serviceclient.verificationClient.base-url` property is not set, it will be automatically set to `http://verificationClient`.
+If the `spring.http.serviceclient.verificationClient.base-url` property is not set, it will be automatically set to `\http://verificationClient`.
 The default scheme (`http`) is used initially; however, if a secure `ServiceInstance` is selected through load-balancing, it will be changed to `https`.
 
 If the `spring.http.serviceclient.verificationClient.base-url` property is set to a URL that has the `lb` scheme, (for example, `lb://verificationClient/path`), it will be used with `http` being initially set as the default scheme.
 If a secure `ServiceInstance` is selected through load-balancing, the scheme will be changed to `https`.
 In both of these cases, either a `DeferringLoadBalancerInterceptor` or `DeferringLoadBalancerExchangeFilterFunction` will be added to the group's client builder, enabling the requests to be load-balanced.
 
-If the `spring.http.serviceclient.verificationClient.base-url` property is set to a URL that does not have the scheme set to `lb`, (for example, `http://verificationClient/path`), no load-balancer integration will be applied.
+If the `spring.http.serviceclient.verificationClient.base-url` property is set to a URL that does not have the scheme set to `lb`, (for example, `\http://verificationClient/path`), no load-balancer integration will be applied.

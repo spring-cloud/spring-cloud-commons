@@ -81,8 +81,8 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 	}
 
 	private <T> TimedRequestContext buildRequestContext(LoadBalancerRequest<T> delegate, String hint) {
-		if (delegate instanceof HttpRequestLoadBalancerRequest) {
-			HttpRequest request = ((HttpRequestLoadBalancerRequest) delegate).getHttpRequest();
+		if (delegate instanceof HttpRequestLoadBalancerRequest httpRequestLoadBalancerRequest) {
+			HttpRequest request = httpRequestLoadBalancerRequest.getHttpRequest();
 			if (request != null) {
 				RequestData requestData = new RequestData(request);
 				return new RequestDataContext(requestData, hint);
@@ -125,8 +125,8 @@ public class BlockingLoadBalancerClient implements LoadBalancerClient {
 
 	private <T> Object getClientResponse(T response) {
 		ClientHttpResponse clientHttpResponse = null;
-		if (response instanceof ClientHttpResponse) {
-			clientHttpResponse = (ClientHttpResponse) response;
+		if (response instanceof ClientHttpResponse httpResponse) {
+			clientHttpResponse = httpResponse;
 		}
 		if (clientHttpResponse != null) {
 			try {
