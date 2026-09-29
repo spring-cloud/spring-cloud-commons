@@ -41,12 +41,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigRegistry;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * Creates a set of child contexts that allows a set of Specifications to define the beans
@@ -144,20 +146,29 @@ public abstract class NamedContextFactory<C extends NamedContextFactory.Specific
 
 	public void registerBeans(String name, GenericApplicationContext context) {
 		Assert.isInstanceOf(AnnotationConfigRegistry.class, context);
-		AnnotationConfigRegistry registry = (AnnotationConfigRegistry) context;
+		AnnotatedBeanDefinitionReader reader = new AnnotatedBeanDefinitionReader(context);
 		if (this.configurations.containsKey(name)) {
 			for (Class<?> configuration : this.configurations.get(name).getConfiguration()) {
-				registry.register(configuration);
+				registerConfiguration(reader, configuration);
 			}
 		}
 		for (Map.Entry<String, C> entry : this.configurations.entrySet()) {
 			if (entry.getKey().startsWith("default.")) {
 				for (Class<?> configuration : entry.getValue().getConfiguration()) {
-					registry.register(configuration);
+					registerConfiguration(reader, configuration);
 				}
 			}
 		}
-		registry.register(PropertyPlaceholderAutoConfiguration.class, this.defaultConfigType);
+		registerConfiguration(reader, PropertyPlaceholderAutoConfiguration.class);
+		registerConfiguration(reader, this.defaultConfigType);
+	}
+
+	private static void registerConfiguration(AnnotatedBeanDefinitionReader reader, Class<?> configuration) {
+		// Configuration classes are registered with a fully qualified bean name so that
+		// configuration classes sharing a simple name (e.g. a custom configuration named
+		// after the default configuration) do not override each other in the child
+		// context. See gh-1359.
+		reader.registerBean(configuration, ClassUtils.getQualifiedName(configuration));
 	}
 
 	public GenericApplicationContext buildContext(String name) {
