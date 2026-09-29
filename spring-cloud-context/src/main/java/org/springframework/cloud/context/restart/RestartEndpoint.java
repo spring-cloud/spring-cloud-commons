@@ -68,6 +68,8 @@ public class RestartEndpoint implements ApplicationListener<ContextRefreshedWith
 
 	private List<PauseHandler> pauseHandlers = Collections.emptyList();
 
+	private volatile boolean paused;
+
 	private long timeout;
 
 	// @ManagedAttribute
@@ -174,6 +176,7 @@ public class RestartEndpoint implements ApplicationListener<ContextRefreshedWith
 		for (PauseHandler handler : this.pauseHandlers) {
 			handler.pause();
 		}
+		this.paused = true;
 	}
 
 	// @ManagedOperation
@@ -182,6 +185,7 @@ public class RestartEndpoint implements ApplicationListener<ContextRefreshedWith
 			PauseHandler handler = this.pauseHandlers.get(i);
 			handler.resume();
 		}
+		this.paused = false;
 	}
 
 	private void overrideClassLoaderForRestart() {
@@ -235,7 +239,7 @@ public class RestartEndpoint implements ApplicationListener<ContextRefreshedWith
 
 		@WriteOperation
 		public Boolean resume() {
-			if (!isRunning()) {
+			if (RestartEndpoint.this.paused) {
 				doResume();
 				return true;
 			}
