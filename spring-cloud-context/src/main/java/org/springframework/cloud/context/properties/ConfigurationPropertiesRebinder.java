@@ -55,6 +55,7 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -96,6 +97,17 @@ public class ConfigurationPropertiesRebinder
 	private final ConcurrentMap<String, Lock> rebindLocks = new ConcurrentHashMap<>();
 
 	private final Set<String> neverResetNestedTypes;
+
+	private final Set<String> loggedResetFailures = ConcurrentHashMap.newKeySet();
+
+	/**
+	 * Safety net against unbounded recursion in {@link #resetProperties}. Cyclic graphs
+	 * are already broken by the identity-based {@code visited} set, and graphs built from
+	 * unstable (newly-allocated-per-call) instances are broken by
+	 * {@link #isStableInstance(BeanWrapper, String, Object)}; this limit only guards
+	 * against a gap in either of those checks, or a legitimately very deep object graph.
+	 */
+	private static final int MAX_RESET_DEPTH = 25;
 
 	public ConfigurationPropertiesRebinder(ConfigurationPropertiesBeans beans) {
 		this(beans, Collections.emptySet());
@@ -253,7 +265,7 @@ public class ConfigurationPropertiesRebinder
 					+ " for reset; skipping property reset", ex);
 			return;
 		}
-		resetProperties(bean, freshInstance, Collections.newSetFromMap(new IdentityHashMap<>()));
+		resetProperties(bean, freshInstance, Collections.newSetFromMap(new IdentityHashMap<>()), 0);
 	}
 
 	/**
@@ -278,9 +290,11 @@ public class ConfigurationPropertiesRebinder
 		return constructors.length == 1 && constructors[0].getParameterCount() == 0;
 	}
 
-	private void resetProperties(Object bean, Object defaults, Set<Object> visited) {
-		// Guard against cyclic object graphs so that recursion always terminates.
-		if (bean == null || !visited.add(bean)) {
+	private void resetProperties(Object bean, Object defaults, Set<Object> visited, int depth) {
+		// Guard against cyclic object graphs and pathologically deep ones so that
+		// recursion
+		// always terminates; see MAX_RESET_DEPTH.
+		if (bean == null || depth > MAX_RESET_DEPTH || !visited.add(bean)) {
 			return;
 		}
 		BeanWrapper target = new BeanWrapperImpl(bean);
@@ -303,25 +317,50 @@ public class ConfigurationPropertiesRebinder
 						continue;
 					}
 					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
-					target.setPropertyValue(propertyName, defaultValue);
+					Object currentValue = target.isReadableProperty(propertyName)
+							? target.getPropertyValue(propertyName) : null;
+					// Skip the setter call entirely when there's nothing to change: this
+					// avoids needlessly invoking setters that don't tolerate being called
+					// again with the same value, and setters that reject null are only
+					// ever
+					// invoked when the property actually needs to become null.
+					if (!ObjectUtils.nullSafeEquals(currentValue, defaultValue)) {
+						try {
+							target.setPropertyValue(propertyName, defaultValue);
+						}
+						catch (Exception ex) {
+							warnCannotReset(bean, propertyName, ex);
+						}
+					}
 				}
 				else if (target.isReadableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
 					Object value = target.getPropertyValue(propertyName);
 					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
 					if (value instanceof Collection collection) {
-						collection.clear();
-						if (defaultValue instanceof Collection defaultCollection) {
-							collection.addAll(defaultCollection);
+						try {
+							collection.clear();
+							if (defaultValue instanceof Collection defaultCollection) {
+								collection.addAll(defaultCollection);
+							}
+						}
+						catch (UnsupportedOperationException ex) {
+							warnCannotReset(bean, propertyName, ex);
 						}
 					}
 					else if (value instanceof Map map) {
-						map.clear();
-						if (defaultValue instanceof Map defaultMap) {
-							map.putAll(defaultMap);
+						try {
+							map.clear();
+							if (defaultValue instanceof Map defaultMap) {
+								map.putAll(defaultMap);
+							}
+						}
+						catch (UnsupportedOperationException ex) {
+							warnCannotReset(bean, propertyName, ex);
 						}
 					}
-					else if (value != null && defaultValue != null && isResettableNestedType(value.getClass())) {
-						resetProperties(value, defaultValue, visited);
+					else if (value != null && defaultValue != null && isResettableNestedType(value.getClass())
+							&& isStableInstance(target, propertyName, value)) {
+						resetProperties(value, defaultValue, visited, depth + 1);
 					}
 				}
 			}
@@ -331,6 +370,42 @@ public class ConfigurationPropertiesRebinder
 							+ AopUtils.getTargetClass(bean).getName(), ex);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Whether re-reading the given read-only property returns the very same instance. A
+	 * getter that instead returns a new object on every call cannot be holding any state
+	 * that a reset would need to affect, so recursing into such a value would only ever
+	 * walk a throw-away object graph - one that, for record-style/fluent accessors, may
+	 * not even terminate (see gh-1750).
+	 */
+	private boolean isStableInstance(BeanWrapper target, String propertyName, Object value) {
+		try {
+			return target.getPropertyValue(propertyName) == value;
+		}
+		catch (Exception ex) {
+			return false;
+		}
+	}
+
+	/**
+	 * Log, at most once per bean type and property, that a property could not be reset to
+	 * its default value and may therefore retain a stale value after this and future
+	 * refreshes. The full exception is only logged at DEBUG, on every occurrence, to
+	 * avoid spamming the log at the default level while still making the failure
+	 * discoverable.
+	 */
+	private void warnCannotReset(Object bean, String propertyName, Exception ex) {
+		String targetClassName = AopUtils.getTargetClass(bean).getName();
+		if (this.loggedResetFailures.add(targetClassName + "#" + propertyName)) {
+			logger.warn("Cannot reset property '" + propertyName + "' on " + targetClassName
+					+ " to its default value; it may retain its previous value after this and future refreshes. "
+					+ "Enable DEBUG logging for " + ConfigurationPropertiesRebinder.class.getName()
+					+ " for the full exception.");
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("Failed to reset property '" + propertyName + "' on " + targetClassName, ex);
 		}
 	}
 
