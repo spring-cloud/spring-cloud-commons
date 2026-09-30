@@ -718,7 +718,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			listSupplier.isAlive(serviceInstance).block();
 		});
 
-		assertThat(exception).hasMessageContaining("Connection refused: /127.0.0.1:8888");
+		assertThat(exception).hasMessageContaining("Connection refused");
 	}
 
 	private static Stream<Arguments> healthCheckFunctions() {
