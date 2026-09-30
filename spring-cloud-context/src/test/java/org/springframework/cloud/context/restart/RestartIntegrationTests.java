@@ -88,6 +88,27 @@ public class RestartIntegrationTests {
 		then(endpoint.getResumeEndpoint().resume()).isFalse();
 	}
 
+	@Test
+	public void testRestartAfterPause() {
+		this.context = SpringApplication.run(PauseHandlerConfiguration.class,
+				"--management.endpoint.restart.enabled=true", "--server.port=0",
+				"--management.endpoints.web.exposure.include=restart,pause,resume");
+
+		RestartEndpoint endpoint = this.context.getBean(RestartEndpoint.class);
+		TestPauseHandler closed = this.context.getBean(TestPauseHandler.class);
+
+		then(endpoint.getPauseEndpoint().pause()).isTrue();
+		this.context = endpoint.doRestart();
+		TestPauseHandler handler = this.context.getBean(TestPauseHandler.class);
+		then(handler).isNotSameAs(closed);
+
+		then(endpoint.getResumeEndpoint().resume()).isFalse();
+		then(endpoint.getPauseEndpoint().pause()).isTrue();
+		then(handler.paused).isTrue();
+		then(endpoint.getResumeEndpoint().resume()).isTrue();
+		then(handler.paused).isFalse();
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	protected static class TestConfiguration {

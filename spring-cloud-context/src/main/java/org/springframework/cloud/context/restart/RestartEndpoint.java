@@ -95,10 +95,14 @@ public class RestartEndpoint implements ApplicationListener<ContextRefreshedWith
 			this.args = this.event.getArgs();
 			this.application = this.event.getSpringApplication();
 			this.application.addInitializers(new PostProcessorInitializer());
-			this.pauseHandlers = this.context.getBeanProvider(PauseHandler.class)
-				.orderedStream()
-				.collect(Collectors.toList());
+			collectPauseHandlers();
 		}
+	}
+
+	private void collectPauseHandlers() {
+		this.pauseHandlers = this.context.getBeanProvider(PauseHandler.class)
+			.orderedStream()
+			.collect(Collectors.toList());
 	}
 
 	@WriteOperation
@@ -142,10 +146,14 @@ public class RestartEndpoint implements ApplicationListener<ContextRefreshedWith
 			}
 			this.application.setEnvironment(this.context.getEnvironment());
 			close();
+			// The handlers and the paused state belong to the context that was closed
+			this.pauseHandlers = Collections.emptyList();
+			this.paused = false;
 			// If running in a webapp then the context classloader is probably going to
 			// die so we need to revert to a safe place before starting again
 			overrideClassLoaderForRestart();
 			this.context = this.application.run(this.args);
+			collectPauseHandlers();
 		}
 		return this.context;
 	}
