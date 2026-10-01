@@ -17,7 +17,7 @@
 	<properties>
 		<okhttp.version>4.12.0</okhttp.version>
 		<spring-retry.version>2.0.13</spring-retry.version>
-		<bouncycastle.version>1.85.2</bouncycastle.version>
+		<bouncycastle.version>1.86.1</bouncycastle.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
