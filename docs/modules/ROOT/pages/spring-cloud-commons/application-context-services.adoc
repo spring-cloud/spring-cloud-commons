@@ -291,7 +291,7 @@ For a Spring Boot Actuator application, some additional management endpoints are
   To enabled this endpoint you must set `management.endpoint.env.post.enabled=true` and set a regular expression to limit what properties may be set at `management.endpoint.env.post.valid-keys-regex`.
 * `/actuator/refresh` to re-load the bootstrap context and refresh the `@RefreshScope` beans.
 * `/actuator/restart` to close the `ApplicationContext` and restart it (disabled by default).
-* `/actuator/pause` and `/actuator/resume` for calling the `Lifecycle` methods (`stop()` and `start()` on the `ApplicationContext`).
+* `/actuator/pause` and `/actuator/resume` for calling `pause()` and `resume()` on every `PauseHandler` bean. A handler for Spring Integration `Pausable` components is provided.
 
 NOTE: While enabling the `POST` method for `/actuator/env` endpoint can provide flexibility and convenience in managing your application environment variables,
 it's critical to ensure that the endpoint is secured, monitored and valid keys to update are set to prevent potential security risks.

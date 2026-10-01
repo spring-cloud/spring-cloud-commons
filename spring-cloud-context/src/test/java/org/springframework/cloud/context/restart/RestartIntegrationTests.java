@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -70,9 +71,81 @@ public class RestartIntegrationTests {
 		 */
 	}
 
+	@Test
+	public void testResumeAfterPause() {
+		this.context = SpringApplication.run(PauseHandlerConfiguration.class,
+				"--management.endpoint.restart.enabled=true", "--server.port=0",
+				"--management.endpoints.web.exposure.include=restart,pause,resume");
+
+		RestartEndpoint endpoint = this.context.getBean(RestartEndpoint.class);
+		TestPauseHandler handler = this.context.getBean(TestPauseHandler.class);
+
+		then(endpoint.getResumeEndpoint().resume()).isFalse();
+		then(endpoint.getPauseEndpoint().pause()).isTrue();
+		then(handler.paused).isTrue();
+		then(endpoint.getResumeEndpoint().resume()).isTrue();
+		then(handler.paused).isFalse();
+		then(endpoint.getResumeEndpoint().resume()).isFalse();
+	}
+
+	@Test
+	public void testRestartAfterPause() {
+		this.context = SpringApplication.run(PauseHandlerConfiguration.class,
+				"--management.endpoint.restart.enabled=true", "--server.port=0",
+				"--management.endpoints.web.exposure.include=restart,pause,resume");
+
+		RestartEndpoint endpoint = this.context.getBean(RestartEndpoint.class);
+		TestPauseHandler closed = this.context.getBean(TestPauseHandler.class);
+
+		then(endpoint.getPauseEndpoint().pause()).isTrue();
+		this.context = endpoint.doRestart();
+		TestPauseHandler handler = this.context.getBean(TestPauseHandler.class);
+		then(handler).isNotSameAs(closed);
+
+		then(endpoint.getResumeEndpoint().resume()).isFalse();
+		then(endpoint.getPauseEndpoint().pause()).isTrue();
+		then(handler.paused).isTrue();
+		then(endpoint.getResumeEndpoint().resume()).isTrue();
+		then(handler.paused).isFalse();
+	}
+
+	@Test
+	public void testResumeWithoutPauseHandlers() {
+		RestartEndpoint endpoint = new RestartEndpoint();
+		endpoint.doPause();
+		then(endpoint.getResumeEndpoint().resume()).isFalse();
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	protected static class TestConfiguration {
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@EnableAutoConfiguration
+	protected static class PauseHandlerConfiguration {
+
+		@Bean
+		TestPauseHandler testPauseHandler() {
+			return new TestPauseHandler();
+		}
+
+	}
+
+	static class TestPauseHandler implements PauseHandler {
+
+		boolean paused;
+
+		@Override
+		public void pause() {
+			this.paused = true;
+		}
+
+		@Override
+		public void resume() {
+			this.paused = false;
+		}
 
 	}
 
