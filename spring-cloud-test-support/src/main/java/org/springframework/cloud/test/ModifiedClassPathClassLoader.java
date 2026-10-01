@@ -41,17 +41,13 @@ import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.collection.CollectRequest;
-import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.graph.Dependency;
-import org.eclipse.aether.impl.DefaultServiceLocator;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResult;
-import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
-import org.eclipse.aether.spi.connector.transport.TransporterFactory;
-import org.eclipse.aether.transport.http.HttpTransporterFactory;
+import org.eclipse.aether.supplier.RepositorySystemSupplier;
 
 import org.springframework.core.annotation.MergedAnnotation;
 import org.springframework.core.annotation.MergedAnnotations;
@@ -233,10 +229,7 @@ final class ModifiedClassPathClassLoader extends URLClassLoader {
 
 	private static List<URL> resolveCoordinates(String[] coordinates) {
 		Exception latestFailure = null;
-		DefaultServiceLocator serviceLocator = MavenRepositorySystemUtils.newServiceLocator();
-		serviceLocator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
-		serviceLocator.addService(TransporterFactory.class, HttpTransporterFactory.class);
-		RepositorySystem repositorySystem = serviceLocator.getService(RepositorySystem.class);
+		RepositorySystem repositorySystem = new RepositorySystemSupplier().get();
 		DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
 		LocalRepository localRepository = new LocalRepository(System.getProperty("user.home") + "/.m2/repository");
 		RemoteRepository remoteRepository = new RemoteRepository.Builder("central", "default",

@@ -15,20 +15,10 @@
 	<name>spring-cloud-test-support</name>
 	<description>Spring Cloud Test Support</description>
 	<properties>
-		<maven-resolver.version>1.9.27</maven-resolver.version>
+		<maven-resolver.version>2.0.24</maven-resolver.version>
 		<maven.version>3.10.0</maven.version>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>org.apache.maven.resolver</groupId>
-			<artifactId>maven-resolver-connector-basic</artifactId>
-			<version>${maven-resolver.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.maven.resolver</groupId>
-			<artifactId>maven-resolver-impl</artifactId>
-			<version>${maven-resolver.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-resolver-provider</artifactId>
@@ -38,18 +28,16 @@
 					<groupId>com.google.guava</groupId>
 					<artifactId>guava</artifactId>
 				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.maven.resolver</groupId>
-			<artifactId>maven-resolver-transport-http</artifactId>
-			<version>${maven-resolver.version}</version>
-			<exclusions>
 				<exclusion>
 					<artifactId>jcl-over-slf4j</artifactId>
 					<groupId>org.slf4j</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.resolver</groupId>
+			<artifactId>maven-resolver-supplier-mvn3</artifactId>
+			<version>${maven-resolver.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
