@@ -184,7 +184,9 @@ public class RestartEndpoint implements ApplicationListener<ContextRefreshedWith
 		for (PauseHandler handler : this.pauseHandlers) {
 			handler.pause();
 		}
-		this.paused = true;
+		if (!this.pauseHandlers.isEmpty()) {
+			this.paused = true;
+		}
 	}
 
 	// @ManagedOperation

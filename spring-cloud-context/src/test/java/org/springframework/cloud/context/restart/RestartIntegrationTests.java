@@ -109,6 +109,13 @@ public class RestartIntegrationTests {
 		then(handler.paused).isFalse();
 	}
 
+	@Test
+	public void testResumeWithoutPauseHandlers() {
+		RestartEndpoint endpoint = new RestartEndpoint();
+		endpoint.doPause();
+		then(endpoint.getResumeEndpoint().resume()).isFalse();
+	}
+
 	@Configuration(proxyBeanMethods = false)
 	@EnableAutoConfiguration
 	protected static class TestConfiguration {
