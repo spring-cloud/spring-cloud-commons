@@ -17,6 +17,7 @@
 package org.springframework.cloud.client.discovery.composite.reactive;
 
 import java.time.Duration;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,6 +32,7 @@ import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.SystemEnvironmentPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -78,10 +80,31 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 		});
 	}
 
-	@Test
-	void shouldEnforceOrderWhenEnabled() {
+	@ParameterizedTest
+	@ValueSource(strings = { "spring.cloud.discovery.reactive.order-enforced=true",
+			"spring.cloud.discovery.reactive.orderEnforced=true" })
+	void shouldEnforceOrderWhenEnabled(String property) {
 		this.contextRunner.withUserConfiguration(OrderedConfiguration.class)
-			.withPropertyValues("spring.cloud.discovery.reactive.order-enforced=true")
+			.withPropertyValues(property)
+			.run(context -> {
+				assertThat(context).hasSingleBean(ReactiveCompositeDiscoveryClient.class);
+				ReactiveDiscoveryClient client = context.getBean(ReactiveDiscoveryClient.class);
+				StepVerifier.withVirtualTime(() -> client.getInstances("service"))
+					.expectSubscription()
+					.expectNoEvent(Duration.ofSeconds(1))
+					.thenAwait(Duration.ofSeconds(1))
+					.assertNext(instance -> assertThat(instance.getInstanceId()).isEqualTo("preferred"))
+					.verifyComplete();
+			});
+	}
+
+	@Test
+	void shouldEnforceOrderWhenEnabledThroughEnvironmentVariable() {
+		this.contextRunner.withUserConfiguration(OrderedConfiguration.class)
+			.withInitializer(context -> context.getEnvironment()
+				.getPropertySources()
+				.addFirst(new SystemEnvironmentPropertySource("systemEnvironment",
+						Map.of("SPRING_CLOUD_DISCOVERY_REACTIVE_ORDERENFORCED", "true"))))
 			.run(context -> {
 				assertThat(context).hasSingleBean(ReactiveCompositeDiscoveryClient.class);
 				ReactiveDiscoveryClient client = context.getBean(ReactiveDiscoveryClient.class);

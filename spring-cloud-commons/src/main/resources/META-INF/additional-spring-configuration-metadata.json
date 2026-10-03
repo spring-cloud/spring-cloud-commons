@@ -44,12 +44,6 @@
 		},
 		{
 			"defaultValue": false,
-			"name": "spring.cloud.discovery.reactive.order-enforced",
-			"description": "Waits for reactive discovery clients in order and falls back only when a client returns no instances, instead of using the fastest non-empty response.",
-			"type": "java.lang.Boolean"
-		},
-		{
-			"defaultValue": false,
 			"name": "management.endpoint.env.post.enabled",
 			"description": "Enables writable environment endpoint.",
 			"type": "java.lang.Boolean"
