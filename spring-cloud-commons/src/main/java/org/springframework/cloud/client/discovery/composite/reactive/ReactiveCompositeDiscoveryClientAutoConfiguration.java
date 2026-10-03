@@ -18,6 +18,7 @@ package org.springframework.cloud.client.discovery.composite.reactive;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
 import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
@@ -36,11 +37,14 @@ import org.springframework.context.annotation.Primary;
 @ConditionalOnReactiveDiscoveryEnabled
 public class ReactiveCompositeDiscoveryClientAutoConfiguration {
 
+	@Value("${spring.cloud.discovery.reactive.order-enforced:false}")
+	private boolean orderEnforced;
+
 	@Bean
 	@Primary
 	public ReactiveCompositeDiscoveryClient reactiveCompositeDiscoveryClient(
 			List<ReactiveDiscoveryClient> discoveryClients) {
-		return new ReactiveCompositeDiscoveryClient(discoveryClients);
+		return new ReactiveCompositeDiscoveryClient(discoveryClients, orderEnforced);
 	}
 
 }

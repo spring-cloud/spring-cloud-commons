@@ -22,11 +22,14 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
+import org.springframework.cloud.commons.publisher.CloudFlux;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
  * A {@link ReactiveDiscoveryClient} that is composed of other discovery clients and
- * delegates calls to each of them in order.
+ * delegates calls to each of them. By default, instance lookup uses the fastest non-empty
+ * response. Client ordering can instead be enforced by using the constructor accepting
+ * {@code orderEnforced}.
  *
  * @author Tim Ysewyn
  */
@@ -34,9 +37,22 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 
 	private final List<ReactiveDiscoveryClient> discoveryClients;
 
+	private final boolean orderEnforced;
+
 	public ReactiveCompositeDiscoveryClient(List<ReactiveDiscoveryClient> discoveryClients) {
+		this(discoveryClients, false);
+	}
+
+	/**
+	 * Create a composite discovery client.
+	 * @param discoveryClients the discovery clients to delegate to
+	 * @param orderEnforced whether to wait for each client in order before falling back
+	 * to the next client if it returns no instances
+	 */
+	public ReactiveCompositeDiscoveryClient(List<ReactiveDiscoveryClient> discoveryClients, boolean orderEnforced) {
 		AnnotationAwareOrderComparator.sort(discoveryClients);
 		this.discoveryClients = discoveryClients;
+		this.orderEnforced = orderEnforced;
 	}
 
 	@Override
@@ -48,6 +64,10 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 	public Flux<ServiceInstance> getInstances(String serviceId) {
 		if (discoveryClients == null || discoveryClients.isEmpty()) {
 			return Flux.empty();
+		}
+		if (!orderEnforced) {
+			return CloudFlux
+				.firstNonEmpty(discoveryClients.stream().map(client -> client.getInstances(serviceId)).toList());
 		}
 		Flux<ServiceInstance> serviceInstances = Flux.empty();
 		for (ReactiveDiscoveryClient discoveryClient : discoveryClients) {

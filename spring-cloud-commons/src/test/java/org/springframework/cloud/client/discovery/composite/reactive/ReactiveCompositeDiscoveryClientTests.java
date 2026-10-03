@@ -134,7 +134,7 @@ class ReactiveCompositeDiscoveryClientTests {
 			.thenAnswer(invocation -> Flux.just(preferred, second).delayElements(Duration.ofSeconds(1)));
 		when(discoveryClient2.getInstances("service")).thenReturn(fallback.flux());
 		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
-				asList(discoveryClient2, discoveryClient1));
+				asList(discoveryClient2, discoveryClient1), true);
 
 		StepVerifier.withVirtualTime(() -> client.getInstances("service"))
 			.thenAwait(Duration.ofSeconds(2))
@@ -149,7 +149,7 @@ class ReactiveCompositeDiscoveryClientTests {
 		when(discoveryClient1.getInstances("service")).thenReturn(Flux.empty());
 		when(discoveryClient2.getInstances("service")).thenReturn(Flux.just(instance));
 		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
-				asList(discoveryClient1, discoveryClient2));
+				asList(discoveryClient1, discoveryClient2), true);
 
 		StepVerifier.create(client.getInstances("service")).expectNext(instance).verifyComplete();
 	}
@@ -161,7 +161,7 @@ class ReactiveCompositeDiscoveryClientTests {
 		when(discoveryClient1.getInstances("service")).thenReturn(Flux.error(error));
 		when(discoveryClient2.getInstances("service")).thenReturn(fallback.flux());
 		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
-				asList(discoveryClient1, discoveryClient2));
+				asList(discoveryClient1, discoveryClient2), true);
 
 		StepVerifier.create(client.getInstances("service")).expectErrorMatches(actual -> actual == error).verify();
 		fallback.assertWasNotSubscribed();
@@ -172,9 +172,47 @@ class ReactiveCompositeDiscoveryClientTests {
 		when(discoveryClient1.getInstances("service")).thenReturn(Flux.empty());
 		when(discoveryClient2.getInstances("service")).thenReturn(Flux.empty());
 		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
-				asList(discoveryClient1, discoveryClient2));
+				asList(discoveryClient1, discoveryClient2), true);
 
 		StepVerifier.create(client.getInstances("service")).verifyComplete();
+	}
+
+	@Test
+	void shouldUseFastestNonEmptyClientByDefault() {
+		ServiceInstance preferred = new DefaultServiceInstance("preferred", "service", "localhost", 8080, false);
+		ServiceInstance second = new DefaultServiceInstance("second", "service", "localhost", 8081, false);
+		when(discoveryClient1.getOrder()).thenReturn(-1);
+		when(discoveryClient1.getInstances("service"))
+			.thenAnswer(invocation -> Flux.just(preferred).delayElements(Duration.ofSeconds(1)));
+		when(discoveryClient2.getInstances("service")).thenReturn(Flux.just(second));
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient2, discoveryClient1));
+
+		StepVerifier.withVirtualTime(() -> client.getInstances("service")).expectNext(second).verifyComplete();
+	}
+
+	@Test
+	void shouldUseFastestNonEmptyClientWhenOrderIsNotEnforced() {
+		ServiceInstance second = new DefaultServiceInstance("second", "service", "localhost", 8081, false);
+		when(discoveryClient1.getInstances("service")).thenReturn(Flux.never());
+		when(discoveryClient2.getInstances("service")).thenReturn(Flux.just(second));
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient1, discoveryClient2), false);
+
+		StepVerifier.create(client.getInstances("service")).expectNext(second).verifyComplete();
+	}
+
+	@Test
+	void shouldStreamPreferredInstancesWithoutWaitingForCompletion() {
+		ServiceInstance preferred = new DefaultServiceInstance("preferred", "service", "localhost", 8080, false);
+		PublisherProbe<ServiceInstance> fallback = PublisherProbe.empty();
+		when(discoveryClient1.getInstances("service")).thenReturn(Flux.just(preferred).concatWith(Flux.never()));
+		when(discoveryClient2.getInstances("service")).thenReturn(fallback.flux());
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient1, discoveryClient2), true);
+
+		StepVerifier.create(client.getInstances("service")).expectNext(preferred).thenCancel().verify();
+		fallback.assertWasNotSubscribed();
 	}
 
 }
