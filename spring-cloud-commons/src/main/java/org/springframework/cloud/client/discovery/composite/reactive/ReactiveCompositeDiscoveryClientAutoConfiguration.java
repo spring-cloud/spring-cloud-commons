@@ -18,7 +18,6 @@ package org.springframework.cloud.client.discovery.composite.reactive;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.ConditionalOnDiscoveryEnabled;
 import org.springframework.cloud.client.ConditionalOnReactiveDiscoveryEnabled;
@@ -39,8 +38,11 @@ import org.springframework.context.annotation.Primary;
 @EnableConfigurationProperties(ReactiveCompositeDiscoveryClientProperties.class)
 public class ReactiveCompositeDiscoveryClientAutoConfiguration {
 
-	@Autowired
-	private ReactiveCompositeDiscoveryClientProperties properties = new ReactiveCompositeDiscoveryClientProperties();
+	private final ReactiveCompositeDiscoveryClientProperties properties;
+
+	public ReactiveCompositeDiscoveryClientAutoConfiguration(ReactiveCompositeDiscoveryClientProperties properties) {
+		this.properties = properties;
+	}
 
 	@Bean
 	@Primary

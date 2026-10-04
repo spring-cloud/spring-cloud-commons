@@ -27,10 +27,23 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ReactiveCompositeDiscoveryClientProperties {
 
 	/**
+	 * Enables reactive discovery.
+	 */
+	private boolean enabled = true;
+
+	/**
 	 * Waits for reactive discovery clients in order and falls back only when a client
 	 * returns no instances, instead of using the fastest non-empty response.
 	 */
 	private boolean orderEnforced = false;
+
+	public boolean isEnabled() {
+		return this.enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
 
 	public boolean isOrderEnforced() {
 		return this.orderEnforced;

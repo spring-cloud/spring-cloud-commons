@@ -26,6 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.client.DefaultServiceInstance;
@@ -51,7 +52,19 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 			assertThat(client).isNotNull();
 			assertThat(client).isInstanceOf(ReactiveCompositeDiscoveryClient.class);
 			assertThat(((ReactiveCompositeDiscoveryClient) client).getDiscoveryClients()).isEmpty();
+			assertThat(context.getBean(ReactiveCompositeDiscoveryClientProperties.class).isEnabled()).isTrue();
 		});
+	}
+
+	@Test
+	void shouldDisableReactiveDiscoveryWhenEnabledIsFalse() {
+		this.contextRunner.withUserConfiguration(PropertiesConfiguration.class)
+			.withPropertyValues("spring.cloud.discovery.reactive.enabled=false")
+			.run(context -> {
+				assertThat(context).doesNotHaveBean(ReactiveCompositeDiscoveryClientAutoConfiguration.class);
+				assertThat(context).doesNotHaveBean(ReactiveCompositeDiscoveryClient.class);
+				assertThat(context.getBean(ReactiveCompositeDiscoveryClientProperties.class).isEnabled()).isFalse();
+			});
 	}
 
 	@Test
@@ -115,6 +128,12 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 					.assertNext(instance -> assertThat(instance.getInstanceId()).isEqualTo("preferred"))
 					.verifyComplete();
 			});
+	}
+
+	@TestConfiguration
+	@EnableConfigurationProperties(ReactiveCompositeDiscoveryClientProperties.class)
+	static class PropertiesConfiguration {
+
 	}
 
 	@TestConfiguration
