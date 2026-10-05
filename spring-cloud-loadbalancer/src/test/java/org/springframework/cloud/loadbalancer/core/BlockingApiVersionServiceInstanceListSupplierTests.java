@@ -90,6 +90,18 @@ class BlockingApiVersionServiceInstanceListSupplierTests {
 	}
 
 	@Test
+	void shouldFilterByVersionFromPathSegment() {
+		properties.getApiVersion().setPathSegment(0);
+		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://localhost/1.0/test"),
+				new HttpHeaders(), new LinkedMultiValueMap<>(), Collections.emptyMap());
+
+		List<ServiceInstance> filtered = supplier.get(new DefaultRequest<>(new RequestDataContext(requestData)))
+			.blockFirst();
+
+		assertThat(filtered).containsExactly(first);
+	}
+
+	@Test
 	void shouldReturnEmptyListWhenRequestedVersionIsNull() {
 		properties.getApiVersion().setHeader("X-Api-Version");
 		HttpHeaders headers = new HttpHeaders();
