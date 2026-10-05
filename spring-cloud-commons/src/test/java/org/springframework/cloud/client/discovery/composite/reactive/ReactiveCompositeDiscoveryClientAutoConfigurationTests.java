@@ -16,15 +16,24 @@
 
 package org.springframework.cloud.client.discovery.composite.reactive;
 
+import java.time.Duration;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.SystemEnvironmentPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,7 +52,19 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 			assertThat(client).isNotNull();
 			assertThat(client).isInstanceOf(ReactiveCompositeDiscoveryClient.class);
 			assertThat(((ReactiveCompositeDiscoveryClient) client).getDiscoveryClients()).isEmpty();
+			assertThat(context.getBean(ReactiveCompositeDiscoveryClientProperties.class).isEnabled()).isTrue();
 		});
+	}
+
+	@Test
+	void shouldDisableReactiveDiscoveryWhenEnabledIsFalse() {
+		this.contextRunner.withUserConfiguration(PropertiesConfiguration.class)
+			.withPropertyValues("spring.cloud.discovery.reactive.enabled=false")
+			.run(context -> {
+				assertThat(context).doesNotHaveBean(ReactiveCompositeDiscoveryClientAutoConfiguration.class);
+				assertThat(context).doesNotHaveBean(ReactiveCompositeDiscoveryClient.class);
+				assertThat(context.getBean(ReactiveCompositeDiscoveryClientProperties.class).isEnabled()).isFalse();
+			});
 	}
 
 	@Test
@@ -54,6 +75,107 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 			assertThat(client).isInstanceOf(ReactiveCompositeDiscoveryClient.class);
 			assertThat(((ReactiveCompositeDiscoveryClient) client).getDiscoveryClients()).hasSize(1);
 		});
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "", "spring.cloud.discovery.reactive.order-enforced=false" })
+	void shouldUseFastestClientWhenOrderIsNotEnforced(String property) {
+		ApplicationContextRunner runner = this.contextRunner.withUserConfiguration(OrderedConfiguration.class);
+		if (!property.isEmpty()) {
+			runner = runner.withPropertyValues(property);
+		}
+		runner.run(context -> {
+			assertThat(context).hasSingleBean(ReactiveCompositeDiscoveryClient.class);
+			ReactiveDiscoveryClient client = context.getBean(ReactiveDiscoveryClient.class);
+			StepVerifier.withVirtualTime(() -> client.getInstances("service"))
+				.assertNext(instance -> assertThat(instance.getInstanceId()).isEqualTo("second"))
+				.verifyComplete();
+		});
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "spring.cloud.discovery.reactive.order-enforced=true",
+			"spring.cloud.discovery.reactive.orderEnforced=true" })
+	void shouldEnforceOrderWhenEnabled(String property) {
+		this.contextRunner.withUserConfiguration(OrderedConfiguration.class)
+			.withPropertyValues(property)
+			.run(context -> {
+				assertThat(context).hasSingleBean(ReactiveCompositeDiscoveryClient.class);
+				ReactiveDiscoveryClient client = context.getBean(ReactiveDiscoveryClient.class);
+				StepVerifier.withVirtualTime(() -> client.getInstances("service"))
+					.expectSubscription()
+					.expectNoEvent(Duration.ofSeconds(1))
+					.thenAwait(Duration.ofSeconds(1))
+					.assertNext(instance -> assertThat(instance.getInstanceId()).isEqualTo("preferred"))
+					.verifyComplete();
+			});
+	}
+
+	@Test
+	void shouldEnforceOrderWhenEnabledThroughEnvironmentVariable() {
+		this.contextRunner.withUserConfiguration(OrderedConfiguration.class)
+			.withInitializer(context -> context.getEnvironment()
+				.getPropertySources()
+				.addFirst(new SystemEnvironmentPropertySource("systemEnvironment",
+						Map.of("SPRING_CLOUD_DISCOVERY_REACTIVE_ORDERENFORCED", "true"))))
+			.run(context -> {
+				assertThat(context).hasSingleBean(ReactiveCompositeDiscoveryClient.class);
+				ReactiveDiscoveryClient client = context.getBean(ReactiveDiscoveryClient.class);
+				StepVerifier.withVirtualTime(() -> client.getInstances("service"))
+					.expectSubscription()
+					.expectNoEvent(Duration.ofSeconds(1))
+					.thenAwait(Duration.ofSeconds(1))
+					.assertNext(instance -> assertThat(instance.getInstanceId()).isEqualTo("preferred"))
+					.verifyComplete();
+			});
+	}
+
+	@TestConfiguration
+	@EnableConfigurationProperties(ReactiveCompositeDiscoveryClientProperties.class)
+	static class PropertiesConfiguration {
+
+	}
+
+	@TestConfiguration
+	static class OrderedConfiguration {
+
+		@Bean
+		ReactiveDiscoveryClient preferredClient() {
+			return discoveryClient(-1, "preferred");
+		}
+
+		@Bean
+		ReactiveDiscoveryClient secondClient() {
+			return discoveryClient(0, "second");
+		}
+
+		private ReactiveDiscoveryClient discoveryClient(int order, String instanceId) {
+			return new ReactiveDiscoveryClient() {
+
+				@Override
+				public String description() {
+					return instanceId;
+				}
+
+				@Override
+				public int getOrder() {
+					return order;
+				}
+
+				@Override
+				public Flux<ServiceInstance> getInstances(String serviceId) {
+					Flux<ServiceInstance> instances = Flux
+						.just(new DefaultServiceInstance(instanceId, serviceId, "localhost", 8080, false));
+					return order < 0 ? instances.delayElements(Duration.ofSeconds(2)) : instances;
+				}
+
+				@Override
+				public Flux<String> getServices() {
+					return Flux.empty();
+				}
+			};
+		}
+
 	}
 
 	@TestConfiguration

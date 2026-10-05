@@ -54,6 +54,12 @@ implementations provided by Spring Cloud, among others  `ConsulDiscoveryClient`,
 `ZookeeperDiscoveryClient`. In order to do it, you just need to set the
 `spring.cloud.\{clientIdentifier}.discovery.order` (or `eureka.client.order` for Eureka) property to the desired value.
 
+The reactive composite discovery client returns instances from the fastest non-empty client by default.
+To wait for clients in their configured order instead, set `spring.cloud.discovery.reactive.order-enforced=true`.
+In this mode, a lower-priority client is subscribed to only when all higher-priority clients return no instances.
+A slow or non-terminating higher-priority client can therefore delay the result, and an error is propagated without falling back.
+This property affects instance lookup only; service enumeration continues to combine results from all clients.
+
 [[simplediscoveryclient]]
 === SimpleDiscoveryClient
 

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.client.discovery.composite.reactive;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import reactor.core.publisher.Flux;
@@ -28,7 +27,9 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
  * A {@link ReactiveDiscoveryClient} that is composed of other discovery clients and
- * delegates calls to each of them in order.
+ * delegates calls to each of them. By default, instance lookup uses the fastest non-empty
+ * response. Client ordering can instead be enforced by using the constructor accepting
+ * {@code orderEnforced}.
  *
  * @author Tim Ysewyn
  */
@@ -36,9 +37,22 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 
 	private final List<ReactiveDiscoveryClient> discoveryClients;
 
+	private final boolean orderEnforced;
+
 	public ReactiveCompositeDiscoveryClient(List<ReactiveDiscoveryClient> discoveryClients) {
+		this(discoveryClients, false);
+	}
+
+	/**
+	 * Create a composite discovery client.
+	 * @param discoveryClients the discovery clients to delegate to
+	 * @param orderEnforced whether to wait for each client in order before falling back
+	 * to the next client if it returns no instances
+	 */
+	public ReactiveCompositeDiscoveryClient(List<ReactiveDiscoveryClient> discoveryClients, boolean orderEnforced) {
 		AnnotationAwareOrderComparator.sort(discoveryClients);
 		this.discoveryClients = discoveryClients;
+		this.orderEnforced = orderEnforced;
 	}
 
 	@Override
@@ -51,11 +65,15 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 		if (discoveryClients == null || discoveryClients.isEmpty()) {
 			return Flux.empty();
 		}
-		List<Flux<ServiceInstance>> serviceInstances = new ArrayList<>();
-		for (ReactiveDiscoveryClient discoveryClient : discoveryClients) {
-			serviceInstances.add(discoveryClient.getInstances(serviceId));
+		if (!orderEnforced) {
+			return CloudFlux
+				.firstNonEmpty(discoveryClients.stream().map(client -> client.getInstances(serviceId)).toList());
 		}
-		return CloudFlux.firstNonEmpty(serviceInstances);
+		Flux<ServiceInstance> serviceInstances = Flux.empty();
+		for (ReactiveDiscoveryClient discoveryClient : discoveryClients) {
+			serviceInstances = serviceInstances.switchIfEmpty(discoveryClient.getInstances(serviceId));
+		}
+		return serviceInstances;
 	}
 
 	@Override
