@@ -66,7 +66,7 @@
 		},
 		{
 			"name": "spring.cloud.loadbalancer.health-check.port",
-			"description": "Path at which the health-check request should be made. If none is set, the port under which the requested service is available at the service instance.",
+			"description": "Port at which the health-check request should be made. If none is set, the port under which the requested service is available at the service instance.",
 			"type": "java.lang.Integer"
 		},
 		{
