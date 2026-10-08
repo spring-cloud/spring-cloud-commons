@@ -54,7 +54,9 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.RequestPath;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.ServletRequestPathUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -338,7 +340,11 @@ public class LoadBalancerHttpServletRequest implements HttpServletRequest {
 		if (requestData == null) {
 			return null;
 		}
-		return requestData.getAttributes().get(name);
+		Object attribute = requestData.getAttributes().get(name);
+		if (attribute == null && ServletRequestPathUtils.PATH_ATTRIBUTE.equals(name)) {
+			return RequestPath.parse(requestData.getUrl(), null);
+		}
+		return attribute;
 	}
 
 	@Override
