@@ -42,6 +42,8 @@ import org.springframework.web.accept.SemanticApiVersionParser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -124,6 +126,24 @@ class BlockingApiVersionServiceInstanceListSupplierTests {
 		List<ServiceInstance> filtered = supplier.get().blockFirst();
 
 		assertThat(filtered).containsExactly(second);
+	}
+
+	@Test
+	void shouldFilterByRequestedVersionWhenNotCallingGetWithRequestOnDelegates() {
+		properties.setCallGetWithRequestOnDelegates(false);
+		properties.getApiVersion().setHeader("X-Api-Version");
+		supplier = new BlockingApiVersionServiceInstanceListSupplier(delegate, loadBalancerClientFactory);
+		supplier.setApiVersionParser(new SemanticApiVersionParser());
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("X-Api-Version", "1.0");
+		RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://localhost/test"), headers,
+				new LinkedMultiValueMap<>(), Collections.emptyMap());
+
+		List<ServiceInstance> filtered = supplier.get(new DefaultRequest<>(new RequestDataContext(requestData)))
+			.blockFirst();
+
+		assertThat(filtered).containsExactly(first);
+		verify(delegate, never()).get(any());
 	}
 
 	private DefaultServiceInstance serviceInstance(String instanceId, Map<String, String> metadata) {
