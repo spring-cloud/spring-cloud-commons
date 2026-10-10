@@ -32,6 +32,7 @@ import org.springframework.cloud.client.loadbalancer.Request;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.accept.ApiVersionParser;
 import org.springframework.web.accept.ApiVersionResolver;
@@ -169,12 +170,30 @@ public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingSer
 
 	private ApiVersionStrategy getApiVersionStrategy() {
 		if (apiVersionStrategy == null) {
-			ApiVersionStrategy userProvidedApiVersionStrategy = loadBalancerClientFactory.getInstance(getServiceId(),
-					ApiVersionStrategy.class);
+			ApiVersionStrategy userProvidedApiVersionStrategy = getUserProvidedApiVersionStrategy();
 			apiVersionStrategy = userProvidedApiVersionStrategy != null ? userProvidedApiVersionStrategy
 					: buildApiVersionStrategy();
 		}
 		return apiVersionStrategy;
+	}
+
+	/**
+	 * Only a strategy declared for the LoadBalancer client is used. A strategy inherited
+	 * from the parent context is the one the application uses for its own endpoints (for
+	 * example when API versioning is configured for Spring MVC or WebFlux): it does not
+	 * use the {@code spring.cloud.loadbalancer.api-version} settings and it rejects
+	 * versions that the application itself does not support.
+	 */
+	private @Nullable ApiVersionStrategy getUserProvidedApiVersionStrategy() {
+		ApiVersionStrategy strategy = loadBalancerClientFactory.getInstance(getServiceId(), ApiVersionStrategy.class);
+		ApplicationContext parent = loadBalancerClientFactory.getParent();
+		if (strategy != null && parent != null
+				&& parent.getBeanProvider(ApiVersionStrategy.class)
+					.stream()
+					.anyMatch(parentStrategy -> parentStrategy == strategy)) {
+			return null;
+		}
+		return strategy;
 	}
 
 	private ApiVersionStrategy buildApiVersionStrategy() {

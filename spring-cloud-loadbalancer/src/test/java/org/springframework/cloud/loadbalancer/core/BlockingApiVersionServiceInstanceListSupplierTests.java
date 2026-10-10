@@ -30,13 +30,17 @@ import reactor.core.publisher.Flux;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.client.loadbalancer.RequestData;
 import org.springframework.cloud.client.loadbalancer.RequestDataContext;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.accept.ApiVersionStrategy;
+import org.springframework.web.accept.DefaultApiVersionStrategy;
 import org.springframework.web.accept.SemanticApiVersionParser;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -144,6 +148,38 @@ class BlockingApiVersionServiceInstanceListSupplierTests {
 
 		assertThat(filtered).containsExactly(first);
 		verify(delegate, never()).get(any());
+	}
+
+	@Test
+	void shouldNotUseApiVersionStrategyOfApplicationEndpoints() {
+		LoadBalancerClientsProperties clientsProperties = new LoadBalancerClientsProperties();
+		clientsProperties.getApiVersion().setHeader("X-Api-Version");
+		LoadBalancerClientFactory clientFactory = new LoadBalancerClientFactory(clientsProperties);
+		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
+		parent.registerBean("mvcApiVersionStrategy", ApiVersionStrategy.class,
+				() -> new DefaultApiVersionStrategy(List.of(request -> request.getHeader("API-Version")),
+						new SemanticApiVersionParser(), false, null, false, version -> false, null));
+		parent.registerBean(LoadBalancerClientFactory.class, () -> clientFactory);
+		parent.refresh();
+		clientFactory.setApplicationContext(parent);
+		try {
+			when(delegate.getServiceId()).thenReturn("test");
+			supplier = new BlockingApiVersionServiceInstanceListSupplier(delegate, clientFactory);
+			supplier.setApiVersionParser(new SemanticApiVersionParser());
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("X-Api-Version", "1.0");
+			RequestData requestData = new RequestData(HttpMethod.GET, URI.create("http://localhost/test"), headers,
+					new LinkedMultiValueMap<>(), Collections.emptyMap());
+
+			List<ServiceInstance> filtered = supplier.get(new DefaultRequest<>(new RequestDataContext(requestData)))
+				.blockFirst();
+
+			assertThat(filtered).containsExactly(first);
+		}
+		finally {
+			clientFactory.destroy();
+			parent.close();
+		}
 	}
 
 	private DefaultServiceInstance serviceInstance(String instanceId, Map<String, String> metadata) {
