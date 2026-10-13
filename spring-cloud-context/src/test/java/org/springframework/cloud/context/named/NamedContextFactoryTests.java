@@ -117,6 +117,21 @@ public class NamedContextFactoryTests {
 				ResolvableType.forType(TestType.class), TestBean.class));
 	}
 
+	@Test
+	void testClientConfigurationWithSameSimpleNameAsDefaultConfiguration() {
+		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
+		parent.register(BaseConfig.class);
+		parent.refresh();
+		TestClientFactoryWithDefaultConfig factory = new TestClientFactoryWithDefaultConfig();
+		factory.setApplicationContext(parent);
+		factory.setConfigurations(List
+			.of(getSpec("foo", org.springframework.cloud.context.named.fixture.DefaultClientConfiguration.class)));
+
+		then(factory.getInstance("foo", TestType.class).value())
+			.as("the client-specific configuration was overridden by the default configuration with the same simple name")
+			.isEqualTo(1);
+	}
+
 	private void testChildContexts(GenericApplicationContext parent) {
 		TestClientFactory factory = new TestClientFactory();
 		factory.setApplicationContext(parent);
@@ -194,6 +209,14 @@ public class NamedContextFactoryTests {
 
 		TestClientFactory() {
 			super(TestSpec.class, "testfactory", "test.client.name");
+		}
+
+	}
+
+	static class TestClientFactoryWithDefaultConfig extends NamedContextFactory<TestSpec> {
+
+		TestClientFactoryWithDefaultConfig() {
+			super(DefaultClientConfiguration.class, "testfactory", "test.client.name");
 		}
 
 	}
@@ -353,7 +376,7 @@ public class NamedContextFactoryTests {
 
 	}
 
-	record TestType(int value) {
+	public record TestType(int value) {
 	}
 
 	@Target({ ElementType.TYPE, ElementType.METHOD })
