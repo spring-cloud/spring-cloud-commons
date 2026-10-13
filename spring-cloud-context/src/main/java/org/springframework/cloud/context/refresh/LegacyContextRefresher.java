@@ -28,6 +28,7 @@ import org.springframework.cloud.bootstrap.BootstrapApplicationListener;
 import org.springframework.cloud.bootstrap.BootstrapConfigFileApplicationListener;
 import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
@@ -127,6 +128,11 @@ public class LegacyContextRefresher extends ContextRefresher {
 			}
 		}
 		return capture;
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	protected static class Empty {
+
 	}
 
 }
