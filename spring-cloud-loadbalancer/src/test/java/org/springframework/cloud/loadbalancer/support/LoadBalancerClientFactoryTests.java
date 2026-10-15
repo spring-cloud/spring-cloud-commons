@@ -22,13 +22,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Tests for {@link LoadBalancerClientFactory}.
@@ -71,6 +75,26 @@ class LoadBalancerClientFactoryTests {
 		assertThat(clientFactory.getInstanceWithoutAncestors("test", TestBean.class)).isNull();
 	}
 
+	@Test
+	void shouldReturnPrimaryInstanceWithoutAncestors() {
+		clientFactory.setConfigurations(List
+			.of(new LoadBalancerClientSpecification("test", new Class<?>[] { PrimaryClientConfiguration.class })));
+
+		TestBean bean = clientFactory.getInstanceWithoutAncestors("test", TestBean.class);
+
+		assertThat(bean).isNotNull();
+		assertThat(bean.source()).isEqualTo("primary");
+	}
+
+	@Test
+	void shouldPropagateCreationFailureWithoutAncestors() {
+		clientFactory.setConfigurations(List
+			.of(new LoadBalancerClientSpecification("test", new Class<?>[] { FailingClientConfiguration.class })));
+
+		assertThatExceptionOfType(BeanCreationException.class)
+			.isThrownBy(() -> clientFactory.getInstanceWithoutAncestors("test", TestBean.class));
+	}
+
 	record TestBean(String source) {
 	}
 
@@ -80,6 +104,33 @@ class LoadBalancerClientFactoryTests {
 		@Bean
 		TestBean clientTestBean() {
 			return new TestBean("client");
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class PrimaryClientConfiguration {
+
+		@Bean
+		TestBean clientTestBean() {
+			return new TestBean("client");
+		}
+
+		@Bean
+		@Primary
+		TestBean primaryTestBean() {
+			return new TestBean("primary");
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class FailingClientConfiguration {
+
+		@Bean
+		@Lazy
+		TestBean clientTestBean() {
+			throw new IllegalStateException("broken");
 		}
 
 	}
