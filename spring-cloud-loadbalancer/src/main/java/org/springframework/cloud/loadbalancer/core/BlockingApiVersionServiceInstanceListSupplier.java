@@ -169,8 +169,9 @@ public class BlockingApiVersionServiceInstanceListSupplier extends DelegatingSer
 
 	private ApiVersionStrategy getApiVersionStrategy() {
 		if (apiVersionStrategy == null) {
-			ApiVersionStrategy userProvidedApiVersionStrategy = loadBalancerClientFactory.getInstance(getServiceId(),
-					ApiVersionStrategy.class);
+			// A strategy in the parent context serves the application's own endpoints
+			ApiVersionStrategy userProvidedApiVersionStrategy = loadBalancerClientFactory
+				.getInstanceWithoutAncestors(getServiceId(), ApiVersionStrategy.class);
 			apiVersionStrategy = userProvidedApiVersionStrategy != null ? userProvidedApiVersionStrategy
 					: buildApiVersionStrategy();
 		}
