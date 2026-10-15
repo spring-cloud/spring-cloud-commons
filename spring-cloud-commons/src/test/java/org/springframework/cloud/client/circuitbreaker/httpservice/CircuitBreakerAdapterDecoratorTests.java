@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.client.circuitbreaker.httpservice;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,6 +25,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
+import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.service.invoker.HttpExchangeAdapter;
 import org.springframework.web.service.invoker.HttpRequestValues;
 
@@ -126,6 +129,36 @@ class CircuitBreakerAdapterDecoratorTests {
 
 		assertThatExceptionOfType(NoFallbackAvailableException.class)
 			.isThrownBy(() -> fallbackHandler.apply(new RuntimeException("test")));
+	}
+
+	// Fallback classes are registered per service under Class#getName() (binary name),
+	// so the declaring-class attribute written by the processor must use the same form.
+	// For a nested @HttpExchange interface getName() ("Outer$Inner") differs from
+	// getCanonicalName() ("Outer.Inner"), which used to leave the per-class fallback
+	// unresolved and fall through to NoFallbackAvailableException.
+	@Test
+	void shouldResolvePerClassFallbackForNestedServiceInterface() throws NoSuchMethodException {
+		Method method = NestedTestService.class.getMethod("test", String.class, Integer.class);
+		HttpRequestValues.Builder builder = HttpRequestValues.builder();
+		new CircuitBreakerRequestValueProcessor().process(method, new MethodParameter[0],
+				new Object[] { "testDescription", 5 }, builder);
+		builder.setHttpMethod(HttpMethod.GET);
+		builder.setUriTemplate("/test");
+		Map<String, Object> attributes = builder.build().getAttributes();
+		CircuitBreakerAdapterDecorator nestedDecorator = new CircuitBreakerAdapterDecorator(adapter, circuitBreaker,
+				Map.of(NestedTestService.class.getName(), Fallbacks.class));
+		when(httpRequestValues.getAttributes()).thenReturn(attributes);
+		Function<Throwable, Object> fallbackHandler = nestedDecorator.createFallbackHandler(httpRequestValues);
+
+		Object fallback = fallbackHandler.apply(new RuntimeException("test"));
+
+		assertThat(fallback).isEqualTo("testDescription: 5");
+	}
+
+	interface NestedTestService {
+
+		String test(String description, Integer value);
+
 	}
 
 }
