@@ -21,7 +21,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
@@ -78,6 +81,24 @@ public class LoadBalancerClientFactory extends NamedContextFactory<LoadBalancerC
 	@Override
 	public ReactiveLoadBalancer<ServiceInstance> getInstance(String serviceId) {
 		return getInstance(serviceId, ReactorServiceInstanceLoadBalancer.class);
+	}
+
+	/**
+	 * Returns the bean of the given type declared for the given client, without looking
+	 * in the parent context.
+	 * @param name the client name
+	 * @param type the bean type
+	 * @param <T> the bean type
+	 * @return the bean, or {@code null} if the client context does not declare exactly
+	 * one bean of the given type
+	 */
+	public <T> @Nullable T getInstanceWithoutAncestors(String name, Class<T> type) {
+		try {
+			return BeanFactoryUtils.beanOfType(getContext(name), type);
+		}
+		catch (BeansException ex) {
+			return null;
+		}
 	}
 
 	@Override

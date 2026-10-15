@@ -25,8 +25,11 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import reactor.core.publisher.Flux;
 
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.DefaultRequest;
@@ -150,8 +153,9 @@ class ReactiveApiVersionServiceInstanceListSupplierTests {
 		verify(delegate, never()).get(any());
 	}
 
-	@Test
-	void shouldNotUseApiVersionStrategyOfApplicationEndpoints() {
+	@ParameterizedTest
+	@ValueSource(strings = { BeanDefinition.SCOPE_SINGLETON, BeanDefinition.SCOPE_PROTOTYPE })
+	void shouldNotUseApiVersionStrategyOfApplicationEndpoints(String scope) {
 		LoadBalancerClientsProperties clientsProperties = new LoadBalancerClientsProperties();
 		clientsProperties.getApiVersion().setHeader("X-Api-Version");
 		LoadBalancerClientFactory clientFactory = new LoadBalancerClientFactory(clientsProperties);
@@ -159,7 +163,8 @@ class ReactiveApiVersionServiceInstanceListSupplierTests {
 		parent.registerBean("webFluxApiVersionStrategy", ApiVersionStrategy.class,
 				() -> new DefaultApiVersionStrategy(
 						List.of(exchange -> exchange.getRequest().getHeaders().getFirst("API-Version")),
-						new SemanticApiVersionParser(), false, null, false, version -> false, null));
+						new SemanticApiVersionParser(), false, null, false, version -> false, null),
+				definition -> definition.setScope(scope));
 		parent.registerBean(LoadBalancerClientFactory.class, () -> clientFactory);
 		parent.refresh();
 		clientFactory.setApplicationContext(parent);
