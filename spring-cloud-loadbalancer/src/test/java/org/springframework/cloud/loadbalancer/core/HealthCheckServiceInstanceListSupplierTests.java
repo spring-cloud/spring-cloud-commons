@@ -359,7 +359,44 @@ class HealthCheckServiceInstanceListSupplierTests {
 		})
 			.expectSubscription()
 			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
-			.expectNext(Lists.list())
+			.expectNext(Lists.list(serviceInstance1, serviceInstance2))
+			.expectNoEvent(properties.getHealthCheck().getInterval())
+			.thenCancel()
+			.verify(VERIFY_TIMEOUT);
+	}
+
+	@Test
+	void shouldEmitAllInstancesIfAllIsAliveChecksFailedWhenUpdateDisabled() {
+		LoadBalancerProperties.HealthCheck healthCheck = properties.getHealthCheck();
+		healthCheck.setInitialDelay(Duration.ofSeconds(1L));
+		healthCheck.setUpdateResultsList(false);
+		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
+				port, false);
+		ServiceInstance serviceInstance2 = new DefaultServiceInstance("ignored-service-2", SERVICE_ID, "127.0.0.2",
+				port, false);
+
+		StepVerifier.withVirtualTime(() -> {
+			ServiceInstanceListSupplier delegate = mock(ServiceInstanceListSupplier.class);
+			Mockito.when(delegate.getServiceId()).thenReturn(SERVICE_ID);
+			Mockito.when(delegate.get()).thenReturn(Flux.just(Lists.list(serviceInstance1, serviceInstance2)));
+			listSupplier = new HealthCheckServiceInstanceListSupplier(delegate,
+					buildLoadBalancerClientFactory(SERVICE_ID, properties), webClientHealthCheckFunction()) {
+				@Override
+				protected Mono<Boolean> isAlive(ServiceInstance serviceInstance) {
+					if (serviceInstance == serviceInstance1) {
+						return Mono.just(false);
+					}
+					else {
+						return Mono.error(new RuntimeException("boom"));
+					}
+				}
+			};
+
+			return listSupplier.get();
+		})
+			.expectSubscription()
+			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
+			.expectNext(Lists.list(serviceInstance1, serviceInstance2))
 			.expectNoEvent(properties.getHealthCheck().getInterval())
 			.thenCancel()
 			.verify(VERIFY_TIMEOUT);
@@ -424,7 +461,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 		})
 			.expectSubscription()
 			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
-			.expectNext(Lists.list())
+			.expectNext(Lists.list(serviceInstance1, serviceInstance2))
 			.expectNoEvent(properties.getHealthCheck().getInterval())
 			.expectNext(Lists.list(serviceInstance1))
 			.expectNoEvent(properties.getHealthCheck().getInterval())
@@ -460,7 +497,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 			.expectSubscription()
 			.expectNoEvent(properties.getHealthCheck().getInitialDelay())
 			.expectNoEvent(properties.getHealthCheck().getInterval())
-			.expectNext(Lists.list())
+			.expectNext(Lists.list(serviceInstance1))
 			.expectNoEvent(properties.getHealthCheck().getInterval())
 			.expectNext(Lists.list(serviceInstance1))
 			.expectNoEvent(properties.getHealthCheck().getInterval())
