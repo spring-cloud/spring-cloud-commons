@@ -37,12 +37,14 @@ import org.springframework.util.StringUtils;
 
 /**
  * A {@link ServiceInstanceListSupplier} implementation that verifies whether the
- * instances are alive and only returns the healthy one, unless there are none. Uses a
- * user-provided function to ping the <code>health</code> endpoint of the instances.
+ * instances are alive and only returns the healthy one, unless there are none -
+ * then it returns all the retrieved instances. Uses a user-provided function to ping
+ * the <code>health</code> endpoint of the instances.
  *
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko
  * @author Roman Chigvintsev
+ * @author Mahesh Bhosale
  * @since 2.2.0
  */
 public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier
@@ -72,7 +74,9 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 		Flux<List<ServiceInstance>> aliveInstancesFlux = Flux.defer(delegate)
 			.repeatWhen(completed -> completed.takeWhile(emitted -> this.healthCheck.getRefetchInstances())
 				.delayElements(healthCheck.getRefetchInstancesInterval()))
-			.switchMap(serviceInstances -> healthCheckFlux(serviceInstances).map(List::copyOf));
+			.switchMap(serviceInstances -> healthCheckFlux(serviceInstances)
+				.map(aliveInstances -> healthyOrAll(aliveInstances, serviceInstances))
+				.map(List::copyOf));
 		aliveInstancesReplay = aliveInstancesFlux.delaySubscription(healthCheck.getInitialDelay())
 			.replay(1)
 			.refCount(1);
@@ -157,6 +161,11 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 					serviceInstance.getMetadata());
 		}
 		return serviceInstance;
+	}
+
+	private static List<ServiceInstance> healthyOrAll(List<ServiceInstance> healthyInstances,
+			List<ServiceInstance> allInstances) {
+		return healthyInstances.isEmpty() ? allInstances : healthyInstances;
 	}
 
 }
