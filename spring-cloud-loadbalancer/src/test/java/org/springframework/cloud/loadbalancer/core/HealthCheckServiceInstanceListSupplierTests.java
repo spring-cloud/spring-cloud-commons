@@ -331,7 +331,7 @@ class HealthCheckServiceInstanceListSupplierTests {
 	}
 
 	@Test
-	void shouldEmitListIfAllIsAliveChecksFailed() {
+	void shouldEmitEmptyListIfAllIsAliveChecksFailed() {
 		properties.getHealthCheck().setInitialDelay(Duration.ofSeconds(1));
 		ServiceInstance serviceInstance1 = new DefaultServiceInstance("ignored-service-1", SERVICE_ID, "127.0.0.1",
 				port, false);
