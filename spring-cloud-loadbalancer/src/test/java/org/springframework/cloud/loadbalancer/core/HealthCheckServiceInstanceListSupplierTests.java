@@ -72,6 +72,7 @@ import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSup
  * @author Roman Matiushchenko
  * @author Roman Chigvintsev
  * @author Sabyasachi Bhattacharya
+ * @author Mahesh Bhosale
  */
 @SpringBootTest(classes = HealthCheckServiceInstanceListSupplierTests.TestApplication.class,
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
