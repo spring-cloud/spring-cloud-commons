@@ -32,6 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -208,15 +209,17 @@ public class ConfigurationPropertiesRebinder
 							appContext.getAutowireCapableBeanFactory().destroyBean(target);
 						}
 						else {
+							Object freshInstance = bindFreshInstance(target, name, appContext);
 							appContext.getAutowireCapableBeanFactory().destroyBean(target);
-							resetBeanToDefaults(target, name, appContext);
+							copyFreshInstance(target, freshInstance);
 							appContext.getAutowireCapableBeanFactory().autowireBean(target);
 							appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
 						}
 					}
 					else {
+						Object freshInstance = bindFreshInstance(bean, name, appContext);
 						appContext.getAutowireCapableBeanFactory().destroyBean(bean);
-						resetBeanToDefaults(bean, name, appContext);
+						copyFreshInstance(bean, freshInstance);
 						appContext.getAutowireCapableBeanFactory().autowireBean(bean);
 						appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
 					}
@@ -239,14 +242,14 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	/**
-	 * Reset bean properties to the values a freshly bound instance of the bean's class
-	 * holds, so that removed properties do not retain stale values after rebinding while
-	 * concurrent readers never observe the bean's unbound class-level defaults (see
-	 * gh-1727). The fresh instance is bound from the {@link Environment} without being
-	 * initialized as a bean, so no lifecycle callbacks run for it; if binding it fails,
-	 * the live bean is left untouched and the failure surfaces as the rebind error.
+	 * Create a fresh instance of the bean's class, autowire it and bind it from the
+	 * {@link Environment}, so that its state can replace the live bean's state once the
+	 * live bean has been destroyed. This happens before the live bean is touched: a
+	 * binding failure surfaces as the rebind error and leaves the live bean as it was.
+	 * Returns {@code null} when no trustworthy fresh instance can be created; the live
+	 * bean is then re-bound in place and removed properties keep their stale values.
 	 */
-	private void resetBeanToDefaults(Object bean, String name, ApplicationContext appContext) {
+	private @Nullable Object bindFreshInstance(Object bean, String name, ApplicationContext appContext) {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!hasDefaultConstructor(targetClass)) {
 			// Beans whose no-arg constructor (if any) is not their only constructor
@@ -259,7 +262,7 @@ public class ConfigurationPropertiesRebinder
 				logger.debug("No default constructor for " + targetClass.getName()
 						+ "; skipping property reset before rebinding");
 			}
-			return;
+			return null;
 		}
 		Object freshInstance;
 		try {
@@ -268,17 +271,29 @@ public class ConfigurationPropertiesRebinder
 		catch (Exception ex) {
 			logger.warn("Cannot create default instance of " + targetClass.getName()
 					+ " for reset; skipping property reset", ex);
-			return;
+			return null;
 		}
+		appContext.getAutowireCapableBeanFactory().autowireBean(freshInstance);
 		bind(freshInstance, name, appContext);
-		resetProperties(bean, freshInstance, Collections.newSetFromMap(new IdentityHashMap<>()), 0);
+		return freshInstance;
+	}
+
+	/**
+	 * Replace the properties of the live bean with those of the freshly bound instance,
+	 * so that removed properties revert to their defaults while concurrent readers never
+	 * observe the bean's unbound class-level defaults (see gh-1727).
+	 */
+	private void copyFreshInstance(Object bean, @Nullable Object freshInstance) {
+		if (freshInstance != null) {
+			resetProperties(bean, freshInstance, Collections.newSetFromMap(new IdentityHashMap<>()), 0);
+		}
 	}
 
 	/**
 	 * Bind the given instance from the {@link Environment} as if it were the bean with
-	 * the given name, without running any other bean post-processor or lifecycle
-	 * callback. Without Spring Boot's binding post-processor the instance keeps its
-	 * class-level defaults.
+	 * the given name, through Spring Boot's binding post-processor only, so that no other
+	 * post-processor or lifecycle callback runs for it. Without that post-processor the
+	 * instance keeps its class-level defaults.
 	 */
 	private void bind(Object instance, String name, ApplicationContext appContext) {
 		ConfigurationPropertiesBindingPostProcessor binder = appContext
@@ -311,7 +326,7 @@ public class ConfigurationPropertiesRebinder
 		return constructors.length == 1 && constructors[0].getParameterCount() == 0;
 	}
 
-	private void resetProperties(Object bean, Object defaults, Set<Object> visited, int depth) {
+	private void resetProperties(Object bean, Object freshInstance, Set<Object> visited, int depth) {
 		// Guard against cyclic object graphs and pathologically deep ones so that
 		// recursion
 		// always terminates; see MAX_RESET_DEPTH.
@@ -319,7 +334,7 @@ public class ConfigurationPropertiesRebinder
 			return;
 		}
 		BeanWrapper target = new BeanWrapperImpl(bean);
-		BeanWrapper defaultsWrapper = new BeanWrapperImpl(defaults);
+		BeanWrapper freshWrapper = new BeanWrapperImpl(freshInstance);
 		for (PropertyDescriptor pd : target.getPropertyDescriptors()) {
 			String propertyName = pd.getName();
 			if ("class".equals(propertyName)) {
@@ -328,16 +343,16 @@ public class ConfigurationPropertiesRebinder
 			try {
 				// A property whose declared type the user excluded is left alone whatever
 				// its accessors look like: a read-only property is not descended into and
-				// a writable one is not overwritten with the default instance's value.
+				// a writable one is not overwritten with the fresh instance's value.
 				if (isNeverReset(pd.getPropertyType())) {
 					continue;
 				}
-				if (target.isWritableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
+				if (target.isWritableProperty(propertyName) && freshWrapper.isReadableProperty(propertyName)) {
 					if (target.isReadableProperty(propertyName)
 							&& isNeverReset(target.getPropertyValue(propertyName))) {
 						continue;
 					}
-					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
+					Object freshValue = freshWrapper.getPropertyValue(propertyName);
 					Object currentValue = target.isReadableProperty(propertyName)
 							? target.getPropertyValue(propertyName) : null;
 					// Skip the setter call entirely when there's nothing to change: this
@@ -345,23 +360,23 @@ public class ConfigurationPropertiesRebinder
 					// again with the same value, and setters that reject null are only
 					// ever
 					// invoked when the property actually needs to become null.
-					if (!ObjectUtils.nullSafeEquals(currentValue, defaultValue)) {
+					if (!ObjectUtils.nullSafeEquals(currentValue, freshValue)) {
 						try {
-							target.setPropertyValue(propertyName, defaultValue);
+							target.setPropertyValue(propertyName, freshValue);
 						}
 						catch (Exception ex) {
 							warnCannotReset(bean, propertyName, ex);
 						}
 					}
 				}
-				else if (target.isReadableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
+				else if (target.isReadableProperty(propertyName) && freshWrapper.isReadableProperty(propertyName)) {
 					Object value = target.getPropertyValue(propertyName);
-					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
+					Object freshValue = freshWrapper.getPropertyValue(propertyName);
 					if (value instanceof Collection collection) {
 						try {
 							collection.clear();
-							if (defaultValue instanceof Collection defaultCollection) {
-								collection.addAll(defaultCollection);
+							if (freshValue instanceof Collection freshCollection) {
+								collection.addAll(freshCollection);
 							}
 						}
 						catch (UnsupportedOperationException ex) {
@@ -371,17 +386,17 @@ public class ConfigurationPropertiesRebinder
 					else if (value instanceof Map map) {
 						try {
 							map.clear();
-							if (defaultValue instanceof Map defaultMap) {
-								map.putAll(defaultMap);
+							if (freshValue instanceof Map freshMap) {
+								map.putAll(freshMap);
 							}
 						}
 						catch (UnsupportedOperationException ex) {
 							warnCannotReset(bean, propertyName, ex);
 						}
 					}
-					else if (value != null && defaultValue != null && isResettableNestedType(value.getClass())
+					else if (value != null && freshValue != null && isResettableNestedType(value.getClass())
 							&& isStableInstance(target, propertyName, value)) {
-						resetProperties(value, defaultValue, visited, depth + 1);
+						resetProperties(value, freshValue, visited, depth + 1);
 					}
 				}
 			}
@@ -412,9 +427,9 @@ public class ConfigurationPropertiesRebinder
 
 	/**
 	 * Log, at most once per bean type and property, that a property could not be reset to
-	 * its default value and may therefore retain a stale value after this and future
-	 * refreshes. The full exception is only logged at DEBUG, on every occurrence, to
-	 * avoid spamming the log at the default level while still making the failure
+	 * its freshly bound value and may therefore retain a stale value after this and
+	 * future refreshes. The full exception is only logged at DEBUG, on every occurrence,
+	 * to avoid spamming the log at the default level while still making the failure
 	 * discoverable.
 	 */
 	private void warnCannotReset(Object bean, String propertyName, Exception ex) {
