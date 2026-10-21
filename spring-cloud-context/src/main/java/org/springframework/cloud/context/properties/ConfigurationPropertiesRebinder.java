@@ -43,6 +43,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration.RefreshProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
@@ -208,14 +209,14 @@ public class ConfigurationPropertiesRebinder
 						}
 						else {
 							appContext.getAutowireCapableBeanFactory().destroyBean(target);
-							resetBeanToDefaults(target);
+							resetBeanToDefaults(target, name, appContext);
 							appContext.getAutowireCapableBeanFactory().autowireBean(target);
 							appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
 						}
 					}
 					else {
 						appContext.getAutowireCapableBeanFactory().destroyBean(bean);
-						resetBeanToDefaults(bean);
+						resetBeanToDefaults(bean, name, appContext);
 						appContext.getAutowireCapableBeanFactory().autowireBean(bean);
 						appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
 					}
@@ -238,10 +239,14 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	/**
-	 * Reset bean properties to their class-level defaults so that removed properties do
-	 * not retain stale values after rebinding.
+	 * Reset bean properties to the values a freshly bound instance of the bean's class
+	 * holds, so that removed properties do not retain stale values after rebinding while
+	 * concurrent readers never observe the bean's unbound class-level defaults (see
+	 * gh-1727). The fresh instance is bound from the {@link Environment} without being
+	 * initialized as a bean, so no lifecycle callbacks run for it; if binding it fails,
+	 * the live bean is left untouched and the failure surfaces as the rebind error.
 	 */
-	private void resetBeanToDefaults(Object bean) {
+	private void resetBeanToDefaults(Object bean, String name, ApplicationContext appContext) {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!hasDefaultConstructor(targetClass)) {
 			// Beans whose no-arg constructor (if any) is not their only constructor
@@ -265,7 +270,23 @@ public class ConfigurationPropertiesRebinder
 					+ " for reset; skipping property reset", ex);
 			return;
 		}
+		bind(freshInstance, name, appContext);
 		resetProperties(bean, freshInstance, Collections.newSetFromMap(new IdentityHashMap<>()), 0);
+	}
+
+	/**
+	 * Bind the given instance from the {@link Environment} as if it were the bean with
+	 * the given name, without running any other bean post-processor or lifecycle
+	 * callback. Without Spring Boot's binding post-processor the instance keeps its
+	 * class-level defaults.
+	 */
+	private void bind(Object instance, String name, ApplicationContext appContext) {
+		ConfigurationPropertiesBindingPostProcessor binder = appContext
+			.getBeanProvider(ConfigurationPropertiesBindingPostProcessor.class)
+			.getIfAvailable();
+		if (binder != null) {
+			binder.postProcessBeforeInitialization(instance, name);
+		}
 	}
 
 	/**
