@@ -16,10 +16,16 @@
 
 package org.springframework.cloud.context.properties;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
@@ -113,22 +119,71 @@ public class ConfigurationPropertiesRebinderTransientStateIntegrationTests {
 
 	@Test
 	@DirtiesContext
-	public void rebindBringsGetterOnlyListToNewContents() {
-		then(this.properties.getTags()).containsExactly("a", "b");
+	public void rebindNeverClearsGetterOnlyList() {
+		TrackingList tags = this.properties.getTags();
+		then(tags).containsExactly("a", "b");
+		int clearsAtStartup = tags.clears;
+		this.rebinder.rebind();
+		then(tags).containsExactly("a", "b");
+		then(tags.clears).as("unchanged rebind").isEqualTo(clearsAtStartup);
 		findTestProperties().put("test.tags[0]", "c");
+		this.rebinder.rebind();
+		then(tags).containsExactly("c", "b");
+		then(tags.clears).as("changed rebind").isEqualTo(clearsAtStartup);
 		findTestProperties().remove("test.tags[1]");
 		this.rebinder.rebind();
-		then(this.properties.getTags()).containsExactly("c");
+		then(tags).containsExactly("c");
+		then(tags.clears).as("shortened rebind").isEqualTo(clearsAtStartup);
+		findTestProperties().remove("test.tags[0]");
+		this.rebinder.rebind();
+		then(tags).isEmpty();
+		then(tags.clears).as("removed rebind").isEqualTo(clearsAtStartup);
 	}
 
 	@Test
 	@DirtiesContext
-	public void rebindEmptiesRemovedGetterOnlyList() {
-		then(this.properties.getTags()).containsExactly("a", "b");
-		findTestProperties().remove("test.tags[0]");
-		findTestProperties().remove("test.tags[1]");
+	public void concurrentReaderNeverSeesGetterOnlyListEmptyDuringRebinds() throws Exception {
+		TrackingList tags = this.properties.getTags();
+		then(tags).containsExactly("a", "b");
+		AtomicBoolean stop = new AtomicBoolean();
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		try {
+			Future<Integer> reads = executor.submit(() -> {
+				int count = 0;
+				while (!stop.get()) {
+					int seen = 0;
+					for (String tag : tags) {
+						then(tag).isNotNull();
+						seen++;
+					}
+					then(seen).as("elements seen by a reader").isEqualTo(2);
+					count++;
+				}
+				return count;
+			});
+			for (int i = 0; i < 50; i++) {
+				findTestProperties().put("test.tags[0]", (i % 2 == 0) ? "c" : "a");
+				this.rebinder.rebind();
+			}
+			stop.set(true);
+			then(reads.get(10, TimeUnit.SECONDS)).isPositive();
+		}
+		finally {
+			stop.set(true);
+			executor.shutdownNow();
+		}
+		then(tags).containsExactly("a", "b");
+	}
+
+	@Test
+	@DirtiesContext
+	public void injectedSetterIsNeitherCopiedFromTheFreshInstanceNorNulled() {
+		Clock clock = this.properties.getClock();
+		then(clock).isNotNull();
 		this.rebinder.rebind();
-		then(this.properties.getTags()).isEmpty();
+		then(this.properties.getClock()).isSameAs(clock);
+		then(this.properties.clockAssignments).doesNotContainNull()
+			.allSatisfy(assigned -> then(assigned).isSameAs(clock));
 	}
 
 	private Map<String, Object> findTestProperties() {
@@ -150,6 +205,11 @@ public class ConfigurationPropertiesRebinderTransientStateIntegrationTests {
 		@Bean
 		protected TestProperties testProperties() {
 			return new TestProperties();
+		}
+
+		@Bean
+		protected Clock testClock() {
+			return Clock.systemUTC();
 		}
 
 	}
@@ -175,7 +235,11 @@ public class ConfigurationPropertiesRebinderTransientStateIntegrationTests {
 
 		final List<Integer> workerAssignments = new ArrayList<>();
 
-		private final List<String> tags = new ArrayList<>();
+		final List<Clock> clockAssignments = new ArrayList<>();
+
+		private final TrackingList tags = new TrackingList();
+
+		private Clock clock;
 
 		private final TrackingMap labels = new TrackingMap();
 
@@ -201,12 +265,35 @@ public class ConfigurationPropertiesRebinderTransientStateIntegrationTests {
 			this.workers = workers;
 		}
 
-		public List<String> getTags() {
+		public TrackingList getTags() {
 			return this.tags;
+		}
+
+		public Clock getClock() {
+			return this.clock;
+		}
+
+		@Autowired
+		public void setClock(Clock clock) {
+			this.clockAssignments.add(clock);
+			this.clock = clock;
 		}
 
 		public TrackingMap getLabels() {
 			return this.labels;
+		}
+
+	}
+
+	@SuppressWarnings("serial")
+	protected static class TrackingList extends ArrayList<String> {
+
+		int clears;
+
+		@Override
+		public void clear() {
+			this.clears++;
+			super.clear();
 		}
 
 	}
