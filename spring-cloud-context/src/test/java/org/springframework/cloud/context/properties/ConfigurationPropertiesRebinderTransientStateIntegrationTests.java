@@ -17,6 +17,7 @@
 package org.springframework.cloud.context.properties;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.test.annotation.DirtiesContext;
 
+import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.assertj.core.api.BDDAssertions.thenThrownBy;
 
@@ -47,10 +49,12 @@ import static org.assertj.core.api.BDDAssertions.thenThrownBy;
  * is what a concurrent reader would observe (see gh-1727): a nested object populated only
  * by binding must never be set to {@code null}, a scalar must never be set to its
  * class-level default on the way to its bound value, and a rebind whose binding fails
- * must leave the bean as it was. The tests check the values the bean's setters receive
- * during a rebind.
+ * must leave the bean as it was, and a getter-only collection or map must never be
+ * emptied on the way to its new contents. The tests check the values the bean's setters
+ * receive during a rebind and the operations its collections see.
  */
-@SpringBootTest(classes = TestConfiguration.class, properties = { "test.timeout.seconds=30", "test.workers=4" })
+@SpringBootTest(classes = TestConfiguration.class, properties = { "test.timeout.seconds=30", "test.workers=4",
+		"test.tags[0]=a", "test.tags[1]=b", "test.labels.one=1", "test.labels.two=2" })
 public class ConfigurationPropertiesRebinderTransientStateIntegrationTests {
 
 	@Autowired
@@ -94,6 +98,37 @@ public class ConfigurationPropertiesRebinderTransientStateIntegrationTests {
 		then(this.properties.workerAssignments).containsOnly(4);
 		then(this.properties.getWorkers()).isEqualTo(4);
 		then(this.properties.getTimeout().getSeconds()).isEqualTo(30);
+	}
+
+	@Test
+	@DirtiesContext
+	public void rebindBringsGetterOnlyMapToNewContentsWithoutEmptyingIt() {
+		then(this.properties.getLabels()).containsOnly(entry("one", "1"), entry("two", "2"));
+		findTestProperties().remove("test.labels.two");
+		findTestProperties().put("test.labels.three", "3");
+		this.rebinder.rebind();
+		then(this.properties.getLabels()).containsOnly(entry("one", "1"), entry("three", "3"));
+		then(this.properties.getLabels().clears).isZero();
+	}
+
+	@Test
+	@DirtiesContext
+	public void rebindBringsGetterOnlyListToNewContents() {
+		then(this.properties.getTags()).containsExactly("a", "b");
+		findTestProperties().put("test.tags[0]", "c");
+		findTestProperties().remove("test.tags[1]");
+		this.rebinder.rebind();
+		then(this.properties.getTags()).containsExactly("c");
+	}
+
+	@Test
+	@DirtiesContext
+	public void rebindEmptiesRemovedGetterOnlyList() {
+		then(this.properties.getTags()).containsExactly("a", "b");
+		findTestProperties().remove("test.tags[0]");
+		findTestProperties().remove("test.tags[1]");
+		this.rebinder.rebind();
+		then(this.properties.getTags()).isEmpty();
 	}
 
 	private Map<String, Object> findTestProperties() {
@@ -140,6 +175,10 @@ public class ConfigurationPropertiesRebinderTransientStateIntegrationTests {
 
 		final List<Integer> workerAssignments = new ArrayList<>();
 
+		private final List<String> tags = new ArrayList<>();
+
+		private final TrackingMap labels = new TrackingMap();
+
 		private Timeout timeout;
 
 		private int workers;
@@ -160,6 +199,27 @@ public class ConfigurationPropertiesRebinderTransientStateIntegrationTests {
 		public void setWorkers(int workers) {
 			this.workerAssignments.add(workers);
 			this.workers = workers;
+		}
+
+		public List<String> getTags() {
+			return this.tags;
+		}
+
+		public TrackingMap getLabels() {
+			return this.labels;
+		}
+
+	}
+
+	@SuppressWarnings("serial")
+	protected static class TrackingMap extends LinkedHashMap<String, String> {
+
+		int clears;
+
+		@Override
+		public void clear() {
+			this.clears++;
+			super.clear();
 		}
 
 	}

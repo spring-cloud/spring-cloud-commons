@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,8 +74,12 @@ import org.springframework.util.StringUtils;
  * racing with an {@link EnvironmentChangeEvent}-triggered {@link #rebind()}) cannot
  * interleave their destroy/reset/re-initialize steps. That does not, however, make the
  * bean safe to read concurrently from other threads while a rebind is in progress: the
- * bean is mutated in place, field by field, so a concurrent reader can observe transient
- * intermediate state. Beans that need a consistent view across a refresh should use
+ * bean is mutated in place, field by field, so a concurrent reader can observe a mix of
+ * previous and new values. What it does not observe is unbound state: a fresh instance is
+ * bound first and its values are then copied into the live bean, so a scalar never passes
+ * through its class-level default, a nested object never through {@code null}, and a
+ * getter-only collection or map is brought to its new contents without being emptied
+ * first. Beans that need a consistent view across a refresh should use
  * {@link RefreshScope} instead, which serializes reads against refreshes via a per-bean
  * {@link java.util.concurrent.locks.ReadWriteLock}.
  *
@@ -250,6 +255,18 @@ public class ConfigurationPropertiesRebinder
 	 * bean is then re-bound in place and removed properties keep their stale values.
 	 */
 	private @Nullable Object bindFreshInstance(Object bean, String name, ApplicationContext appContext) {
+		ConfigurationPropertiesBindingPostProcessor binder = appContext
+			.getBeanProvider(ConfigurationPropertiesBindingPostProcessor.class)
+			.getIfAvailable();
+		if (binder == null) {
+			// Without the binder the fresh instance would only carry its class-level
+			// defaults, and copying those onto the live bean would discard its values.
+			if (logger.isDebugEnabled()) {
+				logger.debug("No ConfigurationPropertiesBindingPostProcessor available; skipping property reset "
+						+ "before rebinding");
+			}
+			return null;
+		}
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!hasDefaultConstructor(targetClass)) {
 			// Beans whose no-arg constructor (if any) is not their only constructor
@@ -273,8 +290,10 @@ public class ConfigurationPropertiesRebinder
 					+ " for reset; skipping property reset", ex);
 			return null;
 		}
+		// Autowired so that an injected dependency is copied over as the same instance
+		// rather than nulled and re-injected on the live bean afterwards.
 		appContext.getAutowireCapableBeanFactory().autowireBean(freshInstance);
-		bind(freshInstance, name, appContext);
+		binder.postProcessBeforeInitialization(freshInstance, name);
 		return freshInstance;
 	}
 
@@ -295,15 +314,6 @@ public class ConfigurationPropertiesRebinder
 	 * post-processor or lifecycle callback runs for it. Without that post-processor the
 	 * instance keeps its class-level defaults.
 	 */
-	private void bind(Object instance, String name, ApplicationContext appContext) {
-		ConfigurationPropertiesBindingPostProcessor binder = appContext
-			.getBeanProvider(ConfigurationPropertiesBindingPostProcessor.class)
-			.getIfAvailable();
-		if (binder != null) {
-			binder.postProcessBeforeInitialization(instance, name);
-		}
-	}
-
 	/**
 	 * Whether the given type's <em>only</em> declared constructor is a no-argument one,
 	 * which is what {@link BeanUtils#instantiateClass(Class)} needs to build a defaults
@@ -373,26 +383,10 @@ public class ConfigurationPropertiesRebinder
 					Object value = target.getPropertyValue(propertyName);
 					Object freshValue = freshWrapper.getPropertyValue(propertyName);
 					if (value instanceof Collection collection) {
-						try {
-							collection.clear();
-							if (freshValue instanceof Collection freshCollection) {
-								collection.addAll(freshCollection);
-							}
-						}
-						catch (UnsupportedOperationException ex) {
-							warnCannotReset(bean, propertyName, ex);
-						}
+						replaceContents(bean, propertyName, collection, freshValue);
 					}
 					else if (value instanceof Map map) {
-						try {
-							map.clear();
-							if (freshValue instanceof Map freshMap) {
-								map.putAll(freshMap);
-							}
-						}
-						catch (UnsupportedOperationException ex) {
-							warnCannotReset(bean, propertyName, ex);
-						}
+						replaceContents(bean, propertyName, map, freshValue);
 					}
 					else if (value != null && freshValue != null && isResettableNestedType(value.getClass())
 							&& isStableInstance(target, propertyName, value)) {
@@ -416,6 +410,54 @@ public class ConfigurationPropertiesRebinder
 	 * walk a throw-away object graph - one that, for record-style/fluent accessors, may
 	 * not even terminate (see gh-1750).
 	 */
+	/**
+	 * Bring a getter-only collection to the contents of the fresh instance without ever
+	 * leaving it empty: nothing is touched when the contents are already equal, and
+	 * otherwise the new elements are added before the previous ones are removed.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void replaceContents(Object bean, String propertyName, Collection collection, @Nullable Object freshValue) {
+		Collection fresh = (freshValue instanceof Collection freshCollection) ? freshCollection
+				: Collections.emptyList();
+		if (collection.equals(fresh)) {
+			return;
+		}
+		try {
+			if (collection instanceof List list) {
+				int previousSize = list.size();
+				list.addAll(fresh);
+				list.subList(0, previousSize).clear();
+			}
+			else {
+				collection.retainAll(fresh);
+				collection.addAll(fresh);
+			}
+		}
+		catch (UnsupportedOperationException ex) {
+			warnCannotReset(bean, propertyName, ex);
+		}
+	}
+
+	/**
+	 * Bring a getter-only map to the contents of the fresh instance without ever leaving
+	 * it empty: nothing is touched when the contents are already equal, and otherwise
+	 * only the removed keys are dropped before the fresh entries are put.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void replaceContents(Object bean, String propertyName, Map map, @Nullable Object freshValue) {
+		Map fresh = (freshValue instanceof Map freshMap) ? freshMap : Collections.emptyMap();
+		if (map.equals(fresh)) {
+			return;
+		}
+		try {
+			map.keySet().retainAll(fresh.keySet());
+			map.putAll(fresh);
+		}
+		catch (UnsupportedOperationException ex) {
+			warnCannotReset(bean, propertyName, ex);
+		}
+	}
+
 	private boolean isStableInstance(BeanWrapper target, String propertyName, Object value) {
 		try {
 			return target.getPropertyValue(propertyName) == value;
