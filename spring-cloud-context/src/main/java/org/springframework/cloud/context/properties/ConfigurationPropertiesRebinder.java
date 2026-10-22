@@ -256,14 +256,6 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	/**
-	 * Create a fresh instance of the bean's class, autowire it and bind it from the
-	 * {@link Environment}, so that its state can replace the live bean's state once the
-	 * live bean has been destroyed. This happens before the live bean is touched: a
-	 * binding failure surfaces as the rebind error and leaves the live bean as it was.
-	 * Returns {@code null} when no trustworthy fresh instance can be created; the live
-	 * bean is then re-bound in place and removed properties keep their stale values.
-	 */
-	/**
 	 * Rebind the live bean in place. Its new state is bound on a fresh instance first and
 	 * then copied over, so that readers never observe unbound state; the bean is then
 	 * destroyed, re-autowired and re-initialized, without being bound in place a second
@@ -337,6 +329,15 @@ public class ConfigurationPropertiesRebinder
 		}
 	}
 
+	/**
+	 * Create a fresh instance of the bean's class and bind it from the
+	 * {@link Environment}, so that its state can replace the live bean's state once the
+	 * live bean has been destroyed. This happens before the live bean is touched: a
+	 * binding failure surfaces as the rebind error and leaves the live bean as it was.
+	 * The instance is not autowired; injected properties are left alone by the copy.
+	 * Returns {@code null} when no trustworthy fresh instance can be created; the live
+	 * bean is then re-bound in place and removed properties keep their stale values.
+	 */
 	private @Nullable Object bindFreshInstance(Object bean, String name, ApplicationContext appContext) {
 		ConfigurationPropertiesBindingPostProcessor binder = appContext
 			.getBeanProvider(ConfigurationPropertiesBindingPostProcessor.class)
