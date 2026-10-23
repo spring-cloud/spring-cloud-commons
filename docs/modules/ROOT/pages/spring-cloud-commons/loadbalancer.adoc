@@ -191,7 +191,7 @@ public class CustomLoadBalancerConfiguration {
 It is possible to enable a scheduled HealthCheck for the LoadBalancer. The `HealthCheckServiceInstanceListSupplier`
 is provided for that. It regularly verifies if the instances provided by a delegate
 `ServiceInstanceListSupplier` are still alive and only returns the healthy instances,
-unless there are none - then it returns all the retrieved instances.
+unless there are none - then it returns an empty list.
 
 TIP: This mechanism is particularly helpful while using the `SimpleDiscoveryClient`. For the
 clients backed by an actual Service Registry, it's not necessary to use, as we already get
