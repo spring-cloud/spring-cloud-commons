@@ -21,7 +21,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.health.contributor.CompositeHealthContributor;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthContributor;
@@ -80,7 +79,6 @@ public class DiscoveryClientHealthIndicatorTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@EnableConfigurationProperties
 	public static class Config {
 
 		@Bean
