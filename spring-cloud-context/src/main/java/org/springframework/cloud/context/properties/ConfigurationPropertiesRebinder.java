@@ -17,12 +17,17 @@
 package org.springframework.cloud.context.properties;
 
 import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -42,7 +48,14 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration.RefreshProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
@@ -56,6 +69,7 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -71,8 +85,13 @@ import org.springframework.util.StringUtils;
  * racing with an {@link EnvironmentChangeEvent}-triggered {@link #rebind()}) cannot
  * interleave their destroy/reset/re-initialize steps. That does not, however, make the
  * bean safe to read concurrently from other threads while a rebind is in progress: the
- * bean is mutated in place, field by field, so a concurrent reader can observe transient
- * intermediate state. Beans that need a consistent view across a refresh should use
+ * bean is mutated in place, field by field, so a concurrent reader can observe a mix of
+ * previous and new values. What it does not observe is unbound state: a fresh instance is
+ * bound first and its values are then copied into the live bean, so a scalar never passes
+ * through its class-level default, a nested object never through {@code null}, and a
+ * getter-only collection or map is brought to its new contents without being emptied
+ * first (the bean is destroyed, re-autowired and re-initialized afterwards, but not bound
+ * in place a second time). Beans that need a consistent view across a refresh should use
  * {@link RefreshScope} instead, which serializes reads against refreshes via a per-bean
  * {@link java.util.concurrent.locks.ReadWriteLock}.
  *
@@ -108,6 +127,11 @@ public class ConfigurationPropertiesRebinder
 	 * against a gap in either of those checks, or a legitimately very deep object graph.
 	 */
 	private static final int MAX_RESET_DEPTH = 25;
+
+	private static final Set<String> INJECTION_ANNOTATIONS = Set.of(
+			"org.springframework.beans.factory.annotation.Autowired",
+			"org.springframework.beans.factory.annotation.Value", "jakarta.inject.Inject", "javax.inject.Inject",
+			"jakarta.annotation.Resource", "javax.annotation.Resource");
 
 	public ConfigurationPropertiesRebinder(ConfigurationPropertiesBeans beans) {
 		this(beans, Collections.emptySet());
@@ -207,17 +231,11 @@ public class ConfigurationPropertiesRebinder
 							appContext.getAutowireCapableBeanFactory().destroyBean(target);
 						}
 						else {
-							appContext.getAutowireCapableBeanFactory().destroyBean(target);
-							resetBeanToDefaults(target);
-							appContext.getAutowireCapableBeanFactory().autowireBean(target);
-							appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
+							rebindInPlace(target, name, appContext);
 						}
 					}
 					else {
-						appContext.getAutowireCapableBeanFactory().destroyBean(bean);
-						resetBeanToDefaults(bean);
-						appContext.getAutowireCapableBeanFactory().autowireBean(bean);
-						appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
+						rebindInPlace(bean, name, appContext);
 					}
 					return true;
 				}
@@ -238,10 +256,101 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	/**
-	 * Reset bean properties to their class-level defaults so that removed properties do
-	 * not retain stale values after rebinding.
+	 * Rebind the live bean in place. Its new state is bound on a fresh instance first and
+	 * then copied over, so that readers never observe unbound state; the bean is then
+	 * destroyed, re-autowired and re-initialized, without being bound in place a second
+	 * time. A bean that cannot be reset from a fresh instance is destroyed and
+	 * re-initialized as before, which binds it in place.
 	 */
-	private void resetBeanToDefaults(Object bean) {
+	private void rebindInPlace(Object bean, String name, ApplicationContext appContext) throws Exception {
+		Object freshInstance = bindFreshInstance(bean, name, appContext);
+		AutowireCapableBeanFactory beanFactory = appContext.getAutowireCapableBeanFactory();
+		beanFactory.destroyBean(bean);
+		if (freshInstance == null) {
+			beanFactory.autowireBean(bean);
+			beanFactory.initializeBean(bean, name);
+			return;
+		}
+		copyFreshInstance(bean, freshInstance);
+		beanFactory.autowireBean(bean);
+		initializeWithoutBinding(bean, name, beanFactory);
+	}
+
+	/**
+	 * Run the initialization callbacks of the live bean again, as
+	 * {@link AutowireCapableBeanFactory#initializeBean} would, but without
+	 * {@link ConfigurationPropertiesBindingPostProcessor}: the bean already holds the
+	 * state bound on the fresh instance, and binding it in place would clear and refill
+	 * its getter-only collections (Spring Boot's {@code CollectionBinder} merges into an
+	 * existing collection that way), which is exactly the kind of transient state this
+	 * class avoids.
+	 */
+	private void initializeWithoutBinding(Object bean, String name, AutowireCapableBeanFactory beanFactory)
+			throws Exception {
+		if (!(beanFactory instanceof AbstractBeanFactory abstractBeanFactory)) {
+			beanFactory.initializeBean(bean, name);
+			return;
+		}
+		for (BeanPostProcessor processor : abstractBeanFactory.getBeanPostProcessors()) {
+			if (!(processor instanceof ConfigurationPropertiesBindingPostProcessor)
+					&& processor.postProcessBeforeInitialization(bean, name) == null) {
+				return;
+			}
+		}
+		if (bean instanceof InitializingBean initializingBean) {
+			initializingBean.afterPropertiesSet();
+		}
+		invokeInitMethods(bean, name, abstractBeanFactory);
+		for (BeanPostProcessor processor : abstractBeanFactory.getBeanPostProcessors()) {
+			if (processor.postProcessAfterInitialization(bean, name) == null) {
+				return;
+			}
+		}
+	}
+
+	private void invokeInitMethods(Object bean, String name, AbstractBeanFactory beanFactory) {
+		String[] initMethodNames;
+		try {
+			initMethodNames = (beanFactory.getMergedBeanDefinition(name) instanceof AbstractBeanDefinition definition)
+					? definition.getInitMethodNames() : null;
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			return;
+		}
+		if (initMethodNames == null) {
+			return;
+		}
+		for (String initMethodName : initMethodNames) {
+			Method initMethod = ReflectionUtils.findMethod(AopUtils.getTargetClass(bean), initMethodName);
+			if (initMethod != null) {
+				ReflectionUtils.makeAccessible(initMethod);
+				ReflectionUtils.invokeMethod(initMethod, bean);
+			}
+		}
+	}
+
+	/**
+	 * Create a fresh instance of the bean's class and bind it from the
+	 * {@link Environment}, so that its state can replace the live bean's state once the
+	 * live bean has been destroyed. This happens before the live bean is touched: a
+	 * binding failure surfaces as the rebind error and leaves the live bean as it was.
+	 * The instance is not autowired; injected properties are left alone by the copy.
+	 * Returns {@code null} when no trustworthy fresh instance can be created; the live
+	 * bean is then re-bound in place and removed properties keep their stale values.
+	 */
+	private @Nullable Object bindFreshInstance(Object bean, String name, ApplicationContext appContext) {
+		ConfigurationPropertiesBindingPostProcessor binder = appContext
+			.getBeanProvider(ConfigurationPropertiesBindingPostProcessor.class)
+			.getIfAvailable();
+		if (binder == null) {
+			// Without the binder the fresh instance would only carry its class-level
+			// defaults, and copying those onto the live bean would discard its values.
+			if (logger.isDebugEnabled()) {
+				logger.debug("No ConfigurationPropertiesBindingPostProcessor available; skipping property reset "
+						+ "before rebinding");
+			}
+			return null;
+		}
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!hasDefaultConstructor(targetClass)) {
 			// Beans whose no-arg constructor (if any) is not their only constructor
@@ -254,7 +363,7 @@ public class ConfigurationPropertiesRebinder
 				logger.debug("No default constructor for " + targetClass.getName()
 						+ "; skipping property reset before rebinding");
 			}
-			return;
+			return null;
 		}
 		Object freshInstance;
 		try {
@@ -263,9 +372,21 @@ public class ConfigurationPropertiesRebinder
 		catch (Exception ex) {
 			logger.warn("Cannot create default instance of " + targetClass.getName()
 					+ " for reset; skipping property reset", ex);
-			return;
+			return null;
 		}
-		resetProperties(bean, freshInstance, Collections.newSetFromMap(new IdentityHashMap<>()), 0);
+		binder.postProcessBeforeInitialization(freshInstance, name);
+		return freshInstance;
+	}
+
+	/**
+	 * Replace the properties of the live bean with those of the freshly bound instance,
+	 * so that removed properties revert to their defaults while concurrent readers never
+	 * observe the bean's unbound class-level defaults (see gh-1727).
+	 */
+	private void copyFreshInstance(Object bean, @Nullable Object freshInstance) {
+		if (freshInstance != null) {
+			resetProperties(bean, freshInstance, Collections.newSetFromMap(new IdentityHashMap<>()), 0);
+		}
 	}
 
 	/**
@@ -290,7 +411,7 @@ public class ConfigurationPropertiesRebinder
 		return constructors.length == 1 && constructors[0].getParameterCount() == 0;
 	}
 
-	private void resetProperties(Object bean, Object defaults, Set<Object> visited, int depth) {
+	private void resetProperties(Object bean, Object freshInstance, Set<Object> visited, int depth) {
 		// Guard against cyclic object graphs and pathologically deep ones so that
 		// recursion
 		// always terminates; see MAX_RESET_DEPTH.
@@ -298,7 +419,7 @@ public class ConfigurationPropertiesRebinder
 			return;
 		}
 		BeanWrapper target = new BeanWrapperImpl(bean);
-		BeanWrapper defaultsWrapper = new BeanWrapperImpl(defaults);
+		BeanWrapper freshWrapper = new BeanWrapperImpl(freshInstance);
 		for (PropertyDescriptor pd : target.getPropertyDescriptors()) {
 			String propertyName = pd.getName();
 			if ("class".equals(propertyName)) {
@@ -307,60 +428,50 @@ public class ConfigurationPropertiesRebinder
 			try {
 				// A property whose declared type the user excluded is left alone whatever
 				// its accessors look like: a read-only property is not descended into and
-				// a writable one is not overwritten with the default instance's value.
+				// a writable one is not overwritten with the fresh instance's value.
 				if (isNeverReset(pd.getPropertyType())) {
 					continue;
 				}
-				if (target.isWritableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
-					if (target.isReadableProperty(propertyName)
-							&& isNeverReset(target.getPropertyValue(propertyName))) {
+				if (target.isWritableProperty(propertyName)
+						&& (freshWrapper.isReadableProperty(propertyName) || hasField(bean, propertyName))) {
+					// A setter that is injected (for example @Autowired or @Value) is not
+					// a
+					// bound property: the fresh instance is not autowired, so copying it
+					// would null the dependency before it is re-injected.
+					if (isInjected(bean, pd) || (target.isReadableProperty(propertyName)
+							&& isNeverReset(target.getPropertyValue(propertyName)))) {
 						continue;
 					}
-					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
-					Object currentValue = target.isReadableProperty(propertyName)
-							? target.getPropertyValue(propertyName) : null;
+					// A write-only property (a setter without a getter, which the binder
+					// still binds) is read from its backing field on both instances.
+					Object freshValue = readProperty(freshWrapper, freshInstance, propertyName);
+					Object currentValue = readProperty(target, bean, propertyName);
 					// Skip the setter call entirely when there's nothing to change: this
 					// avoids needlessly invoking setters that don't tolerate being called
 					// again with the same value, and setters that reject null are only
 					// ever
 					// invoked when the property actually needs to become null.
-					if (!ObjectUtils.nullSafeEquals(currentValue, defaultValue)) {
+					if (!ObjectUtils.nullSafeEquals(currentValue, freshValue)) {
 						try {
-							target.setPropertyValue(propertyName, defaultValue);
+							target.setPropertyValue(propertyName, freshValue);
 						}
 						catch (Exception ex) {
 							warnCannotReset(bean, propertyName, ex);
 						}
 					}
 				}
-				else if (target.isReadableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
+				else if (target.isReadableProperty(propertyName) && freshWrapper.isReadableProperty(propertyName)) {
 					Object value = target.getPropertyValue(propertyName);
-					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
+					Object freshValue = freshWrapper.getPropertyValue(propertyName);
 					if (value instanceof Collection collection) {
-						try {
-							collection.clear();
-							if (defaultValue instanceof Collection defaultCollection) {
-								collection.addAll(defaultCollection);
-							}
-						}
-						catch (UnsupportedOperationException ex) {
-							warnCannotReset(bean, propertyName, ex);
-						}
+						replaceContents(bean, propertyName, collection, freshValue);
 					}
 					else if (value instanceof Map map) {
-						try {
-							map.clear();
-							if (defaultValue instanceof Map defaultMap) {
-								map.putAll(defaultMap);
-							}
-						}
-						catch (UnsupportedOperationException ex) {
-							warnCannotReset(bean, propertyName, ex);
-						}
+						replaceContents(bean, propertyName, map, freshValue);
 					}
-					else if (value != null && defaultValue != null && isResettableNestedType(value.getClass())
+					else if (value != null && freshValue != null && isResettableNestedType(value.getClass())
 							&& isStableInstance(target, propertyName, value)) {
-						resetProperties(value, defaultValue, visited, depth + 1);
+						resetProperties(value, freshValue, visited, depth + 1);
 					}
 				}
 			}
@@ -390,10 +501,118 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	/**
+	 * Bring a getter-only collection to the contents of the fresh instance without ever
+	 * leaving it empty: nothing is touched when the contents are already equal; a list is
+	 * updated element by element, so a reader iterating over it is not disturbed unless
+	 * its size changes; any other collection drops only the removed elements before the
+	 * new ones are added.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void replaceContents(Object bean, String propertyName, Collection collection, @Nullable Object freshValue) {
+		Collection fresh = (freshValue instanceof Collection freshCollection) ? freshCollection
+				: Collections.emptyList();
+		if (collection.equals(fresh)) {
+			return;
+		}
+		try {
+			if (collection instanceof List list) {
+				replaceElements(list, fresh);
+			}
+			else {
+				collection.retainAll(fresh);
+				collection.addAll(fresh);
+			}
+		}
+		catch (UnsupportedOperationException ex) {
+			warnCannotReset(bean, propertyName, ex);
+		}
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private static void replaceElements(List list, Collection fresh) {
+		int index = 0;
+		Iterator iterator = fresh.iterator();
+		while (iterator.hasNext() && index < list.size()) {
+			Object element = iterator.next();
+			if (!ObjectUtils.nullSafeEquals(list.get(index), element)) {
+				list.set(index, element);
+			}
+			index++;
+		}
+		if (iterator.hasNext()) {
+			while (iterator.hasNext()) {
+				list.add(iterator.next());
+			}
+		}
+		else if (index < list.size()) {
+			list.subList(index, list.size()).clear();
+		}
+	}
+
+	/**
+	 * Bring a getter-only map to the contents of the fresh instance without ever leaving
+	 * it empty: nothing is touched when the contents are already equal, and otherwise
+	 * only the removed keys are dropped before the fresh entries are put.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void replaceContents(Object bean, String propertyName, Map map, @Nullable Object freshValue) {
+		Map fresh = (freshValue instanceof Map freshMap) ? freshMap : Collections.emptyMap();
+		if (map.equals(fresh)) {
+			return;
+		}
+		try {
+			map.keySet().retainAll(fresh.keySet());
+			map.putAll(fresh);
+		}
+		catch (UnsupportedOperationException ex) {
+			warnCannotReset(bean, propertyName, ex);
+		}
+	}
+
+	private static boolean hasField(Object bean, String propertyName) {
+		return ReflectionUtils.findField(AopUtils.getTargetClass(bean), propertyName) != null;
+	}
+
+	private static @Nullable Object readProperty(BeanWrapper wrapper, Object instance, String propertyName) {
+		if (wrapper.isReadableProperty(propertyName)) {
+			return wrapper.getPropertyValue(propertyName);
+		}
+		Field field = ReflectionUtils.findField(AopUtils.getTargetClass(instance), propertyName);
+		if (field == null) {
+			return null;
+		}
+		ReflectionUtils.makeAccessible(field);
+		return ReflectionUtils.getField(field, instance);
+	}
+
+	/**
+	 * Whether the given property is a dependency injection point (an annotated setter or
+	 * backing field, for example {@code @Autowired} or {@code @Value}) rather than a
+	 * bound property.
+	 */
+	private boolean isInjected(Object bean, PropertyDescriptor pd) {
+		Method writeMethod = pd.getWriteMethod();
+		if (writeMethod != null && isInjected(writeMethod.getAnnotations())) {
+			return true;
+		}
+		Field field = ReflectionUtils.findField(AopUtils.getTargetClass(bean), pd.getName());
+		return field != null && isInjected(field.getAnnotations());
+	}
+
+	private static boolean isInjected(Annotation[] annotations) {
+		for (Annotation annotation : annotations) {
+			if (INJECTION_ANNOTATIONS.contains(annotation.annotationType().getName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Log, at most once per bean type and property, that a property could not be reset to
-	 * its default value and may therefore retain a stale value after this and future
-	 * refreshes. The full exception is only logged at DEBUG, on every occurrence, to
-	 * avoid spamming the log at the default level while still making the failure
+	 * its freshly bound value and may therefore retain a stale value after this and
+	 * future refreshes. The full exception is only logged at DEBUG, on every occurrence,
+	 * to avoid spamming the log at the default level while still making the failure
 	 * discoverable.
 	 */
 	private void warnCannotReset(Object bean, String propertyName, Exception ex) {
