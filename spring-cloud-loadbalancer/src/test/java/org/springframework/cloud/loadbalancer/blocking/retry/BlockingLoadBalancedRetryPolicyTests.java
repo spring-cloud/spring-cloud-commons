@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
  * Tests for {@link BlockingLoadBalancedRetryPolicy}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Kumar Prabhash Anand
  */
 class BlockingLoadBalancedRetryPolicyTests {
 
@@ -82,6 +83,19 @@ class BlockingLoadBalancedRetryPolicyTests {
 		verify(context).setServiceInstance(any());
 		assertThat(retryPolicy.canRetrySameServer(context)).isTrue();
 		assertThat(retryPolicy.canRetryNextServer(context)).isFalse();
+	}
+
+	@Test
+	void shouldRetryOnQuery() {
+		when(httpRequest.getMethod()).thenReturn(HttpMethod.QUERY);
+		properties.getRetry().setMaxRetriesOnSameServiceInstance(1);
+		BlockingLoadBalancedRetryPolicy retryPolicy = getRetryPolicy(properties);
+
+		boolean canRetry = retryPolicy.canRetry(context);
+
+		assertThat(canRetry).isTrue();
+		assertThat(retryPolicy.canRetrySameServer(context)).isTrue();
+		assertThat(retryPolicy.canRetryNextServer(context)).isTrue();
 	}
 
 	@Test

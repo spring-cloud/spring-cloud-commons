@@ -24,6 +24,7 @@ import org.springframework.http.HttpMethod;
  * The default implementation of {@link LoadBalancerRetryPolicy}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Kumar Prabhash Anand
  * @since 3.0.0
  */
 public class RetryableExchangeFilterFunctionLoadBalancerRetryPolicy implements LoadBalancerRetryPolicy {
@@ -63,7 +64,8 @@ public class RetryableExchangeFilterFunctionLoadBalancerRetryPolicy implements L
 
 	@Override
 	public boolean canRetryOnMethod(HttpMethod method) {
-		return HttpMethod.GET.equals(method) || properties.getRetry().isRetryOnAllOperations();
+		return HttpMethod.GET.equals(method) || HttpMethod.QUERY.equals(method)
+				|| properties.getRetry().isRetryOnAllOperations();
 	}
 
 	static class Factory implements LoadBalancerRetryPolicy.Factory {
