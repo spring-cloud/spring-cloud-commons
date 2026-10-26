@@ -47,6 +47,7 @@ import static org.mockito.Mockito.when;
  * Tests for {@link RetryableLoadBalancerExchangeFilterFunction}.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Kumar Prabhash Anand
  * @since 3.0.0
  */
 @SuppressWarnings("unchecked")
@@ -96,6 +97,20 @@ class RetryableLoadBalancerExchangeFilterFunctionTests {
 	@Test
 	void shouldRetryOnSameAndNextServiceInstanceOnRetryableStatusCode() {
 		when(clientRequest.method()).thenReturn(HttpMethod.GET);
+		when(clientResponse.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
+		when(next.exchange(any())).thenReturn(Mono.just(clientResponse));
+
+		filterFunction.filter(clientRequest, next).subscribe();
+
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+		inOrder.verify(factory, times(1)).getInstance(any());
+		inOrder.verify(next, times(2)).exchange(any());
+	}
+
+	@Test
+	void shouldRetryOnSameAndNextServiceInstanceOnRetryableStatusCodeForQuery() {
+		when(clientRequest.method()).thenReturn(HttpMethod.QUERY);
 		when(clientResponse.statusCode()).thenReturn(HttpStatus.NOT_FOUND);
 		when(next.exchange(any())).thenReturn(Mono.just(clientResponse));
 

@@ -28,6 +28,7 @@ import org.springframework.http.HttpMethod;
  * to achieve feature-parity.
  *
  * @author Olga Maciaszek-Sharma
+ * @author Kumar Prabhash Anand
  * @since 2.2.6
  */
 public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy {
@@ -44,7 +45,8 @@ public class BlockingLoadBalancedRetryPolicy implements LoadBalancedRetryPolicy 
 
 	public boolean canRetry(LoadBalancedRetryContext context) {
 		HttpMethod method = context.getRequest().getMethod();
-		return HttpMethod.GET.equals(method) || properties.getRetry().isRetryOnAllOperations();
+		return HttpMethod.GET.equals(method) || HttpMethod.QUERY.equals(method)
+				|| properties.getRetry().isRetryOnAllOperations();
 	}
 
 	@Override

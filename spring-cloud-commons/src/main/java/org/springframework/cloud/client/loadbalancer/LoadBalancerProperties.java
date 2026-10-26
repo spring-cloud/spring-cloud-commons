@@ -372,7 +372,7 @@ public class LoadBalancerProperties {
 
 		/**
 		 * Indicates retries should be attempted on operations other than
-		 * {@link HttpMethod#GET}.
+		 * {@link HttpMethod#GET} and {@link HttpMethod#QUERY}.
 		 */
 		private boolean retryOnAllOperations = false;
 
