@@ -188,6 +188,17 @@ public class ConfigurationPropertiesRebinder
 		try {
 			try {
 				Object bean = appContext.getBean(name);
+				if (bean != null && !AopUtils.isAopProxy(bean)) {
+					// A BeanPostProcessor may have replaced the bean with a wrapper after
+					// the properties were bound (for example Boot's lazy connection fetch
+					// wraps the DataSource). Rebind what the properties were bound to,
+					// not
+					// the wrapper, which could not be bound to the bean's declared type.
+					Object bound = this.beans.getInstance(name);
+					if (bound != null) {
+						bean = bound;
+					}
+				}
 				if (bean != null) {
 					Class<?> targetClass = AopUtils.getTargetClass(bean);
 					// TODO: determine a more general approach to fix this.
