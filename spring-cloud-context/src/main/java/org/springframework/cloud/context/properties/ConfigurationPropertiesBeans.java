@@ -106,4 +106,17 @@ public class ConfigurationPropertiesBeans implements BeanPostProcessor, Applicat
 		return new HashSet<>(this.beans.keySet());
 	}
 
+	/**
+	 * Get the instance that the properties of the named bean were bound to. This can
+	 * differ from the bean the context exposes under that name when a later
+	 * {@link BeanPostProcessor} replaced it with a wrapper.
+	 * @param beanName the name of the bean
+	 * @return the instance the properties were bound to, or {@code null} if the bean is
+	 * not known
+	 */
+	Object getInstance(String beanName) {
+		ConfigurationPropertiesBean propertiesBean = this.beans.get(beanName);
+		return (propertiesBean != null) ? propertiesBean.getInstance() : null;
+	}
+
 }
