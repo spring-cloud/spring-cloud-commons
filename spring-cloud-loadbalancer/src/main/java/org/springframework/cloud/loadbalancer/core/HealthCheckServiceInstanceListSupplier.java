@@ -38,8 +38,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * A {@link ServiceInstanceListSupplier} implementation that verifies whether the
- * instances are alive and only returns the healthy one, unless there are none. Uses a
- * user-provided function to ping the <code>health</code> endpoint of the instances.
+ * instances are alive and only returns the healthy one. If there are none, returns an
+ * empty list. Uses a user-provided function to ping the <code>health</code> endpoint of
+ * the instances.
  *
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko

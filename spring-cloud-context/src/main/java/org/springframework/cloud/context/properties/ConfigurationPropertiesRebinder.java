@@ -40,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.framework.Advised;
+import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
@@ -212,8 +213,20 @@ public class ConfigurationPropertiesRebinder
 		try {
 			try {
 				Object bean = appContext.getBean(name);
+				if (bean != null && !AopUtils.isAopProxy(bean)) {
+					// A BeanPostProcessor may have replaced the bean with a wrapper after
+					// the properties were bound (for example Boot's lazy connection fetch
+					// wraps the DataSource). Rebind what the properties were bound to,
+					// not
+					// the wrapper, which could not be bound to the bean's declared type.
+					Object bound = this.beans.getInstance(name);
+					if (bound != null) {
+						bean = bound;
+					}
+				}
 				if (bean != null) {
-					Class<?> targetClass = AopUtils.getTargetClass(bean);
+					// The class behind every proxy layer, not just the outermost one
+					Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
 					// TODO: determine a more general approach to fix this.
 					// see
 					// https://github.com/spring-cloud/spring-cloud-commons/issues/571
@@ -227,7 +240,8 @@ public class ConfigurationPropertiesRebinder
 							Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(targetClass);
 							Object freshTarget = AopUtils.isAopProxy(freshBean) ? ProxyUtils.getTargetObject(freshBean)
 									: freshBean;
-							advised.setTargetSource(new SingletonTargetSource(freshTarget));
+							// Keep the advice of every proxy layer
+							innermostAdvised(advised).setTargetSource(new SingletonTargetSource(freshTarget));
 							appContext.getAutowireCapableBeanFactory().destroyBean(target);
 						}
 						else {
@@ -253,6 +267,20 @@ public class ConfigurationPropertiesRebinder
 		finally {
 			lock.unlock();
 		}
+	}
+
+	/**
+	 * Find the innermost proxy of a, possibly nested, chain of AOP proxies: the one whose
+	 * target is not itself a proxy.
+	 */
+	private Advised innermostAdvised(Advised advised) throws Exception {
+		Advised current = advised;
+		Object next = current.getTargetSource().getTarget();
+		while (AopUtils.isAopProxy(next) && next instanceof Advised nested) {
+			current = nested;
+			next = current.getTargetSource().getTarget();
+		}
+		return current;
 	}
 
 	/**

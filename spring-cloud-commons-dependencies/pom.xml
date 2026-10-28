@@ -6,16 +6,16 @@
 	<parent>
 		<artifactId>spring-cloud-dependencies-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
-		<version>5.0.4-SNAPSHOT</version>
+		<version>5.0.5-SNAPSHOT</version>
 		<relativePath/>
 	</parent>
 	<artifactId>spring-cloud-commons-dependencies</artifactId>
-	<version>5.0.4-SNAPSHOT</version>
+	<version>5.0.5-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>spring-cloud-commons-dependencies</name>
 	<description>Spring Cloud Commons Dependencies</description>
 	<properties>
-		<okhttp.version>4.12.0</okhttp.version>
+		<okhttp.version>4.12.1</okhttp.version>
 		<spring-retry.version>2.0.13</spring-retry.version>
 		<bouncycastle.version>1.85.2</bouncycastle.version>
 	</properties>
