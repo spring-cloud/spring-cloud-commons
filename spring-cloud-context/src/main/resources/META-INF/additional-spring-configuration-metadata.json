@@ -1,6 +1,6 @@
 {
 	"properties": [
-	    {
+			{
 			"name": "management.health.refresh.enabled",
 			"type": "java.lang.Boolean",
 			"description": "Enable the health endpoint for the refresh scope.",
@@ -65,6 +65,12 @@
 			"type": "java.lang.Boolean",
 			"description": "Enable refreshing context on start.",
 			"defaultValue": true
+		},
+		{
+			"defaultValue": "true",
+			"name": "spring.cloud.config.allow-override",
+			"description": "Flag to indicate that `PropertySourceBootstrapProperties#isOverrideSystemProperties()` can be used. Set to false to prevent users from changing the default accidentally. Default true.",
+			"type": "java.lang.Boolean"
 		}
 	]
 }
