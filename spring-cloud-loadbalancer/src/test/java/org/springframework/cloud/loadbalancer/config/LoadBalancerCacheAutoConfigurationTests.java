@@ -29,7 +29,11 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.SpringCacheBasedLoadBalancerCacheManager;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -54,6 +58,20 @@ class LoadBalancerCacheAutoConfigurationTests {
 	}
 
 	@Test
+	void shouldUseRedisCacheManagerForLoadBalancerCaching() {
+		ApplicationContextRunner contextRunner = baseApplicationRunner()
+			.withUserConfiguration(RedisTestConfiguration.class)
+			.withPropertyValues("spring.cache.type=redis");
+
+		contextRunner.run(context -> {
+			assertThat(context).hasBean("redisLoadBalancerCacheManager");
+			assertThat(context.getBean("redisLoadBalancerCacheManager"))
+				.isInstanceOf(SpringCacheBasedLoadBalancerCacheManager.class);
+			assertThat(context.getBeansOfType(LoadBalancerCacheManager.class)).hasSize(1);
+		});
+	}
+
+	@Test
 	void caffeineLoadBalancerCacheShouldNotOverrideCacheTypeSetting() {
 		ApplicationContextRunner contextRunner = baseApplicationRunner().withUserConfiguration(TestConfiguration.class)
 			.withPropertyValues("spring.cache.type=none");
@@ -63,7 +81,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 			assertThat(context.getBean("caffeineLoadBalancerCacheManager")).isInstanceOf(CaffeineCacheManager.class);
 			assertThat(context.getBeansOfType(CacheManager.class).get("cacheManager"))
 				.isInstanceOf(NoOpCacheManager.class);
-
 		});
 	}
 
@@ -79,7 +96,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 			assertThat(((CacheManager) context.getBean("caffeineLoadBalancerCacheManager")).getCacheNames())
 				.contains("CachingServiceInstanceListSupplierCache");
 		});
-
 	}
 
 	@Test
@@ -138,7 +154,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 				.isInstanceOf(DefaultLoadBalancerCacheManager.class);
 			assertThat(context.getBeansOfType(CacheManager.class).get("cacheManager"))
 				.isInstanceOf(NoOpCacheManager.class);
-
 		});
 	}
 
@@ -154,7 +169,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames())
 				.contains("CachingServiceInstanceListSupplierCache");
 		});
-
 	}
 
 	@Test
@@ -197,6 +211,17 @@ class LoadBalancerCacheAutoConfigurationTests {
 	@Configuration(proxyBeanMethods = false)
 	@EnableCaching
 	static class TestConfiguration {
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class RedisTestConfiguration {
+
+		@Bean
+		@Primary
+		CacheManager cacheManager() {
+			return new ConcurrentMapCacheManager();
+		}
 
 	}
 

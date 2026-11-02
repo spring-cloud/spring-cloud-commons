@@ -34,6 +34,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.AnyNestedCondition;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
@@ -47,10 +48,14 @@ import org.springframework.cloud.loadbalancer.cache.CaffeineBasedLoadBalancerCac
 import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheProperties;
+import org.springframework.cloud.loadbalancer.cache.SpringCacheBasedLoadBalancerCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.ClassUtils;
 
@@ -64,7 +69,7 @@ import org.springframework.util.ClassUtils;
  * @see CacheManager
  * @see CacheAutoConfiguration
  * @see CacheAspectSupport
- * @see <a href="https://github.com/ben-manes/caffeine>Caffeine</a>
+ * @see <a href="https://github.com/ben-manes/caffeine">Caffeine</a>
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass({ CacheManager.class, CacheAutoConfiguration.class })
@@ -74,6 +79,20 @@ import org.springframework.util.ClassUtils;
 public class LoadBalancerCacheAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
+	@ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
+	@ConditionalOnBean(CacheManager.class)
+	protected static class RedisLoadBalancerCacheManagerConfiguration {
+
+		@Bean(autowireCandidate = false)
+		@ConditionalOnMissingBean
+		LoadBalancerCacheManager redisLoadBalancerCacheManager(CacheManager cacheManager) {
+			return new SpringCacheBasedLoadBalancerCacheManager(cacheManager);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	@Conditional(OnSpringRedisCacheTypeMissingCondition.class)
 	@ConditionalOnClass({ Caffeine.class, CaffeineCacheManager.class })
 	protected static class CaffeineLoadBalancerCacheManagerConfiguration {
 
@@ -86,7 +105,7 @@ public class LoadBalancerCacheAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@Conditional(OnCaffeineCacheMissingCondition.class)
+	@Conditional({ OnSpringRedisCacheTypeMissingCondition.class, OnCaffeineCacheMissingCondition.class })
 	@ConditionalOnClass(ConcurrentMapWithTimedEviction.class)
 	protected static class DefaultLoadBalancerCacheManagerConfiguration {
 
@@ -99,6 +118,15 @@ public class LoadBalancerCacheAutoConfiguration {
 		@Bean
 		LoadBalancerCaffeineWarnLogger caffeineWarnLogger() {
 			return new LoadBalancerCaffeineWarnLogger();
+		}
+
+	}
+
+	static class OnSpringRedisCacheTypeMissingCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return !"redis".equalsIgnoreCase(context.getEnvironment().getProperty("spring.cache.type"));
 		}
 
 	}
