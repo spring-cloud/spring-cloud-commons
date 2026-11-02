@@ -188,8 +188,18 @@ If a `@ConfigurationProperties` bean's class declares a no-argument constructor 
 This is deliberate: instantiating such a class through its no-argument constructor would not reproduce the defaults the bean was actually constructed with, and resetting to it would wipe out values that no property source ever carried.
 
 NOTE: Re-binding mutates the `@ConfigurationProperties` bean's fields in place, destroying and re-initializing the same instance rather than swapping it out for a new one.
-Concurrent rebinds of the same bean are serialized internally, but this does not make the bean safe to read from other threads while a rebind is in progress: a concurrent reader can observe transient, partially-updated state (for example, a property briefly reset to its class-level default before the new value is applied).
+Concurrent rebinds of the same bean are serialized internally.
+To revert properties that were removed from the `Environment` to their defaults, a new instance of the bean's class is bound first and its values are then copied onto the live bean, so a concurrent reader never sees a bound property reset to its class-level default (for example a `null` nested object or a `0`).
+Getter-only collections and maps are updated in place instead of being cleared and refilled.
+This does not make the bean safe to read as a whole while a rebind is in progress: a reader can still see a mix of old and new values.
 If your application needs a consistent view of a bean's properties across a refresh, use `@RefreshScope` instead, which serializes reads against refreshes for beans in that scope.
+
+NOTE: Known limitation: a `Collection` property (such as a `List` or `Set`) that has a value in the `Environment` can be briefly empty during a rebind.
+After the new values are copied onto the live bean, the bean is initialized again, and Spring Boot's binder updates an existing, modifiable collection by clearing it and then adding the bound elements.
+A concurrent reader can therefore observe an empty collection for a short time.
+This happens inside Spring Boot's binding and is not something the rebinder can avoid.
+A `Map` is not affected, because Spring Boot adds to an existing map without clearing it first.
+If readers must never see such a collection empty, use `@RefreshScope`.
 
 Re-binding `@ConfigurationProperties` does not cover another large class of use cases, where you need more control over the refresh and where you need a change to be atomic over the whole `ApplicationContext`.
 To address those concerns, we have `@RefreshScope`.

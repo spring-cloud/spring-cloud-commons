@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,6 +45,7 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesBindingPostProcessor;
 import org.springframework.cloud.autoconfigure.RefreshAutoConfiguration.RefreshProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.context.environment.EnvironmentChangeEvent;
@@ -70,12 +72,26 @@ import org.springframework.util.StringUtils;
  * Rebinding a given bean is serialized against other concurrent rebinds of that same
  * bean, so two overlapping refreshes (for example a manual {@link #rebind(String)} call
  * racing with an {@link EnvironmentChangeEvent}-triggered {@link #rebind()}) cannot
- * interleave their destroy/reset/re-initialize steps. That does not, however, make the
- * bean safe to read concurrently from other threads while a rebind is in progress: the
- * bean is mutated in place, field by field, so a concurrent reader can observe transient
- * intermediate state. Beans that need a consistent view across a refresh should use
+ * interleave their destroy/reset/re-initialize steps.
+ *
+ * <p>
+ * To revert properties that were removed from the {@link Environment} to their defaults
+ * without exposing those defaults to other threads, a new instance of the bean's class is
+ * bound first and its state is then copied onto the live bean. A concurrent reader
+ * therefore never sees a bound property reset to its class-level default (for example a
+ * {@code null} nested object or a {@code 0}), and getter-only collections and maps are
+ * updated in place rather than being cleared and refilled. The bean is still mutated in
+ * place, field by field, so a reader can observe a mix of old and new values while a
+ * rebind is in progress. Beans that need a consistent view across a refresh should use
  * {@link RefreshScope} instead, which serializes reads against refreshes via a per-bean
  * {@link java.util.concurrent.locks.ReadWriteLock}.
+ *
+ * <p>
+ * Known limitation: a collection property that has a value in the {@link Environment} can
+ * be briefly empty during a rebind. The bean is initialized again after the new state has
+ * been copied onto it, and Spring Boot's binder updates an existing, modifiable
+ * collection by clearing it and then adding the bound elements. That happens inside
+ * Spring Boot's binding and cannot be avoided here. Maps are not affected.
  *
  * @author Dave Syer
  * @author Yanming Zhou
@@ -221,15 +237,17 @@ public class ConfigurationPropertiesRebinder
 							appContext.getAutowireCapableBeanFactory().destroyBean(target);
 						}
 						else {
+							Object boundDefaults = bindFreshInstance(target, name, appContext);
 							appContext.getAutowireCapableBeanFactory().destroyBean(target);
-							resetBeanToDefaults(target);
+							resetBeanToDefaults(target, boundDefaults);
 							appContext.getAutowireCapableBeanFactory().autowireBean(target);
 							appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
 						}
 					}
 					else {
+						Object boundDefaults = bindFreshInstance(bean, name, appContext);
 						appContext.getAutowireCapableBeanFactory().destroyBean(bean);
-						resetBeanToDefaults(bean);
+						resetBeanToDefaults(bean, boundDefaults);
 						appContext.getAutowireCapableBeanFactory().autowireBean(bean);
 						appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
 					}
@@ -266,10 +284,17 @@ public class ConfigurationPropertiesRebinder
 	}
 
 	/**
-	 * Reset bean properties to their class-level defaults so that removed properties do
-	 * not retain stale values after rebinding.
+	 * Create a new instance of the bean's class and bind it from the {@link Environment},
+	 * <em>without touching the live bean</em>. The result is what the live bean should
+	 * look like after rebinding: removed properties carry their class-level defaults and
+	 * everything else carries its freshly bound value. Applying it to the live bean (see
+	 * {@link #resetBeanToDefaults}) therefore never exposes the unbound defaults to
+	 * concurrent readers (gh-1727), and a binding failure here leaves the live bean as it
+	 * was.
+	 * @return the bound instance, or {@code null} if one cannot be produced, in which
+	 * case the live bean is simply re-bound in place
 	 */
-	private void resetBeanToDefaults(Object bean) {
+	private Object bindFreshInstance(Object bean, String name, ApplicationContext appContext) {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!hasDefaultConstructor(targetClass)) {
 			// Beans whose no-arg constructor (if any) is not their only constructor
@@ -282,7 +307,18 @@ public class ConfigurationPropertiesRebinder
 				logger.debug("No default constructor for " + targetClass.getName()
 						+ "; skipping property reset before rebinding");
 			}
-			return;
+			return null;
+		}
+		ConfigurationPropertiesBindingPostProcessor binder;
+		try {
+			binder = appContext.getBean(ConfigurationPropertiesBindingPostProcessor.class);
+		}
+		catch (BeansException ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("No ConfigurationPropertiesBindingPostProcessor available; skipping property reset of "
+						+ targetClass.getName());
+			}
+			return null;
 		}
 		Object freshInstance;
 		try {
@@ -291,9 +327,36 @@ public class ConfigurationPropertiesRebinder
 		catch (Exception ex) {
 			logger.warn("Cannot create default instance of " + targetClass.getName()
 					+ " for reset; skipping property reset", ex);
-			return;
+			return null;
 		}
-		resetProperties(bean, freshInstance, Collections.newSetFromMap(new IdentityHashMap<>()), 0);
+		// Deliberately autowire the throw-away instance, even though it is only used as a
+		// source of values. The fresh instance is later copied onto the live bean
+		// property by property (see resetProperties), and anything that is injected
+		// through a writable property (for example an @Autowired setter) would be null
+		// on an un-autowired instance. Copying that null would wipe the live bean's
+		// collaborator and leave it null until the live bean is autowired again, which
+		// reopens the very window (gh-1727) this method exists to close. With the
+		// instance autowired, the copy writes the same collaborator that is already
+		// there, which resetProperties skips as "nothing to change". The cost is one
+		// extra round of dependency injection per rebind; only autowireBean is called,
+		// so injection happens but no initialization callbacks (afterPropertiesSet,
+		// @PostConstruct, init methods) run on the instance.
+		appContext.getAutowireCapableBeanFactory().autowireBean(freshInstance);
+		// Only the binding post-processor runs, so no other post-processor or lifecycle
+		// callback sees the throw-away instance. A binding failure propagates before the
+		// live bean has been touched.
+		binder.postProcessBeforeInitialization(freshInstance, name);
+		return freshInstance;
+	}
+
+	/**
+	 * Copy the state of a freshly bound instance onto the live bean, so that removed
+	 * properties do not retain stale values after rebinding.
+	 */
+	private void resetBeanToDefaults(Object bean, Object boundDefaults) {
+		if (boundDefaults != null) {
+			resetProperties(bean, boundDefaults, Collections.newSetFromMap(new IdentityHashMap<>()), 0);
+		}
 	}
 
 	/**
@@ -366,10 +429,7 @@ public class ConfigurationPropertiesRebinder
 					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
 					if (value instanceof Collection collection) {
 						try {
-							collection.clear();
-							if (defaultValue instanceof Collection defaultCollection) {
-								collection.addAll(defaultCollection);
-							}
+							mergeCollection(collection, defaultValue instanceof Collection c ? c : null);
 						}
 						catch (UnsupportedOperationException ex) {
 							warnCannotReset(bean, propertyName, ex);
@@ -377,10 +437,7 @@ public class ConfigurationPropertiesRebinder
 					}
 					else if (value instanceof Map map) {
 						try {
-							map.clear();
-							if (defaultValue instanceof Map defaultMap) {
-								map.putAll(defaultMap);
-							}
+							mergeMap(map, defaultValue instanceof Map m ? m : null);
 						}
 						catch (UnsupportedOperationException ex) {
 							warnCannotReset(bean, propertyName, ex);
@@ -399,6 +456,56 @@ public class ConfigurationPropertiesRebinder
 				}
 			}
 		}
+	}
+
+	/**
+	 * Make a getter-only collection hold the same elements as {@code source} without ever
+	 * passing through an empty state, which a concurrent reader would otherwise observe
+	 * (gh-1727). The new elements are added before the stale ones are removed, so a
+	 * reader sees the old elements, then old and new, then the new ones.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void mergeCollection(Collection target, Collection source) {
+		if (source == null || source.isEmpty()) {
+			target.clear();
+			return;
+		}
+		if (target == source || (target instanceof List || target instanceof Set) && target.equals(source)) {
+			return;
+		}
+		if (target instanceof List list) {
+			int stale = list.size();
+			list.addAll(source);
+			list.subList(0, stale).clear();
+		}
+		else if (target instanceof Set) {
+			target.addAll(source);
+			target.retainAll(source);
+		}
+		else {
+			// No way to tell old from new elements in other collection types (they may
+			// hold duplicates), so fall back to replacing the contents.
+			target.clear();
+			target.addAll(source);
+		}
+	}
+
+	/**
+	 * Make a getter-only map hold the same entries as {@code source} without ever passing
+	 * through an empty state: new and changed entries are put before removed keys are
+	 * dropped.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void mergeMap(Map target, Map source) {
+		if (source == null || source.isEmpty()) {
+			target.clear();
+			return;
+		}
+		if (target == source || target.equals(source)) {
+			return;
+		}
+		target.putAll(source);
+		target.keySet().retainAll(source.keySet());
 	}
 
 	/**
