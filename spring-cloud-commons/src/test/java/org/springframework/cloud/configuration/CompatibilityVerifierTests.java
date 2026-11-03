@@ -19,13 +19,13 @@ package org.springframework.cloud.configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
@@ -50,13 +50,9 @@ public class CompatibilityVerifierTests {
 		list.add(() -> VerificationResult.notCompatible("Wrong JDK version", "Use JDK 25"));
 		CompositeCompatibilityVerifier verifier = new CompositeCompatibilityVerifier(list);
 
-		try {
-			verifier.verifyDependencies();
-			BDDAssertions.fail("should fail");
-		}
-		catch (CompatibilityNotMetException ex) {
-			then(ex.results).hasSize(2);
-		}
+		assertThatThrownBy(verifier::verifyDependencies)
+				.isInstanceOf(CompatibilityNotMetException.class)
+				.satisfies(ex -> then(((CompatibilityNotMetException) ex).results).hasSize(2));
 	}
 
 }

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.configuration;
 
-import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
@@ -25,6 +24,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.NestedExceptionUtils;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
@@ -34,15 +34,13 @@ public class CompatibilityVerifierFailureAutoConfigurationTests {
 
 	@Test
 	public void contextFailsToLoad() {
-		try {
-			SpringApplication.run(TestConfiguration.class,
-					"--spring.cloud.compatibility-verifier.compatible-boot-versions=1.2.x,1.3.x");
-			BDDAssertions.fail("should throw exception");
-		}
-		catch (BeanCreationException ex) {
-			Throwable cause = NestedExceptionUtils.getRootCause(ex);
-			then(((CompatibilityNotMetException) cause).results).hasSize(1);
-		}
+		assertThatThrownBy(() -> SpringApplication.run(TestConfiguration.class,
+				"--spring.cloud.compatibility-verifier.compatible-boot-versions=1.2.x,1.3.x"))
+				.isInstanceOf(BeanCreationException.class)
+				.satisfies(ex -> {
+					Throwable cause = NestedExceptionUtils.getRootCause(ex);
+					then(((CompatibilityNotMetException) cause).results).hasSize(1);
+				});
 	}
 
 	@Configuration(proxyBeanMethods = false)
