@@ -43,9 +43,9 @@ public class SimpleReactiveDiscoveryClientConfigurations {
 
 		protected final SimpleReactiveDiscoveryProperties simple = new SimpleReactiveDiscoveryProperties();
 
-		protected final InetUtils inet;
+		protected final ObjectProvider<InetUtils> inet;
 
-		SimpleReactiveDiscoveryClientConfiguration(InetUtils inet) {
+		SimpleReactiveDiscoveryClientConfiguration(ObjectProvider<InetUtils> inet) {
 			this.inet = inet;
 		}
 
@@ -61,7 +61,8 @@ public class SimpleReactiveDiscoveryClientConfigurations {
 		public SimpleReactiveDiscoveryProperties simpleReactiveDiscoveryProperties(
 				@Value("${spring.application.name:application}") String serviceId) {
 			simple.getLocal().setServiceId(serviceId);
-			simple.getLocal().setHost(inet.findFirstNonLoopbackHostInfo().getHostname());
+			inet.ifAvailable(
+					(inetUtils) -> simple.getLocal().setHost(inetUtils.findFirstNonLoopbackHostInfo().getHostname()));
 			simple.getLocal().setPort(findPort());
 			return simple;
 		}
@@ -76,7 +77,7 @@ public class SimpleReactiveDiscoveryClientConfigurations {
 	@ConditionalOnMissingClass("org.springframework.boot.web.server.context.WebServerInitializedEvent")
 	static class StandardSimpleReactiveDiscoveryClientConfiguration extends SimpleReactiveDiscoveryClientConfiguration {
 
-		StandardSimpleReactiveDiscoveryClientConfiguration(InetUtils inet) {
+		StandardSimpleReactiveDiscoveryClientConfiguration(ObjectProvider<InetUtils> inet) {
 			super(inet);
 		}
 
@@ -91,7 +92,7 @@ public class SimpleReactiveDiscoveryClientConfigurations {
 
 		private int port;
 
-		WebApplicationSimpleReactiveDiscoveryClientConfiguration(InetUtils inet,
+		WebApplicationSimpleReactiveDiscoveryClientConfiguration(ObjectProvider<InetUtils> inet,
 				ObjectProvider<ServerProperties> serverProperties) {
 			super(inet);
 			this.serverProperties = serverProperties;
@@ -101,7 +102,8 @@ public class SimpleReactiveDiscoveryClientConfigurations {
 		public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
 			port = webServerInitializedEvent.getWebServer().getPort();
 			if (port > 0) {
-				simple.getLocal().setHost(inet.findFirstNonLoopbackHostInfo().getHostname());
+				inet.ifAvailable((inetUtils) -> simple.getLocal()
+					.setHost(inetUtils.findFirstNonLoopbackHostInfo().getHostname()));
 				simple.getLocal().setPort(port);
 			}
 		}
