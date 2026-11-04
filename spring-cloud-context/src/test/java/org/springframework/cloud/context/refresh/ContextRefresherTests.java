@@ -63,7 +63,7 @@ public class ContextRefresherTests {
 	public void orderNewPropertiesConsistentWithNewContext() {
 		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
 				"--spring.cloud.bootstrap.enabled=true", "--spring.main.web-application-type=none", "--debug=false",
-				"--spring.main.bannerMode=OFF")) {
+				"--spring.main.banner-mode=OFF")) {
 			context.getEnvironment().setActiveProfiles("refresh");
 			List<String> names = names(context.getEnvironment().getPropertySources());
 			then(names).doesNotContain("applicationConfig: [classpath:/bootstrap-refresh.properties]");
@@ -83,7 +83,7 @@ public class ContextRefresherTests {
 		// a bootstrapProperties immediately
 		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
 				"--spring.cloud.bootstrap.enabled=true", "--spring.main.web-application-type=none", "--debug=false",
-				"--spring.main.bannerMode=OFF", "--spring.cloud.bootstrap.name=refresh")) {
+				"--spring.main.banner-mode=OFF", "--spring.cloud.bootstrap.name=refresh")) {
 			List<String> names = names(context.getEnvironment().getPropertySources());
 			System.err.println("***** " + context.getEnvironment().getPropertySources());
 			then(names).doesNotContain("bootstrapProperties");
@@ -105,7 +105,7 @@ public class ContextRefresherTests {
 		// a bootstrapProperties immediately
 		try (ConfigurableApplicationContext context = SpringApplication.run(ContextRefresherTests.class,
 				"--spring.main.web-application-type=none", "--spring.cloud.bootstrap.enabled=true", "--debug=false",
-				"--spring.main.bannerMode=OFF", "--spring.cloud.bootstrap.name=refresh")) {
+				"--spring.main.banner-mode=OFF", "--spring.cloud.bootstrap.name=refresh")) {
 			LegacyContextRefresher refresher = new LegacyContextRefresher(context, this.scope);
 			TestPropertyValues
 				.of("spring.cloud.bootstrap.sources: "
@@ -126,7 +126,7 @@ public class ContextRefresherTests {
 		then(system.getCount()).isEqualTo(0);
 		try (ConfigurableApplicationContext context = SpringApplication.run(Empty.class,
 				"--spring.cloud.bootstrap.enabled=true", "--spring.main.web-application-type=none", "--debug=false",
-				"--spring.main.bannerMode=OFF", "--spring.cloud.bootstrap.name=refresh")) {
+				"--spring.main.banner-mode=OFF", "--spring.cloud.bootstrap.name=refresh")) {
 			then(system.getCount()).isEqualTo(4);
 			ContextRefresher refresher = new LegacyContextRefresher(context, this.scope);
 			refresher.refresh();
@@ -141,7 +141,7 @@ public class ContextRefresherTests {
 
 		try (ConfigurableApplicationContext context = SpringApplication.run(ContextRefresherTests.class,
 				"--spring.main.web-application-type=none", "--spring.cloud.bootstrap.enabled=true", "--debug=false",
-				"--spring.main.bannerMode=OFF", "--spring.cloud.bootstrap.name=refresh", "--test.bootstrap.foo=bar")) {
+				"--spring.main.banner-mode=OFF", "--spring.cloud.bootstrap.name=refresh", "--test.bootstrap.foo=bar")) {
 			context.getEnvironment().setActiveProfiles("refresh");
 			ContextRefresher refresher = new LegacyContextRefresher(context, this.scope);
 			refresher.refresh();

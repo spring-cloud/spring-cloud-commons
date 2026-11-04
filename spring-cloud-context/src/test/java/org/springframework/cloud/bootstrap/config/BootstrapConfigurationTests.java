@@ -245,7 +245,7 @@ public class BootstrapConfigurationTests {
 
 	private void systemPropertyOverrideFalse(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
+		PropertySourceConfiguration.MAP.put("spring.cloud.config.override-system-properties", "false");
 		System.setProperty("bootstrap.foo", "system");
 		context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 			.properties(properties)
@@ -267,11 +267,11 @@ public class BootstrapConfigurationTests {
 
 	private void systemPropertyOverrideWhenOverrideDisallowed(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
-		// If spring.cloud.config.allowOverride=false is in the remote property sources
+		PropertySourceConfiguration.MAP.put("spring.cloud.config.override-system-properties", "false");
+		// If spring.cloud.config.allow-override=false is in the remote property sources
 		// with sufficiently high priority it always wins. Admins can enforce it by adding
 		// their own remote property source.
-		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "false");
+		PropertySourceConfiguration.MAP.put("spring.cloud.config.allow-override", "false");
 		System.setProperty("bootstrap.foo", "system");
 		context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 			.properties(properties)
@@ -293,8 +293,8 @@ public class BootstrapConfigurationTests {
 
 	private void systemPropertyOverrideFalseWhenOverrideAllowed(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideSystemProperties", "false");
-		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
+		PropertySourceConfiguration.MAP.put("spring.cloud.config.override-system-properties", "false");
+		PropertySourceConfiguration.MAP.put("spring.cloud.config.allow-override", "true");
 		System.setProperty("bootstrap.foo", "system");
 		context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
 			.properties(properties)
@@ -316,8 +316,8 @@ public class BootstrapConfigurationTests {
 
 	private void overrideAllWhenOverrideAllowed(String... properties) {
 		PropertySourceConfiguration.MAP.put("bootstrap.foo", "bar");
-		PropertySourceConfiguration.MAP.put("spring.cloud.config.overrideNone", "true");
-		PropertySourceConfiguration.MAP.put("spring.cloud.config.allowOverride", "true");
+		PropertySourceConfiguration.MAP.put("spring.cloud.config.override-none", "true");
+		PropertySourceConfiguration.MAP.put("spring.cloud.config.allow-override", "true");
 		ConfigurableEnvironment environment = new StandardEnvironment();
 		environment.getPropertySources()
 			.addLast(new MapPropertySource("last", Collections.<String, Object>singletonMap("bootstrap.foo", "splat")));

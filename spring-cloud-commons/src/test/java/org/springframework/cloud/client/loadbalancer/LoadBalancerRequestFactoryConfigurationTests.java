@@ -73,7 +73,7 @@ public class LoadBalancerRequestFactoryConfigurationTests {
 
 	protected ConfigurableApplicationContext init(Class<?> config) {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-			.properties("spring.aop.proxyTargetClass=true")
+			.properties("spring.aop.proxy-target-class=true")
 			.sources(config, LoadBalancerAutoConfiguration.class)
 			.run();
 

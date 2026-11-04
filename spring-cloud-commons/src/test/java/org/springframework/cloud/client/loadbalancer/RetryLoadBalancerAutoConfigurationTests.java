@@ -53,7 +53,7 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 	@Test
 	void testRetryDisabled() {
 		applicationContextRunner.withUserConfiguration(OneRestTemplate.class)
-			.withPropertyValues("spring.aop.proxyTargetClass=true", "spring.cloud.loadbalancer.retry.enabled=false")
+			.withPropertyValues("spring.aop.proxy-target-class=true", "spring.cloud.loadbalancer.retry.enabled=false")
 			.run(context -> {
 				List<ClientHttpRequestInterceptor> interceptors = context.getBean(RestTemplate.class).getInterceptors();
 				then(interceptors).hasSize(1);
@@ -65,7 +65,7 @@ public class RetryLoadBalancerAutoConfigurationTests extends AbstractLoadBalance
 	@Test
 	void testRetryDisabledWithRestClientBuilder() {
 		applicationContextRunner.withUserConfiguration(OneRestClientBuilder.class)
-			.withPropertyValues("spring.aop.proxyTargetClass=true", "spring.cloud.loadbalancer.retry.enabled=false")
+			.withPropertyValues("spring.aop.proxy-target-class=true", "spring.cloud.loadbalancer.retry.enabled=false")
 			.run(context -> {
 				RestClient.Builder restClientBuilder = context.getBean(RestClient.Builder.class);
 
