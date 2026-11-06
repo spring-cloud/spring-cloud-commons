@@ -27,6 +27,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ReactiveCompositeDiscoveryClientProperties {
 
 	/**
+	 * Combines service instances returned by all reactive discovery clients.
+	 */
+	private boolean combineInstances = false;
+
+	/**
 	 * Enables reactive discovery.
 	 */
 	private boolean enabled = true;
@@ -51,6 +56,14 @@ public class ReactiveCompositeDiscoveryClientProperties {
 
 	public void setOrderEnforced(boolean orderEnforced) {
 		this.orderEnforced = orderEnforced;
+	}
+
+	public boolean isCombineInstances() {
+		return this.combineInstances;
+	}
+
+	public void setCombineInstances(boolean combineInstances) {
+		this.combineInstances = combineInstances;
 	}
 
 }

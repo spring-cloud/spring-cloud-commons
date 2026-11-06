@@ -24,6 +24,7 @@
 |spring.cloud.discovery.enabled | `+++true+++` | Enables discovery client health indicators.
 |spring.cloud.discovery.reactive.enabled | `+++true+++` | Enables reactive discovery.
 |spring.cloud.discovery.reactive.order-enforced | `+++false+++` | Waits for reactive discovery clients in order and falls back only when a client returns no instances, instead of using the fastest non-empty response.
+|spring.cloud.discovery.reactive.combine-instances | `+++false+++` | Combines instances returned by all reactive discovery clients instead of using only the fastest non-empty client.
 |spring.cloud.features.enabled | `+++true+++` | Enables the features endpoint.
 |spring.cloud.httpclientfactories.apache.enabled | `+++true+++` | Enables creation of Apache Http Client factory beans.
 |spring.cloud.httpclientfactories.ok.enabled | `+++true+++` | Enables creation of OK Http Client factory beans.
