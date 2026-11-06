@@ -18,6 +18,8 @@ package org.springframework.cloud.client.discovery.composite.reactive;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
 
 import org.springframework.cloud.client.ServiceInstance;
@@ -29,11 +31,14 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
  * A {@link ReactiveDiscoveryClient} that is composed of other discovery clients and
  * delegates calls to each of them. By default, instance lookup uses the fastest non-empty
  * response. Client ordering can instead be enforced by using the constructor accepting
- * {@code orderEnforced}.
+ * {@code orderEnforced}. Instance results can be combined from all discovery clients by
+ * enabling {@code combineInstances}.
  *
  * @author Tim Ysewyn
  */
 public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient {
+
+	private static final Log logger = LogFactory.getLog(ReactiveCompositeDiscoveryClient.class);
 
 	private final List<ReactiveDiscoveryClient> discoveryClients;
 
@@ -77,7 +82,11 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 		}
 
 		if (combineInstances) {
-			return Flux.merge(discoveryClients.stream().map(client -> client.getInstances(serviceId)).toList());
+			List<Flux<ServiceInstance>> instances = discoveryClients.stream()
+				.map(client -> getInstancesFromClient(client, serviceId))
+				.toList();
+
+			return orderEnforced ? Flux.concat(instances) : Flux.mergeSequential(instances);
 		}
 
 		if (!orderEnforced) {
@@ -90,6 +99,13 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 			serviceInstances = serviceInstances.switchIfEmpty(discoveryClient.getInstances(serviceId));
 		}
 		return serviceInstances;
+	}
+
+	private Flux<ServiceInstance> getInstancesFromClient(ReactiveDiscoveryClient client, String serviceId) {
+		return Flux.defer(() -> client.getInstances(serviceId)).onErrorResume(error -> {
+			logger.warn("Error retrieving instances from " + client.description() + " for service " + serviceId, error);
+			return Flux.empty();
+		});
 	}
 
 	@Override
