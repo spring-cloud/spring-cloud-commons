@@ -37,10 +37,16 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 
 	private final List<ReactiveDiscoveryClient> discoveryClients;
 
+	private final boolean combineInstances;
+
 	private final boolean orderEnforced;
 
 	public ReactiveCompositeDiscoveryClient(List<ReactiveDiscoveryClient> discoveryClients) {
-		this(discoveryClients, false);
+		this(discoveryClients, false, false);
+	}
+
+	public ReactiveCompositeDiscoveryClient(List<ReactiveDiscoveryClient> discoveryClients, boolean orderEnforced) {
+		this(discoveryClients, orderEnforced, false);
 	}
 
 	/**
@@ -48,11 +54,15 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 	 * @param discoveryClients the discovery clients to delegate to
 	 * @param orderEnforced whether to wait for each client in order before falling back
 	 * to the next client if it returns no instances
+	 * @param combineInstances whether to combine instances returned by all discovery
+	 * clients
 	 */
-	public ReactiveCompositeDiscoveryClient(List<ReactiveDiscoveryClient> discoveryClients, boolean orderEnforced) {
+	public ReactiveCompositeDiscoveryClient(List<ReactiveDiscoveryClient> discoveryClients, boolean orderEnforced,
+			boolean combineInstances) {
 		AnnotationAwareOrderComparator.sort(discoveryClients);
 		this.discoveryClients = discoveryClients;
 		this.orderEnforced = orderEnforced;
+		this.combineInstances = combineInstances;
 	}
 
 	@Override
@@ -65,10 +75,16 @@ public class ReactiveCompositeDiscoveryClient implements ReactiveDiscoveryClient
 		if (discoveryClients == null || discoveryClients.isEmpty()) {
 			return Flux.empty();
 		}
+
+		if (combineInstances) {
+			return Flux.merge(discoveryClients.stream().map(client -> client.getInstances(serviceId)).toList());
+		}
+
 		if (!orderEnforced) {
 			return CloudFlux
 				.firstNonEmpty(discoveryClients.stream().map(client -> client.getInstances(serviceId)).toList());
 		}
+
 		Flux<ServiceInstance> serviceInstances = Flux.empty();
 		for (ReactiveDiscoveryClient discoveryClient : discoveryClients) {
 			serviceInstances = serviceInstances.switchIfEmpty(discoveryClient.getInstances(serviceId));

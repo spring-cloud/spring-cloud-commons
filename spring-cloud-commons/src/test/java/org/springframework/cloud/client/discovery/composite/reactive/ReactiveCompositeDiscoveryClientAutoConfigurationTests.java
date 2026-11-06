@@ -130,6 +130,22 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 			});
 	}
 
+	@Test
+	void shouldCombineInstancesWhenEnabled() {
+		this.contextRunner.withUserConfiguration(OrderedConfiguration.class)
+			.withPropertyValues("spring.cloud.discovery.reactive.combine-instances=true")
+			.run(context -> {
+				assertThat(context).hasSingleBean(ReactiveCompositeDiscoveryClient.class);
+
+				ReactiveDiscoveryClient client = context.getBean(ReactiveDiscoveryClient.class);
+
+				StepVerifier.create(client.getInstances("service")).expectNextCount(2).verifyComplete();
+
+				assertThat(context.getBean(ReactiveCompositeDiscoveryClientProperties.class).isCombineInstances())
+					.isTrue();
+			});
+	}
+
 	@TestConfiguration
 	@EnableConfigurationProperties(ReactiveCompositeDiscoveryClientProperties.class)
 	static class PropertiesConfiguration {
