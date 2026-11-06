@@ -201,7 +201,7 @@ class LoadBalancerClientConfigurationTests {
 	void shouldNotWrapWithRetryAwareSupplierWhenRetryTemplateOnClasspath() {
 		blockingDiscoveryClientRunner
 			.withPropertyValues(LoadBalancerClientFactory.PROPERTY_NAME + "=myservice",
-					"spring.cloud.loadbalancer.retry.avoidPreviousInstance=false")
+					"spring.cloud.loadbalancer.retry.avoid-previous-instance=false")
 			.run(context -> {
 				ServiceInstanceListSupplier supplier = context.getBean(ServiceInstanceListSupplier.class);
 				then(supplier).isInstanceOf(CachingServiceInstanceListSupplier.class);

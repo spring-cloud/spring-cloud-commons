@@ -93,12 +93,10 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 		});
 	}
 
-	@ParameterizedTest
-	@ValueSource(strings = { "spring.cloud.discovery.reactive.order-enforced=true",
-			"spring.cloud.discovery.reactive.orderEnforced=true" })
-	void shouldEnforceOrderWhenEnabled(String property) {
+	@Test
+	void shouldEnforceOrderWhenEnabled() {
 		this.contextRunner.withUserConfiguration(OrderedConfiguration.class)
-			.withPropertyValues(property)
+			.withPropertyValues("spring.cloud.discovery.reactive.order-enforced=true")
 			.run(context -> {
 				assertThat(context).hasSingleBean(ReactiveCompositeDiscoveryClient.class);
 				ReactiveDiscoveryClient client = context.getBean(ReactiveDiscoveryClient.class);
