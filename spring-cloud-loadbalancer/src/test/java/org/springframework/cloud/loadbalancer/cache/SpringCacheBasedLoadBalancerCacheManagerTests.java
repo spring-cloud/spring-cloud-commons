@@ -22,6 +22,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SpringCacheBasedLoadBalancerCacheManagerTests {
 
@@ -49,6 +50,13 @@ class SpringCacheBasedLoadBalancerCacheManagerTests {
 		Cache cache = cacheManager.getCache("missingCache");
 
 		assertThat(cache).isNull();
+	}
+
+	@Test
+	void shouldRejectNullCacheManagerDelegate() {
+		assertThatThrownBy(() -> new SpringCacheBasedLoadBalancerCacheManager(null))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("CacheManager delegate must not be null");
 	}
 
 }

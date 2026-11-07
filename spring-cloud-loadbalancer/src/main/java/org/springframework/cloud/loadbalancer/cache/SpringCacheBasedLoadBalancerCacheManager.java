@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.util.Assert;
 
 /**
  * A {@link LoadBalancerCacheManager} implementation that delegates to an existing Spring
@@ -32,17 +33,18 @@ public class SpringCacheBasedLoadBalancerCacheManager implements LoadBalancerCac
 	private final CacheManager delegate;
 
 	public SpringCacheBasedLoadBalancerCacheManager(CacheManager delegate) {
+		Assert.notNull(delegate, "CacheManager delegate must not be null");
 		this.delegate = delegate;
 	}
 
 	@Override
 	public Cache getCache(String name) {
-		return delegate.getCache(name);
+		return this.delegate.getCache(name);
 	}
 
 	@Override
 	public Collection<String> getCacheNames() {
-		return delegate.getCacheNames();
+		return this.delegate.getCacheNames();
 	}
 
 }

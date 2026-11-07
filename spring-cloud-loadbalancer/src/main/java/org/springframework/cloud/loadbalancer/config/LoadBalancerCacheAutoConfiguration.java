@@ -39,6 +39,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.NoneNestedConditions;
 import org.springframework.boot.cache.autoconfigure.CacheAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
@@ -48,21 +49,19 @@ import org.springframework.cloud.loadbalancer.cache.CaffeineBasedLoadBalancerCac
 import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheProperties;
-import org.springframework.cloud.loadbalancer.cache.SpringCacheBasedLoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.RedisLoadBalancerCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.context.annotation.Condition;
-import org.springframework.context.annotation.ConditionContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.ClassUtils;
 
 /**
  * An AutoConfiguration that automatically enables caching when Spring Boot, and Spring
- * Framework Cache support are present. If Caffeine is present in the classpath, it will
- * be used for loadbalancer caching. If not, a default cache will be used.
+ * Framework Cache support are present. If Redis is selected and a Redis connection
+ * factory is available, it will be used for LoadBalancer caching. Otherwise, if Caffeine
+ * is present in the classpath, it will be used. If not, a default cache will be used.
  *
  * @author Olga Maciaszek-Sharma
  * @since 2.2.0
@@ -79,25 +78,26 @@ import org.springframework.util.ClassUtils;
 public class LoadBalancerCacheAutoConfiguration {
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
-	@ConditionalOnBean(CacheManager.class)
+	@Conditional(RedisLoadBalancerCacheManagerCondition.class)
 	protected static class RedisLoadBalancerCacheManagerConfiguration {
 
 		@Bean(autowireCandidate = false)
-		@ConditionalOnMissingBean
-		LoadBalancerCacheManager redisLoadBalancerCacheManager(CacheManager cacheManager) {
-			return new SpringCacheBasedLoadBalancerCacheManager(cacheManager);
+		@ConditionalOnMissingBean(LoadBalancerCacheManager.class)
+		LoadBalancerCacheManager redisLoadBalancerCacheManager(
+				org.springframework.data.redis.connection.RedisConnectionFactory redisConnectionFactory,
+				LoadBalancerCacheProperties cacheProperties) {
+			return new RedisLoadBalancerCacheManager(redisConnectionFactory, cacheProperties);
 		}
 
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@Conditional(OnSpringRedisCacheTypeMissingCondition.class)
+	@Conditional(OnRedisLoadBalancerCacheManagerMissingCondition.class)
 	@ConditionalOnClass({ Caffeine.class, CaffeineCacheManager.class })
 	protected static class CaffeineLoadBalancerCacheManagerConfiguration {
 
 		@Bean(autowireCandidate = false)
-		@ConditionalOnMissingBean
+		@ConditionalOnMissingBean(LoadBalancerCacheManager.class)
 		LoadBalancerCacheManager caffeineLoadBalancerCacheManager(LoadBalancerCacheProperties cacheProperties) {
 			return new CaffeineBasedLoadBalancerCacheManager(cacheProperties);
 		}
@@ -105,12 +105,12 @@ public class LoadBalancerCacheAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@Conditional({ OnSpringRedisCacheTypeMissingCondition.class, OnCaffeineCacheMissingCondition.class })
+	@Conditional({ OnRedisLoadBalancerCacheManagerMissingCondition.class, OnCaffeineCacheMissingCondition.class })
 	@ConditionalOnClass(ConcurrentMapWithTimedEviction.class)
 	protected static class DefaultLoadBalancerCacheManagerConfiguration {
 
 		@Bean(autowireCandidate = false)
-		@ConditionalOnMissingBean
+		@ConditionalOnMissingBean(LoadBalancerCacheManager.class)
 		LoadBalancerCacheManager defaultLoadBalancerCacheManager(LoadBalancerCacheProperties cacheProperties) {
 			return new DefaultLoadBalancerCacheManager(cacheProperties);
 		}
@@ -122,11 +122,38 @@ public class LoadBalancerCacheAutoConfiguration {
 
 	}
 
-	static class OnSpringRedisCacheTypeMissingCondition implements Condition {
+	static final class RedisLoadBalancerCacheManagerCondition extends AllNestedConditions {
 
-		@Override
-		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-			return !"redis".equalsIgnoreCase(context.getEnvironment().getProperty("spring.cache.type"));
+		RedisLoadBalancerCacheManagerCondition() {
+			super(ConfigurationPhase.REGISTER_BEAN);
+		}
+
+		@ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
+		static class RedisCacheTypeSelected {
+
+		}
+
+		@ConditionalOnClass(name = "org.springframework.data.redis.connection.RedisConnectionFactory")
+		static class RedisConnectionFactoryClassPresent {
+
+		}
+
+		@ConditionalOnBean(type = "org.springframework.data.redis.connection.RedisConnectionFactory")
+		static class RedisConnectionFactoryAvailable {
+
+		}
+
+	}
+
+	static final class OnRedisLoadBalancerCacheManagerMissingCondition extends NoneNestedConditions {
+
+		OnRedisLoadBalancerCacheManagerMissingCondition() {
+			super(ConfigurationPhase.REGISTER_BEAN);
+		}
+
+		@Conditional(RedisLoadBalancerCacheManagerCondition.class)
+		static class RedisLoadBalancerCacheManagerAvailable {
+
 		}
 
 	}

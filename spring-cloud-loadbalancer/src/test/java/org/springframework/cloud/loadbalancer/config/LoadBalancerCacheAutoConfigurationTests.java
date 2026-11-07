@@ -30,12 +30,14 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
-import org.springframework.cloud.loadbalancer.cache.SpringCacheBasedLoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.RedisLoadBalancerCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * Tests for {@link LoadBalancerCacheAutoConfiguration}.
@@ -50,7 +52,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 
 		contextRunner.run(context -> {
 			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
-			assertThat(((CacheManager) context.getBean("caffeineLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
 			assertThat(context.getBean("caffeineLoadBalancerCacheManager")).isInstanceOf(CaffeineCacheManager.class);
 			assertThat(((CacheManager) context.getBean("caffeineLoadBalancerCacheManager")).getCacheNames())
 				.contains("CachingServiceInstanceListSupplierCache");
@@ -64,9 +65,47 @@ class LoadBalancerCacheAutoConfigurationTests {
 			.withPropertyValues("spring.cache.type=redis");
 
 		contextRunner.run(context -> {
+			assertThat(context).hasNotFailed();
 			assertThat(context).hasBean("redisLoadBalancerCacheManager");
 			assertThat(context.getBean("redisLoadBalancerCacheManager"))
-				.isInstanceOf(SpringCacheBasedLoadBalancerCacheManager.class);
+				.isInstanceOf(RedisLoadBalancerCacheManager.class);
+			assertThat(context.getBeansOfType(LoadBalancerCacheManager.class)).hasSize(1);
+		});
+	}
+
+	@Test
+	void shouldUseRedisCacheManagerWhenNoApplicationCacheManagerExists() {
+		baseApplicationRunner().withUserConfiguration(RedisConnectionFactoryOnlyConfiguration.class)
+			.withPropertyValues("spring.cache.type=redis")
+			.run(context -> {
+				assertThat(context).hasNotFailed();
+				assertThat(context).hasBean("redisLoadBalancerCacheManager");
+				assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
+				assertThat(context.getBeansOfType(LoadBalancerCacheManager.class)).hasSize(1);
+			});
+	}
+
+	@Test
+	void shouldUseRedisCacheManagerWhenMultipleApplicationCacheManagersExist() {
+		baseApplicationRunner().withUserConfiguration(RedisTestConfigurationWithMultipleCacheManagers.class)
+			.withPropertyValues("spring.cache.type=redis")
+			.run(context -> {
+				assertThat(context).hasNotFailed();
+				assertThat(context).hasBean("redisLoadBalancerCacheManager");
+				assertThat(context.getBeansOfType(CacheManager.class)).hasSize(3);
+				assertThat(context.getBeansOfType(LoadBalancerCacheManager.class)).hasSize(1);
+			});
+	}
+
+	@Test
+	void shouldUseCaffeineWhenRedisIsSelectedButConnectionFactoryIsMissing() {
+		ApplicationContextRunner contextRunner = baseApplicationRunner().withPropertyValues("spring.cache.type=redis");
+
+		contextRunner.run(context -> {
+			assertThat(context).hasNotFailed();
+			assertThat(context).doesNotHaveBean("redisLoadBalancerCacheManager");
+			assertThat(context).hasBean("caffeineLoadBalancerCacheManager");
+			assertThat(context.getBean("caffeineLoadBalancerCacheManager")).isInstanceOf(CaffeineCacheManager.class);
 			assertThat(context.getBeansOfType(LoadBalancerCacheManager.class)).hasSize(1);
 		});
 	}
@@ -92,7 +131,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
 			assertThat(context.getBean("cacheManager")).isInstanceOf(CaffeineCacheManager.class);
 			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
-			assertThat(((CacheManager) context.getBean("caffeineLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
 			assertThat(((CacheManager) context.getBean("caffeineLoadBalancerCacheManager")).getCacheNames())
 				.contains("CachingServiceInstanceListSupplierCache");
 		});
@@ -119,7 +157,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 			assertThat(context.getBean(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
 				.isNotNull();
 			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
-			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
 			assertThat(context.getBean("defaultLoadBalancerCacheManager"))
 				.isInstanceOf(DefaultLoadBalancerCacheManager.class);
 			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames())
@@ -135,7 +172,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 			assertThat(context.getBean(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
 				.isNotNull();
 			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(1);
-			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
 			assertThat(context.getBean("defaultLoadBalancerCacheManager"))
 				.isInstanceOf(DefaultLoadBalancerCacheManager.class);
 			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames())
@@ -165,7 +201,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 			assertThat(context.getBeansOfType(CacheManager.class)).hasSize(2);
 			assertThat(context.getBean("cacheManager")).isInstanceOf(ConcurrentMapCacheManager.class);
 			assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
-			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames()).hasSize(1);
 			assertThat(((CacheManager) context.getBean("defaultLoadBalancerCacheManager")).getCacheNames())
 				.contains("CachingServiceInstanceListSupplierCache");
 		});
@@ -195,6 +230,17 @@ class LoadBalancerCacheAutoConfigurationTests {
 			});
 	}
 
+	@Test
+	void shouldUseDefaultCacheWhenRedisIsSelectedButConnectionFactoryIsMissingAndCaffeineIsUnavailable() {
+		noCaffeineRunner().withPropertyValues("spring.cache.type=redis").run(context -> {
+			assertThat(context).hasNotFailed();
+			assertThat(context).doesNotHaveBean("redisLoadBalancerCacheManager");
+			assertThat(context).hasBean("defaultLoadBalancerCacheManager");
+			assertThat(context.getBean("defaultLoadBalancerCacheManager"))
+				.isInstanceOf(DefaultLoadBalancerCacheManager.class);
+		});
+	}
+
 	private ApplicationContextRunner baseApplicationRunner() {
 		return new ApplicationContextRunner().withConfiguration(
 				AutoConfigurations.of(CacheAutoConfiguration.class, LoadBalancerCacheAutoConfiguration.class));
@@ -215,12 +261,47 @@ class LoadBalancerCacheAutoConfigurationTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
+	static class RedisConnectionFactoryOnlyConfiguration {
+
+		@Bean
+		RedisConnectionFactory redisConnectionFactory() {
+			return mock(RedisConnectionFactory.class);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
 	static class RedisTestConfiguration {
 
 		@Bean
 		@Primary
 		CacheManager cacheManager() {
 			return new ConcurrentMapCacheManager();
+		}
+
+		@Bean
+		RedisConnectionFactory redisConnectionFactory() {
+			return mock(RedisConnectionFactory.class);
+		}
+
+	}
+
+	@Configuration(proxyBeanMethods = false)
+	static class RedisTestConfigurationWithMultipleCacheManagers {
+
+		@Bean
+		CacheManager firstCacheManager() {
+			return new ConcurrentMapCacheManager();
+		}
+
+		@Bean
+		CacheManager secondCacheManager() {
+			return new ConcurrentMapCacheManager();
+		}
+
+		@Bean
+		RedisConnectionFactory redisConnectionFactory() {
+			return mock(RedisConnectionFactory.class);
 		}
 
 	}
