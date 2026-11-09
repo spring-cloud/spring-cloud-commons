@@ -18,6 +18,7 @@ package org.springframework.cloud.context.scope;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -67,6 +69,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Dave Syer
  * @author Yanming Zhou
+ * @author 施浩
  * @since 3.1
  *
  */
@@ -169,10 +172,59 @@ public class GenericScope
 		return false;
 	}
 
+	/**
+	 * Destroys cached beans with a bounded wait for each bean's write lock. A bean is
+	 * removed from the cache only after its lock has been acquired. Stops on the first
+	 * failure; beans already destroyed are not restored.
+	 * @param timeout the maximum wait for each write lock
+	 * @throws IllegalStateException if a lock cannot be acquired or the wait is
+	 * interrupted
+	 * @since 5.1.0
+	 */
+	protected void destroyAll(Duration timeout) {
+		for (String name : new ArrayList<>(this.locks.keySet())) {
+			destroy(name, timeout);
+		}
+		this.errors.clear();
+	}
+
+	/**
+	 * Destroys a named bean after acquiring its write lock within the given timeout. On
+	 * timeout or interruption, the cached bean and its destruction callback are retained.
+	 * @param name the bean name to flush
+	 * @param timeout the maximum wait for the write lock
+	 * @return true if the bean was cached; false otherwise
+	 * @throws IllegalStateException if the lock cannot be acquired or the wait is
+	 * interrupted
+	 * @since 5.1.0
+	 */
+	protected boolean destroy(String name, Duration timeout) {
+		if (this.cache.get(name) == null) {
+			return false;
+		}
+		Lock lock = this.locks.get(name).writeLock();
+		try {
+			if (!lock.tryLock(timeout.toNanos(), TimeUnit.NANOSECONDS)) {
+				throw new IllegalStateException(
+						"Timed out after " + timeout + " waiting for the write lock of scoped bean '" + name + "'");
+			}
+		}
+		catch (InterruptedException ex) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException("Interrupted waiting for the write lock of scoped bean '" + name + "'", ex);
+		}
+		try {
+			return destroy(name);
+		}
+		finally {
+			lock.unlock();
+		}
+	}
+
 	@Override
 	public Object get(String name, ObjectFactory<?> objectFactory) {
-		BeanLifecycleWrapper value = this.cache.put(name, new BeanLifecycleWrapper(name, objectFactory));
 		this.locks.putIfAbsent(name, new ReentrantReadWriteLock());
+		BeanLifecycleWrapper value = this.cache.put(name, new BeanLifecycleWrapper(name, objectFactory));
 		try {
 			return value.getBean();
 		}

@@ -17,6 +17,9 @@
 package org.springframework.cloud.context.scope.refresh;
 
 import java.io.Serializable;
+import java.time.Duration;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
@@ -31,6 +34,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.util.Assert;
 
 /**
  * <p>
@@ -62,6 +66,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
  * </p>
  *
  * @author Dave Syer
+ * @author 施浩
  * @since 3.1
  *
  */
@@ -76,6 +81,8 @@ public class RefreshScope extends GenericScope
 	private boolean eager = true;
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 100;
+
+	private volatile @Nullable Duration lockTimeout;
 
 	/**
 	 * Creates a scope instance and gives it the default name: "refresh".
@@ -100,6 +107,29 @@ public class RefreshScope extends GenericScope
 	 */
 	public void setEager(boolean eager) {
 		this.eager = eager;
+	}
+
+	/**
+	 * Return the maximum wait for each bean's write lock during refresh, or {@code null}
+	 * for an unbounded wait.
+	 * @return the lock timeout
+	 * @since 5.1.0
+	 */
+	public @Nullable Duration getLockTimeout() {
+		return this.lockTimeout;
+	}
+
+	/**
+	 * Set the maximum wait for each bean's write lock during refresh. A timeout or
+	 * interruption leaves that bean cached and causes the refresh to fail. This does not
+	 * limit destruction callbacks or affect application shutdown.
+	 * @param lockTimeout a non-negative timeout, or {@code null} for the default
+	 * unbounded wait; zero attempts to acquire the lock without waiting
+	 * @since 5.1.0
+	 */
+	public void setLockTimeout(@Nullable Duration lockTimeout) {
+		Assert.isTrue(lockTimeout == null || !lockTimeout.isNegative(), "Lock timeout must not be negative");
+		this.lockTimeout = lockTimeout;
 	}
 
 	@Override
@@ -155,7 +185,8 @@ public class RefreshScope extends GenericScope
 			name = ScopedProxyUtils.getTargetBeanName(name);
 		}
 		// Ensure lifecycle is finished if bean was disposable
-		if (super.destroy(name)) {
+		Duration timeout = this.lockTimeout;
+		if (timeout == null ? super.destroy(name) : super.destroy(name, timeout)) {
 			this.context.publishEvent(new RefreshScopeRefreshedEvent(name));
 			return true;
 		}
@@ -165,7 +196,13 @@ public class RefreshScope extends GenericScope
 	@ManagedOperation(description = "Dispose of the current instance of all beans "
 			+ "in this scope and force a refresh on next method execution.")
 	public void refreshAll() {
-		super.destroy();
+		Duration timeout = this.lockTimeout;
+		if (timeout == null) {
+			super.destroy();
+		}
+		else {
+			super.destroyAll(timeout);
+		}
 		this.context.publishEvent(new RefreshScopeRefreshedEvent());
 	}
 

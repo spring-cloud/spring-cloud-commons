@@ -43,6 +43,11 @@
 			"defaultValue": true
 		},
 		{
+			"name": "spring.cloud.refresh.lock-timeout",
+			"type": "java.time.Duration",
+			"description": "Maximum wait for each bean's write lock during refresh. Unset means an unbounded wait; zero means no wait. Does not limit destruction callbacks or application shutdown."
+		},
+		{
 			"name": "spring.cloud.refresh.extra-refreshable",
 			"type": "java.util.Set<java.lang.String>",
 			"description": "Additional bean names or class names for beans to post process into refresh scope.",

@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.autoconfigure;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -67,6 +68,7 @@ import org.springframework.util.StringUtils;
  * @author Venil Noronha
  * @author Olga Maciaszek-Sharma
  * @author Yanming Zhou
+ * @author 施浩
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnClass(RefreshScope.class)
@@ -90,10 +92,18 @@ public class RefreshAutoConfiguration {
 	 */
 	public static final String REFRESH_SCOPE_ENABLED = REFRESH_SCOPE_PREFIX + ".enabled";
 
-	@Bean
-	@ConditionalOnMissingBean(RefreshScope.class)
 	public static RefreshScope refreshScope() {
 		return new RefreshScope();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean(RefreshScope.class)
+	public static RefreshScope refreshScope(Environment environment) {
+		RefreshScope scope = refreshScope();
+		Binder.get(environment)
+			.bind(REFRESH_SCOPE_PREFIX + ".lock-timeout", Duration.class)
+			.ifBound(scope::setLockTimeout);
+		return scope;
 	}
 
 	@Bean
