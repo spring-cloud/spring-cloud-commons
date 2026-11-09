@@ -38,6 +38,12 @@
 			<groupId>org.apache.maven.resolver</groupId>
 			<artifactId>maven-resolver-supplier-mvn3</artifactId>
 			<version>${maven-resolver.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>jcl-over-slf4j</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
