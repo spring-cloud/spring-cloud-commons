@@ -19,7 +19,7 @@
 		{
 			"defaultValue": true,
 			"name": "spring.cloud.loadbalancer.retry.avoid-previous-instance",
-			"description": "Enables wrapping ServiceInstanceListSupplier beans with `RetryAwareServiceInstanceListSupplier` if Spring-Retry is in the classpath.",
+			"description": "Enables wrapping `ServiceInstanceListSupplier` beans with `RetryAwareServiceInstanceListSupplier` if Spring-Retry is in the classpath.",
 			"type": "java.lang.Boolean"
 		},
 		{
@@ -44,6 +44,39 @@
 			"name": "spring.cloud.loadbalancer.stats.micrometer.enabled",
 			"description": "Enables Spring Cloud LoadBalancer Micrometer stats.",
 			"type": "java.lang.Boolean"
+		},
+		{
+			"defaultValue": "true",
+			"name": "spring.cloud.loadbalancer.call-get-with-request-on-delegates",
+			"description": "If this flag is set to `true`, `ServiceInstanceListSupplier#get(Request request)` method will be implemented to call `delegate.get(request)` in classes assignable from `DelegatingServiceInstanceListSupplier` that don't already implement that method, with the exclusion of `CachingServiceInstanceListSupplier` and `HealthCheckServiceInstanceListSupplier`, which should be placed in the instance supplier hierarchy directly after the supplier performing instance retrieval over the network, before any request-based filtering is done, `true` by default.",
+			"type": "java.lang.Boolean"
+		},
+		{
+			"name": "spring.cloud.loadbalancer.cache.ttl",
+			"description": "Time To Live - time counted from writing of the record, after which cache entries are expired, expressed as a `Duration`. The property `String` has to be in keeping with the appropriate syntax as specified in Spring Boot `StringToDurationConverter`.",
+			"type": "java.time.Duration"
+		},
+		{
+			"defaultValue": "true",
+			"name": "spring.cloud.loadbalancer.health-check.update-results-list",
+			"description": "Indicates whether the `healthCheckFlux` should emit on each alive `ServiceInstance` that has been retrieved. If set to `false`, the entire alive instances sequence is first collected into a list and only then emitted.",
+			"type": "java.lang.Boolean"
+		},
+		{
+			"defaultValue": "true",
+			"name": "spring.cloud.loadbalancer.stats.include-path",
+			"description": "Indicates whether the `path` should be added to `uri` tag in metrics. When `RestTemplate` is used to execute load-balanced requests with high cardinality paths, setting it to `false` is recommended.",
+			"type": "java.lang.Boolean"
+		},
+		{
+			"name": "spring.cloud.loadbalancer.subset.instance-id",
+			"description": "Instance id of deterministic subsetting. If not set, `IdUtils#getDefaultInstanceId(org.springframework.core.env.PropertyResolver)` will be used.",
+			"type": "java.lang.String"
+		},
+		{
+			"name": "spring.cloud.loadbalancer.hint",
+			"description": "Allows setting the value of `hint` that is passed on to the LoadBalancer request and can subsequently be used in `ReactiveLoadBalancer` implementations.",
+			"type": "java.lang.String"
 		}
 	]
 }
