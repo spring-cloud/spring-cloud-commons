@@ -48,7 +48,8 @@ public class ReactiveCompositeDiscoveryClientAutoConfiguration {
 	@Primary
 	public ReactiveCompositeDiscoveryClient reactiveCompositeDiscoveryClient(
 			List<ReactiveDiscoveryClient> discoveryClients) {
-		return new ReactiveCompositeDiscoveryClient(discoveryClients, this.properties.isOrderEnforced());
+		return new ReactiveCompositeDiscoveryClient(discoveryClients, this.properties.isOrderEnforced(),
+				this.properties.isCombineInstances());
 	}
 
 }

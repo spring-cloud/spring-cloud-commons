@@ -215,4 +215,83 @@ class ReactiveCompositeDiscoveryClientTests {
 		fallback.assertWasNotSubscribed();
 	}
 
+	@Test
+	void shouldCombineInstancesFromAllDiscoveryClients() {
+		ServiceInstance instance1 = new DefaultServiceInstance("instance1", "service", "localhost", 8080, false);
+		ServiceInstance instance2 = new DefaultServiceInstance("instance2", "service", "localhost", 8081, false);
+
+		when(discoveryClient1.getInstances("service")).thenReturn(Flux.just(instance1));
+		when(discoveryClient2.getInstances("service")).thenReturn(Flux.just(instance2));
+
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient1, discoveryClient2), false, true);
+
+		StepVerifier.create(client.getInstances("service").collectList())
+			.assertNext(instances -> assertThat(instances).containsExactlyInAnyOrder(instance1, instance2))
+			.verifyComplete();
+	}
+
+	@Test
+	void shouldCombineInstancesWhenOneDiscoveryClientIsEmpty() {
+		ServiceInstance instance = new DefaultServiceInstance("instance2", "service", "localhost", 8081, false);
+
+		when(discoveryClient1.getInstances("service")).thenReturn(Flux.empty());
+		when(discoveryClient2.getInstances("service")).thenReturn(Flux.just(instance));
+
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient1, discoveryClient2), false, true);
+
+		StepVerifier.create(client.getInstances("service")).expectNext(instance).verifyComplete();
+	}
+
+	@Test
+	void shouldContinueCombiningInstancesWhenOneDiscoveryClientFails() {
+		ServiceInstance instance = new DefaultServiceInstance("instance2", "service", "localhost", 8081, false);
+		when(discoveryClient1.getInstances("service"))
+			.thenReturn(Flux.error(new IllegalStateException("discovery failed")));
+		when(discoveryClient2.getInstances("service")).thenReturn(Flux.just(instance));
+
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient1, discoveryClient2), false, true);
+
+		StepVerifier.create(client.getInstances("service")).expectNext(instance).verifyComplete();
+	}
+
+	@Test
+	void shouldPreserveDiscoveryClientOrderWhenCombiningInstances() {
+		ServiceInstance first = new DefaultServiceInstance("first", "service", "localhost", 8080, false);
+		ServiceInstance second = new DefaultServiceInstance("second", "service", "localhost", 8081, false);
+		when(discoveryClient1.getInstances("service"))
+			.thenReturn(Flux.just(first).delayElements(Duration.ofSeconds(1)));
+		when(discoveryClient2.getInstances("service")).thenReturn(Flux.just(second));
+
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient1, discoveryClient2), false, true);
+
+		StepVerifier.withVirtualTime(() -> client.getInstances("service"))
+			.thenAwait(Duration.ofSeconds(1))
+			.expectNext(first, second)
+			.verifyComplete();
+	}
+
+	@Test
+	void shouldRespectOrderEnforcedWhenCombiningInstances() {
+		ServiceInstance first = new DefaultServiceInstance("first", "service", "localhost", 8080, false);
+		ServiceInstance second = new DefaultServiceInstance("second", "service", "localhost", 8081, false);
+		PublisherProbe<ServiceInstance> secondPublisher = PublisherProbe.of(Flux.just(second));
+		when(discoveryClient1.getInstances("service"))
+			.thenReturn(Flux.just(first).delayElements(Duration.ofSeconds(1)));
+		when(discoveryClient2.getInstances("service")).thenReturn(secondPublisher.flux());
+
+		ReactiveCompositeDiscoveryClient client = new ReactiveCompositeDiscoveryClient(
+				asList(discoveryClient1, discoveryClient2), true, true);
+
+		StepVerifier.withVirtualTime(() -> client.getInstances("service"))
+			.then(() -> secondPublisher.assertWasNotSubscribed())
+			.thenAwait(Duration.ofSeconds(1))
+			.expectNext(first, second)
+			.verifyComplete();
+		secondPublisher.assertWasSubscribed();
+	}
+
 }

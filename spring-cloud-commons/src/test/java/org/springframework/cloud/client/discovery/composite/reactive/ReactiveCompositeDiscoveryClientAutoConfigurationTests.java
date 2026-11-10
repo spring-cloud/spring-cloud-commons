@@ -47,7 +47,7 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 
 	@Test
 	public void shouldCreateCompositeReactiveDiscoveryClientWithoutDelegates() {
-		this.contextRunner.run((context) -> {
+		this.contextRunner.run(context -> {
 			ReactiveDiscoveryClient client = context.getBean(ReactiveDiscoveryClient.class);
 			assertThat(client).isNotNull();
 			assertThat(client).isInstanceOf(ReactiveCompositeDiscoveryClient.class);
@@ -69,11 +69,25 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 
 	@Test
 	public void shouldCreateCompositeReactiveDiscoveryClientWithDelegate() {
-		this.contextRunner.withUserConfiguration(Configuration.class).run((context) -> {
+		this.contextRunner.withUserConfiguration(Configuration.class).run(context -> {
 			ReactiveDiscoveryClient client = context.getBean(ReactiveDiscoveryClient.class);
 			assertThat(client).isNotNull();
 			assertThat(client).isInstanceOf(ReactiveCompositeDiscoveryClient.class);
 			assertThat(((ReactiveCompositeDiscoveryClient) client).getDiscoveryClients()).hasSize(1);
+		});
+	}
+
+	@Test
+	void shouldDisableCombiningInstancesByDefault() {
+		this.contextRunner.withUserConfiguration(OrderedConfiguration.class).run(context -> {
+			ReactiveCompositeDiscoveryClient client = context.getBean(ReactiveCompositeDiscoveryClient.class);
+
+			assertThat(context.getBean(ReactiveCompositeDiscoveryClientProperties.class).isCombineInstances())
+				.isFalse();
+
+			StepVerifier.create(client.getInstances("service"))
+				.expectNextMatches(instance -> instance.getInstanceId().equals("second"))
+				.verifyComplete();
 		});
 	}
 
@@ -124,6 +138,49 @@ class ReactiveCompositeDiscoveryClientAutoConfigurationTests {
 					.expectNoEvent(Duration.ofSeconds(1))
 					.thenAwait(Duration.ofSeconds(1))
 					.assertNext(instance -> assertThat(instance.getInstanceId()).isEqualTo("preferred"))
+					.verifyComplete();
+			});
+	}
+
+	@Test
+	void shouldCombineInstancesWhenEnabled() {
+		this.contextRunner.withUserConfiguration(OrderedConfiguration.class)
+			.withPropertyValues("spring.cloud.discovery.reactive.combine-instances=true")
+			.run(context -> {
+				assertThat(context).hasSingleBean(ReactiveCompositeDiscoveryClient.class);
+
+				ReactiveDiscoveryClient client = context.getBean(ReactiveDiscoveryClient.class);
+
+				StepVerifier.withVirtualTime(() -> client.getInstances("service"))
+					.thenAwait(Duration.ofSeconds(2))
+					.expectNextMatches(instance -> instance.getInstanceId().equals("preferred"))
+					.expectNextMatches(instance -> instance.getInstanceId().equals("second"))
+					.verifyComplete();
+
+				assertThat(context.getBean(ReactiveCompositeDiscoveryClientProperties.class).isCombineInstances())
+					.isTrue();
+			});
+	}
+
+	@Test
+	void shouldCombineInstancesAndRespectEnforcedOrderWhenBothPropertiesAreEnabled() {
+		this.contextRunner.withUserConfiguration(OrderedConfiguration.class)
+			.withPropertyValues("spring.cloud.discovery.reactive.combine-instances=true",
+					"spring.cloud.discovery.reactive.order-enforced=true")
+			.run(context -> {
+				ReactiveCompositeDiscoveryClient client = context.getBean(ReactiveCompositeDiscoveryClient.class);
+
+				assertThat(context.getBean(ReactiveCompositeDiscoveryClientProperties.class).isCombineInstances())
+					.isTrue();
+				assertThat(context.getBean(ReactiveCompositeDiscoveryClientProperties.class).isOrderEnforced())
+					.isTrue();
+
+				StepVerifier.withVirtualTime(() -> client.getInstances("service"))
+					.expectSubscription()
+					.expectNoEvent(Duration.ofSeconds(1))
+					.thenAwait(Duration.ofSeconds(1))
+					.expectNextMatches(instance -> instance.getInstanceId().equals("preferred"))
+					.expectNextMatches(instance -> instance.getInstanceId().equals("second"))
 					.verifyComplete();
 			});
 	}

@@ -60,6 +60,10 @@ In this mode, a lower-priority client is subscribed to only when all higher-prio
 A slow or non-terminating higher-priority client can therefore delay the result, and an error is propagated without falling back.
 This property affects instance lookup only; service enumeration continues to combine results from all clients.
 
+To combine instances returned by all reactive discovery clients instead, set `spring.cloud.discovery.reactive.combine-instances=true`.
+When enabled, instances from all clients are combined, and an error from an individual client is logged without preventing results from other clients from being returned.
+If `spring.cloud.discovery.reactive.order-enforced=true` is also enabled, clients are queried in their configured order.
+
 [[simplediscoveryclient]]
 === SimpleDiscoveryClient
 
