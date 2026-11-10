@@ -42,8 +42,11 @@ import org.springframework.core.env.PropertySource;
 
 /**
  * @author Ryan Baxter
+ * @deprecated Deprecated in favor of
+ * {@link org.springframework.cloud.commons.config.ConfigDataMissingEnvironmentPostProcessor}
  */
 // TODO: 4.0.0 move to org.springframework.cloud.commons.config
+@Deprecated(forRemoval = true, since = "5.0.0")
 public abstract class ConfigDataMissingEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
 	/**
