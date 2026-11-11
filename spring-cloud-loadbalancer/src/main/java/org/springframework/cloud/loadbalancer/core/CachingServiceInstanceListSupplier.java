@@ -17,10 +17,13 @@
 package org.springframework.cloud.loadbalancer.core;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -51,21 +54,21 @@ public class CachingServiceInstanceListSupplier extends DelegatingServiceInstanc
 	public CachingServiceInstanceListSupplier(ServiceInstanceListSupplier delegate, CacheManager cacheManager) {
 		super(delegate);
 		String serviceId = delegate.getServiceId();
-		this.serviceInstances = Flux.defer(() -> {
+		this.serviceInstances = Flux.defer(() -> Mono.fromCallable(() -> {
 			// TODO: configurable cache name
 			Cache cache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
 			if (cache == null) {
 				if (log.isErrorEnabled()) {
 					log.error("Unable to find cache: " + SERVICE_INSTANCE_CACHE_NAME);
 				}
+				return Optional.<List<ServiceInstance>>empty();
 			}
-			else {
-				List<ServiceInstance> list = cache.get(serviceId, List.class);
-				if (list != null && !list.isEmpty()) {
-					return Flux.just(list);
-				}
+			return Optional.ofNullable((List<ServiceInstance>) cache.get(serviceId, List.class));
+		}).subscribeOn(Schedulers.boundedElastic()).flatMapMany(cachedInstances -> {
+			if (cachedInstances.isPresent() && !cachedInstances.get().isEmpty()) {
+				return Flux.just(cachedInstances.get());
 			}
-			return delegate.get().take(1).doOnNext(instances -> {
+			return delegate.get().take(1).flatMap(instances -> Mono.fromRunnable(() -> {
 				Cache writeCache = cacheManager.getCache(SERVICE_INSTANCE_CACHE_NAME);
 				if (writeCache == null) {
 					if (log.isErrorEnabled()) {
@@ -75,8 +78,8 @@ public class CachingServiceInstanceListSupplier extends DelegatingServiceInstanc
 				else {
 					writeCache.put(serviceId, instances);
 				}
-			});
-		});
+			}).subscribeOn(Schedulers.boundedElastic()).thenReturn(instances));
+		}));
 	}
 
 	@Override

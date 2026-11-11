@@ -22,8 +22,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,16 +38,20 @@ import org.testcontainers.utility.DockerImageName;
 import org.springframework.cache.Cache;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for {@link RedisLoadBalancerCacheManager}.
  *
- * @author
  */
 class RedisLoadBalancerCacheManagerTests {
 
@@ -115,6 +122,70 @@ class RedisLoadBalancerCacheManagerTests {
 	}
 
 	@Test
+	void shouldSerializeCustomServiceInstanceAsDefaultServiceInstance() {
+		Cache cache = getServiceInstanceCache();
+
+		ServiceInstance customInstance = new ServiceInstance() {
+
+			@Override
+			public String getServiceId() {
+				return "orders";
+			}
+
+			@Override
+			public String getHost() {
+				return "custom-host";
+			}
+
+			@Override
+			public int getPort() {
+				return 9090;
+			}
+
+			@Override
+			public boolean isSecure() {
+				return true;
+			}
+
+			@Override
+			public URI getUri() {
+				return URI.create("https://custom-host:9090");
+			}
+
+			@Override
+			public String getInstanceId() {
+				return "custom-instance";
+			}
+
+			@Override
+			public Map<String, String> getMetadata() {
+				return Map.of("zone", "custom-zone");
+			}
+
+		};
+
+		cache.put("orders", List.of(customInstance));
+
+		Cache.ValueWrapper result = cache.get("orders");
+
+		assertThat(result).isNotNull();
+
+		List<?> instances = (List<?>) result.get();
+		assertThat(instances).hasSize(1);
+		assertThat(instances.get(0)).isInstanceOf(DefaultServiceInstance.class);
+
+		ServiceInstance retrieved = (ServiceInstance) instances.get(0);
+
+		assertThat(retrieved.getInstanceId()).isEqualTo("custom-instance");
+		assertThat(retrieved.getServiceId()).isEqualTo("orders");
+		assertThat(retrieved.getHost()).isEqualTo("custom-host");
+		assertThat(retrieved.getPort()).isEqualTo(9090);
+		assertThat(retrieved.isSecure()).isTrue();
+		assertThat(retrieved.getUri()).isEqualTo(URI.create("https://custom-host:9090"));
+		assertThat(retrieved.getMetadata()).containsEntry("zone", "custom-zone");
+	}
+
+	@Test
 	void shouldReturnNullForMissingEntry() {
 		assertThat(getServiceInstanceCache().get("missing")).isNull();
 	}
@@ -170,34 +241,80 @@ class RedisLoadBalancerCacheManagerTests {
 	}
 
 	@Test
-	void shouldRejectUnsupportedSerializationVersion() throws IOException {
+	void shouldRejectTooManyServiceInstancesDuringSerialization() {
+		Cache cache = getServiceInstanceCache();
+		List<ServiceInstance> instances = Collections.nCopies(10_001, createInstance());
+
+		assertThatThrownBy(() -> cache.put("orders", instances)).isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("Invalid service instance count in Redis cache: 10001");
+	}
+
+	@Test
+	void shouldRejectTooManyMetadataEntriesDuringSerialization() {
+		Cache cache = getServiceInstanceCache();
+
+		Map<String, String> metadata = new HashMap<>();
+		for (int i = 0; i < 10_001; i++) {
+			metadata.put("key-" + i, "value-" + i);
+		}
+
+		ServiceInstance instance = new DefaultServiceInstance("instance-1", "orders", "localhost", 8080, false,
+				metadata);
+
+		assertThatThrownBy(() -> cache.put("orders", List.of(instance))).isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("Invalid service instance metadata size: 10001");
+	}
+
+	@Test
+	void shouldTreatRedisReadFailureAsCacheMiss() {
+		Cache cache = createCacheManagerWithUnavailableRedis().getCache(CACHE_NAME);
+
+		assertThat(cache.get("orders")).isNull();
+	}
+
+	@Test
+	void shouldIgnoreRedisWriteFailure() {
+		Cache cache = createCacheManagerWithUnavailableRedis().getCache(CACHE_NAME);
+
+		assertThatCode(() -> cache.put("orders", List.of(createInstance()))).doesNotThrowAnyException();
+	}
+
+	@Test
+	void shouldIgnoreRedisPutIfAbsentFailure() {
+		Cache cache = createCacheManagerWithUnavailableRedis().getCache(CACHE_NAME);
+
+		assertThat(cache.putIfAbsent("orders", List.of(createInstance()))).isNull();
+	}
+
+	@Test
+	void shouldTreatUnsupportedSerializationVersionAsCacheMiss() throws IOException {
 		byte[] invalidValue = createPayload(outputStream -> {
 			outputStream.writeInt(99);
 			outputStream.writeInt(0);
 		});
 
-		assertInvalidPayload(invalidValue, "Unsupported Redis LoadBalancer cache serialization version");
+		assertInvalidPayload(invalidValue);
 	}
 
 	@Test
-	void shouldRejectTruncatedPayload() {
+	void shouldTreatTruncatedPayloadAsCacheMiss() {
 		byte[] invalidValue = { 0, 0, 0, SERIALIZATION_VERSION, 0 };
 
-		assertInvalidPayload(invalidValue, "Failed to deserialize LoadBalancer cache value");
+		assertInvalidPayload(invalidValue);
 	}
 
 	@Test
-	void shouldRejectInvalidServiceInstanceCount() throws IOException {
+	void shouldTreatInvalidServiceInstanceCountAsCacheMiss() throws IOException {
 		byte[] invalidValue = createPayload(outputStream -> {
 			outputStream.writeInt(SERIALIZATION_VERSION);
 			outputStream.writeInt(-1);
 		});
 
-		assertInvalidPayload(invalidValue, "Invalid service instance count in Redis cache");
+		assertInvalidPayload(invalidValue);
 	}
 
 	@Test
-	void shouldRejectInvalidMetadataCount() throws IOException {
+	void shouldTreatInvalidMetadataCountAsCacheMiss() throws IOException {
 		byte[] invalidValue = createPayload(outputStream -> {
 			outputStream.writeInt(SERIALIZATION_VERSION);
 			outputStream.writeInt(1);
@@ -212,11 +329,11 @@ class RedisLoadBalancerCacheManagerTests {
 			outputStream.writeInt(-1);
 		});
 
-		assertInvalidPayload(invalidValue, "Invalid service instance metadata size");
+		assertInvalidPayload(invalidValue);
 	}
 
 	@Test
-	void shouldRejectInvalidStringLength() throws IOException {
+	void shouldTreatInvalidStringLengthAsCacheMiss() throws IOException {
 		byte[] invalidValue = createPayload(outputStream -> {
 			outputStream.writeInt(SERIALIZATION_VERSION);
 			outputStream.writeInt(1);
@@ -224,11 +341,11 @@ class RedisLoadBalancerCacheManagerTests {
 			outputStream.writeInt(-2);
 		});
 
-		assertInvalidPayload(invalidValue, "Invalid string length in Redis LoadBalancer cache value");
+		assertInvalidPayload(invalidValue);
 	}
 
 	@Test
-	void shouldRejectMalformedServiceInstanceUri() throws IOException {
+	void shouldTreatMalformedServiceInstanceUriAsCacheMiss() throws IOException {
 		byte[] invalidValue = createPayload(outputStream -> {
 			outputStream.writeInt(SERIALIZATION_VERSION);
 			outputStream.writeInt(1);
@@ -242,26 +359,77 @@ class RedisLoadBalancerCacheManagerTests {
 			outputStream.writeInt(0);
 		});
 
-		assertInvalidPayload(invalidValue, "Failed to deserialize LoadBalancer cache value");
+		assertInvalidPayload(invalidValue);
 	}
 
 	@Test
-	void shouldRejectUnexpectedTrailingData() throws IOException {
+	void shouldTreatUnexpectedTrailingDataAsCacheMiss() throws IOException {
 		byte[] invalidValue = createPayload(outputStream -> {
 			outputStream.writeInt(SERIALIZATION_VERSION);
 			outputStream.writeInt(0);
 			outputStream.writeByte(1);
 		});
 
-		assertInvalidPayload(invalidValue, "Unexpected trailing data in Redis LoadBalancer cache value");
+		assertInvalidPayload(invalidValue);
 	}
 
-	private void assertInvalidPayload(byte[] invalidValue, String expectedMessage) {
+	@Test
+	void shouldNotExpireEntriesWhenTtlIsZero() {
+		assertEntryDoesNotExpire(Duration.ZERO);
+	}
+
+	@Test
+	void shouldNotExpireEntriesWhenTtlIsNegative() {
+		assertEntryDoesNotExpire(Duration.ofSeconds(-1));
+	}
+
+	@Test
+	void shouldNotExpireEntriesWhenTtlIsNull() {
+		assertEntryDoesNotExpire(null);
+	}
+
+	private void assertEntryDoesNotExpire(Duration ttl) {
+		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
+		properties.setTtl(ttl);
+
+		RedisLoadBalancerCacheManager manager = new RedisLoadBalancerCacheManager(connectionFactory, properties);
+		manager.afterPropertiesSet();
+
+		Cache cache = manager.getCache(CACHE_NAME);
+		assertThat(cache).isNotNull();
+
+		cache.put("no-expiration", List.of(createInstance()));
+
+		@SuppressWarnings("unchecked")
+		RedisTemplate<String, byte[]> redisTemplate = (RedisTemplate<String, byte[]>) cache.getNativeCache();
+
+		String redisKey = REDIS_KEY_PREFIX + CACHE_NAME + ":no-expiration";
+
+		assertThat(redisTemplate.getExpire(redisKey, TimeUnit.SECONDS)).isEqualTo(-1L);
+		assertThat(cache.get("no-expiration")).isNotNull();
+	}
+
+	private void assertInvalidPayload(byte[] invalidValue) {
 		Cache cache = getServiceInstanceCache();
 		writeRedisValue("orders", invalidValue);
 
-		assertThatThrownBy(() -> cache.get("orders")).isInstanceOf(IllegalStateException.class)
-			.hasMessageContaining(expectedMessage);
+		assertThat(cache.get("orders")).isNull();
+	}
+
+	private RedisLoadBalancerCacheManager createCacheManagerWithUnavailableRedis() {
+		RedisConnectionFactory unavailableConnectionFactory = mock(RedisConnectionFactory.class);
+
+		when(unavailableConnectionFactory.getConnection())
+			.thenThrow(new RedisConnectionFailureException("Redis is unavailable"));
+
+		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
+		properties.setTtl(Duration.ofSeconds(5));
+
+		RedisLoadBalancerCacheManager manager = new RedisLoadBalancerCacheManager(unavailableConnectionFactory,
+				properties);
+		manager.afterPropertiesSet();
+
+		return manager;
 	}
 
 	private void writeRedisValue(String key, byte[] value) {

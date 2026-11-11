@@ -28,7 +28,6 @@ import org.springframework.util.Assert;
  * Redis-based {@link LoadBalancerCacheManager} implementation for Spring Cloud
  * LoadBalancer.
  *
- * @author
  */
 public class RedisLoadBalancerCacheManager extends AbstractCacheManager implements LoadBalancerCacheManager {
 

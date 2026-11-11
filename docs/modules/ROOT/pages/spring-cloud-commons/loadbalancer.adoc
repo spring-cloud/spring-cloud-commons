@@ -82,6 +82,41 @@ See the xref:spring-cloud-commons/loadbalancer.adoc#loadbalancer-cache-configura
 
 TIP: To use Caffeine instead of the default cache, add the `com.github.ben-manes.caffeine:caffeine` dependency to classpath.
 
+[[redis-backed-loadbalancer-cache-implementation]]
+=== Redis-backed LoadBalancer Cache Implementation
+
+Spring Cloud LoadBalancer supports a Redis-backed cache implementation. To use it, add the Spring Boot Redis starter to your application:
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+----
+
+To enable Redis-backed caching, set the `spring.cache.type` property to `redis`:
+
+.application.yml
+[source,yaml]
+----
+spring:
+  cache:
+    type: redis
+----
+
+NOTE: The `spring.cache.type=redis` property selects Redis for Spring Cloud LoadBalancer caching and also affects the application's own Spring Cache infrastructure, including caches used with `@Cacheable`.
+
+When Redis is selected and a `RedisConnectionFactory` is available, Spring Cloud LoadBalancer uses the Redis-backed cache implementation.
+
+The Redis cache uses the general LoadBalancer cache configuration, including the `spring.cloud.loadbalancer.cache.ttl` property, to control the expiration time of cached service instance lists.
+
+If Redis is selected but a `RedisConnectionFactory` is not available, Spring Cloud LoadBalancer falls back to Caffeine when it is available, or to the default cache otherwise.
+
+If you define your own `LoadBalancerCacheManager` bean, the auto-configured LoadBalancer cache manager backs off.
+
+NOTE: The Redis cache serializes selected `ServiceInstance` fields: `instanceId`, `serviceId`, `host`, `port`, `uri`, `secure`, and `metadata`. Only these serialized fields are restored, and deserialized instances are always represented as `DefaultServiceInstance`. Other custom properties or behavior from a custom `ServiceInstance` implementation are not preserved.
+
 [[loadbalancer-cache-configuration]]
 === LoadBalancer Cache Configuration
 

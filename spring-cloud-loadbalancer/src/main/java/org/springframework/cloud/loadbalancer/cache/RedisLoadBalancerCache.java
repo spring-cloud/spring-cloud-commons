@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
@@ -45,9 +48,10 @@ import org.springframework.util.Assert;
 /**
  * Redis-backed cache for Spring Cloud LoadBalancer service instances.
  *
- * @author
  */
 final class RedisLoadBalancerCache extends AbstractValueAdaptingCache {
+
+	private static final Log log = LogFactory.getLog(RedisLoadBalancerCache.class);
 
 	private static final String CACHE_KEY_PREFIX = "spring-cloud-loadbalancer:";
 
@@ -69,9 +73,6 @@ final class RedisLoadBalancerCache extends AbstractValueAdaptingCache {
 		super(false);
 		Assert.hasText(name, "Cache name must not be empty");
 		Assert.notNull(redisConnectionFactory, "RedisConnectionFactory must not be null");
-		Assert.notNull(ttl, "Cache TTL must not be null");
-		Assert.isTrue(!ttl.isNegative() && !ttl.isZero(), "Cache TTL must be positive");
-
 		this.name = name;
 		this.ttl = ttl;
 
@@ -94,8 +95,17 @@ final class RedisLoadBalancerCache extends AbstractValueAdaptingCache {
 
 	@Override
 	protected Object lookup(Object key) {
-		byte[] value = this.redisTemplate.opsForValue().get(createRedisKey(key));
-		return value == null ? null : deserialize(value);
+		try {
+			byte[] value = this.redisTemplate.opsForValue().get(createRedisKey(key));
+			return value == null ? null : deserialize(value);
+		}
+		catch (RuntimeException ex) {
+			if (log.isWarnEnabled()) {
+				log.warn("Failed to retrieve value from Redis LoadBalancer cache. " + "Treating it as a cache miss.",
+						ex);
+			}
+			return null;
+		}
 	}
 
 	@Override
@@ -122,16 +132,47 @@ final class RedisLoadBalancerCache extends AbstractValueAdaptingCache {
 	@Override
 	public void put(Object key, Object value) {
 		Assert.isInstanceOf(List.class, value, "LoadBalancer cache values must be lists of ServiceInstance");
+
 		byte[] serializedValue = serialize((List<?>) value);
-		this.redisTemplate.opsForValue().set(createRedisKey(key), serializedValue, this.ttl);
+
+		try {
+			if (hasTtl()) {
+				this.redisTemplate.opsForValue().set(createRedisKey(key), serializedValue, this.ttl);
+			}
+			else {
+				this.redisTemplate.opsForValue().set(createRedisKey(key), serializedValue);
+			}
+		}
+		catch (RuntimeException ex) {
+			if (log.isWarnEnabled()) {
+				log.warn("Failed to write value to Redis LoadBalancer cache. Continuing without caching.", ex);
+			}
+		}
 	}
 
 	@Override
 	public ValueWrapper putIfAbsent(Object key, Object value) {
 		Assert.isInstanceOf(List.class, value, "LoadBalancer cache values must be lists of ServiceInstance");
+
 		byte[] serializedValue = serialize((List<?>) value);
-		Boolean inserted = this.redisTemplate.opsForValue().setIfAbsent(createRedisKey(key), serializedValue, this.ttl);
-		return Boolean.TRUE.equals(inserted) ? null : get(key);
+
+		try {
+			Boolean inserted;
+			if (hasTtl()) {
+				inserted = this.redisTemplate.opsForValue().setIfAbsent(createRedisKey(key), serializedValue, this.ttl);
+			}
+			else {
+				inserted = this.redisTemplate.opsForValue().setIfAbsent(createRedisKey(key), serializedValue);
+			}
+
+			return Boolean.TRUE.equals(inserted) ? null : get(key);
+		}
+		catch (RuntimeException ex) {
+			if (log.isWarnEnabled()) {
+				log.warn("Failed to put value in Redis LoadBalancer cache. Continuing without caching.", ex);
+			}
+			return null;
+		}
 	}
 
 	@Override
@@ -153,12 +194,19 @@ final class RedisLoadBalancerCache extends AbstractValueAdaptingCache {
 		});
 	}
 
+	private boolean hasTtl() {
+		return this.ttl != null && !this.ttl.isZero() && !this.ttl.isNegative();
+	}
+
 	private String createRedisKey(Object key) {
 		Assert.notNull(key, "Cache key must not be null");
 		return CACHE_KEY_PREFIX + this.name + CACHE_KEY_SEPARATOR + key;
 	}
 
 	private byte[] serialize(List<?> instances) {
+		Assert.isTrue(instances.size() <= MAX_SERVICE_INSTANCES,
+				"Invalid service instance count in Redis cache: " + instances.size());
+
 		try {
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
@@ -175,11 +223,19 @@ final class RedisLoadBalancerCache extends AbstractValueAdaptingCache {
 				writeNullableString(dataOutputStream, serviceInstance.getServiceId());
 				writeNullableString(dataOutputStream, serviceInstance.getHost());
 				dataOutputStream.writeInt(serviceInstance.getPort());
+
 				URI uri = serviceInstance.getUri();
 				writeNullableString(dataOutputStream, uri == null ? null : uri.toString());
+
 				dataOutputStream.writeBoolean(serviceInstance.isSecure());
 
 				Map<String, String> metadata = serviceInstance.getMetadata();
+
+				if (metadata != null) {
+					Assert.isTrue(metadata.size() <= MAX_METADATA_ENTRIES,
+							"Invalid service instance metadata size: " + metadata.size());
+				}
+
 				dataOutputStream.writeInt(metadata == null ? 0 : metadata.size());
 
 				if (metadata != null) {
