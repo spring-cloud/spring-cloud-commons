@@ -44,6 +44,7 @@ import org.springframework.util.StringUtils;
  * @author Olga Maciaszek-Sharma
  * @author Roman Matiushchenko
  * @author Roman Chigvintsev
+ * @author Amal Saidov
  * @since 2.2.0
  */
 public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceInstanceListSupplier
@@ -152,7 +153,7 @@ public class HealthCheckServiceInstanceListSupplier extends DelegatingServiceIns
 
 	private ServiceInstance updatedServiceInstance(ServiceInstance serviceInstance) {
 		Integer healthCheckPort = healthCheck.getPort();
-		if (serviceInstance instanceof DefaultServiceInstance && healthCheckPort != null) {
+		if (healthCheckPort != null && healthCheckPort != serviceInstance.getPort()) {
 			return new DefaultServiceInstance(serviceInstance.getInstanceId(), serviceInstance.getServiceId(),
 					serviceInstance.getHost(), healthCheckPort, serviceInstance.isSecure(),
 					serviceInstance.getMetadata());
