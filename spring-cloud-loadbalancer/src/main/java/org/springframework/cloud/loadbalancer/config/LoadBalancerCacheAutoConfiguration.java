@@ -97,7 +97,6 @@ public class LoadBalancerCacheAutoConfiguration {
 		}
 
 		@Bean
-		@ConditionalOnMissingClass("org.springframework.cloud.netflix.eureka.EurekaDiscoveryClient")
 		LoadBalancerCaffeineWarnLogger caffeineWarnLogger() {
 			return new LoadBalancerCaffeineWarnLogger();
 		}
@@ -148,8 +147,9 @@ public class LoadBalancerCacheAutoConfiguration {
 		public void afterPropertiesSet() {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("Spring Cloud LoadBalancer is currently working with the default cache. "
-						+ "While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production."
-						+ "You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.");
+						+ "While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production. "
+						+ "You can switch to using Caffeine cache by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath. "
+						+ "If your DiscoveryClient implementation already provides caching, consider disabling Spring Cloud LoadBalancer caching to avoid double caching.");
 			}
 		}
 
