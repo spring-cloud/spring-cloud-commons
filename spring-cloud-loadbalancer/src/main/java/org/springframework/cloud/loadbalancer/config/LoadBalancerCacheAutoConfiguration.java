@@ -97,6 +97,7 @@ public class LoadBalancerCacheAutoConfiguration {
 		}
 
 		@Bean
+		@ConditionalOnMissingClass("org.springframework.cloud.netflix.eureka.EurekaDiscoveryClient")
 		LoadBalancerCaffeineWarnLogger caffeineWarnLogger() {
 			return new LoadBalancerCaffeineWarnLogger();
 		}

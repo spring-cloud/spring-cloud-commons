@@ -29,6 +29,7 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.support.NoOpCacheManager;
 import org.springframework.cloud.loadbalancer.cache.DefaultLoadBalancerCacheManager;
+import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClient;
 import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,7 +98,7 @@ class LoadBalancerCacheAutoConfigurationTests {
 
 	@Test
 	void shouldUseDefaultCacheIfCaffeineNotInClasspath() {
-		ApplicationContextRunner contextRunner = noCaffeineRunner();
+		ApplicationContextRunner contextRunner = noCaffeineAndNoEurekaRunner();
 
 		contextRunner.run(context -> {
 			assertThat(context.getBean(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
@@ -113,7 +114,7 @@ class LoadBalancerCacheAutoConfigurationTests {
 
 	@Test
 	void shouldUseDefaultCacheIfCaffeineCacheManagerNotInClasspath() {
-		ApplicationContextRunner contextRunner = noCaffeineCacheManagerRunner();
+		ApplicationContextRunner contextRunner = noCaffeineCacheManagerAndNoEurekaRunner();
 
 		contextRunner.run(context -> {
 			assertThat(context.getBean(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
@@ -179,6 +180,32 @@ class LoadBalancerCacheAutoConfigurationTests {
 				assertThat(context.getBean("cacheManager")).isInstanceOf(ConcurrentMapCacheManager.class);
 				assertThat(((CacheManager) context.getBean("cacheManager")).getCacheNames()).isEmpty();
 			});
+	}
+
+	@Test
+	void shouldNotLogWarningWhenEurekaDiscoveryClientIsPresent() {
+		ApplicationContextRunner contextRunner = noCaffeineRunner();
+
+		contextRunner.run(context -> assertThat(
+				context.getBeansOfType(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
+			.isEmpty());
+	}
+
+	@Test
+	void shouldCreateWarnLoggerWhenEurekaDiscoveryClientIsNotPresent() {
+		noCaffeineAndNoEurekaRunner().run(context -> assertThat(
+				context.getBeansOfType(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
+			.hasSize(1));
+	}
+
+	private ApplicationContextRunner noCaffeineAndNoEurekaRunner() {
+		return baseApplicationRunner()
+			.withClassLoader(new FilteredClassLoader(Caffeine.class, EurekaDiscoveryClient.class));
+	}
+
+	private ApplicationContextRunner noCaffeineCacheManagerAndNoEurekaRunner() {
+		return baseApplicationRunner()
+			.withClassLoader(new FilteredClassLoader(CaffeineCacheManager.class, EurekaDiscoveryClient.class));
 	}
 
 	private ApplicationContextRunner baseApplicationRunner() {
