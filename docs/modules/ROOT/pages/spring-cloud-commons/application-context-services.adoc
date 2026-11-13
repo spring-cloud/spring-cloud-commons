@@ -182,7 +182,17 @@ If you have a scaled-out client application, it is better to broadcast the `Envi
 The `EnvironmentChangeEvent` covers a large class of refresh use cases, as long as you can actually make a change to the `Environment` and publish the event.
 Note that those APIs are public and part of core Spring.
 You can verify that the changes are bound to `@ConfigurationProperties` beans by visiting the `/configprops` endpoint (a standard Spring Boot Actuator feature).
-For instance, a `DataSource` can have its `maxPoolSize` changed at runtime (the default `DataSource` created by Spring Boot is a `@ConfigurationProperties` bean) and grow capacity dynamically.
+For instance, a pooled `DataSource` bound through `@ConfigurationProperties` may support changing its maximum pool size at runtime, depending on the implementation and its support for re-binding and re-initialization.
+
+[WARNING]
+====
+Configuration-properties re-binding is not suitable for every stateful bean, including some pooled `DataSource` implementations.
+`HikariDataSource` is excluded from re-binding by default through `spring.cloud.refresh.never-refreshable`, because re-binding can shut down the pool and leave it unusable.
+This property accepts a comma-separated list of bean names or fully qualified class names.
+Setting it explicitly replaces the default, so retain `com.zaxxer.hikari.HikariDataSource` in the list if you use HikariCP.
+Other pooled `DataSource` implementations may also have lifecycle constraints; check the implementation's support for re-binding rather than assuming that changing pools makes re-binding safe.
+This exclusion applies to configuration-properties re-binding, not to the destruction and recreation of explicitly refresh-scoped beans described in <<refresh-scope>>.
+====
 
 When a `@ConfigurationProperties` bean is re-bound, its properties are first reset to their class-level defaults so that values for properties that have been removed from the `Environment` do not linger.
 This reset also recurses into nested `@ConfigurationProperties` objects (for example a nested object that has no setter).
@@ -223,17 +233,15 @@ NOTE: Objects using constructor binding including Java Records annotated with `@
 
 When there is a configuration change, a Spring `@Bean` that is marked as `@RefreshScope` gets special treatment.
 This feature addresses the problem of stateful beans that get their configuration injected only when they are initialized.
-For instance, if a `DataSource` has open connections when the database URL is changed through the `Environment`, you probably want the holders of those connections to be able to complete what they are doing.
-Then, the next time something borrows a connection from the pool, it gets one with the new URL.
+For instance, a refresh-scoped `DataSource` can be recreated with a new database URL after the `Environment` changes and the scope is refreshed.
+Refreshing the scope invokes the old target's destruction callbacks and creates a new target on subsequent access.
+The effect on open connections depends on the pool implementation and its shutdown behavior; `@RefreshScope` does not guarantee that in-flight connections remain usable.
 
 Sometimes, it might even be mandatory to apply the `@RefreshScope` annotation on some beans that can be only initialized once.
 If a bean is "`immutable`", you have to either annotate the bean with `@RefreshScope` or specify the classname under the property key: `spring.cloud.refresh.extra-refreshable`.
 
-WARNING: If you have a `DataSource` bean that is a `HikariDataSource`, it can not be
-refreshed. It is the default value for `spring.cloud.refresh.never-refreshable`. Choose a
-different `DataSource` implementation if you need it to be refreshed.  If you set `spring.cloud.refresh.never-refreshable`
-in your application configuration and use `HikariDataSource` then you should add `com.zaxxer.hikari.HikariDataSource` to
-the list of beans to not refresh.
+NOTE: `spring.cloud.refresh.never-refreshable` does not prevent a bean explicitly annotated with `@RefreshScope` from being destroyed and recreated.
+This also applies to `HikariDataSource`, which is excluded from configuration-properties re-binding by default as described in <<environment-changes>>.
 
 Refresh scope beans are lazy proxies that initialize when they are used (that is, when a method is called), and the scope acts as a cache of initialized values.
 To force a bean to re-initialize on the next method call, you must invalidate its cache entry.
