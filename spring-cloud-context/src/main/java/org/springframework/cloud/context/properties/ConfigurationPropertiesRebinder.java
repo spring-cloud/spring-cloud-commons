@@ -105,11 +105,11 @@ public class ConfigurationPropertiesRebinder
 
 	private static final Log logger = LogFactory.getLog(ConfigurationPropertiesRebinder.class);
 
-	private ConfigurationPropertiesBeans beans;
+	private final ConfigurationPropertiesBeans beans;
 
 	private ApplicationContext applicationContext;
 
-	private Map<String, Exception> errors = new ConcurrentHashMap<>();
+	private final Map<String, Exception> errors = new ConcurrentHashMap<>();
 
 	private final ConcurrentMap<String, Lock> rebindLocks = new ConcurrentHashMap<>();
 
@@ -183,7 +183,7 @@ public class ConfigurationPropertiesRebinder
 	 * @param type bean type to rebind.
 	 * @return true, if successful.
 	 */
-	public boolean rebind(Class type) {
+	public boolean rebind(Class<?> type) {
 		String[] beanNamesForType = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(this.applicationContext, type);
 		if (beanNamesForType.length > 0) {
 			String name = beanNamesForType[0];
@@ -205,7 +205,7 @@ public class ConfigurationPropertiesRebinder
 		try {
 			try {
 				Object bean = appContext.getBean(name);
-				if (bean != null && !AopUtils.isAopProxy(bean)) {
+				if (!AopUtils.isAopProxy(bean)) {
 					// A BeanPostProcessor may have replaced the bean with a wrapper after
 					// the properties were bound (for example Boot's lazy connection fetch
 					// wraps the DataSource). Rebind what the properties were bound to,
@@ -216,43 +216,41 @@ public class ConfigurationPropertiesRebinder
 						bean = bound;
 					}
 				}
-				if (bean != null) {
-					// The class behind every proxy layer, not just the outermost one
-					Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
-					// TODO: determine a more general approach to fix this.
-					// see
-					// https://github.com/spring-cloud/spring-cloud-commons/issues/571
-					if (getNeverRefreshable().contains(targetClass.getName()) || getNeverRefreshable().contains(name)) {
-						return false; // ignore
-					}
-					if (AopUtils.isAopProxy(bean) && bean instanceof Advised advised) {
-						Object target = ProxyUtils.getTargetObject(bean);
-						if (target != bean && !targetClass.isInterface()
-								&& !Modifier.isAbstract(targetClass.getModifiers())) {
-							Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(targetClass);
-							Object freshTarget = AopUtils.isAopProxy(freshBean) ? ProxyUtils.getTargetObject(freshBean)
-									: freshBean;
-							// Keep the advice of every proxy layer
-							innermostAdvised(advised).setTargetSource(new SingletonTargetSource(freshTarget));
-							appContext.getAutowireCapableBeanFactory().destroyBean(target);
-						}
-						else {
-							Object boundDefaults = bindFreshInstance(target, name, appContext);
-							appContext.getAutowireCapableBeanFactory().destroyBean(target);
-							resetBeanToDefaults(target, boundDefaults);
-							appContext.getAutowireCapableBeanFactory().autowireBean(target);
-							appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
-						}
+				// The class behind every proxy layer, not just the outermost one
+				Class<?> targetClass = AopProxyUtils.ultimateTargetClass(bean);
+				// TODO: determine a more general approach to fix this.
+				// see
+				// https://github.com/spring-cloud/spring-cloud-commons/issues/571
+				if (getNeverRefreshable().contains(targetClass.getName()) || getNeverRefreshable().contains(name)) {
+					return false; // ignore
+				}
+				if (AopUtils.isAopProxy(bean) && bean instanceof Advised advised) {
+					Object target = ProxyUtils.getTargetObject(bean);
+					if (target != bean && !targetClass.isInterface()
+							&& !Modifier.isAbstract(targetClass.getModifiers())) {
+						Object freshBean = appContext.getAutowireCapableBeanFactory().createBean(targetClass);
+						Object freshTarget = AopUtils.isAopProxy(freshBean) ? ProxyUtils.getTargetObject(freshBean)
+								: freshBean;
+						// Keep the advice of every proxy layer
+						innermostAdvised(advised).setTargetSource(new SingletonTargetSource(freshTarget));
+						appContext.getAutowireCapableBeanFactory().destroyBean(target);
 					}
 					else {
-						Object boundDefaults = bindFreshInstance(bean, name, appContext);
-						appContext.getAutowireCapableBeanFactory().destroyBean(bean);
-						resetBeanToDefaults(bean, boundDefaults);
-						appContext.getAutowireCapableBeanFactory().autowireBean(bean);
-						appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
+						Object boundDefaults = bindFreshInstance(target, name, appContext);
+						appContext.getAutowireCapableBeanFactory().destroyBean(target);
+						resetBeanToDefaults(target, boundDefaults);
+						appContext.getAutowireCapableBeanFactory().autowireBean(target);
+						appContext.getAutowireCapableBeanFactory().initializeBean(target, name);
 					}
-					return true;
 				}
+				else {
+					Object boundDefaults = bindFreshInstance(bean, name, appContext);
+					appContext.getAutowireCapableBeanFactory().destroyBean(bean);
+					resetBeanToDefaults(bean, boundDefaults);
+					appContext.getAutowireCapableBeanFactory().autowireBean(bean);
+					appContext.getAutowireCapableBeanFactory().initializeBean(bean, name);
+				}
+				return true;
 			}
 			catch (RuntimeException e) {
 				this.errors.put(name, e);
@@ -262,7 +260,6 @@ public class ConfigurationPropertiesRebinder
 				this.errors.put(name, e);
 				throw new IllegalStateException("Cannot rebind to " + name, e);
 			}
-			return false;
 		}
 		finally {
 			lock.unlock();
@@ -427,17 +424,17 @@ public class ConfigurationPropertiesRebinder
 				else if (target.isReadableProperty(propertyName) && defaultsWrapper.isReadableProperty(propertyName)) {
 					Object value = target.getPropertyValue(propertyName);
 					Object defaultValue = defaultsWrapper.getPropertyValue(propertyName);
-					if (value instanceof Collection collection) {
+					if (value instanceof Collection<?> collection) {
 						try {
-							mergeCollection(collection, defaultValue instanceof Collection c ? c : null);
+							mergeCollection(collection, defaultValue instanceof Collection<?> c ? c : null);
 						}
 						catch (UnsupportedOperationException ex) {
 							warnCannotReset(bean, propertyName, ex);
 						}
 					}
-					else if (value instanceof Map map) {
+					else if (value instanceof Map<?, ?> map) {
 						try {
-							mergeMap(map, defaultValue instanceof Map m ? m : null);
+							mergeMap(map, defaultValue instanceof Map<?, ?> m ? m : null);
 						}
 						catch (UnsupportedOperationException ex) {
 							warnCannotReset(bean, propertyName, ex);
