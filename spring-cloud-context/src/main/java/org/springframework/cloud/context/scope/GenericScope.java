@@ -58,7 +58,6 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * <p>
@@ -215,18 +214,12 @@ public class GenericScope
 	}
 
 	private Expression parseExpression(String input) {
-		if (StringUtils.hasText(input)) {
-			ExpressionParser parser = new SpelExpressionParser();
-			try {
-				return parser.parseExpression(input);
-			}
-			catch (ParseException e) {
-				throw new IllegalArgumentException("Cannot parse expression: " + input, e);
-			}
-
+		ExpressionParser parser = new SpelExpressionParser();
+		try {
+			return parser.parseExpression(input);
 		}
-		else {
-			return null;
+		catch (ParseException e) {
+			throw new IllegalArgumentException("Cannot parse expression: " + input, e);
 		}
 	}
 
