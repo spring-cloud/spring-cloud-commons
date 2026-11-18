@@ -242,6 +242,19 @@ The `RefreshScope` is a bean in the context and has a public `refreshAll()` meth
 The `/refresh` endpoint exposes this functionality (over HTTP or JMX).
 To refresh an individual bean by name, there is also a `refresh(String)` method.
 
+By default, refreshing a bean waits indefinitely for its active method invocations to finish before acquiring its write lock.
+A queued refresh writer can also block new method invocations, including work that an active invocation is waiting for.
+To bound this wait, configure `spring.cloud.refresh.lock-timeout`, for example `spring.cloud.refresh.lock-timeout=5s`.
+This setting is read when the auto-configured scope is created; a custom `RefreshScope` can use `setLockTimeout(Duration)`.
+The timeout must be non-negative; zero attempts to acquire the lock without waiting.
+
+If lock acquisition times out or is interrupted, the refresh throws an `IllegalStateException` identifying the bean and does not publish a `RefreshScopeRefreshedEvent` for that operation.
+The affected bean remains cached with its destruction callback intact, and the refresh writer leaves the lock queue so waiting method invocations can proceed.
+`refreshAll()` applies the timeout separately to each bean and stops at the first failure.
+Beans already refreshed are not restored; environment changes made before the scope refresh are not rolled back either.
+There is no automatic retry.
+The timeout limits lock acquisition only: it does not bound destruction callbacks, interrupt active method invocations, or change application shutdown behavior.
+
 To expose the `/refresh` endpoint, you need to add following configuration to your application:
 
 [source,yaml]
