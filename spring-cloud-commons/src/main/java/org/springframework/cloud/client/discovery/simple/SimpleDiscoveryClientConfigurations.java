@@ -44,9 +44,9 @@ class SimpleDiscoveryClientConfigurations {
 
 		protected final SimpleDiscoveryProperties simple = new SimpleDiscoveryProperties();
 
-		protected final InetUtils inet;
+		protected final ObjectProvider<InetUtils> inet;
 
-		SimpleDiscoveryClientConfiguration(InetUtils inet) {
+		SimpleDiscoveryClientConfiguration(ObjectProvider<InetUtils> inet) {
 			this.inet = inet;
 		}
 
@@ -61,7 +61,8 @@ class SimpleDiscoveryClientConfigurations {
 		public SimpleDiscoveryProperties simpleDiscoveryProperties(
 				@Value("${spring.application.name:application}") String serviceId) {
 			this.simple.getLocal().setServiceId(serviceId);
-			this.simple.getLocal().setHost(this.inet.findFirstNonLoopbackHostInfo().getHostname());
+			this.inet.ifAvailable((inetUtils) -> this.simple.getLocal()
+				.setHost(inetUtils.findFirstNonLoopbackHostInfo().getHostname()));
 			this.simple.getLocal().setPort(findPort());
 			return this.simple;
 		}
@@ -76,7 +77,7 @@ class SimpleDiscoveryClientConfigurations {
 	@ConditionalOnMissingClass("org.springframework.boot.web.server.context.WebServerInitializedEvent")
 	static class StandardSimpleDiscoveryClientConfiguration extends SimpleDiscoveryClientConfiguration {
 
-		StandardSimpleDiscoveryClientConfiguration(InetUtils inet) {
+		StandardSimpleDiscoveryClientConfiguration(ObjectProvider<InetUtils> inet) {
 			super(inet);
 		}
 
@@ -91,7 +92,7 @@ class SimpleDiscoveryClientConfigurations {
 
 		private int port;
 
-		WebApplicationSimpleDiscoveryClientConfiguration(InetUtils inet,
+		WebApplicationSimpleDiscoveryClientConfiguration(ObjectProvider<InetUtils> inet,
 				ObjectProvider<ServerProperties> serverProperties) {
 			super(inet);
 			this.serverProperties = serverProperties;
@@ -101,7 +102,8 @@ class SimpleDiscoveryClientConfigurations {
 		public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
 			this.port = webServerInitializedEvent.getWebServer().getPort();
 			if (this.port > 0) {
-				this.simple.getLocal().setHost(this.inet.findFirstNonLoopbackHostInfo().getHostname());
+				this.inet.ifAvailable((inetUtils) -> this.simple.getLocal()
+					.setHost(inetUtils.findFirstNonLoopbackHostInfo().getHostname()));
 				this.simple.getLocal().setPort(this.port);
 			}
 		}
