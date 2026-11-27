@@ -16,9 +16,11 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -721,6 +723,29 @@ class HealthCheckServiceInstanceListSupplierTests {
 		assertThat(exception).hasMessageContaining("Connection refused");
 	}
 
+	@SuppressWarnings("ConstantConditions")
+	@Test
+	void shouldApplyUserProvidedPortToNonDefaultServiceInstance() {
+		String serviceId = "ignored-service";
+		properties.getHealthCheck().setPort(8888);
+		AtomicInteger checkedPort = new AtomicInteger();
+		BiFunction<ServiceInstance, String, Mono<Boolean>> capturingAliveFunction = (instance, path) -> {
+			checkedPort.set(instance.getPort());
+			return Mono.just(true);
+		};
+		// A ServiceInstance implementation other than DefaultServiceInstance, as returned
+		// by discovery clients such as Eureka, Consul or Zookeeper.
+		ServiceInstance serviceInstance = new TestServiceInstance(serviceId, "127.0.0.1", port);
+		listSupplier = new HealthCheckServiceInstanceListSupplier(
+				ServiceInstanceListSuppliers.from(serviceId, serviceInstance),
+				buildLoadBalancerClientFactory(serviceId, properties), capturingAliveFunction);
+
+		boolean alive = listSupplier.isAlive(serviceInstance).block();
+
+		assertThat(alive).isTrue();
+		assertThat(checkedPort).hasValue(8888);
+	}
+
 	private static Stream<Arguments> healthCheckFunctions() {
 		RestTemplate restTemplate = new RestTemplate();
 		RestClient restClient = RestClient.create();
@@ -750,6 +775,52 @@ class HealthCheckServiceInstanceListSupplierTests {
 		@GetMapping("/actuator/health")
 		void defaultHealthCheck() {
 
+		}
+
+	}
+
+	static class TestServiceInstance implements ServiceInstance {
+
+		private final String serviceId;
+
+		private final String host;
+
+		private final int port;
+
+		TestServiceInstance(String serviceId, String host, int port) {
+			this.serviceId = serviceId;
+			this.host = host;
+			this.port = port;
+		}
+
+		@Override
+		public String getServiceId() {
+			return serviceId;
+		}
+
+		@Override
+		public String getHost() {
+			return host;
+		}
+
+		@Override
+		public int getPort() {
+			return port;
+		}
+
+		@Override
+		public boolean isSecure() {
+			return false;
+		}
+
+		@Override
+		public URI getUri() {
+			return ServiceInstance.createUri(this);
+		}
+
+		@Override
+		public Map<String, String> getMetadata() {
+			return Collections.emptyMap();
 		}
 
 	}
