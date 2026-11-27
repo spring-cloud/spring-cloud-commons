@@ -129,6 +129,16 @@ public class LoadBalancerClientConfiguration {
 		@Bean
 		@ConditionalOnBean(ReactiveDiscoveryClient.class)
 		@ConditionalOnMissingBean
+		@Conditional(MultiAZFailoverConfigurationCondition.class)
+		public ServiceInstanceListSupplier multiAZFailoverDiscoveryClientServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withDiscoveryClient().withMultiAZFailover().withCaching()
+					.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(ReactiveDiscoveryClient.class)
+		@ConditionalOnMissingBean
 		@Conditional(RequestBasedStickySessionConfigurationCondition.class)
 		public ServiceInstanceListSupplier requestBasedStickySessionDiscoveryClientServiceInstanceListSupplier(
 				ConfigurableApplicationContext context) {
@@ -240,6 +250,16 @@ public class LoadBalancerClientConfiguration {
 				.withBlockingDiscoveryClient()
 				.withBlockingRestClientHealthChecks()
 				.build(context);
+		}
+
+		@Bean
+		@ConditionalOnBean(DiscoveryClient.class)
+		@ConditionalOnMissingBean
+		@Conditional(MultiAZFailoverConfigurationCondition.class)
+		public ServiceInstanceListSupplier multiAZFailoverServiceInstanceListSupplier(
+				ConfigurableApplicationContext context) {
+			return ServiceInstanceListSupplier.builder().withBlockingDiscoveryClient().withMultiAZFailover()
+					.withCaching().build(context);
 		}
 
 		@Bean
@@ -416,6 +436,16 @@ public class LoadBalancerClientConfiguration {
 		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
 					"configurations", "health-check");
+		}
+
+	}
+
+	static class MultiAZFailoverConfigurationCondition implements Condition {
+
+		@Override
+		public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+			return LoadBalancerEnvironmentPropertyUtils.equalToForClientOrDefault(context.getEnvironment(),
+					"configurations", "multi-az-failover");
 		}
 
 	}
