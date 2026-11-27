@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.autoconfigure;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.context.refresh.ContextRefresher;
+import org.springframework.cloud.context.scope.refresh.RefreshScope;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
@@ -42,9 +44,31 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Dave Syer
  * @author Olga Maciaszek-Sharma
  * @author Yanming Zhou
+ * @author 施浩
  */
 @ExtendWith(OutputCaptureExtension.class)
 class RefreshAutoConfigurationTests {
+
+	@Test
+	void refreshLockTimeoutIsUnboundedByDefault() {
+		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
+			.run(context -> assertThat(context.getBean(RefreshScope.class).getLockTimeout()).isNull());
+	}
+
+	@Test
+	void refreshLockTimeoutCanBeConfigured() {
+		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
+			.withPropertyValues("spring.cloud.refresh.lock-timeout=250ms")
+			.run(context -> assertThat(context.getBean(RefreshScope.class).getLockTimeout())
+				.isEqualTo(Duration.ofMillis(250)));
+	}
+
+	@Test
+	void negativeRefreshLockTimeoutFailsStartup() {
+		new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(RefreshAutoConfiguration.class))
+			.withPropertyValues("spring.cloud.refresh.lock-timeout=-1ms")
+			.run(context -> assertThat(context).hasFailed());
+	}
 
 	private static ConfigurableApplicationContext getApplicationContext(WebApplicationType type, Class<?> configuration,
 			String... properties) {
