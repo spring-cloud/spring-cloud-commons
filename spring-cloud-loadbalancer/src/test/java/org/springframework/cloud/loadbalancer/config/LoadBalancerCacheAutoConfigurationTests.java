@@ -98,7 +98,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 	@Test
 	void shouldUseDefaultCacheIfCaffeineNotInClasspath() {
 		ApplicationContextRunner contextRunner = noCaffeineRunner();
-
 		contextRunner.run(context -> {
 			assertThat(context.getBean(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
 				.isNotNull();
@@ -114,7 +113,6 @@ class LoadBalancerCacheAutoConfigurationTests {
 	@Test
 	void shouldUseDefaultCacheIfCaffeineCacheManagerNotInClasspath() {
 		ApplicationContextRunner contextRunner = noCaffeineCacheManagerRunner();
-
 		contextRunner.run(context -> {
 			assertThat(context.getBean(LoadBalancerCacheAutoConfiguration.LoadBalancerCaffeineWarnLogger.class))
 				.isNotNull();
