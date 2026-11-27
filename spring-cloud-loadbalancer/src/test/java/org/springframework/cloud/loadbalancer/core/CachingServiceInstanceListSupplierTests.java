@@ -16,13 +16,20 @@
 
 package org.springframework.cloud.loadbalancer.core;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cloud.client.DefaultServiceInstance;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.ReactiveDiscoveryClient;
@@ -30,16 +37,26 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperti
 import org.springframework.cloud.client.loadbalancer.LoadBalancerProperties;
 import org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient;
 import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheManager;
+import org.springframework.cloud.loadbalancer.cache.LoadBalancerCacheProperties;
+import org.springframework.cloud.loadbalancer.cache.RedisLoadBalancerCacheManager;
 import org.springframework.cloud.loadbalancer.config.LoadBalancerCacheAutoConfiguration;
 import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static java.time.Duration.ofMillis;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.cloud.loadbalancer.core.LoadBalancerTestUtils.buildLoadBalancerClientFactory;
 import static org.springframework.cloud.loadbalancer.core.ServiceInstanceListSuppliersTestUtils.healthCheckFunction;
 
@@ -66,7 +83,78 @@ class CachingServiceInstanceListSupplierTests {
 		assertTimeoutPreemptively(ofMillis(1000), () -> {
 			blockingLoadBalancerClient.choose(SERVICE_ID);
 		});
+	}
 
+	@Test
+	void shouldReturnInstancesWhenRedisIsUnavailable() {
+		RedisConnectionFactory connectionFactory = mock(RedisConnectionFactory.class);
+		when(connectionFactory.getConnection()).thenThrow(new RedisConnectionFailureException("Redis is unavailable"));
+
+		LoadBalancerCacheProperties properties = new LoadBalancerCacheProperties();
+		properties.setTtl(Duration.ofSeconds(5));
+
+		RedisLoadBalancerCacheManager cacheManager = new RedisLoadBalancerCacheManager(connectionFactory, properties);
+		cacheManager.afterPropertiesSet();
+
+		ServiceInstanceListSupplier delegate = new ServiceInstanceListSupplier() {
+			@Override
+			public Flux<List<ServiceInstance>> get() {
+				return Flux.just(List.of(instance("1host", false), instance("2host-secure", true)));
+			}
+
+			@Override
+			public String getServiceId() {
+				return SERVICE_ID;
+			}
+		};
+
+		CachingServiceInstanceListSupplier supplier = new CachingServiceInstanceListSupplier(delegate, cacheManager);
+
+		StepVerifier.create(supplier.get())
+			.expectNext(List.of(instance("1host", false), instance("2host-secure", true)))
+			.verifyComplete();
+	}
+
+	@Test
+	void shouldExecuteCacheReadAndWriteOnBoundedElasticScheduler() {
+		CacheManager cacheManager = mock(CacheManager.class);
+		Cache cache = mock(Cache.class);
+
+		AtomicReference<String> readThread = new AtomicReference<>();
+		AtomicReference<String> writeThread = new AtomicReference<>();
+
+		when(cacheManager.getCache(CachingServiceInstanceListSupplier.SERVICE_INSTANCE_CACHE_NAME)).thenReturn(cache);
+
+		when(cache.get(SERVICE_ID, List.class)).thenAnswer(invocation -> {
+			readThread.set(Thread.currentThread().getName());
+			return null;
+		});
+
+		doAnswer(invocation -> {
+			writeThread.set(Thread.currentThread().getName());
+			return null;
+		}).when(cache).put(eq(SERVICE_ID), any());
+
+		ServiceInstanceListSupplier delegate = new ServiceInstanceListSupplier() {
+			@Override
+			public Flux<List<ServiceInstance>> get() {
+				return Flux.just(List.of(instance("1host", false), instance("2host-secure", true)));
+			}
+
+			@Override
+			public String getServiceId() {
+				return SERVICE_ID;
+			}
+		};
+
+		CachingServiceInstanceListSupplier supplier = new CachingServiceInstanceListSupplier(delegate, cacheManager);
+
+		StepVerifier.create(supplier.get())
+			.expectNext(List.of(instance("1host", false), instance("2host-secure", true)))
+			.verifyComplete();
+
+		assertThat(readThread.get()).startsWith("boundedElastic-");
+		assertThat(writeThread.get()).startsWith("boundedElastic-");
 	}
 
 	@Configuration(proxyBeanMethods = false)
