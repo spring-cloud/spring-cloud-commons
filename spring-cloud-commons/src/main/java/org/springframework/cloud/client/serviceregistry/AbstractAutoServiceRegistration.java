@@ -112,7 +112,6 @@ public abstract class AbstractAutoServiceRegistration<R extends Registration>
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public void onApplicationEvent(WebServerInitializedEvent event) {
 		ApplicationContext context = event.getApplicationContext();
 		if (context instanceof ConfigurableWebServerApplicationContext configurableWebServerApplicationContext) {

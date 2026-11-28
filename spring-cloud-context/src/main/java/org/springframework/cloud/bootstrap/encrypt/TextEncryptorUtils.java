@@ -77,7 +77,7 @@ public abstract class TextEncryptorUtils {
 	public static void register(BootstrapRegistry registry) {
 		registry.registerIfAbsent(TextEncryptor.class, context -> {
 			KeyProperties keyProperties = context.get(KeyProperties.class);
-			if (TextEncryptorConfigBootstrapper.keysConfigured(keyProperties)) {
+			if (keyProperties != null && keysConfigured(keyProperties)) {
 				if (TextEncryptorConfigBootstrapper.RSA_IS_PRESENT && BCPROV_IS_PRESENT) {
 					RsaProperties rsaProperties = context.get(RsaProperties.class);
 					return createTextEncryptor(keyProperties, rsaProperties);
@@ -89,8 +89,8 @@ public abstract class TextEncryptorUtils {
 		});
 		registry.registerIfAbsent(BindHandler.class, context -> {
 			TextEncryptor textEncryptor = context.get(TextEncryptor.class);
-			if (textEncryptor != null) {
-				KeyProperties keyProperties = context.get(KeyProperties.class);
+			KeyProperties keyProperties = context.get(KeyProperties.class);
+			if (textEncryptor != null && keyProperties != null) {
 				return new TextEncryptorBindHandler(textEncryptor, keyProperties);
 			}
 			return null;
@@ -139,15 +139,10 @@ public abstract class TextEncryptorUtils {
 	 */
 	public static boolean keysConfigured(KeyProperties properties) {
 		if (hasProperty(properties.getKeyStore().getLocation())) {
-			if (hasProperty(properties.getKeyStore().getPassword())) {
-				return true;
-			}
-			return false;
+			return hasProperty(properties.getKeyStore().getPassword());
 		}
-		else if (hasProperty(properties.getKey())) {
-			return true;
-		}
-		return false;
+
+		return hasProperty(properties.getKey());
 	}
 
 	static boolean hasProperty(Object value) {

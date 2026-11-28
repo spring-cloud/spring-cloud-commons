@@ -54,7 +54,7 @@ public class RsaDisabledTests {
 	}
 
 	@Test
-	public void testNoRsaProperites() throws Exception {
+	public void testNoRsaProperties() throws Exception {
 		Map<String, RsaProperties> properties = this.context.getBeansOfType(RsaProperties.class);
 		then(properties.values()).hasSize(0);
 	}
