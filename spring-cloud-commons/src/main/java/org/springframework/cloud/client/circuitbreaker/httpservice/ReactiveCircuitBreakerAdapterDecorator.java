@@ -19,8 +19,6 @@ package org.springframework.cloud.client.circuitbreaker.httpservice;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -60,8 +58,6 @@ import static org.springframework.cloud.client.circuitbreaker.httpservice.Circui
  * @see HttpServiceFallback
  */
 public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeAdapterDecorator {
-
-	private static final Log LOG = LogFactory.getLog(ReactiveCircuitBreakerAdapterDecorator.class);
 
 	private final ReactiveCircuitBreaker reactiveCircuitBreaker;
 
@@ -165,8 +161,9 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	}
 
 	<T> Function<Throwable, Mono<T>> createBodyMonoFallbackHandler(HttpRequestValues requestValues) {
-		if (((requestValues.getAttributes().get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME))
-			.equals(Mono.class))) {
+		Object returnTypeAttributeValue = requestValues.getAttributes()
+			.get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME);
+		if (Mono.class.equals(returnTypeAttributeValue)) {
 			return throwable -> castIfPossible(
 					getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses));
 		}
@@ -180,8 +177,9 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	}
 
 	<T> Function<Throwable, Flux<T>> createBodyFluxFallbackHandler(HttpRequestValues requestValues) {
-		if (((requestValues.getAttributes().get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME)))
-			.equals(Flux.class)) {
+		Object returnTypeAttributeValue = requestValues.getAttributes()
+			.get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME);
+		if (Flux.class.equals(returnTypeAttributeValue)) {
 			return throwable -> castIfPossible(
 					getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses));
 		}
@@ -196,8 +194,9 @@ public class ReactiveCircuitBreakerAdapterDecorator extends ReactorHttpExchangeA
 	}
 
 	Function<Throwable, Mono<HttpHeaders>> createHttpHeadersMonoFallbackHandler(HttpRequestValues requestValues) {
-		if ((requestValues.getAttributes().get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME))
-			.equals(Mono.class)) {
+		Object returnTypeAttributeValue = requestValues.getAttributes()
+			.get(CircuitBreakerRequestValueProcessor.RETURN_TYPE_ATTRIBUTE_NAME);
+		if (Mono.class.equals(returnTypeAttributeValue)) {
 			return throwable -> castIfPossible(
 					getFallback(requestValues, throwable, getFallbackProxies(), fallbackClasses));
 		}

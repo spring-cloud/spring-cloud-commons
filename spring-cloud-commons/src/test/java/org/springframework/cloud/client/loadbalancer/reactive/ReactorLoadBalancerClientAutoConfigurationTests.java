@@ -142,7 +142,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 	@Test
 	void defaultPropertiesWorks() {
 		ConfigurableApplicationContext context = new SpringApplicationBuilder().web(WebApplicationType.NONE)
-			.sources(OneWebClientBuilder.class, DefaulConfig.class)
+			.sources(OneWebClientBuilder.class, DefaultConfig.class)
 			.properties("spring.cloud.loadbalancer.health-check.initial-delay=1s",
 					"spring.cloud.loadbalancer.clients.myclient.health-check.interval=30s")
 			.run();
@@ -175,7 +175,7 @@ public class ReactorLoadBalancerClientAutoConfigurationTests {
 
 	@Configuration
 	@EnableAutoConfiguration
-	protected static class DefaulConfig {
+	protected static class DefaultConfig {
 
 	}
 

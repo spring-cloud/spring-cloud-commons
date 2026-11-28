@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerUriTools;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 
@@ -52,7 +53,7 @@ public final class ExchangeFilterFunctionUtils {
 			.headers(headers -> headers.addAll(request.headers()))
 			.cookies(cookies -> {
 				cookies.addAll(request.cookies());
-				if (!(instanceIdCookieName == null || instanceIdCookieName.length() == 0) && addServiceInstanceCookie) {
+				if (StringUtils.hasLength(instanceIdCookieName) && addServiceInstanceCookie) {
 					cookies.add(instanceIdCookieName, serviceInstance.getInstanceId());
 				}
 			})

@@ -29,7 +29,7 @@ class SleuthPresentVerifier implements CompatibilityVerifier {
 
 	private static final String ACTION = """
 			Migrate from Spring Cloud Sleuth to Micrometer Tracing .
-			You can check the Sleuth 3.1 Migration Guide over here [https://github.com/micrometer-metrics/tracing/wiki/Spring-Cloud-Sleuth-3.1-Migration-Guide].\s
+			You can check the Sleuth 3.1 Migration Guide over here [https://github.com/micrometer-metrics/tracing/wiki/Spring-Cloud-Sleuth-3.1-Migration-Guide].
 			If you want to disable this check, just set the property [spring.cloud.compatibility-verifier.enabled=false]""";
 
 	@Override

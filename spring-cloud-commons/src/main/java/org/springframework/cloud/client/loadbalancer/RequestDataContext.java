@@ -40,6 +40,7 @@ public class RequestDataContext extends DefaultRequestContext {
 		super(requestData, hint);
 	}
 
+	@Override
 	public @Nullable RequestData getClientRequest() {
 		return (RequestData) super.getClientRequest();
 	}

@@ -39,7 +39,7 @@ public class EncryptorFactory {
 
 		TextEncryptor encryptor;
 		if (data.contains("RSA PRIVATE KEY")) {
-			encryptor = new RsaSecretEncryptor(data.replaceAll("\\n *", ""));
+			encryptor = new RsaSecretEncryptor(data.replace("\r", "\n"));
 		}
 		else if (data.startsWith("ssh-rsa") || data.contains("RSA PUBLIC KEY")) {
 			throw new KeyFormatException();

@@ -59,12 +59,6 @@ final class CircuitBreakerConfigurerUtils {
 
 	private static final Log LOG = LogFactory.getLog(CircuitBreakerConfigurerUtils.class);
 
-	static Map<String, Class<?>> resolveFallbackClasses(Map<String, String> fallbackClassNames) {
-		return fallbackClassNames.entrySet()
-			.stream()
-			.collect(Collectors.toMap(java.util.Map.Entry::getKey, entry -> resolveFallbackClass(entry.getValue())));
-	}
-
 	@SuppressWarnings("unchecked")
 	static <T> T castIfPossible(Object result) {
 		try {
@@ -192,18 +186,6 @@ final class CircuitBreakerConfigurerUtils {
 		return fallbackClasses.entrySet()
 			.stream()
 			.collect(Collectors.toMap(Map.Entry::getKey, entry -> createProxy(entry.getValue())));
-	}
-
-	private static Class<?> resolveFallbackClass(String className) {
-		try {
-			return Class.forName(className);
-		}
-		catch (ClassNotFoundException e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Fallback class not found: " + className, e);
-			}
-			throw new IllegalStateException("Unable to load fallback class: " + className, e);
-		}
 	}
 
 	static Object createProxy(Class<?> fallbackClass) {

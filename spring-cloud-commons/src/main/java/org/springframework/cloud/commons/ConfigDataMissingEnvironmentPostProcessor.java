@@ -16,10 +16,10 @@
 
 package org.springframework.cloud.commons;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +39,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author Ryan Baxter
@@ -78,10 +79,10 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 			return;
 		}
 		List<Object> property = getConfigImports(environment);
-		if (property == null || property.isEmpty()) {
+		if (CollectionUtils.isEmpty(property)) {
 			throw new ImportException("No spring.config.import set", false);
 		}
-		if (!property.stream().anyMatch(impt -> ((String) impt).contains(getPrefix()))) {
+		if (property.stream().noneMatch(impt -> ((String) impt).contains(getPrefix()))) {
 			throw new ImportException("spring.config.import missing " + getPrefix(), true);
 		}
 	}
@@ -91,14 +92,9 @@ public abstract class ConfigDataMissingEnvironmentPostProcessor implements Envir
 		List<Object> property = propertySources.stream()
 			.filter(this::propertySourceWithConfigImport)
 			.flatMap(propertySource -> {
-				List<Object> configImports = new ArrayList<>();
-				if (propertySource.getProperty(CONFIG_IMPORT_PROPERTY) != null) {
-					configImports.add(propertySource.getProperty(CONFIG_IMPORT_PROPERTY));
-				}
-				else {
-					configImports.addAll(Arrays.asList(getConfigImportArray(propertySource)));
-				}
-				return configImports.stream();
+				Object configImport = propertySource.getProperty(CONFIG_IMPORT_PROPERTY);
+				return configImport != null ? Stream.of(configImport)
+						: Arrays.stream(getConfigImportArray(propertySource));
 			})
 			.collect(Collectors.toList());
 		return property;
